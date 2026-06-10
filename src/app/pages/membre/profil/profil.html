@@ -1,0 +1,103 @@
+<div class="profil-page">
+
+  <div class="profil-header">
+    <h1>Mon Profil</h1>
+    @if (profile(); as p) {
+      <p class="membre-depuis">Membre depuis le {{ p.dateAdhesion }}</p>
+    }
+  </div>
+
+  <form class="profil-form" (ngSubmit)="save()">
+
+    <!-- Identité -->
+    <section class="form-section">
+      <h2>Identité</h2>
+      <div class="field-row">
+        <label>
+          <span>Prénom</span>
+          <input type="text" [(ngModel)]="form.prenom" name="prenom" placeholder="Votre prénom">
+        </label>
+        <label>
+          <span>Nom</span>
+          <input type="text" [(ngModel)]="form.nom" name="nom" placeholder="Votre nom" required>
+        </label>
+      </div>
+    </section>
+
+    <!-- À propos -->
+    <section class="form-section">
+      <h2>À propos</h2>
+      <label class="full">
+        <span>Biographie courte</span>
+        <textarea [(ngModel)]="form.bio" name="bio" rows="3"
+          placeholder="Quelques mots sur vous, votre parcours photographique…"></textarea>
+      </label>
+    </section>
+
+    <!-- Matériel -->
+    <section class="form-section">
+      <h2>Matériel</h2>
+      <label class="full">
+        <span>Appareil principal</span>
+        <input type="text" [(ngModel)]="form.appareil" name="appareil"
+          placeholder="Ex : Sony A7 IV, Canon EOS R6, Fujifilm X-T5…">
+      </label>
+    </section>
+
+    <!-- Styles -->
+    <section class="form-section">
+      <h2>Styles photographiques</h2>
+      <p class="section-hint">Sélectionnez vos styles de prédilection</p>
+      <div class="styles-grid">
+        @for (style of stylesDisponibles; track style) {
+          <button
+            type="button"
+            class="style-chip"
+            [class.selected]="isStyleSelected(style)"
+            (click)="toggleStyle(style)">
+            {{ style }}
+          </button>
+        }
+      </div>
+    </section>
+
+    <!-- Réseaux sociaux -->
+    <section class="form-section">
+      <h2>Réseaux &amp; liens</h2>
+      <div class="field-col">
+        <label>
+          <span>Instagram</span>
+          <div class="input-prefix">
+            <span class="prefix">instagram.com/</span>
+            <input type="text" [(ngModel)]="form.instagram" name="instagram" placeholder="votre_pseudo">
+          </div>
+        </label>
+        <label>
+          <span>Facebook</span>
+          <div class="input-prefix">
+            <span class="prefix">facebook.com/</span>
+            <input type="text" [(ngModel)]="form.facebook" name="facebook" placeholder="votre.profil">
+          </div>
+        </label>
+        <label>
+          <span>Site web / portfolio</span>
+          <input type="url" [(ngModel)]="form.siteWeb" name="siteWeb" placeholder="https://votre-site.com">
+        </label>
+      </div>
+    </section>
+
+    <!-- Actions -->
+    <div class="form-actions">
+      @if (saved()) {
+        <span class="feedback-ok">Profil enregistré.</span>
+      }
+      @if (error()) {
+        <span class="feedback-err">{{ error() }}</span>
+      }
+      <button type="submit" class="btn-save" [disabled]="saving()">
+        {{ saving() ? 'Enregistrement…' : 'Enregistrer' }}
+      </button>
+    </div>
+
+  </form>
+</div>

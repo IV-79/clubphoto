@@ -6,13 +6,16 @@ import { Membres } from './pages/admin-dashboard/membres/membres';
 import { Galeries } from './pages/admin-dashboard/galeries/galeries';
 import { Evenements } from './pages/admin-dashboard/evenements/evenements';
 import { AdminArticles } from './pages/admin-dashboard/articles/articles';
-import { authGuard, loginGuard } from './guards/auth.guard';
+import { authGuard, memberGuard, loginGuard } from './guards/auth.guard';
 import { PublicLayout } from './layouts/public-layout/public-layout';
+import { MemberLayout } from './layouts/member-layout/member-layout';
 import { Home } from './pages/home/home';
 import { Actualites } from './pages/actualites/actualites';
 import { LeClub, Histoire, Bureau, Adhesion } from './pages/le-club/le-club';
 import { Calendrier } from './pages/calendrier/calendrier';
 import { Contact } from './pages/contact/contact';
+import { MembrePortfolio } from './pages/membre/portfolio/portfolio';
+import { MembreProfil } from './pages/membre/profil/profil';
 
 export const routes: Routes = [
   {
@@ -45,6 +48,16 @@ export const routes: Routes = [
           { path: 'evenements', component: Evenements },
         ]
       },
+    ]
+  },
+  {
+    path: 'membre',
+    component: MemberLayout,
+    canActivate: [memberGuard],
+    children: [
+      { path: 'portfolio', component: MembrePortfolio },
+      { path: 'profil', component: MembreProfil },
+      { path: '', redirectTo: 'portfolio', pathMatch: 'full' }
     ]
   },
   { path: 'login', component: LoginComponent, canActivate: [loginGuard] },

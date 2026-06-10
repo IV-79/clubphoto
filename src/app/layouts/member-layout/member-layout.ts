@@ -1,0 +1,21 @@
+import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+import { Header } from '../../components/header/header';
+
+@Component({
+  selector: 'app-member-layout',
+  imports: [RouterOutlet, Header],
+  template: `
+    <app-header />
+    <main class="member-content">
+      <router-outlet />
+    </main>
+  `,
+  styles: [`
+    .member-content {
+      min-height: calc(100vh - 120px);
+      background: #1a1a1a;
+    }
+  `]
+})
+export class MemberLayout {}

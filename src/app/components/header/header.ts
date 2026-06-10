@@ -20,13 +20,11 @@ export class Header {
 
   mobileMenuOpen = signal(false);
 
-  isAdmin$ = this.authService.currentUserProfile$.pipe(
-    map(profile => profile?.role === 'admin')
-  );
+  profile$ = this.authService.currentUserProfile$;
 
-  isLoggedIn$ = this.authService.user$.pipe(
-    map(user => !!user)
-  );
+  isAdmin$ = this.profile$.pipe(map(p => p?.role === 'admin'));
+  isMembre$ = this.profile$.pipe(map(p => p?.role === 'membre'));
+  isLoggedIn$ = this.authService.user$.pipe(map(user => !!user));
 
   logout() {
     this.authService.logout();

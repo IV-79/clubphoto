@@ -1,6 +1,6 @@
 import { Injectable, inject, Injector, runInInjectionContext } from '@angular/core';
 import { Auth, signInWithEmailAndPassword, signOut, authState, createUserWithEmailAndPassword } from '@angular/fire/auth';
-import { Firestore, doc, setDoc, getDoc, collection, collectionData } from '@angular/fire/firestore';
+import { Firestore, doc, setDoc, getDoc, updateDoc, collection, collectionData } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
 import { from, switchMap, of, Observable, map } from 'rxjs';
 import { UserProfile } from '../models/user.model';
@@ -84,6 +84,12 @@ export class AuthService {
     return runInInjectionContext(this.injector, () =>
       collectionData(collection(this.firestore, 'users'), { idField: 'uid' })
     ) as Observable<UserProfile[]>;
+  }
+
+  async updateProfile(uid: string, data: Partial<Omit<UserProfile, 'uid' | 'email' | 'role' | 'dateAdhesion'>>): Promise<void> {
+    await runInInjectionContext(this.injector, () =>
+      updateDoc(doc(this.firestore, 'users', uid), data as Record<string, unknown>)
+    );
   }
 
   logout() {

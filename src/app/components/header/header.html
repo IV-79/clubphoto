@@ -47,6 +47,37 @@
         <li>
           <a routerLink="/contact" routerLinkActive="active">Contact</a>
         </li>
+
+        @if (isLoggedIn$ | async) {
+          <li class="has-dropdown membre-nav-item">
+            <button [matMenuTriggerFor]="membreNavMenu" class="nav-dropdown-btn">
+              <mat-icon class="membre-nav-icon">account_circle</mat-icon>
+              Membre
+              <mat-icon class="arrow-icon">expand_more</mat-icon>
+            </button>
+            <mat-menu #membreNavMenu="matMenu">
+              <a mat-menu-item routerLink="/membre/portfolio">
+                <mat-icon>photo_library</mat-icon>
+                Mon Portfolio
+              </a>
+              <a mat-menu-item routerLink="/membre/profil">
+                <mat-icon>person</mat-icon>
+                Mon Profil
+              </a>
+              <mat-divider />
+              <button mat-menu-item disabled class="menu-item-soon">
+                <mat-icon>photo_camera</mat-icon>
+                Thèmes du mois
+                <span class="soon-badge">bientôt</span>
+              </button>
+              <mat-divider />
+              <button mat-menu-item (click)="logout()">
+                <mat-icon>logout</mat-icon>
+                Déconnexion
+              </button>
+            </mat-menu>
+          </li>
+        }
       </ul>
 
       <!-- Actions droite -->
@@ -86,11 +117,7 @@
               Déconnexion
             </button>
           </mat-menu>
-        } @else if (isLoggedIn$ | async) {
-          <button class="logout-btn" (click)="logout()">
-            <mat-icon>logout</mat-icon>
-          </button>
-        } @else {
+        } @else if (!(isLoggedIn$ | async)) {
           <a routerLink="/login" class="login-btn">Connexion</a>
         }
       </div>
@@ -119,6 +146,11 @@
           <li><a routerLink="/admin/galeries" (click)="mobileMenuOpen.set(false)">Galeries</a></li>
           <li><a routerLink="/admin/evenements" (click)="mobileMenuOpen.set(false)">Événements</a></li>
           <li><a routerLink="/admin/membres" (click)="mobileMenuOpen.set(false)">Membres</a></li>
+        }
+        @if (isLoggedIn$ | async) {
+          <li class="mobile-section-label">Mon espace</li>
+          <li><a routerLink="/membre/portfolio" (click)="mobileMenuOpen.set(false)">Mon Portfolio</a></li>
+          <li><a routerLink="/membre/profil" (click)="mobileMenuOpen.set(false)">Mon Profil</a></li>
         }
         @if (isLoggedIn$ | async) {
           <li><button class="mobile-logout" (click)="logout()">Déconnexion</button></li>
