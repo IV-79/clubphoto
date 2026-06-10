@@ -1,0 +1,36 @@
+<div class="login-container">
+  <mat-card class="login-card">
+    <mat-card-header>
+      <mat-card-title>Espace Club Photo</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
+
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Adresse email</mat-label>
+          <input matInput type="email" name="email" [(ngModel)]="email" required email>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Mot de passe</mat-label>
+          <input matInput type="password" name="password" [(ngModel)]="password" required>
+        </mat-form-field>
+
+        @if (errorMessage) {
+          <p class="error-text">{{ errorMessage }}</p>
+        }
+
+        <button mat-raised-button color="primary" type="submit"
+          [disabled]="!loginForm.form.valid || loading" class="full-width">
+          {{ loading ? 'Connexion...' : 'Se connecter' }}
+        </button>
+
+      </form>
+    </mat-card-content>
+
+    <mat-card-actions>
+      <p class="register-link">Pas encore de compte ? <a routerLink="/register">S'inscrire</a></p>
+    </mat-card-actions>
+  </mat-card>
+</div>

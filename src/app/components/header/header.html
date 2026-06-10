@@ -1,0 +1,130 @@
+<header class="site-header">
+
+  <!-- Bande logo -->
+  <div class="header-logo-bar">
+    <a routerLink="/" class="logo-link">
+      <mat-icon class="logo-icon">camera_alt</mat-icon>
+      <div class="logo-text">
+        <span class="logo-name">Club Photo</span>
+        <span class="logo-tagline">Photos du Quotidien</span>
+      </div>
+    </a>
+  </div>
+
+  <!-- Barre de navigation -->
+  <nav class="header-nav">
+    <div class="nav-inner">
+
+      <!-- Nav desktop -->
+      <ul class="nav-links">
+        <li>
+          <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">Accueil</a>
+        </li>
+
+        <li class="has-dropdown">
+          <button [matMenuTriggerFor]="clubMenu" class="nav-dropdown-btn">
+            Le Club <mat-icon class="arrow-icon">expand_more</mat-icon>
+          </button>
+          <mat-menu #clubMenu="matMenu" class="nav-menu">
+            <a mat-menu-item routerLink="/le-club/histoire">Histoire</a>
+            <a mat-menu-item routerLink="/le-club/bureau">Le Bureau</a>
+            <a mat-menu-item routerLink="/le-club/adhesion">Adhésion</a>
+          </mat-menu>
+        </li>
+
+        <li>
+          <a routerLink="/actualites" routerLinkActive="active">Actualités</a>
+        </li>
+
+        <li>
+          <a routerLink="/galeries" routerLinkActive="active">Galeries</a>
+        </li>
+
+        <li>
+          <a routerLink="/calendrier" routerLinkActive="active">Calendrier</a>
+        </li>
+
+        <li>
+          <a routerLink="/contact" routerLinkActive="active">Contact</a>
+        </li>
+      </ul>
+
+      <!-- Actions droite -->
+      <div class="nav-actions">
+        @if (isAdmin$ | async) {
+          <button [matMenuTriggerFor]="adminMenu" class="admin-btn">
+            <mat-icon>admin_panel_settings</mat-icon>
+            Admin
+            <mat-icon class="arrow-icon">expand_more</mat-icon>
+          </button>
+          <mat-menu #adminMenu="matMenu">
+            <a mat-menu-item routerLink="/admin">
+              <mat-icon>dashboard</mat-icon>
+              Tableau de bord
+            </a>
+            <mat-divider />
+            <a mat-menu-item routerLink="/admin/articles">
+              <mat-icon>article</mat-icon>
+              Articles
+            </a>
+            <a mat-menu-item routerLink="/admin/galeries">
+              <mat-icon>photo_library</mat-icon>
+              Galeries
+            </a>
+            <a mat-menu-item routerLink="/admin/evenements">
+              <mat-icon>event</mat-icon>
+              Événements
+            </a>
+            <mat-divider />
+            <a mat-menu-item routerLink="/admin/membres">
+              <mat-icon>group</mat-icon>
+              Membres
+            </a>
+            <mat-divider />
+            <button mat-menu-item (click)="logout()">
+              <mat-icon>logout</mat-icon>
+              Déconnexion
+            </button>
+          </mat-menu>
+        } @else if (isLoggedIn$ | async) {
+          <button class="logout-btn" (click)="logout()">
+            <mat-icon>logout</mat-icon>
+          </button>
+        } @else {
+          <a routerLink="/login" class="login-btn">Connexion</a>
+        }
+      </div>
+
+      <!-- Bouton menu mobile -->
+      <button class="mobile-menu-btn" (click)="mobileMenuOpen.set(!mobileMenuOpen())">
+        <mat-icon>{{ mobileMenuOpen() ? 'close' : 'menu' }}</mat-icon>
+      </button>
+    </div>
+
+    <!-- Menu mobile -->
+    @if (mobileMenuOpen()) {
+      <ul class="mobile-nav">
+        <li><a routerLink="/" (click)="mobileMenuOpen.set(false)">Accueil</a></li>
+        <li><a routerLink="/le-club/histoire" (click)="mobileMenuOpen.set(false)">Histoire</a></li>
+        <li><a routerLink="/le-club/bureau" (click)="mobileMenuOpen.set(false)">Le Bureau</a></li>
+        <li><a routerLink="/le-club/adhesion" (click)="mobileMenuOpen.set(false)">Adhésion</a></li>
+        <li><a routerLink="/actualites" (click)="mobileMenuOpen.set(false)">Actualités</a></li>
+        <li><a routerLink="/galeries" (click)="mobileMenuOpen.set(false)">Galeries</a></li>
+        <li><a routerLink="/calendrier" (click)="mobileMenuOpen.set(false)">Calendrier</a></li>
+        <li><a routerLink="/contact" (click)="mobileMenuOpen.set(false)">Contact</a></li>
+        @if (isAdmin$ | async) {
+          <li class="mobile-section-label">Administration</li>
+          <li><a routerLink="/admin" (click)="mobileMenuOpen.set(false)">Tableau de bord</a></li>
+          <li><a routerLink="/admin/articles" (click)="mobileMenuOpen.set(false)">Articles</a></li>
+          <li><a routerLink="/admin/galeries" (click)="mobileMenuOpen.set(false)">Galeries</a></li>
+          <li><a routerLink="/admin/evenements" (click)="mobileMenuOpen.set(false)">Événements</a></li>
+          <li><a routerLink="/admin/membres" (click)="mobileMenuOpen.set(false)">Membres</a></li>
+        }
+        @if (isLoggedIn$ | async) {
+          <li><button class="mobile-logout" (click)="logout()">Déconnexion</button></li>
+        }
+      </ul>
+    }
+  </nav>
+
+</header>

@@ -1,0 +1,233 @@
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+
+/* Bande logo */
+.header-logo-bar {
+  background: #1a1a1a;
+  padding: 14px 32px;
+}
+
+.logo-link {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-decoration: none;
+  color: white;
+}
+
+.logo-icon {
+  font-size: 44px;
+  width: 44px;
+  height: 44px;
+  color: #cc0000;
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.logo-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: white;
+}
+
+.logo-tagline {
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* Barre de navigation */
+.header-nav {
+  background: #2c2c2c;
+  border-top: 1px solid #3a3a3a;
+}
+
+.nav-inner {
+  display: flex;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+.nav-links {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex: 1;
+  gap: 0;
+}
+
+.nav-links li a,
+.nav-dropdown-btn {
+  display: flex;
+  align-items: center;
+  padding: 16px 18px;
+  color: rgba(255,255,255,0.8);
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  transition: color 0.2s, background 0.2s;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.nav-links li a:hover,
+.nav-dropdown-btn:hover {
+  color: white;
+  background: rgba(255,255,255,0.06);
+}
+
+.nav-links li a.active {
+  color: white;
+  border-bottom: 3px solid #cc0000;
+  background: rgba(255,255,255,0.04);
+}
+
+.arrow-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  margin-left: 2px;
+}
+
+/* Actions droite */
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  background: #cc0000;
+  color: white;
+  border-radius: 3px;
+  border: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: inherit;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.admin-btn:hover { background: #aa0000; }
+
+.admin-btn mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+.login-btn {
+  padding: 7px 16px;
+  border: 1px solid rgba(255,255,255,0.3);
+  color: rgba(255,255,255,0.8);
+  border-radius: 3px;
+  text-decoration: none;
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  transition: all 0.2s;
+}
+
+.login-btn:hover {
+  border-color: white;
+  color: white;
+  background: rgba(255,255,255,0.08);
+}
+
+.logout-btn {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.5);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+}
+
+.logout-btn:hover { color: white; }
+
+/* Mobile */
+.mobile-menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 8px;
+  margin-left: auto;
+}
+
+.mobile-nav {
+  display: none;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: #222;
+  border-top: 1px solid #333;
+}
+
+.mobile-nav li a,
+.mobile-logout {
+  display: block;
+  padding: 14px 24px;
+  color: rgba(255,255,255,0.8);
+  text-decoration: none;
+  font-size: 0.9rem;
+  border-bottom: 1px solid #333;
+  transition: background 0.2s;
+}
+
+.mobile-nav li a:hover,
+.mobile-logout:hover { background: rgba(255,255,255,0.06); }
+
+.mobile-section-label {
+  padding: 12px 24px 4px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #cc0000;
+  pointer-events: none;
+}
+
+.mobile-logout {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  border-top: 1px solid #444;
+  color: rgba(255,255,255,0.6);
+  font-family: inherit;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .nav-links, .nav-actions { display: none; }
+  .mobile-menu-btn { display: flex; }
+  .mobile-nav { display: block; }
+}

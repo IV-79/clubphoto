@@ -1,0 +1,33 @@
+<div class="admin-page">
+
+  <div class="page-header">
+    <h2 class="admin-title">Galeries</h2>
+    <button mat-raised-button color="primary">
+      <mat-icon>add_photo_alternate</mat-icon>
+      Nouvelle galerie
+    </button>
+  </div>
+
+  @if (galeries.length === 0) {
+    <div class="empty-state">
+      <mat-icon>photo_library</mat-icon>
+      <p>Aucune galerie pour l'instant.</p>
+    </div>
+  } @else {
+    <div class="galeries-grid">
+      @for (galerie of galeries; track galerie.id) {
+        <mat-card class="galerie-card">
+          <mat-card-header>
+            <mat-card-title>{{ galerie.titre }}</mat-card-title>
+            <mat-card-subtitle>{{ galerie.date }}</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-actions>
+            <button mat-button color="primary">Voir</button>
+            <button mat-button color="warn">Supprimer</button>
+          </mat-card-actions>
+        </mat-card>
+      }
+    </div>
+  }
+
+</div>

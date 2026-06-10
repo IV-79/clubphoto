@@ -1,0 +1,54 @@
+.admin-page {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 0 24px;
+}
+
+.admin-title {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 32px;
+  padding-bottom: 12px;
+  border-bottom: 3px solid #cc0000;
+  display: inline-block;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.stat-card { border-radius: 12px; }
+
+.stat-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.stat-icon {
+  font-size: 40px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  padding: 10px;
+}
+
+.stat-icon.members  { color: #1565c0; background: #e3f2fd; }
+.stat-icon.galleries { color: #6a1b9a; background: #f3e5f5; }
+.stat-icon.events   { color: #2e7d32; background: #e8f5e9; }
+.stat-icon.articles { color: #e65100; background: #fff3e0; }
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: #666;
+  margin-top: 4px;
+}

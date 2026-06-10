@@ -1,0 +1,43 @@
+<div class="admin-page">
+
+  <div class="page-header">
+    <h2 class="admin-title">Membres</h2>
+  </div>
+
+  <mat-card>
+    <mat-card-content>
+      @if (membres$ | async; as membres) {
+        @if (membres.length === 0) {
+          <div class="empty-state">
+            <mat-icon>group_off</mat-icon>
+            <p>Aucun membre inscrit pour l'instant.</p>
+          </div>
+        } @else {
+          <table mat-table [dataSource]="membres" class="full-width">
+            <ng-container matColumnDef="nom">
+              <th mat-header-cell *matHeaderCellDef>Nom</th>
+              <td mat-cell *matCellDef="let m">{{ m.nom }}</td>
+            </ng-container>
+            <ng-container matColumnDef="email">
+              <th mat-header-cell *matHeaderCellDef>Email</th>
+              <td mat-cell *matCellDef="let m">{{ m.email }}</td>
+            </ng-container>
+            <ng-container matColumnDef="role">
+              <th mat-header-cell *matHeaderCellDef>Rôle</th>
+              <td mat-cell *matCellDef="let m">
+                <mat-chip [class]="m.role">{{ m.role }}</mat-chip>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="dateAdhesion">
+              <th mat-header-cell *matHeaderCellDef>Date d'adhésion</th>
+              <td mat-cell *matCellDef="let m">{{ m.dateAdhesion }}</td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+        }
+      }
+    </mat-card-content>
+  </mat-card>
+
+</div>
