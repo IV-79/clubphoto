@@ -43,6 +43,10 @@ __screenshots__/
 .DS_Store
 Thumbs.db
 
+# Environment files (contiennent les clés Firebase)
+src/environments/environment.ts
+src/environments/environment.prod.ts
+
 # Environment local overrides
 .env
 .env.local
