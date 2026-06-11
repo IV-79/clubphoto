@@ -39,10 +39,8 @@ jobs:
       - name: Build Angular App
         run: npm run build
 
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
       - name: Deploy to Firebase Hosting
-        uses: FirebaseExtended/action-hosting-deploy@v0
-        with:
-          repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_CLUBPHOTOPJ }}
-          projectId: clubphotopj
-          channelId: live
+        run: firebase deploy --only hosting --project clubphotopj --token "${{ secrets.FIREBASE_TOKEN }}"
