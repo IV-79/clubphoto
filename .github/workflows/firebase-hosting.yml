@@ -3,6 +3,12 @@ on:
   push:
     branches:
       - master
+
+permissions:
+  contents: read
+  deployments: write
+  statuses: write
+
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
@@ -14,11 +20,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'npm' # Active le cache pour réduire le temps de build futur
 
       - name: Install dependencies
         run: npm ci
 
-      # --- ÉTAPE MODIFIÉE : Lance le script JS avec les variables d'environnement ---
       - name: Generate Environment Files
         env:
           FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
@@ -40,4 +46,3 @@ jobs:
           firebaseToken: ${{ secrets.FIREBASE_TOKEN }}
           projectId: clubphotopj
           channelId: live
-          entryPoint: .
