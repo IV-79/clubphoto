@@ -1,0 +1,100 @@
+<div class="soumettre-page">
+  <h2 class="page-title">Thème du mois</h2>
+
+  @if (themeOuvert() === undefined) {
+    <div class="loading">Chargement…</div>
+  } @else if (themeOuvert() === null) {
+    <mat-card class="no-theme-card">
+      <mat-card-content>
+        <div class="empty-state">
+          <mat-icon>lock</mat-icon>
+          <p>Aucun thème n'est ouvert pour le moment.</p>
+          <span>Revenez bientôt, le prochain thème sera annoncé prochainement.</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  } @else {
+
+    <!-- Thème ouvert -->
+    <mat-card class="theme-card">
+      <mat-card-content>
+        <div class="theme-header">
+          <span class="ouvert-badge">Ouvert</span>
+          <div class="theme-info">
+            <h3 class="theme-titre">{{ themeOuvert()!.titre }}</h3>
+            <span class="theme-mois">{{ formatMois(themeOuvert()!.moisAnnee) }}</span>
+          </div>
+        </div>
+        @if (themeOuvert()!.description) {
+          <p class="theme-desc">{{ themeOuvert()!.description }}</p>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Soumission actuelle -->
+    @if (maSoumission()) {
+      <div class="soumission-section">
+        <h3 class="section-title">
+          <mat-icon class="title-icon check-icon">check_circle</mat-icon>
+          Votre soumission
+        </h3>
+        <div class="soumission-card">
+          <img [src]="maSoumission()!.photoUrl" [alt]="maSoumission()!.photoTitre" class="soumission-img">
+          <div class="soumission-meta">
+            <span class="soumission-titre">{{ maSoumission()!.photoTitre }}</span>
+            <span class="soumission-date">Soumise le {{ formatDate(maSoumission()!.dateSoumission) }}</span>
+            <button mat-stroked-button color="warn" (click)="retirer()">
+              <mat-icon>remove_circle_outline</mat-icon>
+              Retirer ma soumission
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Grille portfolio -->
+    <div class="portfolio-section">
+      <h3 class="section-title">
+        <mat-icon class="title-icon">photo_library</mat-icon>
+        {{ maSoumission() ? 'Changer de photo' : 'Choisir une photo dans mon portfolio' }}
+      </h3>
+
+      @if (mesPhotos().length === 0) {
+        <mat-card>
+          <mat-card-content>
+            <div class="empty-state">
+              <mat-icon>photo_library</mat-icon>
+              <p>Votre portfolio est vide.</p>
+              <a mat-raised-button color="primary" routerLink="/membre/portfolio">
+                Ajouter des photos
+              </a>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      } @else {
+        <div class="photos-grid">
+          @for (photo of mesPhotos(); track photo.id) {
+            <div class="photo-item"
+              [class.is-soumise]="estSoumise(photo)"
+              (click)="soumettre(photo)">
+              <img [src]="photo.url" [alt]="photo.titre" class="photo-img">
+              <div class="photo-overlay">
+                @if (estSoumise(photo)) {
+                  <span class="soumise-badge">
+                    <mat-icon>check</mat-icon> Soumise
+                  </span>
+                } @else {
+                  <span class="action-label">
+                    {{ maSoumission() ? 'Remplacer' : 'Soumettre' }}
+                  </span>
+                }
+              </div>
+              <div class="photo-titre">{{ photo.titre }}</div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+  }
+</div>

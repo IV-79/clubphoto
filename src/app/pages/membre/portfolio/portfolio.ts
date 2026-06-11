@@ -110,6 +110,16 @@ export class MembrePortfolio implements OnInit {
     });
   }
 
+  estCouverture(photo: Photo): boolean {
+    return this.profile()?.photoCouvertureUrl === photo.url;
+  }
+
+  async setCouverture(photo: Photo) {
+    const profile = this.profile();
+    if (!profile || !photo.isPublic) return;
+    await this.authService.updateProfile(profile.uid, { photoCouvertureUrl: photo.url });
+  }
+
   async toggleVisibility(photo: Photo) {
     await this.photoService.toggleVisibility(photo);
   }

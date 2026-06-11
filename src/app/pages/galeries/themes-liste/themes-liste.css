@@ -1,0 +1,147 @@
+.galerie-page {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 48px 32px;
+}
+
+.page-header {
+  margin-bottom: 40px;
+}
+
+.page-header h1 {
+  font-size: 2rem;
+  font-weight: 300;
+  letter-spacing: 1px;
+  color: #1a1a1a;
+  margin: 0 0 8px;
+}
+
+.subtitle {
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+/* Timeline */
+.themes-timeline {
+  display: flex;
+  flex-direction: column;
+}
+
+.theme-entry {
+  display: flex;
+  gap: 32px;
+  padding: 28px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.theme-entry:last-child { border-bottom: none; }
+
+.theme-entry.entry-ouvert {
+  border-left: 3px solid #4caf50;
+  padding-left: 20px;
+  margin-left: -20px;
+}
+
+.mois-col {
+  flex-shrink: 0;
+  width: 120px;
+  padding-top: 4px;
+}
+
+.mois-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.theme-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.theme-title-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.theme-titre {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 400;
+  color: #1a1a1a;
+}
+
+.statut-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+
+.badge-ouvert {
+  background: rgba(76, 175, 80, 0.15);
+  color: #2e7d32;
+}
+
+.badge-ferme {
+  background: rgba(0, 0, 0, 0.06);
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.theme-desc {
+  margin: 0;
+  color: rgba(0, 0, 0, 0.55);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  max-width: 560px;
+}
+
+/* Thumbnails */
+.thumbnails {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.thumb {
+  width: 60px;
+  height: 45px;
+  object-fit: cover;
+  border-radius: 3px;
+  background: #e0e0e0;
+}
+
+.thumb-more {
+  color: rgba(0, 0, 0, 0.4);
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding-left: 4px;
+}
+
+.voir-btn {
+  display: inline-block;
+  color: #cc0000;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  transition: color 0.2s;
+}
+
+.voir-btn:hover { color: #aa0000; }
+
+.empty-state {
+  text-align: center;
+  padding: 80px 24px;
+  color: rgba(0, 0, 0, 0.35);
+}

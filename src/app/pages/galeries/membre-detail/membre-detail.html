@@ -1,0 +1,83 @@
+<div class="membre-detail-page">
+
+  <a routerLink="/galeries/membres" class="back-link">← Retour aux portfolios</a>
+
+  @if (membre() === undefined) {
+    <div class="loading">Chargement…</div>
+  } @else if (membre() === null) {
+    <div class="empty-state"><p>Membre introuvable.</p></div>
+  } @else {
+
+    <div class="membre-profil">
+      @if (membre()!.photoCouvertureUrl) {
+        <div class="cover-hero">
+          <img [src]="membre()!.photoCouvertureUrl" [alt]="membre()!.nom" class="cover-img">
+          <div class="cover-overlay"></div>
+          <h1 class="membre-nom-hero">
+            {{ membre()!.prenom ? membre()!.prenom + ' ' + membre()!.nom : membre()!.nom }}
+          </h1>
+        </div>
+      } @else {
+        <h1 class="membre-nom-simple">
+          {{ membre()!.prenom ? membre()!.prenom + ' ' + membre()!.nom : membre()!.nom }}
+        </h1>
+      }
+
+      <div class="profil-meta">
+        @if (membre()!.appareil) {
+          <span class="meta-item">
+            <span class="meta-icon">📷</span> {{ membre()!.appareil }}
+          </span>
+        }
+        @if (membre()!.stylesPhoto?.length) {
+          <div class="styles-chips">
+            @for (style of membre()!.stylesPhoto!; track style) {
+              <span class="chip">{{ style }}</span>
+            }
+          </div>
+        }
+        @if (membre()!.bio) {
+          <p class="bio">{{ membre()!.bio }}</p>
+        }
+        <div class="social-links">
+          @if (membre()!.instagram) {
+            <a [href]="'https://instagram.com/' + membre()!.instagram" target="_blank" rel="noopener" class="social-link">
+              Instagram
+            </a>
+          }
+          @if (membre()!.facebook) {
+            <a [href]="membre()!.facebook" target="_blank" rel="noopener" class="social-link">
+              Facebook
+            </a>
+          }
+          @if (membre()!.siteWeb) {
+            <a [href]="membre()!.siteWeb" target="_blank" rel="noopener" class="social-link">
+              Site web
+            </a>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="photos-section">
+      <h2 class="section-title">Photos publiques <span class="count">{{ photos().length }}</span></h2>
+
+      @if (photos().length === 0) {
+        <div class="empty-state"><p>Aucune photo publique pour le moment.</p></div>
+      } @else {
+        <div class="photos-grid">
+          @for (photo of photos(); track photo.id) {
+            <div class="photo-card">
+              <img [src]="photo.url" [alt]="photo.titre" loading="lazy" class="photo-img">
+              <div class="photo-overlay">
+                <span class="photo-titre">{{ photo.titre }}</span>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+  }
+
+</div>

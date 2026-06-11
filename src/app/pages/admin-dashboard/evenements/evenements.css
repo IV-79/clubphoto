@@ -1,8 +1,4 @@
-.admin-page {
-  max-width: 1200px;
-  margin: 40px auto;
-  padding: 0 24px;
-}
+.evenements-page { max-width: 900px; }
 
 .page-header {
   display: flex;
@@ -11,14 +7,99 @@
   margin-bottom: 24px;
 }
 
-.admin-title {
-  font-size: 1.8rem;
+.page-title { margin: 0; font-size: 1.5rem; font-weight: 500; }
+
+.form-card { margin-bottom: 24px; }
+
+.form-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.field-grow { flex: 1; min-width: 200px; }
+.field-type { width: 160px; flex-shrink: 0; }
+.field-date { width: 170px; flex-shrink: 0; }
+.full-width { width: 100%; }
+.optional { color: rgba(255,255,255,0.35); font-size: 0.75rem; }
+
+.form-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+.events-list { display: flex; flex-direction: column; gap: 12px; }
+
+.event-card.passe { opacity: 0.6; }
+
+.event-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.event-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.event-titre { margin: 0; font-size: 1rem; font-weight: 500; }
+
+.event-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.type-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+
+.badge-reunion  { background: rgba(25,118,210,0.2);  color: #90caf9; }
+.badge-sortie   { background: rgba(245,124,0,0.2);   color: #ffcc80; }
+
+.passe-badge {
+  font-size: 0.65rem;
   font-weight: 600;
-  color: #1a1a1a;
-  margin: 0;
-  padding-bottom: 12px;
-  border-bottom: 3px solid #cc0000;
-  display: inline-block;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.07);
+  color: rgba(255,255,255,0.3);
+}
+
+.event-meta {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.45);
+  margin-top: 6px;
+}
+
+.meta-lieu { margin-left: 4px; }
+
+.event-desc {
+  margin: 8px 0 0;
+  font-size: 0.875rem;
+  color: rgba(255,255,255,0.55);
+  line-height: 1.5;
+}
+
+.confirm-text {
+  font-size: 0.85rem;
+  color: #ef9a9a;
+  white-space: nowrap;
 }
 
 .empty-state {
@@ -34,10 +115,4 @@
   width: 48px;
   height: 48px;
   margin-bottom: 12px;
-}
-
-.evenements-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
 }

@@ -36,8 +36,20 @@
           <a routerLink="/actualites" routerLinkActive="active">Actualités</a>
         </li>
 
-        <li>
-          <a routerLink="/galeries" routerLinkActive="active">Galeries</a>
+        <li class="has-dropdown">
+          <button [matMenuTriggerFor]="galeriesMenu" class="nav-dropdown-btn">
+            Galeries <mat-icon class="arrow-icon">expand_more</mat-icon>
+          </button>
+          <mat-menu #galeriesMenu="matMenu" class="nav-menu">
+            <a mat-menu-item routerLink="/galeries/membres">
+              <mat-icon>people</mat-icon>
+              Portfolios des membres
+            </a>
+            <a mat-menu-item routerLink="/galeries/themes">
+              <mat-icon>photo_camera</mat-icon>
+              Thèmes du mois
+            </a>
+          </mat-menu>
         </li>
 
         <li>
@@ -48,40 +60,37 @@
           <a routerLink="/contact" routerLinkActive="active">Contact</a>
         </li>
 
-        @if (isLoggedIn$ | async) {
-          <li class="has-dropdown membre-nav-item">
-            <button [matMenuTriggerFor]="membreNavMenu" class="nav-dropdown-btn">
-              <mat-icon class="membre-nav-icon">account_circle</mat-icon>
-              Membre
-              <mat-icon class="arrow-icon">expand_more</mat-icon>
-            </button>
-            <mat-menu #membreNavMenu="matMenu">
-              <a mat-menu-item routerLink="/membre/portfolio">
-                <mat-icon>photo_library</mat-icon>
-                Mon Portfolio
-              </a>
-              <a mat-menu-item routerLink="/membre/profil">
-                <mat-icon>person</mat-icon>
-                Mon Profil
-              </a>
-              <mat-divider />
-              <button mat-menu-item disabled class="menu-item-soon">
-                <mat-icon>photo_camera</mat-icon>
-                Thèmes du mois
-                <span class="soon-badge">bientôt</span>
-              </button>
-              <mat-divider />
-              <button mat-menu-item (click)="logout()">
-                <mat-icon>logout</mat-icon>
-                Déconnexion
-              </button>
-            </mat-menu>
-          </li>
-        }
       </ul>
 
       <!-- Actions droite -->
       <div class="nav-actions">
+        @if (isLoggedIn$ | async) {
+          <button [matMenuTriggerFor]="membreNavMenu" class="membre-btn">
+            <mat-icon>account_circle</mat-icon>
+            Mon espace
+            <mat-icon class="arrow-icon">expand_more</mat-icon>
+          </button>
+          <mat-menu #membreNavMenu="matMenu">
+            <a mat-menu-item routerLink="/membre/portfolio">
+              <mat-icon>photo_library</mat-icon>
+              Mon Portfolio
+            </a>
+            <a mat-menu-item routerLink="/membre/profil">
+              <mat-icon>person</mat-icon>
+              Mon Profil
+            </a>
+            <mat-divider />
+            <a mat-menu-item routerLink="/membre/soumettre">
+              <mat-icon>photo_camera</mat-icon>
+              Thème du mois
+            </a>
+            <mat-divider />
+            <button mat-menu-item (click)="logout()">
+              <mat-icon>logout</mat-icon>
+              Déconnexion
+            </button>
+          </mat-menu>
+        }
         @if (isAdmin$ | async) {
           <button [matMenuTriggerFor]="adminMenu" class="admin-btn">
             <mat-icon>admin_panel_settings</mat-icon>
@@ -106,6 +115,10 @@
               <mat-icon>event</mat-icon>
               Événements
             </a>
+            <a mat-menu-item routerLink="/admin/themes">
+              <mat-icon>photo_camera</mat-icon>
+              Thèmes
+            </a>
             <mat-divider />
             <a mat-menu-item routerLink="/admin/membres">
               <mat-icon>group</mat-icon>
@@ -117,7 +130,8 @@
               Déconnexion
             </button>
           </mat-menu>
-        } @else if (!(isLoggedIn$ | async)) {
+        }
+        @if (!(isLoggedIn$ | async)) {
           <a routerLink="/login" class="login-btn">Connexion</a>
         }
       </div>

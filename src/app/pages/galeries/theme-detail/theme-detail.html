@@ -1,0 +1,40 @@
+<div class="theme-detail-page">
+
+  <a routerLink="/galeries/themes" class="back-link">← Thèmes du mois</a>
+
+  @if (theme() === undefined) {
+    <div class="loading">Chargement…</div>
+  } @else if (theme() === null) {
+    <div class="empty-state"><p>Thème introuvable.</p></div>
+  } @else {
+
+    <div class="theme-header">
+      <div class="header-meta">
+        <span class="mois-badge">{{ formatMois(theme()!.moisAnnee) }}</span>
+        <span class="nb-photos">{{ soumissions().length }} photo{{ soumissions().length !== 1 ? 's' : '' }}</span>
+      </div>
+      <h1 class="theme-titre">{{ theme()!.titre }}</h1>
+      @if (theme()!.description) {
+        <p class="theme-desc">{{ theme()!.description }}</p>
+      }
+    </div>
+
+    @if (soumissions().length === 0) {
+      <div class="empty-state"><p>Aucune photo soumise pour ce thème.</p></div>
+    } @else {
+      <div class="photos-grid">
+        @for (s of soumissions(); track s.id) {
+          <div class="photo-card">
+            <img [src]="s.photoUrl" [alt]="s.photoTitre" loading="lazy" class="photo-img">
+            <div class="photo-overlay">
+              <span class="photo-titre">{{ s.photoTitre }}</span>
+              <span class="photo-membre">{{ s.nomMembre }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+  }
+
+</div>

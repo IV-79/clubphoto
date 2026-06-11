@@ -1,0 +1,170 @@
+.calendrier-page {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 48px 32px 64px;
+}
+
+.page-header { margin-bottom: 32px; }
+
+.page-header h1 {
+  font-size: 2rem;
+  font-weight: 300;
+  letter-spacing: 1px;
+  color: #1a1a1a;
+  margin: 0 0 8px;
+}
+
+.subtitle {
+  color: rgba(0,0,0,0.45);
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+/* Filtres */
+.filtres {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 36px;
+  flex-wrap: wrap;
+}
+
+.filtre-btn {
+  padding: 6px 18px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  background: white;
+  color: rgba(0,0,0,0.55);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.filtre-btn:hover { border-color: #aaa; color: #1a1a1a; }
+.filtre-btn.actif  { background: #1a1a1a; color: white; border-color: #1a1a1a; }
+
+/* Sections */
+.section { margin-bottom: 48px; }
+
+.section-passes { opacity: 0.7; }
+
+.section-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(0,0,0,0.4);
+  margin: 0 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.count {
+  font-size: 0.7rem;
+  background: rgba(0,0,0,0.07);
+  color: rgba(0,0,0,0.4);
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+/* Cards événement */
+.events-list { display: flex; flex-direction: column; gap: 12px; }
+
+.event-card {
+  display: flex;
+  gap: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  background: white;
+}
+
+.card-date-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  flex-shrink: 0;
+  padding: 16px 0;
+}
+
+.card-reunion .card-date-col { background: #1976d2; }
+.card-sortie  .card-date-col { background: #f57c00; }
+.card-passe   .card-date-col { background: #bdbdbd; }
+
+.card-day {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: white;
+  line-height: 1;
+}
+
+.card-month {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.8);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.card-body {
+  flex: 1;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.card-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.type-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 2px 9px;
+  border-radius: 10px;
+}
+
+.badge-reunion { background: rgba(25,118,210,0.1);  color: #1565c0; }
+.badge-sortie  { background: rgba(245,124,0,0.12);  color: #e65100; }
+.badge-passe   { background: rgba(0,0,0,0.06);      color: rgba(0,0,0,0.4); }
+
+.card-titre {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
+.card-lieu {
+  font-size: 0.82rem;
+  color: rgba(0,0,0,0.5);
+}
+
+.card-desc {
+  margin: 4px 0 0;
+  font-size: 0.875rem;
+  color: rgba(0,0,0,0.6);
+  line-height: 1.5;
+}
+
+.card-date-full {
+  font-size: 0.78rem;
+  color: rgba(0,0,0,0.35);
+  margin-top: 4px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 80px 24px;
+  color: rgba(0,0,0,0.35);
+}

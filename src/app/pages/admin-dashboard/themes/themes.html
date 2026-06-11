@@ -1,0 +1,112 @@
+<div class="themes-page">
+
+  <div class="page-header">
+    <h2 class="page-title">Thèmes mensuels</h2>
+    @if (!showForm()) {
+      <button mat-raised-button color="primary" (click)="showForm.set(true)">
+        <mat-icon>add</mat-icon> Nouveau thème
+      </button>
+    }
+  </div>
+
+  @if (showForm()) {
+    <mat-card class="create-form-card">
+      <mat-card-header>
+        <mat-card-title>Nouveau thème</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="form" (ngSubmit)="creer()">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Titre du thème</mat-label>
+            <input matInput formControlName="titre" placeholder="ex. Lumière naturelle">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Mois concerné</mat-label>
+            <input matInput type="month" formControlName="moisAnnee">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Description</mat-label>
+            <textarea matInput formControlName="description" rows="3"
+              placeholder="Consignes, inspiration, règles particulières…"></textarea>
+          </mat-form-field>
+          <div class="form-actions">
+            <button mat-button type="button" (click)="annuler()">Annuler</button>
+            <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || saving()">
+              {{ saving() ? 'Création…' : 'Créer le thème' }}
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  @if (themes$ | async; as themes) {
+    @if (themes.length === 0 && !showForm()) {
+      <mat-card>
+        <mat-card-content>
+          <div class="empty-state">
+            <mat-icon>photo_camera</mat-icon>
+            <p>Aucun thème créé pour l'instant.</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <div class="themes-list">
+      @for (theme of themes; track theme.id) {
+        <mat-card class="theme-card" [class.card-ouvert]="theme.statut === 'ouvert'">
+          <mat-card-content>
+            <div class="theme-header">
+              <div class="theme-info">
+                <span class="statut-badge" [class]="'badge-' + theme.statut">
+                  {{ labelStatut(theme.statut) }}
+                </span>
+                <h3 class="theme-titre">{{ theme.titre }}</h3>
+                <span class="theme-mois">{{ formatMois(theme.moisAnnee) }}</span>
+              </div>
+              <div class="theme-actions">
+                @if (confirmDeleteId() === theme.id) {
+                  <span class="confirm-text">Supprimer définitivement ?</span>
+                  <button mat-stroked-button color="warn" (click)="supprimer(theme.id)">Oui</button>
+                  <button mat-button (click)="confirmDeleteId.set(null)">Non</button>
+                } @else {
+                  @if (theme.statut !== 'ouvert') {
+                    <button mat-stroked-button color="primary" (click)="ouvrir(theme.id)">
+                      <mat-icon>lock_open</mat-icon> Ouvrir
+                    </button>
+                  }
+                  @if (theme.statut === 'ouvert') {
+                    <button mat-stroked-button (click)="fermer(theme.id)">
+                      <mat-icon>lock</mat-icon> Fermer
+                    </button>
+                  }
+                  <button mat-icon-button color="warn"
+                    [disabled]="theme.statut === 'ouvert'"
+                    [title]="theme.statut === 'ouvert' ? 'Fermer le thème avant de supprimer' : 'Supprimer'"
+                    (click)="confirmDeleteId.set(theme.id)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                }
+              </div>
+            </div>
+
+            @if (theme.description) {
+              <p class="theme-desc">{{ theme.description }}</p>
+            }
+
+            <div class="theme-meta">
+              Créé le {{ formatDate(theme.dateCreation) }}
+              @if (theme.dateOuverture) {
+                · Ouvert le {{ formatDate(theme.dateOuverture) }}
+              }
+              @if (theme.dateFermeture) {
+                · Fermé le {{ formatDate(theme.dateFermeture) }}
+              }
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+  }
+
+</div>

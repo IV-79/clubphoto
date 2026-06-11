@@ -1,37 +1,147 @@
-<div class="admin-page">
+<div class="evenements-page">
 
   <div class="page-header">
-    <h2 class="admin-title">Événements</h2>
-    <button mat-raised-button color="primary">
-      <mat-icon>event_note</mat-icon>
-      Nouvel événement
-    </button>
+    <h2 class="page-title">Événements</h2>
+    @if (!showCreateForm()) {
+      <button mat-raised-button color="primary" (click)="showCreateForm.set(true)">
+        <mat-icon>add</mat-icon> Nouvel événement
+      </button>
+    }
   </div>
 
-  @if (evenements.length === 0) {
-    <div class="empty-state">
-      <mat-icon>event_busy</mat-icon>
-      <p>Aucun événement pour l'instant.</p>
-    </div>
-  } @else {
-    <div class="evenements-list">
-      @for (evt of evenements; track evt.id) {
-        <mat-card class="evenement-card">
-          <mat-card-header>
-            <mat-icon mat-card-avatar>event</mat-icon>
-            <mat-card-title>{{ evt.titre }}</mat-card-title>
-            <mat-card-subtitle>{{ evt.date }}</mat-card-subtitle>
-          </mat-card-header>
-          <mat-card-content>
-            <p>{{ evt.description }}</p>
-          </mat-card-content>
-          <mat-card-actions>
-            <button mat-button color="primary">Modifier</button>
-            <button mat-button color="warn">Supprimer</button>
-          </mat-card-actions>
-        </mat-card>
-      }
-    </div>
+  <!-- Formulaire création -->
+  @if (showCreateForm()) {
+    <mat-card class="form-card">
+      <mat-card-header><mat-card-title>Nouvel événement</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="createForm" (ngSubmit)="creer()">
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="field-grow">
+              <mat-label>Titre</mat-label>
+              <input matInput formControlName="titre">
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="field-type">
+              <mat-label>Type</mat-label>
+              <mat-select formControlName="type">
+                @for (t of types; track t.value) {
+                  <mat-option [value]="t.value">{{ t.label }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="field-date">
+              <mat-label>Date</mat-label>
+              <input matInput [matDatepicker]="createPicker" formControlName="date" placeholder="jj/mm/aaaa">
+              <mat-datepicker-toggle matIconSuffix [for]="createPicker"></mat-datepicker-toggle>
+              <mat-datepicker #createPicker></mat-datepicker>
+            </mat-form-field>
+          </div>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Lieu <span class="optional">(optionnel)</span></mat-label>
+            <input matInput formControlName="lieu">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Description <span class="optional">(optionnel)</span></mat-label>
+            <textarea matInput formControlName="description" rows="3"></textarea>
+          </mat-form-field>
+          <div class="form-actions">
+            <button mat-button type="button" (click)="showCreateForm.set(false); createForm.reset({type:'reunion'})">Annuler</button>
+            <button mat-raised-button color="primary" type="submit" [disabled]="createForm.invalid || saving()">
+              {{ saving() ? 'Création…' : 'Créer' }}
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
   }
+
+  <!-- Empty state -->
+  @if (evenements().length === 0 && !showCreateForm()) {
+    <mat-card><mat-card-content>
+      <div class="empty-state">
+        <mat-icon>event</mat-icon>
+        <p>Aucun événement créé pour l'instant.</p>
+      </div>
+    </mat-card-content></mat-card>
+  }
+
+  <!-- Liste -->
+  <div class="events-list">
+    @for (ev of evenements(); track ev.id) {
+      <mat-card class="event-card" [class.passe]="isPasse(ev.date)">
+        <mat-card-content>
+
+          @if (editingId() === ev.id) {
+            <form [formGroup]="editForm" (ngSubmit)="sauvegarder(ev.id)">
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="field-grow">
+                  <mat-label>Titre</mat-label>
+                  <input matInput formControlName="titre">
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="field-type">
+                  <mat-label>Type</mat-label>
+                  <mat-select formControlName="type">
+                    @for (t of types; track t.value) {
+                      <mat-option [value]="t.value">{{ t.label }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="field-date">
+                  <mat-label>Date</mat-label>
+                  <input matInput [matDatepicker]="editPicker" formControlName="date" placeholder="jj/mm/aaaa">
+                  <mat-datepicker-toggle matIconSuffix [for]="editPicker"></mat-datepicker-toggle>
+                  <mat-datepicker #editPicker></mat-datepicker>
+                </mat-form-field>
+              </div>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Lieu</mat-label>
+                <input matInput formControlName="lieu">
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Description</mat-label>
+                <textarea matInput formControlName="description" rows="3"></textarea>
+              </mat-form-field>
+              <div class="form-actions">
+                <button mat-button type="button" (click)="cancelEdit()">Annuler</button>
+                <button mat-raised-button color="primary" type="submit" [disabled]="editForm.invalid || saving()">
+                  {{ saving() ? 'Sauvegarde…' : 'Sauvegarder' }}
+                </button>
+              </div>
+            </form>
+
+          } @else {
+            <div class="event-header">
+              <div class="event-info">
+                <span class="type-badge" [class]="'badge-' + ev.type">{{ labelType(ev.type) }}</span>
+                <h3 class="event-titre">{{ ev.titre }}</h3>
+                @if (isPasse(ev.date)) { <span class="passe-badge">Passé</span> }
+              </div>
+              <div class="event-actions">
+                @if (confirmDeleteId() === ev.id) {
+                  <span class="confirm-text">Supprimer ?</span>
+                  <button mat-stroked-button color="warn" (click)="supprimer(ev.id)">Oui</button>
+                  <button mat-button (click)="confirmDeleteId.set(null)">Non</button>
+                } @else {
+                  <button mat-icon-button (click)="startEdit(ev)" title="Modifier">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button mat-icon-button color="warn" (click)="confirmDeleteId.set(ev.id)" title="Supprimer">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                }
+              </div>
+            </div>
+            <div class="event-meta">
+              <span class="meta-date">{{ formatDate(ev.date) }}</span>
+              @if (ev.lieu) { <span class="meta-lieu">· {{ ev.lieu }}</span> }
+            </div>
+            @if (ev.description) {
+              <p class="event-desc">{{ ev.description }}</p>
+            }
+          }
+
+        </mat-card-content>
+      </mat-card>
+    }
+  </div>
 
 </div>

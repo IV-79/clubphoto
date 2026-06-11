@@ -78,6 +78,18 @@ export class PhotoService {
     );
   }
 
+  getPublicPhotos(uid: string): Observable<Photo[]> {
+    const q = query(
+      collection(this.firestore, 'photos'),
+      where('uid', '==', uid),
+      where('isPublic', '==', true),
+      orderBy('dateUpload', 'desc')
+    );
+    return runInInjectionContext(this.injector, () =>
+      collectionData(q, { idField: 'id' })
+    ) as Observable<Photo[]>;
+  }
+
   async toggleVisibility(photo: Photo): Promise<void> {
     await runInInjectionContext(this.injector, () =>
       updateDoc(doc(this.firestore, 'photos', photo.id), { isPublic: !photo.isPublic })

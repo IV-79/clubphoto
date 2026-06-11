@@ -86,6 +86,16 @@ export class AuthService {
     ) as Observable<UserProfile[]>;
   }
 
+  getMemberProfile(uid: string): Observable<UserProfile | null> {
+    return from(
+      runInInjectionContext(this.injector, () =>
+        getDoc(doc(this.firestore, 'users', uid))
+      )
+    ).pipe(
+      map(snap => snap.exists() ? (snap.data() as UserProfile) : null)
+    );
+  }
+
   async updateProfile(uid: string, data: Partial<Omit<UserProfile, 'uid' | 'email' | 'role' | 'dateAdhesion'>>): Promise<void> {
     await runInInjectionContext(this.injector, () =>
       updateDoc(doc(this.firestore, 'users', uid), data as Record<string, unknown>)

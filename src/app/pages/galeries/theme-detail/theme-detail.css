@@ -1,0 +1,117 @@
+.theme-detail-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 32px 64px;
+}
+
+.back-link {
+  display: inline-block;
+  color: rgba(0, 0, 0, 0.4);
+  text-decoration: none;
+  font-size: 0.85rem;
+  margin-bottom: 32px;
+  transition: color 0.2s;
+}
+
+.back-link:hover { color: #1a1a1a; }
+
+.loading,
+.empty-state {
+  text-align: center;
+  padding: 80px 24px;
+  color: rgba(0, 0, 0, 0.35);
+}
+
+.theme-header {
+  margin-bottom: 40px;
+}
+
+.header-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.mois-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.nb-photos {
+  font-size: 0.8rem;
+  color: rgba(0, 0, 0, 0.35);
+}
+
+.theme-titre {
+  font-size: 2rem;
+  font-weight: 300;
+  letter-spacing: 1px;
+  color: #1a1a1a;
+  margin: 0 0 12px;
+}
+
+.theme-desc {
+  color: rgba(0, 0, 0, 0.55);
+  font-size: 0.95rem;
+  line-height: 1.7;
+  max-width: 640px;
+  margin: 0;
+}
+
+/* Grille galerie */
+.photos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.photo-card {
+  position: relative;
+  aspect-ratio: 4/3;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #f0f0f0;
+}
+
+.photo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s;
+}
+
+.photo-card:hover .photo-img { transform: scale(1.04); }
+
+.photo-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 50%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 14px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.photo-card:hover .photo-overlay { opacity: 1; }
+
+.photo-titre {
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.photo-membre {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.78rem;
+  margin-top: 2px;
+}

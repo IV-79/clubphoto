@@ -1,0 +1,59 @@
+<div class="galerie-page">
+
+  <div class="page-header">
+    <h1>Thèmes du mois</h1>
+    <p class="subtitle">Archives des défis photographiques mensuels</p>
+  </div>
+
+  @if (themes().length === 0) {
+    <div class="empty-state">
+      <p>Aucun thème publié pour le moment.</p>
+    </div>
+  } @else {
+    <div class="themes-timeline">
+      @for (theme of themes(); track theme.id) {
+        <div class="theme-entry" [class.entry-ouvert]="theme.statut === 'ouvert'">
+
+          <div class="mois-col">
+            <span class="mois-badge">{{ formatMois(theme.moisAnnee) }}</span>
+          </div>
+
+          <div class="theme-content">
+            <div class="theme-title-row">
+              <h2 class="theme-titre">{{ theme.titre }}</h2>
+              @if (theme.statut === 'ouvert') {
+                <span class="statut-badge badge-ouvert">En cours</span>
+              } @else {
+                <span class="statut-badge badge-ferme">
+                  {{ countPour(theme.id) }} photo{{ countPour(theme.id) !== 1 ? 's' : '' }}
+                </span>
+              }
+            </div>
+
+            @if (theme.description) {
+              <p class="theme-desc">{{ theme.description }}</p>
+            }
+
+            @if (theme.statut === 'ferme') {
+              @if (thumbnailsPour(theme.id).length > 0) {
+                <div class="thumbnails">
+                  @for (url of thumbnailsPour(theme.id); track url) {
+                    <img [src]="url" class="thumb" alt="">
+                  }
+                  @if (countPour(theme.id) > 4) {
+                    <span class="thumb-more">+{{ countPour(theme.id) - 4 }}</span>
+                  }
+                </div>
+              }
+              <a [routerLink]="['/galeries/themes', theme.id]" class="voir-btn">
+                Voir la galerie →
+              </a>
+            }
+          </div>
+
+        </div>
+      }
+    </div>
+  }
+
+</div>

@@ -1,0 +1,78 @@
+<div class="calendrier-page">
+
+  <div class="page-header">
+    <h1>Calendrier</h1>
+    <p class="subtitle">Réunions et sorties photo du club</p>
+  </div>
+
+  <!-- Filtres -->
+  <div class="filtres">
+    <button class="filtre-btn" [class.actif]="filtre() === 'tous'" (click)="filtre.set('tous')">Tous</button>
+    @for (t of types; track t.value) {
+      <button class="filtre-btn" [class.actif]="filtre() === t.value" (click)="filtre.set(t.value)">
+        {{ t.label }}
+      </button>
+    }
+  </div>
+
+  <!-- À venir -->
+  @if (aVenir().length > 0) {
+    <section class="section">
+      <h2 class="section-title">À venir <span class="count">{{ aVenir().length }}</span></h2>
+      <div class="events-list">
+        @for (ev of aVenir(); track ev.id) {
+          <div class="event-card" [class]="'card-' + ev.type">
+            <div class="card-date-col">
+              <span class="card-day">{{ ev.date | slice:8:10 }}</span>
+              <span class="card-month">{{ formatDate(ev.date) | slice:3:6 }}</span>
+            </div>
+            <div class="card-body">
+              <div class="card-top">
+                <span class="type-badge" [class]="'badge-' + ev.type">{{ labelType(ev.type) }}</span>
+                <h3 class="card-titre">{{ ev.titre }}</h3>
+              </div>
+              @if (ev.lieu) {
+                <span class="card-lieu">📍 {{ ev.lieu }}</span>
+              }
+              @if (ev.description) {
+                <p class="card-desc">{{ ev.description }}</p>
+              }
+              <span class="card-date-full">{{ formatDate(ev.date) }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+  } @else {
+    <div class="empty-state">
+      <p>Aucun événement à venir.</p>
+    </div>
+  }
+
+  <!-- Passés -->
+  @if (passes().length > 0) {
+    <section class="section section-passes">
+      <h2 class="section-title">Passés <span class="count">{{ passes().length }}</span></h2>
+      <div class="events-list">
+        @for (ev of passes(); track ev.id) {
+          <div class="event-card card-passe">
+            <div class="card-date-col">
+              <span class="card-day">{{ ev.date | slice:8:10 }}</span>
+              <span class="card-month">{{ formatDate(ev.date) | slice:3:6 }}</span>
+            </div>
+            <div class="card-body">
+              <div class="card-top">
+                <span class="type-badge badge-passe">{{ labelType(ev.type) }}</span>
+                <h3 class="card-titre">{{ ev.titre }}</h3>
+              </div>
+              @if (ev.lieu) { <span class="card-lieu">📍 {{ ev.lieu }}</span> }
+              @if (ev.description) { <p class="card-desc">{{ ev.description }}</p> }
+              <span class="card-date-full">{{ formatDate(ev.date) }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+  }
+
+</div>

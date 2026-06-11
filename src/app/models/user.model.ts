@@ -11,6 +11,7 @@ export interface UserProfile {
   instagram?: string;
   facebook?: string;
   siteWeb?: string;
+  photoCouvertureUrl?: string;
 }
 
 export const STYLES_PHOTO = [

@@ -6,6 +6,7 @@ import { Membres } from './pages/admin-dashboard/membres/membres';
 import { Galeries } from './pages/admin-dashboard/galeries/galeries';
 import { Evenements } from './pages/admin-dashboard/evenements/evenements';
 import { AdminArticles } from './pages/admin-dashboard/articles/articles';
+import { AdminThemes } from './pages/admin-dashboard/themes/themes';
 import { authGuard, memberGuard, loginGuard } from './guards/auth.guard';
 import { PublicLayout } from './layouts/public-layout/public-layout';
 import { MemberLayout } from './layouts/member-layout/member-layout';
@@ -16,6 +17,11 @@ import { Calendrier } from './pages/calendrier/calendrier';
 import { Contact } from './pages/contact/contact';
 import { MembrePortfolio } from './pages/membre/portfolio/portfolio';
 import { MembreProfil } from './pages/membre/profil/profil';
+import { MembreSoumettre } from './pages/membre/soumettre/soumettre';
+import { MembresGalerie } from './pages/galeries/membres-galerie/membres-galerie';
+import { MembreDetail } from './pages/galeries/membre-detail/membre-detail';
+import { ThemesListe } from './pages/galeries/themes-liste/themes-liste';
+import { ThemeDetail } from './pages/galeries/theme-detail/theme-detail';
 
 export const routes: Routes = [
   {
@@ -34,7 +40,11 @@ export const routes: Routes = [
           { path: '', redirectTo: 'histoire', pathMatch: 'full' }
         ]
       },
-      { path: 'galeries', component: Galeries },
+      { path: 'galeries', redirectTo: 'galeries/membres', pathMatch: 'full' },
+      { path: 'galeries/membres', component: MembresGalerie },
+      { path: 'galeries/membres/:uid', component: MembreDetail },
+      { path: 'galeries/themes', component: ThemesListe },
+      { path: 'galeries/themes/:id', component: ThemeDetail },
       { path: 'calendrier', component: Calendrier },
       { path: 'contact', component: Contact },
       {
@@ -46,6 +56,7 @@ export const routes: Routes = [
           { path: 'membres', component: Membres },
           { path: 'galeries', component: Galeries },
           { path: 'evenements', component: Evenements },
+          { path: 'themes', component: AdminThemes },
         ]
       },
     ]
@@ -57,6 +68,7 @@ export const routes: Routes = [
     children: [
       { path: 'portfolio', component: MembrePortfolio },
       { path: 'profil', component: MembreProfil },
+      { path: 'soumettre', component: MembreSoumettre },
       { path: '', redirectTo: 'portfolio', pathMatch: 'full' }
     ]
   },

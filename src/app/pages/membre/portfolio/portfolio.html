@@ -38,6 +38,15 @@
                 class="btn-icon">
                 {{ photo.isPublic ? 'Privé' : 'Public' }}
               </button>
+              @if (photo.isPublic) {
+                <button
+                  (click)="setCouverture(photo); $event.stopPropagation()"
+                  [class.btn-cover-active]="estCouverture(photo)"
+                  title="Utiliser comme photo de carte"
+                  class="btn-icon btn-cover">
+                  ★
+                </button>
+              }
               <button
                 (click)="confirmDelete(photo)"
                 title="Supprimer"
@@ -49,6 +58,9 @@
           <span class="visibility-badge" [class.public]="photo.isPublic">
             {{ photo.isPublic ? 'Public' : 'Privé' }}
           </span>
+          @if (estCouverture(photo)) {
+            <span class="cover-badge">★ Couv.</span>
+          }
         </div>
       }
     </div>
