@@ -21,8 +21,12 @@ jobs:
       - name: Create environment file
         run: |
           mkdir -p src/environments
-          echo "${{ secrets.ENV_PRODUCTION }}" > src/environments/environment.ts
-          echo "${{ secrets.ENV_PRODUCTION }}" > src/environments/environment.prod.ts
+          cat << 'EOF' > src/environments/environment.ts
+          ${{ secrets.ENV_PRODUCTION }}
+          EOF
+          cat << 'EOF' > src/environments/environment.prod.ts
+          ${{ secrets.ENV_PRODUCTION }}
+          EOF
           
       - name: Build Angular App
         run: npm run build
