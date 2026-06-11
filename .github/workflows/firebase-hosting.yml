@@ -2,7 +2,7 @@ name: Deploy to Firebase Hosting on push
 on:
   push:
     branches:
-      - master # C'est bien votre branche principale
+      - master
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
@@ -18,16 +18,18 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Create environment file
-        run: |
-          mkdir -p src/environments
-          cat << 'EOF' > src/environments/environment.ts
-          ${{ secrets.ENV_PRODUCTION }}
-          EOF
-          cat << 'EOF' > src/environments/environment.prod.ts
-          ${{ secrets.ENV_PRODUCTION }}
-          EOF
-          
+      # --- ÉTAPE MODIFIÉE : Lance le script JS avec les variables d'environnement ---
+      - name: Generate Environment Files
+        env:
+          FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+          FIREBASE_AUTH_DOMAIN: ${{ secrets.FIREBASE_AUTH_DOMAIN }}
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
+          FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
+          FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
+          FIREBASE_MEASUREMENT_ID: ${{ secrets.FIREBASE_MEASUREMENT_ID }}
+        run: node set-env.js
+
       - name: Build Angular App
         run: npm run build
 
@@ -36,5 +38,5 @@ jobs:
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseToken: ${{ secrets.FIREBASE_TOKEN }}
-          projectId: clubphoto-papa # Remplacez STRICTEMENT par l'ID réel de votre projet Firebase
+          projectId: clubphoto-papa
           channelId: live
