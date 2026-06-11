@@ -23,8 +23,7 @@ jobs:
           mkdir -p src/environments
           echo "${{ secrets.ENV_PRODUCTION }}" > src/environments/environment.ts
           echo "${{ secrets.ENV_PRODUCTION }}" > src/environments/environment.prod.ts
-
-
+          
       - name: Build Angular App
         run: npm run build
 
