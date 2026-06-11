@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "public": "dist/club-photo",
+    "public": "dist/club-photo/browser",
     "ignore": [
       "firebase.json",
       "**/.*",
