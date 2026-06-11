@@ -12,7 +12,7 @@ import { Header } from '../../components/header/header';
     </main>
     <footer class="site-footer">
       <p>
-        © {{ year }} Club Photo — Photos du Quotidien &nbsp;|&nbsp;
+        © {{ year }} Club Photo Tain-Tournon &nbsp;|&nbsp;
         <a routerLink="/contact">Contact</a>
         <a routerLink="/le-club/adhesion">Adhésion</a>
         <a routerLink="/mentions-legales">Mentions légales</a>

@@ -19,31 +19,10 @@
   color: white;
 }
 
-.logo-icon {
-  font-size: 44px;
-  width: 44px;
-  height: 44px;
-  color: #cc0000;
-}
-
-.logo-text {
-  display: flex;
-  flex-direction: column;
-}
-
-.logo-name {
-  font-size: 1.5rem;
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: white;
-}
-
-.logo-tagline {
-  font-size: 0.7rem;
-  color: rgba(255,255,255,0.5);
-  letter-spacing: 2px;
-  text-transform: uppercase;
+.logo-img {
+  height: 52px;
+  filter: invert(1);
+  mix-blend-mode: screen;
 }
 
 /* Barre de navigation */
