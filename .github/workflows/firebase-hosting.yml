@@ -40,3 +40,4 @@ jobs:
           firebaseToken: ${{ secrets.FIREBASE_TOKEN }}
           projectId: clubphoto-papa
           channelId: live
+          entryPoint: .
