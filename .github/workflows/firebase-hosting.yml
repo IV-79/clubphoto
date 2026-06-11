@@ -20,7 +20,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm' # Active le cache pour réduire le temps de build futur
+          cache: 'npm' # <-- Active la mise en cache ultra-rapide
 
       - name: Install dependencies
         run: npm ci
@@ -43,6 +43,6 @@ jobs:
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseToken: ${{ secrets.FIREBASE_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_CLUBPHOTOPJ }}
           projectId: clubphotopj
           channelId: live
