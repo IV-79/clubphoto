@@ -26,6 +26,7 @@ import { MembresGalerie } from './pages/galeries/membres-galerie/membres-galerie
 import { MembreDetail } from './pages/galeries/membre-detail/membre-detail';
 import { ThemesListe } from './pages/galeries/themes-liste/themes-liste';
 import { ThemeDetail } from './pages/galeries/theme-detail/theme-detail';
+import { MembresGuide } from './pages/membres/guide/guide';
 
 export const routes: Routes = [
   {
@@ -52,6 +53,7 @@ export const routes: Routes = [
       { path: 'galeries/oneshots', component: OneShotsListe },
       { path: 'galeries/oneshots/:id', component: OneShotDetail },
       { path: 'calendrier', component: Calendrier },
+      { path: 'membres/guide', component: MembresGuide, canActivate: [memberGuard] },
       { path: 'contact', component: Contact },
       {
         path: 'admin',

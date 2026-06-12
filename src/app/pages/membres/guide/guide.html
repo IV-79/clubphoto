@@ -1,0 +1,289 @@
+<div class="guide-page">
+
+  <header class="guide-hero">
+    <h1>Guide des membres</h1>
+    <p class="guide-intro">Comment participer aux deux grandes activités du club : le OneShot et le Thème du mois.</p>
+  </header>
+
+  <!-- Navigation rapide -->
+  <nav class="guide-nav">
+    <a href="#oneshot" class="guide-nav-link">
+      <span class="guide-nav-icon">📷</span>
+      OneShot
+    </a>
+    <a href="#theme" class="guide-nav-link">
+      <span class="guide-nav-icon">🗓️</span>
+      Thème du mois
+    </a>
+  </nav>
+
+  <!-- ── ONESHOT ─────────────────────────────────────── -->
+  <section class="guide-section" id="oneshot">
+    <div class="section-header">
+      <h2>OneShot</h2>
+      <p class="section-subtitle">Un événement photo libre, lancé par n'importe quel membre, avec vote final.</p>
+    </div>
+
+    <!-- Concept -->
+    <div class="guide-card">
+      <h3>Le principe</h3>
+      <p>
+        Un OneShot est un événement thématique créé par un membre. Il définit un ou plusieurs thèmes,
+        les participants s'inscrivent et soumettent leurs photos. Quand l'organisateur clôture les inscriptions,
+        le vote s'ouvre et les membres élisent leurs photos préférées. À la fin, le classement est révélé avec les noms.
+      </p>
+      <p class="guide-note">
+        Contrairement au Thème du mois, un OneShot est entièrement géré par son créateur — c'est lui qui avance
+        manuellement les étapes.
+      </p>
+    </div>
+
+    <!-- Cycle de vie -->
+    <div class="guide-card">
+      <h3>Les 4 étapes d'un OneShot</h3>
+      <div class="steps-list">
+        <div class="step">
+          <span class="step-badge step-preparation">Préparation</span>
+          <div class="step-body">
+            <strong>Invisible aux autres membres.</strong>
+            L'organisateur configure l'événement : titre, description, date, thèmes photo.
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-badge step-inscription">Inscriptions ouvertes</span>
+          <div class="step-body">
+            <strong>Les membres peuvent s'inscrire.</strong>
+            L'organisateur uploade les photos et peut encore ajouter ou renommer des thèmes.
+            Les thèmes restent une information interne — les participants ne les voient pas encore.
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-badge step-fermeture">Inscriptions fermées <em class="optional-label">(optionnel)</em></span>
+          <div class="step-body">
+            <strong>Les inscriptions sont closes mais le vote n'a pas encore démarré.</strong>
+            L'organisateur peut encore ajuster les thèmes et finaliser les photos.
+            Utile pour tout vérifier avant d'ouvrir le vote.
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-badge step-vote">Vote</span>
+          <div class="step-body">
+            <strong>Les thèmes et les photos sont révélés aux participants.</strong>
+            Plus d'inscriptions, d'uploads ni de modification des thèmes.
+            Chaque participant vote pour une photo par thème (pas la sienne). Les noms sont masqués.
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-badge step-resultats">Résultats</span>
+          <div class="step-body">
+            <strong>Le classement est publié.</strong>
+            Les noms sont révélés, les égalités partagent le même rang (ex : deux 2ᵉ places).
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Créer -->
+    <div class="guide-card">
+      <h3>Créer un OneShot</h3>
+      <ol class="guide-steps">
+        <li>Allez dans <strong>Mon espace → Mes OneShots</strong> via le menu en haut à droite.</li>
+        <li>Cliquez sur <strong>+ Créer un événement</strong>.</li>
+        <li>Renseignez le titre (obligatoire), une description et une date optionnelles.</li>
+        <li>L'événement démarre en mode <strong>Préparation</strong> — personne ne le voit encore.</li>
+        <li>Depuis la page de gestion, ajoutez vos <strong>thèmes</strong> (ex : "Paysage", "Portrait").</li>
+        <li>Quand tout est prêt, cliquez <strong>Ouvrir les inscriptions</strong> pour le rendre visible.</li>
+      </ol>
+    </div>
+
+    <!-- Participer -->
+    <div class="guide-card">
+      <h3>Participer à un OneShot</h3>
+      <ol class="guide-steps">
+        <li>Rendez-vous sur <a routerLink="/galeries/oneshots" class="inline-link">Galeries → OneShot</a>.</li>
+        <li>Ouvrez un événement dont le statut est <span class="badge-inline inscription">Inscriptions ouvertes</span>.</li>
+        <li>Inscrivez-vous — l'organisateur pourra ensuite uploader vos photos.</li>
+        <li>Pendant la phase <span class="badge-inline vote">Vote</span>, parcourez les photos et votez pour celles que vous préférez (sauf les vôtres).</li>
+        <li>Les <span class="badge-inline resultats">Résultats</span> sont visibles dès que l'organisateur clôture le vote.</li>
+      </ol>
+      <p class="guide-note">Les photos sont uploadées par l'organisateur, pas par les participants eux-mêmes.</p>
+    </div>
+
+    <!-- Gérer -->
+    <div class="guide-card">
+      <h3>Gérer son OneShot (organisateur)</h3>
+      <ol class="guide-steps">
+        <li>Depuis <strong>Mon espace → Mes OneShots</strong>, cliquez <strong>Gérer</strong> sur votre événement.</li>
+        <li>Ajoutez et renommez les thèmes tant que vous êtes en Préparation, Inscriptions ou Inscriptions fermées. Dès le passage en Vote, les thèmes sont verrouillés et révélés aux participants.</li>
+        <li>Pour ajouter des photos : section <strong>Photos → Gérer les photos</strong>. Glissez plusieurs fichiers en une fois. Assignez chaque photo à un membre et un thème.</li>
+        <li>Avancez les étapes dans l'ordre avec le bouton <strong>Avancer</strong> (action irréversible, une confirmation est demandée).</li>
+        <li>Le bouton <strong>Fermer les inscriptions d'abord</strong> est optionnel : il vous permet de bloquer les nouvelles inscriptions et uploads le temps de tout vérifier, avant d'ouvrir le vote.</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ── THÈME DU MOIS ──────────────────────────────── -->
+  <section class="guide-section" id="theme">
+    <div class="section-header">
+      <h2>Thème du mois</h2>
+      <p class="section-subtitle">Une compétition mensuelle organisée par le club, avec soumission directe par les membres.</p>
+    </div>
+
+    <!-- Concept -->
+    <div class="guide-card">
+      <h3>Le principe</h3>
+      <p>
+        Chaque mois, l'équipe du club propose un thème photo. Les membres soumettent leurs photos directement
+        depuis la galerie. Les phases changent <strong>automatiquement selon les dates</strong> définies par l'admin
+        — aucun bouton à actionner pour avancer les étapes.
+      </p>
+    </div>
+
+    <!-- Bloc admin -->
+    <div class="guide-card guide-card-admin">
+      <div class="admin-card-header">
+        <mat-icon class="admin-icon">admin_panel_settings</mat-icon>
+        <h3>Créer un thème (administrateurs)</h3>
+      </div>
+      <p>Depuis <strong>Admin → Thèmes</strong>, cliquez <strong>Nouveau thème</strong>. Le formulaire comprend :</p>
+
+      <div class="admin-fields">
+        <div class="admin-field-row">
+          <span class="field-label">Titre</span>
+          <span class="field-desc">Le sujet du mois, ex : « Lumière naturelle ».</span>
+        </div>
+        <div class="admin-field-row">
+          <span class="field-label">Description</span>
+          <span class="field-desc">Optionnel — consignes, inspiration, règles particulières.</span>
+        </div>
+        <div class="admin-field-row">
+          <span class="field-label">Mois</span>
+          <span class="field-desc">
+            Sélecteur mois/année. <strong>Remplit automatiquement les 3 dates</strong> dès la sélection
+            (voir ci-dessous) — ajustez ensuite si besoin.
+          </span>
+        </div>
+        <div class="admin-field-row">
+          <span class="field-label">Ouverture soumissions</span>
+          <span class="field-desc">Auto : <strong>1ᵉʳ du mois sélectionné.</strong> À partir de cette date, les membres peuvent soumettre une photo.</span>
+        </div>
+        <div class="admin-field-row">
+          <span class="field-label">Clôture soumissions</span>
+          <span class="field-desc">Auto : <strong>dernier jour du mois sélectionné.</strong> Plus de soumissions après cette date ; le vote s'ouvre.</span>
+        </div>
+        <div class="admin-field-row">
+          <span class="field-label">Fin du vote</span>
+          <span class="field-desc">Auto : <strong>15 du mois suivant.</strong> Après cette date, les résultats sont publiés automatiquement.</span>
+        </div>
+        <div class="admin-field-row">
+          <span class="field-label">Photos / membre</span>
+          <span class="field-desc">Défaut : <strong>1.</strong> Nombre max de soumissions par participant.</span>
+        </div>
+        <div class="admin-field-row">
+          <span class="field-label">Votes / membre</span>
+          <span class="field-desc">Défaut : <strong>3.</strong> Nombre de votes qu'un membre peut répartir sur les photos.</span>
+        </div>
+      </div>
+
+      <div class="admin-timeline">
+        <div class="tl-segment tl-attente">
+          <span class="tl-label">En attente</span>
+          <span class="tl-hint">avant l'ouverture</span>
+        </div>
+        <div class="tl-arrow">→</div>
+        <div class="tl-segment tl-ouvert">
+          <span class="tl-label">Ouvert</span>
+          <span class="tl-hint">ouverture → clôture</span>
+        </div>
+        <div class="tl-arrow">→</div>
+        <div class="tl-segment tl-vote">
+          <span class="tl-label">Vote</span>
+          <span class="tl-hint">clôture → fin vote</span>
+        </div>
+        <div class="tl-arrow">→</div>
+        <div class="tl-segment tl-resultats">
+          <span class="tl-label">Résultats</span>
+          <span class="tl-hint">après fin vote</span>
+        </div>
+      </div>
+
+      <p class="guide-note">
+        Il n'y a pas de bouton « passer à l'étape suivante » — le statut est calculé en temps réel
+        à partir des dates. Pour corriger une erreur, supprimez le thème et recréez-le
+        (possible tant qu'aucune soumission n'existe).
+      </p>
+    </div>
+
+    <!-- Cycle de vie -->
+    <div class="guide-card">
+      <h3>Les 4 phases</h3>
+      <div class="steps-list">
+        <div class="step">
+          <span class="step-badge step-attente">En attente</span>
+          <div class="step-body">
+            Le thème est annoncé mais les soumissions ne sont pas encore ouvertes.
+            Préparez vos photos !
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-badge step-ouvert">Ouvert</span>
+          <div class="step-body">
+            <strong>Soumission ouverte.</strong> Uploadez votre photo directement sur la page du thème.
+            Vous pouvez supprimer et re-soumettre tant que la clôture n'est pas atteinte.
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-badge step-vote">Vote</span>
+          <div class="step-body">
+            <strong>Les photos sont là, les noms sont masqués.</strong>
+            Votez pour vos préférées (pas la vôtre). Vous avez un nombre limité de votes.
+            Vous pouvez retirer un vote et le redéposer ailleurs.
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-badge step-resultats">Résultats</span>
+          <div class="step-body">
+            Classement final avec noms, votes et médailles.
+            Les égalités partagent le même rang.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Soumettre -->
+    <div class="guide-card">
+      <h3>Soumettre une photo</h3>
+      <ol class="guide-steps">
+        <li>Allez sur <a routerLink="/galeries/themesdumois" class="inline-link">Galeries → Thèmes du mois</a>.</li>
+        <li>Ouvrez le thème dont le statut est <span class="badge-inline step-ouvert">Ouvert</span>.</li>
+        <li>Glissez votre photo dans la zone d'upload ou cliquez dessus pour choisir un fichier.</li>
+        <li>La photo est compressée automatiquement (max 5 Mo, JPEG/PNG).</li>
+        <li>Pour supprimer votre soumission, cliquez le <strong>✕</strong> sur votre photo (marquée "Ma photo").</li>
+      </ol>
+      <p class="guide-note">Vous ne pouvez soumettre qu'une photo par thème (sauf indication contraire de l'admin).</p>
+    </div>
+
+    <!-- Voter -->
+    <div class="guide-card">
+      <h3>Voter</h3>
+      <ol class="guide-steps">
+        <li>Pendant la phase <span class="badge-inline step-vote">Vote</span>, ouvrez le thème.</li>
+        <li>Cliquez sur une photo pour voter pour elle. Les photos sont anonymes.</li>
+        <li>La barre de progression en haut indique vos votes restants.</li>
+        <li>Cliquez à nouveau sur une photo votée pour retirer votre vote et le déposer ailleurs.</li>
+        <li>Vous ne pouvez pas voter pour votre propre photo.</li>
+      </ol>
+    </div>
+
+    <!-- Lightbox -->
+    <div class="guide-card">
+      <h3>Visionner les photos</h3>
+      <p>
+        Dans toutes les phases, cliquez sur le bouton <strong>⤢</strong> en haut à droite d'une photo
+        pour l'ouvrir en plein écran. Naviguez avec les flèches à l'écran ou les touches
+        <kbd>←</kbd> <kbd>→</kbd> du clavier.
+      </p>
+    </div>
+  </section>
+
+</div>

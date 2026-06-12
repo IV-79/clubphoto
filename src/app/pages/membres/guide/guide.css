@@ -1,0 +1,301 @@
+.guide-page {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 4rem;
+}
+
+/* Hero */
+.guide-hero {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.guide-hero h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.guide-intro {
+  color: #555;
+  font-size: 1.05rem;
+}
+
+/* Nav rapide */
+.guide-nav {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 3rem;
+  flex-wrap: wrap;
+}
+
+.guide-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.4rem;
+  border: 2px solid #d1d5db;
+  border-radius: 2rem;
+  text-decoration: none;
+  color: #374151;
+  font-weight: 500;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.guide-nav-link:hover {
+  border-color: #4f46e5;
+  background: #f5f3ff;
+  color: #4f46e5;
+}
+
+.guide-nav-icon {
+  font-size: 1.1rem;
+}
+
+/* Sections */
+.guide-section {
+  margin-bottom: 4rem;
+}
+
+.guide-section + .guide-section {
+  border-top: 2px solid #e5e7eb;
+  padding-top: 3rem;
+}
+
+.section-header {
+  margin-bottom: 1.5rem;
+}
+
+.section-header h2 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+}
+
+.section-subtitle {
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+/* Cards */
+.guide-card {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.guide-card h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.guide-card p {
+  color: #374151;
+  line-height: 1.6;
+  margin-bottom: 0.5rem;
+}
+
+.guide-card p:last-child {
+  margin-bottom: 0;
+}
+
+/* Steps ol */
+.guide-steps {
+  padding-left: 1.25rem;
+  margin: 0;
+  color: #374151;
+  line-height: 1.7;
+}
+
+.guide-steps li {
+  margin-bottom: 0.4rem;
+}
+
+.guide-steps li:last-child {
+  margin-bottom: 0;
+}
+
+/* Steps (cycle de vie) */
+.steps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.step {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.step-body {
+  color: #374151;
+  line-height: 1.55;
+  font-size: 0.9rem;
+}
+
+/* Badges statut */
+.step-badge {
+  display: inline-block;
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  min-width: 130px;
+  text-align: center;
+}
+
+.step-preparation { background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; }
+.step-fermeture   { background: #e0f2fe; color: #0369a1; }
+.step-inscription  { background: #dbeafe; color: #1d4ed8; }
+.step-attente      { background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; }
+.step-ouvert       { background: #dcfce7; color: #166534; }
+.step-vote         { background: #fef3c7; color: #92400e; }
+.step-resultats    { background: #ede9fe; color: #5b21b6; }
+
+/* Inline badges in text */
+.badge-inline {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  vertical-align: middle;
+}
+
+.badge-inline.inscription { background: #dbeafe; color: #1d4ed8; }
+.badge-inline.vote        { background: #fef3c7; color: #92400e; }
+.badge-inline.resultats   { background: #ede9fe; color: #5b21b6; }
+.badge-inline.step-ouvert { background: #dcfce7; color: #166534; }
+.badge-inline.step-vote   { background: #fef3c7; color: #92400e; }
+
+.optional-label {
+  font-style: italic;
+  font-weight: 400;
+  opacity: 0.75;
+  font-size: 0.7rem;
+}
+
+/* Bloc admin */
+.guide-card-admin {
+  border-color: #c7d2fe;
+  background: #f5f3ff;
+}
+
+.admin-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.admin-card-header h3 {
+  margin-bottom: 0;
+}
+
+.admin-icon {
+  color: #4f46e5;
+  font-size: 1.2rem;
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.admin-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin: 0.75rem 0 1.25rem;
+}
+
+.admin-field-row {
+  display: grid;
+  grid-template-columns: 10rem 1fr;
+  gap: 0.5rem;
+  align-items: baseline;
+  font-size: 0.875rem;
+}
+
+.field-label {
+  font-weight: 600;
+  color: #4338ca;
+}
+
+.field-desc {
+  color: #374151;
+  line-height: 1.5;
+}
+
+/* Timeline */
+.admin-timeline {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin: 1rem 0 0.75rem;
+}
+
+.tl-segment {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.3rem 0.7rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  line-height: 1.3;
+}
+
+.tl-label { font-weight: 600; }
+.tl-hint  { font-size: 0.68rem; opacity: 0.8; }
+
+.tl-arrow { color: #6b7280; font-weight: 600; }
+
+.tl-attente   { background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; }
+.tl-ouvert    { background: #dcfce7; color: #166534; }
+.tl-vote      { background: #fef3c7; color: #92400e; }
+.tl-resultats { background: #ede9fe; color: #5b21b6; }
+
+@media (max-width: 600px) {
+  .admin-field-row { grid-template-columns: 1fr; gap: 0.1rem; }
+  .admin-timeline  { gap: 0.2rem; font-size: 0.75rem; }
+}
+
+/* Note */
+.guide-note {
+  margin-top: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: #fffbeb;
+  border-left: 3px solid #f59e0b;
+  border-radius: 0 6px 6px 0;
+  color: #78350f;
+  font-size: 0.875rem;
+}
+
+/* Inline link */
+.inline-link {
+  color: #4f46e5;
+  text-decoration: underline;
+}
+
+/* kbd */
+kbd {
+  display: inline-block;
+  padding: 0.1rem 0.4rem;
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.85rem;
+  color: #374151;
+}
+
+@media (max-width: 600px) {
+  .guide-hero h1 { font-size: 1.5rem; }
+  .guide-card { padding: 1rem 1rem; }
+  .step { flex-direction: column; gap: 0.4rem; }
+  .step-badge { min-width: unset; }
+}
