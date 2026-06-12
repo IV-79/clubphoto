@@ -235,6 +235,22 @@
   cursor: pointer;
 }
 
+.mobile-connexion {
+  display: block;
+  padding: 14px 24px;
+  color: white !important;
+  background: #cc0000;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  border-bottom: 1px solid #aa0000;
+  transition: background 0.2s;
+}
+
+.mobile-connexion:hover { background: #aa0000; }
+
 @media (max-width: 768px) {
   .nav-links, .nav-actions { display: none; }
   .mobile-menu-btn { display: flex; }

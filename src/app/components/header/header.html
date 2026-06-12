@@ -183,6 +183,9 @@
       @if (isLoggedIn$ | async) {
       <li><button class="mobile-logout" (click)="logout()">Déconnexion</button></li>
       }
+      @if (!(isLoggedIn$ | async)) {
+      <li><a routerLink="/login" class="mobile-connexion" (click)="mobileMenuOpen.set(false)">Connexion</a></li>
+      }
     </ul>
     }
   </nav>
