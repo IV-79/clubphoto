@@ -8,55 +8,87 @@
     <div class="empty-state"><p>Membre introuvable.</p></div>
   } @else {
 
-    <div class="membre-profil">
-      @if (membre()!.photoCouvertureUrl) {
-        <div class="cover-hero">
-          <img [src]="membre()!.photoCouvertureUrl" [alt]="membre()!.nom" class="cover-img">
-          <div class="cover-overlay"></div>
-          <h1 class="membre-nom-hero">
-            {{ membre()!.prenom ? membre()!.prenom + ' ' + membre()!.nom : membre()!.nom }}
-          </h1>
+    @if (membre()!.photoBandeauUrl) {
+      <div class="cover-hero">
+        <img [src]="membre()!.photoBandeauUrl" [alt]="membre()!.nom" class="cover-img">
+        <div class="cover-overlay"></div>
+        <h1 class="membre-nom-hero">{{ nomComplet() }}</h1>
+      </div>
+    } @else {
+      <h1 class="membre-nom-simple">{{ nomComplet() }}</h1>
+    }
+
+    <div class="profil-meta">
+      @if (membre()!.appareil) {
+        <span class="meta-item">
+          <span class="meta-icon">📷</span> {{ membre()!.appareil }}
+        </span>
+      }
+      @if (membre()!.stylesPhoto?.length) {
+        <div class="styles-chips">
+          @for (style of membre()!.stylesPhoto!; track style) {
+            <span class="chip">{{ style }}</span>
+          }
         </div>
-      } @else {
-        <h1 class="membre-nom-simple">
-          {{ membre()!.prenom ? membre()!.prenom + ' ' + membre()!.nom : membre()!.nom }}
-        </h1>
+      }
+      @if (membre()!.bio) {
+        <p class="bio">{{ membre()!.bio }}</p>
       }
 
-      <div class="profil-meta">
-        @if (membre()!.appareil) {
-          <span class="meta-item">
-            <span class="meta-icon">📷</span> {{ membre()!.appareil }}
-          </span>
-        }
-        @if (membre()!.stylesPhoto?.length) {
-          <div class="styles-chips">
-            @for (style of membre()!.stylesPhoto!; track style) {
-              <span class="chip">{{ style }}</span>
-            }
-          </div>
-        }
-        @if (membre()!.bio) {
-          <p class="bio">{{ membre()!.bio }}</p>
-        }
+      @let m = membre()!;
+      @if (m.instagram || m.facebook || m.px500 || m.flickr || m.siteWeb) {
         <div class="social-links">
-          @if (membre()!.instagram) {
-            <a [href]="'https://instagram.com/' + membre()!.instagram" target="_blank" rel="noopener" class="social-link">
-              Instagram
+          @if (m.instagram) {
+            <a [href]="'https://instagram.com/' + m.instagram" target="_blank" rel="noopener"
+               class="social-link social-link-instagram" title="Instagram">
+              <svg class="social-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="2" width="20" height="20" rx="5"/>
+                <circle cx="12" cy="12" r="4.5"/>
+                <circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none"/>
+              </svg>
             </a>
           }
-          @if (membre()!.facebook) {
-            <a [href]="membre()!.facebook" target="_blank" rel="noopener" class="social-link">
-              Facebook
+          @if (m.facebook) {
+            <a [href]="'https://facebook.com/' + m.facebook" target="_blank" rel="noopener"
+               class="social-link social-link-facebook" title="Facebook">
+              <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+              </svg>
             </a>
           }
-          @if (membre()!.siteWeb) {
-            <a [href]="membre()!.siteWeb" target="_blank" rel="noopener" class="social-link">
-              Site web
+          @if (m.px500) {
+            <a [href]="'https://500px.com/p/' + m.px500" target="_blank" rel="noopener"
+               class="social-link social-link-500px" title="500px">
+              <svg class="social-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                <circle cx="12" cy="13" r="4"/>
+              </svg>
+            </a>
+          }
+          @if (m.flickr) {
+            <a [href]="'https://www.flickr.com/photos/' + m.flickr" target="_blank" rel="noopener"
+               class="social-link social-link-flickr" title="Flickr">
+              <svg class="social-icon flickr-icon" viewBox="0 0 28 14">
+                <circle cx="7" cy="7" r="7" fill="#0063DC"/>
+                <circle cx="21" cy="7" r="7" fill="#FF0084"/>
+              </svg>
+            </a>
+          }
+          @if (m.siteWeb) {
+            <a [href]="m.siteWeb" target="_blank" rel="noopener"
+               class="social-link social-link-web" title="Site web">
+              <svg class="social-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="2" y1="12" x2="22" y2="12"/>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+              </svg>
             </a>
           }
         </div>
-      </div>
+      }
     </div>
 
     <div class="photos-section">
@@ -69,6 +101,9 @@
           @for (photo of photos(); track photo.id; let i = $index) {
             <div class="photo-card" (click)="openLightbox(i)">
               <img [src]="photo.url" [alt]="photo.titre" loading="lazy" class="photo-img">
+              @if (photo.categorie) {
+                <span class="category-badge">{{ getCategorieLabel(photo.categorie) }}</span>
+              }
               <div class="photo-overlay">
                 <span class="photo-titre">{{ photo.titre }}</span>
               </div>

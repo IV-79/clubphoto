@@ -10,8 +10,12 @@ export interface UserProfile {
   stylesPhoto?: string[];
   instagram?: string;
   facebook?: string;
+  px500?: string;
+  flickr?: string;
   siteWeb?: string;
   photoCouvertureUrl?: string;
+  photoProfilUrl?: string;
+  photoBandeauUrl?: string;
 }
 
 export const STYLES_PHOTO = [

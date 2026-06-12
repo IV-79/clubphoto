@@ -7,6 +7,82 @@
     }
   </div>
 
+  <!-- Photos publiques (en haut) -->
+  <div class="photos-profil-section">
+    <h2 class="section-title-photos">Photos publiques</h2>
+
+    <!-- Photo de profil (avatar) -->
+    <div class="photo-upload-row">
+      <div class="photo-upload-info">
+        <span class="upload-title">Photo de profil</span>
+        <span class="upload-hint">Visible sur votre carte et votre page publique</span>
+      </div>
+      <div class="photo-upload-ctrl">
+        <div class="avatar-current">
+          @if (profilPreviewUrl()) {
+            <img [src]="profilPreviewUrl()" class="avatar-thumb" alt="Aperçu">
+          } @else if (profile()?.photoProfilUrl) {
+            <img [src]="profile()!.photoProfilUrl!" class="avatar-thumb" alt="Photo de profil">
+          } @else {
+            <div class="avatar-placeholder-sm">{{ initiales() }}</div>
+          }
+        </div>
+        <input #profilInput type="file" accept="image/*" hidden (change)="onProfilSelected($event)">
+        @if (!profilPreviewUrl()) {
+          <button type="button" class="btn-photo-change" (click)="profilInput.click()"
+            [disabled]="uploadingProfil()">
+            Changer
+          </button>
+        } @else {
+          <div class="upload-preview-actions">
+            <button type="button" class="btn-photo-cancel" (click)="cancelProfil()"
+              [disabled]="uploadingProfil()">Annuler</button>
+            <button type="button" class="btn-photo-save" (click)="saveProfil()"
+              [disabled]="uploadingProfil()">
+              {{ uploadingProfil() ? 'Upload…' : 'Sauvegarder' }}
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Photo bandeau -->
+    <div class="photo-upload-row photo-upload-row-bandeau">
+      <div class="photo-upload-info">
+        <span class="upload-title">Photo bandeau</span>
+        <span class="upload-hint">En-tête de votre page publique — format recommandé : 4:1 paysage (ex. 2400 × 600 px)</span>
+      </div>
+      <div class="photo-upload-ctrl photo-upload-ctrl-bandeau">
+        <div class="bandeau-current">
+          @if (bandeauPreviewUrl()) {
+            <img [src]="bandeauPreviewUrl()" class="bandeau-thumb" alt="Aperçu bandeau">
+          } @else if (profile()?.photoBandeauUrl) {
+            <img [src]="profile()!.photoBandeauUrl!" class="bandeau-thumb" alt="Bandeau actuel">
+          } @else {
+            <div class="bandeau-placeholder">Aucun bandeau</div>
+          }
+        </div>
+        <input #bandeauInput type="file" accept="image/*" hidden (change)="onBandeauSelected($event)">
+        @if (!bandeauPreviewUrl()) {
+          <button type="button" class="btn-photo-change" (click)="bandeauInput.click()"
+            [disabled]="uploadingBandeau()">
+            Changer
+          </button>
+        } @else {
+          <div class="upload-preview-actions">
+            <button type="button" class="btn-photo-cancel" (click)="cancelBandeau()"
+              [disabled]="uploadingBandeau()">Annuler</button>
+            <button type="button" class="btn-photo-save" (click)="saveBandeau()"
+              [disabled]="uploadingBandeau()">
+              {{ uploadingBandeau() ? 'Upload…' : 'Sauvegarder' }}
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+
+  </div>
+
   <form class="profil-form" (ngSubmit)="save()">
 
     <!-- Identité -->
@@ -80,6 +156,20 @@
           </div>
         </label>
         <label>
+          <span>500px</span>
+          <div class="input-prefix">
+            <span class="prefix">500px.com/p/</span>
+            <input type="text" [(ngModel)]="form.px500" name="px500" placeholder="votre_pseudo">
+          </div>
+        </label>
+        <label>
+          <span>Flickr</span>
+          <div class="input-prefix">
+            <span class="prefix">flickr.com/photos/</span>
+            <input type="text" [(ngModel)]="form.flickr" name="flickr" placeholder="votre_pseudo">
+          </div>
+        </label>
+        <label>
           <span>Site web / portfolio</span>
           <input type="url" [(ngModel)]="form.siteWeb" name="siteWeb" placeholder="https://votre-site.com">
         </label>
@@ -100,4 +190,5 @@
     </div>
 
   </form>
+
 </div>

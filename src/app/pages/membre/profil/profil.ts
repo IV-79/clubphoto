@@ -1,8 +1,9 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../services/auth.service';
-import { STYLES_PHOTO } from '../../../models/user.model';
+import { STYLES_PHOTO, UserProfile } from '../../../models/user.model';
+import { compressToJpeg } from '../../../utils/image-compress';
 
 @Component({
   selector: 'app-membre-profil',
@@ -11,6 +12,9 @@ import { STYLES_PHOTO } from '../../../models/user.model';
   styleUrl: './profil.css'
 })
 export class MembreProfil implements OnInit {
+  @ViewChild('profilInput') profilInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('bandeauInput') bandeauInput!: ElementRef<HTMLInputElement>;
+
   private authService = inject(AuthService);
 
   profile = toSignal(this.authService.currentUserProfile$);
@@ -25,12 +29,22 @@ export class MembreProfil implements OnInit {
     stylesPhoto: [] as string[],
     instagram: '',
     facebook: '',
+    px500: '',
+    flickr: '',
     siteWeb: '',
   };
 
   saving = signal(false);
   saved = signal(false);
   error = signal('');
+
+  profilFile = signal<File | null>(null);
+  profilPreviewUrl = signal('');
+  uploadingProfil = signal(false);
+
+  bandeauFile = signal<File | null>(null);
+  bandeauPreviewUrl = signal('');
+  uploadingBandeau = signal(false);
 
   ngOnInit() {
     this.authService.currentUserProfile$.subscribe(p => {
@@ -42,8 +56,16 @@ export class MembreProfil implements OnInit {
       this.form.stylesPhoto = p.stylesPhoto ? [...p.stylesPhoto] : [];
       this.form.instagram  = p.instagram ?? '';
       this.form.facebook   = p.facebook ?? '';
+      this.form.px500      = p.px500 ?? '';
+      this.form.flickr     = p.flickr ?? '';
       this.form.siteWeb    = p.siteWeb ?? '';
     });
+  }
+
+  initiales(): string {
+    const p = this.profile();
+    if (!p) return '?';
+    return ((p.prenom?.[0] ?? '') + (p.nom?.[0] ?? '')).toUpperCase() || '?';
   }
 
   toggleStyle(style: string) {
@@ -73,6 +95,8 @@ export class MembreProfil implements OnInit {
         stylesPhoto: this.form.stylesPhoto,
         instagram:   this.form.instagram.trim(),
         facebook:    this.form.facebook.trim(),
+        px500:       this.form.px500.trim(),
+        flickr:      this.form.flickr.trim(),
         siteWeb:     this.form.siteWeb.trim(),
       });
       this.saved.set(true);
@@ -82,5 +106,73 @@ export class MembreProfil implements OnInit {
     } finally {
       this.saving.set(false);
     }
+  }
+
+  // --- Photo de profil ---
+  async onProfilSelected(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    const compressed = await compressToJpeg(file);
+    this.profilFile.set(compressed);
+    const reader = new FileReader();
+    reader.onload = e => this.profilPreviewUrl.set(e.target?.result as string);
+    reader.readAsDataURL(compressed);
+  }
+
+  cancelProfil() {
+    this.profilFile.set(null);
+    this.profilPreviewUrl.set('');
+    if (this.profilInput?.nativeElement) this.profilInput.nativeElement.value = '';
+  }
+
+  saveProfil() {
+    const file = this.profilFile();
+    const profile = this.profile();
+    if (!file || !profile || this.uploadingProfil()) return;
+    this.uploadingProfil.set(true);
+    this.authService.uploadUserPhoto(profile.uid, file, 'profil').subscribe({
+      next: async state => {
+        if (state.state === 'done' && state.url) {
+          await this.authService.updateProfile(profile.uid, { photoProfilUrl: state.url });
+          this.cancelProfil();
+          this.uploadingProfil.set(false);
+        }
+      },
+      error: () => this.uploadingProfil.set(false)
+    });
+  }
+
+  // --- Photo bandeau ---
+  async onBandeauSelected(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    const compressed = await compressToJpeg(file);
+    this.bandeauFile.set(compressed);
+    const reader = new FileReader();
+    reader.onload = e => this.bandeauPreviewUrl.set(e.target?.result as string);
+    reader.readAsDataURL(compressed);
+  }
+
+  cancelBandeau() {
+    this.bandeauFile.set(null);
+    this.bandeauPreviewUrl.set('');
+    if (this.bandeauInput?.nativeElement) this.bandeauInput.nativeElement.value = '';
+  }
+
+  saveBandeau() {
+    const file = this.bandeauFile();
+    const profile = this.profile();
+    if (!file || !profile || this.uploadingBandeau()) return;
+    this.uploadingBandeau.set(true);
+    this.authService.uploadUserPhoto(profile.uid, file, 'bandeau').subscribe({
+      next: async state => {
+        if (state.state === 'done' && state.url) {
+          await this.authService.updateProfile(profile.uid, { photoBandeauUrl: state.url });
+          this.cancelBandeau();
+          this.uploadingBandeau.set(false);
+        }
+      },
+      error: () => this.uploadingBandeau.set(false)
+    });
   }
 }

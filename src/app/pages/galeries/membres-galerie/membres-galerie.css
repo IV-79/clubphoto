@@ -57,9 +57,7 @@
   transition: transform 0.3s;
 }
 
-.membre-card:hover .cover-img {
-  transform: scale(1.05);
-}
+.membre-card:hover .cover-img { transform: scale(1.05); }
 
 .cover-placeholder {
   width: 100%;

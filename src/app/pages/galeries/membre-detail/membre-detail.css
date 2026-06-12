@@ -22,7 +22,7 @@
   color: rgba(0, 0, 0, 0.35);
 }
 
-/* Hero couverture */
+/* Hero bandeau */
 .cover-hero {
   position: relative;
   height: 320px;
@@ -98,26 +98,46 @@
   margin: 0;
 }
 
+/* Icônes sociales */
 .social-links {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
+  align-items: center;
 }
 
 .social-link {
-  color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
   text-decoration: none;
-  font-size: 0.85rem;
-  border: 1px solid #ddd;
-  padding: 4px 14px;
-  border-radius: 3px;
+  background: white;
   transition: all 0.2s;
 }
 
-.social-link:hover {
-  color: #1a1a1a;
-  border-color: #aaa;
-}
+.social-link:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+
+.social-icon { width: 20px; height: 20px; }
+.flickr-icon { width: 22px; height: 11px; }
+
+.social-link-instagram { color: #E1306C; }
+.social-link-instagram:hover { border-color: #E1306C; background: #fff0f5; }
+
+.social-link-facebook { color: #1877F2; }
+.social-link-facebook:hover { border-color: #1877F2; background: #f0f5ff; }
+
+.social-link-500px { color: #0099E5; }
+.social-link-500px:hover { border-color: #0099E5; background: #f0faff; }
+
+.social-link-flickr { color: #0063DC; }
+.social-link-flickr:hover { border-color: #0063DC; background: #f0f5ff; }
+
+.social-link-web { color: #555; }
+.social-link-web:hover { border-color: #999; background: #f8f8f8; }
 
 /* Photos */
 .section-title {
@@ -148,6 +168,7 @@
   overflow: hidden;
   border-radius: 4px;
   background: #f0f0f0;
+  cursor: pointer;
 }
 
 .photo-img {
@@ -159,6 +180,19 @@
 }
 
 .photo-card:hover .photo-img { transform: scale(1.04); }
+
+.category-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0,0,0,0.55);
+  color: rgba(255,255,255,0.9);
+  font-size: 0.7rem;
+  padding: 3px 8px;
+  border-radius: 10px;
+  letter-spacing: 0.3px;
+  pointer-events: none;
+}
 
 .photo-overlay {
   position: absolute;
@@ -172,7 +206,6 @@
 }
 
 .photo-card:hover .photo-overlay { opacity: 1; }
-.photo-card { cursor: pointer; }
 
 .photo-titre {
   color: white;

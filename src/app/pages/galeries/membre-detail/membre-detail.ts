@@ -4,7 +4,8 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { switchMap } from 'rxjs';
 import { AuthService } from '../../../services/auth.service';
 import { PhotoService } from '../../../services/photo.service';
-import { Photo } from '../../../models/photo.model';
+import { Photo, PHOTO_CATEGORIES } from '../../../models/photo.model';
+import { UserProfile } from '../../../models/user.model';
 
 @Component({
   selector: 'app-membre-detail',
@@ -16,6 +17,8 @@ export class MembreDetail {
   private route = inject(ActivatedRoute);
   private authService = inject(AuthService);
   private photoService = inject(PhotoService);
+
+  private readonly categoriesMap = new Map(PHOTO_CATEGORIES.map(c => [c.value, c.label]));
 
   membre = toSignal(
     this.route.paramMap.pipe(
@@ -35,6 +38,22 @@ export class MembreDetail {
     const i = this.lightboxIndex();
     return i >= 0 ? this.photos()[i] : null;
   });
+
+  nomComplet(): string {
+    const m = this.membre();
+    if (!m) return '';
+    return m.prenom ? `${m.prenom} ${m.nom}` : m.nom;
+  }
+
+  initiales(): string {
+    const m = this.membre();
+    if (!m) return '?';
+    return ((m.prenom?.[0] ?? '') + (m.nom?.[0] ?? '')).toUpperCase() || '?';
+  }
+
+  getCategorieLabel(val?: Photo['categorie']): string {
+    return val ? (this.categoriesMap.get(val) ?? val) : '';
+  }
 
   openLightbox(index: number) { this.lightboxIndex.set(index); }
   closeLightbox() { this.lightboxIndex.set(-1); }

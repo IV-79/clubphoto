@@ -1,6 +1,7 @@
 import { Injectable, inject, Injector, runInInjectionContext } from '@angular/core';
 import { Auth, signInWithEmailAndPassword, signOut, authState, createUserWithEmailAndPassword } from '@angular/fire/auth';
 import { Firestore, doc, setDoc, getDoc, updateDoc, collection, collectionData } from '@angular/fire/firestore';
+import { Storage, ref, uploadBytesResumable, getDownloadURL } from '@angular/fire/storage';
 import { Router } from '@angular/router';
 import { from, switchMap, of, Observable, map, shareReplay } from 'rxjs';
 import { UserProfile } from '../models/user.model';
@@ -9,6 +10,7 @@ import { UserProfile } from '../models/user.model';
 export class AuthService {
   private auth = inject(Auth);
   private firestore = inject(Firestore);
+  private storage = inject(Storage);
   private router = inject(Router);
   private injector = inject(Injector);
 
@@ -101,6 +103,24 @@ export class AuthService {
     await runInInjectionContext(this.injector, () =>
       updateDoc(doc(this.firestore, 'users', uid), data as Record<string, unknown>)
     );
+  }
+
+  uploadUserPhoto(uid: string, file: File, type: 'profil' | 'bandeau'): Observable<{ state: 'uploading' | 'done'; progress: number; url?: string }> {
+    return new Observable(observer => {
+      const storagePath = `user-photos/${uid}/${type}.jpg`;
+      const storageRef = ref(this.storage, storagePath);
+      const task = uploadBytesResumable(storageRef, file);
+      task.on(
+        'state_changed',
+        snap => observer.next({ state: 'uploading', progress: Math.round(snap.bytesTransferred / snap.totalBytes * 100) }),
+        err => observer.error(err),
+        async () => {
+          const url = await getDownloadURL(task.snapshot.ref);
+          observer.next({ state: 'done', progress: 100, url });
+          observer.complete();
+        }
+      );
+    });
   }
 
   logout() {

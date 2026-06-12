@@ -14,8 +14,8 @@
       @for (membre of membres(); track membre.uid) {
         <a [routerLink]="['/galeries/membres', membre.uid]" class="membre-card">
           <div class="cover-wrap">
-            @if (membre.photoCouvertureUrl) {
-              <img [src]="membre.photoCouvertureUrl" [alt]="nomComplet(membre)" class="cover-img">
+            @if (membre.photoProfilUrl) {
+              <img [src]="membre.photoProfilUrl" [alt]="nomComplet(membre)" class="cover-img">
             } @else {
               <div class="cover-placeholder">
                 <span class="placeholder-initiales">{{ initiales(membre) }}</span>
