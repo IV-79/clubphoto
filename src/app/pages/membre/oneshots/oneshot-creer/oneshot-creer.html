@@ -1,6 +1,6 @@
 <div class="creer-page">
 
-  <a routerLink="/membre/oneshots" class="back-link">← Mes OneShots</a>
+  <a routerLink="/galeries/oneshots" class="back-link">← Mes OneShots</a>
 
   <h1>Nouvel événement OneShot</h1>
 
@@ -22,7 +22,7 @@
     <p class="hint">L'événement démarrera en mode <strong>Préparation</strong> — invisible aux autres membres jusqu'à ce que vous ouvriez les inscriptions.</p>
 
     <div class="form-actions">
-      <a routerLink="/membre/oneshots" class="btn-cancel">Annuler</a>
+      <a routerLink="/galeries/oneshots" class="btn-cancel">Annuler</a>
       <button class="btn-submit" (click)="submit()" [disabled]="!titre.trim() || saving()">
         {{ saving() ? 'Création…' : 'Créer l\'événement' }}
       </button>

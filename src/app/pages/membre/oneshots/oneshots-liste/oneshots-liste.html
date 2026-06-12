@@ -5,10 +5,13 @@
       <h1>OneShot</h1>
       <p class="subtitle">Événements photo avec vote</p>
     </div>
-    <a routerLink="/membre/oneshots/creer" class="btn-create">+ Créer un événement</a>
+    @if (profile()) {
+      <a routerLink="/membre/oneshots/creer" class="btn-create">+ Créer un événement</a>
+    }
   </div>
 
   <!-- Mes événements -->
+  @if (profile()) {
   <section class="section">
     <h2 class="section-title">Mes événements <span class="count">{{ mesEvents().length }}</span></h2>
 
@@ -26,7 +29,7 @@
               }
             </div>
             <div class="event-actions">
-              <a [routerLink]="['/membre/oneshots', ev.id]" class="btn-voir">Voir</a>
+              <a [routerLink]="['/galeries/oneshots', ev.id]" class="btn-voir">Voir</a>
               <a [routerLink]="['/membre/oneshots', ev.id, 'gerer']" class="btn-gerer">Gérer</a>
             </div>
           </div>
@@ -34,10 +37,11 @@
       </div>
     }
   </section>
+  }
 
-  <!-- Autres événements -->
+  <!-- Événements -->
   <section class="section">
-    <h2 class="section-title">Autres événements <span class="count">{{ autresEvents().length }}</span></h2>
+    <h2 class="section-title">Événements <span class="count">{{ autresEvents().length }}</span></h2>
 
     @if (autresEvents().length === 0) {
       <p class="empty-msg">Aucun événement ouvert pour le moment.</p>
@@ -54,7 +58,7 @@
               <span class="event-createur">par {{ ev.nomCreateur }}</span>
             </div>
             <div class="event-actions">
-              <a [routerLink]="['/membre/oneshots', ev.id]" class="btn-voir">Voir</a>
+              <a [routerLink]="['/galeries/oneshots', ev.id]" class="btn-voir">Voir</a>
             </div>
           </div>
         }

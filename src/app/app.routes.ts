@@ -17,7 +17,6 @@ import { Calendrier } from './pages/calendrier/calendrier';
 import { Contact } from './pages/contact/contact';
 import { MembrePortfolio } from './pages/membre/portfolio/portfolio';
 import { MembreProfil } from './pages/membre/profil/profil';
-import { MembreSoumettre } from './pages/membre/soumettre/soumettre';
 import { OneShotsListe } from './pages/membre/oneshots/oneshots-liste/oneshots-liste';
 import { OneShotCreer } from './pages/membre/oneshots/oneshot-creer/oneshot-creer';
 import { OneShotGerer } from './pages/membre/oneshots/oneshot-gerer/oneshot-gerer';
@@ -48,8 +47,10 @@ export const routes: Routes = [
       { path: 'galeries', redirectTo: 'galeries/membres', pathMatch: 'full' },
       { path: 'galeries/membres', component: MembresGalerie },
       { path: 'galeries/membres/:uid', component: MembreDetail },
-      { path: 'galeries/themes', component: ThemesListe },
-      { path: 'galeries/themes/:id', component: ThemeDetail },
+      { path: 'galeries/themesdumois', component: ThemesListe },
+      { path: 'galeries/themesdumois/:id', component: ThemeDetail },
+      { path: 'galeries/oneshots', component: OneShotsListe },
+      { path: 'galeries/oneshots/:id', component: OneShotDetail },
       { path: 'calendrier', component: Calendrier },
       { path: 'contact', component: Contact },
       {
@@ -73,10 +74,7 @@ export const routes: Routes = [
     children: [
       { path: 'portfolio', component: MembrePortfolio },
       { path: 'profil', component: MembreProfil },
-      { path: 'soumettre', component: MembreSoumettre },
-      { path: 'oneshots', component: OneShotsListe },
       { path: 'oneshots/creer', component: OneShotCreer },
-      { path: 'oneshots/:id', component: OneShotDetail },
       { path: 'oneshots/:id/gerer', component: OneShotGerer },
       { path: 'oneshots/:id/photos', component: OneShotPhotos },
       { path: '', redirectTo: 'portfolio', pathMatch: 'full' }

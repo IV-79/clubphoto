@@ -2,7 +2,7 @@ import { Injectable, inject, Injector, runInInjectionContext } from '@angular/co
 import { Auth, signInWithEmailAndPassword, signOut, authState, createUserWithEmailAndPassword } from '@angular/fire/auth';
 import { Firestore, doc, setDoc, getDoc, updateDoc, collection, collectionData } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
-import { from, switchMap, of, Observable, map } from 'rxjs';
+import { from, switchMap, of, Observable, map, shareReplay } from 'rxjs';
 import { UserProfile } from '../models/user.model';
 
 @Injectable({ providedIn: 'root' })
@@ -12,7 +12,7 @@ export class AuthService {
   private router = inject(Router);
   private injector = inject(Injector);
 
-  user$ = authState(this.auth);
+  user$ = authState(this.auth).pipe(shareReplay(1));
 
   currentUserProfile$: Observable<UserProfile | null> = this.user$.pipe(
     switchMap(user => {
@@ -24,7 +24,8 @@ export class AuthService {
       ).pipe(
         map(snap => snap.exists() ? (snap.data() as UserProfile) : null)
       );
-    })
+    }),
+    shareReplay(1)
   );
 
   login(email: string, password: string) {

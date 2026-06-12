@@ -1,11 +1,13 @@
-.galerie-page {
-  max-width: 860px;
+.page {
+  max-width: 800px;
   margin: 0 auto;
-  padding: 48px 32px;
+  padding: 48px 32px 80px;
 }
 
+/* ── Header ── */
+
 .page-header {
-  margin-bottom: 40px;
+  margin-bottom: 48px;
 }
 
 .page-header h1 {
@@ -13,135 +15,290 @@
   font-weight: 300;
   letter-spacing: 1px;
   color: #1a1a1a;
-  margin: 0 0 8px;
+  margin: 0 0 6px;
 }
 
 .subtitle {
-  color: rgba(0, 0, 0, 0.45);
+  color: rgba(0, 0, 0, 0.4);
   font-size: 0.875rem;
   margin: 0;
 }
 
-/* Timeline */
-.themes-timeline {
-  display: flex;
-  flex-direction: column;
+/* ── Featured cards (ouvert / vote) ── */
+
+.section-featured {
+  margin-bottom: 18px;
 }
 
-.theme-entry {
-  display: flex;
-  gap: 32px;
-  padding: 28px 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+.featured-card {
+  border-radius: 12px;
+  padding: 32px 36px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
-.theme-entry:last-child { border-bottom: none; }
-
-.theme-entry.entry-ouvert {
-  border-left: 3px solid #4caf50;
-  padding-left: 20px;
-  margin-left: -20px;
+.featured-ouvert {
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.06) 0%, #fff 60%);
+  border-color: rgba(76, 175, 80, 0.28);
 }
 
-.mois-col {
-  flex-shrink: 0;
-  width: 120px;
-  padding-top: 4px;
+.featured-vote {
+  background: linear-gradient(135deg, rgba(33, 150, 243, 0.06) 0%, #fff 60%);
+  border-color: rgba(33, 150, 243, 0.28);
 }
 
-.mois-badge {
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-  color: rgba(0, 0, 0, 0.4);
-}
-
-.theme-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.theme-title-row {
+.card-meta {
   display: flex;
   align-items: center;
   gap: 14px;
-  flex-wrap: wrap;
+  margin-bottom: 14px;
 }
 
-.theme-titre {
-  margin: 0;
-  font-size: 1.2rem;
-  font-weight: 400;
-  color: #1a1a1a;
-}
-
-.statut-badge {
-  font-size: 0.7rem;
+.statut-pill {
+  font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.8px;
   text-transform: uppercase;
-  padding: 3px 10px;
-  border-radius: 12px;
+  padding: 3px 11px;
+  border-radius: 20px;
+  flex-shrink: 0;
+}
+
+.pill-ouvert     { background: rgba(76, 175, 80, 0.14);  color: #2e7d32; }
+.pill-vote       { background: rgba(33, 150, 243, 0.14); color: #1565c0; }
+.pill-resultats  { background: rgba(255, 152, 0, 0.14);  color: #e65100; }
+.pill-en_attente { background: rgba(0,0,0,0.06);         color: rgba(0,0,0,0.4); }
+
+.card-mois {
+  font-size: 0.78rem;
+  color: rgba(0, 0, 0, 0.35);
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.card-titre {
+  font-size: 1.6rem;
+  font-weight: 300;
+  color: #1a1a1a;
+  margin: 0 0 12px;
+  letter-spacing: 0.4px;
+}
+
+.card-desc {
+  color: rgba(0, 0, 0, 0.52);
+  font-size: 0.9rem;
+  line-height: 1.65;
+  margin: 0 0 12px;
+  max-width: 520px;
+}
+
+.card-date {
+  font-size: 0.85rem;
+  color: rgba(0, 0, 0, 0.4);
+  margin: 0 0 22px;
+}
+
+.card-date strong { color: rgba(0, 0, 0, 0.65); }
+
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+/* ── Boutons ── */
+
+.btn-voir-photos {
+  display: inline-block;
+  padding: 9px 24px;
+  border-radius: 22px;
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  transition: background 0.17s;
+  background: #cc0000;
+  color: white;
+}
+.btn-voir-photos:hover { background: #aa0000; color: white; }
+
+.btn-voir-photos.btn-vote-theme { background: #1565c0; }
+.btn-voir-photos.btn-vote-theme:hover { background: #0d47a1; }
+
+
+.btn-soumettre {
+  font-size: 0.82rem;
+  color: rgba(0, 0, 0, 0.42);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.16);
+  padding-bottom: 1px;
+  transition: color 0.15s, border-color 0.15s;
+}
+.btn-soumettre:hover {
+  color: #cc0000;
+  border-color: rgba(204, 0, 0, 0.4);
+}
+
+/* ── Section titres ── */
+
+.section-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: rgba(0, 0, 0, 0.3);
+  margin: 0 0 14px;
+}
+
+/* ── À venir ── */
+
+.section-avenir {
+  margin-top: 20px;
+  margin-bottom: 36px;
+}
+
+.avenir-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.avenir-entry {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 13px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.avenir-entry:last-child { border-bottom: none; }
+
+.avenir-mois {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  min-width: 120px;
+  flex-shrink: 0;
+}
+
+.avenir-titre {
+  flex: 1;
+  font-size: 0.95rem;
+  color: #1a1a1a;
+}
+
+.avenir-date {
+  font-size: 0.78rem;
+  color: rgba(0, 0, 0, 0.3);
   white-space: nowrap;
 }
 
-.badge-ouvert {
-  background: rgba(76, 175, 80, 0.15);
-  color: #2e7d32;
+/* ── Terminés ── */
+
+.section-termines {
+  margin-top: 20px;
+  margin-bottom: 40px;
 }
 
-.badge-ferme {
-  background: rgba(0, 0, 0, 0.06);
-  color: rgba(0, 0, 0, 0.45);
-}
-
-.theme-desc {
-  margin: 0;
-  color: rgba(0, 0, 0, 0.55);
-  font-size: 0.9rem;
-  line-height: 1.6;
-  max-width: 560px;
-}
-
-/* Thumbnails */
-.thumbnails {
+.termines-list {
   display: flex;
-  gap: 6px;
+  flex-direction: column;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 18px;
+}
+
+.termine-entry {
+  display: flex;
   align-items: center;
+  gap: 16px;
+  padding: 11px 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+  background: white;
 }
 
-.thumb {
-  width: 60px;
-  height: 45px;
-  object-fit: cover;
-  border-radius: 3px;
-  background: #e0e0e0;
+.termine-entry:last-child { border-bottom: none; }
+.termine-entry:nth-child(even) { background: #fafafa; }
+
+.termine-mois {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  min-width: 110px;
+  flex-shrink: 0;
 }
 
-.thumb-more {
-  color: rgba(0, 0, 0, 0.4);
-  font-size: 0.8rem;
-  font-weight: 500;
-  padding-left: 4px;
+.termine-titre {
+  flex: 1;
+  font-size: 0.9rem;
+  color: rgba(0, 0, 0, 0.58);
 }
 
-.voir-btn {
+.btn-voir-archive {
   display: inline-block;
-  color: #cc0000;
+  padding: 5px 14px;
+  border-radius: 14px;
   text-decoration: none;
+  font-size: 0.78rem;
+  font-weight: 500;
+  border: 1.5px solid rgba(0,0,0,0.13);
+  color: rgba(0,0,0,0.45);
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: border-color 0.15s, color 0.15s;
+}
+.btn-voir-archive:hover {
+  border-color: rgba(0,0,0,0.26);
+  color: rgba(0,0,0,0.72);
+}
+
+/* ── Charger plus ── */
+
+.load-more-wrap {
+  text-align: center;
+  margin-top: 6px;
+}
+
+.btn-load-more {
+  background: transparent;
+  border: 1.5px solid rgba(0, 0, 0, 0.13);
+  color: rgba(0, 0, 0, 0.42);
+  padding: 8px 28px;
+  border-radius: 20px;
   font-size: 0.85rem;
   font-weight: 500;
-  letter-spacing: 0.3px;
-  transition: color 0.2s;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+  letter-spacing: 0.2px;
 }
 
-.voir-btn:hover { color: #aa0000; }
+.btn-load-more:hover {
+  border-color: rgba(0, 0, 0, 0.26);
+  color: rgba(0, 0, 0, 0.68);
+}
+
+/* ── Empty ── */
 
 .empty-state {
   text-align: center;
   padding: 80px 24px;
-  color: rgba(0, 0, 0, 0.35);
+  color: rgba(0, 0, 0, 0.28);
+  font-size: 0.9rem;
+}
+
+/* ── Mobile ── */
+
+@media (max-width: 600px) {
+  .page { padding: 32px 20px 60px; }
+  .featured-card { padding: 22px 20px; }
+  .card-titre { font-size: 1.3rem; }
+  .avenir-entry { flex-wrap: wrap; gap: 4px; }
+  .avenir-mois { min-width: auto; }
+  .avenir-date { display: none; }
+  .termines-grid { grid-template-columns: 1fr; }
 }

@@ -24,6 +24,24 @@
   margin-bottom: 4px;
 }
 
+.form-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+
+.field-grow  { flex: 1; min-width: 200px; }
+.field-mois  { width: 160px; flex-shrink: 0; }
+.field-date  { flex: 1; min-width: 150px; }
+.field-num   { width: 140px; flex-shrink: 0; }
+
+/* Render the date/month calendar icon visible on dark mat-card */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="month"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) opacity(0.5);
+}
+
 .form-actions {
   display: flex;
   gap: 8px;
@@ -37,16 +55,13 @@
   gap: 16px;
 }
 
-.theme-card.card-ouvert {
-  border-left: 4px solid #4caf50;
-}
-
 .theme-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 16px;
   flex-wrap: wrap;
+  margin-bottom: 4px;
 }
 
 .theme-info {
@@ -84,32 +99,25 @@
   white-space: nowrap;
 }
 
-.badge-brouillon {
-  background: rgba(0, 0, 0, 0.07);
-  color: rgba(0, 0, 0, 0.45);
-}
-
-.badge-ouvert {
-  background: rgba(76, 175, 80, 0.15);
-  color: #2e7d32;
-}
-
-.badge-ferme {
-  background: rgba(0, 0, 0, 0.05);
-  color: rgba(0, 0, 0, 0.35);
-}
+.badge-en_attente { background: rgba(0,0,0,0.06);        color: rgba(0,0,0,0.4); }
+.badge-ouvert     { background: rgba(76,175,80,0.15);    color: #2e7d32; }
+.badge-vote       { background: rgba(33,150,243,0.15);   color: #1565c0; }
+.badge-resultats  { background: rgba(255,193,7,0.15);    color: #e65100; }
 
 .theme-desc {
-  margin: 12px 0 6px;
+  margin: 6px 0;
   color: rgba(0, 0, 0, 0.6);
   font-size: 0.9rem;
   line-height: 1.6;
 }
 
 .theme-meta {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
   font-size: 0.75rem;
   color: rgba(0, 0, 0, 0.38);
-  margin-top: 10px;
+  margin-top: 8px;
 }
 
 .confirm-text {

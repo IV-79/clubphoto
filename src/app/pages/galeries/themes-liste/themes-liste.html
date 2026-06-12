@@ -1,58 +1,93 @@
-<div class="galerie-page">
+<div class="page">
 
   <div class="page-header">
     <h1>Thèmes du mois</h1>
-    <p class="subtitle">Archives des défis photographiques mensuels</p>
+    <p class="subtitle">Défis photographiques mensuels</p>
   </div>
 
-  @if (themes().length === 0) {
-    <div class="empty-state">
-      <p>Aucun thème publié pour le moment.</p>
-    </div>
-  } @else {
-    <div class="themes-timeline">
-      @for (theme of themes(); track theme.id) {
-        <div class="theme-entry" [class.entry-ouvert]="theme.statut === 'ouvert'">
+  <!-- THÈME OUVERT -->
+  @if (themeOuvert(); as t) {
+    <section class="section-featured">
+      <div class="featured-card featured-ouvert">
+        <div class="card-meta">
+          <span class="statut-pill pill-ouvert">Ouvert</span>
+          <span class="card-mois">{{ formatMois(t.mois) }}</span>
+        </div>
+        <h2 class="card-titre">{{ t.titre }}</h2>
+        @if (t.description) {
+          <p class="card-desc">{{ t.description }}</p>
+        }
+        <p class="card-date">Clôture le <strong>{{ formatDate(t.dateCloture) }}</strong></p>
+        <div class="card-actions">
+          <a [routerLink]="['/galeries/themesdumois', t.id]" class="btn-voir-photos">Voir les photos</a>
+          @if (isLoggedIn()) {
+            <a [routerLink]="['/galeries/themesdumois', t.id]" class="btn-soumettre">Soumettre une photo</a>
+          }
+        </div>
+      </div>
+    </section>
+  }
 
-          <div class="mois-col">
-            <span class="mois-badge">{{ formatMois(theme.moisAnnee) }}</span>
+  <!-- THÈME EN VOTE -->
+  @if (themeVote(); as t) {
+    <section class="section-featured">
+      <div class="featured-card featured-vote">
+        <div class="card-meta">
+          <span class="statut-pill pill-vote">Vote en cours</span>
+          <span class="card-mois">{{ formatMois(t.mois) }}</span>
+        </div>
+        <h2 class="card-titre">{{ t.titre }}</h2>
+        @if (t.description) {
+          <p class="card-desc">{{ t.description }}</p>
+        }
+        <p class="card-date">Votes jusqu'au <strong>{{ formatDate(t.dateFinVote) }}</strong></p>
+        <div class="card-actions">
+          <a [routerLink]="['/galeries/themesdumois', t.id]" class="btn-voir-photos btn-vote-theme">Voir les photos</a>
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- À VENIR -->
+  @if (themesAVenir().length > 0) {
+    <section class="section-avenir">
+      <h3 class="section-title">À venir</h3>
+      <div class="avenir-list">
+        @for (t of themesAVenir(); track t.id) {
+          <div class="avenir-entry">
+            <span class="avenir-mois">{{ formatMois(t.mois) }}</span>
+            <span class="avenir-titre">{{ t.titre }}</span>
+            <span class="avenir-date">à partir du {{ formatDate(t.dateOuverture) }}</span>
           </div>
+        }
+      </div>
+    </section>
+  }
 
-          <div class="theme-content">
-            <div class="theme-title-row">
-              <h2 class="theme-titre">{{ theme.titre }}</h2>
-              @if (theme.statut === 'ouvert') {
-                <span class="statut-badge badge-ouvert">En cours</span>
-              } @else {
-                <span class="statut-badge badge-ferme">
-                  {{ countPour(theme.id) }} photo{{ countPour(theme.id) !== 1 ? 's' : '' }}
-                </span>
-              }
-            </div>
-
-            @if (theme.description) {
-              <p class="theme-desc">{{ theme.description }}</p>
-            }
-
-            @if (theme.statut === 'ferme') {
-              @if (thumbnailsPour(theme.id).length > 0) {
-                <div class="thumbnails">
-                  @for (url of thumbnailsPour(theme.id); track url) {
-                    <img [src]="url" class="thumb" alt="">
-                  }
-                  @if (countPour(theme.id) > 4) {
-                    <span class="thumb-more">+{{ countPour(theme.id) - 4 }}</span>
-                  }
-                </div>
-              }
-              <a [routerLink]="['/galeries/themes', theme.id]" class="voir-btn">
-                Voir la galerie →
-              </a>
-            }
+  <!-- THÈMES TERMINÉS -->
+  @if (themesTermines().length > 0) {
+    <section class="section-termines">
+      <h3 class="section-title">Thèmes terminés</h3>
+      <div class="termines-list">
+        @for (t of themesTerminesVisible(); track t.id) {
+          <div class="termine-entry">
+            <span class="termine-mois">{{ formatMois(t.mois) }}</span>
+            <span class="termine-titre">{{ t.titre }}</span>
+            <a [routerLink]="['/galeries/themesdumois', t.id]" class="btn-voir-archive">Voir les photos</a>
           </div>
-
+        }
+      </div>
+      @if (hasMoreTermines()) {
+        <div class="load-more-wrap">
+          <button class="btn-load-more" (click)="loadMore()">Charger plus</button>
         </div>
       }
+    </section>
+  }
+
+  @if (!themeOuvert() && !themeVote() && themesAVenir().length === 0 && themesTermines().length === 0) {
+    <div class="empty-state">
+      <p>Aucun thème pour le moment.</p>
     </div>
   }
 

@@ -1,7 +1,13 @@
+:host {
+  display: block;
+  background: white;
+  min-height: calc(100vh - 120px);
+}
+
 .gerer-page {
   max-width: 720px;
   margin: 0 auto;
-  padding: 32px 24px;
+  padding: 32px 24px 80px;
 }
 
 .page-nav {
@@ -12,33 +18,31 @@
 }
 
 .back-link, .link-voir {
-  color: rgba(255,255,255,0.35);
+  color: rgba(0,0,0,0.35);
   text-decoration: none;
   font-size: 0.85rem;
   transition: color 0.2s;
 }
 
-.back-link:hover, .link-voir:hover { color: rgba(255,255,255,0.7); }
+.back-link:hover, .link-voir:hover { color: #1a1a1a; }
 
-.loading { color: rgba(255,255,255,0.3); padding: 40px 0; }
+.loading { color: rgba(0,0,0,0.3); padding: 40px 0; }
 
-/* En-tête */
 .event-header { margin-bottom: 28px; }
 
 .event-header h1 {
-  color: white;
+  color: #1a1a1a;
   font-size: 1.6rem;
   font-weight: 300;
   margin: 8px 0 4px;
 }
 
 .event-desc {
-  color: rgba(255,255,255,0.4);
+  color: rgba(0,0,0,0.4);
   font-size: 0.85rem;
   margin: 0;
 }
 
-/* Statut badge */
 .statut-badge {
   font-size: 0.65rem;
   font-weight: 700;
@@ -49,16 +53,15 @@
   display: inline-block;
 }
 
-.statut-preparation            { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.4); }
-.statut-inscription            { background: rgba(0,180,0,0.15);     color: #5de05d; }
-.statut-fermeture_inscriptions { background: rgba(255,160,0,0.15);   color: #ffa040; }
-.statut-vote                   { background: rgba(100,140,255,0.15); color: #8aabff; }
-.statut-resultats              { background: rgba(255,200,0,0.15);   color: gold; }
+.statut-preparation            { background: rgba(0,0,0,0.06);         color: rgba(0,0,0,0.42); }
+.statut-inscription            { background: rgba(76,175,80,0.12);      color: #2e7d32; }
+.statut-fermeture_inscriptions { background: rgba(255,152,0,0.12);      color: #e65100; }
+.statut-vote                   { background: rgba(33,150,243,0.12);     color: #1565c0; }
+.statut-resultats              { background: rgba(255,193,7,0.15);      color: #c8a000; }
 
-/* Panels */
 .panel {
-  background: #1a1a1a;
-  border: 1px solid #2a2a2a;
+  background: #f8f8f8;
+  border: 1px solid rgba(0,0,0,0.08);
   border-radius: 6px;
   padding: 20px 24px;
   margin-bottom: 16px;
@@ -67,11 +70,11 @@
 .panel-placeholder { opacity: 0.5; }
 
 .panel-title {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 1.5px;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.35);
+  color: rgba(0,0,0,0.3);
   margin: 0 0 16px;
   display: flex;
   align-items: center;
@@ -79,33 +82,32 @@
 }
 
 .count {
-  background: rgba(255,255,255,0.08);
-  color: rgba(255,255,255,0.3);
+  background: rgba(0,0,0,0.06);
+  color: rgba(0,0,0,0.3);
   font-size: 0.68rem;
   padding: 1px 7px;
   border-radius: 10px;
 }
 
 .panel-note {
-  color: rgba(255,255,255,0.3);
+  color: rgba(0,0,0,0.35);
   font-size: 0.82rem;
   margin: 0 0 12px;
 }
 
 .empty-msg {
-  color: rgba(255,255,255,0.25);
+  color: rgba(0,0,0,0.28);
   font-size: 0.85rem;
   margin: 0;
 }
 
 .event-clos {
-  color: rgba(255,255,255,0.3);
+  color: rgba(0,0,0,0.35);
   font-size: 0.85rem;
   padding: 12px 0;
   margin-bottom: 16px;
 }
 
-/* Date */
 .date-field-row {
   display: flex;
   align-items: center;
@@ -115,25 +117,25 @@
 }
 
 .date-input-lg {
-  background: #111;
-  border: 1px solid #444;
-  color: white;
+  background: white;
+  border: 1px solid rgba(0,0,0,0.18);
+  color: #1a1a1a;
   padding: 8px 12px;
   border-radius: 4px;
   font-size: 0.9rem;
   font-family: inherit;
   outline: none;
   min-width: 180px;
+  transition: border-color 0.15s;
 }
 
 .date-input-lg:focus { border-color: #cc0000; }
 .date-input-lg:disabled { opacity: 0.5; }
-.date-input-lg::-webkit-calendar-picker-indicator { filter: invert(1) opacity(0.6); cursor: pointer; }
 
 .btn-save-date {
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.2);
-  color: rgba(255,255,255,0.7);
+  background: rgba(0,0,0,0.04);
+  border: 1px solid rgba(0,0,0,0.14);
+  color: rgba(0,0,0,0.55);
   padding: 8px 16px;
   border-radius: 4px;
   font-size: 0.85rem;
@@ -141,21 +143,20 @@
   transition: all 0.15s;
 }
 
-.btn-save-date:hover:not(:disabled) { background: rgba(255,255,255,0.14); color: white; }
+.btn-save-date:hover:not(:disabled) { background: rgba(0,0,0,0.08); color: #1a1a1a; }
 .btn-save-date:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .date-readonly {
-  color: rgba(255,255,255,0.6);
+  color: rgba(0,0,0,0.55);
   font-size: 0.9rem;
   margin: 0 0 8px;
 }
 
-/* Transition */
 .transition-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 
 .confirm-zone { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 
-.confirm-msg { color: rgba(255,255,255,0.45); font-size: 0.85rem; }
+.confirm-msg { color: rgba(0,0,0,0.45); font-size: 0.85rem; }
 
 .btn-avancer {
   background: #cc0000;
@@ -173,8 +174,8 @@
 
 .btn-fermer-inscriptions {
   background: none;
-  border: 1px solid #444;
-  color: rgba(255,255,255,0.45);
+  border: 1px solid rgba(0,0,0,0.14);
+  color: rgba(0,0,0,0.45);
   padding: 9px 18px;
   border-radius: 4px;
   font-size: 0.85rem;
@@ -182,20 +183,19 @@
   transition: all 0.15s;
 }
 
-.btn-fermer-inscriptions:hover:not(:disabled) { border-color: #666; color: rgba(255,255,255,0.7); }
+.btn-fermer-inscriptions:hover:not(:disabled) { border-color: rgba(0,0,0,0.26); color: rgba(0,0,0,0.7); }
 .btn-fermer-inscriptions:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .btn-cancel {
   background: none;
-  border: 1px solid #333;
-  color: rgba(255,255,255,0.4);
+  border: 1px solid rgba(0,0,0,0.12);
+  color: rgba(0,0,0,0.4);
   padding: 8px 16px;
   border-radius: 4px;
   font-size: 0.85rem;
   cursor: pointer;
 }
 
-/* Thèmes */
 .themes-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
 
 .theme-row {
@@ -203,17 +203,18 @@
   align-items: center;
   gap: 8px;
   padding: 8px 10px;
-  background: #111;
+  background: white;
+  border: 1px solid rgba(0,0,0,0.07);
   border-radius: 4px;
 }
 
-.theme-nom { flex: 1; color: rgba(255,255,255,0.8); font-size: 0.9rem; }
+.theme-nom { flex: 1; color: rgba(0,0,0,0.72); font-size: 0.9rem; }
 
 .theme-input {
   flex: 1;
-  background: #0d0d0d;
-  border: 1px solid #444;
-  color: white;
+  background: white;
+  border: 1px solid rgba(0,0,0,0.16);
+  color: #1a1a1a;
   padding: 5px 10px;
   border-radius: 3px;
   font-size: 0.88rem;
@@ -234,22 +235,22 @@
   transition: background 0.15s;
 }
 
-.btn-edit { color: rgba(255,255,255,0.3); }
-.btn-edit:hover { color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.05); }
-.btn-del  { color: rgba(255,255,255,0.2); }
-.btn-del:hover  { color: #ff6666; background: rgba(204,0,0,0.1); }
-.btn-ok   { color: #5de05d; }
-.btn-ok:hover   { background: rgba(0,180,0,0.1); }
-.btn-x    { color: rgba(255,255,255,0.3); }
-.btn-x:hover    { color: white; }
+.btn-edit { color: rgba(0,0,0,0.3); }
+.btn-edit:hover { color: rgba(0,0,0,0.65); background: rgba(0,0,0,0.05); }
+.btn-del  { color: rgba(0,0,0,0.22); }
+.btn-del:hover  { color: #cc0000; background: rgba(204,0,0,0.06); }
+.btn-ok   { color: #2e7d32; }
+.btn-ok:hover   { background: rgba(76,175,80,0.08); }
+.btn-x    { color: rgba(0,0,0,0.3); }
+.btn-x:hover    { color: #1a1a1a; }
 .btn-sm:disabled { opacity: 0.3; cursor: not-allowed; }
 
 .add-theme-form { display: flex; gap: 8px; }
 
 .btn-add-theme {
-  background: rgba(255,255,255,0.07);
-  border: 1px solid rgba(255,255,255,0.15);
-  color: rgba(255,255,255,0.6);
+  background: rgba(0,0,0,0.04);
+  border: 1px solid rgba(0,0,0,0.12);
+  color: rgba(0,0,0,0.55);
   padding: 6px 14px;
   border-radius: 4px;
   font-size: 0.85rem;
@@ -258,24 +259,22 @@
   transition: all 0.15s;
 }
 
-.btn-add-theme:hover:not(:disabled) { background: rgba(255,255,255,0.12); color: white; }
+.btn-add-theme:hover:not(:disabled) { background: rgba(0,0,0,0.08); color: #1a1a1a; }
 .btn-add-theme:disabled { opacity: 0.35; cursor: not-allowed; }
 
-/* Photos link */
 .btn-photos-link {
   display: inline-block;
-  color: rgba(255,255,255,0.55);
+  color: rgba(0,0,0,0.5);
   text-decoration: none;
   font-size: 0.88rem;
   padding: 8px 16px;
-  border: 1px solid #333;
+  border: 1px solid rgba(0,0,0,0.12);
   border-radius: 4px;
   transition: all 0.15s;
 }
 
-.btn-photos-link:hover { color: white; border-color: #555; background: rgba(255,255,255,0.04); }
+.btn-photos-link:hover { color: #1a1a1a; border-color: rgba(0,0,0,0.22); background: rgba(0,0,0,0.03); }
 
-/* Inscrits */
 .inscrits-list {
   list-style: none;
   margin: 0;
@@ -286,9 +285,10 @@
 }
 
 .inscrits-list li {
-  color: rgba(255,255,255,0.7);
+  color: rgba(0,0,0,0.65);
   font-size: 0.9rem;
   padding: 6px 10px;
-  background: #111;
+  background: white;
+  border: 1px solid rgba(0,0,0,0.06);
   border-radius: 4px;
 }

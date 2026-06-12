@@ -32,43 +32,51 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    match /themes/{themeId}/soumissions/{soumId} {
+      allow read: if true;
+      allow create: if isLoggedIn() && request.resource.data.membreUid == request.auth.uid;
+      allow delete: if isLoggedIn() && (resource.data.membreUid == request.auth.uid || isAdmin());
+    }
+
+    match /themes/{themeId}/votes/{voteId} {
+      allow read: if true;
+      allow create, update: if isLoggedIn() && request.resource.data.voterUid == request.auth.uid;
+      allow delete: if isLoggedIn() && resource.data.voterUid == request.auth.uid;
+    }
+
     // Événements (lecture publique, écriture admin)
     match /evenements/{evenementId} {
       allow read: if true;
       allow write: if isAdmin();
     }
 
-    // OneShot events
+    // OneShot events (lecture publique sauf statut preparation)
     match /oneshots/{oneShotId} {
-      allow read: if isLoggedIn() &&
-        (resource.data.statut != 'preparation' || resource.data.creatorUid == request.auth.uid);
+      allow read: if resource.data.statut != 'preparation'
+                  || (isLoggedIn() && resource.data.creatorUid == request.auth.uid);
       allow create: if isLoggedIn();
       allow update: if isLoggedIn() && resource.data.creatorUid == request.auth.uid;
     }
 
     match /oneshots/{oneShotId}/themes/{themeId} {
-      allow read: if isLoggedIn();
+      allow read: if true;
       allow write: if isLoggedIn() &&
         get(/databases/$(database)/documents/oneshots/$(oneShotId)).data.creatorUid == request.auth.uid;
     }
 
     match /oneshots/{oneShotId}/inscriptions/{uid} {
-      allow read: if isLoggedIn();
+      allow read: if true;
       allow create, delete: if isLoggedIn() && request.auth.uid == uid;
     }
 
     match /oneshots/{oneShotId}/photos/{photoId} {
-      allow read: if isLoggedIn();
+      allow read: if true;
       allow write: if isLoggedIn() &&
         get(/databases/$(database)/documents/oneshots/$(oneShotId)).data.creatorUid == request.auth.uid;
     }
 
     match /oneshots/{oneShotId}/votes/{voteId} {
-      allow read: if isLoggedIn() && (
-        resource.data.voterUid == request.auth.uid ||
-        get(/databases/$(database)/documents/oneshots/$(oneShotId)).data.creatorUid == request.auth.uid ||
-        get(/databases/$(database)/documents/oneshots/$(oneShotId)).data.statut == 'resultats'
-      );
+      allow read: if true;
       allow create, update: if isLoggedIn() && request.resource.data.voterUid == request.auth.uid;
     }
 

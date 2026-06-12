@@ -1,40 +1,213 @@
 <div class="theme-detail-page">
 
-  <a routerLink="/galeries/themes" class="back-link">← Thèmes du mois</a>
+  <a routerLink="/galeries/themesdumois" class="back-link">← Thèmes du mois</a>
 
   @if (theme() === undefined) {
-    <div class="loading">Chargement…</div>
-  } @else if (theme() === null) {
-    <div class="empty-state"><p>Thème introuvable.</p></div>
+    <p class="loading">Chargement…</p>
+  } @else if (!theme()) {
+    <p class="empty-state">Thème introuvable.</p>
   } @else {
+    @let t = theme()!;
+    @let s = statut()!;
 
     <div class="theme-header">
-      <div class="header-meta">
-        <span class="mois-badge">{{ formatMois(theme()!.moisAnnee) }}</span>
-        <span class="nb-photos">{{ soumissions().length }} photo{{ soumissions().length !== 1 ? 's' : '' }}</span>
-      </div>
-      <h1 class="theme-titre">{{ theme()!.titre }}</h1>
-      @if (theme()!.description) {
-        <p class="theme-desc">{{ theme()!.description }}</p>
+      <span class="statut-badge statut-{{ s }}">{{ statutLabel(t) }}</span>
+      <h1 class="theme-titre">{{ t.titre }}</h1>
+      <p class="theme-mois">{{ formatMois(t.mois) }}</p>
+      @if (t.description) {
+        <p class="theme-desc">{{ t.description }}</p>
       }
+      <div class="theme-dates">
+        <span>Ouverture {{ formatDate(t.dateOuverture) }}</span>
+        <span class="date-sep">·</span>
+        <span>Clôture {{ formatDate(t.dateCloture) }}</span>
+        <span class="date-sep">·</span>
+        <span>Fin du vote {{ formatDate(t.dateFinVote) }}</span>
+      </div>
     </div>
 
-    @if (soumissions().length === 0) {
-      <div class="empty-state"><p>Aucune photo soumise pour ce thème.</p></div>
-    } @else {
-      <div class="photos-grid">
-        @for (s of soumissions(); track s.id) {
-          <div class="photo-card">
-            <img [src]="s.photoUrl" [alt]="s.photoTitre" loading="lazy" class="photo-img">
-            <div class="photo-overlay">
-              <span class="photo-titre">{{ s.photoTitre }}</span>
-              <span class="photo-membre">{{ s.nomMembre }}</span>
+    <!-- ── EN ATTENTE ─────────────────────────────── -->
+    @if (s === 'en_attente') {
+      <div class="info-panel">
+        <p class="info-msg">Les soumissions ouvrent le <strong>{{ formatDate(t.dateOuverture) }}</strong>. Préparez vos photos !</p>
+        <div class="config-chips">
+          <span class="chip">{{ t.maxPhotos }} photo{{ t.maxPhotos > 1 ? 's' : '' }} / membre</span>
+          <span class="chip">{{ t.maxVotes }} vote{{ t.maxVotes > 1 ? 's' : '' }} / membre</span>
+        </div>
+      </div>
+    }
+
+    <!-- ── OUVERT ──────────────────────────────────── -->
+    @if (s === 'ouvert') {
+      <section class="phase-section">
+        <div class="phase-header">
+          <h2 class="phase-title">Photos</h2>
+          <span class="phase-meta">{{ soumissions().length }} photo{{ soumissions().length !== 1 ? 's' : '' }} · Clôture {{ formatDate(t.dateCloture) }}</span>
+        </div>
+
+        @if (authReady() && !isLoggedIn()) {
+          <p class="info-msg"><a routerLink="/login" class="inline-link">Connectez-vous</a> pour soumettre une photo.</p>
+        } @else if (peutSoumettre()) {
+          <div class="upload-zone"
+            [class.drag-over]="dragOver()"
+            (dragover)="$event.preventDefault(); dragOver.set(true)"
+            (dragleave)="dragOver.set(false)"
+            (drop)="onDrop($event)"
+            (click)="fileInput.click()">
+            @if (uploading()) {
+              <div class="progress-bar-wrap">
+                <div class="progress-bar-fill" [style.width.%]="uploadProgress()"></div>
+              </div>
+              <span class="upload-label">Envoi… {{ uploadProgress() }}%</span>
+            } @else {
+              <div class="upload-plus">+</div>
+              <span class="upload-label">Soumettre une photo — glissez ici ou cliquez</span>
+              <span class="upload-hint">JPEG, PNG · max 5 Mo · compressé automatiquement</span>
+            }
+          </div>
+          <input #fileInput type="file" accept="image/*" style="display:none" (change)="onFileSelected($event)">
+          @if (uploadError()) {
+            <p class="upload-error">{{ uploadError() }}</p>
+          }
+        } @else if (isLoggedIn() && mesSoumissions().length >= t.maxPhotos) {
+          <p class="info-msg quota-msg">Quota atteint — {{ t.maxPhotos }} photo{{ t.maxPhotos > 1 ? 's' : '' }} / membre.</p>
+        }
+
+        @if (soumissions().length > 0) {
+          <div class="vote-grid">
+            @for (soum of soumissions(); track soum.id) {
+              @let isOwn = soum.membreUid === profile()?.uid;
+              <div class="vote-card" [class.own-card]="isOwn">
+                <img [src]="soum.url" class="vote-thumb" loading="lazy" alt="">
+                <button class="btn-expand" title="Plein écran" (click)="openLightbox(soum, $event)">⤢</button>
+                @if (isOwn) {
+                  <div class="vote-footer">
+                    <span class="footer-own">Ma photo</span>
+                    <button class="btn-del-sm" title="Supprimer" (click)="supprimerMaSoumission(soum)">✕</button>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        } @else {
+          <p class="empty-state-sm">Aucune photo soumise pour l'instant.</p>
+        }
+      </section>
+    }
+
+    <!-- ── VOTE ───────────────────────────────────── -->
+    @if (s === 'vote') {
+      <section class="phase-section">
+        <div class="phase-header">
+          <h2 class="phase-title">Vote</h2>
+          @if (isLoggedIn()) {
+            <span class="phase-meta">{{ mesVotes().length }} / {{ t.maxVotes }} vote{{ t.maxVotes > 1 ? 's' : '' }} · Fin {{ formatDate(t.dateFinVote) }}</span>
+          }
+        </div>
+
+        @if (authReady() && !isLoggedIn()) {
+          <p class="info-msg">Parcourez les photos et <a routerLink="/login" class="inline-link">connectez-vous</a> pour voter.</p>
+        }
+        @if (isLoggedIn()) {
+          <div class="vote-progress">
+            <div class="vote-track">
+              <div class="vote-fill" [style.width.%]="t.maxVotes ? mesVotes().length / t.maxVotes * 100 : 0"></div>
             </div>
+            <span class="vote-progress-label">{{ nbVotesRestants() }} vote{{ nbVotesRestants() > 1 ? 's' : '' }} restant{{ nbVotesRestants() > 1 ? 's' : '' }}</span>
           </div>
         }
-      </div>
+
+        @if (soumissions().length === 0) {
+          <p class="empty-state">Aucune photo soumise.</p>
+        } @else {
+          <div class="vote-grid">
+            @for (soum of soumissions(); track soum.id) {
+              @let isVoted = mesVotesIds().has(soum.id);
+              @let isOwn   = soum.membreUid === profile()?.uid;
+              @let canVote = isLoggedIn() && !isOwn;
+
+              <div class="vote-card"
+                [class.voted]="isVoted"
+                [class.own-card]="isOwn"
+                [class.clickable]="canVote && !voting()"
+                (click)="canVote && !voting() ? toggleVote(soum.id) : null">
+
+                <img [src]="soum.url" class="vote-thumb" loading="lazy" alt="">
+                <button class="btn-expand" title="Plein écran" (click)="openLightbox(soum, $event)">⤢</button>
+
+                <div class="vote-footer">
+                  @if (isOwn) {
+                    <span class="footer-own">Ma photo</span>
+                  } @else if (isVoted) {
+                    <span class="footer-voted">✓ Mon vote</span>
+                    <span class="footer-sub">Retirer</span>
+                  } @else if (isLoggedIn()) {
+                    <span class="footer-action" [class.disabled]="nbVotesRestants() <= 0">
+                      {{ nbVotesRestants() > 0 ? 'Voter' : '—' }}
+                    </span>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </section>
+    }
+
+    <!-- ── RÉSULTATS ──────────────────────────────── -->
+    @if (s === 'resultats') {
+      <section class="phase-section">
+        <div class="phase-header">
+          <h2 class="phase-title results-title">Résultats</h2>
+          <span class="phase-meta">{{ soumissions().length }} photo{{ soumissions().length !== 1 ? 's' : '' }}</span>
+        </div>
+
+        @if (soumissions().length === 0) {
+          <p class="empty-state">Aucune photo soumise.</p>
+        } @else {
+          <div class="results-grid">
+            @for (soum of resultats(); track soum.id; let i = $index) {
+              @let votes = votesParSoumission()[soum.id] ?? 0;
+              @let rank  = computeRank(resultats(), i);
+              <div class="result-card"
+                [class.rank-1]="rank === 1"
+                [class.rank-2]="rank === 2"
+                [class.rank-3]="rank === 3">
+                <div class="rank-badge" [class.gold]="rank === 1" [class.silver]="rank === 2" [class.bronze]="rank === 3">
+                  {{ rank }}
+                </div>
+                <img [src]="soum.url" class="result-thumb" loading="lazy" alt="">
+                <button class="btn-expand" title="Plein écran" (click)="openLightbox(soum, $event)">⤢</button>
+                <div class="result-footer">
+                  <span class="result-name">{{ soum.nomMembre }}</span>
+                  <span class="result-votes">{{ votes }} vote{{ votes > 1 ? 's' : '' }}</span>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </section>
     }
 
   }
 
 </div>
+
+<!-- Lightbox -->
+@if (lightboxPhoto(); as lb) {
+  <div class="lb-backdrop" (click)="closeLightbox()">
+    <button class="lb-close" (click)="$event.stopPropagation(); closeLightbox()">✕</button>
+    <button class="lb-nav lb-prev" (click)="$event.stopPropagation(); prevPhoto()" [disabled]="lightboxIndex() === 0">‹</button>
+    <div class="lb-content" (click)="$event.stopPropagation()">
+      <img [src]="lb.url" class="lb-img" alt="">
+      <div class="lb-meta">
+        @if (statut() === 'resultats') {
+          <span class="lb-author">{{ lb.nomMembre }}</span>
+          <span class="lb-sep">·</span>
+        }
+        <span class="lb-counter">{{ lightboxIndex() + 1 }} / {{ lightboxPhotos().length }}</span>
+      </div>
+    </div>
+    <button class="lb-nav lb-next" (click)="$event.stopPropagation(); nextPhoto()" [disabled]="lightboxIndex() === lightboxPhotos().length - 1">›</button>
+  </div>
+}

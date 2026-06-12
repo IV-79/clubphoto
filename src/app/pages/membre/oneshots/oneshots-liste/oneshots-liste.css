@@ -1,7 +1,13 @@
+:host {
+  display: block;
+  background: white;
+  min-height: calc(100vh - 120px);
+}
+
 .oneshots-page {
   max-width: 860px;
   margin: 0 auto;
-  padding: 32px 24px;
+  padding: 48px 24px 80px;
 }
 
 .page-header {
@@ -12,7 +18,7 @@
 }
 
 .page-header h1 {
-  color: white;
+  color: #1a1a1a;
   font-size: 1.8rem;
   font-weight: 300;
   letter-spacing: 1px;
@@ -20,7 +26,7 @@
 }
 
 .subtitle {
-  color: rgba(255,255,255,0.35);
+  color: rgba(0,0,0,0.38);
   font-size: 0.85rem;
   margin: 0;
 }
@@ -42,11 +48,11 @@
 .section { margin-bottom: 40px; }
 
 .section-title {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.35);
+  color: rgba(0,0,0,0.3);
   margin: 0 0 14px;
   display: flex;
   align-items: center;
@@ -54,25 +60,25 @@
 }
 
 .count {
-  background: rgba(255,255,255,0.08);
-  color: rgba(255,255,255,0.35);
+  background: rgba(0,0,0,0.06);
+  color: rgba(0,0,0,0.35);
   font-size: 0.68rem;
   padding: 1px 8px;
   border-radius: 10px;
 }
 
 .empty-msg {
-  color: rgba(255,255,255,0.25);
+  color: rgba(0,0,0,0.28);
   font-size: 0.875rem;
   padding: 16px 0;
 }
 
 /* Cards */
-.events-list { display: flex; flex-direction: column; gap: 10px; }
+.events-list { display: flex; flex-direction: column; gap: 8px; }
 
 .event-card {
-  background: #1a1a1a;
-  border: 1px solid #2a2a2a;
+  background: white;
+  border: 1px solid rgba(0,0,0,0.08);
   border-radius: 6px;
   padding: 16px 20px;
   display: flex;
@@ -81,20 +87,20 @@
   transition: border-color 0.2s;
 }
 
-.event-card:hover { border-color: #3a3a3a; }
+.event-card:hover { border-color: rgba(0,0,0,0.16); }
 .event-card-mine { border-left: 3px solid #cc0000; }
 
 .event-main { flex: 1; display: flex; flex-direction: column; gap: 4px; }
 
 .event-titre {
-  color: white;
+  color: #1a1a1a;
   font-size: 1rem;
   font-weight: 400;
   margin: 0;
 }
 
 .event-desc {
-  color: rgba(255,255,255,0.45);
+  color: rgba(0,0,0,0.42);
   font-size: 0.82rem;
   margin: 0;
   white-space: nowrap;
@@ -104,7 +110,7 @@
 }
 
 .event-createur {
-  color: rgba(255,255,255,0.3);
+  color: rgba(0,0,0,0.3);
   font-size: 0.78rem;
 }
 
@@ -119,11 +125,11 @@
   align-self: flex-start;
 }
 
-.statut-preparation            { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.4); }
-.statut-inscription            { background: rgba(0,180,0,0.15);     color: #5de05d; }
-.statut-fermeture_inscriptions { background: rgba(255,160,0,0.15);   color: #ffa040; }
-.statut-vote                   { background: rgba(100,140,255,0.15); color: #8aabff; }
-.statut-resultats              { background: rgba(255,200,0,0.15);   color: gold; }
+.statut-preparation            { background: rgba(0,0,0,0.06);         color: rgba(0,0,0,0.42); }
+.statut-inscription            { background: rgba(76,175,80,0.12);      color: #2e7d32; }
+.statut-fermeture_inscriptions { background: rgba(255,152,0,0.12);      color: #e65100; }
+.statut-vote                   { background: rgba(33,150,243,0.12);     color: #1565c0; }
+.statut-resultats              { background: rgba(255,193,7,0.15);      color: #c8a000; }
 
 /* Actions */
 .event-actions { display: flex; gap: 8px; flex-shrink: 0; }
@@ -133,21 +139,21 @@
   padding: 6px 14px;
   border-radius: 4px;
   font-size: 0.82rem;
-  transition: all 0.2s;
+  transition: all 0.15s;
 }
 
 .btn-voir {
-  background: rgba(255,255,255,0.07);
-  color: rgba(255,255,255,0.65);
-  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(0,0,0,0.04);
+  color: rgba(0,0,0,0.55);
+  border: 1px solid rgba(0,0,0,0.1);
 }
 
-.btn-voir:hover { background: rgba(255,255,255,0.12); color: white; }
+.btn-voir:hover { background: rgba(0,0,0,0.08); color: #1a1a1a; }
 
 .btn-gerer {
-  background: rgba(204,0,0,0.15);
-  color: #ff6666;
-  border: 1px solid rgba(204,0,0,0.25);
+  background: rgba(204,0,0,0.07);
+  color: #cc0000;
+  border: 1px solid rgba(204,0,0,0.18);
 }
 
-.btn-gerer:hover { background: rgba(204,0,0,0.25); color: #ff8888; }
+.btn-gerer:hover { background: rgba(204,0,0,0.13); }

@@ -41,11 +41,11 @@
               <mat-icon>people</mat-icon>
               Portfolios des membres
             </a>
-            <a mat-menu-item routerLink="/galeries/themes">
+            <a mat-menu-item routerLink="/galeries/themesdumois">
               <mat-icon>photo_camera</mat-icon>
               Thèmes du mois
             </a>
-            <a mat-menu-item routerLink="/membre/oneshots">
+            <a mat-menu-item routerLink="/galeries/oneshots">
               <mat-icon>camera_roll</mat-icon>
               OneShot
             </a>
@@ -78,15 +78,6 @@
             <a mat-menu-item routerLink="/membre/profil">
               <mat-icon>person</mat-icon>
               Mon Profil
-            </a>
-            <mat-divider />
-            <a mat-menu-item routerLink="/membre/soumettre">
-              <mat-icon>photo_camera</mat-icon>
-              Thème du mois
-            </a>
-            <a mat-menu-item routerLink="/membre/oneshots">
-              <mat-icon>camera_roll</mat-icon>
-              OneShot
             </a>
             <mat-divider />
             <button mat-menu-item (click)="logout()">
@@ -156,7 +147,6 @@
         <li><a routerLink="/le-club/adhesion" (click)="mobileMenuOpen.set(false)">Adhésion</a></li>
         <li><a routerLink="/actualites" (click)="mobileMenuOpen.set(false)">Actualités</a></li>
         <li><a routerLink="/galeries" (click)="mobileMenuOpen.set(false)">Galeries</a></li>
-        <li><a routerLink="/membre/oneshots" (click)="mobileMenuOpen.set(false)">OneShot</a></li>
         <li><a routerLink="/calendrier" (click)="mobileMenuOpen.set(false)">Calendrier</a></li>
         <li><a routerLink="/contact" (click)="mobileMenuOpen.set(false)">Contact</a></li>
         @if (isAdmin$ | async) {
@@ -171,7 +161,6 @@
           <li class="mobile-section-label">Mon espace</li>
           <li><a routerLink="/membre/portfolio" (click)="mobileMenuOpen.set(false)">Mon Portfolio</a></li>
           <li><a routerLink="/membre/profil" (click)="mobileMenuOpen.set(false)">Mon Profil</a></li>
-          <li><a routerLink="/membre/oneshots" (click)="mobileMenuOpen.set(false)">OneShot</a></li>
         }
         @if (isLoggedIn$ | async) {
           <li><button class="mobile-logout" (click)="logout()">Déconnexion</button></li>

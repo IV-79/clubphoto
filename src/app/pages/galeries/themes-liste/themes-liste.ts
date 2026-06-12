@@ -1,10 +1,9 @@
-import { Component, inject } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { Component, inject, signal, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { map } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ThemeService } from '../../../services/theme.service';
-import { SoumissionService } from '../../../services/soumission.service';
-import { ThemeStatut } from '../../../models/theme.model';
+import { AuthService } from '../../../services/auth.service';
+import { ThemeMensuel, computeThemeStatut } from '../../../models/theme.model';
 
 @Component({
   selector: 'app-themes-liste',
@@ -14,35 +13,47 @@ import { ThemeStatut } from '../../../models/theme.model';
 })
 export class ThemesListe {
   private themeService = inject(ThemeService);
-  private soumissionService = inject(SoumissionService);
+  private authService  = inject(AuthService);
 
-  themes = toSignal(
-    this.themeService.getThemes().pipe(
-      map(themes => themes.filter(t => t.statut !== 'brouillon'))
-    ),
-    { initialValue: [] }
+  private allThemes = toSignal(this.themeService.getThemes(), { initialValue: [] as ThemeMensuel[] });
+  profile    = toSignal(this.authService.currentUserProfile$);
+  isLoggedIn = computed(() => !!this.profile());
+
+  themeOuvert = computed(() =>
+    this.allThemes().find(t => computeThemeStatut(t) === 'ouvert') ?? null
   );
 
-  soumissions = toSignal(this.soumissionService.getAllSoumissions(), { initialValue: [] });
+  themeVote = computed(() =>
+    this.allThemes().find(t => computeThemeStatut(t) === 'vote') ?? null
+  );
 
-  thumbnailsPour(themeId: string): string[] {
-    return this.soumissions()
-      .filter(s => s.themeId === themeId)
-      .slice(0, 4)
-      .map(s => s.photoUrl);
-  }
+  themesAVenir = computed(() =>
+    this.allThemes().filter(t => computeThemeStatut(t) === 'en_attente')
+  );
 
-  countPour(themeId: string): number {
-    return this.soumissions().filter(s => s.themeId === themeId).length;
-  }
+  themesTermines = computed(() =>
+    this.allThemes().filter(t => computeThemeStatut(t) === 'resultats')
+  );
 
-  formatMois(moisAnnee: string): string {
-    const [year, month] = moisAnnee.split('-');
+  closedShown = signal(3);
+
+  themesTerminesVisible = computed(() =>
+    this.themesTermines().slice(0, this.closedShown())
+  );
+
+  hasMoreTermines = computed(() =>
+    this.themesTermines().length > this.closedShown()
+  );
+
+  loadMore() { this.closedShown.update(n => n + 3); }
+
+  formatMois(mois: string): string {
+    const [year, month] = mois.split('-');
     const label = new Date(+year, +month - 1).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
     return label.charAt(0).toUpperCase() + label.slice(1);
   }
 
-  labelStatut(statut: ThemeStatut): string {
-    return statut === 'ouvert' ? 'En cours' : 'Terminé';
+  formatDate(iso: string): string {
+    return new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
   }
 }

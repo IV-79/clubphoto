@@ -1,7 +1,13 @@
+:host {
+  display: block;
+  background: white;
+  min-height: calc(100vh - 120px);
+}
+
 .detail-page {
   max-width: 860px;
   margin: 0 auto;
-  padding: 32px 24px;
+  padding: 32px 24px 80px;
 }
 
 .page-nav {
@@ -12,33 +18,33 @@
 }
 
 .back-link, .link-gerer {
-  color: rgba(255,255,255,0.35);
+  color: rgba(0,0,0,0.35);
   text-decoration: none;
   font-size: 0.85rem;
   transition: color 0.2s;
 }
 
-.back-link:hover, .link-gerer:hover { color: rgba(255,255,255,0.7); }
+.back-link:hover, .link-gerer:hover { color: #1a1a1a; }
 
-.loading { color: rgba(255,255,255,0.3); padding: 40px 0; }
+.loading { color: rgba(0,0,0,0.3); padding: 40px 0; }
 
 .event-header { margin-bottom: 28px; }
 
 .event-header h1 {
-  color: white;
+  color: #1a1a1a;
   font-size: 1.6rem;
   font-weight: 300;
   margin: 8px 0 4px;
 }
 
 .event-createur {
-  color: rgba(255,255,255,0.3);
+  color: rgba(0,0,0,0.3);
   font-size: 0.82rem;
   margin: 0 0 8px;
 }
 
 .event-desc {
-  color: rgba(255,255,255,0.5);
+  color: rgba(0,0,0,0.5);
   font-size: 0.9rem;
   margin: 8px 0 0;
   line-height: 1.6;
@@ -54,31 +60,31 @@
   display: inline-block;
 }
 
-.statut-preparation            { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.4); }
-.statut-inscription            { background: rgba(0,180,0,0.15);     color: #5de05d; }
-.statut-fermeture_inscriptions { background: rgba(255,160,0,0.15);   color: #ffa040; }
-.statut-vote                   { background: rgba(100,140,255,0.15); color: #8aabff; }
-.statut-resultats              { background: rgba(255,200,0,0.15);   color: gold; }
+.statut-preparation            { background: rgba(0,0,0,0.06);         color: rgba(0,0,0,0.42); }
+.statut-inscription            { background: rgba(76,175,80,0.12);      color: #2e7d32; }
+.statut-fermeture_inscriptions { background: rgba(255,152,0,0.12);      color: #e65100; }
+.statut-vote                   { background: rgba(33,150,243,0.12);     color: #1565c0; }
+.statut-resultats              { background: rgba(255,193,7,0.15);      color: #c8a000; }
 
 .panel {
-  background: #1a1a1a;
-  border: 1px solid #2a2a2a;
+  background: #f8f8f8;
+  border: 1px solid rgba(0,0,0,0.08);
   border-radius: 6px;
   padding: 20px 24px;
   margin-bottom: 14px;
 }
 
 .panel-info {
-  color: rgba(255,255,255,0.35);
+  color: rgba(0,0,0,0.42);
   font-size: 0.875rem;
 }
 
 .panel-title {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 1.5px;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.35);
+  color: rgba(0,0,0,0.3);
   margin: 0 0 14px;
   display: flex;
   align-items: center;
@@ -86,15 +92,15 @@
 }
 
 .count {
-  background: rgba(255,255,255,0.08);
-  color: rgba(255,255,255,0.3);
+  background: rgba(0,0,0,0.06);
+  color: rgba(0,0,0,0.3);
   font-size: 0.68rem;
   padding: 1px 7px;
   border-radius: 10px;
 }
 
-.ins-msg { color: rgba(255,255,255,0.55); font-size: 0.9rem; margin: 0 0 14px; }
-.ins-ok  { color: #5de05d; }
+.ins-msg { color: rgba(0,0,0,0.55); font-size: 0.9rem; margin: 0 0 14px; }
+.ins-ok  { color: #2e7d32; }
 
 .btn-inscrire {
   background: #cc0000;
@@ -112,8 +118,8 @@
 
 .btn-desinscrire {
   background: none;
-  border: 1px solid #444;
-  color: rgba(255,255,255,0.4);
+  border: 1px solid rgba(0,0,0,0.14);
+  color: rgba(0,0,0,0.4);
   padding: 9px 18px;
   border-radius: 4px;
   font-size: 0.85rem;
@@ -121,7 +127,7 @@
   transition: all 0.15s;
 }
 
-.btn-desinscrire:hover:not(:disabled) { border-color: #666; color: rgba(255,255,255,0.65); }
+.btn-desinscrire:hover:not(:disabled) { border-color: rgba(0,0,0,0.26); color: rgba(0,0,0,0.65); }
 .btn-desinscrire:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .inscrits-list {
@@ -134,14 +140,15 @@
 }
 
 .inscrits-list li {
-  color: rgba(255,255,255,0.6);
+  color: rgba(0,0,0,0.6);
   font-size: 0.875rem;
   padding: 6px 10px;
-  background: #111;
+  background: white;
+  border: 1px solid rgba(0,0,0,0.06);
   border-radius: 4px;
 }
 
-.inscrits-list li.me { color: #8aabff; }
+.inscrits-list li.me { color: #1565c0; }
 
 /* ── Vote ─────────────────────────────────── */
 
@@ -152,20 +159,20 @@
 .vote-progress-label {
   display: block;
   font-size: 0.78rem;
-  color: rgba(255,255,255,0.35);
+  color: rgba(0,0,0,0.38);
   margin-bottom: 6px;
 }
 
 .vote-progress-track {
   height: 3px;
-  background: #2a2a2a;
+  background: rgba(0,0,0,0.08);
   border-radius: 2px;
   overflow: hidden;
 }
 
 .vote-progress-fill {
   height: 100%;
-  background: #5de05d;
+  background: #2e7d32;
   border-radius: 2px;
   transition: width 0.3s ease;
 }
@@ -177,8 +184,8 @@
   font-weight: 700;
   letter-spacing: 0.6px;
   text-transform: uppercase;
-  background: rgba(93,224,93,0.15);
-  color: #5de05d;
+  background: rgba(76,175,80,0.12);
+  color: #2e7d32;
   padding: 2px 8px;
   border-radius: 8px;
 }
@@ -192,22 +199,22 @@
 .vote-card {
   border-radius: 5px;
   overflow: hidden;
-  background: #111;
+  background: #f5f5f5;
   border: 2px solid transparent;
-  transition: border-color 0.15s, opacity 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s;
   position: relative;
 }
 
 .vote-card.clickable { cursor: pointer; }
-.vote-card.clickable:hover { border-color: rgba(255,255,255,0.2); }
-.vote-card.selected { border-color: #5de05d; }
+.vote-card.clickable:hover { border-color: rgba(0,0,0,0.15); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.vote-card.selected { border-color: #2e7d32; }
 .vote-card.faded { opacity: 0.45; }
 
 .vote-thumb {
   width: 100%;
   aspect-ratio: 4 / 3;
   object-fit: contain;
-  background: #0a0a0a;
+  background: #e0e0e0;
   display: block;
 }
 
@@ -216,26 +223,26 @@
   justify-content: space-between;
   align-items: center;
   padding: 7px 10px;
-  background: #0d0d0d;
+  background: white;
   font-size: 0.75rem;
   min-height: 32px;
 }
 
-.footer-name   { color: rgba(255,255,255,0.6); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.footer-count  { color: rgba(255,255,255,0.35); font-weight: 600; flex-shrink: 0; margin-left: 6px; }
-.footer-voted  { color: #5de05d; font-weight: 600; }
-.footer-own    { color: rgba(255,255,255,0.25); font-style: italic; }
-.footer-loading{ color: rgba(255,255,255,0.3); }
-.footer-action { color: rgba(255,255,255,0.25); }
-.vote-card.clickable:hover .footer-action { color: rgba(255,255,255,0.6); }
-.vote-card.own-photo { border-color: rgba(255,255,255,0.12); cursor: default; }
+.footer-name   { color: rgba(0,0,0,0.6); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.footer-count  { color: rgba(0,0,0,0.38); font-weight: 600; flex-shrink: 0; margin-left: 6px; }
+.footer-voted  { color: #2e7d32; font-weight: 600; }
+.footer-own    { color: rgba(0,0,0,0.28); font-style: italic; }
+.footer-loading{ color: rgba(0,0,0,0.3); }
+.footer-action { color: rgba(0,0,0,0.3); }
+.vote-card.clickable:hover .footer-action { color: rgba(0,0,0,0.65); }
+.vote-card.own-photo { border-color: rgba(0,0,0,0.08); cursor: default; }
 
 /* ── Résultats ───────────────────────────── */
 
 .resultats-header { margin-bottom: 4px; }
 
 .resultats-titre {
-  color: gold;
+  color: #c8a000;
   font-size: 1.3rem;
   font-weight: 300;
   letter-spacing: 1px;
@@ -251,7 +258,7 @@
 .result-card {
   border-radius: 5px;
   overflow: hidden;
-  background: #111;
+  background: #f5f5f5;
   border: 2px solid transparent;
   position: relative;
 }
@@ -267,25 +274,26 @@
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: rgba(0,0,0,0.7);
-  color: rgba(255,255,255,0.6);
+  background: rgba(255,255,255,0.85);
+  color: rgba(0,0,0,0.55);
   font-size: 0.75rem;
   font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1;
+  border: 1px solid rgba(0,0,0,0.1);
 }
 
-.rank-badge.gold   { background: gold;    color: #1a1a00; }
-.rank-badge.silver { background: #b0b0b0; color: #1a1a1a; }
-.rank-badge.bronze { background: #cd7f32; color: #1a1a1a; }
+.rank-badge.gold   { background: gold;    color: #5a4000; border-color: #c8a000; }
+.rank-badge.silver { background: #d8d8d8; color: #444;    border-color: #aaa; }
+.rank-badge.bronze { background: #cd7f32; color: #fff;    border-color: #a85f1a; }
 
 .result-thumb {
   width: 100%;
   aspect-ratio: 4 / 3;
   object-fit: contain;
-  background: #0a0a0a;
+  background: #e0e0e0;
   display: block;
 }
 
@@ -294,12 +302,12 @@
   justify-content: space-between;
   align-items: center;
   padding: 7px 10px;
-  background: #0d0d0d;
+  background: white;
   font-size: 0.75rem;
 }
 
-.result-name  { color: rgba(255,255,255,0.7); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.result-votes { color: rgba(255,255,255,0.35); flex-shrink: 0; margin-left: 6px; font-weight: 600; }
+.result-name  { color: #1a1a1a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.result-votes { color: rgba(0,0,0,0.38); flex-shrink: 0; margin-left: 6px; font-weight: 600; }
 
 /* ── Expand button ───────────────────────── */
 
@@ -307,16 +315,16 @@
   position: absolute;
   top: 6px;
   right: 6px;
-  background: rgba(0,0,0,0.55);
+  background: rgba(0,0,0,0.4);
   border: none;
-  color: rgba(255,255,255,0.55);
+  color: rgba(255,255,255,0.8);
   width: 26px;
   height: 26px;
   border-radius: 3px;
   font-size: 0.95rem;
   cursor: pointer;
   opacity: 0;
-  transition: opacity 0.15s, color 0.15s;
+  transition: opacity 0.15s;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -326,7 +334,7 @@
 
 .vote-card:hover .btn-expand,
 .result-card:hover .btn-expand { opacity: 1; }
-.btn-expand:hover { color: white; background: rgba(0,0,0,0.8); }
+.btn-expand:hover { background: rgba(0,0,0,0.65); }
 
 /* ── Lightbox ────────────────────────────── */
 
@@ -404,7 +412,7 @@
   font-size: 0.8rem;
 }
 
-.lb-theme   { color: rgba(255,255,255,0.65); }
+.lb-theme   { color: rgba(255,255,255,0.6); }
 .lb-author  { color: rgba(255,255,255,0.4); }
 .lb-sep     { color: rgba(255,255,255,0.2); }
 .lb-counter { color: rgba(255,255,255,0.22); }
