@@ -66,8 +66,8 @@
         <div class="empty-state"><p>Aucune photo publique pour le moment.</p></div>
       } @else {
         <div class="photos-grid">
-          @for (photo of photos(); track photo.id) {
-            <div class="photo-card">
+          @for (photo of photos(); track photo.id; let i = $index) {
+            <div class="photo-card" (click)="openLightbox(i)">
               <img [src]="photo.url" [alt]="photo.titre" loading="lazy" class="photo-img">
               <div class="photo-overlay">
                 <span class="photo-titre">{{ photo.titre }}</span>
@@ -81,3 +81,26 @@
   }
 
 </div>
+
+<!-- Lightbox -->
+@if (lightboxPhoto()) {
+  <div class="lightbox-backdrop" (click)="closeLightbox()">
+    <button class="lightbox-close" (click)="closeLightbox()">×</button>
+    <span class="lightbox-counter">{{ lightboxIndex() + 1 }} / {{ photos().length }}</span>
+
+    @if (lightboxIndex() > 0) {
+      <button class="lightbox-nav lightbox-prev" (click)="prevPhoto(); $event.stopPropagation()">&#8249;</button>
+    }
+
+    <div class="lightbox-content" (click)="$event.stopPropagation()">
+      <img [src]="lightboxPhoto()!.url" [alt]="lightboxPhoto()!.titre" class="lightbox-img">
+      @if (lightboxPhoto()!.titre) {
+        <p class="lightbox-caption">{{ lightboxPhoto()!.titre }}</p>
+      }
+    </div>
+
+    @if (lightboxIndex() < photos().length - 1) {
+      <button class="lightbox-nav lightbox-next" (click)="nextPhoto(); $event.stopPropagation()">&#8250;</button>
+    }
+  </div>
+}

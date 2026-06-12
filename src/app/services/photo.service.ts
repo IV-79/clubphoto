@@ -1,7 +1,7 @@
 import { Injectable, inject, Injector, runInInjectionContext } from '@angular/core';
 import { Storage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from '@angular/fire/storage';
 import {
-  Firestore, collection, collectionData, doc, addDoc, deleteDoc, updateDoc, query, where, orderBy
+  Firestore, collection, collectionData, doc, addDoc, deleteDoc, updateDoc, query, where, orderBy, deleteField
 } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { Photo, UploadState } from '../models/photo.model';
@@ -88,6 +88,16 @@ export class PhotoService {
     return runInInjectionContext(this.injector, () =>
       collectionData(q, { idField: 'id' })
     ) as Observable<Photo[]>;
+  }
+
+  async updatePhotoMeta(photoId: string, data: { titre: string; isPublic: boolean; categorie: string }): Promise<void> {
+    await runInInjectionContext(this.injector, () =>
+      updateDoc(doc(this.firestore, 'photos', photoId), {
+        titre: data.titre,
+        isPublic: data.isPublic,
+        categorie: data.categorie || deleteField(),
+      })
+    );
   }
 
   async toggleVisibility(photo: Photo): Promise<void> {

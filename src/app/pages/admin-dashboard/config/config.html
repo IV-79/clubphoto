@@ -1,0 +1,64 @@
+<div class="config-page">
+
+  <div class="page-header">
+    <h2 class="page-title">Configuration du site</h2>
+  </div>
+
+  <!-- Section catégories -->
+  <section class="config-section">
+    <div class="section-header">
+      <div>
+        <h3 class="section-title">Catégories de photos</h3>
+        <p class="section-sub">Ces catégories apparaissent dans le formulaire d'upload des membres.</p>
+      </div>
+      <span class="badge">{{ categories().length }}</span>
+    </div>
+
+    <!-- Liste -->
+    <div class="categories-list">
+      @for (cat of sortedCategories(); track cat.value) {
+        <div class="category-row">
+          <span class="cat-label">{{ cat.label }}</span>
+          <span class="cat-value">{{ cat.value }}</span>
+          <button class="btn-delete" (click)="deleteCategorie(cat.value)" title="Supprimer">×</button>
+        </div>
+      } @empty {
+        <p class="empty-msg">Aucune catégorie. Ajoutez-en une ci-dessous.</p>
+      }
+    </div>
+
+    <!-- Formulaire ajout -->
+    <div class="add-form">
+      <input
+        type="text"
+        [(ngModel)]="newLabel"
+        placeholder="Nom de la catégorie (ex: Portrait)"
+        (keydown.enter)="addCategorie()"
+        class="input-label">
+      <button class="btn-add" (click)="addCategorie()" [disabled]="!newLabel.trim()">
+        + Ajouter
+      </button>
+    </div>
+    @if (errorMsg) {
+      <p class="error-msg">{{ errorMsg }}</p>
+    }
+
+    <!-- Réinitialiser -->
+    <div class="reset-zone">
+      @if (!confirmReset()) {
+        <button class="btn-reset" (click)="confirmReset.set(true)">
+          Réinitialiser par défaut
+        </button>
+      } @else {
+        <span class="reset-confirm-msg">Remettre la liste d'origine ? Cette action écrase la liste actuelle.</span>
+        <button class="btn-reset-ok" (click)="resetDefaut()">Confirmer</button>
+        <button class="btn-cancel" (click)="confirmReset.set(false)">Annuler</button>
+      }
+    </div>
+  </section>
+
+  @if (saving()) {
+    <p class="saving-msg">Sauvegarde…</p>
+  }
+
+</div>

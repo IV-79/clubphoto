@@ -38,6 +38,12 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Config site (lecture publique pour le formulaire upload, écriture admin)
+    match /config/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // Soumissions (lecture publique pour les galeries de thèmes)
     match /soumissions/{soumissionId} {
       allow read: if true;

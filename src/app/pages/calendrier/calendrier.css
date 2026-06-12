@@ -23,9 +23,23 @@
 /* Filtres */
 .filtres {
   display: flex;
-  gap: 8px;
+  align-items: center;
+  gap: 12px;
   margin-bottom: 36px;
   flex-wrap: wrap;
+}
+
+.filtre-group {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.filtre-sep {
+  width: 1px;
+  height: 24px;
+  background: #ddd;
+  flex-shrink: 0;
 }
 
 .filtre-btn {
@@ -42,6 +56,9 @@
 
 .filtre-btn:hover { border-color: #aaa; color: #1a1a1a; }
 .filtre-btn.actif  { background: #1a1a1a; color: white; border-color: #1a1a1a; }
+
+.filtre-toggle { border-style: dashed; }
+.filtre-toggle.actif { border-style: solid; }
 
 /* Sections */
 .section { margin-bottom: 48px; }
@@ -71,6 +88,16 @@
 
 /* Cards événement */
 .events-list { display: flex; flex-direction: column; gap: 12px; }
+
+.month-sep {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(0,0,0,0.35);
+  padding: 8px 0 4px;
+  margin-top: 8px;
+}
 
 .event-card {
   display: flex;
@@ -102,13 +129,6 @@
   line-height: 1;
 }
 
-.card-month {
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: rgba(255,255,255,0.8);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
 
 .card-body {
   flex: 1;
@@ -162,6 +182,22 @@
   color: rgba(0,0,0,0.35);
   margin-top: 4px;
 }
+
+.load-more-btn {
+  display: block;
+  margin: 16px auto 0;
+  background: none;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  padding: 7px 24px;
+  font-size: 0.85rem;
+  color: rgba(0,0,0,0.5);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.load-more-btn:hover { border-color: #aaa; color: #1a1a1a; }
 
 .empty-state {
   text-align: center;

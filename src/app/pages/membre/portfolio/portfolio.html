@@ -26,12 +26,13 @@
   <!-- Grille de photos -->
   @if (photos().length > 0) {
     <div class="photos-grid">
-      @for (photo of photos(); track photo.id) {
-        <div class="photo-card">
+      @for (photo of photos(); track photo.id; let i = $index) {
+        <div class="photo-card" (click)="openLightbox(i)">
           <img [src]="photo.url" [alt]="photo.titre" loading="lazy">
-          <div class="photo-overlay">
+          <div class="photo-overlay" (click)="$event.stopPropagation()">
             <span class="photo-title">{{ photo.titre }}</span>
             <div class="photo-actions">
+              <button (click)="openEdit(photo)" title="Modifier" class="btn-icon">✎</button>
               <button
                 (click)="toggleVisibility(photo)"
                 [title]="photo.isPublic ? 'Rendre privée' : 'Rendre publique'"
@@ -40,17 +41,14 @@
               </button>
               @if (photo.isPublic) {
                 <button
-                  (click)="setCouverture(photo); $event.stopPropagation()"
+                  (click)="setCouverture(photo)"
                   [class.btn-cover-active]="estCouverture(photo)"
                   title="Utiliser comme photo de carte"
                   class="btn-icon btn-cover">
                   ★
                 </button>
               }
-              <button
-                (click)="confirmDelete(photo)"
-                title="Supprimer"
-                class="btn-icon btn-delete">
+              <button (click)="confirmDelete(photo)" title="Supprimer" class="btn-icon btn-delete">
                 Suppr.
               </button>
             </div>
@@ -70,7 +68,7 @@
 
 <!-- Modal upload -->
 @if (showModal()) {
-  <div class="modal-backdrop" (click)="closeModal()">
+  <div class="modal-backdrop">
     <div class="modal" (click)="$event.stopPropagation()">
       <button class="modal-close" (click)="closeModal()">×</button>
       <h2>Ajouter une photo</h2>
@@ -97,7 +95,7 @@
           <label>Catégorie <span class="optional">(optionnel)</span>
             <select [(ngModel)]="uploadCategorie">
               <option value="">— Aucune catégorie —</option>
-              @for (cat of categories; track cat.value) {
+              @for (cat of categories(); track cat.value) {
                 <option [value]="cat.value">{{ cat.label }}</option>
               }
             </select>
@@ -122,7 +120,73 @@
           </button>
         </div>
       }
+
+      <div class="modal-hint">Appuyez sur Échap pour fermer</div>
     </div>
+  </div>
+}
+
+<!-- Modal édition -->
+@if (editPhoto()) {
+  <div class="modal-backdrop">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <button class="modal-close" (click)="closeEdit()">×</button>
+      <h2>Modifier la photo</h2>
+
+      <div class="preview-wrap preview-wrap-sm">
+        <img [src]="editPhoto()!.url" [alt]="editPhoto()!.titre" class="preview-img">
+      </div>
+
+      <div class="upload-form">
+        <label>Titre
+          <input type="text" [(ngModel)]="editTitre" placeholder="Titre de la photo">
+        </label>
+        <label>Catégorie <span class="optional">(optionnel)</span>
+          <select [(ngModel)]="editCategorie">
+            <option value="">— Aucune catégorie —</option>
+            @for (cat of categories(); track cat.value) {
+              <option [value]="cat.value">{{ cat.label }}</option>
+            }
+          </select>
+        </label>
+        <label class="toggle-label">
+          <input type="checkbox" [(ngModel)]="editPublic">
+          <span>Photo publique (visible dans les galeries du club)</span>
+        </label>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" (click)="closeEdit()" [disabled]="editSaving()">Annuler</button>
+        <button class="btn-primary" (click)="saveEdit()" [disabled]="editSaving()">
+          {{ editSaving() ? 'Sauvegarde…' : 'Sauvegarder' }}
+        </button>
+      </div>
+
+      <div class="modal-hint">Appuyez sur Échap pour fermer</div>
+    </div>
+  </div>
+}
+
+<!-- Lightbox -->
+@if (lightboxPhoto()) {
+  <div class="lightbox-backdrop" (click)="closeLightbox()">
+    <button class="lightbox-close" (click)="closeLightbox()">×</button>
+    <span class="lightbox-counter">{{ lightboxIndex() + 1 }} / {{ photos().length }}</span>
+
+    @if (lightboxIndex() > 0) {
+      <button class="lightbox-nav lightbox-prev" (click)="prevPhoto(); $event.stopPropagation()">&#8249;</button>
+    }
+
+    <div class="lightbox-content" (click)="$event.stopPropagation()">
+      <img [src]="lightboxPhoto()!.url" [alt]="lightboxPhoto()!.titre" class="lightbox-img">
+      @if (lightboxPhoto()!.titre) {
+        <p class="lightbox-caption">{{ lightboxPhoto()!.titre }}</p>
+      }
+    </div>
+
+    @if (lightboxIndex() < photos().length - 1) {
+      <button class="lightbox-nav lightbox-next" (click)="nextPhoto(); $event.stopPropagation()">&#8250;</button>
+    }
   </div>
 }
 

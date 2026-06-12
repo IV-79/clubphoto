@@ -103,10 +103,6 @@
               <mat-icon>article</mat-icon>
               Articles
             </a>
-            <a mat-menu-item routerLink="/admin/galeries">
-              <mat-icon>photo_library</mat-icon>
-              Galeries
-            </a>
             <a mat-menu-item routerLink="/admin/evenements">
               <mat-icon>event</mat-icon>
               Événements
@@ -119,6 +115,11 @@
             <a mat-menu-item routerLink="/admin/membres">
               <mat-icon>group</mat-icon>
               Membres
+            </a>
+            <mat-divider />
+            <a mat-menu-item routerLink="/admin/config">
+              <mat-icon>settings</mat-icon>
+              Config site
             </a>
             <mat-divider />
             <button mat-menu-item (click)="logout()">
@@ -153,9 +154,9 @@
           <li class="mobile-section-label">Administration</li>
           <li><a routerLink="/admin" (click)="mobileMenuOpen.set(false)">Tableau de bord</a></li>
           <li><a routerLink="/admin/articles" (click)="mobileMenuOpen.set(false)">Articles</a></li>
-          <li><a routerLink="/admin/galeries" (click)="mobileMenuOpen.set(false)">Galeries</a></li>
           <li><a routerLink="/admin/evenements" (click)="mobileMenuOpen.set(false)">Événements</a></li>
           <li><a routerLink="/admin/membres" (click)="mobileMenuOpen.set(false)">Membres</a></li>
+          <li><a routerLink="/admin/config" (click)="mobileMenuOpen.set(false)">Config site</a></li>
         }
         @if (isLoggedIn$ | async) {
           <li class="mobile-section-label">Mon espace</li>

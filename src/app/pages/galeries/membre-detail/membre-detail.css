@@ -153,7 +153,7 @@
 .photo-img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
   transition: transform 0.3s;
 }
@@ -172,6 +172,7 @@
 }
 
 .photo-card:hover .photo-overlay { opacity: 1; }
+.photo-card { cursor: pointer; }
 
 .photo-titre {
   color: white;
@@ -180,3 +181,92 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* Lightbox */
+.lightbox-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.96);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: lb-fade 0.18s ease;
+}
+
+@keyframes lb-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.lightbox-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 92vw;
+  max-height: 92vh;
+}
+
+.lightbox-img {
+  max-width: 92vw;
+  max-height: 85vh;
+  object-fit: contain;
+  display: block;
+  user-select: none;
+}
+
+.lightbox-caption {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.85rem;
+  margin: 12px 0 0;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+.lightbox-close {
+  position: fixed;
+  top: 20px;
+  right: 24px;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 2.8rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s;
+  z-index: 2001;
+}
+
+.lightbox-close:hover { color: white; }
+
+.lightbox-counter {
+  position: fixed;
+  top: 26px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.8rem;
+  letter-spacing: 1px;
+  z-index: 2001;
+}
+
+.lightbox-nav {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.07);
+  border: none;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 3.5rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 20px 18px;
+  transition: background 0.15s, color 0.15s;
+  z-index: 2001;
+  user-select: none;
+}
+
+.lightbox-nav:hover { background: rgba(255, 255, 255, 0.14); color: white; }
+.lightbox-prev { left: 0; border-radius: 0 4px 4px 0; }
+.lightbox-next { right: 0; border-radius: 4px 0 0 4px; }
