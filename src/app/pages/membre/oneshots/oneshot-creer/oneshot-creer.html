@@ -1,0 +1,32 @@
+<div class="creer-page">
+
+  <a routerLink="/membre/oneshots" class="back-link">← Mes OneShots</a>
+
+  <h1>Nouvel événement OneShot</h1>
+
+  <div class="form-card">
+    <div class="form-field">
+      <label>Titre <span class="required">*</span></label>
+      <input type="text" [(ngModel)]="titre" placeholder="Ex : Sortie Vercors juin 2026" [disabled]="saving()">
+    </div>
+    <div class="form-field">
+      <label>Description <span class="optional">(optionnel)</span></label>
+      <textarea [(ngModel)]="description" rows="3" placeholder="Contexte, lieu, règles particulières…" [disabled]="saving()"></textarea>
+    </div>
+    <div class="form-field">
+      <label>Date de l'événement <span class="optional">(optionnel)</span></label>
+      <input type="date" [(ngModel)]="date" [disabled]="saving()">
+      <p class="field-hint">Si définie, l'événement apparaîtra dans le calendrier.</p>
+    </div>
+
+    <p class="hint">L'événement démarrera en mode <strong>Préparation</strong> — invisible aux autres membres jusqu'à ce que vous ouvriez les inscriptions.</p>
+
+    <div class="form-actions">
+      <a routerLink="/membre/oneshots" class="btn-cancel">Annuler</a>
+      <button class="btn-submit" (click)="submit()" [disabled]="!titre.trim() || saving()">
+        {{ saving() ? 'Création…' : 'Créer l\'événement' }}
+      </button>
+    </div>
+  </div>
+
+</div>

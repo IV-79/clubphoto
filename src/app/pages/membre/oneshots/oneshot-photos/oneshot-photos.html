@@ -1,0 +1,163 @@
+<div class="photos-page">
+
+  <div class="page-nav">
+    <a [routerLink]="['/membre/oneshots', id, 'gerer']" class="back-link">← Gérer l'événement</a>
+    @if (event()) { <span class="event-titre">{{ event()!.titre }}</span> }
+  </div>
+
+  <h1>Photos <span class="total-count">{{ photos().length }}</span></h1>
+
+  @if (nonAssigneesCount() > 0) {
+    <div class="warning-banner">
+      ⚠ {{ nonAssigneesCount() }} photo{{ nonAssigneesCount() > 1 ? 's' : '' }} sans assignation complète
+    </div>
+  }
+
+  <!-- Zone d'upload -->
+  @if (!peutUploader()) {
+    <div class="upload-closed">
+      Les votes sont ouverts — l'ajout de photos est clôturé.
+    </div>
+  }
+  <section class="panel upload-panel" [class.panel-disabled]="!peutUploader()">
+    <h2 class="panel-title">Ajouter des photos</h2>
+
+    @if (!selectedFiles().length && peutUploader()) {
+      <div
+        class="drop-zone"
+        (dragover)="$event.preventDefault()"
+        (dragleave)="$event.preventDefault()"
+        (drop)="onDrop($event)"
+        (click)="fileInput.click()">
+        <p class="drop-label">Glissez plusieurs photos ici</p>
+        <p class="drop-sub">ou cliquez pour parcourir</p>
+      </div>
+      <input #fileInput type="file" accept="image/*" multiple hidden (change)="onFilesSelected($event)">
+    } @else {
+      <!-- Pré-assignation -->
+      <div class="preassign">
+        <span class="preassign-label">Pré-assignation <span class="optional">(optionnel)</span></span>
+        <div class="preassign-selects">
+          <select [(ngModel)]="preassignMembreUid">
+            <option value="">— Membre —</option>
+            @for (ins of inscriptions(); track ins.uid) {
+              <option [value]="ins.uid">{{ ins.nomMembre }}</option>
+            }
+          </select>
+          <select [(ngModel)]="preassignThemeId">
+            <option value="">— Thème —</option>
+            @for (t of themes(); track t.id) {
+              <option [value]="t.id">{{ t.nom }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <!-- Liste des fichiers -->
+      <ul class="file-list">
+        @for (f of selectedFiles(); track f.name) {
+          <li><span class="file-name">{{ f.name }}</span><span class="file-size">{{ f.sizeMb }} Mo</span></li>
+        }
+      </ul>
+
+      @if (uploading()) {
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="uploadDone() / uploadTotal() * 100"></div>
+        </div>
+        <p class="progress-text">{{ uploadDone() }} / {{ uploadTotal() }} photo{{ uploadTotal() > 1 ? 's' : '' }} uploadée{{ uploadTotal() > 1 ? 's' : '' }}</p>
+      }
+
+      <div class="upload-actions">
+        <button class="btn-secondary" (click)="clearFiles()" [disabled]="uploading()">Changer</button>
+        <button class="btn-primary" (click)="uploadAll()" [disabled]="uploading()">
+          {{ uploading() ? 'Upload en cours…' : 'Uploader ' + selectedFiles().length + ' photo' + (selectedFiles().length > 1 ? 's' : '') }}
+        </button>
+      </div>
+    }
+  </section>
+
+  <!-- Grille photos par thème -->
+  @if (photos().length > 0) {
+
+    @for (group of photosByTheme().byTheme; track group.theme.id) {
+      @if (group.photos.length > 0) {
+        <section class="panel">
+          <h2 class="panel-title">{{ group.theme.nom }} <span class="count">{{ group.photos.length }}</span></h2>
+          <div class="photos-grid">
+            @for (photo of group.photos; track photo.id) {
+              <ng-container *ngTemplateOutlet="photoCard; context: { $implicit: photo }"></ng-container>
+            }
+          </div>
+        </section>
+      }
+    }
+
+    @if (photosByTheme().unassigned.length > 0) {
+      <section class="panel">
+        <h2 class="panel-title unassigned-title">Non assignées <span class="count">{{ photosByTheme().unassigned.length }}</span></h2>
+        <div class="photos-grid">
+          @for (photo of photosByTheme().unassigned; track photo.id) {
+            <ng-container *ngTemplateOutlet="photoCard; context: { $implicit: photo }"></ng-container>
+          }
+        </div>
+      </section>
+    }
+
+  }
+
+</div>
+
+<!-- Template carte photo -->
+<ng-template #photoCard let-photo>
+  <div class="photo-card" [class.editing]="editingPhotoId() === photo.id">
+    <img [src]="photo.url" [alt]="photo.nomMembre" loading="lazy" class="photo-thumb">
+
+    @if (editingPhotoId() !== photo.id) {
+      <!-- Overlay info -->
+      <div class="photo-overlay">
+        <div class="photo-info">
+          <span class="info-membre" [class.unset]="!photo.membreUid">
+            {{ photo.nomMembre || '— Membre —' }}
+          </span>
+          <span class="info-theme" [class.unset]="!photo.themeId">
+            {{ themeName(photo.themeId) || '— Thème —' }}
+          </span>
+        </div>
+        <div class="photo-actions">
+          <button class="btn-edit-photo" (click)="startEdit(photo)">✎</button>
+          <button class="btn-del-photo" (click)="confirmDeleteId.set(photo.id)">×</button>
+        </div>
+      </div>
+
+      <!-- Confirm delete -->
+      @if (confirmDeleteId() === photo.id) {
+        <div class="confirm-delete">
+          <span>Supprimer ?</span>
+          <button class="btn-yes" (click)="executeDelete(photo)" [disabled]="deleting()">Oui</button>
+          <button class="btn-no" (click)="confirmDeleteId.set(null)">Non</button>
+        </div>
+      }
+
+    } @else {
+      <!-- Mode édition -->
+      <div class="photo-edit-form">
+        <select [(ngModel)]="editMembreUid" class="edit-select">
+          <option value="">— Membre —</option>
+          @for (ins of inscriptions(); track ins.uid) {
+            <option [value]="ins.uid">{{ ins.nomMembre }}</option>
+          }
+        </select>
+        <select [(ngModel)]="editThemeId" class="edit-select">
+          <option value="">— Thème —</option>
+          @for (t of themes(); track t.id) {
+            <option [value]="t.id">{{ t.nom }}</option>
+          }
+        </select>
+        <div class="edit-btns">
+          <button class="btn-save-edit" (click)="saveEdit(photo)" [disabled]="editSaving()">✓</button>
+          <button class="btn-cancel-edit" (click)="cancelEdit()">×</button>
+        </div>
+      </div>
+    }
+  </div>
+</ng-template>

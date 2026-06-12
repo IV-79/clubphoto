@@ -80,6 +80,10 @@
               <mat-icon>photo_camera</mat-icon>
               Thème du mois
             </a>
+            <a mat-menu-item routerLink="/membre/oneshots">
+              <mat-icon>camera_roll</mat-icon>
+              OneShot
+            </a>
             <mat-divider />
             <button mat-menu-item (click)="logout()">
               <mat-icon>logout</mat-icon>
@@ -162,6 +166,7 @@
           <li class="mobile-section-label">Mon espace</li>
           <li><a routerLink="/membre/portfolio" (click)="mobileMenuOpen.set(false)">Mon Portfolio</a></li>
           <li><a routerLink="/membre/profil" (click)="mobileMenuOpen.set(false)">Mon Profil</a></li>
+          <li><a routerLink="/membre/oneshots" (click)="mobileMenuOpen.set(false)">OneShot</a></li>
         }
         @if (isLoggedIn$ | async) {
           <li><button class="mobile-logout" (click)="logout()">Déconnexion</button></li>

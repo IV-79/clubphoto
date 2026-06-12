@@ -1,0 +1,171 @@
+<div class="detail-page">
+
+  <div class="page-nav">
+    <a routerLink="/membre/oneshots" class="back-link">← OneShots</a>
+    @if (isCreator()) {
+      <a [routerLink]="['/membre/oneshots', id, 'gerer']" class="link-gerer">Gérer cet événement →</a>
+    }
+  </div>
+
+  @if (!event()) {
+    <p class="loading">Chargement…</p>
+  } @else {
+
+    <div class="event-header">
+      <span class="statut-badge statut-{{ event()!.statut }}">{{ statutLabel() }}</span>
+      <h1>{{ event()!.titre }}</h1>
+      <p class="event-createur">Organisé par {{ event()!.nomCreateur }}</p>
+      @if (event()!.description) {
+        <p class="event-desc">{{ event()!.description }}</p>
+      }
+    </div>
+
+    <!-- Inscription -->
+    @if (inscriptionOuverte() && !isCreator()) {
+      <section class="panel">
+        @if (!isInscrit()) {
+          <p class="ins-msg">Inscrivez-vous pour participer à cet événement.</p>
+          <button class="btn-inscrire" (click)="inscrire()" [disabled]="saving()">
+            {{ saving() ? 'En cours…' : 'Je participe' }}
+          </button>
+        } @else {
+          <p class="ins-msg ins-ok">Vous êtes inscrit à cet événement.</p>
+          <button class="btn-desinscrire" (click)="desinscrire()" [disabled]="saving()">
+            {{ saving() ? 'En cours…' : 'Me désinscrire' }}
+          </button>
+        }
+      </section>
+    }
+
+    @if (!inscriptionOuverte() && !isInscrit() && !isCreator() && event()!.statut === 'fermeture_inscriptions') {
+      <div class="panel panel-info">Les inscriptions sont fermées.</div>
+    }
+
+    <!-- Participants -->
+    @if (inscriptions().length > 0 && event()!.statut !== 'vote' && event()!.statut !== 'resultats') {
+      <section class="panel">
+        <h2 class="panel-title">Participants <span class="count">{{ inscriptions().length }}</span></h2>
+        <ul class="inscrits-list">
+          @for (ins of inscriptions(); track ins.uid) {
+            <li [class.me]="ins.uid === profile()?.uid">
+              {{ ins.nomMembre }}{{ ins.uid === profile()?.uid ? ' (vous)' : '' }}
+            </li>
+          }
+        </ul>
+      </section>
+    }
+
+    <!-- ── VOTE ─────────────────────────────────────── -->
+    @if (event()!.statut === 'vote') {
+
+      @if (isInscrit() || isCreator()) {
+
+        @if (!isCreator()) {
+          <div class="vote-progress-bar">
+            <span class="vote-progress-label">
+              {{ themesVoted().size }} / {{ photosByTheme().length }} thème{{ photosByTheme().length > 1 ? 's' : '' }} voté{{ themesVoted().size > 1 ? 's' : '' }}
+            </span>
+            <div class="vote-progress-track">
+              <div class="vote-progress-fill"
+                [style.width.%]="photosByTheme().length ? themesVoted().size / photosByTheme().length * 100 : 0">
+              </div>
+            </div>
+          </div>
+        }
+
+        @for (group of photosByTheme(); track group.theme.id) {
+          <section class="panel theme-section">
+            <h2 class="panel-title">
+              {{ group.theme.nom }}
+              @if (!isCreator() && themesVoted().has(group.theme.id)) {
+                <span class="voted-chip">Voté</span>
+              }
+              @if (isCreator()) {
+                <span class="count">{{ voteCountByTheme()[group.theme.id] ?? 0 }} vote{{ (voteCountByTheme()[group.theme.id] ?? 0) > 1 ? 's' : '' }}</span>
+              }
+            </h2>
+
+            <div class="vote-grid">
+              @for (photo of group.photos; track photo.id) {
+                @let isSelected  = myVoteByTheme()[group.theme.id] === photo.id;
+                @let isOwnPhoto  = isInscrit() && photo.membreUid === profile()?.uid;
+                @let isFaded     = !!myVoteByTheme()[group.theme.id] && !isSelected && !isOwnPhoto;
+                @let isVoting    = voting() === group.theme.id;
+                @let canVote     = isInscrit() && !isOwnPhoto;
+
+                <div
+                  class="vote-card"
+                  [class.selected]="isSelected"
+                  [class.faded]="isFaded"
+                  [class.own-photo]="isOwnPhoto"
+                  [class.clickable]="canVote"
+                  (click)="castVote(group.theme.id, photo.id)">
+
+                  <img [src]="photo.url" class="vote-thumb" loading="lazy">
+
+                  <div class="vote-footer">
+                    @if (isCreator()) {
+                      <span class="footer-name">{{ photo.nomMembre }}</span>
+                      @if (isOwnPhoto) {
+                        <span class="footer-own">Ma photo</span>
+                      } @else if (isSelected) {
+                        <span class="footer-voted">Mon vote</span>
+                      } @else {
+                        <span class="footer-count">{{ voteCountByPhoto()[photo.id] ?? 0 }}</span>
+                      }
+                    } @else if (isOwnPhoto) {
+                      <span class="footer-own">Ma photo</span>
+                    } @else if (isSelected) {
+                      <span class="footer-voted">Mon vote</span>
+                    } @else if (isVoting) {
+                      <span class="footer-loading">…</span>
+                    } @else {
+                      <span class="footer-action">Voter</span>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          </section>
+        }
+
+      } @else {
+        <div class="panel panel-info">Le vote est en cours — réservé aux participants inscrits.</div>
+      }
+    }
+
+    <!-- ── RÉSULTATS ───────────────────────────────── -->
+    @if (event()!.statut === 'resultats') {
+      <div class="resultats-header">
+        <h2 class="resultats-titre">Résultats</h2>
+      </div>
+
+      @for (group of resultsByTheme(); track group.theme.id) {
+        <section class="panel theme-section">
+          <h2 class="panel-title">
+            {{ group.theme.nom }}
+            <span class="count">{{ voteCountByTheme()[group.theme.id] ?? 0 }} vote{{ (voteCountByTheme()[group.theme.id] ?? 0) > 1 ? 's' : '' }}</span>
+          </h2>
+
+          <div class="results-grid">
+            @for (photo of group.photos; track photo.id; let rank = $index) {
+              @let votes = voteCountByPhoto()[photo.id] ?? 0;
+              <div class="result-card" [class.rank-1]="rank === 0" [class.rank-2]="rank === 1" [class.rank-3]="rank === 2">
+                <div class="rank-badge" [class.gold]="rank === 0" [class.silver]="rank === 1" [class.bronze]="rank === 2">
+                  {{ rank + 1 }}
+                </div>
+                <img [src]="photo.url" class="result-thumb" loading="lazy">
+                <div class="result-footer">
+                  <span class="result-name">{{ photo.nomMembre }}</span>
+                  <span class="result-votes">{{ votes }} vote{{ votes > 1 ? 's' : '' }}</span>
+                </div>
+              </div>
+            }
+          </div>
+        </section>
+      }
+    }
+
+  }
+
+</div>

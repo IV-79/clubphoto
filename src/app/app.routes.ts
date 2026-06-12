@@ -18,6 +18,11 @@ import { Contact } from './pages/contact/contact';
 import { MembrePortfolio } from './pages/membre/portfolio/portfolio';
 import { MembreProfil } from './pages/membre/profil/profil';
 import { MembreSoumettre } from './pages/membre/soumettre/soumettre';
+import { OneShotsListe } from './pages/membre/oneshots/oneshots-liste/oneshots-liste';
+import { OneShotCreer } from './pages/membre/oneshots/oneshot-creer/oneshot-creer';
+import { OneShotGerer } from './pages/membre/oneshots/oneshot-gerer/oneshot-gerer';
+import { OneShotDetail } from './pages/membre/oneshots/oneshot-detail/oneshot-detail';
+import { OneShotPhotos } from './pages/membre/oneshots/oneshot-photos/oneshot-photos';
 import { MembresGalerie } from './pages/galeries/membres-galerie/membres-galerie';
 import { MembreDetail } from './pages/galeries/membre-detail/membre-detail';
 import { ThemesListe } from './pages/galeries/themes-liste/themes-liste';
@@ -69,6 +74,11 @@ export const routes: Routes = [
       { path: 'portfolio', component: MembrePortfolio },
       { path: 'profil', component: MembreProfil },
       { path: 'soumettre', component: MembreSoumettre },
+      { path: 'oneshots', component: OneShotsListe },
+      { path: 'oneshots/creer', component: OneShotCreer },
+      { path: 'oneshots/:id', component: OneShotDetail },
+      { path: 'oneshots/:id/gerer', component: OneShotGerer },
+      { path: 'oneshots/:id/photos', component: OneShotPhotos },
       { path: '', redirectTo: 'portfolio', pathMatch: 'full' }
     ]
   },

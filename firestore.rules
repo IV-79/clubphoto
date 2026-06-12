@@ -38,6 +38,40 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // OneShot events
+    match /oneshots/{oneShotId} {
+      allow read: if isLoggedIn() &&
+        (resource.data.statut != 'preparation' || resource.data.creatorUid == request.auth.uid);
+      allow create: if isLoggedIn();
+      allow update: if isLoggedIn() && resource.data.creatorUid == request.auth.uid;
+    }
+
+    match /oneshots/{oneShotId}/themes/{themeId} {
+      allow read: if isLoggedIn();
+      allow write: if isLoggedIn() &&
+        get(/databases/$(database)/documents/oneshots/$(oneShotId)).data.creatorUid == request.auth.uid;
+    }
+
+    match /oneshots/{oneShotId}/inscriptions/{uid} {
+      allow read: if isLoggedIn();
+      allow create, delete: if isLoggedIn() && request.auth.uid == uid;
+    }
+
+    match /oneshots/{oneShotId}/photos/{photoId} {
+      allow read: if isLoggedIn();
+      allow write: if isLoggedIn() &&
+        get(/databases/$(database)/documents/oneshots/$(oneShotId)).data.creatorUid == request.auth.uid;
+    }
+
+    match /oneshots/{oneShotId}/votes/{voteId} {
+      allow read: if isLoggedIn() && (
+        resource.data.voterUid == request.auth.uid ||
+        get(/databases/$(database)/documents/oneshots/$(oneShotId)).data.creatorUid == request.auth.uid ||
+        get(/databases/$(database)/documents/oneshots/$(oneShotId)).data.statut == 'resultats'
+      );
+      allow create, update: if isLoggedIn() && request.resource.data.voterUid == request.auth.uid;
+    }
+
     // Config site (lecture publique pour le formulaire upload, écriture admin)
     match /config/{docId} {
       allow read: if true;

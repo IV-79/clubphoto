@@ -5,6 +5,7 @@ import { PhotoService } from '../../../services/photo.service';
 import { AuthService } from '../../../services/auth.service';
 import { ConfigService } from '../../../services/config.service';
 import { Photo } from '../../../models/photo.model';
+import { compressToJpeg } from '../../../utils/image-compress';
 import { switchMap, of } from 'rxjs';
 
 @Component({
@@ -99,47 +100,12 @@ export class MembrePortfolio implements OnInit {
   }
 
   private async setFile(file: File) {
-    const compressed = await this.compressToJpeg(file);
+    const compressed = await compressToJpeg(file);
     this.selectedFile.set(compressed);
     this.uploadTitre = file.name.replace(/\.[^.]+$/, '');
     const reader = new FileReader();
     reader.onload = e => this.previewUrl.set(e.target?.result as string);
     reader.readAsDataURL(compressed);
-  }
-
-  private compressToJpeg(file: File): Promise<File> {
-    return new Promise(resolve => {
-      const img = new Image();
-      const url = URL.createObjectURL(file);
-      img.onload = () => {
-        URL.revokeObjectURL(url);
-        const MAX = 3840;
-        let w = img.naturalWidth;
-        let h = img.naturalHeight;
-        if (w > MAX || h > MAX) {
-          if (w >= h) { h = Math.round(h * MAX / w); w = MAX; }
-          else        { w = Math.round(w * MAX / h); h = MAX; }
-        }
-        const canvas = document.createElement('canvas');
-        canvas.width = w;
-        canvas.height = h;
-        canvas.getContext('2d')!.drawImage(img, 0, 0, w, h);
-        const name = file.name.replace(/\.[^.]+$/, '.jpg');
-        const attempt = (quality: number) => {
-          canvas.toBlob(blob => {
-            if (!blob) { resolve(file); return; }
-            if (blob.size > 5 * 1024 * 1024 && quality > 0.65) {
-              attempt(quality - 0.15);
-            } else {
-              resolve(new File([blob], name, { type: 'image/jpeg' }));
-            }
-          }, 'image/jpeg', quality);
-        };
-        attempt(0.85);
-      };
-      img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
-      img.src = url;
-    });
   }
 
   resetFile() {

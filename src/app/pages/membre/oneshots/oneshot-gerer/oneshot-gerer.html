@@ -1,0 +1,138 @@
+<div class="gerer-page">
+
+  <div class="page-nav">
+    <a routerLink="/membre/oneshots" class="back-link">← OneShots</a>
+    @if (event()) {
+      <a [routerLink]="['/membre/oneshots', event()!.id]" class="link-voir">Voir la page membre →</a>
+    }
+  </div>
+
+  @if (!event()) {
+    <p class="loading">Chargement…</p>
+  } @else {
+
+    <!-- En-tête -->
+    <div class="event-header">
+      <div>
+        <span class="statut-badge statut-{{ event()!.statut }}">{{ statutLabel() }}</span>
+        <h1>{{ event()!.titre }}</h1>
+        @if (event()!.description) {
+          <p class="event-desc">{{ event()!.description }}</p>
+        }
+      </div>
+    </div>
+
+    <!-- Date -->
+    <section class="panel">
+      <h2 class="panel-title">Date de l'événement</h2>
+      @if (peutEditerDate()) {
+        <div class="date-field-row">
+          <input type="date" class="date-input-lg" [(ngModel)]="dateValue" [disabled]="savingDate()">
+          <button class="btn-save-date" (click)="saveDate()" [disabled]="savingDate()">
+            {{ savingDate() ? '…' : 'Enregistrer' }}
+          </button>
+        </div>
+        <p class="panel-note">
+          {{ dateValue ? 'L\'événement apparaîtra dans le calendrier à cette date.' : 'Non définie — l\'événement n\'apparaîtra pas dans le calendrier.' }}
+        </p>
+      } @else {
+        <p class="date-readonly">{{ event()!.date ? formatDate(event()!.date!) : '—' }}</p>
+        <p class="panel-note">La date ne peut plus être modifiée après l'ouverture des votes.</p>
+      }
+    </section>
+
+    <!-- Transition de statut -->
+    @if (nextStatut()) {
+      <section class="panel">
+        <h2 class="panel-title">Avancement de l'événement</h2>
+
+        @if (!confirmTransition()) {
+          <div class="transition-actions">
+            <button class="btn-avancer" (click)="confirmTransition.set(true)" [disabled]="transitioning()">
+              {{ nextStatutLabel() }}
+            </button>
+            @if (peutFermerInscriptions()) {
+              <button class="btn-fermer-inscriptions" (click)="fermerInscriptions()" [disabled]="transitioning()">
+                Fermer les inscriptions d'abord
+              </button>
+            }
+          </div>
+        } @else {
+          <div class="confirm-zone">
+            <span class="confirm-msg">Cette action est irréversible. Confirmer ?</span>
+            <button class="btn-avancer" (click)="avancer()" [disabled]="transitioning()">
+              {{ transitioning() ? 'En cours…' : 'Confirmer' }}
+            </button>
+            <button class="btn-cancel" (click)="confirmTransition.set(false)">Annuler</button>
+          </div>
+        }
+      </section>
+    } @else {
+      <div class="event-clos">L'événement est terminé — résultats publiés.</div>
+    }
+
+    <!-- Thèmes -->
+    <section class="panel">
+      <h2 class="panel-title">Thèmes <span class="count">{{ themes().length }}</span></h2>
+      @if (!peutEditerThemes()) {
+        <p class="panel-note">Les thèmes ne peuvent plus être modifiés à ce stade.</p>
+      }
+
+      <div class="themes-list">
+        @for (theme of themes(); track theme.id) {
+          <div class="theme-row">
+            @if (editingThemeId() === theme.id) {
+              <input class="theme-input" [(ngModel)]="editingThemeNom" (keydown.enter)="saveEdit(theme.id)" (keydown.escape)="cancelEdit()">
+              <button class="btn-sm btn-ok" (click)="saveEdit(theme.id)" [disabled]="savingTheme()">✓</button>
+              <button class="btn-sm btn-x" (click)="cancelEdit()">×</button>
+            } @else {
+              <span class="theme-nom">{{ theme.nom }}</span>
+              @if (peutEditerThemes()) {
+                <button class="btn-sm btn-edit" (click)="startEdit(theme)" title="Renommer">✎</button>
+                <button class="btn-sm btn-del" (click)="deleteTheme(theme.id)" title="Supprimer">×</button>
+              }
+            }
+          </div>
+        } @empty {
+          <p class="empty-msg">Aucun thème. Ajoutez-en un ci-dessous.</p>
+        }
+      </div>
+
+      @if (peutEditerThemes()) {
+        <div class="add-theme-form">
+          <input class="theme-input" [(ngModel)]="newThemeNom" placeholder="Nom du thème" (keydown.enter)="addTheme()">
+          <button class="btn-add-theme" (click)="addTheme()" [disabled]="!newThemeNom.trim() || savingTheme()">
+            + Ajouter
+          </button>
+        </div>
+      }
+    </section>
+
+    <!-- Inscrits -->
+    <section class="panel">
+      <h2 class="panel-title">Inscrits <span class="count">{{ inscriptions().length }}</span></h2>
+
+      @if (inscriptions().length === 0) {
+        <p class="empty-msg">Aucun inscrit pour le moment.</p>
+      } @else {
+        <ul class="inscrits-list">
+          @for (ins of inscriptions(); track ins.uid) {
+            <li>{{ ins.nomMembre }}</li>
+          }
+        </ul>
+      }
+    </section>
+
+    <!-- Photos -->
+    @if (['inscription', 'fermeture_inscriptions', 'vote', 'resultats'].includes(event()!.statut)) {
+      <section class="panel">
+        <h2 class="panel-title">Photos</h2>
+        <a [routerLink]="['/membre/oneshots', event()!.id, 'photos']" class="btn-photos-link">
+          Gérer les photos →
+        </a>
+      </section>
+    }
+
+  }
+
+</div>

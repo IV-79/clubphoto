@@ -1,21 +1,37 @@
 import { Component, inject, signal, computed, effect, untracked } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { SlicePipe } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { combineLatest, of, switchMap, map } from 'rxjs';
 import { EvenementService } from '../../services/evenement.service';
+import { OneShotService } from '../../services/oneshot.service';
+import { AuthService } from '../../services/auth.service';
 import { Evenement, EvenementType, EVENEMENT_TYPES } from '../../models/evenement.model';
+import { OneShot, ONESHOT_STATUT_LABELS } from '../../models/oneshot.model';
 
 const INIT = 3;
 const PAGE = 5;
 
+interface CalItem {
+  kind: 'event' | 'oneshot';
+  id: string;
+  date: string;
+  event?: Evenement;
+  oneshot?: OneShot;
+}
+
 @Component({
   selector: 'app-calendrier',
-  imports: [SlicePipe],
+  imports: [SlicePipe, RouterLink],
   templateUrl: './calendrier.html',
   styleUrl: './calendrier.css',
 })
 export class Calendrier {
   private service = inject(EvenementService);
+  private oneShotService = inject(OneShotService);
+  private authService = inject(AuthService);
 
+  // --- Filtres ---
   types = EVENEMENT_TYPES;
   filtre = signal<EvenementType | 'tous'>('tous');
   showPasses = signal(false);
@@ -25,22 +41,35 @@ export class Calendrier {
 
   private tous = toSignal(this.service.getEvenements(), { initialValue: [] as Evenement[] });
 
-  private filtres = computed(() => {
+  // --- OneShots publics ---
+  profile = toSignal(this.authService.currentUserProfile$);
+  private publicOneShots$ = this.oneShotService.getPublicOneShots();
+  private oneshots = toSignal(this.publicOneShots$, { initialValue: [] as OneShot[] });
+
+  // --- Items unifiés (événements + oneshots avec une date) ---
+  private filtresItems = computed((): CalItem[] => {
     const f = this.filtre();
-    return f === 'tous' ? this.tous() : this.tous().filter(e => e.type === f);
+    const events: CalItem[] = (f === 'tous' ? this.tous() : this.tous().filter(e => e.type === (f as EvenementType)))
+      .map(e => ({ kind: 'event' as const, id: 'e.' + e.id, date: e.date, event: e }));
+    const shots: CalItem[] = (f === 'tous' || f === 'sortie')
+      ? this.oneshots()
+          .filter(os => !!os.date)
+          .map(os => ({ kind: 'oneshot' as const, id: 'os.' + os.id, date: os.date!, oneshot: os }))
+      : [];
+    return [...events, ...shots];
   });
 
-  private aVenirAll = computed(() =>
-    [...this.filtres().filter(e => !this.isPasse(e.date))].sort((a, b) => a.date.localeCompare(b.date))
+  private aVenirAll = computed((): CalItem[] =>
+    [...this.filtresItems().filter(i => !this.isPasse(i.date))].sort((a, b) => a.date.localeCompare(b.date))
   );
-  private passesAll = computed(() =>
-    [...this.filtres().filter(e => this.isPasse(e.date))].sort((a, b) => b.date.localeCompare(a.date))
+  private passesAll = computed((): CalItem[] =>
+    [...this.filtresItems().filter(i => this.isPasse(i.date))].sort((a, b) => b.date.localeCompare(a.date))
   );
 
-  aVenir      = computed(() => this.aVenirAll().slice(0, this.limitAVenir()));
-  passes      = computed(() => this.passesAll().slice(0, this.limitPasses()));
-  aVenirCount = computed(() => this.aVenirAll().length);
-  passesCount = computed(() => this.passesAll().length);
+  aVenir        = computed(() => this.aVenirAll().slice(0, this.limitAVenir()));
+  passes        = computed(() => this.passesAll().slice(0, this.limitPasses()));
+  aVenirCount   = computed(() => this.aVenirAll().length);
+  passesCount   = computed(() => this.passesAll().length);
   hasMoreAVenir = computed(() => this.limitAVenir() < this.aVenirAll().length);
   hasMorePasses = computed(() => this.limitPasses() < this.passesAll().length);
   restantAVenir = computed(() => Math.min(PAGE, this.aVenirAll().length - this.limitAVenir()));
@@ -56,6 +85,54 @@ export class Calendrier {
   loadMoreAVenir() { this.limitAVenir.update(n => n + PAGE); }
   loadMorePasses()  { this.limitPasses.update(n => n + PAGE); }
 
+  // --- Inscriptions OneShot ---
+  private inscriptionStatus$ = combineLatest([
+    this.authService.currentUserProfile$,
+    this.publicOneShots$,
+  ]).pipe(
+    switchMap(([profile, oneshots]) => {
+      if (!profile) return of({} as Record<string, boolean>);
+      const open = oneshots.filter(e => e.statut === 'inscription');
+      if (open.length === 0) return of({} as Record<string, boolean>);
+      return combineLatest(
+        open.map(os =>
+          this.oneShotService.getInscriptions(os.id).pipe(
+            map(ins => [os.id, ins.some(i => i.uid === profile.uid)] as [string, boolean])
+          )
+        )
+      ).pipe(map(pairs => Object.fromEntries(pairs)));
+    })
+  );
+
+  inscriptionStatus = toSignal(this.inscriptionStatus$, { initialValue: {} as Record<string, boolean> });
+  inscrisSaving = signal<string | null>(null);
+
+  isInscrit(oneShotId: string): boolean {
+    return this.inscriptionStatus()[oneShotId] ?? false;
+  }
+
+  statutLabel(statut: string): string {
+    return ONESHOT_STATUT_LABELS[statut as keyof typeof ONESHOT_STATUT_LABELS] ?? statut;
+  }
+
+  async inscrire(os: OneShot) {
+    const profile = this.profile();
+    if (!profile || this.inscrisSaving()) return;
+    this.inscrisSaving.set(os.id);
+    const nom = `${profile.prenom ?? ''} ${profile.nom}`.trim();
+    await this.oneShotService.inscrire(os.id, profile.uid, nom);
+    this.inscrisSaving.set(null);
+  }
+
+  async desinscrire(os: OneShot) {
+    const profile = this.profile();
+    if (!profile || this.inscrisSaving()) return;
+    this.inscrisSaving.set(os.id);
+    await this.oneShotService.desinscrire(os.id, profile.uid);
+    this.inscrisSaving.set(null);
+  }
+
+  // --- Helpers ---
   isPasse(date: string): boolean {
     return new Date(date + 'T23:59:59') < new Date();
   }
