@@ -102,6 +102,7 @@
                   (click)="castVote(group.theme.id, photo.id)">
 
                   <img [src]="photo.url" class="vote-thumb" loading="lazy">
+                  <button class="btn-expand" title="Plein écran" (click)="openLightbox(photo, $event)">⤢</button>
 
                   <div class="vote-footer">
                     @if (isCreator()) {
@@ -148,13 +149,15 @@
           </h2>
 
           <div class="results-grid">
-            @for (photo of group.photos; track photo.id; let rank = $index) {
+            @for (photo of group.photos; track photo.id; let i = $index) {
               @let votes = voteCountByPhoto()[photo.id] ?? 0;
-              <div class="result-card" [class.rank-1]="rank === 0" [class.rank-2]="rank === 1" [class.rank-3]="rank === 2">
-                <div class="rank-badge" [class.gold]="rank === 0" [class.silver]="rank === 1" [class.bronze]="rank === 2">
-                  {{ rank + 1 }}
+              @let rank = computeRank(group.photos, i);
+              <div class="result-card" [class.rank-1]="rank === 1" [class.rank-2]="rank === 2" [class.rank-3]="rank === 3">
+                <div class="rank-badge" [class.gold]="rank === 1" [class.silver]="rank === 2" [class.bronze]="rank === 3">
+                  {{ rank }}
                 </div>
                 <img [src]="photo.url" class="result-thumb" loading="lazy">
+                <button class="btn-expand" title="Plein écran" (click)="openLightbox(photo, $event)">⤢</button>
                 <div class="result-footer">
                   <span class="result-name">{{ photo.nomMembre }}</span>
                   <span class="result-votes">{{ votes }} vote{{ votes > 1 ? 's' : '' }}</span>
@@ -169,3 +172,25 @@
   }
 
 </div>
+
+@if (lightboxPhoto(); as lb) {
+  <div class="lb-backdrop" (click)="closeLightbox()">
+    <button class="lb-close" (click)="$event.stopPropagation(); closeLightbox()">✕</button>
+    <button class="lb-nav lb-prev" (click)="$event.stopPropagation(); prevPhoto()" [disabled]="lightboxIndex() === 0">‹</button>
+    <div class="lb-content" (click)="$event.stopPropagation()">
+      <img [src]="lb.url" class="lb-img" alt="">
+      <div class="lb-meta">
+        @if (lightboxTheme()) {
+          <span class="lb-theme">{{ lightboxTheme()!.nom }}</span>
+          <span class="lb-sep">·</span>
+        }
+        @if (isCreator() || event()?.statut === 'resultats') {
+          <span class="lb-author">{{ lb.nomMembre }}</span>
+          <span class="lb-sep">·</span>
+        }
+        <span class="lb-counter">{{ lightboxIndex() + 1 }} / {{ lightboxPhotos().length }}</span>
+      </div>
+    </div>
+    <button class="lb-nav lb-next" (click)="$event.stopPropagation(); nextPhoto()" [disabled]="lightboxIndex() === lightboxPhotos().length - 1">›</button>
+  </div>
+}

@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, HostListener } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { combineLatest, of, switchMap } from 'rxjs';
@@ -97,8 +97,53 @@ export class OneShotDetail {
       .filter(g => g.photos.length > 0)
   );
 
+  // Lightbox
+  lightboxIndex = signal(-1);
+
+  lightboxPhotos = computed(() => {
+    const statut = this.event()?.statut;
+    if (statut === 'resultats') {
+      return this.resultsByTheme().flatMap(g => g.photos);
+    }
+    return this.photosByTheme().flatMap(g => g.photos);
+  });
+
+  lightboxPhoto = computed(() => {
+    const i = this.lightboxIndex();
+    const photos = this.lightboxPhotos();
+    return i >= 0 && i < photos.length ? photos[i] : null;
+  });
+
+  lightboxTheme = computed(() => {
+    const p = this.lightboxPhoto();
+    return p ? (this.themes().find(t => t.id === p.themeId) ?? null) : null;
+  });
+
+  openLightbox(photo: OneShotPhoto, $event?: MouseEvent) {
+    $event?.stopPropagation();
+    const idx = this.lightboxPhotos().findIndex(p => p.id === photo.id);
+    if (idx >= 0) this.lightboxIndex.set(idx);
+  }
+
+  computeRank(photos: OneShotPhoto[], index: number): number {
+    const currentVotes = this.voteCountByPhoto()[photos[index].id] ?? 0;
+    return photos.filter(p => (this.voteCountByPhoto()[p.id] ?? 0) > currentVotes).length + 1;
+  }
+
+  closeLightbox() { this.lightboxIndex.set(-1); }
+  prevPhoto() { const i = this.lightboxIndex(); if (i > 0) this.lightboxIndex.set(i - 1); }
+  nextPhoto() { const i = this.lightboxIndex(); if (i < this.lightboxPhotos().length - 1) this.lightboxIndex.set(i + 1); }
+
+  @HostListener('document:keydown', ['$event'])
+  onKeydown(e: KeyboardEvent) {
+    if (this.lightboxIndex() < 0) return;
+    if (e.key === 'Escape') this.closeLightbox();
+    else if (e.key === 'ArrowLeft') this.prevPhoto();
+    else if (e.key === 'ArrowRight') this.nextPhoto();
+  }
+
   // Vote
-  voting = signal<string | null>(null); // themeId en cours de traitement
+  voting = signal<string | null>(null);
 
   async castVote(themeId: string, photoId: string) {
     const profile = this.profile();

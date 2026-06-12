@@ -206,7 +206,8 @@
 .vote-thumb {
   width: 100%;
   aspect-ratio: 4 / 3;
-  object-fit: cover;
+  object-fit: contain;
+  background: #0a0a0a;
   display: block;
 }
 
@@ -283,7 +284,8 @@
 .result-thumb {
   width: 100%;
   aspect-ratio: 4 / 3;
-  object-fit: cover;
+  object-fit: contain;
+  background: #0a0a0a;
   display: block;
 }
 
@@ -298,3 +300,111 @@
 
 .result-name  { color: rgba(255,255,255,0.7); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .result-votes { color: rgba(255,255,255,0.35); flex-shrink: 0; margin-left: 6px; font-weight: 600; }
+
+/* ── Expand button ───────────────────────── */
+
+.btn-expand {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: rgba(0,0,0,0.55);
+  border: none;
+  color: rgba(255,255,255,0.55);
+  width: 26px;
+  height: 26px;
+  border-radius: 3px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  z-index: 2;
+}
+
+.vote-card:hover .btn-expand,
+.result-card:hover .btn-expand { opacity: 1; }
+.btn-expand:hover { color: white; background: rgba(0,0,0,0.8); }
+
+/* ── Lightbox ────────────────────────────── */
+
+.lb-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.93);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lb-close {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.45);
+  font-size: 1.4rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 6px 10px;
+  border-radius: 3px;
+  transition: color 0.15s;
+  z-index: 1;
+}
+
+.lb-close:hover { color: white; }
+
+.lb-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255,255,255,0.07);
+  border: none;
+  color: rgba(255,255,255,0.55);
+  font-size: 2rem;
+  width: 46px;
+  height: 60px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lb-nav:disabled { opacity: 0.15; cursor: default; }
+.lb-nav:not(:disabled):hover { background: rgba(255,255,255,0.14); color: white; }
+.lb-prev { left: 12px; }
+.lb-next { right: 12px; }
+
+.lb-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: calc(100vw - 140px);
+  max-height: 100vh;
+}
+
+.lb-img {
+  max-width: 100%;
+  max-height: calc(100vh - 72px);
+  object-fit: contain;
+  display: block;
+}
+
+.lb-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0 6px;
+  font-size: 0.8rem;
+}
+
+.lb-theme   { color: rgba(255,255,255,0.65); }
+.lb-author  { color: rgba(255,255,255,0.4); }
+.lb-sep     { color: rgba(255,255,255,0.2); }
+.lb-counter { color: rgba(255,255,255,0.22); }
