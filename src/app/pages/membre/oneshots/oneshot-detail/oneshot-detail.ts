@@ -66,7 +66,7 @@ export class OneShotDetail {
   );
   allVotes = toSignal(this.allVotes$, { initialValue: [] as OneShotVote[] });
 
-  voteCountByPhoto = computed((): Record<string, number> => {
+  voteCountByPhoto = computed((): Record<string, number | undefined> => {
     const counts: Record<string, number> = {};
     for (const v of this.allVotes()) {
       counts[v.photoId] = (counts[v.photoId] ?? 0) + 1;
@@ -74,7 +74,7 @@ export class OneShotDetail {
     return counts;
   });
 
-  voteCountByTheme = computed((): Record<string, number> => {
+  voteCountByTheme = computed((): Record<string, number | undefined> => {
     const counts: Record<string, number> = {};
     for (const v of this.allVotes()) {
       counts[v.themeId] = (counts[v.themeId] ?? 0) + 1;

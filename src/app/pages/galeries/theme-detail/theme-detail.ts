@@ -66,8 +66,8 @@ export class ThemeDetail {
   );
   tousVotes = toSignal(this.tousVotes$, { initialValue: [] as ThemeVote[] });
 
-  votesParSoumission = computed(() => {
-    const counts: Record<string, number> = {};
+  votesParSoumission = computed((): Record<string, number | undefined> => {
+    const counts: Record<string, number | undefined> = {};
     for (const v of this.tousVotes()) {
       counts[v.soumissionId] = (counts[v.soumissionId] ?? 0) + 1;
     }
