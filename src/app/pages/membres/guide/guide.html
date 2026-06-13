@@ -7,6 +7,10 @@
 
   <!-- Navigation rapide -->
   <nav class="guide-nav">
+    <a (click)="scrollTo('general')" class="guide-nav-link">
+      <span class="guide-nav-icon">💡</span>
+      Général
+    </a>
     <a (click)="scrollTo('theme')" class="guide-nav-link">
       <span class="guide-nav-icon">🗓️</span>
       Thème du mois
@@ -20,6 +24,116 @@
       OneShot
     </a>
   </nav>
+
+
+  <!-- ── GÉNÉRAL ───────────────────────────────────── -->
+  <section class="guide-section" id="general">
+    <div class="section-header">
+      <h2>Informations générales</h2>
+      <p class="section-subtitle">Fonctionnalités communes à toutes les sections du site.</p>
+    </div>
+
+    <!-- Upload -->
+    <div class="guide-card">
+      <h3>Uploader une photo</h3>
+      <p>
+        Le site accepte les fichiers <strong>JPEG et PNG</strong>. Chaque photo est automatiquement
+        compressée côté client avant l'envoi pour limiter le poids en stockage.
+      </p>
+      <p class="guide-note">
+        Uploadez toujours le fichier <strong>original sorti de l'appareil ou du logiciel de retouche</strong>
+        (pas une capture d'écran, pas une photo re-enregistrée depuis une messagerie). Les réseaux sociaux
+        et les applications de messagerie suppriment les métadonnées EXIF — un fichier passé par WhatsApp
+        ou Facebook arrivera sans aucune info technique.
+      </p>
+    </div>
+
+    <!-- EXIF -->
+    <div class="guide-card">
+      <h3>Métadonnées EXIF</h3>
+      <p>
+        Quand vous uploadez une photo, le site lit automatiquement les métadonnées EXIF intégrées
+        dans le fichier avant de le compresser. Ces informations sont ensuite affichées dans la
+        lightbox (plein écran) au-dessus des commentaires.
+      </p>
+      <div class="admin-fields">
+        <div class="admin-field-row">
+          <span class="field-label">Appareil</span>
+          <span class="field-desc">Marque et modèle de l'appareil photo (ex : Sony A7 IV).</span>
+        </div>
+        <div class="admin-field-row">
+          <span class="field-label">Objectif</span>
+          <span class="field-desc">Objectif utilisé (ex : 85mm f/1.8).</span>
+        </div>
+        <div class="admin-field-row">
+          <span class="field-label">Focale</span>
+          <span class="field-desc">Focale effective en millimètres.</span>
+        </div>
+        <div class="admin-field-row">
+          <span class="field-label">Ouverture</span>
+          <span class="field-desc">Valeur f/ utilisée (ex : f/2.8).</span>
+        </div>
+        <div class="admin-field-row">
+          <span class="field-label">Vitesse</span>
+          <span class="field-desc">Temps d'exposition (ex : 1/500 s).</span>
+        </div>
+        <div class="admin-field-row">
+          <span class="field-label">ISO</span>
+          <span class="field-desc">Sensibilité ISO au moment de la prise de vue.</span>
+        </div>
+        <div class="admin-field-row">
+          <span class="field-label">Date de prise de vue</span>
+          <span class="field-desc">Date enregistrée par l'appareil, pas la date d'upload.</span>
+        </div>
+      </div>
+      <p class="guide-note">
+        Si aucun EXIF n'est détecté (fichier édité, screenshot, photo reçue par messagerie), la section
+        EXIF n'apparaît tout simplement pas dans la lightbox.
+      </p>
+    </div>
+
+    <!-- Lightbox -->
+    <div class="guide-card">
+      <h3>Visionner en plein écran (lightbox)</h3>
+      <p>
+        Sur toutes les pages de photos, le bouton <strong>⤢</strong> en haut à droite de chaque carte
+        ouvre la photo en plein écran.
+      </p>
+      <ul class="guide-steps">
+        <li>Naviguez entre les photos avec les <strong>flèches à l'écran</strong> ou les touches <kbd>←</kbd> <kbd>→</kbd> du clavier.</li>
+        <li>Fermez avec la croix ou la touche <kbd>Échap</kbd>.</li>
+        <li>Les infos <strong>EXIF</strong> s'affichent au-dessus des commentaires si elles sont disponibles.</li>
+        <li>Vous pouvez <strong>liker</strong> la photo directement depuis la lightbox.</li>
+        <li>Vous pouvez lire, ajouter et répondre aux <strong>commentaires</strong> depuis la lightbox.</li>
+      </ul>
+    </div>
+
+    <!-- Likes -->
+    <div class="guide-card">
+      <h3>Likes ♥</h3>
+      <p>
+        Chaque photo peut être likée depuis la carte directement ou depuis la lightbox.
+        Le bouton ♥ indique le nombre de likes. Un cœur rouge signifie que <strong>vous avez liké</strong> cette photo.
+        Cliquez à nouveau pour retirer votre like.
+      </p>
+      <p class="guide-note">Vous devez être connecté pour liker une photo.</p>
+    </div>
+
+    <!-- Commentaires -->
+    <div class="guide-card">
+      <h3>Commentaires</h3>
+      <p>
+        Les commentaires sont accessibles uniquement depuis la <strong>lightbox</strong> (bouton ⤢).
+      </p>
+      <ul class="guide-steps">
+        <li>Tapez votre commentaire dans le champ en bas et appuyez sur <strong>Envoyer</strong>.</li>
+        <li>Cliquez <strong>Répondre</strong> sous un commentaire pour y répondre directement.</li>
+        <li>Vous pouvez supprimer vos propres commentaires et réponses.</li>
+        <li>Les commentaires sont visibles par tous les membres connectés.</li>
+      </ul>
+      <p class="guide-note">Vous devez être connecté pour commenter.</p>
+    </div>
+  </section>
 
 
   <!-- ── THÈME DU MOIS ──────────────────────────────── -->
