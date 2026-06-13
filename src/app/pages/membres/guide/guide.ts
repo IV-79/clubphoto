@@ -8,4 +8,8 @@ import { MatIconModule } from '@angular/material/icon';
   templateUrl: './guide.html',
   styleUrl: './guide.css',
 })
-export class MembresGuide {}
+export class MembresGuide {
+  scrollTo(id: string) {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+  }
+}
