@@ -83,7 +83,7 @@
                 <button class="card-heart" [class.liked]="isLiked(soum)"
                   (click)="toggleLike(soum, $event)"
                   [title]="isLiked(soum) ? 'Retirer le like' : 'J\'aime'">
-                  ♥ @if ((soum.likes?.length ?? 0) > 0) { {{ soum.likes!.length }} }
+                  <span class="hi">♥</span> @if ((soum.likes?.length ?? 0) > 0) { {{ soum.likes!.length }} }
                 </button>
                 @if (isOwn) {
                   <div class="vote-footer">
@@ -142,7 +142,7 @@
                 <button class="card-heart" [class.liked]="isLiked(soum)"
                   (click)="toggleLike(soum, $event)"
                   [title]="isLiked(soum) ? 'Retirer le like' : 'J\'aime'">
-                  ♥ @if ((soum.likes?.length ?? 0) > 0) { {{ soum.likes!.length }} }
+                  <span class="hi">♥</span> @if ((soum.likes?.length ?? 0) > 0) { {{ soum.likes!.length }} }
                 </button>
 
                 <div class="vote-footer">
@@ -191,7 +191,7 @@
                 <button class="card-heart" [class.liked]="isLiked(soum)"
                   (click)="toggleLike(soum, $event)"
                   [title]="isLiked(soum) ? 'Retirer le like' : 'J\'aime'">
-                  ♥ @if ((soum.likes?.length ?? 0) > 0) { {{ soum.likes!.length }} }
+                  <span class="hi">♥</span> @if ((soum.likes?.length ?? 0) > 0) { {{ soum.likes!.length }} }
                 </button>
                 <div class="result-footer">
                   <span class="result-name">{{ soum.nomMembre }}</span>

@@ -413,4 +413,5 @@
   line-height: 1;
 }
 .card-heart:hover { background: rgba(192,57,43,0.6); color: #fff; }
-.card-heart.liked { background: rgba(192,57,43,0.5); color: #f87070; }
+.card-heart.liked { background: rgba(0,0,0,0.45); }
+.card-heart.liked .hi { color: #f87070; }

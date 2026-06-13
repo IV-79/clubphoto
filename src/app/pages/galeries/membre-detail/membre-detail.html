@@ -108,7 +108,7 @@
               <button class="card-heart" [class.liked]="isLiked(photo)"
                 (click)="toggleLike(photo, $event)"
                 [title]="isLiked(photo) ? 'Retirer le like' : 'J\'aime'">
-                ♥ @if ((photo.likes?.length ?? 0) > 0) { {{ photo.likes!.length }} }
+                <span class="hi">♥</span> @if ((photo.likes?.length ?? 0) > 0) { {{ photo.likes!.length }} }
               </button>
               <div class="photo-overlay">
                 <div class="overlay-bottom">
