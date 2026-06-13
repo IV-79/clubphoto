@@ -10,6 +10,8 @@ import {
   Sortie, SortieInscription, SortieImage, SortieCommentaire, SortieReply
 } from '../models/sortie.model';
 import { PhotoExif } from '../models/photo.model';
+import { hasExif } from '../utils/exif-reader';
+import { generateId } from '../utils/id';
 
 export interface SortieUploadState {
   progress: number;
@@ -119,7 +121,7 @@ export class SortieService {
   ): Observable<SortieUploadState> {
     return new Observable(observer => {
       const ext = file.name.split('.').pop() ?? 'jpg';
-      const storagePath = `sorties/${sortieId}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+      const storagePath = `sorties/${sortieId}/${generateId()}.${ext}`;
       const storageRef = ref(this.storage, storagePath);
       const task = uploadBytesResumable(storageRef, file);
 
@@ -131,7 +133,7 @@ export class SortieService {
           const imageData: Omit<SortieImage, 'id'> = {
             url, storagePath, likes: [], uploadedAt: new Date().toISOString(),
             uploaderUid: meta.uploaderUid, nomUploader: meta.nomUploader,
-            ...(meta.exif && Object.keys(meta.exif).length ? { exif: meta.exif } : {}),
+            ...(hasExif(meta.exif) ? { exif: meta.exif } : {}),
           };
           const docRef = await runInInjectionContext(this.injector, () =>
             addDoc(collection(this.firestore, `sorties/${sortieId}/photos`), imageData)
@@ -186,12 +188,11 @@ export class SortieService {
       getDocs(query(collection(this.firestore, `sorties/${sortieId}/photos`), orderBy('uploadedAt', 'asc')))
     );
     if (photosSnap.empty) return;
-    let best = photosSnap.docs[0];
-    for (const d of photosSnap.docs) {
+    const best = photosSnap.docs.reduce((acc, d) => {
       const dLikes = (d.data()['likes'] as string[] | undefined)?.length ?? 0;
-      const bestLikes = (best.data()['likes'] as string[] | undefined)?.length ?? 0;
-      if (dLikes > bestLikes) best = d;
-    }
+      const accLikes = (acc.data()['likes'] as string[] | undefined)?.length ?? 0;
+      return dLikes > accLikes ? d : acc;
+    });
     await runInInjectionContext(this.injector, () =>
       updateDoc(doc(this.firestore, 'sorties', sortieId), {
         photoCouvertureUrl: best.data()['url'],
@@ -242,10 +243,7 @@ export class SortieService {
   async addReply(
     sortieId: string, photoId: string, commentaireId: string, reply: Omit<SortieReply, 'id'>
   ): Promise<void> {
-    const replyWithId: SortieReply = {
-      ...reply,
-      id: `${Date.now()}_${Math.random().toString(36).slice(2)}`,
-    };
+    const replyWithId: SortieReply = { ...reply, id: generateId() };
     await runInInjectionContext(this.injector, () =>
       updateDoc(doc(this.firestore, `sorties/${sortieId}/photos/${photoId}/commentaires`, commentaireId), {
         replies: arrayUnion(replyWithId),

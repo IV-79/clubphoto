@@ -11,6 +11,8 @@ import {
 } from '../models/oneshot.model';
 import { PhotoExif } from '../models/photo.model';
 import { Commentaire, Reponse } from '../models/commentaire.model';
+import { hasExif } from '../utils/exif-reader';
+import { generateId } from '../utils/id';
 
 export interface OneShotUploadState {
   progress: number;
@@ -143,7 +145,7 @@ export class OneShotService {
   ): Observable<OneShotUploadState> {
     return new Observable(observer => {
       const ext = file.name.split('.').pop() ?? 'jpg';
-      const storagePath = `oneshots/${oneShotId}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+      const storagePath = `oneshots/${oneShotId}/${generateId()}.${ext}`;
       const storageRef = ref(this.storage, storagePath);
       const task = uploadBytesResumable(storageRef, file);
 
@@ -155,7 +157,7 @@ export class OneShotService {
           const data: Omit<OneShotPhoto, 'id'> = {
             url, storagePath, uploadedAt: new Date().toISOString(),
             membreUid: meta.membreUid, nomMembre: meta.nomMembre, themeId: meta.themeId,
-            ...(meta.exif && Object.keys(meta.exif).length ? { exif: meta.exif } : {}),
+            ...(hasExif(meta.exif) ? { exif: meta.exif } : {}),
           };
           const docRef = await runInInjectionContext(this.injector, () =>
             addDoc(collection(this.firestore, `oneshots/${oneShotId}/photos`), data)
@@ -251,7 +253,7 @@ export class OneShotService {
   }
 
   async addReply(oneShotId: string, photoId: string, commentId: string, reply: Omit<Reponse, 'id'>): Promise<void> {
-    const replyWithId: Reponse = { ...reply, id: `${Date.now()}_${Math.random().toString(36).slice(2)}` };
+    const replyWithId: Reponse = { ...reply, id: generateId() };
     await runInInjectionContext(this.injector, () =>
       updateDoc(doc(this.firestore, `oneshots/${oneShotId}/photos/${photoId}/commentaires`, commentId), {
         replies: arrayUnion(replyWithId),

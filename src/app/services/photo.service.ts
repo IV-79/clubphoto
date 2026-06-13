@@ -6,6 +6,8 @@ import {
 import { Observable, map } from 'rxjs';
 import { Photo, PhotoExif, PhotoVisibilite, UploadState } from '../models/photo.model';
 import { Commentaire, Reponse } from '../models/commentaire.model';
+import { hasExif } from '../utils/exif-reader';
+import { generateId } from '../utils/id';
 
 @Injectable({ providedIn: 'root' })
 export class PhotoService {
@@ -21,7 +23,7 @@ export class PhotoService {
   ): Observable<UploadState> {
     return new Observable(observer => {
       const ext = file.name.split('.').pop() ?? 'jpg';
-      const storagePath = `photos/${uid}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+      const storagePath = `photos/${uid}/${generateId()}.${ext}`;
       const storageRef = ref(this.storage, storagePath);
       const task = uploadBytesResumable(storageRef, file);
 
@@ -45,7 +47,7 @@ export class PhotoService {
               dateUpload: new Date().toISOString(),
               storagePath,
               ...(meta.categorie ? { categorie: meta.categorie as Photo['categorie'] } : {}),
-              ...(meta.exif && Object.keys(meta.exif).length ? { exif: meta.exif } : {}),
+              ...(hasExif(meta.exif) ? { exif: meta.exif } : {}),
             };
             const docRef = await runInInjectionContext(this.injector, () =>
               addDoc(collection(this.firestore, 'photos'), data)
@@ -170,7 +172,7 @@ export class PhotoService {
   }
 
   async addReply(photoId: string, commentId: string, reply: Omit<Reponse, 'id'>): Promise<void> {
-    const replyWithId: Reponse = { ...reply, id: `${Date.now()}_${Math.random().toString(36).slice(2)}` };
+    const replyWithId: Reponse = { ...reply, id: generateId() };
     await runInInjectionContext(this.injector, () =>
       updateDoc(doc(this.firestore, `photos/${photoId}/commentaires`, commentId), {
         replies: arrayUnion(replyWithId),

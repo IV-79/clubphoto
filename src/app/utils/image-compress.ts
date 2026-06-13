@@ -14,14 +14,16 @@ export function compressToJpeg(file: File): Promise<File> {
       canvas.width = w; canvas.height = h;
       canvas.getContext('2d')!.drawImage(img, 0, 0, w, h);
       const name = file.name.replace(/\.[^.]+$/, '.jpg');
-      const attempt = (quality: number) => {
-        canvas.toBlob(blob => {
-          if (!blob) { resolve(file); return; }
-          if (blob.size > 5 * 1024 * 1024 && quality > 0.65) attempt(quality - 0.15);
-          else resolve(new File([blob], name, { type: 'image/jpeg' }));
-        }, 'image/jpeg', quality);
-      };
-      attempt(0.85);
+      const toBlob = (q: number) => new Promise<Blob | null>(r => canvas.toBlob(r, 'image/jpeg', q));
+      (async () => {
+        let quality = 0.85;
+        let blob = await toBlob(quality);
+        while (blob && blob.size > 5 * 1024 * 1024 && quality > 0.65) {
+          quality -= 0.15;
+          blob = await toBlob(quality);
+        }
+        resolve(blob ? new File([blob], name, { type: 'image/jpeg' }) : file);
+      })().catch(() => resolve(file));
     };
     img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
     img.src = url;

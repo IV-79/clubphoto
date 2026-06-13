@@ -10,12 +10,8 @@ export class EvenementService {
   private firestore = inject(Firestore);
   private injector = inject(Injector);
 
-  private col() {
-    return collection(this.firestore, 'evenements');
-  }
-
   getEvenements(): Observable<Evenement[]> {
-    const q = query(this.col(), orderBy('date', 'asc'));
+    const q = query(collection(this.firestore, 'evenements'), orderBy('date', 'asc'));
     return runInInjectionContext(this.injector, () =>
       collectionData(q, { idField: 'id' })
     ) as Observable<Evenement[]>;
@@ -23,7 +19,7 @@ export class EvenementService {
 
   async creer(data: Omit<Evenement, 'id' | 'dateCreation'>): Promise<void> {
     await runInInjectionContext(this.injector, () =>
-      addDoc(this.col(), { ...data, dateCreation: new Date().toISOString() })
+      addDoc(collection(this.firestore, 'evenements'), { ...data, dateCreation: new Date().toISOString() })
     );
   }
 

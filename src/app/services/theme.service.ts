@@ -8,6 +8,8 @@ import { Observable } from 'rxjs';
 import { ThemeMensuel, ThemeSoumission, ThemeVote } from '../models/theme.model';
 import { PhotoExif } from '../models/photo.model';
 import { Commentaire, Reponse } from '../models/commentaire.model';
+import { hasExif } from '../utils/exif-reader';
+import { generateId } from '../utils/id';
 
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
@@ -15,12 +17,8 @@ export class ThemeService {
   private storage   = inject(Storage);
   private injector  = inject(Injector);
 
-  private col() {
-    return collection(this.firestore, 'themes');
-  }
-
   getThemes(): Observable<ThemeMensuel[]> {
-    const q = query(this.col(), orderBy('mois', 'desc'));
+    const q = query(collection(this.firestore, 'themes'), orderBy('mois', 'desc'));
     return runInInjectionContext(this.injector, () =>
       collectionData(q, { idField: 'id' })
     ) as Observable<ThemeMensuel[]>;
@@ -72,7 +70,7 @@ export class ThemeService {
     maxVotes: number;
     createdBy: string;
   }): Promise<void> {
-    await addDoc(this.col(), {
+    await addDoc(collection(this.firestore, 'themes'), {
       ...data,
       dateCreation: new Date().toISOString(),
     });
@@ -107,7 +105,7 @@ export class ThemeService {
               {
                 membreUid: uid, nomMembre, url, storagePath,
                 uploadedAt: new Date().toISOString(),
-                ...(exif && Object.keys(exif).length ? { exif } : {}),
+                ...(hasExif(exif) ? { exif } : {}),
               }
             );
             resolve();
@@ -182,7 +180,7 @@ export class ThemeService {
   }
 
   async addReply(themeId: string, soumissionId: string, commentId: string, reply: Omit<Reponse, 'id'>): Promise<void> {
-    const replyWithId: Reponse = { ...reply, id: `${Date.now()}_${Math.random().toString(36).slice(2)}` };
+    const replyWithId: Reponse = { ...reply, id: generateId() };
     await runInInjectionContext(this.injector, () =>
       updateDoc(doc(this.firestore, `themes/${themeId}/soumissions/${soumissionId}/commentaires`, commentId), {
         replies: arrayUnion(replyWithId),
