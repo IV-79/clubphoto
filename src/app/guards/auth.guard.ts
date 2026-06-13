@@ -2,18 +2,20 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { Auth } from '@angular/fire/auth';
 import { AuthService } from '../services/auth.service';
+import { LoginModalService } from '../services/login-modal.service';
 import { from, switchMap, map, take, of } from 'rxjs';
 
-export const authGuard: CanActivateFn = () => {
+export const authGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
   const auth = inject(Auth);
+  const loginModal = inject(LoginModalService);
 
   return from(auth.authStateReady()).pipe(
     switchMap(() => authService.user$.pipe(take(1))),
     switchMap(user => {
       if (!user) {
-        router.navigate(['/login']);
+        loginModal.open(state.url);
         return of(false);
       }
       return from(authService.getUserRole()).pipe(
@@ -27,16 +29,16 @@ export const authGuard: CanActivateFn = () => {
   );
 };
 
-export const memberGuard: CanActivateFn = () => {
+export const memberGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
-  const router = inject(Router);
   const auth = inject(Auth);
+  const loginModal = inject(LoginModalService);
 
   return from(auth.authStateReady()).pipe(
     switchMap(() => authService.user$.pipe(take(1))),
     map(user => {
       if (!user) {
-        router.navigate(['/login']);
+        loginModal.open(state.url);
         return false;
       }
       return true;

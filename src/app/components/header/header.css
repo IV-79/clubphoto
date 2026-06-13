@@ -119,21 +119,23 @@
 }
 
 .login-btn {
-  padding: 7px 16px;
-  border: 1px solid rgba(255,255,255,0.3);
-  color: rgba(255,255,255,0.8);
+  padding: 7px 18px;
+  border: none;
+  background: #f5f0e8;
+  color: #1a1a2e;
   border-radius: 3px;
   text-decoration: none;
   font-size: 0.8rem;
+  font-weight: 600;
   letter-spacing: 0.5px;
   text-transform: uppercase;
-  transition: all 0.2s;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
 }
 
 .login-btn:hover {
-  border-color: white;
-  color: white;
-  background: rgba(255,255,255,0.08);
+  background: #ffffff;
+  color: #c0392b;
 }
 
 .logout-btn {
@@ -200,8 +202,7 @@
   border-top: 1px solid #333;
 }
 
-.mobile-nav li a,
-.mobile-logout {
+.mobile-nav > li > a {
   display: block;
   padding: 14px 24px;
   color: rgba(255,255,255,0.8);
@@ -211,8 +212,7 @@
   transition: background 0.2s;
 }
 
-.mobile-nav li a:hover,
-.mobile-logout:hover { background: rgba(255,255,255,0.06); }
+.mobile-nav > li > a:hover { background: rgba(255,255,255,0.06); }
 
 .mobile-section-label {
   padding: 12px 24px 4px;
@@ -224,32 +224,90 @@
   pointer-events: none;
 }
 
-.mobile-logout {
+/* Accordion mobile */
+.mobile-sub-toggle {
   width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  color: rgba(255,255,255,0.8);
+  background: none;
+  border: none;
+  border-bottom: 1px solid #333;
+  font-size: 0.9rem;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.mobile-sub-toggle:hover { background: rgba(255,255,255,0.06); color: white; }
+
+.mobile-sub-toggle-admin { color: #ff9999; }
+
+.toggle-arrow {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: rgba(255,255,255,0.4);
+  flex-shrink: 0;
+}
+
+.mobile-sub {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: #1c1c1c;
+  border-bottom: 1px solid #333;
+}
+
+.mobile-sub li a {
+  display: block;
+  padding: 12px 24px 12px 36px;
+  color: rgba(255,255,255,0.6);
+  text-decoration: none;
+  font-size: 0.85rem;
+  border-bottom: 1px solid #2a2a2a;
+  transition: background 0.2s, color 0.2s;
+}
+
+.mobile-sub li a:hover { background: rgba(255,255,255,0.05); color: white; }
+.mobile-sub li:last-child a { border-bottom: none; }
+
+.mobile-sub-logout {
+  width: 100%;
+  display: block;
+  padding: 12px 24px 12px 36px;
   text-align: left;
   background: none;
   border: none;
-  border-top: 1px solid #444;
-  color: rgba(255,255,255,0.6);
+  color: rgba(255,255,255,0.4);
+  font-size: 0.85rem;
   font-family: inherit;
   cursor: pointer;
+  transition: background 0.2s, color 0.2s;
 }
+
+.mobile-sub-logout:hover { background: rgba(255,255,255,0.05); color: white; }
 
 .mobile-connexion {
   display: block;
+  width: 100%;
+  text-align: left;
   padding: 14px 24px;
-  color: white !important;
-  background: #cc0000;
-  text-decoration: none;
+  color: #1a1a2e;
+  background: #f5f0e8;
+  border: none;
   font-size: 0.85rem;
   font-weight: 600;
   letter-spacing: 0.5px;
   text-transform: uppercase;
-  border-bottom: 1px solid #aa0000;
-  transition: background 0.2s;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
 }
 
-.mobile-connexion:hover { background: #aa0000; }
+.mobile-connexion:hover { background: #ffffff; color: #c0392b; }
 
 @media (max-width: 768px) {
   .nav-links, .nav-actions { display: none; }

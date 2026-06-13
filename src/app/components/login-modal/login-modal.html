@@ -1,0 +1,51 @@
+@if (modal.isOpen()) {
+  <div class="modal-backdrop" (click)="close()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+
+      <button class="modal-close" (click)="close()" aria-label="Fermer">×</button>
+
+      <h2 class="modal-title">Espace Club Photo</h2>
+
+      <form (ngSubmit)="submit()" #loginForm="ngForm" class="modal-form">
+
+        <label class="field-label">
+          <span>Adresse email</span>
+          <input
+            type="email"
+            name="email"
+            [(ngModel)]="email"
+            required
+            email
+            autocomplete="email"
+            placeholder="votre@email.com">
+        </label>
+
+        <label class="field-label">
+          <span>Mot de passe</span>
+          <input
+            type="password"
+            name="password"
+            [(ngModel)]="password"
+            required
+            autocomplete="current-password"
+            placeholder="••••••••">
+        </label>
+
+        @if (error()) {
+          <p class="error-msg">{{ error() }}</p>
+        }
+
+        <button type="submit" class="btn-submit" [disabled]="!loginForm.form.valid || loading()">
+          {{ loading() ? 'Connexion…' : 'Se connecter' }}
+        </button>
+
+      </form>
+
+      <p class="register-hint">
+        Pas encore de compte ?
+        <a routerLink="/register" (click)="close()">S'inscrire</a>
+      </p>
+
+    </div>
+  </div>
+}

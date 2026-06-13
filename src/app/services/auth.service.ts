@@ -127,7 +127,7 @@ export class AuthService {
     return runInInjectionContext(this.injector, () =>
       signOut(this.auth)
     ).then(() => {
-      this.router.navigate(['/login']);
+      this.router.navigate(['/']);
     });
   }
 }

@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -26,6 +26,7 @@ import { MatButtonModule } from '@angular/material/button';
 export class LoginComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   email = '';
   password = '';
@@ -38,11 +39,12 @@ export class LoginComponent {
     try {
       await this.authService.login(this.email, this.password);
       // Créer le document Firestore si absent, puis rediriger selon le rôle
-      const profile = await this.authService.ensureUserDocument();
-      if (profile?.role === 'admin') {
-        this.router.navigate(['/admin']);
+      const returnUrl = this.route.snapshot.queryParams['returnUrl'];
+      if (returnUrl) {
+        this.router.navigateByUrl(returnUrl);
       } else {
-        this.router.navigate(['/']);
+        const profile = await this.authService.ensureUserDocument();
+        this.router.navigate([profile?.role === 'admin' ? '/admin' : '/']);
       }
     } catch (error: any) {
       this.errorMessage = 'Identifiants incorrects. Veuillez réessayer.';

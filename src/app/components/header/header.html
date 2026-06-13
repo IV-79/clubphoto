@@ -142,12 +142,12 @@
           </mat-menu>
         }
         @if (!(isLoggedIn$ | async)) {
-          <a routerLink="/login" class="login-btn">Connexion</a>
+          <button (click)="openLogin()" class="login-btn">Connexion</button>
         }
       </div>
 
       <!-- Bouton menu mobile -->
-      <button class="mobile-menu-btn" (click)="mobileMenuOpen.set(!mobileMenuOpen())">
+      <button class="mobile-menu-btn" (click)="mobileMenuOpen.set(!mobileMenuOpen()); mobileOpenSection.set(null)">
         <mat-icon>{{ mobileMenuOpen() ? 'close' : 'menu' }}</mat-icon>
       </button>
     </div>
@@ -155,37 +155,98 @@
     <!-- Menu mobile -->
     @if (mobileMenuOpen()) {
     <ul class="mobile-nav">
-      <li><a routerLink="/" (click)="mobileMenuOpen.set(false)">Accueil</a></li>
-      <li><a routerLink="/le-club/histoire" (click)="mobileMenuOpen.set(false)">Histoire</a></li>
-      <li><a routerLink="/le-club/bureau" (click)="mobileMenuOpen.set(false)">Le Bureau</a></li>
-      <li><a routerLink="/le-club/adhesion" (click)="mobileMenuOpen.set(false)">Adhésion</a></li>
-      <li><a routerLink="/actualites" (click)="mobileMenuOpen.set(false)">Actualités</a></li>
-      <li><a routerLink="/galeries" (click)="mobileMenuOpen.set(false)">Galeries</a></li>
-      <li><a routerLink="/calendrier" (click)="mobileMenuOpen.set(false)">Calendrier</a></li>
+
+      <li><a routerLink="/" (click)="closeMobileMenu()">Accueil</a></li>
+
+      <!-- Le Club -->
+      <li class="mobile-has-sub">
+        <button class="mobile-sub-toggle" (click)="toggleMobileSection('club')">
+          Le Club
+          <mat-icon class="toggle-arrow">{{ mobileOpenSection() === 'club' ? 'expand_less' : 'expand_more' }}</mat-icon>
+        </button>
+        @if (mobileOpenSection() === 'club') {
+          <ul class="mobile-sub">
+            <li><a routerLink="/le-club/histoire" (click)="closeMobileMenu()">Histoire</a></li>
+            <li><a routerLink="/le-club/bureau" (click)="closeMobileMenu()">Le Bureau</a></li>
+            <li><a routerLink="/le-club/adhesion" (click)="closeMobileMenu()">Adhésion</a></li>
+          </ul>
+        }
+      </li>
+
+      <li><a routerLink="/actualites" (click)="closeMobileMenu()">Actualités</a></li>
+
+      <!-- Galeries -->
+      <li class="mobile-has-sub">
+        <button class="mobile-sub-toggle" (click)="toggleMobileSection('galeries')">
+          Galeries
+          <mat-icon class="toggle-arrow">{{ mobileOpenSection() === 'galeries' ? 'expand_less' : 'expand_more' }}</mat-icon>
+        </button>
+        @if (mobileOpenSection() === 'galeries') {
+          <ul class="mobile-sub">
+            <li><a routerLink="/galeries/membres" (click)="closeMobileMenu()">Portfolios des membres</a></li>
+            <li><a routerLink="/galeries/themesdumois" (click)="closeMobileMenu()">Thèmes du mois</a></li>
+            <li><a routerLink="/galeries/oneshots" (click)="closeMobileMenu()">OneShot</a></li>
+          </ul>
+        }
+      </li>
+
+      <li><a routerLink="/calendrier" (click)="closeMobileMenu()">Calendrier</a></li>
+
       @if (isLoggedIn$ | async) {
-      <li class="mobile-section-label">Membres</li>
-      <li><a routerLink="/membres/guide" (click)="mobileMenuOpen.set(false)">Guide des membres</a></li>
+        <li class="mobile-has-sub">
+          <button class="mobile-sub-toggle" (click)="toggleMobileSection('membres')">
+            Membres
+            <mat-icon class="toggle-arrow">{{ mobileOpenSection() === 'membres' ? 'expand_less' : 'expand_more' }}</mat-icon>
+          </button>
+          @if (mobileOpenSection() === 'membres') {
+            <ul class="mobile-sub">
+              <li><a routerLink="/membres/guide" (click)="closeMobileMenu()">Guide des membres</a></li>
+            </ul>
+          }
+        </li>
       }
-      <li><a routerLink="/contact" (click)="mobileMenuOpen.set(false)">Contact</a></li>
+
+      <li><a routerLink="/contact" (click)="closeMobileMenu()">Contact</a></li>
+
+      @if (isLoggedIn$ | async) {
+        <li class="mobile-has-sub">
+          <button class="mobile-sub-toggle" (click)="toggleMobileSection('monespace')">
+            Mon espace
+            <mat-icon class="toggle-arrow">{{ mobileOpenSection() === 'monespace' ? 'expand_less' : 'expand_more' }}</mat-icon>
+          </button>
+          @if (mobileOpenSection() === 'monespace') {
+            <ul class="mobile-sub">
+              <li><a routerLink="/membre/portfolio" (click)="closeMobileMenu()">Mon Portfolio</a></li>
+              <li><a routerLink="/membre/profil" (click)="closeMobileMenu()">Mon Profil</a></li>
+              <li><button class="mobile-sub-logout" (click)="logout()">Déconnexion</button></li>
+            </ul>
+          }
+        </li>
+      }
+
       @if (isAdmin$ | async) {
-      <li class="mobile-section-label">Administration</li>
-      <li><a routerLink="/admin" (click)="mobileMenuOpen.set(false)">Tableau de bord</a></li>
-      <li><a routerLink="/admin/articles" (click)="mobileMenuOpen.set(false)">Articles</a></li>
-      <li><a routerLink="/admin/evenements" (click)="mobileMenuOpen.set(false)">Événements</a></li>
-      <li><a routerLink="/admin/membres" (click)="mobileMenuOpen.set(false)">Membres</a></li>
-      <li><a routerLink="/admin/config" (click)="mobileMenuOpen.set(false)">Config site</a></li>
+        <li class="mobile-has-sub">
+          <button class="mobile-sub-toggle mobile-sub-toggle-admin" (click)="toggleMobileSection('admin')">
+            Administration
+            <mat-icon class="toggle-arrow">{{ mobileOpenSection() === 'admin' ? 'expand_less' : 'expand_more' }}</mat-icon>
+          </button>
+          @if (mobileOpenSection() === 'admin') {
+            <ul class="mobile-sub">
+              <li><a routerLink="/admin" (click)="closeMobileMenu()">Tableau de bord</a></li>
+              <li><a routerLink="/admin/articles" (click)="closeMobileMenu()">Articles</a></li>
+              <li><a routerLink="/admin/evenements" (click)="closeMobileMenu()">Événements</a></li>
+              <li><a routerLink="/admin/themes" (click)="closeMobileMenu()">Thèmes</a></li>
+              <li><a routerLink="/admin/membres" (click)="closeMobileMenu()">Membres</a></li>
+              <li><a routerLink="/admin/config" (click)="closeMobileMenu()">Config site</a></li>
+            </ul>
+          }
+        </li>
       }
-      @if (isLoggedIn$ | async) {
-      <li class="mobile-section-label">Mon espace</li>
-      <li><a routerLink="/membre/portfolio" (click)="mobileMenuOpen.set(false)">Mon Portfolio</a></li>
-      <li><a routerLink="/membre/profil" (click)="mobileMenuOpen.set(false)">Mon Profil</a></li>
-      }
-      @if (isLoggedIn$ | async) {
-      <li><button class="mobile-logout" (click)="logout()">Déconnexion</button></li>
-      }
+
       @if (!(isLoggedIn$ | async)) {
-      <li><a routerLink="/login" class="mobile-connexion" (click)="mobileMenuOpen.set(false)">Connexion</a></li>
+        <li><button class="mobile-connexion" (click)="openLogin()">Connexion</button></li>
       }
+
     </ul>
     }
   </nav>
