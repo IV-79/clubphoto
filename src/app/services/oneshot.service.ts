@@ -1,7 +1,7 @@
 import { Injectable, inject, Injector, runInInjectionContext } from '@angular/core';
 import {
   Firestore, collection, collectionData, doc, docData,
-  addDoc, updateDoc, deleteDoc, setDoc, query, where, orderBy
+  addDoc, updateDoc, deleteDoc, setDoc, query, where, orderBy, arrayUnion, arrayRemove
 } from '@angular/fire/firestore';
 import { Storage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from '@angular/fire/storage';
 import { Observable } from 'rxjs';
@@ -9,6 +9,8 @@ import {
   OneShot, OneShotTheme, OneShotInscription,
   OneShotPhoto, OneShotVote, OneShotStatut
 } from '../models/oneshot.model';
+import { PhotoExif } from '../models/photo.model';
+import { Commentaire, Reponse } from '../models/commentaire.model';
 
 export interface OneShotUploadState {
   progress: number;
@@ -137,7 +139,7 @@ export class OneShotService {
   uploadPhoto(
     file: File,
     oneShotId: string,
-    meta: { membreUid: string; nomMembre: string; themeId: string }
+    meta: { membreUid: string; nomMembre: string; themeId: string; exif?: PhotoExif }
   ): Observable<OneShotUploadState> {
     return new Observable(observer => {
       const ext = file.name.split('.').pop() ?? 'jpg';
@@ -151,7 +153,9 @@ export class OneShotService {
         async () => {
           const url = await getDownloadURL(task.snapshot.ref);
           const data: Omit<OneShotPhoto, 'id'> = {
-            url, storagePath, uploadedAt: new Date().toISOString(), ...meta,
+            url, storagePath, uploadedAt: new Date().toISOString(),
+            membreUid: meta.membreUid, nomMembre: meta.nomMembre, themeId: meta.themeId,
+            ...(meta.exif && Object.keys(meta.exif).length ? { exif: meta.exif } : {}),
           };
           const docRef = await runInInjectionContext(this.injector, () =>
             addDoc(collection(this.firestore, `oneshots/${oneShotId}/photos`), data)
@@ -198,6 +202,67 @@ export class OneShotService {
     await runInInjectionContext(this.injector, () =>
       setDoc(doc(this.firestore, `oneshots/${oneShotId}/votes`, `${voterUid}_${themeId}`), {
         voterUid, themeId, photoId, votedAt: new Date().toISOString(),
+      })
+    );
+  }
+
+  // --- Likes ---
+
+  async toggleLikePhoto(oneShotId: string, photoId: string, uid: string, currentlyLiked: boolean): Promise<void> {
+    await runInInjectionContext(this.injector, () =>
+      updateDoc(doc(this.firestore, `oneshots/${oneShotId}/photos`, photoId), {
+        likes: currentlyLiked ? arrayRemove(uid) : arrayUnion(uid),
+      })
+    );
+  }
+
+  // --- Commentaires ---
+
+  getCommentaires(oneShotId: string, photoId: string): Observable<Commentaire[]> {
+    const q = query(
+      collection(this.firestore, `oneshots/${oneShotId}/photos/${photoId}/commentaires`),
+      orderBy('createdAt', 'asc')
+    );
+    return runInInjectionContext(this.injector, () =>
+      collectionData(q, { idField: 'id' })
+    ) as Observable<Commentaire[]>;
+  }
+
+  async addCommentaire(oneShotId: string, photoId: string, data: { texte: string; auteurUid: string; nomAuteur: string }): Promise<void> {
+    await runInInjectionContext(this.injector, () =>
+      addDoc(collection(this.firestore, `oneshots/${oneShotId}/photos/${photoId}/commentaires`), {
+        ...data, likes: [], replies: [], createdAt: new Date().toISOString(),
+      })
+    );
+  }
+
+  async deleteCommentaire(oneShotId: string, photoId: string, commentId: string): Promise<void> {
+    await runInInjectionContext(this.injector, () =>
+      deleteDoc(doc(this.firestore, `oneshots/${oneShotId}/photos/${photoId}/commentaires`, commentId))
+    );
+  }
+
+  async toggleLikeCommentaire(oneShotId: string, photoId: string, commentId: string, uid: string, currentlyLiked: boolean): Promise<void> {
+    await runInInjectionContext(this.injector, () =>
+      updateDoc(doc(this.firestore, `oneshots/${oneShotId}/photos/${photoId}/commentaires`, commentId), {
+        likes: currentlyLiked ? arrayRemove(uid) : arrayUnion(uid),
+      })
+    );
+  }
+
+  async addReply(oneShotId: string, photoId: string, commentId: string, reply: Omit<Reponse, 'id'>): Promise<void> {
+    const replyWithId: Reponse = { ...reply, id: `${Date.now()}_${Math.random().toString(36).slice(2)}` };
+    await runInInjectionContext(this.injector, () =>
+      updateDoc(doc(this.firestore, `oneshots/${oneShotId}/photos/${photoId}/commentaires`, commentId), {
+        replies: arrayUnion(replyWithId),
+      })
+    );
+  }
+
+  async deleteReply(oneShotId: string, photoId: string, commentId: string, replyId: string, allReplies: Reponse[]): Promise<void> {
+    await runInInjectionContext(this.injector, () =>
+      updateDoc(doc(this.firestore, `oneshots/${oneShotId}/photos/${photoId}/commentaires`, commentId), {
+        replies: allReplies.filter(r => r.id !== replyId),
       })
     );
   }

@@ -1,4 +1,4 @@
-export type EvenementType = 'reunion' | 'sortie';
+export type EvenementType = 'reunion';
 
 export interface Evenement {
   id: string;
@@ -12,5 +12,4 @@ export interface Evenement {
 
 export const EVENEMENT_TYPES: { value: EvenementType; label: string }[] = [
   { value: 'reunion', label: 'Réunion' },
-  { value: 'sortie', label: 'Sortie photo' },
 ];

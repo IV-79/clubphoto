@@ -88,33 +88,82 @@
 
 .photo-card:hover img { transform: scale(1.03); }
 
+/* Category badge: top-left, always visible */
+.card-cat {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: rgba(0,0,0,0.52);
+  color: rgba(255,255,255,0.82);
+  font-size: 0.68rem;
+  padding: 2px 7px;
+  border-radius: 3px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  pointer-events: none;
+  z-index: 1;
+}
+
 .photo-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 50%);
+  background: linear-gradient(to top, rgba(0,0,0,0.88) 0%, transparent 58%);
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  padding: 12px;
+  justify-content: space-between;
+  padding: 8px;
   opacity: 0;
   transition: opacity 0.2s;
 }
 
 .photo-card:hover .photo-overlay { opacity: 1; }
 
+.overlay-top {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.overlay-bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.overlay-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .photo-title {
+  flex: 1;
   color: white;
   font-size: 0.85rem;
-  margin-bottom: 8px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.photo-actions {
+/* Fullscreen button */
+.btn-fs {
+  background: rgba(0,0,0,0.45);
+  border: none;
+  color: rgba(255,255,255,0.8);
+  width: 26px;
+  height: 26px;
+  border-radius: 3px;
+  font-size: 0.95rem;
+  cursor: pointer;
   display: flex;
-  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  flex-shrink: 0;
+  padding: 0;
 }
+
+.btn-fs:hover { background: rgba(0,0,0,0.7); color: white; }
+.btn-info { font-size: 0.85rem; }
 
 .btn-icon {
   background: rgba(255,255,255,0.15);
@@ -129,39 +178,24 @@
 
 .btn-icon:hover { background: rgba(255,255,255,0.3); }
 .btn-delete:hover { background: rgba(204,0,0,0.6) !important; border-color: #cc0000 !important; }
-.btn-cover-active { background: rgba(255,200,0,0.2) !important; border-color: rgba(255,200,0,0.5) !important; color: gold !important; }
 
-.visibility-badge {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background: rgba(0,0,0,0.65);
-  color: rgba(255,255,255,0.5);
-  font-size: 0.7rem;
-  padding: 2px 8px;
-  border-radius: 2px;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-}
+.btn-vis.vis-public  { color: #5de05d; border-color: rgba(0,180,0,0.4); }
+.btn-vis.vis-membre  { color: #7ab4ff; border-color: rgba(50,130,255,0.4); }
 
-.visibility-badge.public {
-  background: rgba(0,180,0,0.25);
-  color: #5de05d;
+.vis-select {
+  background: #111;
+  border: 1px solid #333;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+  width: 100%;
 }
-
-.cover-badge {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  background: rgba(180,140,0,0.75);
-  color: gold;
-  font-size: 0.65rem;
-  font-weight: 700;
-  padding: 2px 7px;
-  border-radius: 2px;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-}
+.vis-select:focus { border-color: #cc0000; }
+.vis-select option { background: #1e1e1e; }
 
 /* Lightbox */
 .lightbox-backdrop {
@@ -484,4 +518,52 @@
   color: rgba(255,255,255,0.5);
   font-size: 0.9rem;
   margin: 0 0 24px;
+}
+
+/* Modal EXIF */
+.modal-exif { max-width: 420px; }
+
+.exif-titre {
+  color: rgba(255,255,255,0.45);
+  font-size: 0.85rem;
+  margin: -16px 0 20px;
+  font-style: italic;
+}
+
+.exif-list {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.6rem 1.2rem;
+  margin: 0;
+}
+
+.exif-list dt {
+  color: rgba(255,255,255,0.4);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding-top: 2px;
+  white-space: nowrap;
+}
+
+.exif-list dd {
+  color: #e0e0e0;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.exif-settings {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.exif-settings span {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 0.85rem;
+  font-family: monospace;
+  letter-spacing: 0.3px;
 }

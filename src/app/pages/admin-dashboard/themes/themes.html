@@ -95,17 +95,9 @@
               <span class="theme-mois">{{ formatMois(theme.mois) }}</span>
             </div>
             <div class="theme-actions">
-              @if (confirmDeleteId() === theme.id) {
-                <span class="confirm-text">Supprimer définitivement ?</span>
-                <button mat-stroked-button color="warn" (click)="supprimer(theme.id)">Oui</button>
-                <button mat-button (click)="confirmDeleteId.set(null)">Non</button>
-              } @else {
-                <button mat-icon-button color="warn"
-                  title="Supprimer"
-                  (click)="confirmDeleteId.set(theme.id)">
-                  <mat-icon>delete</mat-icon>
-                </button>
-              }
+              <button mat-icon-button color="warn" title="Supprimer" (click)="supprimer(theme)">
+                <mat-icon>delete</mat-icon>
+              </button>
             </div>
           </div>
 

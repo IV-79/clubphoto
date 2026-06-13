@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, HostListener } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { combineLatest, of, switchMap } from 'rxjs';
@@ -8,10 +8,12 @@ import {
   OneShotInscription, OneShotPhoto, OneShotTheme, OneShotVote,
   ONESHOT_STATUT_LABELS
 } from '../../../../models/oneshot.model';
+import { LightboxPhoto, PhotoLightboxCallbacks } from '../../../../models/commentaire.model';
+import { PhotoLightbox } from '../../../../components/photo-lightbox/photo-lightbox';
 
 @Component({
   selector: 'app-oneshot-detail',
-  imports: [RouterLink],
+  imports: [RouterLink, PhotoLightbox],
   templateUrl: './oneshot-detail.html',
   styleUrl: './oneshot-detail.css',
 })
@@ -98,9 +100,9 @@ export class OneShotDetail {
   );
 
   // Lightbox
-  lightboxIndex = signal(-1);
+  lightboxIndex = signal<number | null>(null);
 
-  lightboxPhotos = computed(() => {
+  lightboxPhotoList = computed(() => {
     const statut = this.event()?.statut;
     if (statut === 'resultats') {
       return this.resultsByTheme().flatMap(g => g.photos);
@@ -108,38 +110,78 @@ export class OneShotDetail {
     return this.photosByTheme().flatMap(g => g.photos);
   });
 
-  lightboxPhoto = computed(() => {
-    const i = this.lightboxIndex();
-    const photos = this.lightboxPhotos();
-    return i >= 0 && i < photos.length ? photos[i] : null;
+  lightboxPhotos = computed((): LightboxPhoto[] => {
+    const isVote = this.event()?.statut === 'vote';
+    const uid = this.profile()?.uid;
+    return this.lightboxPhotoList().map(p => ({
+      id: p.id,
+      url: p.url,
+      nomAuteur: isVote && !this.isCreator() && p.membreUid !== uid ? '' : p.nomMembre,
+      uploaderUid: p.membreUid,
+      likes: p.likes ?? [],
+      uploadedAt: p.uploadedAt,
+      exif: p.exif,
+    }));
   });
 
-  lightboxTheme = computed(() => {
-    const p = this.lightboxPhoto();
-    return p ? (this.themes().find(t => t.id === p.themeId) ?? null) : null;
+  lightboxCallbacks = computed((): PhotoLightboxCallbacks => {
+    const oneShotId = this.id;
+    const uid = this.profile()?.uid ?? '';
+    return {
+      toggleLike: (photoId, liked) =>
+        this.oneShotService.toggleLikePhoto(oneShotId, photoId, uid, liked),
+      getComments: (photoId) =>
+        this.oneShotService.getCommentaires(oneShotId, photoId),
+      addComment: (photoId, texte, auteurUid, nomAuteur) =>
+        this.oneShotService.addCommentaire(oneShotId, photoId, { texte, auteurUid, nomAuteur }),
+      deleteComment: (photoId, commentId) =>
+        this.oneShotService.deleteCommentaire(oneShotId, photoId, commentId),
+      toggleCommentLike: (photoId, commentId, cUid, liked) =>
+        this.oneShotService.toggleLikeCommentaire(oneShotId, photoId, commentId, cUid, liked),
+      addReply: (photoId, commentId, texte, auteurUid, nomAuteur) =>
+        this.oneShotService.addReply(oneShotId, photoId, commentId, {
+          texte, auteurUid, nomAuteur, createdAt: new Date().toISOString(),
+        }),
+      deleteReply: (photoId, commentId, replyId, allReplies) =>
+        this.oneShotService.deleteReply(oneShotId, photoId, commentId, replyId, allReplies),
+      canDeletePhoto: (photo) =>
+        this.isCreator() || photo.uploaderUid === uid,
+      deletePhoto: (photo) => {
+        const p = this.photos().find(p => p.id === photo.id)!;
+        return this.oneShotService.deletePhoto(oneShotId, p);
+      },
+    };
   });
+
+  userName = computed(() => {
+    const p = this.profile();
+    if (!p) return '';
+    return `${p.prenom ?? ''} ${p.nom}`.trim();
+  });
+
+  isLiked(photo: OneShotPhoto): boolean {
+    const uid = this.profile()?.uid;
+    return !!uid && (photo.likes ?? []).includes(uid);
+  }
+
+  async toggleLike(photo: OneShotPhoto, event: Event) {
+    event.stopPropagation();
+    const uid = this.profile()?.uid;
+    if (!uid) return;
+    await this.oneShotService.toggleLikePhoto(this.id, photo.id, uid, this.isLiked(photo));
+  }
 
   openLightbox(photo: OneShotPhoto, $event?: MouseEvent) {
     $event?.stopPropagation();
-    const idx = this.lightboxPhotos().findIndex(p => p.id === photo.id);
+    const idx = this.lightboxPhotoList().findIndex(p => p.id === photo.id);
     if (idx >= 0) this.lightboxIndex.set(idx);
   }
+
+  closeLightbox() { this.lightboxIndex.set(null); }
 
   computeRank(photos: OneShotPhoto[], index: number): number {
     const currentVotes = this.voteCountByPhoto()[photos[index].id] ?? 0;
     return photos.filter(p => (this.voteCountByPhoto()[p.id] ?? 0) > currentVotes).length + 1;
-  }
-
-  closeLightbox() { this.lightboxIndex.set(-1); }
-  prevPhoto() { const i = this.lightboxIndex(); if (i > 0) this.lightboxIndex.set(i - 1); }
-  nextPhoto() { const i = this.lightboxIndex(); if (i < this.lightboxPhotos().length - 1) this.lightboxIndex.set(i + 1); }
-
-  @HostListener('document:keydown', ['$event'])
-  onKeydown(e: KeyboardEvent) {
-    if (this.lightboxIndex() < 0) return;
-    if (e.key === 'Escape') this.closeLightbox();
-    else if (e.key === 'ArrowLeft') this.prevPhoto();
-    else if (e.key === 'ArrowRight') this.nextPhoto();
   }
 
   // Vote
@@ -150,7 +192,7 @@ export class OneShotDetail {
     if (!profile || !this.isInscrit() || this.voting()) return;
     if (this.myVoteByTheme()[themeId] === photoId) return;
     const photo = this.photos().find(p => p.id === photoId);
-    if (photo?.membreUid === profile.uid) return; // pas de vote pour sa propre photo
+    if (photo?.membreUid === profile.uid) return;
     this.voting.set(themeId);
     await this.oneShotService.vote(this.id, profile.uid, themeId, photoId);
     this.voting.set(null);

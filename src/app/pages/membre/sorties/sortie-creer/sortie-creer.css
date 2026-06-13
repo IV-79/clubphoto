@@ -1,0 +1,82 @@
+.creer-page {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.page-header h1 {
+  margin: 0 0 2rem;
+  font-size: 1.8rem;
+  color: #1a1a1a;
+}
+
+.sortie-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.field-full { width: 100%; }
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.field-half {
+  flex: 1;
+  min-width: 0;
+}
+
+.checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+}
+
+.sub-checkbox { margin-left: 1.5rem; }
+
+.lieu-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: rgba(0,0,0,0.45);
+  margin: 0;
+}
+
+.hint-icon { font-size: 1rem; width: 1rem; height: 1rem; }
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  align-items: center;
+}
+
+.btn-cancel {
+  color: rgba(0,0,0,0.45);
+  text-decoration: none;
+  font-size: 0.9rem;
+  padding: 0.6rem 0;
+}
+.btn-cancel:hover { color: #1a1a1a; }
+
+.btn-submit {
+  background: #c0392b;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0.7rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-submit:hover:not(:disabled) { background: #a93226; }
+.btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+@media (max-width: 600px) {
+  .form-row { flex-direction: column; gap: 0.5rem; }
+}

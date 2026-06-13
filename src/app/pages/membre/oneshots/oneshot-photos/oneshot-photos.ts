@@ -4,8 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { NgTemplateOutlet } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { OneShotService } from '../../../../services/oneshot.service';
+import { ConfirmService } from '../../../../services/confirm.service';
 import { OneShotPhoto, OneShotTheme, OneShotInscription } from '../../../../models/oneshot.model';
 import { compressToJpeg } from '../../../../utils/image-compress';
+import { readExif } from '../../../../utils/exif-reader';
 
 interface FileEntry {
   file: File;
@@ -24,6 +26,7 @@ export class OneShotPhotos {
 
   private oneShotService = inject(OneShotService);
   private route = inject(ActivatedRoute);
+  private confirmService = inject(ConfirmService);
 
   readonly id = this.route.snapshot.paramMap.get('id')!;
 
@@ -100,9 +103,9 @@ export class OneShotPhotos {
     this.uploadTotal.set(entries.length);
 
     for (const entry of entries) {
-      const compressed = await compressToJpeg(entry.file);
+      const [exif, compressed] = await Promise.all([readExif(entry.file), compressToJpeg(entry.file)]);
       await new Promise<void>((resolve, reject) => {
-        this.oneShotService.uploadPhoto(compressed, this.id, meta).subscribe({
+        this.oneShotService.uploadPhoto(compressed, this.id, { ...meta, exif }).subscribe({
           complete: () => { this.uploadDone.update(n => n + 1); resolve(); },
           error: reject,
         });
@@ -143,15 +146,10 @@ export class OneShotPhotos {
   }
 
   // --- Suppression ---
-  confirmDeleteId = signal<string | null>(null);
-  deleting        = signal(false);
-
-  async executeDelete(photo: OneShotPhoto) {
-    if (this.deleting()) return;
-    this.deleting.set(true);
+  async deletePhoto(photo: OneShotPhoto) {
+    const ok = await this.confirmService.confirm('Supprimer cette photo définitivement ?');
+    if (!ok) return;
     await this.oneShotService.deletePhoto(this.id, photo);
-    this.confirmDeleteId.set(null);
-    this.deleting.set(false);
   }
 
   // --- Helpers ---

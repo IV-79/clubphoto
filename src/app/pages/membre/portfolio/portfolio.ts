@@ -4,8 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { PhotoService } from '../../../services/photo.service';
 import { AuthService } from '../../../services/auth.service';
 import { ConfigService } from '../../../services/config.service';
-import { Photo } from '../../../models/photo.model';
+import { ConfirmService } from '../../../services/confirm.service';
+import { Photo, PhotoExif, PhotoVisibilite } from '../../../models/photo.model';
 import { compressToJpeg } from '../../../utils/image-compress';
+import { readExif, hasExif } from '../../../utils/exif-reader';
 import { switchMap, of } from 'rxjs';
 
 @Component({
@@ -20,6 +22,7 @@ export class MembrePortfolio implements OnInit {
   private photoService = inject(PhotoService);
   private authService = inject(AuthService);
   private configService = inject(ConfigService);
+  private confirmService = inject(ConfirmService);
 
   private profile$ = this.authService.currentUserProfile$;
   profile = toSignal(this.profile$);
@@ -28,8 +31,9 @@ export class MembrePortfolio implements OnInit {
     switchMap(p => p ? this.photoService.getMyPhotos(p.uid) : of([]))
   );
   photos = toSignal(this.myPhotos$, { initialValue: [] as Photo[] });
-  photoCount = computed(() => this.photos().length);
-  publicCount = computed(() => this.photos().filter(p => p.isPublic).length);
+  photoCount   = computed(() => this.photos().length);
+  publicCount  = computed(() => this.photos().filter(p => p.visibilite === 'public').length);
+  membreCount  = computed(() => this.photos().filter(p => p.visibilite === 'membre').length);
 
   private categoriesRaw = toSignal(this.configService.getCategories(), { initialValue: [] });
   categories = computed(() =>
@@ -41,20 +45,24 @@ export class MembrePortfolio implements OnInit {
   selectedFile = signal<File | null>(null);
   previewUrl = signal('');
   uploadTitre = '';
-  uploadPublic = false;
+  uploadVisibilite: PhotoVisibilite = 'membre';
   uploadCategorie = '';
+  private pendingExif: PhotoExif = {};
   uploading = signal(false);
   uploadProgress = signal(0);
 
   // --- Edit ---
   editPhoto = signal<Photo | null>(null);
   editTitre = '';
-  editPublic = false;
+  editVisibilite: PhotoVisibilite = 'membre';
   editCategorie = '';
   editSaving = signal(false);
 
+  // --- Infos EXIF ---
+  exifPhoto = signal<Photo | null>(null);
+  readonly hasExif = hasExif;
+
   // --- Delete ---
-  toDelete = signal<Photo | null>(null);
 
   // --- Lightbox ---
   lightboxIndex = signal(-1);
@@ -100,6 +108,7 @@ export class MembrePortfolio implements OnInit {
   }
 
   private async setFile(file: File) {
+    this.pendingExif = await readExif(file);
     const compressed = await compressToJpeg(file);
     this.selectedFile.set(compressed);
     this.uploadTitre = file.name.replace(/\.[^.]+$/, '');
@@ -112,8 +121,9 @@ export class MembrePortfolio implements OnInit {
     this.selectedFile.set(null);
     this.previewUrl.set('');
     this.uploadTitre = '';
-    this.uploadPublic = false;
+    this.uploadVisibilite = 'membre';
     this.uploadCategorie = '';
+    this.pendingExif = {};
     this.uploadProgress.set(0);
     if (this.fileInput?.nativeElement) this.fileInput.nativeElement.value = '';
   }
@@ -125,8 +135,9 @@ export class MembrePortfolio implements OnInit {
     this.uploading.set(true);
     this.photoService.uploadPhoto(file, profile.uid, profile.nom, {
       titre: this.uploadTitre,
-      isPublic: this.uploadPublic,
-      categorie: this.uploadCategorie || undefined
+      visibilite: this.uploadVisibilite,
+      categorie: this.uploadCategorie || undefined,
+      exif: this.pendingExif,
     }).subscribe({
       next: state => {
         this.uploadProgress.set(state.progress);
@@ -140,7 +151,7 @@ export class MembrePortfolio implements OnInit {
   openEdit(photo: Photo) {
     this.editPhoto.set(photo);
     this.editTitre = photo.titre;
-    this.editPublic = photo.isPublic;
+    this.editVisibilite = photo.visibilite;
     this.editCategorie = photo.categorie ?? '';
   }
 
@@ -155,37 +166,42 @@ export class MembrePortfolio implements OnInit {
     this.editSaving.set(true);
     await this.photoService.updatePhotoMeta(photo.id, {
       titre: this.editTitre.trim() || photo.titre,
-      isPublic: this.editPublic,
+      visibilite: this.editVisibilite,
       categorie: this.editCategorie,
     });
     this.editSaving.set(false);
     this.editPhoto.set(null);
   }
 
-  // --- Cover & visibility ---
-  estCouverture(photo: Photo): boolean {
-    return this.profile()?.photoCouvertureUrl === photo.url;
+  async toggleVisibilite(photo: Photo) {
+    await this.photoService.toggleVisibilite(photo);
   }
 
-  async setCouverture(photo: Photo) {
-    const profile = this.profile();
-    if (!profile || !photo.isPublic) return;
-    await this.authService.updateProfile(profile.uid, { photoCouvertureUrl: photo.url });
+  visibiliteLabel(v: PhotoVisibilite): string {
+    return v === 'public' ? 'Public' : 'Membres';
   }
 
-  async toggleVisibility(photo: Photo) {
-    await this.photoService.toggleVisibility(photo);
+  formatDateCapture(iso: string): string {
+    return new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
   }
 
-  // --- Delete ---
-  confirmDelete(photo: Photo) { this.toDelete.set(photo); }
-  cancelDelete() { this.toDelete.set(null); }
+  getCategorieLabel(value: string): string {
+    if (!value) return '';
+    return this.categories().find(c => c.value === value)?.label ?? value;
+  }
 
-  async executeDelete() {
-    const photo = this.toDelete();
-    if (!photo) return;
+  visibiliteTitle(v: PhotoVisibilite): string {
+    return v === 'public'
+      ? 'Visible par tous — cliquer pour "Membres seulement"'
+      : 'Membres connectés seulement — cliquer pour "Public"';
+  }
+
+  async deletePhoto(photo: Photo) {
+    const ok = await this.confirmService.confirm(
+      `« ${photo.titre} » sera supprimée définitivement.`
+    );
+    if (!ok) return;
     await this.photoService.deletePhoto(photo);
-    this.toDelete.set(null);
   }
 
   // --- Lightbox ---

@@ -16,6 +16,18 @@ export const PHOTO_CATEGORIES: { value: PhotoCategorie; label: string }[] = [
   { value: 'autre',         label: 'Autre' },
 ];
 
+export type PhotoVisibilite = 'public' | 'membre';
+
+export interface PhotoExif {
+  appareil?: string;
+  objectif?: string;
+  focale?: number;
+  ouverture?: number;
+  vitesse?: string;
+  iso?: number;
+  dateCapture?: string;
+}
+
 export interface Photo {
   id: string;
   uid: string;
@@ -23,10 +35,12 @@ export interface Photo {
   titre: string;
   description: string;
   url: string;
-  isPublic: boolean;
+  visibilite: PhotoVisibilite;
   dateUpload: string;
   storagePath: string;
   categorie?: PhotoCategorie;
+  exif?: PhotoExif;
+  likes?: string[];
 }
 
 export interface UploadState {

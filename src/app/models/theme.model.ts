@@ -14,6 +14,8 @@ export interface ThemeMensuel {
   createdBy: string;
 }
 
+import { PhotoExif } from './photo.model';
+
 export interface ThemeSoumission {
   id: string;
   membreUid: string;
@@ -21,6 +23,8 @@ export interface ThemeSoumission {
   url: string;
   storagePath: string;
   uploadedAt: string;
+  likes?: string[];
+  exif?: PhotoExif;
 }
 
 export interface ThemeVote {

@@ -1,0 +1,163 @@
+@if (sortie(); as s) {
+<div class="sortie-detail">
+
+  <!-- En-tête -->
+  <div class="detail-header">
+    <a routerLink="/galeries/sorties" class="back-link">← Sorties Photo</a>
+
+    <div class="header-title-row">
+      <div>
+        <span class="status-badge" [class.status-avenir]="isAVenir()" [class.status-ouverte]="!isAVenir()">
+          {{ isAVenir() ? 'À venir' : 'Ouverte aux photos' }}
+        </span>
+        <h1>{{ s.titre }}</h1>
+      </div>
+      @if (isOrganisateur() || isAdmin()) {
+        <a [routerLink]="['/membre/sorties', sortieId, 'gerer']" class="btn-gerer">⚙ Gérer</a>
+      }
+    </div>
+
+    <div class="header-meta">
+      <span class="meta-item">📅 {{ formatDate(s.date) }}</span>
+      @if (s.lieu) {
+        <a [href]="mapsUrl(s.lieu)" target="_blank" class="meta-item meta-lieu">
+          📍 {{ s.lieu }}
+        </a>
+      }
+      <span class="meta-item meta-org">par {{ s.nomOrganisateur }}</span>
+    </div>
+
+    @if (s.description) {
+      <p class="detail-desc">{{ s.description }}</p>
+    }
+  </div>
+
+  <!-- Inscription -->
+  @if (s.inscriptionObligatoire) {
+    <section class="inscription-section">
+      <div class="inscription-header">
+        <h2>
+          Participants
+          <span class="count">{{ inscriptions().length }}</span>
+          @if (s.maxParticipants) {
+            <span class="max-count">/ {{ s.maxParticipants }}</span>
+          }
+        </h2>
+
+        @if (profile()) {
+          @if (isInscrit()) {
+            <button class="btn-desinscrit" (click)="toggleInscription()" [disabled]="inscribing()">
+              ✓ Inscrit — Se désinscrire
+            </button>
+          } @else if (canInscrire()) {
+            <button class="btn-inscrire" (click)="toggleInscription()" [disabled]="inscribing()">
+              {{ inscribing() ? '…' : 'Je participe' }}
+            </button>
+          } @else if (s.maxParticipants && inscriptions().length >= s.maxParticipants) {
+            <span class="full-badge">Complet</span>
+          }
+        } @else if (isAVenir()) {
+          <span class="login-hint">Connectez-vous pour vous inscrire</span>
+        }
+      </div>
+
+      @if (inscriptions().length > 0) {
+        <div class="participants-row">
+          @for (p of inscriptions(); track p.uid) {
+            <span class="participant-chip" [title]="p.nomMembre">
+              {{ p.nomMembre[0].toUpperCase() }}
+            </span>
+          }
+        </div>
+      }
+    </section>
+  }
+
+  <!-- Upload -->
+  @if (canUpload()) {
+    <section class="upload-section">
+      <div class="upload-header">
+        <h2>Partager vos photos</h2>
+        <button class="btn-upload" (click)="photoInput.click()">+ Ajouter des photos</button>
+        <input #photoInput type="file" accept="image/*" multiple class="hidden-input"
+          (change)="onPhotosSelected($event)" />
+      </div>
+
+      @if (uploads().length > 0) {
+        <div class="uploads-list">
+          @for (u of uploads(); track u.id) {
+            <div class="upload-item" [class.upload-done]="u.done" [class.upload-error]="u.error">
+              <span class="upload-name">{{ u.name }}</span>
+              @if (!u.done && !u.error) {
+                <div class="upload-bar-wrap">
+                  <div class="upload-bar" [style.width.%]="u.progress"></div>
+                </div>
+              } @else if (u.done) {
+                <span class="upload-check">✓</span>
+              } @else {
+                <span class="upload-err">{{ u.error }}</span>
+              }
+            </div>
+          }
+          @if (uploads().every(u => u.done || u.error)) {
+            <button class="btn-clear" (click)="clearDoneUploads()">Effacer</button>
+          }
+        </div>
+      }
+    </section>
+  } @else if (!isAVenir() && profile() && !canUpload()) {
+    <p class="upload-locked">🔒 Upload réservé aux participants inscrits.</p>
+  }
+
+  <!-- Galerie de photos -->
+  <section class="photos-section">
+    <h2>
+      Photos
+      <span class="count">{{ photos().length }}</span>
+    </h2>
+
+    @if (photos().length === 0) {
+      @if (isAVenir()) {
+        <p class="empty-msg">Les photos seront disponibles à partir du {{ formatDate(s.date) }}.</p>
+      } @else {
+        <p class="empty-msg">Aucune photo pour l'instant.@if (canUpload()) { Soyez le premier à partager ! }</p>
+      }
+    } @else {
+      <div class="photos-grid">
+        @for (photo of photos(); track photo.id; let i = $index) {
+          <div class="photo-card" (click)="openLightbox(i)">
+            <img [src]="photo.url" [alt]="photo.nomUploader" loading="lazy" class="photo-img" />
+            <button class="btn-fs" title="Plein écran" (click)="$event.stopPropagation(); openLightbox(i)">⤢</button>
+            <button class="card-heart" [class.liked]="isLiked(photo)"
+              (click)="toggleLike(photo, $event)"
+              [title]="isLiked(photo) ? 'Retirer le like' : 'J\'aime'">
+              ♥ @if (photo.likes.length > 0) { {{ photo.likes.length }} }
+            </button>
+            <div class="photo-overlay">
+              <div class="overlay-bottom">
+                <span class="photo-name">{{ photo.nomUploader }}</span>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </section>
+
+</div>
+} @else {
+  <div class="loading-page">Chargement…</div>
+}
+
+<!-- Lightbox -->
+@if (lightboxIndex() !== null && photos().length > 0) {
+  <app-photo-lightbox
+    [photos]="lightboxPhotos()"
+    [callbacks]="lightboxCallbacks()"
+    [startIndex]="lightboxIndex()!"
+    [userUid]="profile()?.uid ?? null"
+    [userName]="userName()"
+    [canInteract]="!!profile()"
+    (closed)="closeLightbox()"
+  />
+}

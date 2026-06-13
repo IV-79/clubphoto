@@ -89,7 +89,7 @@
               <span class="theme-nom">{{ theme.nom }}</span>
               @if (peutEditerThemes()) {
                 <button class="btn-sm btn-edit" (click)="startEdit(theme)" title="Renommer">✎</button>
-                <button class="btn-sm btn-del" (click)="deleteTheme(theme.id)" title="Supprimer">×</button>
+                <button class="btn-sm btn-del" (click)="deleteTheme(theme)" title="Supprimer">×</button>
               }
             }
           </div>

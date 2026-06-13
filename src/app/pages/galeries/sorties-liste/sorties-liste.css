@@ -1,0 +1,184 @@
+.sorties-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2.5rem;
+  gap: 1rem;
+}
+
+.page-header h1 {
+  margin: 0 0 0.25rem;
+  font-size: 2rem;
+  color: #e0e0e0;
+}
+
+.subtitle {
+  margin: 0;
+  color: #999;
+  font-size: 0.95rem;
+}
+
+.btn-create {
+  background: #c0392b;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+
+.btn-create:hover { background: #a93226; }
+
+.section { margin-bottom: 3rem; }
+
+.section-title {
+  font-size: 1.2rem;
+  color: #e0e0e0;
+  margin: 0 0 1.25rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #333;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.count {
+  background: #333;
+  color: #aaa;
+  border-radius: 12px;
+  padding: 0.1rem 0.5rem;
+  font-size: 0.8rem;
+}
+
+.empty-msg {
+  color: #666;
+  font-style: italic;
+}
+
+.sorties-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.sortie-card {
+  background: #1a1a2e;
+  border: 1px solid #333;
+  border-radius: 8px;
+  overflow: hidden;
+  text-decoration: none;
+  display: block;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.sortie-card:hover {
+  transform: translateY(-2px);
+  border-color: #555;
+}
+
+.sortie-card-passee { opacity: 0.8; }
+.sortie-card-passee:hover { opacity: 1; }
+
+.sortie-cover {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: #111;
+  overflow: hidden;
+}
+
+.cover-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cover-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0f0f1e;
+}
+
+.cover-icon { font-size: 2.5rem; opacity: 0.3; }
+
+.sortie-status {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-avenir { background: #1a6b3a; color: #5dba82; }
+.status-passee { background: #333; color: #999; }
+
+.sortie-info { padding: 1rem; }
+
+.sortie-titre {
+  margin: 0 0 0.6rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #e0e0e0;
+  line-height: 1.3;
+}
+
+.sortie-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.meta-date, .meta-lieu {
+  font-size: 0.8rem;
+  color: #aaa;
+}
+
+.meta-lieu {
+  color: #7ab3e0;
+  text-decoration: none;
+}
+.meta-lieu:hover { text-decoration: underline; }
+
+.sortie-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.sortie-organisateur {
+  font-size: 0.8rem;
+  color: #777;
+}
+
+.inscription-badge {
+  font-size: 0.7rem;
+  background: #2a1a2e;
+  border: 1px solid #663399;
+  color: #aa77dd;
+  border-radius: 4px;
+  padding: 0.1rem 0.4rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .page-header { flex-direction: column; }
+  .sorties-grid { grid-template-columns: 1fr; }
+}

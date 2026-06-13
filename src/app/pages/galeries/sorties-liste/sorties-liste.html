@@ -1,0 +1,91 @@
+<div class="sorties-page">
+
+  <div class="page-header">
+    <div>
+      <h1>Sorties Photo</h1>
+      <p class="subtitle">Sorties organisées par les membres</p>
+    </div>
+    @if (profile()) {
+      <a routerLink="/membre/sorties/creer" class="btn-create">+ Organiser une sortie</a>
+    }
+  </div>
+
+  <!-- À venir -->
+  <section class="section">
+    <h2 class="section-title">À venir <span class="count">{{ aVenir().length }}</span></h2>
+
+    @if (aVenir().length === 0) {
+      <p class="empty-msg">Aucune sortie planifiée pour le moment.</p>
+    } @else {
+      <div class="sorties-grid">
+        @for (sortie of aVenir(); track sortie.id) {
+          <a [routerLink]="['/galeries/sorties', sortie.id]" class="sortie-card">
+            <div class="sortie-cover">
+              @if (sortie.photoCouvertureUrl) {
+                <img [src]="sortie.photoCouvertureUrl" [alt]="sortie.titre" class="cover-img" />
+              } @else {
+                <div class="cover-placeholder">
+                  <span class="cover-icon">📷</span>
+                </div>
+              }
+              <span class="sortie-status status-avenir">À venir</span>
+            </div>
+            <div class="sortie-info">
+              <h3 class="sortie-titre">{{ sortie.titre }}</h3>
+              <div class="sortie-meta">
+                <span class="meta-date">📅 {{ formatDate(sortie.date) }}</span>
+                @if (sortie.lieu) {
+                  <a class="meta-lieu" [href]="mapsUrl(sortie.lieu)" target="_blank" (click)="$event.stopPropagation()">
+                    📍 {{ sortie.lieu }}
+                  </a>
+                }
+              </div>
+              <div class="sortie-footer">
+                <span class="sortie-organisateur">par {{ sortie.nomOrganisateur }}</span>
+                @if (sortie.inscriptionObligatoire) {
+                  <span class="inscription-badge">Inscription requise</span>
+                }
+              </div>
+            </div>
+          </a>
+        }
+      </div>
+    }
+  </section>
+
+  <!-- Passées -->
+  @if (passees().length > 0) {
+    <section class="section">
+      <h2 class="section-title">Passées <span class="count">{{ passees().length }}</span></h2>
+      <div class="sorties-grid">
+        @for (sortie of passees(); track sortie.id) {
+          <a [routerLink]="['/galeries/sorties', sortie.id]" class="sortie-card sortie-card-passee">
+            <div class="sortie-cover">
+              @if (sortie.photoCouvertureUrl) {
+                <img [src]="sortie.photoCouvertureUrl" [alt]="sortie.titre" class="cover-img" />
+              } @else {
+                <div class="cover-placeholder">
+                  <span class="cover-icon">📷</span>
+                </div>
+              }
+              <span class="sortie-status status-passee">Terminée</span>
+            </div>
+            <div class="sortie-info">
+              <h3 class="sortie-titre">{{ sortie.titre }}</h3>
+              <div class="sortie-meta">
+                <span class="meta-date">📅 {{ formatDate(sortie.date) }}</span>
+                @if (sortie.lieu) {
+                  <a class="meta-lieu" [href]="mapsUrl(sortie.lieu)" target="_blank" (click)="$event.stopPropagation()">
+                    📍 {{ sortie.lieu }}
+                  </a>
+                }
+              </div>
+              <span class="sortie-organisateur">par {{ sortie.nomOrganisateur }}</span>
+            </div>
+          </a>
+        }
+      </div>
+    </section>
+  }
+
+</div>

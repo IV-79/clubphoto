@@ -311,6 +311,7 @@
 
 /* ── Expand button ───────────────────────── */
 
+/* ⤢ Fullscreen — always visible, top-right */
 .btn-expand {
   position: absolute;
   top: 6px;
@@ -323,96 +324,33 @@
   border-radius: 3px;
   font-size: 0.95rem;
   cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.15s;
   display: flex;
   align-items: center;
   justify-content: center;
   line-height: 1;
   z-index: 2;
+  transition: background 0.15s;
 }
-
-.vote-card:hover .btn-expand,
-.result-card:hover .btn-expand { opacity: 1; }
 .btn-expand:hover { background: rgba(0,0,0,0.65); }
 
-/* ── Lightbox ────────────────────────────── */
-
-.lb-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.93);
-  z-index: 1000;
+/* ♥ Heart — always visible, bottom-right (above footer) */
+.card-heart {
+  position: absolute;
+  bottom: 38px;
+  right: 6px;
+  z-index: 3;
+  background: rgba(0,0,0,0.45);
+  border: none;
+  color: rgba(255,255,255,0.75);
+  font-size: 0.75rem;
+  padding: 3px 6px;
+  border-radius: 12px;
+  cursor: pointer;
   display: flex;
   align-items: center;
-  justify-content: center;
-}
-
-.lb-close {
-  position: absolute;
-  top: 14px;
-  right: 18px;
-  background: none;
-  border: none;
-  color: rgba(255,255,255,0.45);
-  font-size: 1.4rem;
-  cursor: pointer;
-  line-height: 1;
-  padding: 6px 10px;
-  border-radius: 3px;
-  transition: color 0.15s;
-  z-index: 1;
-}
-
-.lb-close:hover { color: white; }
-
-.lb-nav {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background: rgba(255,255,255,0.07);
-  border: none;
-  color: rgba(255,255,255,0.55);
-  font-size: 2rem;
-  width: 46px;
-  height: 60px;
-  border-radius: 4px;
-  cursor: pointer;
+  gap: 3px;
   transition: background 0.15s, color 0.15s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  line-height: 1;
 }
-
-.lb-nav:disabled { opacity: 0.15; cursor: default; }
-.lb-nav:not(:disabled):hover { background: rgba(255,255,255,0.14); color: white; }
-.lb-prev { left: 12px; }
-.lb-next { right: 12px; }
-
-.lb-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  max-width: calc(100vw - 140px);
-  max-height: 100vh;
-}
-
-.lb-img {
-  max-width: 100%;
-  max-height: calc(100vh - 72px);
-  object-fit: contain;
-  display: block;
-}
-
-.lb-meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 0 6px;
-  font-size: 0.8rem;
-}
-
-.lb-theme   { color: rgba(255,255,255,0.6); }
-.lb-author  { color: rgba(255,255,255,0.4); }
-.lb-sep     { color: rgba(255,255,255,0.2); }
-.lb-counter { color: rgba(255,255,255,0.22); }
+.card-heart:hover { background: rgba(192,57,43,0.6); color: #fff; }
+.card-heart.liked { background: rgba(192,57,43,0.5); color: #f87070; }

@@ -14,7 +14,7 @@ import { Header } from '../../components/header/header';
   styles: [`
     .member-content {
       min-height: calc(100vh - 120px);
-      background: #1a1a1a;
+      background: #fff;
     }
   `]
 })

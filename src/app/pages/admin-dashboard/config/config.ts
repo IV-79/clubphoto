@@ -2,6 +2,7 @@ import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ConfigService, CategorieConfig } from '../../../services/config.service';
+import { ConfirmService } from '../../../services/confirm.service';
 import { PHOTO_CATEGORIES } from '../../../models/photo.model';
 
 function toSlug(label: string): string {
@@ -19,6 +20,7 @@ function toSlug(label: string): string {
 })
 export class AdminConfig implements OnInit {
   private configService = inject(ConfigService);
+  private confirmService = inject(ConfirmService);
 
   categories = signal<CategorieConfig[]>([]);
   sortedCategories = computed(() =>
@@ -48,8 +50,10 @@ export class AdminConfig implements OnInit {
     this.save();
   }
 
-  deleteCategorie(value: string) {
-    this.categories.update(list => list.filter(c => c.value !== value));
+  async deleteCategorie(cat: CategorieConfig) {
+    const ok = await this.confirmService.confirm(`Supprimer la catégorie « ${cat.label} » ?`);
+    if (!ok) return;
+    this.categories.update(list => list.filter(c => c.value !== cat.value));
     this.save();
   }
 

@@ -1,25 +1,30 @@
-import { Component, inject, signal, computed, HostListener } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { switchMap, of } from 'rxjs';
 import { ThemeService } from '../../../services/theme.service';
 import { AuthService } from '../../../services/auth.service';
+import { ConfirmService } from '../../../services/confirm.service';
 import { compressToJpeg } from '../../../utils/image-compress';
+import { readExif } from '../../../utils/exif-reader';
 import {
   ThemeMensuel, ThemeSoumission, ThemeVote,
   computeThemeStatut, THEME_STATUT_LABELS,
 } from '../../../models/theme.model';
+import { LightboxPhoto, PhotoLightboxCallbacks } from '../../../models/commentaire.model';
+import { PhotoLightbox } from '../../../components/photo-lightbox/photo-lightbox';
 
 @Component({
   selector: 'app-theme-detail',
-  imports: [RouterLink],
+  imports: [RouterLink, PhotoLightbox],
   templateUrl: './theme-detail.html',
   styleUrl: './theme-detail.css',
 })
 export class ThemeDetail {
-  private route        = inject(ActivatedRoute);
-  private themeService = inject(ThemeService);
-  private authService  = inject(AuthService);
+  private route          = inject(ActivatedRoute);
+  private themeService   = inject(ThemeService);
+  private authService    = inject(AuthService);
+  private confirmService = inject(ConfirmService);
 
   readonly id = this.route.snapshot.paramMap.get('id')!;
 
@@ -54,7 +59,7 @@ export class ThemeDetail {
   );
   mesVotes = toSignal(this.mesVotes$, { initialValue: [] as ThemeVote[] });
 
-  mesVotesIds    = computed(() => new Set(this.mesVotes().map(v => v.soumissionId)));
+  mesVotesIds     = computed(() => new Set(this.mesVotes().map(v => v.soumissionId)));
   nbVotesRestants = computed(() => (this.theme()?.maxVotes ?? 3) - this.mesVotes().length);
 
   // Tous les votes (résultats uniquement)
@@ -90,43 +95,80 @@ export class ThemeDetail {
   }
 
   // Lightbox
-  lightboxIndex = signal(-1);
+  lightboxIndex = signal<number | null>(null);
 
-  lightboxPhotos = computed(() =>
+  lightboxSoumissions = computed(() =>
     this.statut() === 'resultats' ? this.resultats() : this.soumissions()
   );
 
-  lightboxPhoto = computed(() => {
-    const i = this.lightboxIndex(), photos = this.lightboxPhotos();
-    return i >= 0 && i < photos.length ? photos[i] : null;
+  lightboxPhotos = computed((): LightboxPhoto[] => {
+    const showAuteur = this.statut() === 'resultats';
+    const uid = this.profile()?.uid;
+    return this.lightboxSoumissions().map(s => ({
+      id: s.id,
+      url: s.url,
+      nomAuteur: showAuteur || s.membreUid === uid ? s.nomMembre : '',
+      uploaderUid: s.membreUid,
+      likes: s.likes ?? [],
+      uploadedAt: s.uploadedAt,
+      exif: s.exif,
+    }));
   });
+
+  lightboxCallbacks = computed((): PhotoLightboxCallbacks => {
+    const themeId = this.id;
+    const uid = this.profile()?.uid ?? '';
+    return {
+      toggleLike: (soumId, liked) =>
+        this.themeService.toggleLikePhoto(themeId, soumId, uid, liked),
+      getComments: (soumId) =>
+        this.themeService.getCommentaires(themeId, soumId),
+      addComment: (soumId, texte, auteurUid, nomAuteur) =>
+        this.themeService.addCommentaire(themeId, soumId, { texte, auteurUid, nomAuteur }),
+      deleteComment: (soumId, commentId) =>
+        this.themeService.deleteCommentaire(themeId, soumId, commentId),
+      toggleCommentLike: (soumId, commentId, cUid, liked) =>
+        this.themeService.toggleLikeCommentaire(themeId, soumId, commentId, cUid, liked),
+      addReply: (soumId, commentId, texte, auteurUid, nomAuteur) =>
+        this.themeService.addReply(themeId, soumId, commentId, {
+          texte, auteurUid, nomAuteur, createdAt: new Date().toISOString(),
+        }),
+      deleteReply: (soumId, commentId, replyId, allReplies) =>
+        this.themeService.deleteReply(themeId, soumId, commentId, replyId, allReplies),
+    };
+  });
+
+  userName = computed(() => {
+    const p = this.profile();
+    if (!p) return '';
+    return `${p.prenom ?? ''} ${p.nom}`.trim();
+  });
+
+  isLiked(soum: ThemeSoumission): boolean {
+    const uid = this.profile()?.uid;
+    return !!uid && (soum.likes ?? []).includes(uid);
+  }
+
+  async toggleLike(soum: ThemeSoumission, event: Event) {
+    event.stopPropagation();
+    const uid = this.profile()?.uid;
+    if (!uid) return;
+    await this.themeService.toggleLikePhoto(this.id, soum.id, uid, this.isLiked(soum));
+  }
 
   openLightbox(soum: ThemeSoumission, $event?: MouseEvent) {
     $event?.stopPropagation();
-    const idx = this.lightboxPhotos().findIndex(s => s.id === soum.id);
+    const idx = this.lightboxSoumissions().findIndex(s => s.id === soum.id);
     if (idx >= 0) this.lightboxIndex.set(idx);
   }
 
-  closeLightbox() { this.lightboxIndex.set(-1); }
-  prevPhoto() { const i = this.lightboxIndex(); if (i > 0) this.lightboxIndex.set(i - 1); }
-  nextPhoto() {
-    const i = this.lightboxIndex();
-    if (i < this.lightboxPhotos().length - 1) this.lightboxIndex.set(i + 1);
-  }
-
-  @HostListener('document:keydown', ['$event'])
-  onKeydown(e: KeyboardEvent) {
-    if (this.lightboxIndex() < 0) return;
-    if (e.key === 'Escape') this.closeLightbox();
-    else if (e.key === 'ArrowLeft') this.prevPhoto();
-    else if (e.key === 'ArrowRight') this.nextPhoto();
-  }
+  closeLightbox() { this.lightboxIndex.set(null); }
 
   // Upload
-  uploading     = signal(false);
+  uploading      = signal(false);
   uploadProgress = signal(0);
-  dragOver      = signal(false);
-  uploadError   = signal('');
+  dragOver       = signal(false);
+  uploadError    = signal('');
 
   async onFileSelected(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0];
@@ -153,12 +195,13 @@ export class ThemeDetail {
     this.uploading.set(true);
     this.uploadError.set('');
     try {
-      const compressed = await compressToJpeg(file);
+      const [exif, compressed] = await Promise.all([readExif(file), compressToJpeg(file)]);
       await this.themeService.uploadSoumission(
         this.id,
         profile.uid,
         `${profile.prenom ?? ''} ${profile.nom}`.trim(),
         compressed,
+        exif,
         pct => this.uploadProgress.set(pct)
       );
       this.uploadProgress.set(0);
@@ -170,6 +213,8 @@ export class ThemeDetail {
   }
 
   async supprimerMaSoumission(soum: ThemeSoumission) {
+    const ok = await this.confirmService.confirm('Retirer cette photo du thème définitivement ?');
+    if (!ok) return;
     await this.themeService.deleteSoumission(this.id, soum.id, soum.storagePath);
   }
 

@@ -80,6 +80,11 @@
               <div class="vote-card" [class.own-card]="isOwn">
                 <img [src]="soum.url" class="vote-thumb" loading="lazy" alt="">
                 <button class="btn-expand" title="Plein écran" (click)="openLightbox(soum, $event)">⤢</button>
+                <button class="card-heart" [class.liked]="isLiked(soum)"
+                  (click)="toggleLike(soum, $event)"
+                  [title]="isLiked(soum) ? 'Retirer le like' : 'J\'aime'">
+                  ♥ @if ((soum.likes?.length ?? 0) > 0) { {{ soum.likes!.length }} }
+                </button>
                 @if (isOwn) {
                   <div class="vote-footer">
                     <span class="footer-own">Ma photo</span>
@@ -134,6 +139,11 @@
 
                 <img [src]="soum.url" class="vote-thumb" loading="lazy" alt="">
                 <button class="btn-expand" title="Plein écran" (click)="openLightbox(soum, $event)">⤢</button>
+                <button class="card-heart" [class.liked]="isLiked(soum)"
+                  (click)="toggleLike(soum, $event)"
+                  [title]="isLiked(soum) ? 'Retirer le like' : 'J\'aime'">
+                  ♥ @if ((soum.likes?.length ?? 0) > 0) { {{ soum.likes!.length }} }
+                </button>
 
                 <div class="vote-footer">
                   @if (isOwn) {
@@ -178,6 +188,11 @@
                 </div>
                 <img [src]="soum.url" class="result-thumb" loading="lazy" alt="">
                 <button class="btn-expand" title="Plein écran" (click)="openLightbox(soum, $event)">⤢</button>
+                <button class="card-heart" [class.liked]="isLiked(soum)"
+                  (click)="toggleLike(soum, $event)"
+                  [title]="isLiked(soum) ? 'Retirer le like' : 'J\'aime'">
+                  ♥ @if ((soum.likes?.length ?? 0) > 0) { {{ soum.likes!.length }} }
+                </button>
                 <div class="result-footer">
                   <span class="result-name">{{ soum.nomMembre }}</span>
                   <span class="result-votes">{{ votes }} vote{{ votes > 1 ? 's' : '' }}</span>
@@ -193,21 +208,15 @@
 
 </div>
 
-<!-- Lightbox -->
-@if (lightboxPhoto(); as lb) {
-  <div class="lb-backdrop" (click)="closeLightbox()">
-    <button class="lb-close" (click)="$event.stopPropagation(); closeLightbox()">✕</button>
-    <button class="lb-nav lb-prev" (click)="$event.stopPropagation(); prevPhoto()" [disabled]="lightboxIndex() === 0">‹</button>
-    <div class="lb-content" (click)="$event.stopPropagation()">
-      <img [src]="lb.url" class="lb-img" alt="">
-      <div class="lb-meta">
-        @if (statut() === 'resultats') {
-          <span class="lb-author">{{ lb.nomMembre }}</span>
-          <span class="lb-sep">·</span>
-        }
-        <span class="lb-counter">{{ lightboxIndex() + 1 }} / {{ lightboxPhotos().length }}</span>
-      </div>
-    </div>
-    <button class="lb-nav lb-next" (click)="$event.stopPropagation(); nextPhoto()" [disabled]="lightboxIndex() === lightboxPhotos().length - 1">›</button>
-  </div>
+<!-- Lightbox universelle -->
+@if (lightboxIndex() !== null && lightboxPhotos().length > 0) {
+  <app-photo-lightbox
+    [photos]="lightboxPhotos()"
+    [callbacks]="lightboxCallbacks()"
+    [startIndex]="lightboxIndex()!"
+    [userUid]="profile()?.uid ?? null"
+    [userName]="userName()"
+    [canInteract]="!!profile()"
+    (closed)="closeLightbox()"
+  />
 }

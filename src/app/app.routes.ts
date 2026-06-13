@@ -26,6 +26,10 @@ import { MembresGalerie } from './pages/galeries/membres-galerie/membres-galerie
 import { MembreDetail } from './pages/galeries/membre-detail/membre-detail';
 import { ThemesListe } from './pages/galeries/themes-liste/themes-liste';
 import { ThemeDetail } from './pages/galeries/theme-detail/theme-detail';
+import { SortiesListe } from './pages/galeries/sorties-liste/sorties-liste';
+import { SortieDetail } from './pages/galeries/sortie-detail/sortie-detail';
+import { SortieCreer } from './pages/membre/sorties/sortie-creer/sortie-creer';
+import { SortieGerer } from './pages/membre/sorties/sortie-gerer/sortie-gerer';
 import { MembresGuide } from './pages/membres/guide/guide';
 
 export const routes: Routes = [
@@ -52,6 +56,8 @@ export const routes: Routes = [
       { path: 'galeries/themesdumois/:id', component: ThemeDetail },
       { path: 'galeries/oneshots', component: OneShotsListe },
       { path: 'galeries/oneshots/:id', component: OneShotDetail },
+      { path: 'galeries/sorties', component: SortiesListe },
+      { path: 'galeries/sorties/:id', component: SortieDetail },
       { path: 'calendrier', component: Calendrier },
       { path: 'membres/guide', component: MembresGuide, canActivate: [memberGuard] },
       { path: 'contact', component: Contact },
@@ -79,6 +85,8 @@ export const routes: Routes = [
       { path: 'oneshots/creer', component: OneShotCreer },
       { path: 'oneshots/:id/gerer', component: OneShotGerer },
       { path: 'oneshots/:id/photos', component: OneShotPhotos },
+      { path: 'sorties/creer', component: SortieCreer },
+      { path: 'sorties/:id/gerer', component: SortieGerer },
       { path: '', redirectTo: 'portfolio', pathMatch: 'full' }
     ]
   },

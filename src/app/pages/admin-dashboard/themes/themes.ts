@@ -8,6 +8,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { ThemeService } from '../../../services/theme.service';
 import { AuthService } from '../../../services/auth.service';
+import { ConfirmService } from '../../../services/confirm.service';
 import { ThemeMensuel, computeThemeStatut, THEME_STATUT_LABELS } from '../../../models/theme.model';
 
 @Component({
@@ -23,10 +24,10 @@ import { ThemeMensuel, computeThemeStatut, THEME_STATUT_LABELS } from '../../../
 export class AdminThemes {
   private themeService = inject(ThemeService);
   private authService  = inject(AuthService);
+  private confirmService = inject(ConfirmService);
 
-  showForm       = signal(false);
-  saving         = signal(false);
-  confirmDeleteId = signal<string | null>(null);
+  showForm = signal(false);
+  saving   = signal(false);
 
   profile = toSignal(this.authService.currentUserProfile$);
   themes  = toSignal(this.themeService.getThemes(), { initialValue: [] as ThemeMensuel[] });
@@ -82,9 +83,10 @@ export class AdminThemes {
     this.showForm.set(false);
   }
 
-  async supprimer(id: string) {
-    await this.themeService.supprimerTheme(id);
-    this.confirmDeleteId.set(null);
+  async supprimer(theme: ThemeMensuel) {
+    const ok = await this.confirmService.confirm(`Supprimer le thème « ${theme.titre} » définitivement ?`);
+    if (!ok) return;
+    await this.themeService.supprimerTheme(theme.id);
   }
 
   statut(theme: ThemeMensuel) { return computeThemeStatut(theme); }

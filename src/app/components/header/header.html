@@ -45,6 +45,10 @@
               <mat-icon>photo_camera</mat-icon>
               Thèmes du mois
             </a>
+            <a mat-menu-item routerLink="/galeries/sorties">
+              <mat-icon>directions_walk</mat-icon>
+              Sorties Photo
+            </a>
             <a mat-menu-item routerLink="/galeries/oneshots">
               <mat-icon>camera_roll</mat-icon>
               OneShot
@@ -118,7 +122,7 @@
             </a>
             <a mat-menu-item routerLink="/admin/evenements">
               <mat-icon>event</mat-icon>
-              Événements
+              Réunions
             </a>
             <a mat-menu-item routerLink="/admin/themes">
               <mat-icon>photo_camera</mat-icon>
@@ -182,11 +186,12 @@
           <mat-icon class="toggle-arrow">{{ mobileOpenSection() === 'galeries' ? 'expand_less' : 'expand_more' }}</mat-icon>
         </button>
         @if (mobileOpenSection() === 'galeries') {
-          <ul class="mobile-sub">
-            <li><a routerLink="/galeries/membres" (click)="closeMobileMenu()">Portfolios des membres</a></li>
-            <li><a routerLink="/galeries/themesdumois" (click)="closeMobileMenu()">Thèmes du mois</a></li>
-            <li><a routerLink="/galeries/oneshots" (click)="closeMobileMenu()">OneShot</a></li>
-          </ul>
+        <ul class="mobile-sub">
+          <li><a routerLink="/galeries/membres" (click)="closeMobileMenu()">Portfolios des membres</a></li>
+          <li><a routerLink="/galeries/themesdumois" (click)="closeMobileMenu()">Thèmes du mois</a></li>
+          <li><a routerLink="/galeries/sorties" (click)="closeMobileMenu()">Sorties Photo</a></li>
+          <li><a routerLink="/galeries/oneshots" (click)="closeMobileMenu()">OneShot</a></li>
+        </ul>
         }
       </li>
 
@@ -234,7 +239,7 @@
             <ul class="mobile-sub">
               <li><a routerLink="/admin" (click)="closeMobileMenu()">Tableau de bord</a></li>
               <li><a routerLink="/admin/articles" (click)="closeMobileMenu()">Articles</a></li>
-              <li><a routerLink="/admin/evenements" (click)="closeMobileMenu()">Événements</a></li>
+              <li><a routerLink="/admin/evenements" (click)="closeMobileMenu()">Réunion</a></li>
               <li><a routerLink="/admin/themes" (click)="closeMobileMenu()">Thèmes</a></li>
               <li><a routerLink="/admin/membres" (click)="closeMobileMenu()">Membres</a></li>
               <li><a routerLink="/admin/config" (click)="closeMobileMenu()">Config site</a></li>

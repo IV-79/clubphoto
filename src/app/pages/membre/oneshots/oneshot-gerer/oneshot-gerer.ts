@@ -5,6 +5,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { switchMap } from 'rxjs';
 import { OneShotService } from '../../../../services/oneshot.service';
 import { AuthService } from '../../../../services/auth.service';
+import { ConfirmService } from '../../../../services/confirm.service';
 import {
   OneShotTheme, OneShotStatut, ONESHOT_STATUT_LABELS
 } from '../../../../models/oneshot.model';
@@ -20,6 +21,7 @@ export class OneShotGerer implements OnInit {
   private router = inject(Router);
   private oneShotService = inject(OneShotService);
   private authService = inject(AuthService);
+  private confirmService = inject(ConfirmService);
 
   private id = this.route.snapshot.paramMap.get('id')!;
 
@@ -140,7 +142,9 @@ export class OneShotGerer implements OnInit {
     this.savingTheme.set(false);
   }
 
-  async deleteTheme(themeId: string) {
-    await this.oneShotService.deleteTheme(this.id, themeId);
+  async deleteTheme(theme: OneShotTheme) {
+    const ok = await this.confirmService.confirm(`Supprimer le thème « ${theme.nom} » définitivement ?`);
+    if (!ok) return;
+    await this.oneShotService.deleteTheme(this.id, theme.id);
   }
 }

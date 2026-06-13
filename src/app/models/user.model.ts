@@ -13,7 +13,6 @@ export interface UserProfile {
   px500?: string;
   flickr?: string;
   siteWeb?: string;
-  photoCouvertureUrl?: string;
   photoProfilUrl?: string;
   photoBandeauUrl?: string;
 }

@@ -5,19 +5,22 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { combineLatest, of, switchMap, map } from 'rxjs';
 import { EvenementService } from '../../services/evenement.service';
 import { OneShotService } from '../../services/oneshot.service';
+import { SortieService } from '../../services/sortie.service';
 import { AuthService } from '../../services/auth.service';
 import { Evenement, EvenementType, EVENEMENT_TYPES } from '../../models/evenement.model';
 import { OneShot, ONESHOT_STATUT_LABELS } from '../../models/oneshot.model';
+import { Sortie } from '../../models/sortie.model';
 
 const INIT = 3;
 const PAGE = 5;
 
 interface CalItem {
-  kind: 'event' | 'oneshot';
+  kind: 'event' | 'oneshot' | 'sortie';
   id: string;
   date: string;
   event?: Evenement;
   oneshot?: OneShot;
+  sortie?: Sortie;
 }
 
 @Component({
@@ -29,11 +32,12 @@ interface CalItem {
 export class Calendrier {
   private service = inject(EvenementService);
   private oneShotService = inject(OneShotService);
+  private sortieService = inject(SortieService);
   private authService = inject(AuthService);
 
   // --- Filtres ---
   types = EVENEMENT_TYPES;
-  filtre = signal<EvenementType | 'tous'>('tous');
+  filtre = signal<'tous' | EvenementType | 'oneshot' | 'sortie'>('tous');
   showPasses = signal(false);
 
   private limitAVenir = signal(INIT);
@@ -45,18 +49,26 @@ export class Calendrier {
   profile = toSignal(this.authService.currentUserProfile$);
   private publicOneShots$ = this.oneShotService.getPublicOneShots();
   private oneshots = toSignal(this.publicOneShots$, { initialValue: [] as OneShot[] });
+  private sorties = toSignal(this.sortieService.getSorties(), { initialValue: [] as Sortie[] });
 
-  // --- Items unifiés (événements + oneshots avec une date) ---
+  // --- Items unifiés (événements + oneshots + sorties avec une date) ---
   private filtresItems = computed((): CalItem[] => {
     const f = this.filtre();
-    const events: CalItem[] = (f === 'tous' ? this.tous() : this.tous().filter(e => e.type === (f as EvenementType)))
-      .map(e => ({ kind: 'event' as const, id: 'e.' + e.id, date: e.date, event: e }));
-    const shots: CalItem[] = (f === 'tous' || f === 'sortie')
-      ? this.oneshots()
-          .filter(os => !!os.date)
+    const showEvents  = f === 'tous' || f === 'reunion';
+    const showShots   = f === 'tous' || f === 'oneshot';
+    const showSorties = f === 'tous' || f === 'sortie';
+
+    const events: CalItem[] = showEvents
+      ? this.tous().map(e => ({ kind: 'event' as const, id: 'e.' + e.id, date: e.date, event: e }))
+      : [];
+    const shots: CalItem[] = showShots
+      ? this.oneshots().filter(os => !!os.date)
           .map(os => ({ kind: 'oneshot' as const, id: 'os.' + os.id, date: os.date!, oneshot: os }))
       : [];
-    return [...events, ...shots];
+    const sortieItems: CalItem[] = showSorties
+      ? this.sorties().map(s => ({ kind: 'sortie' as const, id: 's.' + s.id, date: s.date, sortie: s }))
+      : [];
+    return [...events, ...shots, ...sortieItems];
   });
 
   private aVenirAll = computed((): CalItem[] =>

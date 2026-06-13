@@ -102,10 +102,18 @@
             <div class="photo-card" (click)="openLightbox(i)">
               <img [src]="photo.url" [alt]="photo.titre" loading="lazy" class="photo-img">
               @if (photo.categorie) {
-                <span class="category-badge">{{ getCategorieLabel(photo.categorie) }}</span>
+                <span class="card-cat">{{ getCategorieLabel(photo.categorie) }}</span>
               }
+              <button class="btn-fs" title="Plein écran" (click)="$event.stopPropagation(); openLightbox(i)">⤢</button>
+              <button class="card-heart" [class.liked]="isLiked(photo)"
+                (click)="toggleLike(photo, $event)"
+                [title]="isLiked(photo) ? 'Retirer le like' : 'J\'aime'">
+                ♥ @if ((photo.likes?.length ?? 0) > 0) { {{ photo.likes!.length }} }
+              </button>
               <div class="photo-overlay">
-                <span class="photo-titre">{{ photo.titre }}</span>
+                <div class="overlay-bottom">
+                  <span class="photo-titre">{{ photo.titre }}</span>
+                </div>
               </div>
             </div>
           }
@@ -117,25 +125,15 @@
 
 </div>
 
-<!-- Lightbox -->
-@if (lightboxPhoto()) {
-  <div class="lightbox-backdrop" (click)="closeLightbox()">
-    <button class="lightbox-close" (click)="closeLightbox()">×</button>
-    <span class="lightbox-counter">{{ lightboxIndex() + 1 }} / {{ photos().length }}</span>
-
-    @if (lightboxIndex() > 0) {
-      <button class="lightbox-nav lightbox-prev" (click)="prevPhoto(); $event.stopPropagation()">&#8249;</button>
-    }
-
-    <div class="lightbox-content" (click)="$event.stopPropagation()">
-      <img [src]="lightboxPhoto()!.url" [alt]="lightboxPhoto()!.titre" class="lightbox-img">
-      @if (lightboxPhoto()!.titre) {
-        <p class="lightbox-caption">{{ lightboxPhoto()!.titre }}</p>
-      }
-    </div>
-
-    @if (lightboxIndex() < photos().length - 1) {
-      <button class="lightbox-nav lightbox-next" (click)="nextPhoto(); $event.stopPropagation()">&#8250;</button>
-    }
-  </div>
+<!-- Lightbox universelle -->
+@if (lightboxIndex() !== null && photos().length > 0) {
+  <app-photo-lightbox
+    [photos]="lightboxPhotos()"
+    [callbacks]="lightboxCallbacks()"
+    [startIndex]="lightboxIndex()!"
+    [userUid]="profile()?.uid ?? null"
+    [userName]="userName()"
+    [canInteract]="!!profile()"
+    (closed)="closeLightbox()"
+  />
 }

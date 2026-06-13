@@ -19,11 +19,25 @@ service cloud.firestore {
 
     // Photos du portfolio
     match /photos/{photoId} {
-      allow read: if resource.data.isPublic == true
-                  || (isLoggedIn() && resource.data.uid == request.auth.uid)
-                  || isAdmin();
+      // Le propriétaire peut toujours lire ses propres photos (getMyPhotos sans filtre de visibilité)
+      allow read: if resource.data.visibilite == 'public'
+                  || (isLoggedIn() && resource.data.visibilite == 'membre')
+                  || (isLoggedIn() && resource.data.uid == request.auth.uid);
       allow create: if isLoggedIn() && request.resource.data.uid == request.auth.uid;
-      allow update, delete: if isLoggedIn() && resource.data.uid == request.auth.uid;
+      // Propriétaire : tous les champs — autres membres connectés : likes seulement (atomique)
+      allow update: if isLoggedIn() && resource.data.uid == request.auth.uid;
+      allow update: if isLoggedIn(); // likes via arrayUnion/arrayRemove par les autres membres
+      allow delete: if isLoggedIn() && resource.data.uid == request.auth.uid;
+    }
+
+    match /photos/{photoId}/commentaires/{commentaireId} {
+      allow read: if true;
+      allow create: if isLoggedIn() && request.resource.data.auteurUid == request.auth.uid;
+      allow update: if isLoggedIn(); // likes et replies via arrayUnion/arrayRemove
+      allow delete: if isLoggedIn() && (
+        resource.data.auteurUid == request.auth.uid ||
+        get(/databases/$(database)/documents/photos/$(photoId)).data.uid == request.auth.uid
+      );
     }
 
     // Thèmes mensuels (lecture publique pour les galeries)
@@ -35,7 +49,18 @@ service cloud.firestore {
     match /themes/{themeId}/soumissions/{soumId} {
       allow read: if true;
       allow create: if isLoggedIn() && request.resource.data.membreUid == request.auth.uid;
+      allow update: if isLoggedIn() && resource.data.membreUid == request.auth.uid;
+      allow update: if isLoggedIn(); // likes via arrayUnion/arrayRemove par les autres membres
       allow delete: if isLoggedIn() && (resource.data.membreUid == request.auth.uid || isAdmin());
+    }
+
+    match /themes/{themeId}/soumissions/{soumId}/commentaires/{commentaireId} {
+      allow read: if true;
+      allow create: if isLoggedIn() && request.resource.data.auteurUid == request.auth.uid;
+      allow update: if isLoggedIn(); // likes et replies
+      allow delete: if isLoggedIn() && (
+        resource.data.auteurUid == request.auth.uid || isAdmin()
+      );
     }
 
     match /themes/{themeId}/votes/{voteId} {
@@ -66,18 +91,72 @@ service cloud.firestore {
 
     match /oneshots/{oneShotId}/inscriptions/{uid} {
       allow read: if true;
-      allow create, delete: if isLoggedIn() && request.auth.uid == uid;claude
+      allow create, delete: if isLoggedIn() && request.auth.uid == uid;
     }
 
     match /oneshots/{oneShotId}/photos/{photoId} {
       allow read: if true;
-      allow write: if isLoggedIn() &&
-        get(/databases/$(database)/documents/oneshots/$(oneShotId)).data.creatorUid == request.auth.uid;
+      allow create: if isLoggedIn();
+      allow update: if isLoggedIn(); // likes via arrayUnion/arrayRemove
+      allow delete: if isLoggedIn() && (
+        resource.data.membreUid == request.auth.uid ||
+        get(/databases/$(database)/documents/oneshots/$(oneShotId)).data.creatorUid == request.auth.uid
+      );
+    }
+
+    match /oneshots/{oneShotId}/photos/{photoId}/commentaires/{commentaireId} {
+      allow read: if true;
+      allow create: if isLoggedIn() && request.resource.data.auteurUid == request.auth.uid;
+      allow update: if isLoggedIn(); // likes et replies
+      allow delete: if isLoggedIn() && (
+        resource.data.auteurUid == request.auth.uid ||
+        get(/databases/$(database)/documents/oneshots/$(oneShotId)).data.creatorUid == request.auth.uid
+      );
     }
 
     match /oneshots/{oneShotId}/votes/{voteId} {
       allow read: if true;
       allow create, update: if isLoggedIn() && request.resource.data.voterUid == request.auth.uid;
+    }
+
+    // Sorties Photo (lecture publique, création membres connectés)
+    match /sorties/{sortieId} {
+      allow read: if true;
+      allow create: if isLoggedIn();
+      allow update: if isLoggedIn() && (
+        resource.data.organisateurUid == request.auth.uid || isAdmin()
+      );
+      allow delete: if isLoggedIn() && (
+        resource.data.organisateurUid == request.auth.uid || isAdmin()
+      );
+    }
+
+    match /sorties/{sortieId}/inscriptions/{uid} {
+      allow read: if true;
+      allow create: if isLoggedIn() && request.auth.uid == uid;
+      allow delete: if isLoggedIn() && (request.auth.uid == uid || isAdmin());
+    }
+
+    match /sorties/{sortieId}/photos/{photoId} {
+      allow read: if true;
+      allow create: if isLoggedIn();
+      allow update: if isLoggedIn(); // likes via arrayUnion/arrayRemove
+      allow delete: if isLoggedIn() && (
+        resource.data.uploaderUid == request.auth.uid ||
+        isAdmin() ||
+        get(/databases/$(database)/documents/sorties/$(sortieId)).data.organisateurUid == request.auth.uid
+      );
+    }
+
+    match /sorties/{sortieId}/photos/{photoId}/commentaires/{commentaireId} {
+      allow read: if true;
+      allow create: if isLoggedIn() && request.resource.data.auteurUid == request.auth.uid;
+      allow update: if isLoggedIn(); // likes et replies via arrayUnion/arrayRemove
+      allow delete: if isLoggedIn() && (
+        resource.data.auteurUid == request.auth.uid ||
+        isAdmin() ||
+        get(/databases/$(database)/documents/sorties/$(sortieId)).data.organisateurUid == request.auth.uid
+      );
     }
 
     // Config site (lecture publique pour le formulaire upload, écriture admin)

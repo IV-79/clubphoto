@@ -20,7 +20,7 @@
         <div class="category-row">
           <span class="cat-label">{{ cat.label }}</span>
           <span class="cat-value">{{ cat.value }}</span>
-          <button class="btn-delete" (click)="deleteCategorie(cat.value)" title="Supprimer">×</button>
+          <button class="btn-delete" (click)="deleteCategorie(cat)" title="Supprimer">×</button>
         </div>
       } @empty {
         <p class="empty-msg">Aucune catégorie. Ajoutez-en une ci-dessous.</p>

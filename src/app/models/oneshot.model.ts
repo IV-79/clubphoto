@@ -1,3 +1,5 @@
+import { PhotoExif } from './photo.model';
+
 export type OneShotStatut =
   'preparation' | 'inscription' | 'fermeture_inscriptions' | 'vote' | 'resultats';
 
@@ -40,6 +42,8 @@ export interface OneShotPhoto {
   nomMembre: string;
   themeId: string;
   uploadedAt: string;
+  likes?: string[];
+  exif?: PhotoExif;
 }
 
 export interface OneShotVote {

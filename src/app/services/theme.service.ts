@@ -1,11 +1,13 @@
 import { Injectable, inject, Injector, runInInjectionContext } from '@angular/core';
 import {
   Firestore, collection, collectionData, doc, docData,
-  addDoc, deleteDoc, setDoc, query, where, orderBy,
+  addDoc, deleteDoc, setDoc, updateDoc, query, where, orderBy, arrayUnion, arrayRemove,
 } from '@angular/fire/firestore';
 import { Storage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from '@angular/fire/storage';
 import { Observable } from 'rxjs';
 import { ThemeMensuel, ThemeSoumission, ThemeVote } from '../models/theme.model';
+import { PhotoExif } from '../models/photo.model';
+import { Commentaire, Reponse } from '../models/commentaire.model';
 
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
@@ -85,6 +87,7 @@ export class ThemeService {
     uid: string,
     nomMembre: string,
     file: File,
+    exif?: PhotoExif,
     onProgress?: (pct: number) => void
   ): Promise<void> {
     const storagePath = `themes/${themeId}/${uid}_${Date.now()}.jpg`;
@@ -101,7 +104,11 @@ export class ThemeService {
             const url = await getDownloadURL(storageRef);
             await addDoc(
               collection(this.firestore, 'themes', themeId, 'soumissions'),
-              { membreUid: uid, nomMembre, url, storagePath, uploadedAt: new Date().toISOString() }
+              {
+                membreUid: uid, nomMembre, url, storagePath,
+                uploadedAt: new Date().toISOString(),
+                ...(exif && Object.keys(exif).length ? { exif } : {}),
+              }
             );
             resolve();
           } catch (e) {
@@ -129,6 +136,65 @@ export class ThemeService {
   async deVoter(themeId: string, voterUid: string, soumissionId: string): Promise<void> {
     await deleteDoc(
       doc(this.firestore, 'themes', themeId, 'votes', `${voterUid}_${soumissionId}`)
+    );
+  }
+
+  // --- Likes ---
+
+  async toggleLikePhoto(themeId: string, soumissionId: string, uid: string, currentlyLiked: boolean): Promise<void> {
+    await updateDoc(doc(this.firestore, 'themes', themeId, 'soumissions', soumissionId), {
+      likes: currentlyLiked ? arrayRemove(uid) : arrayUnion(uid),
+    });
+  }
+
+  // --- Commentaires ---
+
+  getCommentaires(themeId: string, soumissionId: string): Observable<Commentaire[]> {
+    const q = query(
+      collection(this.firestore, `themes/${themeId}/soumissions/${soumissionId}/commentaires`),
+      orderBy('createdAt', 'asc')
+    );
+    return runInInjectionContext(this.injector, () =>
+      collectionData(q, { idField: 'id' })
+    ) as Observable<Commentaire[]>;
+  }
+
+  async addCommentaire(themeId: string, soumissionId: string, data: { texte: string; auteurUid: string; nomAuteur: string }): Promise<void> {
+    await runInInjectionContext(this.injector, () =>
+      addDoc(collection(this.firestore, `themes/${themeId}/soumissions/${soumissionId}/commentaires`), {
+        ...data, likes: [], replies: [], createdAt: new Date().toISOString(),
+      })
+    );
+  }
+
+  async deleteCommentaire(themeId: string, soumissionId: string, commentId: string): Promise<void> {
+    await runInInjectionContext(this.injector, () =>
+      deleteDoc(doc(this.firestore, `themes/${themeId}/soumissions/${soumissionId}/commentaires`, commentId))
+    );
+  }
+
+  async toggleLikeCommentaire(themeId: string, soumissionId: string, commentId: string, uid: string, currentlyLiked: boolean): Promise<void> {
+    await runInInjectionContext(this.injector, () =>
+      updateDoc(doc(this.firestore, `themes/${themeId}/soumissions/${soumissionId}/commentaires`, commentId), {
+        likes: currentlyLiked ? arrayRemove(uid) : arrayUnion(uid),
+      })
+    );
+  }
+
+  async addReply(themeId: string, soumissionId: string, commentId: string, reply: Omit<Reponse, 'id'>): Promise<void> {
+    const replyWithId: Reponse = { ...reply, id: `${Date.now()}_${Math.random().toString(36).slice(2)}` };
+    await runInInjectionContext(this.injector, () =>
+      updateDoc(doc(this.firestore, `themes/${themeId}/soumissions/${soumissionId}/commentaires`, commentId), {
+        replies: arrayUnion(replyWithId),
+      })
+    );
+  }
+
+  async deleteReply(themeId: string, soumissionId: string, commentId: string, replyId: string, allReplies: Reponse[]): Promise<void> {
+    await runInInjectionContext(this.injector, () =>
+      updateDoc(doc(this.firestore, `themes/${themeId}/soumissions/${soumissionId}/commentaires`, commentId), {
+        replies: allReplies.filter(r => r.id !== replyId),
+      })
     );
   }
 }

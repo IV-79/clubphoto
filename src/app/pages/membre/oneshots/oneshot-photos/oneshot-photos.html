@@ -125,18 +125,9 @@
         </div>
         <div class="photo-actions">
           <button class="btn-edit-photo" (click)="startEdit(photo)">✎</button>
-          <button class="btn-del-photo" (click)="confirmDeleteId.set(photo.id)">×</button>
+          <button class="btn-del-photo" (click)="deletePhoto(photo)">×</button>
         </div>
       </div>
-
-      <!-- Confirm delete -->
-      @if (confirmDeleteId() === photo.id) {
-        <div class="confirm-delete">
-          <span>Supprimer ?</span>
-          <button class="btn-yes" (click)="executeDelete(photo)" [disabled]="deleting()">Oui</button>
-          <button class="btn-no" (click)="confirmDeleteId.set(null)">Non</button>
-        </div>
-      }
 
     } @else {
       <!-- Mode édition -->

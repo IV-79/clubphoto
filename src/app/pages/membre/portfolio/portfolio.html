@@ -8,6 +8,8 @@
         <span>{{ photoCount() }} photo{{ photoCount() !== 1 ? 's' : '' }}</span>
         <span class="sep">·</span>
         <span>{{ publicCount() }} publique{{ publicCount() !== 1 ? 's' : '' }}</span>
+        <span class="sep">·</span>
+        <span>{{ membreCount() }} membres</span>
       </div>
     </div>
     <button class="btn-add" (click)="openUpload()">+ Ajouter une photo</button>
@@ -29,36 +31,32 @@
       @for (photo of photos(); track photo.id; let i = $index) {
         <div class="photo-card" (click)="openLightbox(i)">
           <img [src]="photo.url" [alt]="photo.titre" loading="lazy">
+          @if (photo.categorie) {
+            <span class="card-cat">{{ getCategorieLabel(photo.categorie) }}</span>
+          }
           <div class="photo-overlay" (click)="$event.stopPropagation()">
-            <span class="photo-title">{{ photo.titre }}</span>
-            <div class="photo-actions">
-              <button (click)="openEdit(photo)" title="Modifier" class="btn-icon">✎</button>
-              <button
-                (click)="toggleVisibility(photo)"
-                [title]="photo.isPublic ? 'Rendre privée' : 'Rendre publique'"
-                class="btn-icon">
-                {{ photo.isPublic ? 'Privé' : 'Public' }}
-              </button>
-              @if (photo.isPublic) {
+            <div class="overlay-top">
+              <button (click)="openLightbox(i)" class="btn-fs" title="Plein écran">⤢</button>
+            </div>
+            <div class="overlay-bottom">
+              <div class="overlay-row">
+                <span class="photo-title">{{ photo.titre }}</span>
+                @if (hasExif(photo.exif)) {
+                  <button (click)="exifPhoto.set(photo)" title="Infos EXIF" class="btn-fs btn-info">ⓘ</button>
+                }
+              </div>
+              <div class="overlay-row">
                 <button
-                  (click)="setCouverture(photo)"
-                  [class.btn-cover-active]="estCouverture(photo)"
-                  title="Utiliser comme photo de carte"
-                  class="btn-icon btn-cover">
-                  ★
+                  (click)="toggleVisibilite(photo)"
+                  [title]="visibiliteTitle(photo.visibilite)"
+                  class="btn-icon btn-vis vis-{{ photo.visibilite }}">
+                  {{ visibiliteLabel(photo.visibilite) }}
                 </button>
-              }
-              <button (click)="confirmDelete(photo)" title="Supprimer" class="btn-icon btn-delete">
-                Suppr.
-              </button>
+                <button (click)="openEdit(photo)" title="Modifier" class="btn-icon">✎</button>
+                <button (click)="deletePhoto(photo)" title="Supprimer" class="btn-icon btn-delete">Suppr.</button>
+              </div>
             </div>
           </div>
-          <span class="visibility-badge" [class.public]="photo.isPublic">
-            {{ photo.isPublic ? 'Public' : 'Privé' }}
-          </span>
-          @if (estCouverture(photo)) {
-            <span class="cover-badge">★ Couv.</span>
-          }
         </div>
       }
     </div>
@@ -100,9 +98,11 @@
               }
             </select>
           </label>
-          <label class="toggle-label">
-            <input type="checkbox" [(ngModel)]="uploadPublic">
-            <span>Rendre publique (visible dans les galeries du club)</span>
+          <label>Visibilité
+            <select [(ngModel)]="uploadVisibilite" class="vis-select">
+              <option value="public">Public — tout le monde peut voir</option>
+              <option value="membre">Membres — connectés seulement</option>
+            </select>
           </label>
         </div>
 
@@ -149,9 +149,11 @@
             }
           </select>
         </label>
-        <label class="toggle-label">
-          <input type="checkbox" [(ngModel)]="editPublic">
-          <span>Photo publique (visible dans les galeries du club)</span>
+        <label>Visibilité
+          <select [(ngModel)]="editVisibilite" class="vis-select">
+            <option value="public">Public — tout le monde peut voir</option>
+            <option value="membre">Membres — connectés seulement</option>
+          </select>
         </label>
       </div>
 
@@ -190,16 +192,36 @@
   </div>
 }
 
-<!-- Confirmation suppression -->
-@if (toDelete()) {
-  <div class="modal-backdrop" (click)="cancelDelete()">
-    <div class="modal modal-sm" (click)="$event.stopPropagation()">
-      <h2>Supprimer la photo ?</h2>
-      <p class="confirm-msg">« {{ toDelete()!.titre }} » sera supprimée définitivement.</p>
-      <div class="modal-actions">
-        <button class="btn-secondary" (click)="cancelDelete()">Annuler</button>
-        <button class="btn-danger" (click)="executeDelete()">Supprimer</button>
-      </div>
+<!-- Modal infos EXIF -->
+@if (exifPhoto()) {
+  @let e = exifPhoto()!.exif!;
+  <div class="modal-backdrop" (click)="exifPhoto.set(null)">
+    <div class="modal modal-exif" (click)="$event.stopPropagation()">
+      <button class="modal-close" (click)="exifPhoto.set(null)">×</button>
+      <h2>Infos de la photo</h2>
+      <p class="exif-titre">{{ exifPhoto()!.titre }}</p>
+
+      <dl class="exif-list">
+        @if (e.appareil) {
+          <dt>Appareil</dt><dd>{{ e.appareil }}</dd>
+        }
+        @if (e.objectif) {
+          <dt>Objectif</dt><dd>{{ e.objectif }}</dd>
+        }
+        @if (e.focale || e.ouverture || e.vitesse || e.iso) {
+          <dt>Réglages</dt>
+          <dd class="exif-settings">
+            @if (e.focale)    { <span>{{ e.focale }}mm</span> }
+            @if (e.ouverture) { <span>ƒ/{{ e.ouverture }}</span> }
+            @if (e.vitesse)   { <span>{{ e.vitesse }}s</span> }
+            @if (e.iso)       { <span>ISO {{ e.iso }}</span> }
+          </dd>
+        }
+        @if (e.dateCapture) {
+          <dt>Date de prise de vue</dt><dd>{{ formatDateCapture(e.dateCapture) }}</dd>
+        }
+      </dl>
     </div>
   </div>
 }
+
