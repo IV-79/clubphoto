@@ -35,15 +35,9 @@
             <span class="card-cat">{{ getCategorieLabel(photo.categorie) }}</span>
           }
           <div class="photo-overlay" (click)="$event.stopPropagation()">
-            <div class="overlay-top">
-              <button (click)="openLightbox(i)" class="btn-fs" title="Plein écran">⤢</button>
-            </div>
             <div class="overlay-bottom">
               <div class="overlay-row">
                 <span class="photo-title">{{ photo.titre }}</span>
-                @if (hasExif(photo.exif)) {
-                  <button (click)="exifPhoto.set(photo)" title="Infos EXIF" class="btn-fs btn-info">ⓘ</button>
-                }
               </div>
               <div class="overlay-row">
                 <button
@@ -89,6 +83,9 @@
         <div class="upload-form">
           <label>Titre
             <input type="text" [(ngModel)]="uploadTitre" placeholder="Titre de la photo">
+          </label>
+          <label>Description <span class="optional">(optionnel)</span>
+            <textarea [(ngModel)]="uploadDescription" rows="3" placeholder="Décrivez votre photo…"></textarea>
           </label>
           <label>Catégorie <span class="optional">(optionnel)</span>
             <select [(ngModel)]="uploadCategorie">
@@ -141,6 +138,9 @@
         <label>Titre
           <input type="text" [(ngModel)]="editTitre" placeholder="Titre de la photo">
         </label>
+        <label>Description <span class="optional">(optionnel)</span>
+          <textarea [(ngModel)]="editDescription" rows="3" placeholder="Décrivez votre photo…"></textarea>
+        </label>
         <label>Catégorie <span class="optional">(optionnel)</span>
           <select [(ngModel)]="editCategorie">
             <option value="">— Aucune catégorie —</option>
@@ -170,58 +170,15 @@
 }
 
 <!-- Lightbox -->
-@if (lightboxPhoto()) {
-  <div class="lightbox-backdrop" (click)="closeLightbox()">
-    <button class="lightbox-close" (click)="closeLightbox()">×</button>
-    <span class="lightbox-counter">{{ lightboxIndex() + 1 }} / {{ photos().length }}</span>
-
-    @if (lightboxIndex() > 0) {
-      <button class="lightbox-nav lightbox-prev" (click)="prevPhoto(); $event.stopPropagation()">&#8249;</button>
-    }
-
-    <div class="lightbox-content" (click)="$event.stopPropagation()">
-      <img [src]="lightboxPhoto()!.url" [alt]="lightboxPhoto()!.titre" class="lightbox-img">
-      @if (lightboxPhoto()!.titre) {
-        <p class="lightbox-caption">{{ lightboxPhoto()!.titre }}</p>
-      }
-    </div>
-
-    @if (lightboxIndex() < photos().length - 1) {
-      <button class="lightbox-nav lightbox-next" (click)="nextPhoto(); $event.stopPropagation()">&#8250;</button>
-    }
-  </div>
-}
-
-<!-- Modal infos EXIF -->
-@if (exifPhoto()) {
-  @let e = exifPhoto()!.exif!;
-  <div class="modal-backdrop" (click)="exifPhoto.set(null)">
-    <div class="modal modal-exif" (click)="$event.stopPropagation()">
-      <button class="modal-close" (click)="exifPhoto.set(null)">×</button>
-      <h2>Infos de la photo</h2>
-      <p class="exif-titre">{{ exifPhoto()!.titre }}</p>
-
-      <dl class="exif-list">
-        @if (e.appareil) {
-          <dt>Appareil</dt><dd>{{ e.appareil }}</dd>
-        }
-        @if (e.objectif) {
-          <dt>Objectif</dt><dd>{{ e.objectif }}</dd>
-        }
-        @if (e.focale || e.ouverture || e.vitesse || e.iso) {
-          <dt>Réglages</dt>
-          <dd class="exif-settings">
-            @if (e.focale)    { <span>{{ e.focale }}mm</span> }
-            @if (e.ouverture) { <span>ƒ/{{ e.ouverture }}</span> }
-            @if (e.vitesse)   { <span>{{ e.vitesse }}s</span> }
-            @if (e.iso)       { <span>ISO {{ e.iso }}</span> }
-          </dd>
-        }
-        @if (e.dateCapture) {
-          <dt>Date de prise de vue</dt><dd>{{ formatDateCapture(e.dateCapture) }}</dd>
-        }
-      </dl>
-    </div>
-  </div>
+@if (lightboxIndex() !== null) {
+  <app-photo-lightbox
+    [photos]="lightboxPhotos()"
+    [startIndex]="lightboxIndex()!"
+    [userUid]="profile()?.uid ?? null"
+    [userName]="userName()"
+    [canInteract]="!!profile()"
+    [isAdmin]="isAdmin()"
+    [callbacks]="lightboxCallbacks()"
+    (closed)="closeLightbox()" />
 }
 

@@ -19,7 +19,7 @@ export class PhotoService {
     file: File,
     uid: string,
     nomMembre: string,
-    meta: { titre: string; visibilite: PhotoVisibilite; categorie?: string; exif?: PhotoExif }
+    meta: { titre: string; description?: string; visibilite: PhotoVisibilite; categorie?: string; exif?: PhotoExif }
   ): Observable<UploadState> {
     return new Observable(observer => {
       const ext = file.name.split('.').pop() ?? 'jpg';
@@ -41,7 +41,7 @@ export class PhotoService {
               uid,
               nomMembre,
               titre: meta.titre.trim() || file.name.replace(/\.[^.]+$/, ''),
-              description: '',
+              description: meta.description?.trim() ?? '',
               url,
               visibilite: meta.visibilite,
               dateUpload: new Date().toISOString(),
@@ -110,10 +110,11 @@ export class PhotoService {
     );
   }
 
-  async updatePhotoMeta(photoId: string, data: { titre: string; visibilite: PhotoVisibilite; categorie: string }): Promise<void> {
+  async updatePhotoMeta(photoId: string, data: { titre: string; description: string; visibilite: PhotoVisibilite; categorie: string }): Promise<void> {
     await runInInjectionContext(this.injector, () =>
       updateDoc(doc(this.firestore, 'photos', photoId), {
         titre: data.titre,
+        description: data.description.trim(),
         visibilite: data.visibilite,
         categorie: data.categorie || deleteField(),
       })

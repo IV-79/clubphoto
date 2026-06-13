@@ -18,6 +18,12 @@ export const PHOTO_CATEGORIES: { value: PhotoCategorie; label: string }[] = [
 
 export type PhotoVisibilite = 'public' | 'membre';
 
+export interface PhotoGps {
+  lat: number;
+  lng: number;
+  alt?: number;
+}
+
 export interface PhotoExif {
   appareil?: string;
   objectif?: string;
@@ -26,6 +32,7 @@ export interface PhotoExif {
   vitesse?: string;
   iso?: number;
   dateCapture?: string;
+  gps?: PhotoGps;
 }
 
 export interface Photo {

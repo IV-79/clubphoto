@@ -125,18 +125,26 @@
     } @else {
       <div class="photos-grid">
         @for (photo of photos(); track photo.id; let i = $index) {
-          <div class="photo-card" (click)="openLightbox(i)">
-            <img [src]="photo.url" [alt]="photo.nomUploader" loading="lazy" class="photo-img" />
-            <button class="btn-fs" title="Plein écran" (click)="$event.stopPropagation(); openLightbox(i)">⤢</button>
-            <button class="card-heart" [class.liked]="isLiked(photo)"
-              (click)="toggleLike(photo, $event)"
-              [title]="isLiked(photo) ? 'Retirer le like' : 'J\'aime'">
-              <span class="hi">♥</span> @if (photo.likes.length > 0) { {{ photo.likes.length }} }
-            </button>
-            <div class="photo-overlay">
-              <div class="overlay-bottom">
+          @let isOwn = photo.uploaderUid === profile()?.uid;
+          <div class="photo-card" [class.own-card]="isOwn" (click)="openLightbox(i)">
+            <div class="photo-img-wrap">
+              <img [src]="photo.url" [alt]="photo.nomUploader" loading="lazy" class="photo-img" />
+              <button class="card-heart" [class.liked]="isLiked(photo)"
+                (click)="toggleLike(photo, $event)"
+                [title]="isLiked(photo) ? 'Retirer le like' : 'J\'aime'">
+                <span class="hi">♥</span> @if (photo.likes.length > 0) { {{ photo.likes.length }} }
+              </button>
+            </div>
+            <div class="photo-footer">
+              @if (isOwn) {
+                <span class="footer-own">Ma photo</span>
+                <button class="btn-del-sm" title="Supprimer" (click)="$event.stopPropagation(); supprimerPhoto(photo)">🗑</button>
+              } @else {
                 <span class="photo-name">{{ photo.nomUploader }}</span>
-              </div>
+                @if (isAdmin() || isOrganisateur()) {
+                  <button class="btn-del-sm btn-del-admin" title="Supprimer" (click)="$event.stopPropagation(); supprimerPhoto(photo)">🗑</button>
+                }
+              }
             </div>
           </div>
         }
@@ -158,6 +166,7 @@
     [userUid]="profile()?.uid ?? null"
     [userName]="userName()"
     [canInteract]="!!profile()"
+    [isAdmin]="isAdmin()"
     (closed)="closeLightbox()"
   />
 }

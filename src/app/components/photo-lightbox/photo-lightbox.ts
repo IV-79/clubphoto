@@ -1,6 +1,6 @@
 import {
   Component, signal, computed, effect,
-  input, output, HostListener, OnInit
+  input, output, HostListener, OnInit, OnDestroy
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
@@ -13,20 +13,30 @@ import { LightboxPhoto, Commentaire, PhotoLightboxCallbacks } from '../../models
   templateUrl: './photo-lightbox.html',
   styleUrl: './photo-lightbox.css',
 })
-export class PhotoLightbox implements OnInit {
+export class PhotoLightbox implements OnInit, OnDestroy {
   photos      = input.required<LightboxPhoto[]>();
   startIndex  = input<number>(0);
   userUid     = input<string | null>(null);
   userName    = input<string>('');
   canInteract = input<boolean>(false);
+  isAdmin     = input<boolean>(false);
+  anonyme     = input<boolean>(false);
   callbacks   = input.required<PhotoLightboxCallbacks>();
 
   closed = output<void>();
 
-  currentIdx = signal(0);
+  currentIdx   = signal(0);
+  fullscreen   = signal(false);
+  showFsHint   = signal(false);
+  private fsHintTimer?: ReturnType<typeof setTimeout>;
 
   ngOnInit() {
     this.currentIdx.set(this.startIndex());
+  }
+
+  ngOnDestroy() {
+    clearTimeout(this.fsHintTimer);
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
   }
 
   constructor() {
@@ -70,10 +80,36 @@ export class PhotoLightbox implements OnInit {
     this.replyingTo.set(null);
   }
 
+  openFullscreen() {
+    this.fullscreen.set(true);
+    this.showFsHint.set(true);
+    clearTimeout(this.fsHintTimer);
+    this.fsHintTimer = setTimeout(() => this.showFsHint.set(false), 3500);
+    document.documentElement.requestFullscreen?.().catch(() => {});
+  }
+
+  closeFullscreen() {
+    this.fullscreen.set(false);
+    this.showFsHint.set(false);
+    clearTimeout(this.fsHintTimer);
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+  }
+
+  @HostListener('document:fullscreenchange')
+  onFullscreenChange() {
+    if (!document.fullscreenElement && this.fullscreen()) {
+      this.fullscreen.set(false);
+      this.showFsHint.set(false);
+    }
+  }
+
   @HostListener('document:keydown', ['$event'])
   onKey(e: KeyboardEvent) {
     if ((e.target as HTMLElement).tagName === 'TEXTAREA') return;
-    if (e.key === 'Escape') this.closed.emit();
+    if (e.key === 'Escape') {
+      if (this.fullscreen()) { this.closeFullscreen(); return; }
+      this.closed.emit();
+    }
     if (e.key === 'ArrowLeft') this.prev();
     if (e.key === 'ArrowRight') this.next();
   }
@@ -147,17 +183,13 @@ export class PhotoLightbox implements OnInit {
   }
 
   canDeleteComment(auteurUid: string): boolean {
-    const cb = this.callbacks();
-    return !!cb.canDeletePhoto
-      ? (this.userUid() === auteurUid)
-      : (this.userUid() === auteurUid);
+    const uid = this.userUid();
+    const photoOwnerUid = this.currentPhoto()?.uploaderUid;
+    return uid === auteurUid || uid === photoOwnerUid || this.isAdmin();
   }
 
   canDeletePhoto(): boolean {
-    const cb = this.callbacks();
-    const photo = this.currentPhoto();
-    if (!photo || !cb.canDeletePhoto) return false;
-    return cb.canDeletePhoto(photo);
+    return this.isAdmin() && !!this.callbacks().deletePhoto;
   }
 
   async deleteCurrentPhoto() {
@@ -174,8 +206,14 @@ export class PhotoLightbox implements OnInit {
   hasExifData = computed((): boolean => {
     const exif = this.currentPhoto()?.exif;
     if (!exif) return false;
-    return !!(exif.appareil || exif.objectif || exif.focale || exif.ouverture || exif.vitesse || exif.iso || exif.dateCapture);
+    return !!(exif.appareil || exif.objectif || exif.focale || exif.ouverture || exif.vitesse || exif.iso || exif.dateCapture || exif.gps);
   });
+
+  gpsMapUrl(): string {
+    const gps = this.currentPhoto()?.exif?.gps;
+    if (!gps) return '';
+    return `https://www.google.com/maps?q=${gps.lat},${gps.lng}`;
+  }
 
   formatDateExif(iso: string): string {
     return new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });

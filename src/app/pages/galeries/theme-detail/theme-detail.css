@@ -218,16 +218,17 @@
 .btn-del-sm {
   background: none;
   border: none;
-  color: rgba(0,0,0,0.3);
+  color: rgba(160,30,30,0.6);
   cursor: pointer;
-  font-size: 0.7rem;
+  font-size: 0.9rem;
   padding: 2px 5px;
   border-radius: 3px;
   line-height: 1;
-  transition: color 0.15s;
+  transition: color 0.15s, background 0.15s;
   flex-shrink: 0;
 }
-.btn-del-sm:hover { color: #cc0000; }
+.btn-del-sm:hover { color: #cc0000; background: rgba(200,0,0,0.08); }
+.btn-del-sm.btn-del-admin { margin-left: auto; }
 
 .inline-link { color: #cc0000; text-decoration: underline; }
 .inline-link:hover { color: #aa0000; }
@@ -278,10 +279,10 @@
   position: relative;
 }
 
-.vote-card.clickable { cursor: pointer; }
-.vote-card.clickable:hover { border-color: rgba(0,0,0,0.15); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.vote-card { cursor: pointer; }
+.vote-card:hover { border-color: rgba(0,0,0,0.15); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
 .vote-card.voted { border-color: #1565c0; }
-.vote-card.own-card { border-color: rgba(0,0,0,0.1); cursor: default; }
+.vote-card.own-card { border-color: rgba(0,0,0,0.1); }
 
 .vote-thumb {
   width: 100%;
@@ -303,10 +304,15 @@
 
 .footer-own    { color: rgba(0,0,0,0.35); font-style: italic; }
 .footer-voted  { color: #1565c0; font-weight: 600; }
-.footer-sub    { color: rgba(0,0,0,0.28); font-size: 0.7rem; }
-.footer-action { color: rgba(0,0,0,0.35); }
-.footer-action.disabled { color: rgba(0,0,0,0.2); }
-.vote-card.clickable:hover .footer-action { color: rgba(0,0,0,0.65); }
+.footer-action {
+  background: none; border: none; padding: 0;
+  font-size: inherit; font-family: inherit;
+  cursor: pointer; color: rgba(0,0,0,0.4);
+}
+.footer-action:hover:not(:disabled) { color: rgba(0,0,0,0.7); }
+.footer-action:disabled { color: rgba(0,0,0,0.2); cursor: default; }
+.footer-action.footer-voted { color: #1565c0; font-weight: 600; }
+.vote-card:hover .footer-action { color: rgba(0,0,0,0.65); }
 
 /* ── Results grid ────────────────────────────── */
 
@@ -319,6 +325,7 @@
 .result-card {
   border-radius: 6px;
   overflow: hidden;
+  cursor: pointer;
   background: #f5f5f5;
   border: 2px solid transparent;
   position: relative;
@@ -377,21 +384,21 @@
   position: absolute;
   top: 6px;
   right: 6px;
-  background: rgba(0,0,0,0.45);
+  background: transparent;
   border: none;
-  color: rgba(255,255,255,0.8);
+  color: rgba(255,255,255,0.85);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.7);
   width: 26px;
   height: 26px;
-  border-radius: 3px;
-  font-size: 0.9rem;
+  font-size: 1.05rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 2;
-  transition: background 0.15s;
+  transition: color 0.15s, text-shadow 0.15s;
 }
-.btn-expand:hover { background: rgba(0,0,0,0.7); color: white; }
+.btn-expand:hover { color: white; text-shadow: 0 1px 6px rgba(0,0,0,0.9); }
 
 /* ♥ Heart — always visible, bottom-right (above footer) */
 .card-heart {

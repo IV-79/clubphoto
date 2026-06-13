@@ -39,6 +39,7 @@ export class ThemeDetail {
 
   authReady  = computed(() => this.profile() !== undefined);
   isLoggedIn = computed(() => !!this.profile());
+  isAdmin    = computed(() => this.profile()?.role === 'admin');
 
   mesSoumissions = computed(() =>
     this.soumissions().filter(s => s.membreUid === this.profile()?.uid)
@@ -212,8 +213,8 @@ export class ThemeDetail {
     }
   }
 
-  async supprimerMaSoumission(soum: ThemeSoumission) {
-    const ok = await this.confirmService.confirm('Retirer cette photo du thème définitivement ?');
+  async supprimerSoumission(soum: ThemeSoumission) {
+    const ok = await this.confirmService.confirm('Supprimer cette photo du thème définitivement ?');
     if (!ok) return;
     await this.themeService.deleteSoumission(this.id, soum.id, soum.storagePath);
   }

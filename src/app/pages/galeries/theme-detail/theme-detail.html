@@ -77,9 +77,8 @@
           <div class="vote-grid">
             @for (soum of soumissions(); track soum.id) {
               @let isOwn = soum.membreUid === profile()?.uid;
-              <div class="vote-card" [class.own-card]="isOwn">
+              <div class="vote-card" [class.own-card]="isOwn" (click)="openLightbox(soum)">
                 <img [src]="soum.url" class="vote-thumb" loading="lazy" alt="">
-                <button class="btn-expand" title="Plein écran" (click)="openLightbox(soum, $event)">⤢</button>
                 <button class="card-heart" [class.liked]="isLiked(soum)"
                   (click)="toggleLike(soum, $event)"
                   [title]="isLiked(soum) ? 'Retirer le like' : 'J\'aime'">
@@ -88,7 +87,11 @@
                 @if (isOwn) {
                   <div class="vote-footer">
                     <span class="footer-own">Ma photo</span>
-                    <button class="btn-del-sm" title="Supprimer" (click)="supprimerMaSoumission(soum)">✕</button>
+                    <button class="btn-del-sm" title="Supprimer" (click)="$event.stopPropagation(); supprimerSoumission(soum)">🗑</button>
+                  </div>
+                } @else if (isAdmin()) {
+                  <div class="vote-footer">
+                    <button class="btn-del-sm btn-del-admin" title="Supprimer (admin)" (click)="$event.stopPropagation(); supprimerSoumission(soum)">🗑</button>
                   </div>
                 }
               </div>
@@ -129,16 +132,13 @@
             @for (soum of soumissions(); track soum.id) {
               @let isVoted = mesVotesIds().has(soum.id);
               @let isOwn   = soum.membreUid === profile()?.uid;
-              @let canVote = isLoggedIn() && !isOwn;
 
               <div class="vote-card"
                 [class.voted]="isVoted"
                 [class.own-card]="isOwn"
-                [class.clickable]="canVote && !voting()"
-                (click)="canVote && !voting() ? toggleVote(soum.id) : null">
+                (click)="openLightbox(soum)">
 
                 <img [src]="soum.url" class="vote-thumb" loading="lazy" alt="">
-                <button class="btn-expand" title="Plein écran" (click)="openLightbox(soum, $event)">⤢</button>
                 <button class="card-heart" [class.liked]="isLiked(soum)"
                   (click)="toggleLike(soum, $event)"
                   [title]="isLiked(soum) ? 'Retirer le like' : 'J\'aime'">
@@ -148,13 +148,21 @@
                 <div class="vote-footer">
                   @if (isOwn) {
                     <span class="footer-own">Ma photo</span>
+                    <button class="btn-del-sm" title="Supprimer" (click)="$event.stopPropagation(); supprimerSoumission(soum)">🗑</button>
                   } @else if (isVoted) {
-                    <span class="footer-voted">✓ Mon vote</span>
-                    <span class="footer-sub">Retirer</span>
+                    <button class="footer-action footer-voted" (click)="$event.stopPropagation(); toggleVote(soum.id)">✓ Retirer</button>
+                    @if (isAdmin()) {
+                      <button class="btn-del-sm btn-del-admin" title="Supprimer (admin)" (click)="$event.stopPropagation(); supprimerSoumission(soum)">🗑</button>
+                    }
                   } @else if (isLoggedIn()) {
-                    <span class="footer-action" [class.disabled]="nbVotesRestants() <= 0">
+                    <button class="footer-action" [disabled]="nbVotesRestants() <= 0 || !!voting()" (click)="$event.stopPropagation(); toggleVote(soum.id)">
                       {{ nbVotesRestants() > 0 ? 'Voter' : '—' }}
-                    </span>
+                    </button>
+                    @if (isAdmin()) {
+                      <button class="btn-del-sm btn-del-admin" title="Supprimer (admin)" (click)="$event.stopPropagation(); supprimerSoumission(soum)">🗑</button>
+                    }
+                  } @else if (isAdmin()) {
+                    <button class="btn-del-sm btn-del-admin" title="Supprimer (admin)" (click)="$event.stopPropagation(); supprimerSoumission(soum)">🗑</button>
                   }
                 </div>
               </div>
@@ -182,12 +190,12 @@
               <div class="result-card"
                 [class.rank-1]="rank === 1"
                 [class.rank-2]="rank === 2"
-                [class.rank-3]="rank === 3">
+                [class.rank-3]="rank === 3"
+                (click)="openLightbox(soum)">
                 <div class="rank-badge" [class.gold]="rank === 1" [class.silver]="rank === 2" [class.bronze]="rank === 3">
                   {{ rank }}
                 </div>
                 <img [src]="soum.url" class="result-thumb" loading="lazy" alt="">
-                <button class="btn-expand" title="Plein écran" (click)="openLightbox(soum, $event)">⤢</button>
                 <button class="card-heart" [class.liked]="isLiked(soum)"
                   (click)="toggleLike(soum, $event)"
                   [title]="isLiked(soum) ? 'Retirer le like' : 'J\'aime'">
@@ -196,6 +204,9 @@
                 <div class="result-footer">
                   <span class="result-name">{{ soum.nomMembre }}</span>
                   <span class="result-votes">{{ votes }} vote{{ votes > 1 ? 's' : '' }}</span>
+                  @if (isAdmin()) {
+                    <button class="btn-del-sm btn-del-admin" title="Supprimer (admin)" (click)="$event.stopPropagation(); supprimerSoumission(soum)">🗑</button>
+                  }
                 </div>
               </div>
             }
@@ -217,6 +228,8 @@
     [userUid]="profile()?.uid ?? null"
     [userName]="userName()"
     [canInteract]="!!profile()"
+    [anonyme]="statut() === 'ouvert' || statut() === 'vote'"
+    [isAdmin]="profile()?.role === 'admin'"
     (closed)="closeLightbox()"
   />
 }

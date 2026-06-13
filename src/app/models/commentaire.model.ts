@@ -23,6 +23,7 @@ export interface LightboxPhoto {
   id: string;
   url: string;
   titre?: string;
+  description?: string;
   nomAuteur: string;
   uploaderUid?: string;
   likes: string[];

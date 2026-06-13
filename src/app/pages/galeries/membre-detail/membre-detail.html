@@ -104,7 +104,7 @@
               @if (photo.categorie) {
                 <span class="card-cat">{{ getCategorieLabel(photo.categorie) }}</span>
               }
-              <button class="btn-fs" title="Plein écran" (click)="$event.stopPropagation(); openLightbox(i)">⤢</button>
+              <button class="btn-fs" title="Infos" (click)="$event.stopPropagation(); openLightbox(i)">ⓘ</button>
               <button class="card-heart" [class.liked]="isLiked(photo)"
                 (click)="toggleLike(photo, $event)"
                 [title]="isLiked(photo) ? 'Retirer le like' : 'J\'aime'">
@@ -134,6 +134,7 @@
     [userUid]="profile()?.uid ?? null"
     [userName]="userName()"
     [canInteract]="!!profile()"
+    [isAdmin]="profile()?.role === 'admin'"
     (closed)="closeLightbox()"
   />
 }

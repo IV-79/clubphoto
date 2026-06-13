@@ -4,6 +4,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
 import { SortieService } from '../../../services/sortie.service';
 import { AuthService } from '../../../services/auth.service';
+import { ConfirmService } from '../../../services/confirm.service';
 import { Sortie, SortieImage } from '../../../models/sortie.model';
 import { LightboxPhoto, PhotoLightboxCallbacks } from '../../../models/commentaire.model';
 import { PhotoLightbox } from '../../../components/photo-lightbox/photo-lightbox';
@@ -30,6 +31,7 @@ export class SortieDetail {
   private route = inject(ActivatedRoute);
   private sortieService = inject(SortieService);
   private authService = inject(AuthService);
+  private confirmService = inject(ConfirmService);
 
   sortieId = this.route.snapshot.paramMap.get('id')!;
   profile = toSignal(this.authService.currentUserProfile$);
@@ -101,8 +103,7 @@ export class SortieDetail {
   lightboxCallbacks = computed((): PhotoLightboxCallbacks => {
     const sortieId = this.sortieId;
     const uid = this.profile()?.uid ?? '';
-    const canDel = (photo: LightboxPhoto) =>
-      this.isOrganisateur() || this.isAdmin() || photo.uploaderUid === uid;
+    const canDel = (_photo: LightboxPhoto) => this.isAdmin();
     return {
       toggleLike: (photoId, liked) =>
         this.sortieService.toggleLikePhoto(sortieId, photoId, uid, liked),
@@ -195,6 +196,12 @@ export class SortieDetail {
 
   clearDoneUploads() {
     this.uploads.update(u => u.filter(item => !item.done && !item.error));
+  }
+
+  async supprimerPhoto(photo: SortieImage) {
+    const ok = await this.confirmService.confirm('Supprimer cette photo définitivement ?');
+    if (!ok) return;
+    await this.sortieService.deletePhoto(this.sortieId, photo, this.sortie()?.photoCouvertureUrl);
   }
 
   openLightbox(index: number) { this.lightboxIndex.set(index); }

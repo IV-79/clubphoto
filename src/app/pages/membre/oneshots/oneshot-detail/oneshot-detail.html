@@ -91,18 +91,15 @@
                 @let isOwnPhoto  = isInscrit() && photo.membreUid === profile()?.uid;
                 @let isFaded     = !!myVoteByTheme()[group.theme.id] && !isSelected && !isOwnPhoto;
                 @let isVoting    = voting() === group.theme.id;
-                @let canVote     = isInscrit() && !isOwnPhoto;
 
                 <div
                   class="vote-card"
                   [class.selected]="isSelected"
                   [class.faded]="isFaded"
                   [class.own-photo]="isOwnPhoto"
-                  [class.clickable]="canVote"
-                  (click)="castVote(group.theme.id, photo.id)">
+                  (click)="openLightbox(photo)">
 
                   <img [src]="photo.url" class="vote-thumb" loading="lazy">
-                  <button class="btn-expand" title="Plein écran" (click)="openLightbox(photo, $event)">⤢</button>
                   <button class="card-heart" [class.liked]="isLiked(photo)"
                     (click)="toggleLike(photo, $event)"
                     [title]="isLiked(photo) ? 'Retirer le like' : 'J\'aime'">
@@ -122,11 +119,11 @@
                     } @else if (isOwnPhoto) {
                       <span class="footer-own">Ma photo</span>
                     } @else if (isSelected) {
-                      <span class="footer-voted">Mon vote</span>
+                      <button class="footer-action footer-voted" (click)="$event.stopPropagation(); castVote(group.theme.id, photo.id)">✓ Retirer</button>
                     } @else if (isVoting) {
                       <span class="footer-loading">…</span>
                     } @else {
-                      <span class="footer-action">Voter</span>
+                      <button class="footer-action" [disabled]="!!voting()" (click)="$event.stopPropagation(); castVote(group.theme.id, photo.id)">Voter</button>
                     }
                   </div>
                 </div>
@@ -157,12 +154,11 @@
             @for (photo of group.photos; track photo.id; let i = $index) {
               @let votes = voteCountByPhoto()[photo.id] ?? 0;
               @let rank = computeRank(group.photos, i);
-              <div class="result-card" [class.rank-1]="rank === 1" [class.rank-2]="rank === 2" [class.rank-3]="rank === 3">
+              <div class="result-card" [class.rank-1]="rank === 1" [class.rank-2]="rank === 2" [class.rank-3]="rank === 3" (click)="openLightbox(photo)">
                 <div class="rank-badge" [class.gold]="rank === 1" [class.silver]="rank === 2" [class.bronze]="rank === 3">
                   {{ rank }}
                 </div>
                 <img [src]="photo.url" class="result-thumb" loading="lazy">
-                <button class="btn-expand" title="Plein écran" (click)="openLightbox(photo, $event)">⤢</button>
                 <button class="card-heart" [class.liked]="isLiked(photo)"
                   (click)="toggleLike(photo, $event)"
                   [title]="isLiked(photo) ? 'Retirer le like' : 'J\'aime'">
