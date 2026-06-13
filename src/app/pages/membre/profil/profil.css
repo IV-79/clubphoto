@@ -9,7 +9,7 @@
 }
 
 .profil-header h1 {
-  color: white;
+  color: #1a1a1a;
   font-size: 1.8rem;
   font-weight: 300;
   letter-spacing: 1px;
@@ -17,7 +17,7 @@
 }
 
 .membre-depuis {
-  color: rgba(255,255,255,0.35);
+  color: rgba(0,0,0,0.38);
   font-size: 0.8rem;
   margin: 0;
   letter-spacing: 0.5px;
@@ -27,13 +27,13 @@
 .form-section {
   margin-bottom: 36px;
   padding-bottom: 36px;
-  border-bottom: 1px solid #2a2a2a;
+  border-bottom: 1px solid #e8e8e8;
 }
 
 .form-section:last-of-type { border-bottom: none; }
 
 .form-section h2 {
-  color: white;
+  color: #1a1a1a;
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 2px;
@@ -45,7 +45,7 @@
 }
 
 .section-hint {
-  color: rgba(255,255,255,0.35);
+  color: rgba(0,0,0,0.38);
   font-size: 0.8rem;
   margin: -8px 0 14px;
 }
@@ -67,7 +67,7 @@ label {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  color: rgba(255,255,255,0.55);
+  color: rgba(0,0,0,0.55);
   font-size: 0.8rem;
   letter-spacing: 0.5px;
 }
@@ -77,9 +77,9 @@ label.full { width: 100%; }
 input[type="text"],
 input[type="url"],
 textarea {
-  background: #111;
-  border: 1px solid #333;
-  color: white;
+  background: white;
+  border: 1px solid #d4d4d4;
+  color: #1a1a1a;
   padding: 10px 14px;
   border-radius: 4px;
   font-size: 0.9rem;
@@ -96,8 +96,8 @@ textarea:focus { border-color: #cc0000; }
 .input-prefix {
   display: flex;
   align-items: center;
-  background: #111;
-  border: 1px solid #333;
+  background: white;
+  border: 1px solid #d4d4d4;
   border-radius: 4px;
   overflow: hidden;
   transition: border-color 0.2s;
@@ -107,11 +107,11 @@ textarea:focus { border-color: #cc0000; }
 
 .prefix {
   padding: 10px 12px;
-  background: #1a1a1a;
-  color: rgba(255,255,255,0.3);
+  background: #f5f5f5;
+  color: rgba(0,0,0,0.38);
   font-size: 0.8rem;
   white-space: nowrap;
-  border-right: 1px solid #333;
+  border-right: 1px solid #d4d4d4;
 }
 
 .input-prefix input {
@@ -131,9 +131,9 @@ textarea:focus { border-color: #cc0000; }
 }
 
 .style-chip {
-  background: #222;
-  border: 1px solid #3a3a3a;
-  color: rgba(255,255,255,0.6);
+  background: #f2f2f2;
+  border: 1px solid #e0e0e0;
+  color: rgba(0,0,0,0.6);
   padding: 6px 14px;
   border-radius: 20px;
   font-size: 0.8rem;
@@ -143,14 +143,14 @@ textarea:focus { border-color: #cc0000; }
 }
 
 .style-chip:hover {
-  border-color: #666;
-  color: white;
+  border-color: #aaa;
+  color: #1a1a1a;
 }
 
 .style-chip.selected {
-  background: rgba(204,0,0,0.2);
+  background: rgba(204,0,0,0.08);
   border-color: #cc0000;
-  color: white;
+  color: #cc0000;
 }
 
 /* Actions */
@@ -163,12 +163,12 @@ textarea:focus { border-color: #cc0000; }
 }
 
 .feedback-ok {
-  color: #5de05d;
+  color: #2e7d32;
   font-size: 0.85rem;
 }
 
 .feedback-err {
-  color: #ff6b6b;
+  color: #cc0000;
   font-size: 0.85rem;
 }
 
@@ -194,11 +194,11 @@ textarea:focus { border-color: #cc0000; }
 .photos-profil-section {
   margin-top: 48px;
   padding-top: 36px;
-  border-top: 1px solid #2a2a2a;
+  border-top: 1px solid #e8e8e8;
 }
 
 .section-title-photos {
-  color: white;
+  color: #1a1a1a;
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 2px;
@@ -214,7 +214,7 @@ textarea:focus { border-color: #cc0000; }
   align-items: flex-start;
   gap: 24px;
   padding: 20px 0;
-  border-bottom: 1px solid #1e1e1e;
+  border-bottom: 1px solid #efefef;
 }
 
 .photo-upload-row-bandeau {
@@ -230,13 +230,13 @@ textarea:focus { border-color: #cc0000; }
 }
 
 .upload-title {
-  color: rgba(255,255,255,0.8);
+  color: rgba(0,0,0,0.8);
   font-size: 0.85rem;
   font-weight: 500;
 }
 
 .upload-hint {
-  color: rgba(255,255,255,0.3);
+  color: rgba(0,0,0,0.38);
   font-size: 0.75rem;
   line-height: 1.5;
 }
@@ -258,8 +258,8 @@ textarea:focus { border-color: #cc0000; }
   height: 64px;
   border-radius: 50%;
   overflow: hidden;
-  background: #1a1a1a;
-  border: 2px solid #333;
+  background: #f0f0f0;
+  border: 2px solid #e0e0e0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -276,7 +276,7 @@ textarea:focus { border-color: #cc0000; }
 .avatar-placeholder-sm {
   font-size: 1.4rem;
   font-weight: 300;
-  color: rgba(255,255,255,0.3);
+  color: rgba(0,0,0,0.25);
   letter-spacing: 1px;
   user-select: none;
 }
@@ -286,8 +286,8 @@ textarea:focus { border-color: #cc0000; }
   height: 56px;
   border-radius: 4px;
   overflow: hidden;
-  background: #1a1a1a;
-  border: 1px solid #333;
+  background: #f0f0f0;
+  border: 1px solid #e0e0e0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -302,15 +302,15 @@ textarea:focus { border-color: #cc0000; }
 }
 
 .bandeau-placeholder {
-  color: rgba(255,255,255,0.2);
+  color: rgba(0,0,0,0.3);
   font-size: 0.75rem;
   user-select: none;
 }
 
 .btn-photo-change {
-  background: #222;
-  border: 1px solid #444;
-  color: rgba(255,255,255,0.6);
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+  color: rgba(0,0,0,0.6);
   padding: 7px 16px;
   border-radius: 4px;
   font-size: 0.8rem;
@@ -320,8 +320,8 @@ textarea:focus { border-color: #cc0000; }
 }
 
 .btn-photo-change:hover:not(:disabled) {
-  border-color: #888;
-  color: white;
+  border-color: #aaa;
+  color: #1a1a1a;
 }
 
 .btn-photo-change:disabled { opacity: 0.4; cursor: not-allowed; }
@@ -333,8 +333,8 @@ textarea:focus { border-color: #cc0000; }
 
 .btn-photo-cancel {
   background: none;
-  border: 1px solid #444;
-  color: rgba(255,255,255,0.4);
+  border: 1px solid #ddd;
+  color: rgba(0,0,0,0.45);
   padding: 7px 14px;
   border-radius: 4px;
   font-size: 0.8rem;
@@ -343,7 +343,7 @@ textarea:focus { border-color: #cc0000; }
   transition: all 0.2s;
 }
 
-.btn-photo-cancel:hover:not(:disabled) { border-color: #888; color: white; }
+.btn-photo-cancel:hover:not(:disabled) { border-color: #aaa; color: #1a1a1a; }
 .btn-photo-cancel:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .btn-photo-save {
