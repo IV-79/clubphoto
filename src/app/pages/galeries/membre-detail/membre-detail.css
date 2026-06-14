@@ -25,7 +25,7 @@
 /* Hero bandeau */
 .cover-hero {
   position: relative;
-  height: 320px;
+  aspect-ratio: 4/1;
   border-radius: 8px;
   overflow: hidden;
   margin-bottom: 32px;
