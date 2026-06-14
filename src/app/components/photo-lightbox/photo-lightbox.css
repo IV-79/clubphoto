@@ -271,9 +271,10 @@
 
 .lb-comment-meta {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 0.5rem;
   margin-bottom: 0.2rem;
+  justify-content: space-between;
 }
 
 .lb-author {
@@ -322,10 +323,10 @@
   color: #555;
   font-size: 0.7rem;
   cursor: pointer;
-  margin-left: auto;
   padding: 0.1rem 0.3rem;
   border-radius: 3px;
   transition: color 0.2s;
+  flex-shrink: 0;
 }
 .lb-action-delete:hover { color: #e74c3c; }
 

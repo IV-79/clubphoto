@@ -126,6 +126,9 @@
                     <div class="lb-comment-meta">
                       <span class="lb-author">{{ c.nomAuteur }}</span>
                       <span class="lb-time-small">{{ formatTime(c.createdAt) }}</span>
+                      @if (canDeleteComment(c.auteurUid)) {
+                        <button class="lb-action-delete" (click)="deleteComment(c.id)" title="Supprimer">✕</button>
+                      }
                     </div>
                     <p class="lb-comment-text">{{ c.texte }}</p>
                     <div class="lb-comment-actions">
@@ -135,9 +138,6 @@
                       </button>
                       @if (canInteract()) {
                         <button class="lb-action-btn" (click)="startReply(c.id)">Répondre</button>
-                      }
-                      @if (canDeleteComment(c.auteurUid)) {
-                        <button class="lb-action-delete" (click)="deleteComment(c.id)" title="Supprimer">✕</button>
                       }
                     </div>
 
@@ -150,11 +150,11 @@
                               <div class="lb-comment-meta">
                                 <span class="lb-author">{{ r.nomAuteur }}</span>
                                 <span class="lb-time-small">{{ formatTime(r.createdAt) }}</span>
+                                @if (canDeleteComment(r.auteurUid)) {
+                                  <button class="lb-action-delete" (click)="deleteReply(c, r.id)" title="Supprimer">✕</button>
+                                }
                               </div>
                               <p class="lb-comment-text">{{ r.texte }}</p>
-                              @if (canDeleteComment(r.auteurUid)) {
-                                <button class="lb-action-delete" (click)="deleteReply(c, r.id)" title="Supprimer">✕</button>
-                              }
                             </div>
                           </div>
                         }
