@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { switchMap, of } from 'rxjs';
 import { LightboxPhoto, Commentaire, PhotoLightboxCallbacks } from '../../models/commentaire.model';
+import { ConfirmService } from '../../services/confirm.service';
 
 @Component({
   selector: 'app-photo-lightbox',
@@ -14,7 +15,8 @@ import { LightboxPhoto, Commentaire, PhotoLightboxCallbacks } from '../../models
   styleUrl: './photo-lightbox.css',
 })
 export class PhotoLightbox implements OnInit, OnDestroy {
-  private el = inject(ElementRef);
+  private el            = inject(ElementRef);
+  private confirmService = inject(ConfirmService);
   photos      = input.required<LightboxPhoto[]>();
   startIndex  = input<number>(0);
   userUid     = input<string | null>(null);
@@ -138,6 +140,8 @@ export class PhotoLightbox implements OnInit, OnDestroy {
   async deleteComment(commentId: string) {
     const photo = this.currentPhoto();
     if (!photo) return;
+    const ok = await this.confirmService.confirm('Supprimer ce commentaire ?');
+    if (!ok) return;
     await this.callbacks().deleteComment(photo.id, commentId);
   }
 
@@ -190,6 +194,8 @@ export class PhotoLightbox implements OnInit, OnDestroy {
   async deleteReply(c: Commentaire, replyId: string) {
     const photo = this.currentPhoto();
     if (!photo) return;
+    const ok = await this.confirmService.confirm('Supprimer cette réponse ?');
+    if (!ok) return;
     await this.callbacks().deleteReply(photo.id, c.id, replyId, c.replies);
   }
 
@@ -207,6 +213,8 @@ export class PhotoLightbox implements OnInit, OnDestroy {
     const photo = this.currentPhoto();
     const cb = this.callbacks();
     if (!photo || !cb.deletePhoto) return;
+    const ok = await this.confirmService.confirm('Supprimer cette photo définitivement ?');
+    if (!ok) return;
     await cb.deletePhoto(photo);
   }
 

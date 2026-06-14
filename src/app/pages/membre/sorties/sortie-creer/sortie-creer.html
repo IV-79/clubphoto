@@ -25,16 +25,11 @@
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="field-half">
-        <mat-label>Lieu</mat-label>
+        <mat-label>Lieu *</mat-label>
         <input matInput formControlName="lieu" placeholder="Ex: Parc de la Tête d'Or, Lyon" />
         <mat-icon matSuffix>place</mat-icon>
       </mat-form-field>
     </div>
-
-    <mat-form-field appearance="outline" class="field-half">
-      <mat-label>Nombre max de participants</mat-label>
-      <input matInput type="number" formControlName="maxParticipants" min="1" placeholder="Optionnel" />
-    </mat-form-field>
 
     <div class="checkboxes">
       <mat-checkbox formControlName="inscriptionObligatoire" color="primary">
@@ -48,10 +43,12 @@
       }
     </div>
 
-    <p class="lieu-hint">
-      <mat-icon class="hint-icon">info</mat-icon>
-      Si vous renseignez un lieu, un lien Google Maps sera généré automatiquement.
-    </p>
+    @if (inscriptionObligatoire) {
+      <mat-form-field appearance="outline" class="field-half">
+        <mat-label>Nombre max de participants</mat-label>
+        <input matInput type="number" formControlName="maxParticipants" min="1" placeholder="Optionnel" />
+      </mat-form-field>
+    }
 
     <div class="form-actions">
       <a routerLink="/galeries/sorties" class="btn-cancel">Annuler</a>

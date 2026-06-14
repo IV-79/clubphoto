@@ -166,17 +166,20 @@
 }
 
 .participant-chip {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: #333;
-  color: #e0e0e0;
-  font-size: 0.8rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background: #2a2a3e;
+  border: 1px solid #444;
+  border-radius: 20px;
+  padding: 3px 12px;
+  font-size: 0.82rem;
+  color: #ccc;
   cursor: default;
+  white-space: nowrap;
+}
+
+.participant-chip.me {
+  color: #7ab3e0;
+  border-color: #3a5a7a;
+  background: #1a2a3e;
 }
 
 /* ── Upload ── */

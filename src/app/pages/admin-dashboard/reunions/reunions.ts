@@ -7,26 +7,25 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { EvenementService } from '../../../services/evenement.service';
+import { ReunionService } from '../../../services/reunion.service';
 import { ConfirmService } from '../../../services/confirm.service';
-import { Evenement, EVENEMENT_TYPES } from '../../../models/evenement.model';
+import { Reunion } from '../../../models/reunion.model';
 
 @Component({
-  selector: 'app-evenements',
+  selector: 'app-reunions',
   imports: [
     ReactiveFormsModule,
     MatCardModule, MatButtonModule, MatIconModule,
     MatFormFieldModule, MatInputModule, MatDatepickerModule,
   ],
-  templateUrl: './evenements.html',
-  styleUrl: './evenements.css',
+  templateUrl: './reunions.html',
+  styleUrl: './reunions.css',
 })
-export class Evenements {
-  private service = inject(EvenementService);
+export class Reunions {
+  private service = inject(ReunionService);
   private confirmService = inject(ConfirmService);
 
-  types = EVENEMENT_TYPES;
-  evenements = toSignal(this.service.getEvenements(), { initialValue: [] as Evenement[] });
+  reunions = toSignal(this.service.getReunions(), { initialValue: [] as Reunion[] });
 
   showCreateForm = signal(false);
   editingId = signal<string | null>(null);
@@ -38,7 +37,6 @@ export class Evenements {
   private buildForm() {
     return new FormGroup({
       titre:       new FormControl('', { validators: [Validators.required], nonNullable: true }),
-      type:        new FormControl<'reunion'>('reunion', { validators: [Validators.required], nonNullable: true }),
       date:        new FormControl<Date | null>(null, [Validators.required]),
       lieu:        new FormControl('', { nonNullable: true }),
       description: new FormControl('', { nonNullable: true }),
@@ -60,20 +58,18 @@ export class Evenements {
       const v = this.createForm.getRawValue();
       await this.service.creer({
         titre: v.titre.trim(),
-        type: v.type,
         date: this.dateToString(v.date),
-        lieu: v.lieu.trim() || undefined,
-        description: v.description.trim() || undefined,
+        ...(v.lieu.trim() ? { lieu: v.lieu.trim() } : {}),
+        ...(v.description.trim() ? { description: v.description.trim() } : {}),
       });
-      this.createForm.reset({ type: 'reunion' });
+      this.createForm.reset();
       this.showCreateForm.set(false);
     } finally { this.saving.set(false); }
   }
 
-  startEdit(ev: Evenement) {
+  startEdit(ev: Reunion) {
     this.editForm.reset({
       titre: ev.titre,
-      type: ev.type,
       date: new Date(ev.date + 'T12:00:00'),
       lieu: ev.lieu ?? '',
       description: ev.description ?? '',
@@ -90,16 +86,15 @@ export class Evenements {
       const v = this.editForm.getRawValue();
       await this.service.modifier(id, {
         titre: v.titre.trim(),
-        type: v.type,
         date: this.dateToString(v.date),
-        lieu: v.lieu.trim() || undefined,
-        description: v.description.trim() || undefined,
+        ...(v.lieu.trim() ? { lieu: v.lieu.trim() } : {}),
+        ...(v.description.trim() ? { description: v.description.trim() } : {}),
       });
       this.editingId.set(null);
     } finally { this.saving.set(false); }
   }
 
-  async supprimer(ev: Evenement) {
+  async supprimer(ev: Reunion) {
     const ok = await this.confirmService.confirm(`Supprimer « ${ev.titre} » définitivement ?`);
     if (!ok) return;
     await this.service.supprimer(ev.id);
@@ -109,10 +104,6 @@ export class Evenements {
     return new Date(date + 'T12:00:00').toLocaleDateString('fr-FR', {
       weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
     });
-  }
-
-  labelType(type: string): string {
-    return this.types.find(t => t.value === type)?.label ?? type;
   }
 
   isPasse(date: string): boolean {

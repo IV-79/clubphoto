@@ -136,6 +136,11 @@ export class ThemeDetail {
         }),
       deleteReply: (soumId, commentId, replyId, allReplies) =>
         this.themeService.deleteReply(themeId, soumId, commentId, replyId, allReplies),
+      deletePhoto: async (lbPhoto) => {
+        const soum = this.soumissions().find(s => s.id === lbPhoto.id);
+        if (!soum) return;
+        await this.themeService.deleteSoumission(themeId, soum.id, soum.storagePath);
+      },
     };
   });
 

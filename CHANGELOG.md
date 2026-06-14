@@ -4,6 +4,17 @@
 
 ## En cours (alpha)
 
+### Améliorations
+- **Liste des sorties compacte** — les cartes sans photo de couverture n'affichent plus le placeholder 📷 (zone 16:9 vide). Le badge "À venir" / "Terminée" se place directement à côté du titre. Les cartes avec photo conservent leur mise en page actuelle.
+- **Page "Gérer une sortie" lisible** — le formulaire de modification utilisait des couleurs sombres (`#1a1a2e`) incompatibles avec le fond blanc du layout membre. Refonte en thème clair cohérent avec les autres pages de l'espace membre.
+- **Affichage participants unifié** — les sections inscription/participants de OneShot et Sortie photo utilisent maintenant le même layout et le même visuel : boîte sombre `#1a1a2e`, header "Participants N" + bouton sur la même ligne, chips noms complets, couleurs et boutons identiques entre les deux pages.
+- **Auto-inscription à la création** — l'organisateur d'une sortie photo (si inscription obligatoire) et le créateur d'un OneShot sont automatiquement inscrits lors de la création. Ils peuvent se désinscrire depuis la page de l'événement comme n'importe quel participant.
+- **Section "Réunions" (ex-Événements)** — modèle, service, page admin, route et collection Firestore tous renommés de `evenements` → `reunions`. Formulaire simplifié (sélecteur de type supprimé). Nav admin et header mis à jour.
+- **Calendrier accordéon** — les événements s'affichent en vue compacte (chiffre du jour + badge type + titre). Un clic ouvre les détails (lieu, description, date complète, actions). Un seul item ouvert à la fois.
+
+### Corrections
+- **Création de sortie** — le champ Lieu est maintenant obligatoire (formulaire bloquant + indicateur `*`). Le champ "Nombre max de participants" n'apparaît que lorsque l'inscription est obligatoire. Correction d'une erreur Firebase qui rejetait les valeurs `undefined` pour les champs optionnels.
+
 ### Ajouts
 - **Coordonnées GPS dans les EXIF** — si la photo contient des données GPS, un lien "Voir sur la carte" apparaît dans la fiche info (ouvre Google Maps au lieu de la prise de vue).
 - **Description des photos** — les membres peuvent ajouter une description libre lors de l'upload ou de la modification d'une photo du portfolio. Elle s'affiche dans la fiche info.

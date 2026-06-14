@@ -20,18 +20,19 @@
       <div class="sorties-grid">
         @for (sortie of aVenir(); track sortie.id) {
           <a [routerLink]="['/galeries/sorties', sortie.id]" class="sortie-card">
-            <div class="sortie-cover">
-              @if (sortie.photoCouvertureUrl) {
+            @if (sortie.photoCouvertureUrl) {
+              <div class="sortie-cover">
                 <img [src]="sortie.photoCouvertureUrl" [alt]="sortie.titre" class="cover-img" />
-              } @else {
-                <div class="cover-placeholder">
-                  <span class="cover-icon">📷</span>
-                </div>
-              }
-              <span class="sortie-status status-avenir">À venir</span>
-            </div>
+                <span class="sortie-status status-avenir">À venir</span>
+              </div>
+            }
             <div class="sortie-info">
-              <h3 class="sortie-titre">{{ sortie.titre }}</h3>
+              <div class="sortie-titre-row">
+                <h3 class="sortie-titre">{{ sortie.titre }}</h3>
+                @if (!sortie.photoCouvertureUrl) {
+                  <span class="sortie-status status-avenir">À venir</span>
+                }
+              </div>
               <div class="sortie-meta">
                 <span class="meta-date">📅 {{ formatDate(sortie.date) }}</span>
                 @if (sortie.lieu) {
@@ -60,18 +61,19 @@
       <div class="sorties-grid">
         @for (sortie of passees(); track sortie.id) {
           <a [routerLink]="['/galeries/sorties', sortie.id]" class="sortie-card sortie-card-passee">
-            <div class="sortie-cover">
-              @if (sortie.photoCouvertureUrl) {
+            @if (sortie.photoCouvertureUrl) {
+              <div class="sortie-cover">
                 <img [src]="sortie.photoCouvertureUrl" [alt]="sortie.titre" class="cover-img" />
-              } @else {
-                <div class="cover-placeholder">
-                  <span class="cover-icon">📷</span>
-                </div>
-              }
-              <span class="sortie-status status-passee">Terminée</span>
-            </div>
+                <span class="sortie-status status-passee">Terminée</span>
+              </div>
+            }
             <div class="sortie-info">
-              <h3 class="sortie-titre">{{ sortie.titre }}</h3>
+              <div class="sortie-titre-row">
+                <h3 class="sortie-titre">{{ sortie.titre }}</h3>
+                @if (!sortie.photoCouvertureUrl) {
+                  <span class="sortie-status status-passee">Terminée</span>
+                }
+              </div>
               <div class="sortie-meta">
                 <span class="meta-date">📅 {{ formatDate(sortie.date) }}</span>
                 @if (sortie.lieu) {

@@ -64,8 +64,8 @@
       @if (inscriptions().length > 0) {
         <div class="participants-row">
           @for (p of inscriptions(); track p.uid) {
-            <span class="participant-chip" [title]="p.nomMembre">
-              {{ p.nomMembre[0].toUpperCase() }}
+            <span class="participant-chip" [class.me]="p.uid === profile()?.uid">
+              {{ p.nomMembre }}
             </span>
           }
         </div>

@@ -3,7 +3,7 @@ import { LoginComponent } from './pages/login/login.component';
 import { RegisterComponent } from './pages/register/register.component';
 import { Overview } from './pages/admin-dashboard/overview/overview';
 import { Membres } from './pages/admin-dashboard/membres/membres';
-import { Evenements } from './pages/admin-dashboard/evenements/evenements';
+import { Reunions } from './pages/admin-dashboard/reunions/reunions';
 import { AdminConfig } from './pages/admin-dashboard/config/config';
 import { AdminArticles } from './pages/admin-dashboard/articles/articles';
 import { AdminThemes } from './pages/admin-dashboard/themes/themes';
@@ -68,7 +68,7 @@ export const routes: Routes = [
           { path: '', component: Overview },
           { path: 'articles', component: AdminArticles },
           { path: 'membres', component: Membres },
-          { path: 'evenements', component: Evenements },
+          { path: 'reunions', component: Reunions },
           { path: 'themes', component: AdminThemes },
           { path: 'config', component: AdminConfig },
         ]

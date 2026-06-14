@@ -34,7 +34,7 @@ export class SortieCreer {
     titre:                 new FormControl('', { validators: [Validators.required, Validators.minLength(3)], nonNullable: true }),
     description:           new FormControl('', { nonNullable: true }),
     date:                  new FormControl<Date | null>(null, [Validators.required]),
-    lieu:                  new FormControl('', { nonNullable: true }),
+    lieu:                  new FormControl('', { validators: [Validators.required], nonNullable: true }),
     maxParticipants:       new FormControl<number | null>(null),
     inscriptionObligatoire: new FormControl(true, { nonNullable: true }),
     uploadParticipantsOnly: new FormControl(true, { nonNullable: true }),
@@ -60,17 +60,22 @@ export class SortieCreer {
       const inscriptionObligatoire = v.inscriptionObligatoire;
       const uploadParticipantsOnly = inscriptionObligatoire ? v.uploadParticipantsOnly : false;
 
+      const nomOrganisateur = `${profile.prenom ?? ''} ${profile.nom}`.trim();
       const id = await this.sortieService.createSortie({
         titre: v.titre.trim(),
-        description: v.description.trim() || undefined,
         date: `${yyyy}-${mm}-${dd}`,
-        lieu: v.lieu.trim() || undefined,
-        maxParticipants: v.maxParticipants ?? undefined,
+        lieu: v.lieu.trim(),
         inscriptionObligatoire,
         uploadParticipantsOnly,
         organisateurUid: profile.uid,
-        nomOrganisateur: `${profile.prenom ?? ''} ${profile.nom}`.trim(),
+        nomOrganisateur,
+        ...(v.description.trim() ? { description: v.description.trim() } : {}),
+        ...(inscriptionObligatoire && v.maxParticipants != null ? { maxParticipants: v.maxParticipants } : {}),
       });
+
+      if (inscriptionObligatoire) {
+        await this.sortieService.inscrire(id, profile.uid, nomOrganisateur);
+      }
 
       this.router.navigate(['/galeries/sorties', id]);
     } finally {

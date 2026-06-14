@@ -87,7 +87,7 @@
 }
 
 /* Cards événement */
-.events-list { display: flex; flex-direction: column; gap: 12px; }
+.events-list { display: flex; flex-direction: column; gap: 6px; }
 
 .month-sep {
   font-size: 0.7rem;
@@ -113,9 +113,9 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 72px;
+  width: 64px;
   flex-shrink: 0;
-  padding: 16px 0;
+  padding: 10px 0;
 }
 
 .card-reunion  .card-date-col { background: #1976d2; }
@@ -124,26 +124,46 @@
 .card-oneshot  .card-date-col { background: #7e57c2; }
 
 .card-day {
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   font-weight: 700;
   color: white;
   line-height: 1;
 }
 
 
+.event-card { cursor: pointer; transition: box-shadow 0.15s; }
+.event-card:hover { box-shadow: 0 3px 10px rgba(0,0,0,0.15); }
+
 .card-body {
   flex: 1;
-  padding: 14px 18px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.card-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-height: 36px;
+}
+
+.expand-arrow {
+  margin-left: auto;
+  font-size: 0.6rem;
+  color: rgba(0,0,0,0.3);
+  flex-shrink: 0;
+}
+
+.card-detail {
   display: flex;
   flex-direction: column;
   gap: 4px;
-}
-
-.card-top {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
+  padding-top: 8px;
+  margin-top: 6px;
+  border-top: 1px solid rgba(0,0,0,0.07);
 }
 
 .type-badge {
@@ -170,7 +190,10 @@
 .card-lieu {
   font-size: 0.82rem;
   color: rgba(0,0,0,0.5);
+  text-decoration: none;
 }
+
+a.card-lieu:hover { color: #1565c0; text-decoration: underline; }
 
 .card-desc {
   margin: 4px 0 0;

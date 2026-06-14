@@ -27,13 +27,15 @@ export class OneShotCreer {
     const profile = this.profile();
     if (!profile || !this.titre.trim() || this.saving()) return;
     this.saving.set(true);
+    const nomCreateur = `${profile.prenom ?? ''} ${profile.nom}`.trim();
     const id = await this.oneShotService.create({
       titre: this.titre.trim(),
-      description: this.description.trim() || undefined,
-      date: this.date || undefined,
+      ...(this.description.trim() ? { description: this.description.trim() } : {}),
+      ...(this.date ? { date: this.date } : {}),
       creatorUid: profile.uid,
-      nomCreateur: `${profile.prenom ?? ''} ${profile.nom}`.trim(),
+      nomCreateur,
     });
+    await this.oneShotService.inscrire(id, profile.uid, nomCreateur);
     this.saving.set(false);
     this.router.navigate(['/membre/oneshots', id, 'gerer']);
   }

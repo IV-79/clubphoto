@@ -1,4 +1,4 @@
-<div class="evenements-page">
+<div class="reunions-page">
 
   <div class="page-header">
     <h2 class="page-title">Réunions</h2>
@@ -36,7 +36,7 @@
             <textarea matInput formControlName="description" rows="3"></textarea>
           </mat-form-field>
           <div class="form-actions">
-            <button mat-button type="button" (click)="showCreateForm.set(false); createForm.reset({type:'reunion'})">Annuler</button>
+            <button mat-button type="button" (click)="showCreateForm.set(false); createForm.reset()">Annuler</button>
             <button mat-raised-button color="primary" type="submit" [disabled]="createForm.invalid || saving()">
               {{ saving() ? 'Création…' : 'Créer' }}
             </button>
@@ -47,7 +47,7 @@
   }
 
   <!-- Empty state -->
-  @if (evenements().length === 0 && !showCreateForm()) {
+  @if (reunions().length === 0 && !showCreateForm()) {
     <mat-card><mat-card-content>
       <div class="empty-state">
         <mat-icon>event</mat-icon>
@@ -57,9 +57,9 @@
   }
 
   <!-- Liste -->
-  <div class="events-list">
-    @for (ev of evenements(); track ev.id) {
-      <mat-card class="event-card" [class.passe]="isPasse(ev.date)">
+  <div class="reunions-list">
+    @for (ev of reunions(); track ev.id) {
+      <mat-card class="reunion-card" [class.passe]="isPasse(ev.date)">
         <mat-card-content>
 
           @if (editingId() === ev.id) {
@@ -93,13 +93,12 @@
             </form>
 
           } @else {
-            <div class="event-header">
-              <div class="event-info">
-                <span class="type-badge" [class]="'badge-' + ev.type">{{ labelType(ev.type) }}</span>
-                <h3 class="event-titre">{{ ev.titre }}</h3>
-                @if (isPasse(ev.date)) { <span class="passe-badge">Passé</span> }
+            <div class="reunion-header">
+              <div class="reunion-info">
+                <h3 class="reunion-titre">{{ ev.titre }}</h3>
+                @if (isPasse(ev.date)) { <span class="passe-badge">Passée</span> }
               </div>
-              <div class="event-actions">
+              <div class="reunion-actions">
                 <button mat-icon-button (click)="startEdit(ev)" title="Modifier">
                   <mat-icon>edit</mat-icon>
                 </button>
@@ -108,12 +107,12 @@
                 </button>
               </div>
             </div>
-            <div class="event-meta">
+            <div class="reunion-meta">
               <span class="meta-date">{{ formatDate(ev.date) }}</span>
-              @if (ev.lieu) { <span class="meta-lieu">· {{ ev.lieu }}</span> }
+              @if (ev.lieu) { <span class="meta-lieu">· 📍 {{ ev.lieu }}</span> }
             </div>
             @if (ev.description) {
-              <p class="event-desc">{{ ev.description }}</p>
+              <p class="reunion-desc">{{ ev.description }}</p>
             }
           }
 

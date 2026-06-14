@@ -102,28 +102,33 @@
   object-fit: cover;
 }
 
-.cover-placeholder {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #0f0f1e;
-}
-
-.cover-icon { font-size: 2.5rem; opacity: 0.3; }
-
-.sortie-status {
+.sortie-cover .sortie-status {
   position: absolute;
   top: 0.6rem;
   right: 0.6rem;
+}
+
+.sortie-status {
+  display: inline-block;
   padding: 0.2rem 0.6rem;
   border-radius: 4px;
   font-size: 0.7rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
+
+.sortie-titre-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+
+.sortie-titre-row .sortie-titre { margin-bottom: 0; }
 
 .status-avenir { background: #1a6b3a; color: #5dba82; }
 .status-passee { background: #333; color: #999; }
@@ -131,7 +136,7 @@
 .sortie-info { padding: 1rem; }
 
 .sortie-titre {
-  margin: 0 0 0.6rem;
+  margin: 0;
   font-size: 1rem;
   font-weight: 600;
   color: #e0e0e0;

@@ -20,40 +20,43 @@
       }
     </div>
 
-    <!-- Inscription -->
-    @if (inscriptionOuverte() && !isCreator()) {
-      <section class="panel">
-        @if (!isInscrit()) {
-          <p class="ins-msg">Inscrivez-vous pour participer à cet événement.</p>
-          <button class="btn-inscrire" (click)="inscrire()" [disabled]="saving()">
-            {{ saving() ? 'En cours…' : 'Je participe' }}
-          </button>
-        } @else {
-          <p class="ins-msg ins-ok">Vous êtes inscrit à cet événement.</p>
-          <button class="btn-desinscrire" (click)="desinscrire()" [disabled]="saving()">
-            {{ saving() ? 'En cours…' : 'Me désinscrire' }}
-          </button>
-        }
-      </section>
-    }
-
-    @if (!inscriptionOuverte() && !isInscrit() && !isCreator() && event()!.statut === 'fermeture_inscriptions') {
-      <div class="panel panel-info">Les inscriptions sont fermées.</div>
-    }
-
-    <!-- Participants -->
-    @if (inscriptions().length > 0 && event()!.statut !== 'vote' && event()!.statut !== 'resultats') {
-      <section class="panel">
-        <h2 class="panel-title">Participants <span class="count">{{ inscriptions().length }}</span></h2>
-        <ul class="inscrits-list">
-          @for (ins of inscriptions(); track ins.uid) {
-            <li [class.me]="ins.uid === profile()?.uid">
-              {{ ins.nomMembre }}{{ ins.uid === profile()?.uid ? ' (vous)' : '' }}
-            </li>
+    <!-- Inscription + Participants -->
+    <section class="inscription-section">
+      <div class="inscription-header">
+        <h2 class="panel-title">
+          Participants <span class="count">{{ inscriptions().length }}</span>
+        </h2>
+        @if (profile()) {
+          @if (inscriptionOuverte() && (!isCreator() || isInscrit())) {
+            @if (isInscrit()) {
+              <button class="btn-desinscrire" (click)="desinscrire()" [disabled]="saving()">
+                ✓ Inscrit — Se désinscrire
+              </button>
+            } @else {
+              <button class="btn-inscrire" (click)="inscrire()" [disabled]="saving()">
+                {{ saving() ? '…' : 'Je participe' }}
+              </button>
+            }
+          } @else if (!inscriptionOuverte() && !isInscrit() && !isCreator() && event()!.statut === 'fermeture_inscriptions') {
+            <span class="closed-hint">Inscriptions fermées</span>
           }
-        </ul>
-      </section>
-    }
+        } @else {
+          @if (inscriptionOuverte()) {
+            <span class="login-hint">Connectez-vous pour vous inscrire</span>
+          }
+        }
+      </div>
+
+      @if (inscriptions().length > 0 && event()!.statut !== 'vote' && event()!.statut !== 'resultats') {
+        <div class="participants-row">
+          @for (ins of inscriptions(); track ins.uid) {
+            <span class="participant-name-chip" [class.me]="ins.uid === profile()?.uid">
+              {{ ins.nomMembre }}
+            </span>
+          }
+        </div>
+      }
+    </section>
 
     <!-- ── VOTE ─────────────────────────────────────── -->
     @if (event()!.statut === 'vote') {

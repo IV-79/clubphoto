@@ -36,80 +36,87 @@
           }
 
           @if (item.kind === 'event') {
-            <div class="event-card" [class]="'card-' + item.event!.type">
+            <div class="event-card" [class]="'card-' + item.event!.type" (click)="toggleExpand(item.id)">
               <div class="card-date-col">
                 <span class="card-day">{{ item.date | slice:8:10 }}</span>
               </div>
               <div class="card-body">
-                <div class="card-top">
+                <div class="card-summary">
                   <span class="type-badge" [class]="'badge-' + item.event!.type">{{ labelType(item.event!.type) }}</span>
                   <h3 class="card-titre">{{ item.event!.titre }}</h3>
+                  <span class="expand-arrow">{{ expandedId() === item.id ? '▲' : '▼' }}</span>
                 </div>
-                @if (item.event!.lieu) {
-                  <span class="card-lieu">📍 {{ item.event!.lieu }}</span>
+                @if (expandedId() === item.id) {
+                  <div class="card-detail">
+                    @if (item.event!.lieu) { <a class="card-lieu" [href]="mapsUrl(item.event!.lieu)" target="_blank" rel="noopener" (click)="$event.stopPropagation()">📍 {{ item.event!.lieu }}</a> }
+                    @if (item.event!.description) { <p class="card-desc">{{ item.event!.description }}</p> }
+                    <span class="card-date-full">{{ formatDate(item.date) }}</span>
+                  </div>
                 }
-                @if (item.event!.description) {
-                  <p class="card-desc">{{ item.event!.description }}</p>
-                }
-                <span class="card-date-full">{{ formatDate(item.date) }}</span>
               </div>
             </div>
+
           } @else if (item.kind === 'oneshot') {
-            <div class="event-card card-oneshot">
+            <div class="event-card card-oneshot" (click)="toggleExpand(item.id)">
               <div class="card-date-col">
                 <span class="card-day">{{ item.date | slice:8:10 }}</span>
               </div>
               <div class="card-body">
-                <div class="card-top">
+                <div class="card-summary">
                   <span class="type-badge badge-oneshot">OneShot</span>
                   <span class="os-statut-badge os-statut-{{ item.oneshot!.statut }}">{{ statutLabel(item.oneshot!.statut) }}</span>
                   <h3 class="card-titre">{{ item.oneshot!.titre }}</h3>
+                  <span class="expand-arrow">{{ expandedId() === item.id ? '▲' : '▼' }}</span>
                 </div>
-                @if (item.oneshot!.description) {
-                  <p class="card-desc">{{ item.oneshot!.description }}</p>
-                }
-                <span class="os-createur">Organisé par {{ item.oneshot!.nomCreateur }}</span>
-                <div class="os-actions-inline">
-                  @if (item.oneshot!.statut === 'inscription') {
-                    @if (profile()) {
-                      @if (!isInscrit(item.oneshot!.id)) {
-                        <button class="btn-os-inscrire" (click)="inscrire(item.oneshot!)" [disabled]="inscrisSaving() === item.oneshot!.id">
-                          {{ inscrisSaving() === item.oneshot!.id ? '…' : 'Je participe' }}
-                        </button>
-                      } @else {
-                        <span class="os-inscrit-label">✓ Inscrit</span>
-                        <button class="btn-os-desinscrire" (click)="desinscrire(item.oneshot!)" [disabled]="inscrisSaving() === item.oneshot!.id">
-                          Se désinscrire
-                        </button>
+                @if (expandedId() === item.id) {
+                  <div class="card-detail">
+                    @if (item.oneshot!.description) { <p class="card-desc">{{ item.oneshot!.description }}</p> }
+                    <span class="os-createur">Organisé par {{ item.oneshot!.nomCreateur }}</span>
+                    <div class="os-actions-inline" (click)="$event.stopPropagation()">
+                      @if (item.oneshot!.statut === 'inscription') {
+                        @if (profile()) {
+                          @if (!isInscrit(item.oneshot!.id)) {
+                            <button class="btn-os-inscrire" (click)="inscrire(item.oneshot!)" [disabled]="inscrisSaving() === item.oneshot!.id">
+                              {{ inscrisSaving() === item.oneshot!.id ? '…' : 'Je participe' }}
+                            </button>
+                          } @else {
+                            <span class="os-inscrit-label">✓ Inscrit</span>
+                            <button class="btn-os-desinscrire" (click)="desinscrire(item.oneshot!)" [disabled]="inscrisSaving() === item.oneshot!.id">
+                              Se désinscrire
+                            </button>
+                          }
+                        } @else {
+                          <a routerLink="/login" class="btn-os-login">Connexion pour s'inscrire</a>
+                        }
                       }
-                    } @else {
-                      <a routerLink="/login" class="btn-os-login">Connexion pour s'inscrire</a>
-                    }
-                  }
-                  <a [routerLink]="['/membre/oneshots', item.oneshot!.id]" class="btn-os-voir">Voir →</a>
-                </div>
-                <span class="card-date-full">{{ formatDate(item.date) }}</span>
+                      <a [routerLink]="['/galeries/oneshots', item.oneshot!.id]" class="btn-os-voir">Voir →</a>
+                    </div>
+                    <span class="card-date-full">{{ formatDate(item.date) }}</span>
+                  </div>
+                }
               </div>
             </div>
+
           } @else {
-            <div class="event-card card-sortie">
+            <div class="event-card card-sortie" (click)="toggleExpand(item.id)">
               <div class="card-date-col">
                 <span class="card-day">{{ item.date | slice:8:10 }}</span>
               </div>
               <div class="card-body">
-                <div class="card-top">
+                <div class="card-summary">
                   <span class="type-badge badge-sortie">Sortie photo</span>
                   <h3 class="card-titre">{{ item.sortie!.titre }}</h3>
+                  <span class="expand-arrow">{{ expandedId() === item.id ? '▲' : '▼' }}</span>
                 </div>
-                @if (item.sortie!.lieu) {
-                  <span class="card-lieu">📍 {{ item.sortie!.lieu }}</span>
+                @if (expandedId() === item.id) {
+                  <div class="card-detail">
+                    @if (item.sortie!.lieu) { <a class="card-lieu" [href]="mapsUrl(item.sortie!.lieu)" target="_blank" rel="noopener" (click)="$event.stopPropagation()">📍 {{ item.sortie!.lieu }}</a> }
+                    @if (item.sortie!.description) { <p class="card-desc">{{ item.sortie!.description }}</p> }
+                    <span class="os-createur">Organisé par {{ item.sortie!.nomOrganisateur }}</span>
+                    <a [routerLink]="['/galeries/sorties', item.sortie!.id]" class="btn-os-voir" (click)="$event.stopPropagation()">Voir →</a>
+                    <span class="card-date-full">{{ formatDate(item.date) }}</span>
+                  </div>
                 }
-                @if (item.sortie!.description) {
-                  <p class="card-desc">{{ item.sortie!.description }}</p>
-                }
-                <span class="os-createur">Organisé par {{ item.sortie!.nomOrganisateur }}</span>
-                <a [routerLink]="['/galeries/sorties', item.sortie!.id]" class="btn-os-voir">Voir →</a>
-                <span class="card-date-full">{{ formatDate(item.date) }}</span>
               </div>
             </div>
           }
@@ -138,51 +145,68 @@
           }
 
           @if (item.kind === 'event') {
-            <div class="event-card card-passe">
+            <div class="event-card card-passe" (click)="toggleExpand(item.id)">
               <div class="card-date-col">
                 <span class="card-day">{{ item.date | slice:8:10 }}</span>
               </div>
               <div class="card-body">
-                <div class="card-top">
+                <div class="card-summary">
                   <span class="type-badge badge-passe">{{ labelType(item.event!.type) }}</span>
                   <h3 class="card-titre">{{ item.event!.titre }}</h3>
+                  <span class="expand-arrow">{{ expandedId() === item.id ? '▲' : '▼' }}</span>
                 </div>
-                @if (item.event!.lieu) { <span class="card-lieu">📍 {{ item.event!.lieu }}</span> }
-                @if (item.event!.description) { <p class="card-desc">{{ item.event!.description }}</p> }
-                <span class="card-date-full">{{ formatDate(item.date) }}</span>
+                @if (expandedId() === item.id) {
+                  <div class="card-detail">
+                    @if (item.event!.lieu) { <a class="card-lieu" [href]="mapsUrl(item.event!.lieu)" target="_blank" rel="noopener" (click)="$event.stopPropagation()">📍 {{ item.event!.lieu }}</a> }
+                    @if (item.event!.description) { <p class="card-desc">{{ item.event!.description }}</p> }
+                    <span class="card-date-full">{{ formatDate(item.date) }}</span>
+                  </div>
+                }
               </div>
             </div>
+
           } @else if (item.kind === 'oneshot') {
-            <div class="event-card card-passe">
+            <div class="event-card card-passe" (click)="toggleExpand(item.id)">
               <div class="card-date-col">
                 <span class="card-day">{{ item.date | slice:8:10 }}</span>
               </div>
               <div class="card-body">
-                <div class="card-top">
+                <div class="card-summary">
                   <span class="type-badge badge-passe">OneShot</span>
                   <h3 class="card-titre">{{ item.oneshot!.titre }}</h3>
+                  <span class="expand-arrow">{{ expandedId() === item.id ? '▲' : '▼' }}</span>
                 </div>
-                @if (item.oneshot!.description) { <p class="card-desc">{{ item.oneshot!.description }}</p> }
-                <span class="os-createur">Organisé par {{ item.oneshot!.nomCreateur }}</span>
-                <a [routerLink]="['/membre/oneshots', item.oneshot!.id]" class="btn-os-voir">Voir les résultats →</a>
-                <span class="card-date-full">{{ formatDate(item.date) }}</span>
+                @if (expandedId() === item.id) {
+                  <div class="card-detail">
+                    @if (item.oneshot!.description) { <p class="card-desc">{{ item.oneshot!.description }}</p> }
+                    <span class="os-createur">Organisé par {{ item.oneshot!.nomCreateur }}</span>
+                    <a [routerLink]="['/galeries/oneshots', item.oneshot!.id]" class="btn-os-voir" (click)="$event.stopPropagation()">Voir les résultats →</a>
+                    <span class="card-date-full">{{ formatDate(item.date) }}</span>
+                  </div>
+                }
               </div>
             </div>
+
           } @else {
-            <div class="event-card card-passe">
+            <div class="event-card card-passe" (click)="toggleExpand(item.id)">
               <div class="card-date-col">
                 <span class="card-day">{{ item.date | slice:8:10 }}</span>
               </div>
               <div class="card-body">
-                <div class="card-top">
+                <div class="card-summary">
                   <span class="type-badge badge-passe">Sortie photo</span>
                   <h3 class="card-titre">{{ item.sortie!.titre }}</h3>
+                  <span class="expand-arrow">{{ expandedId() === item.id ? '▲' : '▼' }}</span>
                 </div>
-                @if (item.sortie!.lieu) { <span class="card-lieu">📍 {{ item.sortie!.lieu }}</span> }
-                @if (item.sortie!.description) { <p class="card-desc">{{ item.sortie!.description }}</p> }
-                <span class="os-createur">Organisé par {{ item.sortie!.nomOrganisateur }}</span>
-                <a [routerLink]="['/galeries/sorties', item.sortie!.id]" class="btn-os-voir">Voir les photos →</a>
-                <span class="card-date-full">{{ formatDate(item.date) }}</span>
+                @if (expandedId() === item.id) {
+                  <div class="card-detail">
+                    @if (item.sortie!.lieu) { <a class="card-lieu" [href]="mapsUrl(item.sortie!.lieu)" target="_blank" rel="noopener" (click)="$event.stopPropagation()">📍 {{ item.sortie!.lieu }}</a> }
+                    @if (item.sortie!.description) { <p class="card-desc">{{ item.sortie!.description }}</p> }
+                    <span class="os-createur">Organisé par {{ item.sortie!.nomOrganisateur }}</span>
+                    <a [routerLink]="['/galeries/sorties', item.sortie!.id]" class="btn-os-voir" (click)="$event.stopPropagation()">Voir les photos →</a>
+                    <span class="card-date-full">{{ formatDate(item.date) }}</span>
+                  </div>
+                }
               </div>
             </div>
           }

@@ -4,6 +4,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { combineLatest, switchMap, startWith } from 'rxjs';
 import { AuthService } from '../../../services/auth.service';
 import { PhotoService } from '../../../services/photo.service';
+import { ConfirmService } from '../../../services/confirm.service';
 import { Photo, PHOTO_CATEGORIES } from '../../../models/photo.model';
 import { UserProfile } from '../../../models/user.model';
 import { LightboxPhoto, PhotoLightboxCallbacks } from '../../../models/commentaire.model';
@@ -16,9 +17,10 @@ import { PhotoLightbox } from '../../../components/photo-lightbox/photo-lightbox
   styleUrl: './membre-detail.css',
 })
 export class MembreDetail {
-  private route = inject(ActivatedRoute);
-  private authService = inject(AuthService);
-  private photoService = inject(PhotoService);
+  private route          = inject(ActivatedRoute);
+  private authService    = inject(AuthService);
+  private photoService   = inject(PhotoService);
+  private confirmService = inject(ConfirmService);
 
   private readonly categoriesMap = new Map(PHOTO_CATEGORIES.map(c => [c.value, c.label]));
 
@@ -99,6 +101,11 @@ export class MembreDetail {
         }),
       deleteReply: (photoId, commentId, replyId, allReplies) =>
         this.photoService.deleteReply(photoId, commentId, replyId, allReplies),
+      deletePhoto: async (lbPhoto) => {
+        const photo = this.photos().find(p => p.id === lbPhoto.id);
+        if (!photo) return;
+        await this.photoService.deletePhoto(photo);
+      },
     };
   });
 

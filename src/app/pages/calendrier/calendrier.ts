@@ -3,11 +3,11 @@ import { RouterLink } from '@angular/router';
 import { SlicePipe } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { combineLatest, of, switchMap, map } from 'rxjs';
-import { EvenementService } from '../../services/evenement.service';
+import { ReunionService } from '../../services/reunion.service';
 import { OneShotService } from '../../services/oneshot.service';
 import { SortieService } from '../../services/sortie.service';
 import { AuthService } from '../../services/auth.service';
-import { Evenement, EvenementType, EVENEMENT_TYPES } from '../../models/evenement.model';
+import { Reunion, REUNION_TYPES } from '../../models/reunion.model';
 import { OneShot, ONESHOT_STATUT_LABELS } from '../../models/oneshot.model';
 import { Sortie } from '../../models/sortie.model';
 
@@ -18,7 +18,7 @@ interface CalItem {
   kind: 'event' | 'oneshot' | 'sortie';
   id: string;
   date: string;
-  event?: Evenement;
+  event?: Reunion;
   oneshot?: OneShot;
   sortie?: Sortie;
 }
@@ -30,20 +30,20 @@ interface CalItem {
   styleUrl: './calendrier.css',
 })
 export class Calendrier {
-  private service = inject(EvenementService);
+  private service = inject(ReunionService);
   private oneShotService = inject(OneShotService);
   private sortieService = inject(SortieService);
   private authService = inject(AuthService);
 
   // --- Filtres ---
-  types = EVENEMENT_TYPES;
-  filtre = signal<'tous' | EvenementType | 'oneshot' | 'sortie'>('tous');
+  types = REUNION_TYPES;
+  filtre = signal<'tous' | 'reunion' | 'oneshot' | 'sortie'>('tous');
   showPasses = signal(false);
 
   private limitAVenir = signal(INIT);
   private limitPasses = signal(INIT);
 
-  private tous = toSignal(this.service.getEvenements(), { initialValue: [] as Evenement[] });
+  private tous = toSignal(this.service.getReunions(), { initialValue: [] as Reunion[] });
 
   // --- OneShots publics ---
   profile = toSignal(this.authService.currentUserProfile$);
@@ -96,6 +96,11 @@ export class Calendrier {
 
   loadMoreAVenir() { this.limitAVenir.update(n => n + PAGE); }
   loadMorePasses()  { this.limitPasses.update(n => n + PAGE); }
+
+  expandedId = signal<string | null>(null);
+  toggleExpand(id: string) {
+    this.expandedId.set(this.expandedId() === id ? null : id);
+  }
 
   // --- Inscriptions OneShot ---
   private inscriptionStatus$ = combineLatest([
@@ -160,6 +165,10 @@ export class Calendrier {
   }
 
   labelType(type: string): string {
-    return EVENEMENT_TYPES.find(t => t.value === type)?.label ?? type;
+    return REUNION_TYPES.find(t => t.value === type)?.label ?? type;
+  }
+
+  mapsUrl(lieu: string): string {
+    return `https://www.google.com/maps/search/?q=${encodeURIComponent(lieu)}`;
   }
 }

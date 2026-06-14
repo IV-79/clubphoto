@@ -69,8 +69,8 @@ service cloud.firestore {
       allow delete: if isLoggedIn() && resource.data.voterUid == request.auth.uid;
     }
 
-    // Événements (lecture publique, écriture admin)
-    match /evenements/{evenementId} {
+    // Réunions (lecture publique, écriture admin)
+    match /reunions/{reunionId} {
       allow read: if true;
       allow write: if isAdmin();
     }

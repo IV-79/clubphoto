@@ -1,4 +1,4 @@
-.evenements-page { max-width: 900px; }
+.reunions-page { max-width: 900px; }
 
 .page-header {
   display: flex;
@@ -18,10 +18,9 @@
 }
 
 .field-grow { flex: 1; min-width: 200px; }
-.field-type { width: 160px; flex-shrink: 0; }
 .field-date { width: 170px; flex-shrink: 0; }
 .full-width { width: 100%; }
-.optional { color: rgba(255,255,255,0.35); font-size: 0.75rem; }
+.optional { color: rgba(0,0,0,0.38); font-size: 0.75rem; }
 
 .form-actions {
   display: flex;
@@ -30,45 +29,32 @@
   margin-top: 4px;
 }
 
-.events-list { display: flex; flex-direction: column; gap: 12px; }
+.reunions-list { display: flex; flex-direction: column; gap: 12px; }
 
-.event-card.passe { opacity: 0.6; }
+.reunion-card.passe { opacity: 0.6; }
 
-.event-header {
+.reunion-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   gap: 12px;
 }
 
-.event-info {
+.reunion-info {
   display: flex;
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
 }
 
-.event-titre { margin: 0; font-size: 1rem; font-weight: 500; }
+.reunion-titre { margin: 0; font-size: 1rem; font-weight: 500; }
 
-.event-actions {
+.reunion-actions {
   display: flex;
   align-items: center;
   gap: 4px;
   flex-shrink: 0;
 }
-
-.type-badge {
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-  padding: 3px 10px;
-  border-radius: 12px;
-  white-space: nowrap;
-}
-
-.badge-reunion  { background: rgba(25,118,210,0.2);  color: #90caf9; }
-.badge-sortie   { background: rgba(245,124,0,0.2);   color: #ffcc80; }
 
 .passe-badge {
   font-size: 0.65rem;
@@ -77,29 +63,23 @@
   text-transform: uppercase;
   padding: 2px 8px;
   border-radius: 10px;
-  background: rgba(255,255,255,0.07);
-  color: rgba(255,255,255,0.3);
+  background: rgba(0,0,0,0.07);
+  color: rgba(0,0,0,0.38);
 }
 
-.event-meta {
+.reunion-meta {
   font-size: 0.8rem;
-  color: rgba(255,255,255,0.45);
+  color: rgba(0,0,0,0.45);
   margin-top: 6px;
 }
 
-.meta-lieu { margin-left: 4px; }
+.meta-lieu { margin-left: 6px; }
 
-.event-desc {
+.reunion-desc {
   margin: 8px 0 0;
   font-size: 0.875rem;
-  color: rgba(255,255,255,0.55);
+  color: rgba(0,0,0,0.6);
   line-height: 1.5;
-}
-
-.confirm-text {
-  font-size: 0.85rem;
-  color: #ef9a9a;
-  white-space: nowrap;
 }
 
 .empty-state {

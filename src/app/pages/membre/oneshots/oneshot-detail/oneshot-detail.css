@@ -99,56 +99,93 @@
   border-radius: 10px;
 }
 
-.ins-msg { color: rgba(0,0,0,0.55); font-size: 0.9rem; margin: 0 0 14px; }
-.ins-ok  { color: #2e7d32; }
+.inscription-section {
+  background: #1a1a2e;
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 20px 24px;
+  margin-bottom: 14px;
+}
+
+.inscription-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0;
+}
+
+.inscription-header:has(+ .participants-row) { margin-bottom: 12px; }
+
+.inscription-section .inscription-header .panel-title {
+  color: #e0e0e0;
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  margin: 0;
+}
+
+.inscription-section .count {
+  background: #333;
+  color: #aaa;
+}
+
+.participants-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.participant-name-chip {
+  background: #2a2a3e;
+  border: 1px solid #444;
+  border-radius: 20px;
+  padding: 3px 12px;
+  font-size: 0.82rem;
+  color: #ccc;
+}
+
+.participant-name-chip.me {
+  color: #7ab3e0;
+  border-color: #3a5a7a;
+  background: #1a2a3e;
+}
+
+.login-hint { font-size: 0.82rem; color: #777; }
+.closed-hint { font-size: 0.82rem; color: #777; }
 
 .btn-inscrire {
-  background: #cc0000;
+  background: #c0392b;
   color: white;
   border: none;
-  padding: 10px 22px;
+  padding: 7px 18px;
   border-radius: 4px;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 600;
   cursor: pointer;
   transition: background 0.15s;
 }
 
-.btn-inscrire:hover:not(:disabled) { background: #aa0000; }
+.btn-inscrire:hover:not(:disabled) { background: #a93226; }
 .btn-inscrire:disabled { opacity: 0.45; cursor: not-allowed; }
 
 .btn-desinscrire {
-  background: none;
-  border: 1px solid rgba(0,0,0,0.14);
-  color: rgba(0,0,0,0.4);
-  padding: 9px 18px;
+  background: transparent;
+  border: 1px solid #555;
+  color: #5dba82;
+  padding: 6px 14px;
   border-radius: 4px;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   cursor: pointer;
   transition: all 0.15s;
+  white-space: nowrap;
 }
 
-.btn-desinscrire:hover:not(:disabled) { border-color: rgba(0,0,0,0.26); color: rgba(0,0,0,0.65); }
+.btn-desinscrire:hover:not(:disabled) { border-color: #c0392b; color: #e74c3c; }
 .btn-desinscrire:disabled { opacity: 0.4; cursor: not-allowed; }
-
-.inscrits-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.inscrits-list li {
-  color: rgba(0,0,0,0.6);
-  font-size: 0.875rem;
-  padding: 6px 10px;
-  background: white;
-  border: 1px solid rgba(0,0,0,0.06);
-  border-radius: 4px;
-}
-
-.inscrits-list li.me { color: #1565c0; }
 
 /* ── Vote ─────────────────────────────────── */
 
