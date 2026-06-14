@@ -54,3 +54,5 @@ src/environments/environment.prod.ts
 
 # Claude Code memory
 .claude/
+/ClubPhoto-Tracking.xlsx
+/SITEMAP.md
