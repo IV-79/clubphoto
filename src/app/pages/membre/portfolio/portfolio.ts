@@ -50,7 +50,7 @@ export class MembrePortfolio implements OnInit {
   previewUrl = signal('');
   uploadTitre = '';
   uploadDescription = '';
-  uploadVisibilite: PhotoVisibilite = 'membre';
+  uploadVisibilite: PhotoVisibilite = 'public';
   uploadCategorie = '';
   private pendingExif: PhotoExif = {};
   uploading = signal(false);
@@ -164,7 +164,7 @@ export class MembrePortfolio implements OnInit {
     this.previewUrl.set('');
     this.uploadTitre = '';
     this.uploadDescription = '';
-    this.uploadVisibilite = 'membre';
+    this.uploadVisibilite = 'public';
     this.uploadCategorie = '';
     this.pendingExif = {};
     this.uploadProgress.set(0);
