@@ -56,19 +56,19 @@
           </mat-menu>
         </li>
 
-        <li>
-          <a routerLink="/calendrier" routerLinkActive="active">Calendrier</a>
-        </li>
-
         @if (isLoggedIn$ | async) {
         <li class="has-dropdown">
           <button [matMenuTriggerFor]="membresMenu" class="nav-dropdown-btn">
             Membres <mat-icon class="arrow-icon">expand_more</mat-icon>
           </button>
           <mat-menu #membresMenu="matMenu" class="nav-menu">
+            <a mat-menu-item routerLink="/calendrier">
+              <mat-icon>event</mat-icon>
+              Calendrier
+            </a>
             <a mat-menu-item routerLink="/membres/guide">
               <mat-icon>menu_book</mat-icon>
-              Guide des membres
+              Guide du site
             </a>
           </mat-menu>
         </li>
@@ -195,8 +195,6 @@
         }
       </li>
 
-      <li><a routerLink="/calendrier" (click)="closeMobileMenu()">Calendrier</a></li>
-
       @if (isLoggedIn$ | async) {
         <li class="mobile-has-sub">
           <button class="mobile-sub-toggle" (click)="toggleMobileSection('membres')">
@@ -205,7 +203,8 @@
           </button>
           @if (mobileOpenSection() === 'membres') {
             <ul class="mobile-sub">
-              <li><a routerLink="/membres/guide" (click)="closeMobileMenu()">Guide des membres</a></li>
+              <li><a routerLink="/calendrier" (click)="closeMobileMenu()">Calendrier</a></li>
+              <li><a routerLink="/membres/guide" (click)="closeMobileMenu()">Guide du site</a></li>
             </ul>
           }
         </li>

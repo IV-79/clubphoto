@@ -27,7 +27,7 @@ service cloud.firestore {
       // Propriétaire : tous les champs — autres membres connectés : likes seulement (atomique)
       allow update: if isLoggedIn() && resource.data.uid == request.auth.uid;
       allow update: if isLoggedIn(); // likes via arrayUnion/arrayRemove par les autres membres
-      allow delete: if isLoggedIn() && resource.data.uid == request.auth.uid;
+      allow delete: if isLoggedIn() && (resource.data.uid == request.auth.uid || isAdmin());
     }
 
     match /photos/{photoId}/commentaires/{commentaireId} {
@@ -36,7 +36,8 @@ service cloud.firestore {
       allow update: if isLoggedIn(); // likes et replies via arrayUnion/arrayRemove
       allow delete: if isLoggedIn() && (
         resource.data.auteurUid == request.auth.uid ||
-        get(/databases/$(database)/documents/photos/$(photoId)).data.uid == request.auth.uid
+        get(/databases/$(database)/documents/photos/$(photoId)).data.uid == request.auth.uid ||
+        isAdmin()
       );
     }
 
@@ -100,7 +101,8 @@ service cloud.firestore {
       allow update: if isLoggedIn(); // likes via arrayUnion/arrayRemove
       allow delete: if isLoggedIn() && (
         resource.data.membreUid == request.auth.uid ||
-        get(/databases/$(database)/documents/oneshots/$(oneShotId)).data.creatorUid == request.auth.uid
+        get(/databases/$(database)/documents/oneshots/$(oneShotId)).data.creatorUid == request.auth.uid ||
+        isAdmin()
       );
     }
 
@@ -110,7 +112,8 @@ service cloud.firestore {
       allow update: if isLoggedIn(); // likes et replies
       allow delete: if isLoggedIn() && (
         resource.data.auteurUid == request.auth.uid ||
-        get(/databases/$(database)/documents/oneshots/$(oneShotId)).data.creatorUid == request.auth.uid
+        get(/databases/$(database)/documents/oneshots/$(oneShotId)).data.creatorUid == request.auth.uid ||
+        isAdmin()
       );
     }
 
