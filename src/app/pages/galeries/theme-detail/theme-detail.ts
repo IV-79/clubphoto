@@ -6,7 +6,8 @@ import { ThemeService } from '../../../services/theme.service';
 import { AuthService } from '../../../services/auth.service';
 import { ConfirmService } from '../../../services/confirm.service';
 import { compressToJpeg } from '../../../utils/image-compress';
-import { readExif } from '../../../utils/exif-reader';
+import { readExifWithConsent } from '../../../utils/exif-reader';
+import { GpsConsentService } from '../../../services/gps-consent.service';
 import {
   ThemeMensuel, ThemeSoumission, ThemeVote,
   computeThemeStatut, THEME_STATUT_LABELS,
@@ -25,6 +26,7 @@ export class ThemeDetail {
   private themeService   = inject(ThemeService);
   private authService    = inject(AuthService);
   private confirmService = inject(ConfirmService);
+  private gpsConsentService = inject(GpsConsentService);
 
   readonly id = this.route.snapshot.paramMap.get('id')!;
 
@@ -201,7 +203,7 @@ export class ThemeDetail {
     this.uploading.set(true);
     this.uploadError.set('');
     try {
-      const [exif, compressed] = await Promise.all([readExif(file), compressToJpeg(file)]);
+      const [exif, compressed] = await Promise.all([readExifWithConsent(file, this.gpsConsentService), compressToJpeg(file)]);
       await this.themeService.uploadSoumission(
         this.id,
         profile.uid,

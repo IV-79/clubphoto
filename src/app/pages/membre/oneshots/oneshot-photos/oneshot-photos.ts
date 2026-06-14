@@ -7,7 +7,8 @@ import { OneShotService } from '../../../../services/oneshot.service';
 import { ConfirmService } from '../../../../services/confirm.service';
 import { OneShotPhoto, OneShotTheme, OneShotInscription } from '../../../../models/oneshot.model';
 import { compressToJpeg } from '../../../../utils/image-compress';
-import { readExif } from '../../../../utils/exif-reader';
+import { readExifWithConsent } from '../../../../utils/exif-reader';
+import { GpsConsentService } from '../../../../services/gps-consent.service';
 
 interface FileEntry {
   file: File;
@@ -27,6 +28,7 @@ export class OneShotPhotos {
   private oneShotService = inject(OneShotService);
   private route = inject(ActivatedRoute);
   private confirmService = inject(ConfirmService);
+  private gpsConsentService = inject(GpsConsentService);
 
   readonly id = this.route.snapshot.paramMap.get('id')!;
 
@@ -103,7 +105,7 @@ export class OneShotPhotos {
     this.uploadTotal.set(entries.length);
 
     for (const entry of entries) {
-      const [exif, compressed] = await Promise.all([readExif(entry.file), compressToJpeg(entry.file)]);
+      const [exif, compressed] = await Promise.all([readExifWithConsent(entry.file, this.gpsConsentService), compressToJpeg(entry.file)]);
       await new Promise<void>((resolve, reject) => {
         this.oneShotService.uploadPhoto(compressed, this.id, { ...meta, exif }).subscribe({
           complete: () => { this.uploadDone.update(n => n + 1); resolve(); },

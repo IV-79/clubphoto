@@ -2,10 +2,11 @@ import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { LoginModalComponent } from './components/login-modal/login-modal';
 import { ConfirmModal } from './components/confirm-modal/confirm-modal';
+import { GpsConsentModal } from './components/gps-consent-modal/gps-consent-modal';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, LoginModalComponent, ConfirmModal],
+  imports: [RouterOutlet, LoginModalComponent, ConfirmModal, GpsConsentModal],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

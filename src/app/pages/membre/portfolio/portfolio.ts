@@ -9,7 +9,8 @@ import { Photo, PhotoExif, PhotoVisibilite } from '../../../models/photo.model';
 import { LightboxPhoto, PhotoLightboxCallbacks } from '../../../models/commentaire.model';
 import { PhotoLightbox } from '../../../components/photo-lightbox/photo-lightbox';
 import { compressToJpeg } from '../../../utils/image-compress';
-import { readExif } from '../../../utils/exif-reader';
+import { readExifWithConsent } from '../../../utils/exif-reader';
+import { GpsConsentService } from '../../../services/gps-consent.service';
 import { switchMap, of } from 'rxjs';
 
 @Component({
@@ -25,6 +26,7 @@ export class MembrePortfolio implements OnInit {
   private authService = inject(AuthService);
   private configService = inject(ConfigService);
   private confirmService = inject(ConfirmService);
+  private gpsConsentService = inject(GpsConsentService);
 
   private profile$ = this.authService.currentUserProfile$;
   profile = toSignal(this.profile$);
@@ -148,7 +150,7 @@ export class MembrePortfolio implements OnInit {
   }
 
   private async setFile(file: File) {
-    this.pendingExif = await readExif(file);
+    this.pendingExif = await readExifWithConsent(file, this.gpsConsentService);
     const compressed = await compressToJpeg(file);
     this.selectedFile.set(compressed);
     this.uploadTitre = file.name.replace(/\.[^.]+$/, '');

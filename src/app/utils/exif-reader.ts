@@ -1,5 +1,6 @@
 import exifr from 'exifr';
 import { PhotoExif } from '../models/photo.model';
+import { GpsConsentService } from '../services/gps-consent.service';
 
 export async function readExif(file: File): Promise<PhotoExif> {
   try {
@@ -34,6 +35,15 @@ export async function readExif(file: File): Promise<PhotoExif> {
   } catch {
     return {};
   }
+}
+
+export async function readExifWithConsent(file: File, gpsService: GpsConsentService): Promise<PhotoExif> {
+  const exif = await readExif(file);
+  if (exif.gps) {
+    const keep = await gpsService.requestConsent();
+    if (!keep) delete exif.gps;
+  }
+  return exif;
 }
 
 export function hasExif(exif?: PhotoExif): boolean {

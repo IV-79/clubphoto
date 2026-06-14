@@ -5,6 +5,7 @@
 ## En cours (alpha)
 
 ### Améliorations
+- **Consentement GPS à l'upload** — si une photo contient des coordonnées GPS dans ses EXIF, une fenêtre demande "Garder l'info GPS ?" (défaut : Oui). En cas de refus, les coordonnées ne sont pas enregistrées. Fonctionne dans tous les contextes : portfolio, sortie photo, thème du mois, OneShot.
 - **Liste des sorties compacte** — les cartes sans photo de couverture n'affichent plus le placeholder 📷 (zone 16:9 vide). Le badge "À venir" / "Terminée" se place directement à côté du titre. Les cartes avec photo conservent leur mise en page actuelle.
 - **Page "Gérer une sortie" lisible** — le formulaire de modification utilisait des couleurs sombres (`#1a1a2e`) incompatibles avec le fond blanc du layout membre. Refonte en thème clair cohérent avec les autres pages de l'espace membre.
 - **Affichage participants unifié** — les sections inscription/participants de OneShot et Sortie photo utilisent maintenant le même layout et le même visuel : boîte sombre `#1a1a2e`, header "Participants N" + bouton sur la même ligne, chips noms complets, couleurs et boutons identiques entre les deux pages.

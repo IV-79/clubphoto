@@ -9,7 +9,8 @@ import { Sortie, SortieImage } from '../../../models/sortie.model';
 import { LightboxPhoto, PhotoLightboxCallbacks } from '../../../models/commentaire.model';
 import { PhotoLightbox } from '../../../components/photo-lightbox/photo-lightbox';
 import { compressToJpeg } from '../../../utils/image-compress';
-import { readExif } from '../../../utils/exif-reader';
+import { readExifWithConsent } from '../../../utils/exif-reader';
+import { GpsConsentService } from '../../../services/gps-consent.service';
 
 interface UploadTask {
   id: string;
@@ -32,6 +33,7 @@ export class SortieDetail {
   private sortieService = inject(SortieService);
   private authService = inject(AuthService);
   private confirmService = inject(ConfirmService);
+  private gpsConsentService = inject(GpsConsentService);
 
   sortieId = this.route.snapshot.paramMap.get('id')!;
   profile = toSignal(this.authService.currentUserProfile$);
@@ -169,7 +171,7 @@ export class SortieDetail {
       this.uploads.update(u => [...u, { id, name: file.name, progress: 0, done: false }]);
 
       try {
-        const [exif, compressed] = await Promise.all([readExif(file), compressToJpeg(file)]);
+        const [exif, compressed] = await Promise.all([readExifWithConsent(file, this.gpsConsentService), compressToJpeg(file)]);
         this.sortieService.uploadPhoto(compressed, this.sortieId, {
           uploaderUid: p.uid,
           nomUploader: this.userName(),
