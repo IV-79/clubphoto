@@ -11,6 +11,10 @@
 - **Clic sur carte = ouverture fiche info** — le bouton ⓘ est supprimé des cartes. Un simple clic sur n'importe quelle carte photo ouvre directement la fiche info. Dans les phases de vote (Thème du mois, OneShot), le vote se fait maintenant via un bouton explicite dans le bas de la carte.
 
 ### Améliorations
+- **Expérience mobile** — le menu de navigation est maintenant toujours visible en haut de l'écran (fixe) et peut défiler verticalement si les entrées dépassent la hauteur de l'écran. Le bandeau des portfolios membres conserve son ratio 4:1 sur toutes les tailles d'écran.
+- **Fiche info : scroll intelligent** — le titre reste fixe en haut, tout le reste (auteur, EXIF, commentaires) défile dans la colonne. Le champ de saisie reste ancré en bas pour rester accessible. Cliquer "Répondre" fait défiler automatiquement jusqu'au champ de réponse.
+- **Navigation par swipe** — dans la fiche info et en plein écran, glisser horizontalement sur la photo passe à la photo suivante ou précédente (pratique sur mobile).
+- **Anonymat des concours** — les boutons ♥ sont masqués sur les cartes photo pendant les phases *Ouvert* et *Vote* des Thèmes du mois et des OneShots, en plus des infos auteur déjà masquées.
 - **Refonte de la fiche info (lightbox)** — nouvelle mise en page en deux colonnes : photo à gauche, informations à droite (titre centré, auteur, description, likes, EXIF, commentaires). Les actions de suppression (admin) sont intégrées à la colonne infos.
 - **Icône ⓘ** — l'ancien bouton ⤢ devient ⓘ sur toutes les pages ; terminologie "infobox" adoptée dans le guide des membres.
 - **Boutons de suppression dans les grilles** — les admins peuvent supprimer une photo directement depuis la grille sans ouvrir la fiche info (Thèmes du mois toutes phases, Sorties Photo). Guide des membres mis à jour.

@@ -1,6 +1,6 @@
 import {
   Component, signal, computed, effect,
-  input, output, HostListener, OnInit, OnDestroy
+  input, output, HostListener, OnInit, OnDestroy, ElementRef, inject
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
@@ -14,6 +14,7 @@ import { LightboxPhoto, Commentaire, PhotoLightboxCallbacks } from '../../models
   styleUrl: './photo-lightbox.css',
 })
 export class PhotoLightbox implements OnInit, OnDestroy {
+  private el = inject(ElementRef);
   photos      = input.required<LightboxPhoto[]>();
   startIndex  = input<number>(0);
   userUid     = input<string | null>(null);
@@ -152,9 +153,26 @@ export class PhotoLightbox implements OnInit, OnDestroy {
     await this.callbacks().toggleCommentLike(photo.id, c.id, uid, this.isLikedComment(c));
   }
 
+  private touchStartX = 0;
+
+  onTouchStart(e: TouchEvent) {
+    this.touchStartX = e.touches[0].clientX;
+  }
+
+  onTouchEnd(e: TouchEvent) {
+    const delta = e.changedTouches[0].clientX - this.touchStartX;
+    if (Math.abs(delta) > 50) delta < 0 ? this.next() : this.prev();
+  }
+
   startReply(commentId: string) {
     this.replyingTo.set(this.replyingTo() === commentId ? null : commentId);
     this.newReply = '';
+    if (this.replyingTo() === commentId) {
+      setTimeout(() => {
+        const form = this.el.nativeElement.querySelector('.lb-reply-form');
+        form?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 0);
+    }
   }
 
   async submitReply(c: Commentaire) {
