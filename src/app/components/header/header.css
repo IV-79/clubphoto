@@ -310,7 +310,18 @@
 .mobile-connexion:hover { background: #ffffff; color: #c0392b; }
 
 @media (max-width: 768px) {
+  .site-header {
+    position: fixed;
+    left: 0;
+    right: 0;
+    width: 100%;
+  }
   .nav-links, .nav-actions { display: none; }
   .mobile-menu-btn { display: flex; }
-  .mobile-nav { display: block; }
+  .mobile-nav {
+    display: block;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
 }

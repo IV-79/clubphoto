@@ -16,6 +16,7 @@ import { Header } from '../../components/header/header';
       min-height: calc(100vh - 120px);
       background: #fff;
     }
+    @media (max-width: 768px) { .member-content { padding-top: 120px; } }
   `]
 })
 export class MemberLayout {}

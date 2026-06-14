@@ -21,6 +21,7 @@ import { Header } from '../../components/header/header';
   `,
   styles: [`
     .page-content { min-height: calc(100vh - 120px); }
+    @media (max-width: 768px) { .page-content { padding-top: 120px; } }
     .site-footer {
       background: #1a1a1a;
       color: rgba(255,255,255,0.45);

@@ -34,8 +34,8 @@
           @if (photo.categorie) {
             <span class="card-cat">{{ getCategorieLabel(photo.categorie) }}</span>
           }
-          <div class="photo-overlay" (click)="$event.stopPropagation()">
-            <div class="overlay-bottom">
+          <div class="photo-overlay">
+            <div class="overlay-bottom" (click)="$event.stopPropagation()">
               <div class="overlay-row">
                 <span class="photo-title">{{ photo.titre }}</span>
               </div>

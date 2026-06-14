@@ -27,15 +27,14 @@ export class PhotoLightbox implements OnInit, OnDestroy {
 
   currentIdx   = signal(0);
   fullscreen   = signal(false);
-  showFsHint   = signal(false);
-  private fsHintTimer?: ReturnType<typeof setTimeout>;
 
   ngOnInit() {
     this.currentIdx.set(this.startIndex());
+    document.body.style.overflow = 'hidden';
   }
 
   ngOnDestroy() {
-    clearTimeout(this.fsHintTimer);
+    document.body.style.overflow = '';
     if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
   }
 
@@ -82,16 +81,11 @@ export class PhotoLightbox implements OnInit, OnDestroy {
 
   openFullscreen() {
     this.fullscreen.set(true);
-    this.showFsHint.set(true);
-    clearTimeout(this.fsHintTimer);
-    this.fsHintTimer = setTimeout(() => this.showFsHint.set(false), 3500);
     document.documentElement.requestFullscreen?.().catch(() => {});
   }
 
   closeFullscreen() {
     this.fullscreen.set(false);
-    this.showFsHint.set(false);
-    clearTimeout(this.fsHintTimer);
     if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
   }
 
@@ -99,7 +93,6 @@ export class PhotoLightbox implements OnInit, OnDestroy {
   onFullscreenChange() {
     if (!document.fullscreenElement && this.fullscreen()) {
       this.fullscreen.set(false);
-      this.showFsHint.set(false);
     }
   }
 

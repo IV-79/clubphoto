@@ -200,11 +200,6 @@
   <!-- Plein écran natif (par-dessus tout) -->
   @if (fullscreen() && currentPhoto()) {
     <div class="lb-fullscreen" (click)="$event.stopPropagation(); closeFullscreen()">
-      @if (showFsHint()) {
-        <div class="lb-fs-hint" (click)="$event.stopPropagation()">
-          Appuyez sur <kbd>Échap</kbd> pour quitter le plein écran
-        </div>
-      }
       @if (photos().length > 1) {
         <button class="lb-fs-nav lb-fs-prev" (click)="$event.stopPropagation(); prev()" aria-label="Précédent">‹</button>
       }

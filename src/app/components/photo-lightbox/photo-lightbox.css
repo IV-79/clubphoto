@@ -179,6 +179,7 @@
   background: #1a1a2e;
   border-left: 1px solid #333;
   overflow: hidden;
+  overscroll-behavior: contain;
 }
 
 .lb-header {
@@ -477,36 +478,6 @@
   cursor: default;
   user-select: none;
   display: block;
-}
-
-.lb-fs-hint {
-  position: fixed;
-  top: 1.2rem;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0,0,0,0.6);
-  color: rgba(255,255,255,0.9);
-  padding: 0.45rem 1.1rem;
-  border-radius: 20px;
-  font-size: 0.82rem;
-  z-index: 11;
-  pointer-events: none;
-  white-space: nowrap;
-  animation: fs-hint-fade 3.5s ease forwards;
-}
-.lb-fs-hint kbd {
-  background: rgba(255,255,255,0.15);
-  border-radius: 4px;
-  padding: 0.1rem 0.35rem;
-  font-size: 0.78rem;
-  font-family: inherit;
-}
-
-@keyframes fs-hint-fade {
-  0%   { opacity: 0; transform: translateX(-50%) translateY(-6px); }
-  12%  { opacity: 1; transform: translateX(-50%) translateY(0); }
-  70%  { opacity: 1; }
-  100% { opacity: 0; }
 }
 
 .lb-fs-nav {
