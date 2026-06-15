@@ -4,6 +4,7 @@ export interface UserProfile {
   nom: string;
   prenom?: string;
   role: 'admin' | 'membre';
+  isSuspended?: boolean;
   dateAdhesion: string;
   bio?: string;
   appareil?: string;

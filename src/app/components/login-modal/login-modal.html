@@ -31,6 +31,20 @@
             placeholder="••••••••">
         </label>
 
+        <div class="forgot-link">
+          <button type="button" class="btn-forgot"
+            [disabled]="resetLoading()"
+            (click)="onResetPassword()">
+            {{ resetLoading() ? 'Envoi…' : 'Mot de passe oublié ?' }}
+          </button>
+        </div>
+
+        @if (resetMessage()) {
+          <p [class]="resetSuccess() ? 'reset-success' : 'error-msg'">
+            {{ resetMessage() }}
+          </p>
+        }
+
         @if (error()) {
           <p class="error-msg">{{ error() }}</p>
         }

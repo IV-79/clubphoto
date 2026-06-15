@@ -1,7 +1,13 @@
 import { Injectable, inject, Injector, runInInjectionContext } from '@angular/core';
-import { Auth, signInWithEmailAndPassword, signOut, authState, createUserWithEmailAndPassword } from '@angular/fire/auth';
-import { Firestore, doc, setDoc, getDoc, updateDoc, collection, collectionData } from '@angular/fire/firestore';
-import { Storage, ref, uploadBytesResumable, getDownloadURL } from '@angular/fire/storage';
+import {
+  Auth, signInWithEmailAndPassword, signOut, authState,
+  createUserWithEmailAndPassword, sendSignInLinkToEmail, sendPasswordResetEmail
+} from '@angular/fire/auth';
+import {
+  Firestore, doc, setDoc, getDoc, updateDoc, deleteDoc,
+  collection, collectionData, query, where, getDocs
+} from '@angular/fire/firestore';
+import { Storage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from '@angular/fire/storage';
 import { Router } from '@angular/router';
 import { from, switchMap, of, Observable, map, shareReplay } from 'rxjs';
 import { UserProfile } from '../models/user.model';
@@ -34,6 +40,10 @@ export class AuthService {
     return runInInjectionContext(this.injector, () =>
       signInWithEmailAndPassword(this.auth, email, password)
     );
+  }
+
+  async logoutSilent(): Promise<void> {
+    await runInInjectionContext(this.injector, () => signOut(this.auth));
   }
 
   async register(email: string, password: string, nom: string) {
@@ -103,6 +113,113 @@ export class AuthService {
     await runInInjectionContext(this.injector, () =>
       updateDoc(doc(this.firestore, 'users', uid), data as Record<string, unknown>)
     );
+  }
+
+  async changeMemberRole(uid: string, role: string): Promise<void> {
+    await runInInjectionContext(this.injector, () =>
+      updateDoc(doc(this.firestore, 'users', uid), { role })
+    );
+  }
+
+  async suspendMember(uid: string, isSuspended: boolean): Promise<void> {
+    await runInInjectionContext(this.injector, () =>
+      updateDoc(doc(this.firestore, 'users', uid), { isSuspended })
+    );
+  }
+
+  async resetPassword(email: string): Promise<void> {
+    await runInInjectionContext(this.injector, () =>
+      sendPasswordResetEmail(this.auth, email, {
+        url: `${window.location.origin}/`,
+        handleCodeInApp: false,
+      })
+    );
+  }
+
+  async inviteMember(email: string): Promise<void> {
+    const actionCodeSettings = {
+      url: `${window.location.origin}/completer-profil`,
+      handleCodeInApp: true,
+    };
+    await runInInjectionContext(this.injector, () =>
+      sendSignInLinkToEmail(this.auth, email, actionCodeSettings)
+    );
+    window.localStorage.setItem('emailForSignIn', email);
+  }
+
+  async deleteMemberData(uid: string): Promise<void> {
+    const deletes: Promise<void>[] = [];
+
+    // 1. Photos portfolio
+    const photosSnap = await runInInjectionContext(this.injector, () =>
+      getDocs(query(collection(this.firestore, 'photos'), where('uid', '==', uid)))
+    );
+    for (const d of photosSnap.docs) {
+      const sp = (d.data() as { storagePath?: string }).storagePath;
+      if (sp) deletes.push(deleteObject(ref(this.storage, sp)).catch(() => {}));
+      deletes.push(runInInjectionContext(this.injector, () => deleteDoc(d.ref)));
+    }
+
+    // 2. Soumissions thèmes (par thème pour éviter collectionGroup et son index requis)
+    const themesSnap = await runInInjectionContext(this.injector, () =>
+      getDocs(collection(this.firestore, 'themes'))
+    );
+    for (const themeDoc of themesSnap.docs) {
+      const soumSnap = await runInInjectionContext(this.injector, () =>
+        getDocs(query(
+          collection(this.firestore, 'themes', themeDoc.id, 'soumissions'),
+          where('membreUid', '==', uid)
+        ))
+      );
+      for (const d of soumSnap.docs) {
+        const sp = (d.data() as { storagePath?: string }).storagePath;
+        if (sp) deletes.push(deleteObject(ref(this.storage, sp)).catch(() => {}));
+        deletes.push(runInInjectionContext(this.injector, () => deleteDoc(d.ref)));
+      }
+    }
+
+    // 3. OneShots : photos + inscriptions directes (id doc == uid)
+    const oneshotsSnap = await runInInjectionContext(this.injector, () =>
+      getDocs(collection(this.firestore, 'oneshots'))
+    );
+    for (const osDoc of oneshotsSnap.docs) {
+      const osId = osDoc.id;
+      deletes.push(
+        runInInjectionContext(this.injector, () =>
+          deleteDoc(doc(this.firestore, 'oneshots', osId, 'inscriptions', uid))
+        ).catch(() => {})
+      );
+      const osPhotosSnap = await runInInjectionContext(this.injector, () =>
+        getDocs(query(
+          collection(this.firestore, 'oneshots', osId, 'photos'),
+          where('membreUid', '==', uid)
+        ))
+      );
+      for (const pd of osPhotosSnap.docs) {
+        const sp = (pd.data() as { storagePath?: string }).storagePath;
+        if (sp) deletes.push(deleteObject(ref(this.storage, sp)).catch(() => {}));
+        deletes.push(runInInjectionContext(this.injector, () => deleteDoc(pd.ref)));
+      }
+    }
+
+    // 4. Sorties : inscriptions directes (id doc == uid)
+    const sortiesSnap = await runInInjectionContext(this.injector, () =>
+      getDocs(collection(this.firestore, 'sorties'))
+    );
+    for (const sortieDoc of sortiesSnap.docs) {
+      deletes.push(
+        runInInjectionContext(this.injector, () =>
+          deleteDoc(doc(this.firestore, 'sorties', sortieDoc.id, 'inscriptions', uid))
+        ).catch(() => {})
+      );
+    }
+
+    // 5. Profil Firestore
+    deletes.push(runInInjectionContext(this.injector, () =>
+      deleteDoc(doc(this.firestore, 'users', uid))
+    ));
+
+    await Promise.all(deletes);
   }
 
   uploadUserPhoto(uid: string, file: File, type: 'profil' | 'bandeau'): Observable<{ state: 'uploading' | 'done'; progress: number; url?: string }> {

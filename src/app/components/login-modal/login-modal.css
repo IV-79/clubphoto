@@ -103,6 +103,43 @@
   cursor: not-allowed;
 }
 
+.forgot-link {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -0.25rem;
+}
+
+.btn-forgot {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.8rem;
+  color: #aaa;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.2s;
+}
+
+.btn-forgot:hover {
+  color: #e0e0e0;
+}
+
+.btn-forgot:disabled {
+  color: #666;
+  cursor: default;
+  text-decoration: none;
+}
+
+.reset-success {
+  font-size: 0.8rem;
+  color: #81c784;
+  background: #1b3a1b;
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin: 0;
+}
+
 .register-hint {
   text-align: center;
   margin: 1.25rem 0 0;

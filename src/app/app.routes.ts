@@ -1,5 +1,4 @@
 import { Routes } from '@angular/router';
-import { LoginComponent } from './pages/login/login.component';
 import { RegisterComponent } from './pages/register/register.component';
 import { Overview } from './pages/admin-dashboard/overview/overview';
 import { Membres } from './pages/admin-dashboard/membres/membres';
@@ -31,6 +30,7 @@ import { SortieDetail } from './pages/galeries/sortie-detail/sortie-detail';
 import { SortieCreer } from './pages/membre/sorties/sortie-creer/sortie-creer';
 import { SortieGerer } from './pages/membre/sorties/sortie-gerer/sortie-gerer';
 import { MembresGuide } from './pages/membres/guide/guide';
+import { CompleterProfilComponent } from './pages/completer-profil/completer-profil.component';
 
 export const routes: Routes = [
   {
@@ -90,7 +90,7 @@ export const routes: Routes = [
       { path: '', redirectTo: 'portfolio', pathMatch: 'full' }
     ]
   },
-  { path: 'login', component: LoginComponent, canActivate: [loginGuard] },
   { path: 'register', component: RegisterComponent, canActivate: [loginGuard] },
+  { path: 'completer-profil', component: CompleterProfilComponent },
   { path: '**', redirectTo: '' }
 ];

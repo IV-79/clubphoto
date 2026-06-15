@@ -2,10 +2,13 @@
   max-width: 1200px;
   margin: 40px auto;
   padding: 0 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
 .page-header {
-  margin-bottom: 24px;
+  margin-bottom: 0;
 }
 
 .admin-title {
@@ -17,6 +20,162 @@
   border-bottom: 3px solid #cc0000;
   display: inline-block;
 }
+
+/* Invite section */
+.invite-card {
+  border-left: 4px solid #1565c0;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1565c0;
+  margin: 0 0 16px;
+}
+
+.section-title mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.invite-form {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.invite-field {
+  flex: 1;
+  min-width: 260px;
+}
+
+.btn-spinner {
+  display: inline-block;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.feedback-success,
+.feedback-error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.875rem;
+  margin: 8px 0 0;
+}
+
+.feedback-success {
+  color: #2e7d32;
+}
+
+.feedback-error {
+  color: #c62828;
+}
+
+.feedback-success mat-icon,
+.feedback-error mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+/* Toolbar */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.filter-field {
+  flex: 1;
+  max-width: 360px;
+}
+
+.count {
+  color: #666;
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+/* Table */
+.full-width {
+  width: 100%;
+}
+
+.prenom {
+  color: #666;
+}
+
+.suspended-name {
+  text-decoration: line-through;
+  color: #999;
+}
+
+.row-suspended {
+  background: #fafafa;
+  opacity: 0.75;
+}
+
+/* Role chips */
+mat-chip.admin {
+  background-color: #1565c0 !important;
+  color: white !important;
+}
+
+mat-chip.membre {
+  background-color: #e0e0e0 !important;
+  color: #333 !important;
+}
+
+/* Statut chips */
+.chip-actif {
+  background-color: #e8f5e9 !important;
+  color: #2e7d32 !important;
+}
+
+.chip-suspendu {
+  background-color: #ffebee !important;
+  color: #c62828 !important;
+}
+
+/* Role select */
+.role-select {
+  font-size: 0.8rem;
+  font-weight: 500;
+  border-radius: 16px;
+  padding: 2px 8px;
+  border: none;
+}
+
+.role-select-admin {
+  background: #1565c0;
+  color: white;
+}
+
+.role-select-membre {
+  background: #e0e0e0;
+  color: #333;
+}
+
+.self-label {
+  font-size: 0.8rem;
+  color: #999;
+  font-style: italic;
+}
+
+/* Actions */
+.actions-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 
 .empty-state {
   display: flex;
@@ -31,18 +190,4 @@
   width: 48px;
   height: 48px;
   margin-bottom: 12px;
-}
-
-.full-width {
-  width: 100%;
-}
-
-mat-chip.admin {
-  background-color: #1565c0;
-  color: white;
-}
-
-mat-chip.membre {
-  background-color: #e0e0e0;
-  color: #333;
 }

@@ -4,6 +4,7 @@ import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { switchMap, of } from 'rxjs';
 import { ThemeService } from '../../../services/theme.service';
 import { AuthService } from '../../../services/auth.service';
+import { LoginModalService } from '../../../services/login-modal.service';
 import { ConfirmService } from '../../../services/confirm.service';
 import { compressToJpeg } from '../../../utils/image-compress';
 import { readExifWithConsent } from '../../../utils/exif-reader';
@@ -27,6 +28,7 @@ export class ThemeDetail {
   private authService    = inject(AuthService);
   private confirmService = inject(ConfirmService);
   private gpsConsentService = inject(GpsConsentService);
+  readonly loginModal = inject(LoginModalService);
 
   readonly id = this.route.snapshot.paramMap.get('id')!;
 

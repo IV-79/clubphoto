@@ -20,9 +20,11 @@ service cloud.firestore {
     // Photos du portfolio
     match /photos/{photoId} {
       // Le propriétaire peut toujours lire ses propres photos (getMyPhotos sans filtre de visibilité)
+      // isAdmin() : permet la lecture en query sans filtre sur visibilite (nécessaire pour deleteMemberData)
       allow read: if resource.data.visibilite == 'public'
                   || (isLoggedIn() && resource.data.visibilite == 'membre')
-                  || (isLoggedIn() && resource.data.uid == request.auth.uid);
+                  || (isLoggedIn() && resource.data.uid == request.auth.uid)
+                  || isAdmin();
       allow create: if isLoggedIn() && request.resource.data.uid == request.auth.uid;
       // Propriétaire : tous les champs — autres membres connectés : likes seulement (atomique)
       allow update: if isLoggedIn() && resource.data.uid == request.auth.uid;
@@ -79,7 +81,8 @@ service cloud.firestore {
     // OneShot events (lecture publique sauf statut preparation)
     match /oneshots/{oneShotId} {
       allow read: if resource.data.statut != 'preparation'
-                  || (isLoggedIn() && resource.data.creatorUid == request.auth.uid);
+                  || (isLoggedIn() && resource.data.creatorUid == request.auth.uid)
+                  || isAdmin();
       allow create: if isLoggedIn();
       allow update: if isLoggedIn() && resource.data.creatorUid == request.auth.uid;
     }
@@ -92,7 +95,8 @@ service cloud.firestore {
 
     match /oneshots/{oneShotId}/inscriptions/{uid} {
       allow read: if true;
-      allow create, delete: if isLoggedIn() && request.auth.uid == uid;
+      allow create: if isLoggedIn() && request.auth.uid == uid;
+      allow delete: if isLoggedIn() && (request.auth.uid == uid || isAdmin());
     }
 
     match /oneshots/{oneShotId}/photos/{photoId} {

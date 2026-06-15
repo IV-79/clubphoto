@@ -46,7 +46,7 @@
         </div>
 
         @if (authReady() && !isLoggedIn()) {
-          <p class="info-msg"><a routerLink="/login" class="inline-link">Connectez-vous</a> pour soumettre une photo.</p>
+          <p class="info-msg"><button class="inline-link" (click)="loginModal.open()">Connectez-vous</button> pour soumettre une photo.</p>
         } @else if (peutSoumettre()) {
           <div class="upload-zone"
             [class.drag-over]="dragOver()"
@@ -109,7 +109,7 @@
         </div>
 
         @if (authReady() && !isLoggedIn()) {
-          <p class="info-msg">Parcourez les photos et <a routerLink="/login" class="inline-link">connectez-vous</a> pour voter.</p>
+          <p class="info-msg">Parcourez les photos et <button class="inline-link" (click)="loginModal.open()">connectez-vous</button> pour voter.</p>
         }
         @if (isLoggedIn()) {
           <div class="vote-progress">

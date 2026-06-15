@@ -30,7 +30,16 @@
   margin: 8px 0 0;
 }
 
-.login-link a {
+.btn-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
   color: #1976d2;
   text-decoration: none;
+}
+
+.btn-link:hover {
+  text-decoration: underline;
 }

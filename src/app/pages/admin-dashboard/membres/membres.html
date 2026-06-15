@@ -4,39 +4,142 @@
     <h2 class="admin-title">Membres</h2>
   </div>
 
+  <!-- Inviter un membre -->
+  <mat-card class="invite-card">
+    <mat-card-content>
+      <h3 class="section-title">
+        <mat-icon>mail_outline</mat-icon>
+        Inviter un membre
+      </h3>
+      <div class="invite-form">
+        <mat-form-field appearance="outline" class="invite-field">
+          <mat-label>Adresse email</mat-label>
+          <input matInput type="email" [(ngModel)]="inviteEmail"
+            (keydown.enter)="sendInvite()" placeholder="prenom.nom@exemple.com">
+        </mat-form-field>
+        <button mat-raised-button color="primary"
+          (click)="sendInvite()"
+          [disabled]="inviteLoading() || !inviteEmail.trim()">
+          @if (inviteLoading()) {
+            <mat-spinner diameter="18" class="btn-spinner"></mat-spinner>
+          } @else {
+            <mat-icon>send</mat-icon>
+          }
+          Envoyer l'invitation
+        </button>
+      </div>
+      @if (inviteSuccess()) {
+        <p class="feedback-success">
+          <mat-icon>check_circle</mat-icon> {{ inviteSuccess() }}
+        </p>
+      }
+      @if (inviteError()) {
+        <p class="feedback-error">
+          <mat-icon>error_outline</mat-icon> {{ inviteError() }}
+        </p>
+      }
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Liste des membres -->
   <mat-card>
     <mat-card-content>
-      @if (membres$ | async; as membres) {
-        @if (membres.length === 0) {
-          <div class="empty-state">
-            <mat-icon>group_off</mat-icon>
-            <p>Aucun membre inscrit pour l'instant.</p>
-          </div>
-        } @else {
-          <table mat-table [dataSource]="membres" class="full-width">
-            <ng-container matColumnDef="nom">
-              <th mat-header-cell *matHeaderCellDef>Nom</th>
-              <td mat-cell *matCellDef="let m">{{ m.nom }}</td>
-            </ng-container>
-            <ng-container matColumnDef="email">
-              <th mat-header-cell *matHeaderCellDef>Email</th>
-              <td mat-cell *matCellDef="let m">{{ m.email }}</td>
-            </ng-container>
-            <ng-container matColumnDef="role">
-              <th mat-header-cell *matHeaderCellDef>Rôle</th>
-              <td mat-cell *matCellDef="let m">
+
+      <div class="toolbar">
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Filtrer par nom ou email</mat-label>
+          <mat-icon matPrefix>search</mat-icon>
+          <input matInput [ngModel]="filterText()"
+            (ngModelChange)="filterText.set($event)" placeholder="Rechercher…">
+        </mat-form-field>
+        <span class="count">{{ filteredMembres().length }} membre(s)</span>
+      </div>
+
+      @if (filteredMembres().length === 0) {
+        <div class="empty-state">
+          <mat-icon>group_off</mat-icon>
+          <p>Aucun membre trouvé.</p>
+        </div>
+      } @else {
+        <table mat-table [dataSource]="filteredMembres()" class="full-width">
+
+          <ng-container matColumnDef="nom">
+            <th mat-header-cell *matHeaderCellDef>Nom</th>
+            <td mat-cell *matCellDef="let m">
+              <span [class.suspended-name]="m.isSuspended">{{ m.nom }}</span>
+              @if (m.prenom) { <span class="prenom"> {{ m.prenom }}</span> }
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="email">
+            <th mat-header-cell *matHeaderCellDef>Email</th>
+            <td mat-cell *matCellDef="let m">{{ m.email }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="role">
+            <th mat-header-cell *matHeaderCellDef>Rôle</th>
+            <td mat-cell *matCellDef="let m">
+              @if (m.uid === currentUid()) {
                 <mat-chip [class]="m.role">{{ m.role }}</mat-chip>
-              </td>
-            </ng-container>
-            <ng-container matColumnDef="dateAdhesion">
-              <th mat-header-cell *matHeaderCellDef>Date d'inscription</th>
-              <td mat-cell *matCellDef="let m">{{ m.dateAdhesion }}</td>
-            </ng-container>
-            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-          </table>
-        }
+              } @else {
+                <mat-select [value]="m.role" class="role-select"
+                  [class]="'role-select-' + m.role"
+                  (selectionChange)="changeRole(m, $event.value)">
+                  @for (r of roles; track r) {
+                    <mat-option [value]="r">{{ r }}</mat-option>
+                  }
+                </mat-select>
+              }
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="statut">
+            <th mat-header-cell *matHeaderCellDef>Statut</th>
+            <td mat-cell *matCellDef="let m">
+              @if (m.isSuspended) {
+                <mat-chip class="chip-suspendu">Suspendu</mat-chip>
+              } @else {
+                <mat-chip class="chip-actif">Actif</mat-chip>
+              }
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="dateAdhesion">
+            <th mat-header-cell *matHeaderCellDef>Inscrit le</th>
+            <td mat-cell *matCellDef="let m">{{ m.dateAdhesion }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let m">
+              @if (m.uid === currentUid()) {
+                <span class="self-label">Vous</span>
+              } @else if (loadingUid() === m.uid) {
+                <mat-spinner diameter="24"></mat-spinner>
+              } @else {
+                <div class="actions-row">
+                  <button mat-icon-button
+                    [matTooltip]="m.isSuspended ? 'Réactiver le compte' : 'Suspendre le compte'"
+                    [color]="m.isSuspended ? 'primary' : ''"
+                    (click)="toggleSuspend(m)">
+                    <mat-icon>{{ m.isSuspended ? 'check_circle' : 'block' }}</mat-icon>
+                  </button>
+                  <button mat-icon-button color="warn"
+                    matTooltip="Supprimer le membre et toutes ses photos"
+                    (click)="requestDelete(m)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              }
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+            [class.row-suspended]="row.isSuspended"></tr>
+        </table>
       }
+
     </mat-card-content>
   </mat-card>
 

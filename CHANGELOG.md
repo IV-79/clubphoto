@@ -5,6 +5,10 @@
 ## En cours (alpha)
 
 ### Améliorations
+- **Mot de passe oublié** — lien "Mot de passe oublié ?" sur la page de connexion `/login` et dans le modal de connexion. Déclenche l'email de réinitialisation Firebase. Si l'email n'est pas renseigné, un message guide l'utilisateur. Fonctionne dans les deux contextes (page et modal thème sombre).
+- **Compte suspendu — modal** — la vérification de suspension était absente du modal de connexion. Désormais, si un membre suspendu se connecte via le modal, il est immédiatement déconnecté et voit le dialogue "Votre compte a été suspendu" (identique à la page `/login`).
+- **Gestion des membres (admin)** — page refaite : liste avec rôle et statut, filtre texte en temps réel (nom ou email), invitation par email (lien magique Firebase), suspension de compte (accès bloqué au login avec message), suppression complète d'un membre (photos portfolio, soumissions thèmes, photos et inscriptions OneShots/Sorties, profil). Le compte Firebase Auth est conservé.
+- **Invitation membre** — un admin peut inviter un nouvel utilisateur par email. L'invité reçoit un lien pour compléter son profil (nom, prénom, mot de passe) sans passer par la page d'inscription publique.
 - **Consentement GPS à l'upload** — si une photo contient des coordonnées GPS dans ses EXIF, une fenêtre demande "Garder l'info GPS ?" (défaut : Oui). En cas de refus, les coordonnées ne sont pas enregistrées. Fonctionne dans tous les contextes : portfolio, sortie photo, thème du mois, OneShot.
 - **Liste des sorties compacte** — les cartes sans photo de couverture n'affichent plus le placeholder 📷 (zone 16:9 vide). Le badge "À venir" / "Terminée" se place directement à côté du titre. Les cartes avec photo conservent leur mise en page actuelle.
 - **Page "Gérer une sortie" lisible** — le formulaire de modification utilisait des couleurs sombres (`#1a1a2e`) incompatibles avec le fond blanc du layout membre. Refonte en thème clair cohérent avec les autres pages de l'espace membre.

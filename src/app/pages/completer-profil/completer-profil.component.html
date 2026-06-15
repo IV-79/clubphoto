@@ -1,0 +1,90 @@
+<div class="page-container">
+  <mat-card class="card">
+
+    @switch (step()) {
+
+      @case ('checking') {
+        <mat-card-content class="center">
+          <mat-spinner diameter="48"></mat-spinner>
+          <p>Vérification du lien…</p>
+        </mat-card-content>
+      }
+
+      @case ('invalid') {
+        <mat-card-content class="center">
+          <mat-icon class="icon-error">link_off</mat-icon>
+          <h2>Lien invalide ou expiré</h2>
+          <p>{{ errorMessage() || 'Ce lien d\'invitation n\'est plus valide.' }}</p>
+          <button mat-raised-button routerLink="/">Retour à l'accueil</button>
+        </mat-card-content>
+      }
+
+      @case ('needEmail') {
+        <mat-card-header>
+          <mat-card-title>Confirmer votre adresse email</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>Pour des raisons de sécurité, veuillez saisir l'adresse email sur laquelle vous avez reçu l'invitation.</p>
+          <mat-form-field appearance="fill" class="full-width">
+            <mat-label>Adresse email</mat-label>
+            <input matInput type="email" [(ngModel)]="confirmedEmail" required>
+          </mat-form-field>
+          @if (errorMessage()) {
+            <p class="error-text">{{ errorMessage() }}</p>
+          }
+          <button mat-raised-button color="primary" class="full-width" (click)="confirmEmail()">
+            Continuer
+          </button>
+        </mat-card-content>
+      }
+
+      @case ('form') {
+        <mat-card-header>
+          <mat-card-title>Bienvenue ! Complétez votre profil</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <mat-form-field appearance="fill" class="full-width">
+            <mat-label>Nom *</mat-label>
+            <input matInput [(ngModel)]="nom" required>
+          </mat-form-field>
+          <mat-form-field appearance="fill" class="full-width">
+            <mat-label>Prénom</mat-label>
+            <input matInput [(ngModel)]="prenom">
+          </mat-form-field>
+          <mat-form-field appearance="fill" class="full-width">
+            <mat-label>Mot de passe *</mat-label>
+            <input matInput type="password" [(ngModel)]="password" required>
+            <mat-hint>Minimum 6 caractères</mat-hint>
+          </mat-form-field>
+          <mat-form-field appearance="fill" class="full-width">
+            <mat-label>Confirmer le mot de passe *</mat-label>
+            <input matInput type="password" [(ngModel)]="passwordConfirm" required>
+          </mat-form-field>
+          @if (errorMessage()) {
+            <p class="error-text">{{ errorMessage() }}</p>
+          }
+          <button mat-raised-button color="primary" class="full-width" (click)="saveProfile()">
+            Créer mon compte
+          </button>
+        </mat-card-content>
+      }
+
+      @case ('saving') {
+        <mat-card-content class="center">
+          <mat-spinner diameter="48"></mat-spinner>
+          <p>Création de votre compte…</p>
+        </mat-card-content>
+      }
+
+      @case ('done') {
+        <mat-card-content class="center">
+          <mat-icon class="icon-success">check_circle</mat-icon>
+          <h2>Compte créé !</h2>
+          <p>Vous allez être redirigé vers votre espace membre…</p>
+        </mat-card-content>
+      }
+
+    }
+
+  </mat-card>
+</div>

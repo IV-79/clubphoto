@@ -86,7 +86,7 @@
                             </button>
                           }
                         } @else {
-                          <a routerLink="/login" class="btn-os-login">Connexion pour s'inscrire</a>
+                          <button class="btn-os-login" (click)="openLogin()">Connexion pour s'inscrire</button>
                         }
                       }
                       <a [routerLink]="['/galeries/oneshots', item.oneshot!.id]" class="btn-os-voir">Voir →</a>

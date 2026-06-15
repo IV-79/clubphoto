@@ -7,6 +7,7 @@ import { ReunionService } from '../../services/reunion.service';
 import { OneShotService } from '../../services/oneshot.service';
 import { SortieService } from '../../services/sortie.service';
 import { AuthService } from '../../services/auth.service';
+import { LoginModalService } from '../../services/login-modal.service';
 import { Reunion, REUNION_TYPES } from '../../models/reunion.model';
 import { OneShot, ONESHOT_STATUT_LABELS } from '../../models/oneshot.model';
 import { Sortie } from '../../models/sortie.model';
@@ -34,6 +35,7 @@ export class Calendrier {
   private oneShotService = inject(OneShotService);
   private sortieService = inject(SortieService);
   private authService = inject(AuthService);
+  private loginModal = inject(LoginModalService);
 
   // --- Filtres ---
   types = REUNION_TYPES;
@@ -171,4 +173,6 @@ export class Calendrier {
   mapsUrl(lieu: string): string {
     return `https://www.google.com/maps/search/?q=${encodeURIComponent(lieu)}`;
   }
+
+  openLogin() { this.loginModal.open(); }
 }

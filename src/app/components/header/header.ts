@@ -23,7 +23,7 @@ export class Header {
 
   openLogin() {
     const url = this.router.url;
-    this.loginModal.open(url.startsWith('/login') ? undefined : url);
+    this.loginModal.open(url);
     this.closeMobileMenu();
   }
 
