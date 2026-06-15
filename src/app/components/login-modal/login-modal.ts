@@ -47,8 +47,10 @@ export class LoginModalComponent {
     this.resetMessage.set('');
     this.loading.set(true);
     try {
-      await this.authService.login(this.email, this.password);
+      const cred = await this.authService.login(this.email, this.password);
       const profile = await this.authService.ensureUserDocument();
+
+      await this.authService.updateLastConnection(cred.user.uid).catch(() => {});
 
       if (profile?.isSuspended) {
         await this.authService.logoutSilent();

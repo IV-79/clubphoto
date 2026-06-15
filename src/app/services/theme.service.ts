@@ -1,7 +1,7 @@
 import { Injectable, inject, Injector, runInInjectionContext } from '@angular/core';
 import {
   Firestore, collection, collectionData, doc, docData,
-  addDoc, deleteDoc, setDoc, updateDoc, query, where, orderBy, arrayUnion, arrayRemove,
+  addDoc, deleteDoc, setDoc, updateDoc, query, where, orderBy, arrayUnion, arrayRemove, increment,
 } from '@angular/fire/firestore';
 import { Storage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from '@angular/fire/storage';
 import { Observable } from 'rxjs';
@@ -104,10 +104,16 @@ export class ThemeService {
               collection(this.firestore, 'themes', themeId, 'soumissions'),
               {
                 membreUid: uid, nomMembre, url, storagePath,
+                fileSize: file.size,
                 uploadedAt: new Date().toISOString(),
                 ...(hasExif(exif) ? { exif } : {}),
               }
             );
+            await runInInjectionContext(this.injector, () =>
+              updateDoc(doc(this.firestore, 'users', uid), {
+                'storageUsed.themes': increment(file.size),
+              })
+            ).catch(() => {});
             resolve();
           } catch (e) {
             reject(e);
@@ -117,11 +123,18 @@ export class ThemeService {
     });
   }
 
-  async deleteSoumission(themeId: string, soumissionId: string, storagePath: string): Promise<void> {
+  async deleteSoumission(themeId: string, soumissionId: string, storagePath: string, membreUid?: string, fileSize?: number): Promise<void> {
     await Promise.all([
       deleteObject(ref(this.storage, storagePath)).catch(() => {}),
       deleteDoc(doc(this.firestore, 'themes', themeId, 'soumissions', soumissionId)),
     ]);
+    if (membreUid && fileSize) {
+      await runInInjectionContext(this.injector, () =>
+        updateDoc(doc(this.firestore, 'users', membreUid), {
+          'storageUsed.themes': increment(-fileSize),
+        })
+      ).catch(() => {});
+    }
   }
 
   async voter(themeId: string, voterUid: string, soumissionId: string): Promise<void> {

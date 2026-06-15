@@ -143,7 +143,7 @@ export class ThemeDetail {
       deletePhoto: async (lbPhoto) => {
         const soum = this.soumissions().find(s => s.id === lbPhoto.id);
         if (!soum) return;
-        await this.themeService.deleteSoumission(themeId, soum.id, soum.storagePath);
+        await this.themeService.deleteSoumission(themeId, soum.id, soum.storagePath, soum.membreUid, soum.fileSize);
       },
     };
   });
@@ -225,7 +225,7 @@ export class ThemeDetail {
   async supprimerSoumission(soum: ThemeSoumission) {
     const ok = await this.confirmService.confirm('Supprimer cette photo du thème définitivement ?');
     if (!ok) return;
-    await this.themeService.deleteSoumission(this.id, soum.id, soum.storagePath);
+    await this.themeService.deleteSoumission(this.id, soum.id, soum.storagePath, soum.membreUid, soum.fileSize);
   }
 
   // Vote

@@ -115,6 +115,14 @@ export class AuthService {
     );
   }
 
+  async updateLastConnection(uid: string): Promise<void> {
+    await runInInjectionContext(this.injector, () =>
+      updateDoc(doc(this.firestore, 'users', uid), {
+        derniereConnexion: new Date().toISOString(),
+      })
+    );
+  }
+
   async changeMemberRole(uid: string, role: string): Promise<void> {
     await runInInjectionContext(this.injector, () =>
       updateDoc(doc(this.firestore, 'users', uid), { role })

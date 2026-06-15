@@ -22,6 +22,7 @@ export interface ThemeSoumission {
   nomMembre: string;
   url: string;
   storagePath: string;
+  fileSize?: number;
   uploadedAt: string;
   likes?: string[];
   exif?: PhotoExif;

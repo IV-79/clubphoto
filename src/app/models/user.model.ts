@@ -5,6 +5,8 @@ export interface UserProfile {
   prenom?: string;
   role: 'admin' | 'membre';
   isSuspended?: boolean;
+  derniereConnexion?: string;
+  storageUsed?: { portfolio: number; themes: number; oneshots: number };
   dateAdhesion: string;
   bio?: string;
   appareil?: string;

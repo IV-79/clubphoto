@@ -108,6 +108,30 @@
   width: 100%;
 }
 
+.compact-table .mat-mdc-header-cell,
+.compact-table .mat-mdc-cell {
+  padding: 4px 8px !important;
+  font-size: 12px;
+}
+
+.cell-date {
+  white-space: nowrap;
+  color: #555;
+}
+
+.cell-email {
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.storage-cell {
+  cursor: default;
+  font-variant-numeric: tabular-nums;
+  color: #444;
+}
+
 .prenom {
   color: #666;
 }

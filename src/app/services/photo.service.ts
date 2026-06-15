@@ -1,7 +1,7 @@
 import { Injectable, inject, Injector, runInInjectionContext } from '@angular/core';
 import { Storage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from '@angular/fire/storage';
 import {
-  Firestore, collection, collectionData, doc, addDoc, deleteDoc, updateDoc, query, where, orderBy, deleteField, arrayUnion, arrayRemove
+  Firestore, collection, collectionData, doc, addDoc, deleteDoc, updateDoc, query, where, orderBy, deleteField, arrayUnion, arrayRemove, increment
 } from '@angular/fire/firestore';
 import { Observable, map } from 'rxjs';
 import { Photo, PhotoExif, PhotoVisibilite, UploadState } from '../models/photo.model';
@@ -46,12 +46,18 @@ export class PhotoService {
               visibilite: meta.visibilite,
               dateUpload: new Date().toISOString(),
               storagePath,
+              fileSize: file.size,
               ...(meta.categorie ? { categorie: meta.categorie as Photo['categorie'] } : {}),
               ...(hasExif(meta.exif) ? { exif: meta.exif } : {}),
             };
             const docRef = await runInInjectionContext(this.injector, () =>
               addDoc(collection(this.firestore, 'photos'), data)
             );
+            await runInInjectionContext(this.injector, () =>
+              updateDoc(doc(this.firestore, 'users', uid), {
+                'storageUsed.portfolio': increment(file.size),
+              })
+            ).catch(() => {});
             observer.next({ state: 'done', progress: 100, photo: { id: docRef.id, ...data } });
             observer.complete();
           } catch (e) {
@@ -105,9 +111,16 @@ export class PhotoService {
     await runInInjectionContext(this.injector, () =>
       Promise.all([
         deleteObject(ref(this.storage, photo.storagePath)),
-        deleteDoc(doc(this.firestore, 'photos', photo.id))
+        deleteDoc(doc(this.firestore, 'photos', photo.id)),
       ])
     );
+    if (photo.fileSize) {
+      await runInInjectionContext(this.injector, () =>
+        updateDoc(doc(this.firestore, 'users', photo.uid), {
+          'storageUsed.portfolio': increment(-photo.fileSize!),
+        })
+      ).catch(() => {});
+    }
   }
 
   async updatePhotoMeta(photoId: string, data: { titre: string; description: string; visibilite: PhotoVisibilite; categorie: string }): Promise<void> {

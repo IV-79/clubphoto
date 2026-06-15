@@ -45,6 +45,7 @@ export interface Photo {
   visibilite: PhotoVisibilite;
   dateUpload: string;
   storagePath: string;
+  fileSize?: number;
   categorie?: PhotoCategorie;
   exif?: PhotoExif;
   likes?: string[];

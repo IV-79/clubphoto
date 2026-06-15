@@ -11,6 +11,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSortModule, Sort } from '@angular/material/sort';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Auth } from '@angular/fire/auth';
 import { AuthService } from '../../../services/auth.service';
@@ -23,7 +24,7 @@ import { UserProfile } from '../../../models/user.model';
     FormsModule,
     MatCardModule, MatButtonModule, MatIconModule, MatTableModule,
     MatChipsModule, MatFormFieldModule, MatInputModule, MatSelectModule,
-    MatTooltipModule, MatProgressSpinnerModule,
+    MatTooltipModule, MatProgressSpinnerModule, MatSortModule,
   ],
   templateUrl: './membres.html',
   styleUrl: './membres.css',
@@ -47,6 +48,11 @@ export class Membres {
   inviteSuccess = signal('');
   inviteError = signal('');
 
+  sortCol = signal<string>('nom');
+  sortDir = signal<'asc' | 'desc'>('asc');
+
+  displayedColumns = ['nom', 'email', 'role', 'statut', 'dateAdhesion', 'derniereConnexion', 'stockage', 'actions'];
+
   filteredMembres = computed(() => {
     const q = this.filterText().toLowerCase().trim();
     if (!q) return this.membres();
@@ -56,7 +62,53 @@ export class Membres {
     );
   });
 
-  displayedColumns = ['nom', 'email', 'role', 'statut', 'dateAdhesion', 'actions'];
+  sortedMembres = computed(() => {
+    const col = this.sortCol();
+    const dir = this.sortDir();
+    const list = [...this.filteredMembres()];
+    return list.sort((a, b) => {
+      if (col === 'stockage') {
+        const diff = this.totalStorage(a) - this.totalStorage(b);
+        return dir === 'asc' ? diff : -diff;
+      }
+      const va = String((a as unknown as Record<string, unknown>)[col] ?? '');
+      const vb = String((b as unknown as Record<string, unknown>)[col] ?? '');
+      const cmp = va.localeCompare(vb, 'fr');
+      return dir === 'asc' ? cmp : -cmp;
+    });
+  });
+
+  onSort(sort: Sort) {
+    this.sortCol.set(sort.active || 'nom');
+    this.sortDir.set((sort.direction as 'asc' | 'desc') || 'asc');
+  }
+
+  totalStorage(m: UserProfile): number {
+    const s = m.storageUsed;
+    if (!s) return 0;
+    return (s.portfolio ?? 0) + (s.themes ?? 0) + (s.oneshots ?? 0);
+  }
+
+  formatStorage(bytes: number): string {
+    if (bytes === 0) return '—';
+    if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} Ko`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
+  }
+
+  storageTooltip(m: UserProfile): string {
+    const s = m.storageUsed;
+    if (!s || this.totalStorage(m) === 0) return 'Aucune photo uploadée';
+    return [
+      `Portfolio : ${this.formatStorage(s.portfolio ?? 0)}`,
+      `Thèmes du mois : ${this.formatStorage(s.themes ?? 0)}`,
+      `OneShots : ${this.formatStorage(s.oneshots ?? 0)}`,
+    ].join('\n');
+  }
+
+  formatDate(iso: string | undefined): string {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: '2-digit' });
+  }
 
   async changeRole(membre: UserProfile, newRole: string) {
     if (newRole === membre.role) return;

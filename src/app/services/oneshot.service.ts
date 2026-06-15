@@ -1,7 +1,7 @@
 import { Injectable, inject, Injector, runInInjectionContext } from '@angular/core';
 import {
   Firestore, collection, collectionData, doc, docData,
-  addDoc, updateDoc, deleteDoc, setDoc, query, where, orderBy, arrayUnion, arrayRemove
+  addDoc, updateDoc, deleteDoc, setDoc, query, where, orderBy, arrayUnion, arrayRemove, increment
 } from '@angular/fire/firestore';
 import { Storage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from '@angular/fire/storage';
 import { Observable } from 'rxjs';
@@ -156,12 +156,18 @@ export class OneShotService {
           const url = await getDownloadURL(task.snapshot.ref);
           const data: Omit<OneShotPhoto, 'id'> = {
             url, storagePath, uploadedAt: new Date().toISOString(),
+            fileSize: file.size,
             membreUid: meta.membreUid, nomMembre: meta.nomMembre, themeId: meta.themeId,
             ...(hasExif(meta.exif) ? { exif: meta.exif } : {}),
           };
           const docRef = await runInInjectionContext(this.injector, () =>
             addDoc(collection(this.firestore, `oneshots/${oneShotId}/photos`), data)
           );
+          await runInInjectionContext(this.injector, () =>
+            updateDoc(doc(this.firestore, 'users', meta.membreUid), {
+              'storageUsed.oneshots': increment(file.size),
+            })
+          ).catch(() => {});
           observer.next({ progress: 100, done: true, photo: { id: docRef.id, ...data } });
           observer.complete();
         }
@@ -182,6 +188,13 @@ export class OneShotService {
         deleteDoc(doc(this.firestore, `oneshots/${oneShotId}/photos`, photo.id)),
       ])
     );
+    if (photo.fileSize) {
+      await runInInjectionContext(this.injector, () =>
+        updateDoc(doc(this.firestore, 'users', photo.membreUid), {
+          'storageUsed.oneshots': increment(-photo.fileSize!),
+        })
+      ).catch(() => {});
+    }
   }
 
   // --- Votes ---
