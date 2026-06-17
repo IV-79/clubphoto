@@ -138,11 +138,12 @@ export class OneShotPhotos {
     if (this.editSaving()) return;
     const membre = this.inscriptions().find(i => i.uid === this.editMembreUid);
     this.editSaving.set(true);
-    await this.oneShotService.updatePhotoAssignment(this.id, photo.id, {
-      membreUid: this.editMembreUid  || '',
-      nomMembre: membre?.nomMembre   || '',
-      themeId:   this.editThemeId    || '',
-    });
+    await this.oneShotService.updatePhotoAssignment(
+      this.id, photo.id,
+      { membreUid: this.editMembreUid || '', nomMembre: membre?.nomMembre || '', themeId: this.editThemeId || '' },
+      photo.membreUid,
+      photo.fileSize,
+    );
     this.editSaving.set(false);
     this.editingPhotoId.set(null);
   }

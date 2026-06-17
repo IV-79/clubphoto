@@ -155,6 +155,53 @@ export class AuthService {
     window.localStorage.setItem('emailForSignIn', email);
   }
 
+  async recalculateStorage(uid: string): Promise<void> {
+    let portfolio = 0;
+    let themes = 0;
+    let oneshots = 0;
+
+    const photosSnap = await runInInjectionContext(this.injector, () =>
+      getDocs(query(collection(this.firestore, 'photos'), where('uid', '==', uid)))
+    );
+    for (const d of photosSnap.docs) {
+      portfolio += (d.data() as { fileSize?: number }).fileSize ?? 0;
+    }
+
+    const themesSnap = await runInInjectionContext(this.injector, () =>
+      getDocs(collection(this.firestore, 'themes'))
+    );
+    for (const themeDoc of themesSnap.docs) {
+      const soumSnap = await runInInjectionContext(this.injector, () =>
+        getDocs(query(
+          collection(this.firestore, 'themes', themeDoc.id, 'soumissions'),
+          where('membreUid', '==', uid)
+        ))
+      );
+      for (const d of soumSnap.docs) {
+        themes += (d.data() as { fileSize?: number }).fileSize ?? 0;
+      }
+    }
+
+    const oneshotsSnap = await runInInjectionContext(this.injector, () =>
+      getDocs(collection(this.firestore, 'oneshots'))
+    );
+    for (const osDoc of oneshotsSnap.docs) {
+      const osPhotosSnap = await runInInjectionContext(this.injector, () =>
+        getDocs(query(
+          collection(this.firestore, 'oneshots', osDoc.id, 'photos'),
+          where('membreUid', '==', uid)
+        ))
+      );
+      for (const pd of osPhotosSnap.docs) {
+        oneshots += (pd.data() as { fileSize?: number }).fileSize ?? 0;
+      }
+    }
+
+    await runInInjectionContext(this.injector, () =>
+      updateDoc(doc(this.firestore, 'users', uid), { storageUsed: { portfolio, themes, oneshots } })
+    );
+  }
+
   async deleteMemberData(uid: string): Promise<void> {
     const deletes: Promise<void>[] = [];
 

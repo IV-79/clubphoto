@@ -5,6 +5,9 @@
 ## En cours (alpha)
 
 ### Améliorations
+- **Suivi du stockage par membre** — à chaque upload (portfolio, thème du mois, OneShot), la taille du fichier compressé est enregistrée sur le doc photo (`fileSize`) et accumulée sur le profil Firestore (`storageUsed.portfolio / .themes / .oneshots`). Les suppressions décrément atomiquement ces compteurs. La colonne "Stockage" de la page admin/membres affiche le total avec un tooltip détaillant la répartition par catégorie au survol.
+- **Dernière connexion** — la date de connexion est écrite dans Firestore à chaque login via le modal. Visible dans la colonne "Dernière co." de la page admin/membres.
+- **Tableau membres triable** — toutes les colonnes sont triables (clic sur l'en-tête, bascule asc/desc) via MatSort. Table resserrée (police 12px, padding réduit, email tronqué).
 - **Mot de passe oublié** — lien "Mot de passe oublié ?" sur la page de connexion `/login` et dans le modal de connexion. Déclenche l'email de réinitialisation Firebase. Si l'email n'est pas renseigné, un message guide l'utilisateur. Fonctionne dans les deux contextes (page et modal thème sombre).
 - **Compte suspendu — modal** — la vérification de suspension était absente du modal de connexion. Désormais, si un membre suspendu se connecte via le modal, il est immédiatement déconnecté et voit le dialogue "Votre compte a été suspendu" (identique à la page `/login`).
 - **Gestion des membres (admin)** — page refaite : liste avec rôle et statut, filtre texte en temps réel (nom ou email), invitation par email (lien magique Firebase), suspension de compte (accès bloqué au login avec message), suppression complète d'un membre (photos portfolio, soumissions thèmes, photos et inscriptions OneShots/Sorties, profil). Le compte Firebase Auth est conservé.
@@ -18,9 +21,15 @@
 - **Calendrier accordéon** — les événements s'affichent en vue compacte (chiffre du jour + badge type + titre). Un clic ouvre les détails (lieu, description, date complète, actions). Un seul item ouvert à la fois.
 
 ### Corrections
+- **Stockage négatif dans admin/membres** — le compteur `storageUsed` pouvait devenir négatif si l'incrémentation échouait silencieusement à l'upload (réseau, permissions) mais que la décrémentation à la suppression réussissait. Le total est maintenant clampé à 0 dans l'affichage, et `formatStorage` traite les valeurs négatives comme zéro.
+- **Crash suppression photo OneShot sans membre assigné** — `deletePhoto` tentait un `updateDoc(users/'')` avec un chemin vide quand `membreUid` était absent, provoquant une erreur Firestore. La mise à jour du stockage est maintenant conditionnée à `photo.membreUid` non vide.
+- **Votes OneShot limités aux inscrits** — le vote était réservé aux membres ayant cliqué "Je participe". Tous les membres connectés peuvent maintenant voter. Un membre ayant une photo assignée à son nom reste bloqué sur cette photo (ne peut pas voter pour soi-même).
 - **Création de sortie** — le champ Lieu est maintenant obligatoire (formulaire bloquant + indicateur `*`). Le champ "Nombre max de participants" n'apparaît que lorsque l'inscription est obligatoire. Correction d'une erreur Firebase qui rejetait les valeurs `undefined` pour les champs optionnels.
 
 ### Ajouts
+- **Recalcul du stockage par membre (admin)** — un bouton ⟳ apparaît au survol de la colonne "Stockage" dans admin/membres. Il recalcule le stockage réel en parcourant toutes les photos portfolio, soumissions thèmes et photos OneShot assignées au membre, puis écrase le compteur Firestore. Utile pour corriger des données décalées (photos uploadées avant l'ajout du suivi, ou reassignations dans les OneShots).
+- **Assignation photos OneShot et suivi stockage** — quand le créateur assigne une photo à un membre dans la page de gestion, la photo est liée au membre dans Firestore (`membreUid`). Le stockage du membre se met à jour via le bouton Recalculer en admin (les règles Firestore bloquent les mises à jour cross-user directes depuis le client).
+- **Bordure rouge sur photos non assignées (OneShot)** — dans la page de gestion des photos d'un OneShot, les photos sans membre assigné affichent un contour rouge pour alerter le créateur.
 - **Coordonnées GPS dans les EXIF** — si la photo contient des données GPS, un lien "Voir sur la carte" apparaît dans la fiche info (ouvre Google Maps au lieu de la prise de vue).
 - **Description des photos** — les membres peuvent ajouter une description libre lors de l'upload ou de la modification d'une photo du portfolio. Elle s'affiche dans la fiche info.
 - **Vue plein écran native** — dans la fiche info, cliquer sur la photo active le plein écran natif du navigateur (Fullscreen API : barre d'adresse et onglets disparaissent). Navigation entre photos avec ←→, clic pour revenir à la fiche info. Un message guide s'affiche brièvement à l'ouverture.

@@ -120,11 +120,22 @@
           <ng-container matColumnDef="stockage">
             <th mat-header-cell *matHeaderCellDef mat-sort-header>Stockage</th>
             <td mat-cell *matCellDef="let m">
-              <span class="storage-cell"
-                [matTooltip]="storageTooltip(m)"
-                matTooltipClass="multiline-tooltip">
-                {{ formatStorage(totalStorage(m)) }}
-              </span>
+              <div class="storage-cell-wrap">
+                @if (recalcUid() === m.uid) {
+                  <mat-spinner diameter="16"></mat-spinner>
+                } @else {
+                  <span class="storage-cell"
+                    [matTooltip]="storageTooltip(m)"
+                    matTooltipClass="multiline-tooltip">
+                    {{ formatStorage(totalStorage(m)) }}
+                  </span>
+                  <button mat-icon-button class="recalc-btn"
+                    matTooltip="Recalculer depuis les photos réelles"
+                    (click)="recalcStorage(m)">
+                    <mat-icon>refresh</mat-icon>
+                  </button>
+                }
+              </div>
             </td>
           </ng-container>
 

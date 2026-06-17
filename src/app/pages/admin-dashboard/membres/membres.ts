@@ -42,6 +42,7 @@ export class Membres {
   membres = toSignal(this.authService.getAllMembers(), { initialValue: [] as UserProfile[] });
   filterText = signal('');
   loadingUid = signal<string | null>(null);
+  recalcUid  = signal<string | null>(null);
 
   inviteEmail = '';
   inviteLoading = signal(false);
@@ -86,11 +87,11 @@ export class Membres {
   totalStorage(m: UserProfile): number {
     const s = m.storageUsed;
     if (!s) return 0;
-    return (s.portfolio ?? 0) + (s.themes ?? 0) + (s.oneshots ?? 0);
+    return Math.max(0, (s.portfolio ?? 0) + (s.themes ?? 0) + (s.oneshots ?? 0));
   }
 
   formatStorage(bytes: number): string {
-    if (bytes === 0) return '—';
+    if (bytes <= 0) return '—';
     if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} Ko`;
     return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
   }
@@ -108,6 +109,19 @@ export class Membres {
   formatDate(iso: string | undefined): string {
     if (!iso) return '—';
     return new Date(iso).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: '2-digit' });
+  }
+
+  async recalcStorage(membre: UserProfile) {
+    if (this.recalcUid()) return;
+    this.recalcUid.set(membre.uid);
+    try {
+      await this.authService.recalculateStorage(membre.uid);
+      this.snackBar.open('Stockage recalculé', '', { duration: 2500 });
+    } catch {
+      this.snackBar.open('Erreur lors du recalcul', '', { duration: 3000 });
+    } finally {
+      this.recalcUid.set(null);
+    }
   }
 
   async changeRole(membre: UserProfile, newRole: string) {

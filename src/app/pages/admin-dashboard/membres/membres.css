@@ -126,6 +126,24 @@
   white-space: nowrap;
 }
 
+.storage-cell-wrap {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.recalc-btn {
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.storage-cell-wrap:hover .recalc-btn { opacity: 1; }
+
+.recalc-btn mat-icon { font-size: 14px; width: 14px; height: 14px; line-height: 14px; }
+
 .storage-cell {
   cursor: default;
   font-variant-numeric: tabular-nums;

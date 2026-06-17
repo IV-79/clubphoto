@@ -61,7 +61,7 @@
     <!-- ── VOTE ─────────────────────────────────────── -->
     @if (event()!.statut === 'vote') {
 
-      @if (isInscrit() || isCreator()) {
+      @if (profile()) {
 
         @if (!isCreator()) {
           <div class="vote-progress-bar">
@@ -91,7 +91,7 @@
             <div class="vote-grid">
               @for (photo of group.photos; track photo.id) {
                 @let isSelected  = myVoteByTheme()[group.theme.id] === photo.id;
-                @let isOwnPhoto  = isInscrit() && photo.membreUid === profile()?.uid;
+                @let isOwnPhoto  = !isCreator() && photo.membreUid === profile()?.uid;
                 @let isFaded     = !!myVoteByTheme()[group.theme.id] && !isSelected && !isOwnPhoto;
                 @let isVoting    = voting() === group.theme.id;
 
@@ -131,7 +131,7 @@
         }
 
       } @else {
-        <div class="panel panel-info">Le vote est en cours — réservé aux participants inscrits.</div>
+        <div class="panel panel-info">Le vote est en cours — connectez-vous pour voter.</div>
       }
     }
 

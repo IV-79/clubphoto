@@ -189,7 +189,7 @@ export class OneShotDetail {
 
   async castVote(themeId: string, photoId: string) {
     const profile = this.profile();
-    if (!profile || !this.isInscrit() || this.voting()) return;
+    if (!profile || this.voting()) return;
     if (this.myVoteByTheme()[themeId] === photoId) return;
     const photo = this.photos().find(p => p.id === photoId);
     if (photo?.membreUid === profile.uid) return;

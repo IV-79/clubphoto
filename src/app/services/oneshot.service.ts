@@ -163,11 +163,13 @@ export class OneShotService {
           const docRef = await runInInjectionContext(this.injector, () =>
             addDoc(collection(this.firestore, `oneshots/${oneShotId}/photos`), data)
           );
-          await runInInjectionContext(this.injector, () =>
-            updateDoc(doc(this.firestore, 'users', meta.membreUid), {
-              'storageUsed.oneshots': increment(file.size),
-            })
-          ).catch(() => {});
+          if (meta.membreUid) {
+            await runInInjectionContext(this.injector, () =>
+              updateDoc(doc(this.firestore, 'users', meta.membreUid), {
+                'storageUsed.oneshots': increment(file.size),
+              })
+            ).catch(() => {});
+          }
           observer.next({ progress: 100, done: true, photo: { id: docRef.id, ...data } });
           observer.complete();
         }
@@ -175,10 +177,19 @@ export class OneShotService {
     });
   }
 
-  async updatePhotoAssignment(oneShotId: string, photoId: string, data: { membreUid: string; nomMembre: string; themeId: string }): Promise<void> {
+  async updatePhotoAssignment(
+    oneShotId: string,
+    photoId: string,
+    data: { membreUid: string; nomMembre: string; themeId: string },
+    oldMembreUid?: string,
+    fileSize?: number
+  ): Promise<void> {
     await runInInjectionContext(this.injector, () =>
       updateDoc(doc(this.firestore, `oneshots/${oneShotId}/photos`, photoId), data)
     );
+    // La mise à jour cross-user de storageUsed est bloquée par les règles Firestore
+    // (allow write: if request.auth.uid == uid || isAdmin() — l'appel isAdmin() est
+    // interceptable). Le recalcul est délégué au bouton "Recalculer" dans admin/membre.
   }
 
   async deletePhoto(oneShotId: string, photo: OneShotPhoto): Promise<void> {
@@ -188,7 +199,7 @@ export class OneShotService {
         deleteDoc(doc(this.firestore, `oneshots/${oneShotId}/photos`, photo.id)),
       ])
     );
-    if (photo.fileSize) {
+    if (photo.fileSize && photo.membreUid) {
       await runInInjectionContext(this.injector, () =>
         updateDoc(doc(this.firestore, 'users', photo.membreUid), {
           'storageUsed.oneshots': increment(-photo.fileSize!),

@@ -109,7 +109,7 @@
 
 <!-- Template carte photo -->
 <ng-template #photoCard let-photo>
-  <div class="photo-card" [class.editing]="editingPhotoId() === photo.id">
+  <div class="photo-card" [class.editing]="editingPhotoId() === photo.id" [class.no-membre]="!photo.membreUid">
     <img [src]="photo.url" [alt]="photo.nomMembre" loading="lazy" class="photo-thumb">
 
     @if (editingPhotoId() !== photo.id) {
