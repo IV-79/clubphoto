@@ -11,31 +11,45 @@ service cloud.firestore {
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
+    function isRedacteur() {
+      return isLoggedIn() && (
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'redacteur'
+      );
+    }
+
     // Profils membres (lecture publique pour les galeries)
     match /users/{uid} {
       allow read: if true;
       allow write: if request.auth.uid == uid || isAdmin();
     }
 
+    // Articles (lecture publique pour statut=publie+portee=public, membres pour portee=membre)
+    match /articles/{articleId} {
+      allow read: if resource.data.statut == 'publie' && resource.data.portee == 'public';
+      allow read: if isLoggedIn() && resource.data.statut == 'publie';
+      allow read: if isRedacteur();
+      allow create: if isRedacteur();
+      allow update: if isRedacteur();
+      allow delete: if isRedacteur();
+    }
+
     // Photos du portfolio
     match /photos/{photoId} {
-      // Le propriétaire peut toujours lire ses propres photos (getMyPhotos sans filtre de visibilité)
-      // isAdmin() : permet la lecture en query sans filtre sur visibilite (nécessaire pour deleteMemberData)
       allow read: if resource.data.visibilite == 'public'
                   || (isLoggedIn() && resource.data.visibilite == 'membre')
                   || (isLoggedIn() && resource.data.uid == request.auth.uid)
                   || isAdmin();
       allow create: if isLoggedIn() && request.resource.data.uid == request.auth.uid;
-      // Propriétaire : tous les champs — autres membres connectés : likes seulement (atomique)
       allow update: if isLoggedIn() && resource.data.uid == request.auth.uid;
-      allow update: if isLoggedIn(); // likes via arrayUnion/arrayRemove par les autres membres
+      allow update: if isLoggedIn();
       allow delete: if isLoggedIn() && (resource.data.uid == request.auth.uid || isAdmin());
     }
 
     match /photos/{photoId}/commentaires/{commentaireId} {
       allow read: if true;
       allow create: if isLoggedIn() && request.resource.data.auteurUid == request.auth.uid;
-      allow update: if isLoggedIn(); // likes et replies via arrayUnion/arrayRemove
+      allow update: if isLoggedIn();
       allow delete: if isLoggedIn() && (
         resource.data.auteurUid == request.auth.uid ||
         get(/databases/$(database)/documents/photos/$(photoId)).data.uid == request.auth.uid ||
@@ -53,14 +67,14 @@ service cloud.firestore {
       allow read: if true;
       allow create: if isLoggedIn() && request.resource.data.membreUid == request.auth.uid;
       allow update: if isLoggedIn() && resource.data.membreUid == request.auth.uid;
-      allow update: if isLoggedIn(); // likes via arrayUnion/arrayRemove par les autres membres
+      allow update: if isLoggedIn();
       allow delete: if isLoggedIn() && (resource.data.membreUid == request.auth.uid || isAdmin());
     }
 
     match /themes/{themeId}/soumissions/{soumId}/commentaires/{commentaireId} {
       allow read: if true;
       allow create: if isLoggedIn() && request.resource.data.auteurUid == request.auth.uid;
-      allow update: if isLoggedIn(); // likes et replies
+      allow update: if isLoggedIn();
       allow delete: if isLoggedIn() && (
         resource.data.auteurUid == request.auth.uid || isAdmin()
       );
@@ -102,7 +116,7 @@ service cloud.firestore {
     match /oneshots/{oneShotId}/photos/{photoId} {
       allow read: if true;
       allow create: if isLoggedIn();
-      allow update: if isLoggedIn(); // likes via arrayUnion/arrayRemove
+      allow update: if isLoggedIn();
       allow delete: if isLoggedIn() && (
         resource.data.membreUid == request.auth.uid ||
         get(/databases/$(database)/documents/oneshots/$(oneShotId)).data.creatorUid == request.auth.uid ||
@@ -113,7 +127,7 @@ service cloud.firestore {
     match /oneshots/{oneShotId}/photos/{photoId}/commentaires/{commentaireId} {
       allow read: if true;
       allow create: if isLoggedIn() && request.resource.data.auteurUid == request.auth.uid;
-      allow update: if isLoggedIn(); // likes et replies
+      allow update: if isLoggedIn();
       allow delete: if isLoggedIn() && (
         resource.data.auteurUid == request.auth.uid ||
         get(/databases/$(database)/documents/oneshots/$(oneShotId)).data.creatorUid == request.auth.uid ||
@@ -147,7 +161,7 @@ service cloud.firestore {
     match /sorties/{sortieId}/photos/{photoId} {
       allow read: if true;
       allow create: if isLoggedIn();
-      allow update: if isLoggedIn(); // likes via arrayUnion/arrayRemove
+      allow update: if isLoggedIn();
       allow delete: if isLoggedIn() && (
         resource.data.uploaderUid == request.auth.uid ||
         isAdmin() ||
@@ -158,7 +172,7 @@ service cloud.firestore {
     match /sorties/{sortieId}/photos/{photoId}/commentaires/{commentaireId} {
       allow read: if true;
       allow create: if isLoggedIn() && request.resource.data.auteurUid == request.auth.uid;
-      allow update: if isLoggedIn(); // likes et replies via arrayUnion/arrayRemove
+      allow update: if isLoggedIn();
       allow delete: if isLoggedIn() && (
         resource.data.auteurUid == request.auth.uid ||
         isAdmin() ||
@@ -166,13 +180,12 @@ service cloud.firestore {
       );
     }
 
-    // Config site (lecture publique pour le formulaire upload, écriture admin)
+    // Config site (lecture publique, écriture admin)
     match /config/{docId} {
       allow read: if true;
       allow write: if isAdmin();
     }
 
-    // Soumissions (lecture publique pour les galeries de thèmes)
     match /soumissions/{soumissionId} {
       allow read: if true;
       allow create, update: if isLoggedIn() && request.resource.data.uid == request.auth.uid;

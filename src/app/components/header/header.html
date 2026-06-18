@@ -116,7 +116,7 @@
               Tableau de bord
             </a>
             <mat-divider />
-            <a mat-menu-item routerLink="/admin/articles">
+            <a mat-menu-item routerLink="/membre/articles">
               <mat-icon>article</mat-icon>
               Articles
             </a>
@@ -237,7 +237,7 @@
           @if (mobileOpenSection() === 'admin') {
             <ul class="mobile-sub">
               <li><a routerLink="/admin" (click)="closeMobileMenu()">Tableau de bord</a></li>
-              <li><a routerLink="/admin/articles" (click)="closeMobileMenu()">Articles</a></li>
+              <li><a routerLink="/membre/articles" (click)="closeMobileMenu()">Articles</a></li>
               <li><a routerLink="/admin/reunions" (click)="closeMobileMenu()">Réunions</a></li>
               <li><a routerLink="/admin/themes" (click)="closeMobileMenu()">Thèmes du mois</a></li>
               <li><a routerLink="/admin/membres" (click)="closeMobileMenu()">Membres</a></li>

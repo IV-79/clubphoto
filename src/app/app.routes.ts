@@ -6,7 +6,7 @@ import { Reunions } from './pages/admin-dashboard/reunions/reunions';
 import { AdminConfig } from './pages/admin-dashboard/config/config';
 import { AdminArticles } from './pages/admin-dashboard/articles/articles';
 import { AdminThemes } from './pages/admin-dashboard/themes/themes';
-import { authGuard, memberGuard, loginGuard } from './guards/auth.guard';
+import { authGuard, memberGuard, loginGuard, editorGuard } from './guards/auth.guard';
 import { PublicLayout } from './layouts/public-layout/public-layout';
 import { MemberLayout } from './layouts/member-layout/member-layout';
 import { Home } from './pages/home/home';
@@ -16,6 +16,8 @@ import { Calendrier } from './pages/calendrier/calendrier';
 import { Contact } from './pages/contact/contact';
 import { MembrePortfolio } from './pages/membre/portfolio/portfolio';
 import { MembreProfil } from './pages/membre/profil/profil';
+import { ArticlesGestion } from './pages/membre/articles/articles-gestion';
+import { ArticleForm } from './pages/membre/articles/article-form';
 import { OneShotsListe } from './pages/membre/oneshots/oneshots-liste/oneshots-liste';
 import { OneShotCreer } from './pages/membre/oneshots/oneshot-creer/oneshot-creer';
 import { OneShotGerer } from './pages/membre/oneshots/oneshot-gerer/oneshot-gerer';
@@ -82,6 +84,9 @@ export const routes: Routes = [
     children: [
       { path: 'portfolio', component: MembrePortfolio },
       { path: 'profil', component: MembreProfil },
+      { path: 'articles', component: ArticlesGestion, canActivate: [editorGuard] },
+      { path: 'articles/creer', component: ArticleForm, canActivate: [editorGuard] },
+      { path: 'articles/:id/editer', component: ArticleForm, canActivate: [editorGuard] },
       { path: 'oneshots/creer', component: OneShotCreer },
       { path: 'oneshots/:id/gerer', component: OneShotGerer },
       { path: 'oneshots/:id/photos', component: OneShotPhotos },

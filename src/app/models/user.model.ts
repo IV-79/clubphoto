@@ -3,7 +3,7 @@ export interface UserProfile {
   email: string;
   nom: string;
   prenom?: string;
-  role: 'admin' | 'membre';
+  role: 'admin' | 'redacteur' | 'membre';
   isSuspended?: boolean;
   derniereConnexion?: string;
   storageUsed?: { portfolio: number; themes: number; oneshots: number };

@@ -83,7 +83,7 @@ export class AuthService {
     return profile;
   }
 
-  async getUserRole(): Promise<'admin' | 'membre' | null> {
+  async getUserRole(): Promise<'admin' | 'redacteur' | 'membre' | null> {
     const user = this.auth.currentUser;
     if (!user) return null;
     const snap = await runInInjectionContext(this.injector, () =>

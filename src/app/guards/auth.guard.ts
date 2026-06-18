@@ -29,6 +29,30 @@ export const authGuard: CanActivateFn = (route, state) => {
   );
 };
 
+export const editorGuard: CanActivateFn = (route, state) => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+  const auth = inject(Auth);
+  const loginModal = inject(LoginModalService);
+
+  return from(auth.authStateReady()).pipe(
+    switchMap(() => authService.user$.pipe(take(1))),
+    switchMap(user => {
+      if (!user) {
+        loginModal.open(state.url);
+        return of(false);
+      }
+      return from(authService.getUserRole()).pipe(
+        map(role => {
+          if (role === 'admin' || role === 'redacteur') return true;
+          router.navigate(['/']);
+          return false;
+        })
+      );
+    })
+  );
+};
+
 export const memberGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const auth = inject(Auth);
@@ -58,6 +82,7 @@ export const loginGuard: CanActivateFn = () => {
       return from(authService.getUserRole()).pipe(
         map(role => {
           if (role === 'admin') router.navigate(['/admin']);
+          else if (role === 'redacteur') router.navigate(['/membre/articles']);
           else router.navigate(['/membre/portfolio']);
           return false;
         })

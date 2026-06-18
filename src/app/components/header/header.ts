@@ -41,8 +41,7 @@ export class Header {
 
   profile$ = this.authService.currentUserProfile$;
 
-  isAdmin$ = this.profile$.pipe(map(p => p?.role === 'admin'));
-  isMembre$ = this.profile$.pipe(map(p => p?.role === 'membre'));
+  isAdmin$    = this.profile$.pipe(map(p => p?.role === 'admin'));
   isLoggedIn$ = this.authService.user$.pipe(map(user => !!user));
 
   logout() {

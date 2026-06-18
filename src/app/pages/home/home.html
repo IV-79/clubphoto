@@ -71,20 +71,20 @@
         <div class="articles-grid">
           @for (article of articles; track article.id) {
             <div class="article-card">
-              @if (article.imageUrl) {
-                <img class="article-img" [src]="article.imageUrl" [alt]="article.titre">
+              @if (article.couvertureUrl) {
+                <img class="article-img" [src]="article.couvertureUrl" [alt]="article.titre">
               } @else {
                 <div class="article-img-placeholder">
                   <mat-icon>photo_camera</mat-icon>
                 </div>
               }
               <div class="article-body">
-                <span class="article-categorie">{{ article.categorie }}</span>
+                <span class="article-categorie">{{ article.type }}</span>
                 <h3 class="article-title">{{ article.titre }}</h3>
-                <p class="article-date">{{ article.datePublication | date:'d MMMM yyyy':'':'fr' }}</p>
-                <p class="article-extrait">{{ article.extrait }}</p>
-                <a [routerLink]="['/actualites', article.id]" class="card-link">
-                  Lire la suite <mat-icon class="link-arrow">arrow_forward</mat-icon>
+                <p class="article-date">{{ article.dateCreation | date:'d MMMM yyyy':'':'fr' }}</p>
+                <p class="article-extrait">{{ article.description }}</p>
+                <a routerLink="/actualites" class="card-link">
+                  Voir les actualités <mat-icon class="link-arrow">arrow_forward</mat-icon>
                 </a>
               </div>
             </div>
