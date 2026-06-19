@@ -103,10 +103,10 @@ import { Article, getArticleTypeMeta } from '../../models/article.model';
     .lock-icon { color: #888; font-size: 18px; width: 18px; height: 18px; }
     .titre { margin: 0 0 8px; font-size: .97rem; font-weight: 600; line-height: 1.35; color: #1a1a1a; }
     .meta {
-      display: flex; align-items: center; gap: 5px;
+      display: flex; align-items: flex-start; gap: 5px;
       margin: 4px 0 0; font-size: .78rem; color: #666;
     }
-    .meta mat-icon { font-size: 13px; width: 13px; height: 13px; }
+    .meta mat-icon { font-size: 13px; width: 13px; height: 13px; flex-shrink: 0; margin-top: 1px; }
     .lieu-link { color: inherit; text-decoration: none; }
     .lieu-link:hover { text-decoration: underline; }
     .edit-btn {

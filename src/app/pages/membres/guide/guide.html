@@ -2,7 +2,7 @@
 
   <header class="guide-hero">
     <h1>Guide du site</h1>
-    <p class="guide-intro">Comment utiliser le site et participer aux activités du club : Thème du mois, Sortie Photo et OneShot.</p>
+    <p class="guide-intro">Comment utiliser le site, partager des documents et participer aux activités du club : Actualités, Calendrier, Documents, Thème du mois, Sortie Photo et OneShot.</p>
   </header>
 
   <!-- Navigation rapide -->
@@ -10,6 +10,18 @@
     <a (click)="scrollTo('general')" class="guide-nav-link">
       <span class="guide-nav-icon">💡</span>
       Général
+    </a>
+    <a (click)="scrollTo('actualites')" class="guide-nav-link">
+      <span class="guide-nav-icon">📰</span>
+      Actualités
+    </a>
+    <a (click)="scrollTo('calendrier')" class="guide-nav-link">
+      <span class="guide-nav-icon">📅</span>
+      Calendrier
+    </a>
+    <a (click)="scrollTo('documents')" class="guide-nav-link">
+      <span class="guide-nav-icon">📁</span>
+      Documents
     </a>
     <a (click)="scrollTo('theme')" class="guide-nav-link">
       <span class="guide-nav-icon">🗓️</span>
@@ -103,10 +115,10 @@
 
     <!-- Lightbox -->
     <div class="guide-card">
-      <h3>Visionner une photo — la fiche info ⓘ</h3>
+      <h3>Visionner une photo — la fiche info</h3>
       <p>
-        Sur toutes les pages de photos, le bouton <strong>ⓘ</strong> en haut à droite de chaque carte
-        ouvre la fiche info de la photo (aperçu grand format, infos techniques, likes et commentaires).
+        Sur toutes les pages de photos, <strong>cliquez sur une carte</strong> pour ouvrir la fiche info
+        (aperçu grand format, infos techniques, likes et commentaires).
       </p>
       <ul class="guide-steps">
         <li>Naviguez entre les photos avec les <strong>flèches à l'écran</strong> ou les touches <kbd>←</kbd> <kbd>→</kbd> du clavier.</li>
@@ -142,6 +154,158 @@
         <li>Les commentaires sont visibles par tous les membres connectés.</li>
       </ul>
       <p class="guide-note">Vous devez être connecté pour commenter.</p>
+    </div>
+  </section>
+
+
+  <!-- ── ACTUALITÉS ───────────────────────────────────── -->
+  <section class="guide-section" id="actualites">
+    <div class="section-header">
+      <h2>Actualités</h2>
+      <p class="section-subtitle">Les nouvelles du club : infos, événements, expositions, annonces.</p>
+    </div>
+
+    <div class="guide-card">
+      <h3>Consulter les actualités</h3>
+      <p>
+        La page <a routerLink="/actualites" class="inline-link">Actualités</a> affiche toutes les
+        publications du club sous forme de cartes. Les articles épinglés apparaissent en tête.
+      </p>
+      <ul class="guide-steps">
+        <li>Filtrez les articles par type avec les boutons en haut de page :
+          <strong>Info, Encart, Exposition, Événement, Annonce</strong>.</li>
+        <li><strong>Cliquez sur une carte</strong> pour ouvrir l'article complet (lightbox).
+          Vous y trouverez la description complète, la date, le lieu et un éventuel lien externe.</li>
+        <li>Si un lieu est renseigné, cliquez dessus pour l'ouvrir dans <strong>Google Maps</strong>.</li>
+        <li>Fermez la lightbox avec la croix ou la touche <kbd>Échap</kbd>.</li>
+      </ul>
+    </div>
+
+    <div class="guide-card guide-card-admin">
+      <div class="admin-card-header">
+        <mat-icon class="admin-icon">admin_panel_settings</mat-icon>
+        <h3>Publier un article (administrateurs et rédacteurs)</h3>
+      </div>
+      <p>
+        Le bouton <strong>+ Nouvel article</strong> est visible en haut de la page Actualités pour les
+        administrateurs et les rédacteurs. Depuis la page de gestion (<strong>Admin → Articles</strong>),
+        retrouvez la liste de tous vos articles.
+      </p>
+      <div class="admin-fields">
+        <div class="admin-field-row">
+          <span class="field-label">Type</span>
+          <span class="field-desc">Info, Encart, Exposition, Événement ou Annonce — détermine la couleur du badge.</span>
+        </div>
+        <div class="admin-field-row">
+          <span class="field-label">Statut</span>
+          <span class="field-desc">Brouillon (non visible), Publié (visible), Expiré.</span>
+        </div>
+        <div class="admin-field-row">
+          <span class="field-label">Portée</span>
+          <span class="field-desc">Public (tout le monde) ou Membres uniquement (connexion requise).</span>
+        </div>
+        <div class="admin-field-row">
+          <span class="field-label">Image de couverture</span>
+          <span class="field-desc">Optionnelle. Glissez-déposez une image ou cliquez pour choisir.</span>
+        </div>
+        <div class="admin-field-row">
+          <span class="field-label">Date & Lieu</span>
+          <span class="field-desc">Pour les événements. Le lieu devient un lien Google Maps dans la carte et la lightbox.</span>
+        </div>
+        <div class="admin-field-row">
+          <span class="field-label">Épingler</span>
+          <span class="field-desc">L'article remontera toujours en tête, quelle que soit sa date.</span>
+        </div>
+      </div>
+      <p class="guide-note">
+        Pour modifier un article depuis la page Actualités, survolez sa carte — une icône crayon apparaît en haut à droite.
+      </p>
+    </div>
+  </section>
+
+
+  <!-- ── CALENDRIER ─────────────────────────────────── -->
+  <section class="guide-section" id="calendrier">
+    <div class="section-header">
+      <h2>Calendrier</h2>
+      <p class="section-subtitle">Toutes les dates du club au même endroit.</p>
+    </div>
+
+    <div class="guide-card">
+      <h3>Consulter le calendrier</h3>
+      <p>
+        Accessible via <strong>Membres → Calendrier</strong>. Il regroupe les trois types d'événements du club :
+      </p>
+      <ul class="guide-steps">
+        <li><strong>Réunions</strong> — assemblées, conseils d'administration, séances de travail.</li>
+        <li><strong>Sorties Photo</strong> — sorties organisées par les membres.</li>
+        <li><strong>OneShots</strong> — événements photo compétitifs créés par les membres.</li>
+      </ul>
+      <p>
+        Chaque jour peut afficher plusieurs événements. Cliquez sur un événement pour en voir les détails
+        (lieu, description, date complète). Des filtres permettent d'afficher un seul type à la fois.
+      </p>
+      <p class="guide-note">Connexion requise pour accéder au calendrier.</p>
+    </div>
+  </section>
+
+
+  <!-- ── DOCUMENTS ──────────────────────────────────── -->
+  <section class="guide-section" id="documents">
+    <div class="section-header">
+      <h2>Documents</h2>
+      <p class="section-subtitle">Espace de partage de fichiers entre membres : statuts, comptes-rendus, formulaires, ressources…</p>
+    </div>
+
+    <div class="guide-card">
+      <h3>Télécharger un document</h3>
+      <p>
+        Accessible via <strong>Membres → Documents</strong>. Les fichiers sont classés par dossiers
+        définis par l'administration.
+      </p>
+      <ul class="guide-steps">
+        <li>Filtrez par dossier avec les boutons en haut de la liste.</li>
+        <li>Cliquez sur le bouton <strong>⬇</strong> à droite d'un document pour l'ouvrir ou le télécharger.</li>
+        <li>L'icône colorée à gauche indique le type de fichier (PDF, Word, Excel, image, archive…).</li>
+      </ul>
+      <p class="guide-note">Connexion requise pour accéder aux documents et les télécharger.</p>
+    </div>
+
+    <div class="guide-card">
+      <h3>Déposer un document</h3>
+      <ol class="guide-steps">
+        <li>Cliquez sur <strong>Nouveau document</strong> en haut de la page.</li>
+        <li>Renseignez le <strong>nom du fichier</strong> tel qu'il apparaîtra dans la liste.</li>
+        <li>Choisissez le <strong>dossier</strong> de destination.</li>
+        <li>Glissez votre fichier dans la zone d'upload ou cliquez pour le sélectionner.</li>
+        <li>Cliquez <strong>Uploader</strong> — une barre de progression s'affiche.</li>
+      </ol>
+      <p class="guide-note">Tous les types de fichiers sont acceptés. La taille maximale n'est pas limitée par le site.</p>
+    </div>
+
+    <div class="guide-card">
+      <h3>Remplacer ou supprimer un document</h3>
+      <p>Vous pouvez modifier uniquement les documents que <strong>vous avez déposés</strong>.</p>
+      <ul class="guide-steps">
+        <li><strong>Remplacer</strong> (icône crayon) — met à jour le fichier et optionnellement son nom.
+          L'ancienne version est définitivement remplacée.</li>
+        <li><strong>Supprimer</strong> (icône poubelle) — supprime le fichier définitivement après confirmation.</li>
+      </ul>
+      <p class="guide-note">
+        Un administrateur peut supprimer n'importe quel document. S'il souhaite en prendre possession,
+        il supprime l'existant et en dépose un nouveau à son nom.
+      </p>
+    </div>
+
+    <div class="guide-card guide-card-admin">
+      <div class="admin-card-header">
+        <mat-icon class="admin-icon">admin_panel_settings</mat-icon>
+        <h3>Gérer les dossiers (administrateurs)</h3>
+      </div>
+      <p>
+        Depuis <strong>Admin → Dossiers documents</strong>, créez, renommez et réordonnez les dossiers
+        disponibles. Les dossiers supprimés ne suppriment pas les fichiers qu'ils contenaient.
+      </p>
     </div>
   </section>
 
@@ -278,7 +442,7 @@
     <div class="guide-card">
       <h3>Soumettre une photo</h3>
       <ol class="guide-steps">
-        <li>Allez sur <a routerLink="/galeries/themesdumois" class="inline-link">Galeries → Thèmes du mois</a>.</li>
+        <li>Allez sur <a routerLink="/galeries/themesdumois" class="inline-link">Activités → Thèmes du mois</a>.</li>
         <li>Ouvrez le thème dont le statut est <span class="badge-inline step-ouvert">Ouvert</span>.</li>
         <li>Glissez votre photo dans la zone d'upload ou cliquez dessus pour choisir un fichier.</li>
         <li>La photo est compressée automatiquement (max 5 Mo, JPEG/PNG).</li>
@@ -303,9 +467,8 @@
     <div class="guide-card">
       <h3>Visionner les photos</h3>
       <p>
-        Dans toutes les phases, cliquez sur le bouton <strong>ⓘ</strong> en haut à droite d'une photo
-        pour ouvrir sa fiche info. Naviguez avec les flèches à l'écran ou les touches
-        <kbd>←</kbd> <kbd>→</kbd> du clavier.
+        Dans toutes les phases, <strong>cliquez sur une photo</strong> pour ouvrir sa fiche info.
+        Naviguez avec les flèches à l'écran ou les touches <kbd>←</kbd> <kbd>→</kbd> du clavier.
       </p>
     </div>
   </section>
@@ -335,7 +498,7 @@
     <div class="guide-card">
       <h3>Organiser une sortie</h3>
       <ol class="guide-steps">
-        <li>Allez sur <a routerLink="/galeries/sorties" class="inline-link">Galeries → Sorties Photo</a>.</li>
+        <li>Allez sur <a routerLink="/galeries/sorties" class="inline-link">Activités → Sorties Photo</a>.</li>
         <li>Cliquez <strong>+ Nouvelle sortie</strong>.</li>
         <li>Renseignez le titre, la date, le lieu et une description.</li>
         <li>La sortie est immédiatement visible par tous les membres.</li>
@@ -347,7 +510,7 @@
     <div class="guide-card">
       <h3>Participer à une sortie</h3>
       <ol class="guide-steps">
-        <li>Rendez-vous sur <a routerLink="/galeries/sorties" class="inline-link">Galeries → Sorties Photo</a>.</li>
+        <li>Rendez-vous sur <a routerLink="/galeries/sorties" class="inline-link">Activités → Sorties Photo</a>.</li>
         <li>Ouvrez une sortie à venir et cliquez <strong>Je participe</strong> pour vous inscrire.</li>
         <li>Après la sortie, revenez sur la page et uploadez vos photos dans la zone prévue à cet effet.</li>
         <li>La photo la plus likée devient automatiquement la couverture de la sortie.</li>
@@ -359,7 +522,7 @@
       <h3>Photos et interactions</h3>
       <ul class="guide-steps">
         <li>Glissez vos fichiers dans la zone d'upload ou cliquez pour les sélectionner. Plusieurs fichiers acceptés en une fois.</li>
-        <li>Cliquez sur le bouton <strong>ⓘ</strong> pour ouvrir la fiche info d'une photo. Naviguez avec <kbd>←</kbd> <kbd>→</kbd>.</li>
+        <li><strong>Cliquez sur une photo</strong> pour ouvrir sa fiche info. Naviguez avec <kbd>←</kbd> <kbd>→</kbd>.</li>
         <li>Likez les photos avec le bouton ♥ sur la carte ou dans la lightbox.</li>
         <li>Laissez un commentaire ou une réponse depuis la lightbox.</li>
         <li>Vous pouvez supprimer vos propres photos. L'organisateur peut supprimer toutes les photos de la sortie.</li>
@@ -451,7 +614,7 @@
     <div class="guide-card">
       <h3>Participer à un OneShot</h3>
       <ol class="guide-steps">
-        <li>Rendez-vous sur <a routerLink="/galeries/oneshots" class="inline-link">Galeries → OneShot</a>.</li>
+        <li>Rendez-vous sur <a routerLink="/galeries/oneshots" class="inline-link">Activités → OneShot</a>.</li>
         <li>Ouvrez un événement dont le statut est <span class="badge-inline inscription">Inscriptions ouvertes</span>.</li>
         <li>Inscrivez-vous — l'organisateur pourra ensuite uploader vos photos.</li>
         <li>Pendant la phase <span class="badge-inline vote">Vote</span>, parcourez les photos et votez pour celles que vous préférez (sauf les vôtres).</li>
