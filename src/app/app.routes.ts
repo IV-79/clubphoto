@@ -33,6 +33,8 @@ import { SortieCreer } from './pages/membre/sorties/sortie-creer/sortie-creer';
 import { SortieGerer } from './pages/membre/sorties/sortie-gerer/sortie-gerer';
 import { MembresGuide } from './pages/membres/guide/guide';
 import { CompleterProfilComponent } from './pages/completer-profil/completer-profil.component';
+import { Documents } from './pages/membre/documents/documents';
+import { DocumentDossiers } from './pages/admin-dashboard/document-dossiers/document-dossiers';
 
 export const routes: Routes = [
   {
@@ -73,6 +75,7 @@ export const routes: Routes = [
           { path: 'reunions', component: Reunions },
           { path: 'themes', component: AdminThemes },
           { path: 'config', component: AdminConfig },
+          { path: 'dossiers', component: DocumentDossiers },
         ]
       },
     ]
@@ -90,6 +93,7 @@ export const routes: Routes = [
       { path: 'oneshots/creer', component: OneShotCreer },
       { path: 'oneshots/:id/gerer', component: OneShotGerer },
       { path: 'oneshots/:id/photos', component: OneShotPhotos },
+      { path: 'documents', component: Documents },
       { path: 'sorties/creer', component: SortieCreer },
       { path: 'sorties/:id/gerer', component: SortieGerer },
       { path: '', redirectTo: 'portfolio', pathMatch: 'full' }

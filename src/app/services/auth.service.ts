@@ -10,6 +10,7 @@ import {
 import { Storage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from '@angular/fire/storage';
 import { Router } from '@angular/router';
 import { from, switchMap, of, Observable, map, shareReplay } from 'rxjs';
+import { DocumentService } from './document.service';
 import { UserProfile } from '../models/user.model';
 
 @Injectable({ providedIn: 'root' })
@@ -19,6 +20,7 @@ export class AuthService {
   private storage = inject(Storage);
   private router = inject(Router);
   private injector = inject(Injector);
+  private documentService = inject(DocumentService);
 
   user$ = authState(this.auth).pipe(shareReplay(1));
 
@@ -197,8 +199,16 @@ export class AuthService {
       }
     }
 
+    let documents = 0;
+    const docsSnap = await runInInjectionContext(this.injector, () =>
+      getDocs(query(collection(this.firestore, 'documents'), where('uploadeurUid', '==', uid)))
+    );
+    for (const d of docsSnap.docs) {
+      documents += (d.data() as { taille?: number }).taille ?? 0;
+    }
+
     await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, 'users', uid), { storageUsed: { portfolio, themes, oneshots } })
+      updateDoc(doc(this.firestore, 'users', uid), { storageUsed: { portfolio, themes, oneshots, documents } })
     );
   }
 
@@ -269,7 +279,10 @@ export class AuthService {
       );
     }
 
-    // 5. Profil Firestore
+    // 5. Documents partagés
+    await this.documentService.deleteAllDocumentsByUser(uid);
+
+    // 6. Profil Firestore
     deletes.push(runInInjectionContext(this.injector, () =>
       deleteDoc(doc(this.firestore, 'users', uid))
     ));

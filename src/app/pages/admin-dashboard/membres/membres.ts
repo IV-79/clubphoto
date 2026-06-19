@@ -87,7 +87,7 @@ export class Membres {
   totalStorage(m: UserProfile): number {
     const s = m.storageUsed;
     if (!s) return 0;
-    return Math.max(0, (s.portfolio ?? 0) + (s.themes ?? 0) + (s.oneshots ?? 0));
+    return Math.max(0, (s.portfolio ?? 0) + (s.themes ?? 0) + (s.oneshots ?? 0) + (s.documents ?? 0));
   }
 
   formatStorage(bytes: number): string {
@@ -103,6 +103,7 @@ export class Membres {
       `Portfolio : ${this.formatStorage(s.portfolio ?? 0)}`,
       `Thèmes du mois : ${this.formatStorage(s.themes ?? 0)}`,
       `OneShots : ${this.formatStorage(s.oneshots ?? 0)}`,
+      `Documents : ${this.formatStorage(s.documents ?? 0)}`,
     ].join('\n');
   }
 

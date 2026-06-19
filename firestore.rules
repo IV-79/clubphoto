@@ -180,6 +180,20 @@ service cloud.firestore {
       );
     }
 
+    // Dossiers de documents (lecture membres, écriture admin)
+    match /documentDossiers/{dossierId} {
+      allow read: if isLoggedIn();
+      allow write: if isAdmin();
+    }
+
+    // Documents partagés
+    match /documents/{documentId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn() && request.resource.data.uploadeurUid == request.auth.uid;
+      allow update: if isLoggedIn() && resource.data.uploadeurUid == request.auth.uid;
+      allow delete: if isLoggedIn() && (resource.data.uploadeurUid == request.auth.uid || isAdmin());
+    }
+
     // Config site (lecture publique, écriture admin)
     match /config/{docId} {
       allow read: if true;

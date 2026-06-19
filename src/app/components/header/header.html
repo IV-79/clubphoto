@@ -22,6 +22,11 @@
             Le Club <mat-icon class="arrow-icon">expand_more</mat-icon>
           </button>
           <mat-menu #clubMenu="matMenu" class="nav-menu">
+            <a mat-menu-item routerLink="/galeries/membres">
+              <mat-icon>people</mat-icon>
+              Portfolios des membres
+            </a>
+            <mat-divider />
             <a mat-menu-item routerLink="/le-club/histoire">Histoire</a>
             <a mat-menu-item routerLink="/le-club/bureau">Le Bureau</a>
             <a mat-menu-item routerLink="/le-club/adhesion">Adhésion</a>
@@ -34,13 +39,9 @@
 
         <li class="has-dropdown">
           <button [matMenuTriggerFor]="galeriesMenu" class="nav-dropdown-btn">
-            Galeries <mat-icon class="arrow-icon">expand_more</mat-icon>
+            Activités <mat-icon class="arrow-icon">expand_more</mat-icon>
           </button>
           <mat-menu #galeriesMenu="matMenu" class="nav-menu">
-            <a mat-menu-item routerLink="/galeries/membres">
-              <mat-icon>people</mat-icon>
-              Portfolios des membres
-            </a>
             <a mat-menu-item routerLink="/galeries/themesdumois">
               <mat-icon>photo_camera</mat-icon>
               Thèmes du mois
@@ -65,6 +66,10 @@
             <a mat-menu-item routerLink="/calendrier">
               <mat-icon>event</mat-icon>
               Calendrier
+            </a>
+            <a mat-menu-item routerLink="/membre/documents">
+              <mat-icon>folder_shared</mat-icon>
+              Documents
             </a>
             <a mat-menu-item routerLink="/membres/guide">
               <mat-icon>menu_book</mat-icon>
@@ -134,9 +139,13 @@
               Membres
             </a>
             <mat-divider />
+            <a mat-menu-item routerLink="/admin/dossiers">
+              <mat-icon>folder_shared</mat-icon>
+              Dossiers documents
+            </a>
             <a mat-menu-item routerLink="/admin/config">
-              <mat-icon>settings</mat-icon>
-              Config site
+              <mat-icon>category</mat-icon>
+              Catégories photos
             </a>
             <mat-divider />
             <button mat-menu-item (click)="logout()">
@@ -170,6 +179,7 @@
         </button>
         @if (mobileOpenSection() === 'club') {
           <ul class="mobile-sub">
+            <li><a routerLink="/galeries/membres" (click)="closeMobileMenu()">Portfolios des membres</a></li>
             <li><a routerLink="/le-club/histoire" (click)="closeMobileMenu()">Histoire</a></li>
             <li><a routerLink="/le-club/bureau" (click)="closeMobileMenu()">Le Bureau</a></li>
             <li><a routerLink="/le-club/adhesion" (click)="closeMobileMenu()">Adhésion</a></li>
@@ -182,12 +192,11 @@
       <!-- Galeries -->
       <li class="mobile-has-sub">
         <button class="mobile-sub-toggle" (click)="toggleMobileSection('galeries')">
-          Galeries
+          Activités
           <mat-icon class="toggle-arrow">{{ mobileOpenSection() === 'galeries' ? 'expand_less' : 'expand_more' }}</mat-icon>
         </button>
         @if (mobileOpenSection() === 'galeries') {
         <ul class="mobile-sub">
-          <li><a routerLink="/galeries/membres" (click)="closeMobileMenu()">Portfolios des membres</a></li>
           <li><a routerLink="/galeries/themesdumois" (click)="closeMobileMenu()">Thèmes du mois</a></li>
           <li><a routerLink="/galeries/sorties" (click)="closeMobileMenu()">Sorties Photo</a></li>
           <li><a routerLink="/galeries/oneshots" (click)="closeMobileMenu()">OneShot</a></li>
@@ -204,6 +213,7 @@
           @if (mobileOpenSection() === 'membres') {
             <ul class="mobile-sub">
               <li><a routerLink="/calendrier" (click)="closeMobileMenu()">Calendrier</a></li>
+              <li><a routerLink="/membre/documents" (click)="closeMobileMenu()">Documents</a></li>
               <li><a routerLink="/membres/guide" (click)="closeMobileMenu()">Guide du site</a></li>
             </ul>
           }
@@ -241,7 +251,8 @@
               <li><a routerLink="/admin/reunions" (click)="closeMobileMenu()">Réunions</a></li>
               <li><a routerLink="/admin/themes" (click)="closeMobileMenu()">Thèmes du mois</a></li>
               <li><a routerLink="/admin/membres" (click)="closeMobileMenu()">Membres</a></li>
-              <li><a routerLink="/admin/config" (click)="closeMobileMenu()">Config site</a></li>
+              <li><a routerLink="/admin/dossiers" (click)="closeMobileMenu()">Dossiers documents</a></li>
+              <li><a routerLink="/admin/config" (click)="closeMobileMenu()">Catégories photos</a></li>
             </ul>
           }
         </li>

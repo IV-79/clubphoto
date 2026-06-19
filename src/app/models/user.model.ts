@@ -6,7 +6,7 @@ export interface UserProfile {
   role: 'admin' | 'redacteur' | 'membre';
   isSuspended?: boolean;
   derniereConnexion?: string;
-  storageUsed?: { portfolio: number; themes: number; oneshots: number };
+  storageUsed?: { portfolio: number; themes: number; oneshots: number; documents?: number };
   dateAdhesion: string;
   bio?: string;
   appareil?: string;
