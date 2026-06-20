@@ -211,6 +211,7 @@
 }
 
 .photo-card:hover .photo-overlay { opacity: 1; }
+@media (hover: none) { .photo-card .photo-overlay { opacity: 1; } }
 
 .overlay-bottom { display: flex; align-items: center; }
 

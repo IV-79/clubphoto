@@ -1,7 +1,7 @@
 import { Injectable, inject, Injector, runInInjectionContext } from '@angular/core';
 import {
   Firestore, collection, collectionData, doc,
-  addDoc, updateDoc, deleteDoc, query, orderBy, deleteField
+  addDoc, updateDoc, deleteDoc, query, orderBy, where, deleteField
 } from '@angular/fire/firestore';
 import { Storage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from '@angular/fire/storage';
 import { Observable } from 'rxjs';
@@ -18,6 +18,33 @@ export class ArticleService {
     return runInInjectionContext(this.injector, () =>
       collectionData(
         query(collection(this.firestore, 'articles'), orderBy('dateCreation', 'desc')),
+        { idField: 'id' }
+      )
+    ) as Observable<Article[]>;
+  }
+
+  getPublishedArticles(): Observable<Article[]> {
+    return runInInjectionContext(this.injector, () =>
+      collectionData(
+        query(
+          collection(this.firestore, 'articles'),
+          where('statut', '==', 'publie'),
+          orderBy('dateCreation', 'desc')
+        ),
+        { idField: 'id' }
+      )
+    ) as Observable<Article[]>;
+  }
+
+  getPublicArticles(): Observable<Article[]> {
+    return runInInjectionContext(this.injector, () =>
+      collectionData(
+        query(
+          collection(this.firestore, 'articles'),
+          where('statut', '==', 'publie'),
+          where('portee', '==', 'public'),
+          orderBy('dateCreation', 'desc')
+        ),
         { idField: 'id' }
       )
     ) as Observable<Article[]>;

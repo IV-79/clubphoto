@@ -119,6 +119,7 @@ import { Article, getArticleTypeMeta } from '../../models/article.model';
       text-decoration: none;
     }
     .card:hover .edit-btn { opacity: 1; }
+    @media (hover: none) { .card .edit-btn { opacity: 1; } }
     .edit-btn mat-icon { font-size: 17px; width: 17px; height: 17px; }
   `]
 })

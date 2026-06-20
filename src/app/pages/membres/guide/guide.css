@@ -264,6 +264,55 @@
   .admin-timeline  { gap: 0.2rem; font-size: 0.75rem; }
 }
 
+/* Navigation flow diagram */
+.nav-flow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin: 0.75rem 0;
+  justify-content: center;
+}
+
+.flow-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background: #fff;
+  border: 1.5px solid #d1d5db;
+  border-radius: 10px;
+  padding: 0.5rem 0.8rem;
+  min-width: 82px;
+  gap: 0.1rem;
+  font-size: 0.8rem;
+}
+
+.flow-node-hl {
+  border-color: #4f46e5;
+  background: #f5f3ff;
+}
+
+.flow-emoji { font-size: 1.35rem; line-height: 1; margin-bottom: 0.15rem; }
+
+.flow-sub { font-size: 0.62rem; color: #6b7280; }
+
+.flow-conn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #9ca3af;
+  gap: 0.05rem;
+}
+
+.flow-act { font-size: 0.62rem; color: #4f46e5; font-weight: 600; white-space: nowrap; }
+
+@media (max-width: 600px) {
+  .nav-flow { flex-direction: column; gap: 0.15rem; }
+  .flow-conn { flex-direction: row; gap: 0.3rem; }
+  .flow-conn .flow-act { order: 2; }
+}
+
 /* Note */
 .guide-note {
   margin-top: 0.75rem;

@@ -141,6 +141,7 @@
 }
 
 .storage-cell-wrap:hover .recalc-btn { opacity: 1; }
+@media (hover: none) { .storage-cell-wrap .recalc-btn { opacity: 1; } }
 
 .recalc-btn mat-icon { font-size: 14px; width: 14px; height: 14px; line-height: 14px; }
 

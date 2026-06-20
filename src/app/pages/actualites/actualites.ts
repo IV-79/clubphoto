@@ -1,7 +1,7 @@
 import { Component, inject, signal, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { switchMap, map } from 'rxjs';
+import { switchMap } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../services/auth.service';
@@ -94,11 +94,7 @@ export class Actualites {
   articles = toSignal(
     this.authService.user$.pipe(
       switchMap(user =>
-        this.articleService.getAllArticles().pipe(
-          map(list => list.filter(a =>
-            a.statut === 'publie' && (user ? true : a.portee === 'public')
-          ))
-        )
+        user ? this.articleService.getPublishedArticles() : this.articleService.getPublicArticles()
       )
     ),
     { initialValue: [] as Article[] }

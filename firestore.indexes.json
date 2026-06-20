@@ -1,0 +1,22 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "statut", "order": "ASCENDING" },
+        { "fieldPath": "dateCreation", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "statut", "order": "ASCENDING" },
+        { "fieldPath": "portee", "order": "ASCENDING" },
+        { "fieldPath": "dateCreation", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

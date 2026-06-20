@@ -45,6 +45,47 @@
       <p class="section-subtitle">Fonctionnalités communes à toutes les sections du site.</p>
     </div>
 
+    <!-- Flow navigation -->
+    <div class="guide-card">
+      <h3>Comment naviguer dans le site</h3>
+      <div class="nav-flow">
+        <div class="flow-node">
+          <span class="flow-emoji">📄</span>
+          <strong>Page</strong>
+          <span class="flow-sub">grille de cartes</span>
+        </div>
+        <div class="flow-conn">
+          <span class="flow-act">vous voyez</span>
+          <span>→</span>
+        </div>
+        <div class="flow-node">
+          <span class="flow-emoji">🃏</span>
+          <strong>Carte</strong>
+          <span class="flow-sub">aperçu condensé</span>
+        </div>
+        <div class="flow-conn">
+          <span class="flow-act">clic</span>
+          <span>→</span>
+        </div>
+        <div class="flow-node flow-node-hl">
+          <span class="flow-emoji">ℹ️</span>
+          <strong>Fiche info</strong>
+          <span class="flow-sub">détails complets</span>
+        </div>
+        <div class="flow-conn">
+          <span class="flow-act">clic photo</span>
+          <span>→</span>
+        </div>
+        <div class="flow-node">
+          <span class="flow-emoji">🖼️</span>
+          <strong>Plein écran</strong>
+          <span class="flow-sub">photos uniquement</span>
+        </div>
+      </div>
+      <p class="guide-note">Le plein écran est réservé aux photos. Pour les actualités et les documents, la navigation s'arrête à la fiche info.</p>
+      <p class="guide-note">Dans la fiche info, naviguez entre les éléments avec les <strong>flèches à l'écran</strong> ou les touches <kbd>←</kbd> <kbd>→</kbd> du clavier. Sur mobile, glissez horizontalement sur la photo.</p>
+    </div>
+
     <!-- Upload -->
     <div class="guide-card">
       <h3>Uploader une photo</h3>
@@ -66,7 +107,7 @@
       <p>
         Quand vous uploadez une photo, le site lit automatiquement les métadonnées EXIF intégrées
         dans le fichier avant de le compresser. Ces informations sont ensuite affichées dans la
-        fiche info (bouton ⓘ) dans la colonne de droite.
+        fiche info, dans la colonne de droite.
       </p>
       <div class="admin-fields">
         <div class="admin-field-row">
@@ -109,32 +150,35 @@
       </p>
       <p class="guide-note">
         Si aucun EXIF n'est détecté (fichier édité, screenshot, photo reçue par messagerie), la section
-        EXIF n'apparaît tout simplement pas dans la lightbox.
+        EXIF n'apparaît tout simplement pas dans la fiche info.
       </p>
     </div>
 
-    <!-- Lightbox -->
+    <!-- Vocabulaire -->
     <div class="guide-card">
-      <h3>Visionner une photo — la fiche info</h3>
-      <p>
-        Sur toutes les pages de photos, <strong>cliquez sur une carte</strong> pour ouvrir la fiche info
-        (aperçu grand format, infos techniques, likes et commentaires).
-      </p>
-      <ul class="guide-steps">
-        <li>Naviguez entre les photos avec les <strong>flèches à l'écran</strong> ou les touches <kbd>←</kbd> <kbd>→</kbd> du clavier.</li>
-        <li>Cliquez sur la photo pour l'afficher en <strong>plein écran</strong>. Les flèches de navigation restent disponibles. Cliquez ailleurs ou appuyez sur <kbd>Échap</kbd> pour revenir à la fiche info.</li>
-        <li>Fermez la fiche info avec la croix ou la touche <kbd>Échap</kbd>.</li>
-        <li>Les infos <strong>EXIF</strong> s'affichent dans la colonne de droite si elles sont disponibles.</li>
-        <li>Vous pouvez <strong>liker</strong> la photo directement depuis la fiche info.</li>
-        <li>Vous pouvez lire, ajouter et répondre aux <strong>commentaires</strong> depuis la fiche info.</li>
-      </ul>
+      <h3>Vocabulaire du site</h3>
+      <p>Trois termes décrivent la navigation dans le contenu :</p>
+      <div class="admin-fields">
+        <div class="admin-field-row">
+          <span class="field-label">Carte</span>
+          <span class="field-desc">Rectangle affiché sur une page de liste (actualités, galeries, sorties…). Présente les infos essentielles : titre, image, date. Un clic dessus ouvre la fiche info.</span>
+        </div>
+        <div class="admin-field-row">
+          <span class="field-label">Fiche info</span>
+          <span class="field-desc">Panneau détaillé qui s'ouvre au clic sur une carte. Contient la description complète, les données EXIF (photos), les likes et les commentaires.</span>
+        </div>
+        <div class="admin-field-row">
+          <span class="field-label">Plein écran</span>
+          <span class="field-desc">Pour les photos uniquement. Cliquez sur la photo dans la fiche info pour passer en plein écran natif (barre d'adresse et onglets disparaissent). Appuyez sur <kbd>Échap</kbd> ou cliquez pour revenir à la fiche info.</span>
+        </div>
+      </div>
     </div>
 
     <!-- Likes -->
     <div class="guide-card">
       <h3>Likes ♥</h3>
       <p>
-        Chaque photo peut être likée depuis la carte directement ou depuis la lightbox.
+        Chaque photo peut être likée depuis la carte directement ou depuis la fiche info.
         Le bouton ♥ indique le nombre de likes. Un cœur rouge signifie que <strong>vous avez liké</strong> cette photo.
         Cliquez à nouveau pour retirer votre like.
       </p>
@@ -145,7 +189,7 @@
     <div class="guide-card">
       <h3>Commentaires</h3>
       <p>
-        Les commentaires sont accessibles uniquement depuis la <strong>fiche info</strong> (bouton ⓘ).
+        Les commentaires sont accessibles uniquement depuis la <strong>fiche info</strong>.
       </p>
       <ul class="guide-steps">
         <li>Tapez votre commentaire dans le champ en bas et appuyez sur <strong>Envoyer</strong>.</li>
@@ -174,10 +218,10 @@
       <ul class="guide-steps">
         <li>Filtrez les articles par type avec les boutons en haut de page :
           <strong>Info, Encart, Exposition, Événement, Annonce</strong>.</li>
-        <li><strong>Cliquez sur une carte</strong> pour ouvrir l'article complet (lightbox).
+        <li><strong>Cliquez sur une carte</strong> pour ouvrir la fiche info de l'article.
           Vous y trouverez la description complète, la date, le lieu et un éventuel lien externe.</li>
         <li>Si un lieu est renseigné, cliquez dessus pour l'ouvrir dans <strong>Google Maps</strong>.</li>
-        <li>Fermez la lightbox avec la croix ou la touche <kbd>Échap</kbd>.</li>
+        <li>Fermez la fiche info avec la croix ou la touche <kbd>Échap</kbd>.</li>
       </ul>
     </div>
 
@@ -210,7 +254,7 @@
         </div>
         <div class="admin-field-row">
           <span class="field-label">Date & Lieu</span>
-          <span class="field-desc">Pour les événements. Le lieu devient un lien Google Maps dans la carte et la lightbox.</span>
+          <span class="field-desc">Pour les événements. Le lieu devient un lien Google Maps dans la carte et la fiche info.</span>
         </div>
         <div class="admin-field-row">
           <span class="field-label">Épingler</span>
@@ -218,7 +262,7 @@
         </div>
       </div>
       <p class="guide-note">
-        Pour modifier un article depuis la page Actualités, survolez sa carte — une icône crayon apparaît en haut à droite.
+        Pour modifier un article depuis la page Actualités, cliquez sur l'icône crayon ✎ en haut à droite de la carte (toujours visible sur mobile).
       </p>
     </div>
   </section>
@@ -523,8 +567,8 @@
       <ul class="guide-steps">
         <li>Glissez vos fichiers dans la zone d'upload ou cliquez pour les sélectionner. Plusieurs fichiers acceptés en une fois.</li>
         <li><strong>Cliquez sur une photo</strong> pour ouvrir sa fiche info. Naviguez avec <kbd>←</kbd> <kbd>→</kbd>.</li>
-        <li>Likez les photos avec le bouton ♥ sur la carte ou dans la lightbox.</li>
-        <li>Laissez un commentaire ou une réponse depuis la lightbox.</li>
+        <li>Likez les photos avec le bouton ♥ sur la carte ou dans la fiche info.</li>
+        <li>Laissez un commentaire ou une réponse depuis la fiche info.</li>
         <li>Vous pouvez supprimer vos propres photos. L'organisateur peut supprimer toutes les photos de la sortie.</li>
       </ul>
     </div>

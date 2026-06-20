@@ -286,6 +286,7 @@ select:focus { border-color: rgba(0,0,0,0.28); }
 }
 
 .photo-card:hover .photo-overlay { opacity: 1; }
+@media (hover: none) { .photo-card .photo-overlay { opacity: 1; } }
 
 .photo-info { display: flex; flex-direction: column; gap: 4px; }
 

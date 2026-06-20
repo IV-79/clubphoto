@@ -4,7 +4,13 @@
 
 ## En cours (alpha)
 
+### Corrections
+- **Actualités invisibles pour les membres** — la requête Firestore `/actualites` utilisait `getAllArticles()` sans filtre `where`, ce que les règles de sécurité Firestore rejettent pour les non-rédacteurs. Deux nouvelles méthodes (`getPublishedArticles` / `getPublicArticles`) avec les `where` appropriés, et deux index composites (`statut+dateCreation`, `statut+portee+dateCreation`) dans `firestore.indexes.json`. ⚠️ Déployer les index : `firebase deploy --only firestore:indexes`.
+- **Boutons de cartes invisibles sur mobile** — les overlays et boutons d'action (crayon article, recalcul stockage, overlay photos portfolio/galerie/oneshot) étaient masqués par `opacity: 0` visible uniquement au survol. Ajout de `@media (hover: none)` sur les 5 fichiers concernés pour les afficher en permanence sur appareils tactiles.
+
 ### Améliorations
+- **Guide du site mis à jour** — terminologie homogénéisée : "lightbox" remplacé par "fiche info" partout, références au "bouton ⓘ" supprimées, nouvelle carte "Vocabulaire du site" (Carte → Fiche info → Plein écran), note sur le crayon d'édition d'article mise à jour.
+- **Guide du site mis à jour** — 3 nouvelles sections (Actualités, Calendrier, Documents) ; navigation rapide enrichie ; références au bouton ⓘ corrigées (clic sur la carte) ; "Galeries →" remplacé par "Activités →" dans tous les liens.
 - **Refonte navigation** — "Galeries" renommé "Activités". "Portfolios des membres" déplacé en tête du menu "Le Club". "Config site" renommé "Catégories photos" dans le menu admin. Modifications appliquées desktop et mobile.
 - **Partage de documents** — espace `/membre/documents` accessible à tous les membres connectés. Les dossiers sont définis par l'admin depuis `/admin/dossiers` (ordonnés, renommables, déplaçables). Les membres uploadent n'importe quel type de fichier (PDF, Word, Excel, images, archives…) avec glisser-déposer ; le fichier va directement en Firebase Storage. L'uploader peut remplacer son document (re-upload inline avec mise à jour du nom et du stockage) ; admin et uploader peuvent supprimer. Icônes et badges colorés par type d'extension. Filtre par dossier (chips). `storageUsed.documents` tracké sur le profil et visible dans le tooltip admin/membres. La suppression d'un membre efface aussi ses documents. Le bouton "Recalculer" en admin intègre les documents dans le total.
 
