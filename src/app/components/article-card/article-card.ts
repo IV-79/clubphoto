@@ -22,9 +22,6 @@ import { Article, getArticleTypeMeta } from '../../models/article.model';
           <span class="type-badge" [style.background]="meta().color">
             <mat-icon>{{ meta().icon }}</mat-icon>{{ meta().label }}
           </span>
-          @if (article().epingle) {
-            <span class="pin-badge" title="Épinglé"><mat-icon>push_pin</mat-icon></span>
-          }
           @if (article().portee === 'membre') {
             <span class="membre-badge" title="Membres uniquement"><mat-icon>lock</mat-icon></span>
           }
@@ -37,9 +34,6 @@ import { Article, getArticleTypeMeta } from '../../models/article.model';
               <mat-icon>{{ meta().icon }}</mat-icon>{{ meta().label }}
             </span>
             <div class="no-cover-icons">
-              @if (article().epingle) {
-                <span title="Épinglé"><mat-icon class="pin-icon">push_pin</mat-icon></span>
-              }
               @if (article().portee === 'membre') {
                 <span title="Membres uniquement"><mat-icon class="lock-icon">lock</mat-icon></span>
               }
@@ -81,15 +75,13 @@ import { Article, getArticleTypeMeta } from '../../models/article.model';
       font-size: .72rem; font-weight: 600; letter-spacing: .3px;
     }
     .type-badge mat-icon { font-size: 13px; width: 13px; height: 13px; }
-    .pin-badge, .membre-badge {
-      position: absolute; top: 8px;
-      background: rgba(0,0,0,.55); color: #fff;
+    .membre-badge {
+      position: absolute; top: 8px; left: 8px;
+      background: rgba(0,0,0,.55); color: #ffb300;
       border-radius: 50%; width: 28px; height: 28px;
       display: flex; align-items: center; justify-content: center;
     }
-    .pin-badge { right: 8px; color: #ffb300; }
-    .membre-badge { left: 8px; color: #ffb300; }
-    .pin-badge mat-icon, .membre-badge mat-icon { font-size: 16px; width: 16px; height: 16px; }
+    .membre-badge mat-icon { font-size: 16px; width: 16px; height: 16px; }
     .body { padding: 14px 16px 18px; flex: 1; }
     .no-cover-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
     .type-badge-inline {
@@ -99,7 +91,6 @@ import { Article, getArticleTypeMeta } from '../../models/article.model';
     }
     .type-badge-inline mat-icon { font-size: 13px; width: 13px; height: 13px; }
     .no-cover-icons { display: flex; gap: 4px; align-items: center; }
-    .pin-icon { color: #ffb300; font-size: 18px; width: 18px; height: 18px; }
     .lock-icon { color: #888; font-size: 18px; width: 18px; height: 18px; }
     .titre { margin: 0 0 8px; font-size: .97rem; font-weight: 600; line-height: 1.35; color: #1a1a1a; }
     .meta {

@@ -1,33 +1,35 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, HostListener } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AsyncPipe } from '@angular/common';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatDividerModule } from '@angular/material/divider';
 import { AuthService } from '../../services/auth.service';
 import { LoginModalService } from '../../services/login-modal.service';
 import { map } from 'rxjs';
 
 @Component({
   selector: 'app-header',
-  imports: [RouterLink, RouterLinkActive, AsyncPipe, MatMenuModule, MatButtonModule, MatIconModule, MatToolbarModule, MatDividerModule],
+  imports: [RouterLink, RouterLinkActive, AsyncPipe, MatIconModule],
   templateUrl: './header.html',
   styleUrl: './header.css',
 })
 export class Header {
   private authService = inject(AuthService);
-  private router = inject(Router);
-  private loginModal = inject(LoginModalService);
+  private router      = inject(Router);
+  private loginModal  = inject(LoginModalService);
 
-  openLogin() {
-    const url = this.router.url;
-    this.loginModal.open(url);
-    this.closeMobileMenu();
+  // Desktop dropdowns
+  openMenu = signal<string | null>(null);
+
+  toggleMenu(name: string, event: MouseEvent) {
+    event.stopPropagation();
+    this.openMenu.set(this.openMenu() === name ? null : name);
   }
 
-  mobileMenuOpen = signal(false);
+  @HostListener('document:click')
+  closeMenus() { this.openMenu.set(null); }
+
+  // Mobile menu
+  mobileMenuOpen    = signal(false);
   mobileOpenSection = signal<string | null>(null);
 
   toggleMobileSection(section: string) {
@@ -39,12 +41,14 @@ export class Header {
     this.mobileOpenSection.set(null);
   }
 
-  profile$ = this.authService.currentUserProfile$;
+  openLogin() {
+    this.loginModal.open(this.router.url);
+    this.closeMobileMenu();
+  }
 
+  profile$    = this.authService.currentUserProfile$;
   isAdmin$    = this.profile$.pipe(map(p => p?.role === 'admin'));
   isLoggedIn$ = this.authService.user$.pipe(map(user => !!user));
 
-  logout() {
-    this.authService.logout();
-  }
+  logout() { this.authService.logout(); }
 }

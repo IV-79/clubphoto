@@ -48,7 +48,7 @@
   gap: 0;
 }
 
-.nav-links li a,
+.nav-links > li > a,
 .nav-dropdown-btn {
   display: flex;
   align-items: center;
@@ -66,13 +66,13 @@
   font-family: inherit;
 }
 
-.nav-links li a:hover,
+.nav-links > li > a:hover,
 .nav-dropdown-btn:hover {
   color: white;
   background: rgba(255,255,255,0.06);
 }
 
-.nav-links li a.active {
+.nav-links > li > a.active {
   color: white;
   border-bottom: 3px solid #cc0000;
   background: rgba(255,255,255,0.04);
@@ -83,6 +83,52 @@
   width: 16px;
   height: 16px;
   margin-left: 2px;
+}
+
+/* Dropdown panels custom (remplace mat-menu) */
+.has-dropdown { position: relative; }
+
+.nav-panel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.25);
+  min-width: 210px;
+  z-index: 200;
+  overflow: hidden;
+  padding: 4px 0;
+}
+.nav-panel-right { left: auto; right: 0; }
+
+.nav-panel .nav-panel-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  color: #333;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: normal;
+  text-transform: none;
+  cursor: pointer;
+  transition: background .12s;
+  width: 100%;
+  box-sizing: border-box;
+}
+.nav-panel .nav-panel-item:hover { background: #f0f0f0; }
+.nav-panel-item mat-icon { font-size: 18px; width: 18px; height: 18px; color: #666; flex-shrink: 0; }
+
+.nav-panel-divider { border: none; border-top: 1px solid #e8e8e8; margin: 4px 0; }
+
+.nav-panel-btn {
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: .85rem;
+  text-align: left;
 }
 
 /* Actions droite */

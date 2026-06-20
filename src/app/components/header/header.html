@@ -18,19 +18,20 @@
         </li>
 
         <li class="has-dropdown">
-          <button [matMenuTriggerFor]="clubMenu" class="nav-dropdown-btn">
+          <button class="nav-dropdown-btn" (click)="toggleMenu('club', $event)">
             Le Club <mat-icon class="arrow-icon">expand_more</mat-icon>
           </button>
-          <mat-menu #clubMenu="matMenu" class="nav-menu">
-            <a mat-menu-item routerLink="/galeries/membres">
-              <mat-icon>people</mat-icon>
-              Portfolios des membres
-            </a>
-            <mat-divider />
-            <a mat-menu-item routerLink="/le-club/histoire">Histoire</a>
-            <a mat-menu-item routerLink="/le-club/bureau">Le Bureau</a>
-            <a mat-menu-item routerLink="/le-club/adhesion">Adhésion</a>
-          </mat-menu>
+          @if (openMenu() === 'club') {
+            <div class="nav-panel">
+              <a routerLink="/galeries/membres" class="nav-panel-item" (click)="openMenu.set(null)">
+                <mat-icon>people</mat-icon>Portfolios des membres
+              </a>
+              <div class="nav-panel-divider"></div>
+              <a routerLink="/le-club/histoire" class="nav-panel-item" (click)="openMenu.set(null)">Histoire</a>
+              <a routerLink="/le-club/bureau" class="nav-panel-item" (click)="openMenu.set(null)">Le Bureau</a>
+              <a routerLink="/le-club/adhesion" class="nav-panel-item" (click)="openMenu.set(null)">Adhésion</a>
+            </div>
+          }
         </li>
 
         <li>
@@ -38,44 +39,43 @@
         </li>
 
         <li class="has-dropdown">
-          <button [matMenuTriggerFor]="galeriesMenu" class="nav-dropdown-btn">
+          <button class="nav-dropdown-btn" (click)="toggleMenu('activites', $event)">
             Activités <mat-icon class="arrow-icon">expand_more</mat-icon>
           </button>
-          <mat-menu #galeriesMenu="matMenu" class="nav-menu">
-            <a mat-menu-item routerLink="/galeries/themesdumois">
-              <mat-icon>photo_camera</mat-icon>
-              Thèmes du mois
-            </a>
-            <a mat-menu-item routerLink="/galeries/sorties">
-              <mat-icon>directions_walk</mat-icon>
-              Sorties Photo
-            </a>
-            <a mat-menu-item routerLink="/galeries/oneshots">
-              <mat-icon>camera_roll</mat-icon>
-              OneShot
-            </a>
-          </mat-menu>
+          @if (openMenu() === 'activites') {
+            <div class="nav-panel">
+              <a routerLink="/calendrier" class="nav-panel-item" (click)="openMenu.set(null)">
+                <mat-icon>event</mat-icon>Calendrier
+              </a>
+              <div class="nav-panel-divider"></div>
+              <a routerLink="/galeries/themesdumois" class="nav-panel-item" (click)="openMenu.set(null)">
+                <mat-icon>photo_camera</mat-icon>Thèmes du mois
+              </a>
+              <a routerLink="/galeries/sorties" class="nav-panel-item" (click)="openMenu.set(null)">
+                <mat-icon>directions_walk</mat-icon>Sorties Photo
+              </a>
+              <a routerLink="/galeries/oneshots" class="nav-panel-item" (click)="openMenu.set(null)">
+                <mat-icon>camera_roll</mat-icon>OneShot
+              </a>
+            </div>
+          }
         </li>
 
         @if (isLoggedIn$ | async) {
         <li class="has-dropdown">
-          <button [matMenuTriggerFor]="membresMenu" class="nav-dropdown-btn">
+          <button class="nav-dropdown-btn" (click)="toggleMenu('membres', $event)">
             Membres <mat-icon class="arrow-icon">expand_more</mat-icon>
           </button>
-          <mat-menu #membresMenu="matMenu" class="nav-menu">
-            <a mat-menu-item routerLink="/calendrier">
-              <mat-icon>event</mat-icon>
-              Calendrier
-            </a>
-            <a mat-menu-item routerLink="/membre/documents">
-              <mat-icon>folder_shared</mat-icon>
-              Documents
-            </a>
-            <a mat-menu-item routerLink="/membres/guide">
-              <mat-icon>menu_book</mat-icon>
-              Guide du site
-            </a>
-          </mat-menu>
+          @if (openMenu() === 'membres') {
+            <div class="nav-panel">
+              <a routerLink="/membre/documents" class="nav-panel-item" (click)="openMenu.set(null)">
+                <mat-icon>folder_shared</mat-icon>Documents
+              </a>
+              <a routerLink="/membres/guide" class="nav-panel-item" (click)="openMenu.set(null)">
+                <mat-icon>menu_book</mat-icon>Guide du site
+              </a>
+            </div>
+          }
         </li>
         }
 
@@ -88,71 +88,68 @@
       <!-- Actions droite -->
       <div class="nav-actions">
         @if (isLoggedIn$ | async) {
-          <button [matMenuTriggerFor]="membreNavMenu" class="membre-btn">
-            <mat-icon>account_circle</mat-icon>
-            Mon espace
-            <mat-icon class="arrow-icon">expand_more</mat-icon>
-          </button>
-          <mat-menu #membreNavMenu="matMenu">
-            <a mat-menu-item routerLink="/membre/portfolio">
-              <mat-icon>photo_library</mat-icon>
-              Mon Portfolio
-            </a>
-            <a mat-menu-item routerLink="/membre/profil">
-              <mat-icon>person</mat-icon>
-              Mon Profil
-            </a>
-            <mat-divider />
-            <button mat-menu-item (click)="logout()">
-              <mat-icon>logout</mat-icon>
-              Déconnexion
+          <div class="has-dropdown">
+            <button class="membre-btn" (click)="toggleMenu('monespace', $event)">
+              <mat-icon>account_circle</mat-icon>
+              Mon espace
+              <mat-icon class="arrow-icon">expand_more</mat-icon>
             </button>
-          </mat-menu>
+            @if (openMenu() === 'monespace') {
+              <div class="nav-panel nav-panel-right">
+                <a routerLink="/membre/portfolio" class="nav-panel-item" (click)="openMenu.set(null)">
+                  <mat-icon>photo_library</mat-icon>Mon Portfolio
+                </a>
+                <a routerLink="/membre/profil" class="nav-panel-item" (click)="openMenu.set(null)">
+                  <mat-icon>person</mat-icon>Mon Profil
+                </a>
+                <div class="nav-panel-divider"></div>
+                <button class="nav-panel-item nav-panel-btn" (click)="logout(); openMenu.set(null)">
+                  <mat-icon>logout</mat-icon>Déconnexion
+                </button>
+              </div>
+            }
+          </div>
         }
         @if (isAdmin$ | async) {
-          <button [matMenuTriggerFor]="adminMenu" class="admin-btn">
-            <mat-icon>admin_panel_settings</mat-icon>
-            Admin
-            <mat-icon class="arrow-icon">expand_more</mat-icon>
-          </button>
-          <mat-menu #adminMenu="matMenu">
-            <a mat-menu-item routerLink="/admin">
-              <mat-icon>dashboard</mat-icon>
-              Tableau de bord
-            </a>
-            <mat-divider />
-            <a mat-menu-item routerLink="/membre/articles">
-              <mat-icon>article</mat-icon>
-              Articles
-            </a>
-            <a mat-menu-item routerLink="/admin/reunions">
-              <mat-icon>event</mat-icon>
-              Réunions
-            </a>
-            <a mat-menu-item routerLink="/admin/themes">
-              <mat-icon>photo_camera</mat-icon>
-              Thèmes du mois
-            </a>
-            <mat-divider />
-            <a mat-menu-item routerLink="/admin/membres">
-              <mat-icon>group</mat-icon>
-              Membres
-            </a>
-            <mat-divider />
-            <a mat-menu-item routerLink="/admin/dossiers">
-              <mat-icon>folder_shared</mat-icon>
-              Dossiers documents
-            </a>
-            <a mat-menu-item routerLink="/admin/config">
-              <mat-icon>category</mat-icon>
-              Catégories photos
-            </a>
-            <mat-divider />
-            <button mat-menu-item (click)="logout()">
-              <mat-icon>logout</mat-icon>
-              Déconnexion
+          <div class="has-dropdown">
+            <button class="admin-btn" (click)="toggleMenu('admin', $event)">
+              <mat-icon>admin_panel_settings</mat-icon>
+              Admin
+              <mat-icon class="arrow-icon">expand_more</mat-icon>
             </button>
-          </mat-menu>
+            @if (openMenu() === 'admin') {
+              <div class="nav-panel nav-panel-right">
+                <a routerLink="/admin" class="nav-panel-item" (click)="openMenu.set(null)">
+                  <mat-icon>dashboard</mat-icon>Tableau de bord
+                </a>
+                <div class="nav-panel-divider"></div>
+                <a routerLink="/membre/articles" class="nav-panel-item" (click)="openMenu.set(null)">
+                  <mat-icon>article</mat-icon>Articles
+                </a>
+                <a routerLink="/admin/reunions" class="nav-panel-item" (click)="openMenu.set(null)">
+                  <mat-icon>event</mat-icon>Réunions
+                </a>
+                <a routerLink="/admin/themes" class="nav-panel-item" (click)="openMenu.set(null)">
+                  <mat-icon>photo_camera</mat-icon>Thèmes du mois
+                </a>
+                <div class="nav-panel-divider"></div>
+                <a routerLink="/admin/membres" class="nav-panel-item" (click)="openMenu.set(null)">
+                  <mat-icon>group</mat-icon>Membres
+                </a>
+                <div class="nav-panel-divider"></div>
+                <a routerLink="/admin/dossiers" class="nav-panel-item" (click)="openMenu.set(null)">
+                  <mat-icon>folder_shared</mat-icon>Dossiers documents
+                </a>
+                <a routerLink="/admin/config" class="nav-panel-item" (click)="openMenu.set(null)">
+                  <mat-icon>category</mat-icon>Catégories photos
+                </a>
+                <div class="nav-panel-divider"></div>
+                <button class="nav-panel-item nav-panel-btn" (click)="logout(); openMenu.set(null)">
+                  <mat-icon>logout</mat-icon>Déconnexion
+                </button>
+              </div>
+            }
+          </div>
         }
         @if (!(isLoggedIn$ | async)) {
           <button (click)="openLogin()" class="login-btn">Connexion</button>
@@ -165,13 +162,12 @@
       </button>
     </div>
 
-    <!-- Menu mobile -->
+    <!-- Menu mobile (inchangé) -->
     @if (mobileMenuOpen()) {
     <ul class="mobile-nav">
 
       <li><a routerLink="/" (click)="closeMobileMenu()">Accueil</a></li>
 
-      <!-- Le Club -->
       <li class="mobile-has-sub">
         <button class="mobile-sub-toggle" (click)="toggleMobileSection('club')">
           Le Club
@@ -189,7 +185,6 @@
 
       <li><a routerLink="/actualites" (click)="closeMobileMenu()">Actualités</a></li>
 
-      <!-- Galeries -->
       <li class="mobile-has-sub">
         <button class="mobile-sub-toggle" (click)="toggleMobileSection('galeries')">
           Activités
@@ -197,6 +192,7 @@
         </button>
         @if (mobileOpenSection() === 'galeries') {
         <ul class="mobile-sub">
+          <li><a routerLink="/calendrier" (click)="closeMobileMenu()">Calendrier</a></li>
           <li><a routerLink="/galeries/themesdumois" (click)="closeMobileMenu()">Thèmes du mois</a></li>
           <li><a routerLink="/galeries/sorties" (click)="closeMobileMenu()">Sorties Photo</a></li>
           <li><a routerLink="/galeries/oneshots" (click)="closeMobileMenu()">OneShot</a></li>
@@ -212,7 +208,6 @@
           </button>
           @if (mobileOpenSection() === 'membres') {
             <ul class="mobile-sub">
-              <li><a routerLink="/calendrier" (click)="closeMobileMenu()">Calendrier</a></li>
               <li><a routerLink="/membre/documents" (click)="closeMobileMenu()">Documents</a></li>
               <li><a routerLink="/membres/guide" (click)="closeMobileMenu()">Guide du site</a></li>
             </ul>

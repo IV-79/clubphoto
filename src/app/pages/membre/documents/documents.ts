@@ -40,21 +40,6 @@ import { ClubDocument, getExtensionMeta, extractExtension } from '../../../model
       <!-- Formulaire upload -->
       @if (showUploadForm()) {
         <div class="upload-panel">
-          <div class="upload-fields">
-            <mat-form-field appearance="outline" class="field-nom">
-              <mat-label>Nom du fichier *</mat-label>
-              <input matInput [(ngModel)]="uploadNom" placeholder="ex: Statuts 2024.pdf" />
-            </mat-form-field>
-            <mat-form-field appearance="outline" class="field-dossier">
-              <mat-label>Dossier *</mat-label>
-              <mat-select [(ngModel)]="uploadDossier">
-                @for (d of dossiers(); track d.id) {
-                  <mat-option [value]="d.nom">{{ d.nom }}</mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-          </div>
-
           <label class="file-drop" for="upload-input"
             [class.dragging]="isDragging()"
             (dragover)="onDragOver($event)"
@@ -73,6 +58,24 @@ import { ClubDocument, getExtensionMeta, extractExtension } from '../../../model
           </label>
           <input id="upload-input" type="file" style="display:none" (change)="onUploadFileSelected($event)" />
 
+          <div class="upload-fields">
+            <mat-form-field appearance="outline" class="field-nom">
+              <mat-label>Nom *</mat-label>
+              <input matInput [(ngModel)]="uploadNomBase" placeholder="ex: Statuts 2024" />
+              @if (uploadExtension) {
+                <span matSuffix class="ext-suffix">.{{ uploadExtension }}</span>
+              }
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="field-dossier">
+              <mat-label>Dossier *</mat-label>
+              <mat-select [(ngModel)]="uploadDossier">
+                @for (d of dossiers(); track d.id) {
+                  <mat-option [value]="d.nom">{{ d.nom }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+
           @if (uploadProgress() > 0 && uploadProgress() < 100) {
             <mat-progress-bar mode="determinate" [value]="uploadProgress()" />
           }
@@ -80,7 +83,7 @@ import { ClubDocument, getExtensionMeta, extractExtension } from '../../../model
           <div class="upload-actions">
             <button mat-button (click)="resetUploadForm()">Annuler</button>
             <button mat-raised-button color="primary" (click)="upload()"
-              [disabled]="uploading() || !uploadFile() || !uploadNom.trim() || !uploadDossier">
+              [disabled]="uploading() || !uploadFile() || !uploadNomBase.trim() || !uploadDossier">
               @if (uploading()) { <mat-icon>hourglass_empty</mat-icon> } @else { <mat-icon>cloud_upload</mat-icon> }
               Uploader
             </button>
@@ -167,14 +170,27 @@ import { ClubDocument, getExtensionMeta, extractExtension } from '../../../model
             <!-- Formulaire de remplacement inline -->
             @if (expandedDocId() === doc.id) {
               <div class="replace-panel">
-                <mat-form-field appearance="outline" class="field-replace-nom">
-                  <mat-label>Nouveau nom</mat-label>
-                  <input matInput [(ngModel)]="replaceNom" />
-                </mat-form-field>
+                <div class="replace-fields">
+                  <mat-form-field appearance="outline" class="field-replace-nom">
+                    <mat-label>Nom</mat-label>
+                    <input matInput [(ngModel)]="replaceNom" />
+                    @if (replaceExtension) {
+                      <span matSuffix class="ext-suffix">.{{ replaceExtension }}</span>
+                    }
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="field-replace-dossier">
+                    <mat-label>Dossier</mat-label>
+                    <mat-select [(ngModel)]="replaceDossier">
+                      @for (d of dossiers(); track d.id) {
+                        <mat-option [value]="d.nom">{{ d.nom }}</mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
+                </div>
                 <div class="replace-file-row">
                   <button mat-stroked-button (click)="triggerReplaceInput()">
                     <mat-icon>attach_file</mat-icon>
-                    {{ replaceFile() ? replaceFile()!.name : 'Choisir un fichier' }}
+                    {{ replaceFile() ? replaceFile()!.name : 'Remplacer le fichier (optionnel)' }}
                   </button>
                   <input id="replace-input" type="file" style="display:none"
                     (change)="onReplaceFileSelected($event)" />
@@ -185,7 +201,7 @@ import { ClubDocument, getExtensionMeta, extractExtension } from '../../../model
                 <div class="replace-actions">
                   <button mat-button (click)="expandedDocId.set(null)">Annuler</button>
                   <button mat-raised-button color="primary"
-                    [disabled]="replacing() || !replaceFile() || !replaceNom.trim()"
+                    [disabled]="replacing() || !replaceNom.trim() || !replaceDossier"
                     (click)="replace(doc)">
                     @if (replacing()) { <mat-icon>hourglass_empty</mat-icon> } @else { <mat-icon>save</mat-icon> }
                     Enregistrer
@@ -222,6 +238,7 @@ import { ClubDocument, getExtensionMeta, extractExtension } from '../../../model
     .file-name { font-weight: 500; font-size: .95rem; word-break: break-all; text-align: center; }
     .file-size { font-size: .8rem; color: #666; }
     .upload-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px; }
+    .ext-suffix { color: #888; font-size: .9rem; padding-right: 4px; }
 
     /* Folder chips */
     .folder-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
@@ -271,7 +288,8 @@ import { ClubDocument, getExtensionMeta, extractExtension } from '../../../model
       border-top: 1px solid #e0e0e0; background: #fafafa;
       padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;
     }
-    .field-replace-nom { width: 100%; }
+    .replace-fields { display: grid; grid-template-columns: 1fr 200px; gap: 12px; }
+    .field-replace-nom, .field-replace-dossier { width: 100%; }
     .replace-file-row { display: flex; align-items: center; gap: 12px; }
     .replace-progress { flex: 1; }
     .replace-actions { display: flex; gap: 8px; justify-content: flex-end; }
@@ -299,14 +317,17 @@ export class Documents {
   showUploadForm  = signal(false);
   expandedDocId   = signal<string | null>(null);
 
-  uploadNom     = '';
+  uploadNomBase     = '';
+  uploadExtension   = '';
   uploadDossier = '';
   uploadFile    = signal<File | null>(null);
   uploadProgress = signal(0);
   uploading      = signal(false);
   isDragging     = signal(false);
 
-  replaceNom      = '';
+  replaceNom       = '';
+  replaceDossier   = '';
+  replaceExtension = '';
   replaceFile     = signal<File | null>(null);
   replaceProgress = signal(0);
   replacing       = signal(false);
@@ -362,13 +383,17 @@ export class Documents {
 
   private setUploadFile(file: File) {
     this.uploadFile.set(file);
-    if (!this.uploadNom) this.uploadNom = file.name;
+    const ext = extractExtension(file.name);
+    this.uploadExtension = ext;
+    if (!this.uploadNomBase) {
+      this.uploadNomBase = ext ? file.name.slice(0, -(ext.length + 1)) : file.name;
+    }
   }
 
   async upload() {
     const file = this.uploadFile();
     const profile = this.profile();
-    if (!file || !this.uploadNom.trim() || !this.uploadDossier || !profile) return;
+    if (!file || !this.uploadNomBase.trim() || !this.uploadDossier || !profile) return;
 
     this.uploading.set(true);
     this.uploadProgress.set(0);
@@ -381,7 +406,7 @@ export class Documents {
       );
 
       await this.documentService.createDocument(docId, {
-        nom:          this.uploadNom.trim(),
+        nom:          this.uploadNomBase.trim(),
         extension,
         taille:       file.size,
         dossier:      this.uploadDossier,
@@ -404,7 +429,8 @@ export class Documents {
   }
 
   resetUploadForm() {
-    this.uploadNom = '';
+    this.uploadNomBase = '';
+    this.uploadExtension = '';
     this.uploadDossier = '';
     this.uploadFile.set(null);
     this.uploadProgress.set(0);
@@ -415,6 +441,8 @@ export class Documents {
   openReplace(doc: ClubDocument) {
     this.expandedDocId.set(doc.id!);
     this.replaceNom = doc.nom;
+    this.replaceDossier = doc.dossier;
+    this.replaceExtension = doc.extension;
     this.replaceFile.set(null);
     this.replaceProgress.set(0);
   }
@@ -425,30 +453,37 @@ export class Documents {
 
   onReplaceFileSelected(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0];
-    if (file) this.replaceFile.set(file);
+    if (file) {
+      this.replaceFile.set(file);
+      this.replaceExtension = extractExtension(file.name);
+    }
   }
 
   async replace(doc: ClubDocument) {
     const file = this.replaceFile();
     const profile = this.profile();
-    if (!file || !this.replaceNom.trim() || !profile) return;
+    if (!this.replaceNom.trim() || !profile) return;
 
     this.replacing.set(true);
     this.replaceProgress.set(0);
     try {
-      const extension = extractExtension(file.name);
-      const { url, storagePath } = await this.documentService.uploadFile(
-        doc.id!, file, pct => this.replaceProgress.set(pct)
-      );
-
-      await this.documentService.updateDocument(doc.id!, {
-        nom: this.replaceNom.trim(), extension, taille: file.size, url, storagePath,
-      });
-
-      const diff = file.size - doc.taille;
-      if (diff > 0) await this.documentService.incrementStorage(profile.uid, diff);
-      else if (diff < 0) await this.documentService.decrementStorage(profile.uid, -diff);
-
+      if (file) {
+        const extension = extractExtension(file.name);
+        const { url, storagePath } = await this.documentService.uploadFile(
+          doc.id!, file, pct => this.replaceProgress.set(pct)
+        );
+        await this.documentService.updateDocument(doc.id!, {
+          nom: this.replaceNom.trim(), dossier: this.replaceDossier,
+          extension, taille: file.size, url, storagePath,
+        });
+        const diff = file.size - doc.taille;
+        if (diff > 0) await this.documentService.incrementStorage(profile.uid, diff);
+        else if (diff < 0) await this.documentService.decrementStorage(profile.uid, -diff);
+      } else {
+        await this.documentService.updateDocument(doc.id!, {
+          nom: this.replaceNom.trim(), dossier: this.replaceDossier,
+        });
+      }
       this.expandedDocId.set(null);
       this.snackBar.open('Document mis à jour', '', { duration: 3000 });
     } catch (e) {

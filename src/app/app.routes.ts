@@ -62,7 +62,7 @@ export const routes: Routes = [
       { path: 'galeries/oneshots/:id', component: OneShotDetail },
       { path: 'galeries/sorties', component: SortiesListe },
       { path: 'galeries/sorties/:id', component: SortieDetail },
-      { path: 'calendrier', component: Calendrier, canActivate: [memberGuard] },
+      { path: 'calendrier', component: Calendrier },
       { path: 'membres/guide', component: MembresGuide, canActivate: [memberGuard] },
       { path: 'contact', component: Contact },
       {
