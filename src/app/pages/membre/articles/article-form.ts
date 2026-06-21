@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Location } from '@angular/common';
@@ -222,6 +222,7 @@ export class ArticleForm implements OnInit {
   removePendingCover    = signal(false);
 
   private profile = toSignal(this.authService.currentUserProfile$);
+  private cdRef   = inject(ChangeDetectorRef);
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
@@ -242,6 +243,7 @@ export class ArticleForm implements OnInit {
       this.epingle           = a.epingle;
       this.couvertureUrl.set(a.couvertureUrl ?? '');
       this.couvertureStoragePath.set(a.couvertureStoragePath ?? '');
+      this.cdRef.detectChanges();
     });
   }
 

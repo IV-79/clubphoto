@@ -1,0 +1,109 @@
+.notifs-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 32px 24px 80px;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 300;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.header-actions { display: flex; gap: 10px; }
+
+.btn-action {
+  padding: 6px 14px;
+  border: 1px solid rgba(0,0,0,0.2);
+  border-radius: 4px;
+  background: white;
+  font-size: 0.8rem;
+  cursor: pointer;
+  color: #444;
+  transition: background 0.15s;
+}
+.btn-action:hover { background: #f0f0f0; }
+.btn-action.btn-danger { border-color: #e53935; color: #e53935; }
+.btn-action.btn-danger:hover { background: #ffebee; }
+
+/* ── Liste ─────────────────────────────────────── */
+
+.notif-list { display: flex; flex-direction: column; gap: 6px; }
+
+.notif-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 6px;
+  background: #f9f9f9;
+  border: 1px solid #ececec;
+  cursor: pointer;
+  transition: background 0.15s;
+  position: relative;
+}
+.notif-item:hover { background: #f0f0f0; }
+.notif-item.unread { background: #eef4ff; border-color: #c5d8f5; }
+.notif-item.unread:hover { background: #e4eeff; }
+
+.notif-type-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.notif-body { flex: 1; min-width: 0; }
+
+.notif-message {
+  margin: 0 0 4px;
+  font-size: 0.875rem;
+  color: #222;
+  line-height: 1.45;
+}
+
+.notif-date {
+  font-size: 0.75rem;
+  color: rgba(0,0,0,0.4);
+}
+
+.unread-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #1565c0;
+  flex-shrink: 0;
+  margin-top: 6px;
+}
+
+.btn-del {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 2px 4px;
+  border-radius: 3px;
+  color: rgba(0,0,0,0.3);
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+.btn-del:hover { color: #c62828; }
+
+/* ── État vide ──────────────────────────────────── */
+
+.empty-state {
+  text-align: center;
+  padding: 60px 0;
+  color: rgba(0,0,0,0.35);
+}
+.empty-icon { font-size: 2.5rem; display: block; margin-bottom: 12px; }
+.empty-msg { margin: 0; font-size: 0.95rem; }

@@ -88,6 +88,45 @@
       <!-- Actions droite -->
       <div class="nav-actions">
         @if (isLoggedIn$ | async) {
+
+          <!-- Cloche notifications -->
+          <div class="has-dropdown">
+            <button class="notif-bell" (click)="toggleMenu('notifs', $event)" [class.has-unread]="unreadCount() > 0" title="Notifications">
+              <mat-icon>notifications</mat-icon>
+              @if (unreadCount() > 0) {
+                <span class="notif-badge">{{ unreadCount() > 9 ? '9+' : unreadCount() }}</span>
+              }
+            </button>
+            @if (openMenu() === 'notifs') {
+              <div class="nav-panel nav-panel-right notif-panel" (click)="$event.stopPropagation()">
+                <div class="notif-panel-header">
+                  <span class="notif-panel-title">Notifications</span>
+                  @if (unreadCount() > 0) {
+                    <button class="notif-mark-all" (click)="markAllRead()">Tout marquer lu</button>
+                  }
+                </div>
+                @if (recentNotifs().length === 0) {
+                  <p class="notif-panel-empty">Aucune notification</p>
+                } @else {
+                  @for (n of recentNotifs(); track n.id) {
+                    <button class="notif-panel-item" [class.unread]="!n.lu" (click)="navigateFromNotif(n)">
+                      <span class="notif-item-icon">{{ notifIcon(n.type) }}</span>
+                      <div class="notif-item-body">
+                        <p class="notif-item-msg">{{ n.message }}</p>
+                        <span class="notif-item-date">{{ formatNotifDate(n.createdAt) }}</span>
+                      </div>
+                      @if (!n.lu) { <span class="notif-unread-dot"></span> }
+                    </button>
+                  }
+                }
+                <div class="notif-panel-footer">
+                  <a routerLink="/membre/notifications" class="notif-voir-tout" (click)="openMenu.set(null)">Toutes les notifications →</a>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Mon espace -->
           <div class="has-dropdown">
             <button class="membre-btn" (click)="toggleMenu('monespace', $event)">
               <mat-icon>account_circle</mat-icon>
@@ -101,6 +140,16 @@
                 </a>
                 <a routerLink="/membre/profil" class="nav-panel-item" (click)="openMenu.set(null)">
                   <mat-icon>person</mat-icon>Mon Profil
+                </a>
+                <div class="nav-panel-divider"></div>
+                <a routerLink="/membre/notifications" class="nav-panel-item" (click)="openMenu.set(null)">
+                  <mat-icon>notifications</mat-icon>Mes notifications
+                  @if (unreadCount() > 0) {
+                    <span class="notif-count-chip">{{ unreadCount() }}</span>
+                  }
+                </a>
+                <a routerLink="/membre/preferences" class="nav-panel-item" (click)="openMenu.set(null)">
+                  <mat-icon>tune</mat-icon>Préférences
                 </a>
                 <div class="nav-panel-divider"></div>
                 <button class="nav-panel-item nav-panel-btn" (click)="logout(); openMenu.set(null)">
@@ -221,12 +270,15 @@
         <li class="mobile-has-sub">
           <button class="mobile-sub-toggle" (click)="toggleMobileSection('monespace')">
             Mon espace
+            @if (unreadCount() > 0) { <span class="mobile-notif-badge">{{ unreadCount() }}</span> }
             <mat-icon class="toggle-arrow">{{ mobileOpenSection() === 'monespace' ? 'expand_less' : 'expand_more' }}</mat-icon>
           </button>
           @if (mobileOpenSection() === 'monespace') {
             <ul class="mobile-sub">
               <li><a routerLink="/membre/portfolio" (click)="closeMobileMenu()">Mon Portfolio</a></li>
               <li><a routerLink="/membre/profil" (click)="closeMobileMenu()">Mon Profil</a></li>
+              <li><a routerLink="/membre/notifications" (click)="closeMobileMenu()">Mes notifications@if (unreadCount() > 0) { ({{ unreadCount() }}) }</a></li>
+              <li><a routerLink="/membre/preferences" (click)="closeMobileMenu()">Préférences</a></li>
               <li><button class="mobile-sub-logout" (click)="logout()">Déconnexion</button></li>
             </ul>
           }

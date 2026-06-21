@@ -4,6 +4,21 @@
 
 ## En cours (alpha)
 
+### Améliorations
+- **Système de notifications** — infrastructure complète in-app (pas d'email pour l'instant) :
+  - **Cloche 🔔** dans la barre de navigation (desktop) à gauche de "Mon espace", avec badge rouge pour les non-lus. Panel dropdown avec les 8 dernières notifications, bouton "Tout marquer lu", lien vers la page complète.
+  - **`/membre/notifications`** — liste complète, tri par date, suppression unitaire ou globale, lien direct vers l'élément concerné, marquage lu au clic.
+  - **`/membre/preferences`** — page de gestion des abonnements avec toggles individuels (oneshots, sorties, actualités, likes, commentaires). Sauvegarde immédiate sur le profil Firestore.
+  - **Broadcasts** (un événement → tous les membres abonnés) :
+    - OneShot : ouverture des inscriptions, passage au vote, publication des résultats
+    - Nouvelle sortie photo créée
+    - Nouvel article publié
+  - **Notifications personnelles** :
+    - Like sur une photo de portfolio
+    - Commentaire sur une photo de portfolio
+  - Firestore : collection `notifications/{uid}/items/{notifId}`. Règle : lecture/màj/suppression par le propriétaire, création par tout membre connecté (pour le broadcast client-side).
+  - Les abonnements sont stockés sur le profil utilisateur (`subscriptions: { oneshots, sorties, articles, likes, comments }`). Tout activé par défaut.
+
 ### Corrections
 - **OneShot — visibilité selon connexion** — mêmes règles que les Thèmes du mois appliquées aux pages OneShot :
   - `vote` : les visiteurs non connectés voient uniquement un message d'invitation à se connecter, sans accès aux photos. Les membres voient la grille de vote en mode anonyme.

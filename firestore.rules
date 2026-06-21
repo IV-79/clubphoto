@@ -194,6 +194,12 @@ service cloud.firestore {
       allow delete: if isLoggedIn() && (resource.data.uploadeurUid == request.auth.uid || isAdmin());
     }
 
+    // Notifications par membre
+    match /notifications/{uid}/items/{notifId} {
+      allow read, update, delete: if request.auth.uid == uid;
+      allow create: if isLoggedIn(); // tout membre peut créer pour autrui (broadcast + perso)
+    }
+
     // Config site (lecture publique, écriture admin)
     match /config/{docId} {
       allow read: if true;

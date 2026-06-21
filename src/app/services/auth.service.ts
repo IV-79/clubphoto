@@ -5,7 +5,7 @@ import {
 } from '@angular/fire/auth';
 import {
   Firestore, doc, setDoc, getDoc, updateDoc, deleteDoc,
-  collection, collectionData, query, where, getDocs
+  collection, collectionData, query, where, getDocs, docData
 } from '@angular/fire/firestore';
 import { Storage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from '@angular/fire/storage';
 import { Router } from '@angular/router';
@@ -27,12 +27,10 @@ export class AuthService {
   currentUserProfile$: Observable<UserProfile | null> = this.user$.pipe(
     switchMap(user => {
       if (!user) return of(null);
-      return from(
-        runInInjectionContext(this.injector, () =>
-          getDoc(doc(this.firestore, 'users', user.uid))
-        )
-      ).pipe(
-        map(snap => snap.exists() ? (snap.data() as UserProfile) : null)
+      return (runInInjectionContext(this.injector, () =>
+        docData(doc(this.firestore, 'users', user.uid))
+      ) as Observable<UserProfile | undefined>).pipe(
+        map(data => data ?? null)
       );
     }),
     shareReplay(1)

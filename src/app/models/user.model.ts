@@ -1,3 +1,5 @@
+import { UserSubscriptions } from './notification.model';
+
 export interface UserProfile {
   uid: string;
   email: string;
@@ -7,6 +9,7 @@ export interface UserProfile {
   isSuspended?: boolean;
   derniereConnexion?: string;
   storageUsed?: { portfolio: number; themes: number; oneshots: number; documents?: number };
+  subscriptions?: UserSubscriptions;
   dateAdhesion: string;
   bio?: string;
   appareil?: string;

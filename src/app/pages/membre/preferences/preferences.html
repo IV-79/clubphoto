@@ -1,0 +1,91 @@
+<div class="prefs-page">
+
+  <h1 class="page-title">Préférences de notifications</h1>
+  <p class="page-subtitle">Choisissez les événements pour lesquels vous souhaitez recevoir une notification.</p>
+
+  <!-- Activités du club (broadcasts) -->
+  <section class="pref-section">
+    <h2 class="section-title">Activités du club</h2>
+    <p class="section-desc">Envoyée à tous les membres abonnés lors d'un changement d'état.</p>
+
+    <div class="pref-list">
+      <div class="pref-item">
+        <div class="pref-info">
+          <span class="pref-icon">📸</span>
+          <div>
+            <p class="pref-label">OneShot</p>
+            <p class="pref-hint">Ouverture des inscriptions, passage au vote, résultats</p>
+          </div>
+        </div>
+        <button class="toggle" [class.on]="subs().oneshots" (click)="toggle('oneshots')" [disabled]="saving()">
+          <span class="toggle-thumb"></span>
+        </button>
+      </div>
+
+      <div class="pref-item">
+        <div class="pref-info">
+          <span class="pref-icon">🚶</span>
+          <div>
+            <p class="pref-label">Sorties photo</p>
+            <p class="pref-hint">Annonce d'une nouvelle sortie</p>
+          </div>
+        </div>
+        <button class="toggle" [class.on]="subs().sorties" (click)="toggle('sorties')" [disabled]="saving()">
+          <span class="toggle-thumb"></span>
+        </button>
+      </div>
+
+      <div class="pref-item">
+        <div class="pref-info">
+          <span class="pref-icon">📰</span>
+          <div>
+            <p class="pref-label">Actualités</p>
+            <p class="pref-hint">Publication d'un nouvel article</p>
+          </div>
+        </div>
+        <button class="toggle" [class.on]="subs().articles" (click)="toggle('articles')" [disabled]="saving()">
+          <span class="toggle-thumb"></span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactions sur mes photos -->
+  <section class="pref-section">
+    <h2 class="section-title">Interactions sur mes photos</h2>
+    <p class="section-desc">Notifications personnelles quand quelqu'un interagit avec vos photos.</p>
+
+    <div class="pref-list">
+      <div class="pref-item">
+        <div class="pref-info">
+          <span class="pref-icon">♥</span>
+          <div>
+            <p class="pref-label">J'aime</p>
+            <p class="pref-hint">Quelqu'un like une de vos photos de portfolio</p>
+          </div>
+        </div>
+        <button class="toggle" [class.on]="subs().likes" (click)="toggle('likes')" [disabled]="saving()">
+          <span class="toggle-thumb"></span>
+        </button>
+      </div>
+
+      <div class="pref-item">
+        <div class="pref-info">
+          <span class="pref-icon">💬</span>
+          <div>
+            <p class="pref-label">Commentaires</p>
+            <p class="pref-hint">Quelqu'un commente une de vos photos de portfolio</p>
+          </div>
+        </div>
+        <button class="toggle" [class.on]="subs().comments" (click)="toggle('comments')" [disabled]="saving()">
+          <span class="toggle-thumb"></span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  @if (saving()) {
+    <p class="saving-hint">Enregistrement…</p>
+  }
+
+</div>

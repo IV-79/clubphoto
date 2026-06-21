@@ -1,10 +1,13 @@
-import { Component, inject, signal, HostListener } from '@angular/core';
+import { Component, inject, signal, computed, HostListener } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AsyncPipe } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { switchMap, map, of } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { LoginModalService } from '../../services/login-modal.service';
-import { map } from 'rxjs';
+import { NotificationService } from '../../services/notification.service';
+import { AppNotification, NOTIF_ICONS } from '../../models/notification.model';
 
 @Component({
   selector: 'app-header',
@@ -13,9 +16,10 @@ import { map } from 'rxjs';
   styleUrl: './header.css',
 })
 export class Header {
-  private authService = inject(AuthService);
-  private router      = inject(Router);
-  private loginModal  = inject(LoginModalService);
+  private authService  = inject(AuthService);
+  private notifService = inject(NotificationService);
+  private router       = inject(Router);
+  private loginModal   = inject(LoginModalService);
 
   // Desktop dropdowns
   openMenu = signal<string | null>(null);
@@ -49,6 +53,44 @@ export class Header {
   profile$    = this.authService.currentUserProfile$;
   isAdmin$    = this.profile$.pipe(map(p => p?.role === 'admin'));
   isLoggedIn$ = this.authService.user$.pipe(map(user => !!user));
+
+  // Notifications
+  private profile = toSignal(this.authService.currentUserProfile$);
+
+  private notifs$ = this.authService.currentUserProfile$.pipe(
+    switchMap(p => p ? this.notifService.getNotifications(p.uid) : of([] as AppNotification[]))
+  );
+  notifications = toSignal(this.notifs$, { initialValue: [] as AppNotification[] });
+  unreadCount   = computed(() => this.notifications().filter(n => !n.lu).length);
+  recentNotifs  = computed(() => this.notifications().slice(0, 8));
+
+  notifIcon(type: AppNotification['type']): string {
+    return NOTIF_ICONS[type] ?? '🔔';
+  }
+
+  formatNotifDate(iso: string): string {
+    const d = new Date(iso);
+    const diffMs = Date.now() - d.getTime();
+    const diffMin = Math.floor(diffMs / 60000);
+    if (diffMin < 60) return `${diffMin || 1}m`;
+    const diffH = Math.floor(diffMin / 60);
+    if (diffH < 24) return `${diffH}h`;
+    const diffD = Math.floor(diffH / 24);
+    if (diffD < 7) return `${diffD}j`;
+    return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+  }
+
+  async navigateFromNotif(n: AppNotification) {
+    const uid = this.profile()?.uid;
+    if (uid && !n.lu) await this.notifService.markAsRead(uid, n.id);
+    this.openMenu.set(null);
+    if (n.lien) this.router.navigate([n.lien]);
+  }
+
+  async markAllRead() {
+    const uid = this.profile()?.uid;
+    if (uid) await this.notifService.markAllAsRead(uid);
+  }
 
   logout() { this.authService.logout(); }
 }

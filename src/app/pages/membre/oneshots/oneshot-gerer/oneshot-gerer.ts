@@ -106,7 +106,10 @@ export class OneShotGerer implements OnInit {
     if (!next || this.transitioning()) return;
     this.transitioning.set(true);
     this.confirmTransition.set(false);
-    await this.oneShotService.updateStatut(this.id, next);
+    const ev = this.event();
+    await this.oneShotService.updateStatut(this.id, next, ev ? {
+      titre: ev.titre, nomCreateur: ev.nomCreateur, creatorUid: ev.creatorUid
+    } : undefined);
     this.transitioning.set(false);
   }
 

@@ -7,12 +7,14 @@ import { Storage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from
 import { Observable } from 'rxjs';
 import { Article } from '../models/article.model';
 import { compressToJpeg } from '../utils/image-compress';
+import { NotificationService } from './notification.service';
 
 @Injectable({ providedIn: 'root' })
 export class ArticleService {
-  private firestore = inject(Firestore);
-  private storage   = inject(Storage);
-  private injector  = inject(Injector);
+  private firestore    = inject(Firestore);
+  private storage      = inject(Storage);
+  private injector     = inject(Injector);
+  private notifService = inject(NotificationService);
 
   getAllArticles(): Observable<Article[]> {
     return runInInjectionContext(this.injector, () =>
@@ -57,10 +59,20 @@ export class ArticleService {
     const ref = await runInInjectionContext(this.injector, () =>
       addDoc(collection(this.firestore, 'articles'), clean)
     );
+    if (article.statut === 'publie') {
+      this.notifService.broadcast('article',
+        `${article.auteurNom} a publié un nouvel article : « ${article.titre} »`,
+        { lien: '/actualites', sourceNom: article.auteurNom, excludeUid: article.auteurUid }
+      ).catch(() => {});
+    }
     return ref.id;
   }
 
-  async updateArticle(id: string, data: Partial<Omit<Article, 'id' | 'dateCreation' | 'auteurUid'>>): Promise<void> {
+  async updateArticle(
+    id: string,
+    data: Partial<Omit<Article, 'id' | 'dateCreation' | 'auteurUid'>>,
+    publishNotif?: { titre: string; auteurNom: string; auteurUid: string }
+  ): Promise<void> {
     const mapped = Object.fromEntries(
       Object.entries(data).map(([k, v]) => [k, v === undefined ? deleteField() : v])
     );
@@ -70,6 +82,12 @@ export class ArticleService {
         dateMiseAJour: new Date().toISOString(),
       })
     );
+    if (publishNotif && data.statut === 'publie') {
+      this.notifService.broadcast('article',
+        `${publishNotif.auteurNom} a publié un article : « ${publishNotif.titre} »`,
+        { lien: '/actualites', sourceNom: publishNotif.auteurNom, excludeUid: publishNotif.auteurUid }
+      ).catch(() => {});
+    }
   }
 
   async deleteArticle(id: string, couvertureStoragePath?: string): Promise<void> {

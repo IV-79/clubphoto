@@ -1,4 +1,5 @@
 import { Injectable, inject, Injector, runInInjectionContext } from '@angular/core';
+import { NotificationService } from './notification.service';
 import {
   Firestore, collection, collectionData, doc, docData,
   addDoc, updateDoc, deleteDoc, setDoc, getDocs, getDoc,
@@ -21,9 +22,10 @@ export interface SortieUploadState {
 
 @Injectable({ providedIn: 'root' })
 export class SortieService {
-  private firestore = inject(Firestore);
-  private storage = inject(Storage);
-  private injector = inject(Injector);
+  private firestore    = inject(Firestore);
+  private storage      = inject(Storage);
+  private injector     = inject(Injector);
+  private notifService = inject(NotificationService);
 
   getSorties(): Observable<Sortie[]> {
     const q = query(collection(this.firestore, 'sorties'), orderBy('date', 'desc'));
@@ -56,6 +58,10 @@ export class SortieService {
         dateCreation: new Date().toISOString(),
       })
     );
+    this.notifService.broadcast('sortie',
+      `${data.nomOrganisateur} a organisé une nouvelle sortie photo : « ${data.titre} »`,
+      { lien: `/galeries/sorties/${docRef.id}`, sourceNom: data.nomOrganisateur, excludeUid: data.organisateurUid }
+    ).catch(() => {});
     return docRef.id;
   }
 

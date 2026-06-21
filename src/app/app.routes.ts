@@ -35,6 +35,8 @@ import { MembresGuide } from './pages/membres/guide/guide';
 import { CompleterProfilComponent } from './pages/completer-profil/completer-profil.component';
 import { Documents } from './pages/membre/documents/documents';
 import { DocumentDossiers } from './pages/admin-dashboard/document-dossiers/document-dossiers';
+import { Notifications } from './pages/membre/notifications/notifications';
+import { Preferences } from './pages/membre/preferences/preferences';
 
 export const routes: Routes = [
   {
@@ -94,6 +96,8 @@ export const routes: Routes = [
       { path: 'oneshots/:id/gerer', component: OneShotGerer },
       { path: 'oneshots/:id/photos', component: OneShotPhotos },
       { path: 'documents', component: Documents },
+      { path: 'notifications', component: Notifications },
+      { path: 'preferences', component: Preferences },
       { path: 'sorties/creer', component: SortieCreer },
       { path: 'sorties/:id/gerer', component: SortieGerer },
       { path: '', redirectTo: 'portfolio', pathMatch: 'full' }

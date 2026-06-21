@@ -8,12 +8,15 @@ import { Photo, PhotoExif, PhotoVisibilite, UploadState } from '../models/photo.
 import { Commentaire, Reponse } from '../models/commentaire.model';
 import { hasExif } from '../utils/exif-reader';
 import { generateId } from '../utils/id';
+import { NotificationService } from './notification.service';
+import { UserSubscriptions } from '../models/notification.model';
 
 @Injectable({ providedIn: 'root' })
 export class PhotoService {
-  private storage = inject(Storage);
-  private firestore = inject(Firestore);
-  private injector = inject(Injector);
+  private storage      = inject(Storage);
+  private firestore    = inject(Firestore);
+  private injector     = inject(Injector);
+  private notifService = inject(NotificationService);
 
   uploadPhoto(
     file: File,
@@ -143,12 +146,23 @@ export class PhotoService {
 
   // --- Likes ---
 
-  async toggleLikePhoto(photoId: string, uid: string, currentlyLiked: boolean): Promise<void> {
+  async toggleLikePhoto(
+    photoId: string,
+    uid: string,
+    currentlyLiked: boolean,
+    notif?: { ownerUid: string; likerNom: string; lien: string; ownerSubscriptions?: UserSubscriptions }
+  ): Promise<void> {
     await runInInjectionContext(this.injector, () =>
       updateDoc(doc(this.firestore, 'photos', photoId), {
         likes: currentlyLiked ? arrayRemove(uid) : arrayUnion(uid),
       })
     );
+    if (notif && !currentlyLiked) {
+      await this.notifService.createPersonalNotif(notif.ownerUid, 'like',
+        `${notif.likerNom} a aimé une de vos photos`,
+        { lien: notif.lien, sourceNom: notif.likerNom, sourceUid: uid, toSubscriptions: notif.ownerSubscriptions }
+      );
+    }
   }
 
   // --- Commentaires ---
@@ -163,12 +177,22 @@ export class PhotoService {
     ) as Observable<Commentaire[]>;
   }
 
-  async addCommentaire(photoId: string, data: { texte: string; auteurUid: string; nomAuteur: string }): Promise<void> {
+  async addCommentaire(
+    photoId: string,
+    data: { texte: string; auteurUid: string; nomAuteur: string },
+    notif?: { ownerUid: string; lien: string; ownerSubscriptions?: UserSubscriptions }
+  ): Promise<void> {
     await runInInjectionContext(this.injector, () =>
       addDoc(collection(this.firestore, `photos/${photoId}/commentaires`), {
         ...data, likes: [], replies: [], createdAt: new Date().toISOString(),
       })
     );
+    if (notif) {
+      await this.notifService.createPersonalNotif(notif.ownerUid, 'comment',
+        `${data.nomAuteur} a commenté une de vos photos`,
+        { lien: notif.lien, sourceNom: data.nomAuteur, sourceUid: data.auteurUid, toSubscriptions: notif.ownerSubscriptions }
+      );
+    }
   }
 
   async deleteCommentaire(photoId: string, commentId: string): Promise<void> {

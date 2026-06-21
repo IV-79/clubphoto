@@ -9,6 +9,7 @@ import {
   OneShot, OneShotTheme, OneShotInscription,
   OneShotPhoto, OneShotVote, OneShotStatut
 } from '../models/oneshot.model';
+import { NotificationService } from './notification.service';
 import { PhotoExif } from '../models/photo.model';
 import { Commentaire, Reponse } from '../models/commentaire.model';
 import { hasExif } from '../utils/exif-reader';
@@ -22,9 +23,10 @@ export interface OneShotUploadState {
 
 @Injectable({ providedIn: 'root' })
 export class OneShotService {
-  private firestore = inject(Firestore);
-  private storage = inject(Storage);
-  private injector = inject(Injector);
+  private firestore     = inject(Firestore);
+  private storage       = inject(Storage);
+  private injector      = inject(Injector);
+  private notifService  = inject(NotificationService);
 
   // --- OneShot ---
 
@@ -72,10 +74,29 @@ export class OneShotService {
     );
   }
 
-  async updateStatut(id: string, statut: OneShotStatut): Promise<void> {
+  async updateStatut(
+    id: string,
+    statut: OneShotStatut,
+    notifCtx?: { titre: string; nomCreateur: string; creatorUid: string }
+  ): Promise<void> {
     await runInInjectionContext(this.injector, () =>
       updateDoc(doc(this.firestore, 'oneshots', id), { statut })
     );
+    if (notifCtx) {
+      const msgs: Partial<Record<OneShotStatut, string>> = {
+        inscription:  `${notifCtx.nomCreateur} a ouvert les inscriptions pour le OneShot « ${notifCtx.titre} »`,
+        vote:         `Le vote est ouvert pour le OneShot « ${notifCtx.titre} »`,
+        resultats:    `Les résultats du OneShot « ${notifCtx.titre} » sont disponibles`,
+      };
+      const msg = msgs[statut];
+      if (msg) {
+        this.notifService.broadcast('oneshot', msg, {
+          lien: `/galeries/oneshots/${id}`,
+          sourceNom: notifCtx.nomCreateur,
+          excludeUid: notifCtx.creatorUid,
+        }).catch(() => {});
+      }
+    }
   }
 
   // --- Thèmes ---

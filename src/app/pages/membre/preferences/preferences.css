@@ -1,0 +1,118 @@
+.prefs-page {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 32px 24px 80px;
+}
+
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 300;
+  color: #1a1a1a;
+  margin: 0 0 6px;
+}
+
+.page-subtitle {
+  color: rgba(0,0,0,0.45);
+  font-size: 0.9rem;
+  margin: 0 0 36px;
+}
+
+/* ── Sections ───────────────────────────────────── */
+
+.pref-section { margin-bottom: 36px; }
+
+.section-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: rgba(0,0,0,0.35);
+  margin: 0 0 4px;
+}
+
+.section-desc {
+  font-size: 0.8rem;
+  color: rgba(0,0,0,0.4);
+  margin: 0 0 16px;
+}
+
+.pref-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pref-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: #f9f9f9;
+  border-radius: 6px;
+  gap: 16px;
+}
+
+.pref-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.pref-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.pref-label {
+  margin: 0 0 2px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #222;
+}
+
+.pref-hint {
+  margin: 0;
+  font-size: 0.78rem;
+  color: rgba(0,0,0,0.4);
+}
+
+/* ── Toggle switch ──────────────────────────────── */
+
+.toggle {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  border-radius: 12px;
+  background: #ccc;
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+  transition: background 0.2s;
+}
+.toggle.on { background: #2e7d32; }
+.toggle:disabled { opacity: 0.5; cursor: default; }
+
+.toggle-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+  transition: transform 0.2s;
+}
+.toggle.on .toggle-thumb { transform: translateX(20px); }
+
+/* ── Feedback enregistrement ────────────────────── */
+
+.saving-hint {
+  font-size: 0.8rem;
+  color: rgba(0,0,0,0.4);
+  text-align: center;
+  margin-top: 20px;
+}

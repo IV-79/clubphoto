@@ -1,0 +1,36 @@
+<div class="notifs-page">
+
+  <div class="page-header">
+    <h1 class="page-title">Mes notifications</h1>
+    <div class="header-actions">
+      @if (unreadCount() > 0) {
+        <button class="btn-action" (click)="markAllRead()">Tout marquer lu</button>
+      }
+      @if (notifications().length > 0) {
+        <button class="btn-action btn-danger" (click)="deleteAll()">Tout supprimer</button>
+      }
+    </div>
+  </div>
+
+  @if (notifications().length === 0) {
+    <div class="empty-state">
+      <span class="empty-icon">🔔</span>
+      <p class="empty-msg">Aucune notification pour l'instant.</p>
+    </div>
+  } @else {
+    <div class="notif-list">
+      @for (n of notifications(); track n.id) {
+        <div class="notif-item" [class.unread]="!n.lu" (click)="onNotifClick(n)">
+          <span class="notif-type-icon">{{ notifIcon(n.type) }}</span>
+          <div class="notif-body">
+            <p class="notif-message">{{ n.message }}</p>
+            <span class="notif-date">{{ formatDate(n.createdAt) }}</span>
+          </div>
+          @if (!n.lu) { <span class="unread-dot"></span> }
+          <button class="btn-del" (click)="deleteNotif(n, $event)" title="Supprimer">🗑</button>
+        </div>
+      }
+    </div>
+  }
+
+</div>

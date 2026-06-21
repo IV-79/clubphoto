@@ -83,14 +83,22 @@ export class MembreDetail {
   );
 
   lightboxCallbacks = computed((): PhotoLightboxCallbacks => {
-    const uid = this.profile()?.uid ?? '';
+    const uid      = this.profile()?.uid ?? '';
+    const lien     = `/galeries/membres/${this.membre()?.uid ?? ''}`;
+    const ownerUid = this.membre()?.uid ?? '';
+    const ownerSubs = this.membre()?.subscriptions;
     return {
       toggleLike: (photoId, liked) =>
-        this.photoService.toggleLikePhoto(photoId, uid, liked),
+        this.photoService.toggleLikePhoto(photoId, uid, liked, uid ? {
+          ownerUid, likerNom: `${this.profile()?.prenom ?? ''} ${this.profile()?.nom ?? ''}`.trim(),
+          lien, ownerSubscriptions: ownerSubs,
+        } : undefined),
       getComments: (photoId) =>
         this.photoService.getCommentaires(photoId),
       addComment: (photoId, texte, auteurUid, nomAuteur) =>
-        this.photoService.addCommentaire(photoId, { texte, auteurUid, nomAuteur }),
+        this.photoService.addCommentaire(photoId, { texte, auteurUid, nomAuteur }, uid ? {
+          ownerUid, lien, ownerSubscriptions: ownerSubs,
+        } : undefined),
       deleteComment: (photoId, commentId) =>
         this.photoService.deleteCommentaire(photoId, commentId),
       toggleCommentLike: (photoId, commentId, cUid, liked) =>
