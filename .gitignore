@@ -56,3 +56,4 @@ src/environments/environment.prod.ts
 .claude/
 /ClubPhoto-Tracking.xlsx
 /SITEMAP.md
+/visibilite_clubphoto.xlsx
