@@ -45,13 +45,20 @@ export class Calendrier {
   private limitAVenir = signal(INIT);
   private limitPasses = signal(INIT);
 
-  private tous = toSignal(this.service.getReunions(), { initialValue: [] as Reunion[] });
+  private tous = toSignal(
+    this.authService.currentUserProfile$.pipe(
+      switchMap(profile => profile ? this.service.getReunions() : of([] as Reunion[]))
+    ),
+    { initialValue: [] as Reunion[] }
+  );
 
   // --- OneShots publics ---
   profile = toSignal(this.authService.currentUserProfile$);
   private publicOneShots$ = this.oneShotService.getPublicOneShots();
   private oneshots = toSignal(this.publicOneShots$, { initialValue: [] as OneShot[] });
   private sorties = toSignal(this.sortieService.getSorties(), { initialValue: [] as Sortie[] });
+
+  isMembre = computed(() => !!this.profile());
 
   // --- Items unifiés (événements + oneshots + sorties avec une date) ---
   private filtresItems = computed((): CalItem[] => {

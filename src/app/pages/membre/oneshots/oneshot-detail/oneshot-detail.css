@@ -79,6 +79,10 @@
   font-size: 0.875rem;
 }
 
+.inline-link { background: none; border: none; padding: 0; font: inherit; cursor: pointer; color: #cc0000; text-decoration: underline; }
+.inline-link:hover { color: #aa0000; }
+.top3-hint { margin-top: 20px; text-align: center; }
+
 .panel-title {
   font-size: 0.7rem;
   font-weight: 700;

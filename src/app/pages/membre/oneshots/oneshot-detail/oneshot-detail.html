@@ -14,7 +14,9 @@
     <div class="event-header">
       <span class="statut-badge statut-{{ event()!.statut }}">{{ statutLabel() }}</span>
       <h1>{{ event()!.titre }}</h1>
-      <p class="event-createur">Organisé par {{ event()!.nomCreateur }}</p>
+      @if (isLoggedIn()) {
+        <p class="event-createur">Organisé par {{ event()!.nomCreateur }}</p>
+      }
       @if (event()!.description) {
         <p class="event-desc">{{ event()!.description }}</p>
       }
@@ -24,7 +26,8 @@
     <section class="inscription-section">
       <div class="inscription-header">
         <h2 class="panel-title">
-          Participants <span class="count">{{ inscriptions().length }}</span>
+          Participants
+          @if (isLoggedIn()) { <span class="count">{{ inscriptions().length }}</span> }
         </h2>
         @if (profile()) {
           @if (inscriptionOuverte() && (!isCreator() || isInscrit())) {
@@ -47,7 +50,7 @@
         }
       </div>
 
-      @if (inscriptions().length > 0 && event()!.statut !== 'vote' && event()!.statut !== 'resultats') {
+      @if (isLoggedIn() && inscriptions().length > 0 && event()!.statut !== 'vote' && event()!.statut !== 'resultats') {
         <div class="participants-row">
           @for (ins of inscriptions(); track ins.uid) {
             <span class="participant-name-chip" [class.me]="ins.uid === profile()?.uid">
@@ -130,8 +133,8 @@
           </section>
         }
 
-      } @else {
-        <div class="panel panel-info">Le vote est en cours — connectez-vous pour voter.</div>
+      } @else if (authReady()) {
+        <div class="panel panel-info"><button class="inline-link" (click)="loginModal.open()">Connectez-vous</button> pour voir les photos et voter.</div>
       }
     }
 
@@ -141,35 +144,61 @@
         <h2 class="resultats-titre">Résultats</h2>
       </div>
 
-      @for (group of resultsByTheme(); track group.theme.id) {
-        <section class="panel theme-section">
-          <h2 class="panel-title">
-            {{ group.theme.nom }}
-            <span class="count">{{ voteCountByTheme()[group.theme.id] ?? 0 }} vote{{ (voteCountByTheme()[group.theme.id] ?? 0) > 1 ? 's' : '' }}</span>
-          </h2>
+      @if (isLoggedIn()) {
 
-          <div class="results-grid">
-            @for (photo of group.photos; track photo.id; let i = $index) {
-              @let votes = voteCountByPhoto()[photo.id] ?? 0;
-              @let rank = computeRank(group.photos, i);
-              <div class="result-card" [class.rank-1]="rank === 1" [class.rank-2]="rank === 2" [class.rank-3]="rank === 3" (click)="openLightbox(photo)">
-                <div class="rank-badge" [class.gold]="rank === 1" [class.silver]="rank === 2" [class.bronze]="rank === 3">
-                  {{ rank }}
+        <!-- Classement complet pour les membres -->
+        @for (group of resultsByTheme(); track group.theme.id) {
+          <section class="panel theme-section">
+            <h2 class="panel-title">
+              {{ group.theme.nom }}
+              <span class="count">{{ voteCountByTheme()[group.theme.id] ?? 0 }} vote{{ (voteCountByTheme()[group.theme.id] ?? 0) > 1 ? 's' : '' }}</span>
+            </h2>
+            <div class="results-grid">
+              @for (photo of group.photos; track photo.id; let i = $index) {
+                @let votes = voteCountByPhoto()[photo.id] ?? 0;
+                @let rank = computeRank(group.photos, i);
+                <div class="result-card" [class.rank-1]="rank === 1" [class.rank-2]="rank === 2" [class.rank-3]="rank === 3" (click)="openLightbox(photo)">
+                  <div class="rank-badge" [class.gold]="rank === 1" [class.silver]="rank === 2" [class.bronze]="rank === 3">{{ rank }}</div>
+                  <img [src]="photo.url" class="result-thumb" loading="lazy">
+                  <button class="card-heart" [class.liked]="isLiked(photo)"
+                    (click)="toggleLike(photo, $event)"
+                    [title]="isLiked(photo) ? 'Retirer le like' : 'J\'aime'">
+                    <span class="hi">♥</span> @if ((photo.likes?.length ?? 0) > 0) { {{ photo.likes!.length }} }
+                  </button>
+                  <div class="result-footer">
+                    <span class="result-name">{{ photo.nomMembre }}</span>
+                    <span class="result-votes">{{ votes }} vote{{ votes > 1 ? 's' : '' }}</span>
+                  </div>
                 </div>
-                <img [src]="photo.url" class="result-thumb" loading="lazy">
-                <button class="card-heart" [class.liked]="isLiked(photo)"
-                  (click)="toggleLike(photo, $event)"
-                  [title]="isLiked(photo) ? 'Retirer le like' : 'J\'aime'">
-                  <span class="hi">♥</span> @if ((photo.likes?.length ?? 0) > 0) { {{ photo.likes!.length }} }
-                </button>
-                <div class="result-footer">
-                  <span class="result-name">{{ photo.nomMembre }}</span>
-                  <span class="result-votes">{{ votes }} vote{{ votes > 1 ? 's' : '' }}</span>
+              }
+            </div>
+          </section>
+        }
+
+      } @else {
+
+        <!-- Top 3 par thème pour les visiteurs -->
+        @for (group of top3ResultsByTheme(); track group.theme.id) {
+          <section class="panel theme-section">
+            <h2 class="panel-title">{{ group.theme.nom }}</h2>
+            <div class="results-grid">
+              @for (photo of group.photos; track photo.id; let i = $index) {
+                @let rank = computeRank(group.photos, i);
+                <div class="result-card" [class.rank-1]="rank === 1" [class.rank-2]="rank === 2" [class.rank-3]="rank === 3" (click)="openLightbox(photo)">
+                  <div class="rank-badge" [class.gold]="rank === 1" [class.silver]="rank === 2" [class.bronze]="rank === 3">{{ rank }}</div>
+                  <img [src]="photo.url" class="result-thumb" loading="lazy">
+                  <div class="result-footer">
+                    <span class="result-name">{{ photo.nomMembre }}</span>
+                  </div>
                 </div>
-              </div>
-            }
-          </div>
-        </section>
+              }
+            </div>
+          </section>
+        }
+        @if (authReady()) {
+          <p class="panel-info top3-hint"><button class="inline-link" (click)="loginModal.open()">Connectez-vous</button> pour voir le classement complet.</p>
+        }
+
       }
     }
 

@@ -94,6 +94,7 @@
 }
 
 .info-msg:last-child { margin-bottom: 0; }
+.top3-hint { margin-top: 20px; text-align: center; }
 
 .config-chips {
   display: flex;

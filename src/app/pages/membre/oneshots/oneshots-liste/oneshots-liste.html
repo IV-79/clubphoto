@@ -55,7 +55,7 @@
               @if (ev.description) {
                 <p class="event-desc">{{ ev.description }}</p>
               }
-              <span class="event-createur">par {{ ev.nomCreateur }}</span>
+              @if (profile()) { <span class="event-createur">par {{ ev.nomCreateur }}</span> }
             </div>
             <div class="event-actions">
               <a [routerLink]="['/galeries/oneshots', ev.id]" class="btn-voir">Voir</a>

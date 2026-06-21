@@ -19,12 +19,14 @@
 
     <div class="header-meta">
       <span class="meta-item">📅 {{ formatDate(s.date) }}</span>
-      @if (s.lieu) {
+      @if (profile() && s.lieu) {
         <a [href]="mapsUrl(s.lieu)" target="_blank" class="meta-item meta-lieu">
           📍 {{ s.lieu }}
         </a>
       }
-      <span class="meta-item meta-org">par {{ s.nomOrganisateur }}</span>
+      @if (profile()) {
+        <span class="meta-item meta-org">par {{ s.nomOrganisateur }}</span>
+      }
     </div>
 
     @if (s.description) {
@@ -38,9 +40,11 @@
       <div class="inscription-header">
         <h2>
           Participants
-          <span class="count">{{ inscriptions().length }}</span>
-          @if (s.maxParticipants) {
-            <span class="max-count">/ {{ s.maxParticipants }}</span>
+          @if (profile()) {
+            <span class="count">{{ inscriptions().length }}</span>
+            @if (s.maxParticipants) {
+              <span class="max-count">/ {{ s.maxParticipants }}</span>
+            }
           }
         </h2>
 
@@ -61,7 +65,7 @@
         }
       </div>
 
-      @if (inscriptions().length > 0) {
+      @if (profile() && inscriptions().length > 0) {
         <div class="participants-row">
           @for (p of inscriptions(); track p.uid) {
             <span class="participant-chip" [class.me]="p.uid === profile()?.uid">

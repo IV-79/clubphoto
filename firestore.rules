@@ -47,7 +47,7 @@ service cloud.firestore {
     }
 
     match /photos/{photoId}/commentaires/{commentaireId} {
-      allow read: if true;
+      allow read: if isLoggedIn();
       allow create: if isLoggedIn() && request.resource.data.auteurUid == request.auth.uid;
       allow update: if isLoggedIn();
       allow delete: if isLoggedIn() && (
@@ -72,7 +72,7 @@ service cloud.firestore {
     }
 
     match /themes/{themeId}/soumissions/{soumId}/commentaires/{commentaireId} {
-      allow read: if true;
+      allow read: if isLoggedIn();
       allow create: if isLoggedIn() && request.resource.data.auteurUid == request.auth.uid;
       allow update: if isLoggedIn();
       allow delete: if isLoggedIn() && (
@@ -86,9 +86,9 @@ service cloud.firestore {
       allow delete: if isLoggedIn() && resource.data.voterUid == request.auth.uid;
     }
 
-    // Réunions (lecture publique, écriture admin)
+    // Réunions (lecture membres, écriture admin)
     match /reunions/{reunionId} {
-      allow read: if true;
+      allow read: if isLoggedIn();
       allow write: if isAdmin();
     }
 
@@ -108,7 +108,7 @@ service cloud.firestore {
     }
 
     match /oneshots/{oneShotId}/inscriptions/{uid} {
-      allow read: if true;
+      allow read: if isLoggedIn();
       allow create: if isLoggedIn() && request.auth.uid == uid;
       allow delete: if isLoggedIn() && (request.auth.uid == uid || isAdmin());
     }
@@ -125,7 +125,7 @@ service cloud.firestore {
     }
 
     match /oneshots/{oneShotId}/photos/{photoId}/commentaires/{commentaireId} {
-      allow read: if true;
+      allow read: if isLoggedIn();
       allow create: if isLoggedIn() && request.resource.data.auteurUid == request.auth.uid;
       allow update: if isLoggedIn();
       allow delete: if isLoggedIn() && (
@@ -153,7 +153,7 @@ service cloud.firestore {
     }
 
     match /sorties/{sortieId}/inscriptions/{uid} {
-      allow read: if true;
+      allow read: if isLoggedIn();
       allow create: if isLoggedIn() && request.auth.uid == uid;
       allow delete: if isLoggedIn() && (request.auth.uid == uid || isAdmin());
     }
@@ -170,7 +170,7 @@ service cloud.firestore {
     }
 
     match /sorties/{sortieId}/photos/{photoId}/commentaires/{commentaireId} {
-      allow read: if true;
+      allow read: if isLoggedIn();
       allow create: if isLoggedIn() && request.resource.data.auteurUid == request.auth.uid;
       allow update: if isLoggedIn();
       allow delete: if isLoggedIn() && (

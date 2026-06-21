@@ -325,41 +325,7 @@ select:focus { border-color: rgba(0,0,0,0.28); }
 
 .btn-edit-photo:hover { background: rgba(255,255,255,0.22); }
 .btn-del-photo:hover  { background: rgba(204,0,0,0.55); color: white; }
-
-.confirm-delete {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.85);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-.confirm-delete span { color: rgba(255,255,255,0.7); font-size: 0.78rem; }
-
-.btn-yes {
-  background: #cc0000;
-  border: none;
-  color: white;
-  padding: 5px 14px;
-  border-radius: 3px;
-  font-size: 0.78rem;
-  cursor: pointer;
-}
-
-.btn-yes:disabled { opacity: 0.5; }
-
-.btn-no {
-  background: none;
-  border: 1px solid rgba(255,255,255,0.25);
-  color: rgba(255,255,255,0.45);
-  padding: 4px 12px;
-  border-radius: 3px;
-  font-size: 0.78rem;
-  cursor: pointer;
-}
+.btn-del-photo { font-size: 0.75rem; }
 
 .photo-edit-form {
   position: absolute;

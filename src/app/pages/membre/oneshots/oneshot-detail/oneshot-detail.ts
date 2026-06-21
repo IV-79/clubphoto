@@ -4,6 +4,7 @@ import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { combineLatest, of, switchMap } from 'rxjs';
 import { OneShotService } from '../../../../services/oneshot.service';
 import { AuthService } from '../../../../services/auth.service';
+import { LoginModalService } from '../../../../services/login-modal.service';
 import {
   OneShotInscription, OneShotPhoto, OneShotTheme, OneShotVote,
   ONESHOT_STATUT_LABELS
@@ -21,14 +22,22 @@ export class OneShotDetail {
   private route = inject(ActivatedRoute);
   private oneShotService = inject(OneShotService);
   private authService = inject(AuthService);
+  readonly loginModal = inject(LoginModalService);
 
   readonly id = this.route.snapshot.paramMap.get('id')!;
 
-  event        = toSignal(this.oneShotService.getOneShot(this.id));
-  themes       = toSignal(this.oneShotService.getThemes(this.id),       { initialValue: [] as OneShotTheme[] });
-  photos       = toSignal(this.oneShotService.getPhotos(this.id),       { initialValue: [] as OneShotPhoto[] });
-  inscriptions = toSignal(this.oneShotService.getInscriptions(this.id), { initialValue: [] as OneShotInscription[] });
-  profile      = toSignal(this.authService.currentUserProfile$);
+  event   = toSignal(this.oneShotService.getOneShot(this.id));
+  themes  = toSignal(this.oneShotService.getThemes(this.id),  { initialValue: [] as OneShotTheme[] });
+  photos  = toSignal(this.oneShotService.getPhotos(this.id),  { initialValue: [] as OneShotPhoto[] });
+  profile = toSignal(this.authService.currentUserProfile$);
+
+  isLoggedIn = computed(() => !!this.profile());
+  authReady  = computed(() => this.profile() !== undefined);
+
+  private inscriptions$ = toObservable(this.profile).pipe(
+    switchMap(p => p ? this.oneShotService.getInscriptions(this.id) : of([] as OneShotInscription[]))
+  );
+  inscriptions = toSignal(this.inscriptions$, { initialValue: [] as OneShotInscription[] });
 
   isCreator          = computed(() => this.event()?.creatorUid === this.profile()?.uid);
   isInscrit          = computed(() => this.inscriptions().some(i => i.uid === this.profile()?.uid));
@@ -55,15 +64,16 @@ export class OneShotDetail {
     Object.fromEntries(this.myVotes().map(v => [v.themeId, v.photoId]))
   );
 
-  // Tous les votes — créateur pendant le vote, tout le monde pendant les résultats
+  // Tous les votes — public en resultats, créateur pendant vote, sinon vide
   private allVotes$ = combineLatest([
     this.authService.currentUserProfile$,
     toObservable(this.event),
   ]).pipe(
     switchMap(([profile, event]) => {
-      if (!event || !profile) return of([] as OneShotVote[]);
-      const canSeeAll = event.creatorUid === profile.uid || event.statut === 'resultats';
-      return canSeeAll ? this.oneShotService.getAllVotes(this.id) : of([] as OneShotVote[]);
+      if (!event) return of([] as OneShotVote[]);
+      if (event.statut === 'resultats') return this.oneShotService.getAllVotes(this.id);
+      if (!profile) return of([] as OneShotVote[]);
+      return event.creatorUid === profile.uid ? this.oneShotService.getAllVotes(this.id) : of([] as OneShotVote[]);
     })
   );
   allVotes = toSignal(this.allVotes$, { initialValue: [] as OneShotVote[] });
@@ -99,13 +109,18 @@ export class OneShotDetail {
       .filter(g => g.photos.length > 0)
   );
 
+  top3ResultsByTheme = computed(() =>
+    this.resultsByTheme().map(g => ({ ...g, photos: g.photos.slice(0, 3) }))
+  );
+
   // Lightbox
   lightboxIndex = signal<number | null>(null);
 
   lightboxPhotoList = computed(() => {
     const statut = this.event()?.statut;
     if (statut === 'resultats') {
-      return this.resultsByTheme().flatMap(g => g.photos);
+      const groups = this.isLoggedIn() ? this.resultsByTheme() : this.top3ResultsByTheme();
+      return groups.flatMap(g => g.photos);
     }
     return this.photosByTheme().flatMap(g => g.photos);
   });

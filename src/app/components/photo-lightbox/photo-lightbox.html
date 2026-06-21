@@ -107,8 +107,8 @@
             </div>
           }
 
-          <!-- Commentaires (masqués en mode anonyme) -->
-          @if (!anonyme()) {
+          <!-- Commentaires (masqués en mode anonyme et pour les visiteurs non connectés) -->
+          @if (!anonyme() && userUid()) {
 
             <div class="lb-comments-header">
               💬 {{ commentaires().length }} commentaire{{ commentaires().length !== 1 ? 's' : '' }}
@@ -188,7 +188,7 @@
         </div>
 
         <!-- Champ commentaire fixe en bas -->
-        @if (!anonyme() && canInteract()) {
+        @if (!anonyme() && userUid() && canInteract()) {
           <div class="lb-add-comment">
             <textarea [(ngModel)]="newComment" rows="2"
               placeholder="Ajouter un commentaire…"

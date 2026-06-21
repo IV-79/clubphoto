@@ -9,14 +9,19 @@
   <div class="filtres">
     <div class="filtre-group">
       <button class="filtre-btn" [class.actif]="filtre() === 'tous'" (click)="filtre.set('tous')">Tous</button>
-      @for (t of types; track t.value) {
-        <button class="filtre-btn" [class.actif]="filtre() === t.value" (click)="filtre.set(t.value)">
-          {{ t.label }}
-        </button>
+      @if (isMembre()) {
+        @for (t of types; track t.value) {
+          <button class="filtre-btn" [class.actif]="filtre() === t.value" (click)="filtre.set(t.value)">
+            {{ t.label }}
+          </button>
+        }
       }
       <button class="filtre-btn" [class.actif]="filtre() === 'oneshot'" (click)="filtre.set('oneshot')">OneShot</button>
       <button class="filtre-btn" [class.actif]="filtre() === 'sortie'" (click)="filtre.set('sortie')">Sortie photo</button>
     </div>
+    @if (!isMembre()) {
+      <p class="membres-note">🔒 <button class="membres-note-link" (click)="openLogin()">Connectez-vous</button> pour voir les réunions du club.</p>
+    }
     <div class="filtre-sep"></div>
     <div class="filtre-group">
       <button class="filtre-btn filtre-toggle" [class.actif]="showPasses()" (click)="showPasses.set(!showPasses())">
@@ -71,7 +76,7 @@
                 @if (expandedId() === item.id) {
                   <div class="card-detail">
                     @if (item.oneshot!.description) { <p class="card-desc">{{ item.oneshot!.description }}</p> }
-                    <span class="os-createur">Organisé par {{ item.oneshot!.nomCreateur }}</span>
+                    @if (isMembre()) { <span class="os-createur">Organisé par {{ item.oneshot!.nomCreateur }}</span> }
                     <div class="os-actions-inline" (click)="$event.stopPropagation()">
                       @if (item.oneshot!.statut === 'inscription') {
                         @if (profile()) {
@@ -110,9 +115,9 @@
                 </div>
                 @if (expandedId() === item.id) {
                   <div class="card-detail">
-                    @if (item.sortie!.lieu) { <a class="card-lieu" [href]="mapsUrl(item.sortie!.lieu)" target="_blank" rel="noopener" (click)="$event.stopPropagation()">📍 {{ item.sortie!.lieu }}</a> }
+                    @if (isMembre() && item.sortie!.lieu) { <a class="card-lieu" [href]="mapsUrl(item.sortie!.lieu)" target="_blank" rel="noopener" (click)="$event.stopPropagation()">📍 {{ item.sortie!.lieu }}</a> }
                     @if (item.sortie!.description) { <p class="card-desc">{{ item.sortie!.description }}</p> }
-                    <span class="os-createur">Organisé par {{ item.sortie!.nomOrganisateur }}</span>
+                    @if (isMembre()) { <span class="os-createur">Organisé par {{ item.sortie!.nomOrganisateur }}</span> }
                     <a [routerLink]="['/galeries/sorties', item.sortie!.id]" class="btn-os-voir" (click)="$event.stopPropagation()">Voir →</a>
                     <span class="card-date-full">{{ formatDate(item.date) }}</span>
                   </div>
@@ -179,7 +184,7 @@
                 @if (expandedId() === item.id) {
                   <div class="card-detail">
                     @if (item.oneshot!.description) { <p class="card-desc">{{ item.oneshot!.description }}</p> }
-                    <span class="os-createur">Organisé par {{ item.oneshot!.nomCreateur }}</span>
+                    @if (isMembre()) { <span class="os-createur">Organisé par {{ item.oneshot!.nomCreateur }}</span> }
                     <a [routerLink]="['/galeries/oneshots', item.oneshot!.id]" class="btn-os-voir" (click)="$event.stopPropagation()">Voir les résultats →</a>
                     <span class="card-date-full">{{ formatDate(item.date) }}</span>
                   </div>
@@ -200,9 +205,9 @@
                 </div>
                 @if (expandedId() === item.id) {
                   <div class="card-detail">
-                    @if (item.sortie!.lieu) { <a class="card-lieu" [href]="mapsUrl(item.sortie!.lieu)" target="_blank" rel="noopener" (click)="$event.stopPropagation()">📍 {{ item.sortie!.lieu }}</a> }
+                    @if (isMembre() && item.sortie!.lieu) { <a class="card-lieu" [href]="mapsUrl(item.sortie!.lieu)" target="_blank" rel="noopener" (click)="$event.stopPropagation()">📍 {{ item.sortie!.lieu }}</a> }
                     @if (item.sortie!.description) { <p class="card-desc">{{ item.sortie!.description }}</p> }
-                    <span class="os-createur">Organisé par {{ item.sortie!.nomOrganisateur }}</span>
+                    @if (isMembre()) { <span class="os-createur">Organisé par {{ item.sortie!.nomOrganisateur }}</span> }
                     <a [routerLink]="['/galeries/sorties', item.sortie!.id]" class="btn-os-voir" (click)="$event.stopPropagation()">Voir les photos →</a>
                     <span class="card-date-full">{{ formatDate(item.date) }}</span>
                   </div>

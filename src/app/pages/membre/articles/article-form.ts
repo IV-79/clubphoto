@@ -219,6 +219,7 @@ export class ArticleForm implements OnInit {
   couvertureStoragePath = signal('');
   pendingFile           = signal<File | null>(null);
   previewUrl            = signal('');
+  removePendingCover    = signal(false);
 
   private profile = toSignal(this.authService.currentUserProfile$);
 
@@ -310,6 +311,16 @@ export class ArticleForm implements OnInit {
         await this.articleService.updateArticle(id, fields);
       }
 
+      if (this.removePendingCover() && !this.pendingFile()) {
+        const oldPath = this.couvertureStoragePath();
+        if (oldPath) {
+          await this.articleService.deleteCouverture(oldPath);
+          await this.articleService.updateArticle(id!, { couvertureUrl: undefined, couvertureStoragePath: undefined });
+          this.couvertureStoragePath.set('');
+        }
+        this.removePendingCover.set(false);
+      }
+
       if (this.pendingFile()) {
         this.saving.set(false);
         this.uploading.set(true);
@@ -324,6 +335,7 @@ export class ArticleForm implements OnInit {
         this.previewUrl.set('');
         this.couvertureUrl.set(url);
         this.couvertureStoragePath.set(storagePath);
+        this.removePendingCover.set(false);
         this.uploading.set(false);
       }
 
@@ -355,15 +367,15 @@ export class ArticleForm implements OnInit {
     }
   }
 
-  async removeCouverture() {
-    const id = this.articleId();
-    if (id && this.couvertureStoragePath()) {
-      await this.articleService.deleteCouverture(this.couvertureStoragePath());
-      await this.articleService.updateArticle(id, { couvertureUrl: undefined, couvertureStoragePath: undefined });
+  removeCouverture() {
+    if (this.pendingFile()) {
+      // Annule juste la sélection locale — restaure la vraie couverture Firestore
+      this.pendingFile.set(null);
+      this.previewUrl.set('');
+      return;
     }
+    // Suppression différée : sera effective uniquement à l'enregistrement
+    this.removePendingCover.set(true);
     this.couvertureUrl.set('');
-    this.couvertureStoragePath.set('');
-    this.pendingFile.set(null);
-    this.previewUrl.set('');
   }
 }

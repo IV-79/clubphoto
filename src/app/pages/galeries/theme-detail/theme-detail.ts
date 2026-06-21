@@ -90,6 +90,8 @@ export class ThemeDetail {
     )
   );
 
+  top3Resultats = computed(() => this.resultats().slice(0, 3));
+
   computeRank(soumissions: ThemeSoumission[], index: number): number {
     const currentVotes = this.votesParSoumission()[soumissions[index].id] ?? 0;
     return soumissions.filter(s => (this.votesParSoumission()[s.id] ?? 0) > currentVotes).length + 1;
@@ -102,9 +104,12 @@ export class ThemeDetail {
   // Lightbox
   lightboxIndex = signal<number | null>(null);
 
-  lightboxSoumissions = computed(() =>
-    this.statut() === 'resultats' ? this.resultats() : this.soumissions()
-  );
+  lightboxSoumissions = computed(() => {
+    if (this.statut() === 'resultats') {
+      return this.isLoggedIn() ? this.resultats() : this.top3Resultats();
+    }
+    return this.soumissions();
+  });
 
   lightboxPhotos = computed((): LightboxPhoto[] => {
     const showAuteur = this.statut() === 'resultats';

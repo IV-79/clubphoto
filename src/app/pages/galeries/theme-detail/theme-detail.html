@@ -42,7 +42,11 @@
       <section class="phase-section">
         <div class="phase-header">
           <h2 class="phase-title">Photos</h2>
-          <span class="phase-meta">{{ soumissions().length }} photo{{ soumissions().length !== 1 ? 's' : '' }} · Clôture {{ formatDate(t.dateCloture) }}</span>
+          @if (isLoggedIn()) {
+            <span class="phase-meta">{{ soumissions().length }} photo{{ soumissions().length !== 1 ? 's' : '' }} · Clôture {{ formatDate(t.dateCloture) }}</span>
+          } @else {
+            <span class="phase-meta">Clôture {{ formatDate(t.dateCloture) }}</span>
+          }
         </div>
 
         @if (authReady() && !isLoggedIn()) {
@@ -73,27 +77,29 @@
           <p class="info-msg quota-msg">Quota atteint — {{ t.maxPhotos }} photo{{ t.maxPhotos > 1 ? 's' : '' }} / membre.</p>
         }
 
-        @if (soumissions().length > 0) {
-          <div class="vote-grid">
-            @for (soum of soumissions(); track soum.id) {
-              @let isOwn = soum.membreUid === profile()?.uid;
-              <div class="vote-card" [class.own-card]="isOwn" (click)="openLightbox(soum)">
-                <img [src]="soum.url" class="vote-thumb" loading="lazy" alt="">
-                @if (isOwn) {
-                  <div class="vote-footer">
-                    <span class="footer-own">Ma photo</span>
-                    <button class="btn-del-sm" title="Supprimer" (click)="$event.stopPropagation(); supprimerSoumission(soum)">🗑</button>
-                  </div>
-                } @else if (isAdmin()) {
-                  <div class="vote-footer">
-                    <button class="btn-del-sm btn-del-admin" title="Supprimer (admin)" (click)="$event.stopPropagation(); supprimerSoumission(soum)">🗑</button>
-                  </div>
-                }
-              </div>
-            }
-          </div>
-        } @else {
-          <p class="empty-state-sm">Aucune photo soumise pour l'instant.</p>
+        @if (isLoggedIn()) {
+          @if (soumissions().length > 0) {
+            <div class="vote-grid">
+              @for (soum of soumissions(); track soum.id) {
+                @let isOwn = soum.membreUid === profile()?.uid;
+                <div class="vote-card" [class.own-card]="isOwn" (click)="openLightbox(soum)">
+                  <img [src]="soum.url" class="vote-thumb" loading="lazy" alt="">
+                  @if (isOwn) {
+                    <div class="vote-footer">
+                      <span class="footer-own">Ma photo</span>
+                      <button class="btn-del-sm" title="Supprimer" (click)="$event.stopPropagation(); supprimerSoumission(soum)">🗑</button>
+                    </div>
+                  } @else if (isAdmin()) {
+                    <div class="vote-footer">
+                      <button class="btn-del-sm btn-del-admin" title="Supprimer (admin)" (click)="$event.stopPropagation(); supprimerSoumission(soum)">🗑</button>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          } @else {
+            <p class="empty-state-sm">Aucune photo soumise pour l'instant.</p>
+          }
         }
       </section>
     }
@@ -108,56 +114,55 @@
           }
         </div>
 
-        @if (authReady() && !isLoggedIn()) {
-          <p class="info-msg">Parcourez les photos et <button class="inline-link" (click)="loginModal.open()">connectez-vous</button> pour voter.</p>
-        }
-        @if (isLoggedIn()) {
+        @if (!isLoggedIn()) {
+          @if (authReady()) {
+            <p class="info-msg"><button class="inline-link" (click)="loginModal.open()">Connectez-vous</button> pour voir les photos et participer au vote.</p>
+          }
+        } @else {
           <div class="vote-progress">
             <div class="vote-track">
               <div class="vote-fill" [style.width.%]="t.maxVotes ? mesVotes().length / t.maxVotes * 100 : 0"></div>
             </div>
             <span class="vote-progress-label">{{ nbVotesRestants() }} vote{{ nbVotesRestants() > 1 ? 's' : '' }} restant{{ nbVotesRestants() > 1 ? 's' : '' }}</span>
           </div>
-        }
 
-        @if (soumissions().length === 0) {
-          <p class="empty-state">Aucune photo soumise.</p>
-        } @else {
-          <div class="vote-grid">
-            @for (soum of soumissions(); track soum.id) {
-              @let isVoted = mesVotesIds().has(soum.id);
-              @let isOwn   = soum.membreUid === profile()?.uid;
+          @if (soumissions().length === 0) {
+            <p class="empty-state">Aucune photo soumise.</p>
+          } @else {
+            <div class="vote-grid">
+              @for (soum of soumissions(); track soum.id) {
+                @let isVoted = mesVotesIds().has(soum.id);
+                @let isOwn   = soum.membreUid === profile()?.uid;
 
-              <div class="vote-card"
-                [class.voted]="isVoted"
-                [class.own-card]="isOwn"
-                (click)="openLightbox(soum)">
+                <div class="vote-card"
+                  [class.voted]="isVoted"
+                  [class.own-card]="isOwn"
+                  (click)="openLightbox(soum)">
 
-                <img [src]="soum.url" class="vote-thumb" loading="lazy" alt="">
+                  <img [src]="soum.url" class="vote-thumb" loading="lazy" alt="">
 
-                <div class="vote-footer">
-                  @if (isOwn) {
-                    <span class="footer-own">Ma photo</span>
-                    <button class="btn-del-sm" title="Supprimer" (click)="$event.stopPropagation(); supprimerSoumission(soum)">🗑</button>
-                  } @else if (isVoted) {
-                    <button class="footer-action footer-voted" (click)="$event.stopPropagation(); toggleVote(soum.id)">✓ Retirer</button>
-                    @if (isAdmin()) {
-                      <button class="btn-del-sm btn-del-admin" title="Supprimer (admin)" (click)="$event.stopPropagation(); supprimerSoumission(soum)">🗑</button>
+                  <div class="vote-footer">
+                    @if (isOwn) {
+                      <span class="footer-own">Ma photo</span>
+                      <button class="btn-del-sm" title="Supprimer" (click)="$event.stopPropagation(); supprimerSoumission(soum)">🗑</button>
+                    } @else if (isVoted) {
+                      <button class="footer-action footer-voted" (click)="$event.stopPropagation(); toggleVote(soum.id)">✓ Retirer</button>
+                      @if (isAdmin()) {
+                        <button class="btn-del-sm btn-del-admin" title="Supprimer (admin)" (click)="$event.stopPropagation(); supprimerSoumission(soum)">🗑</button>
+                      }
+                    } @else {
+                      <button class="footer-action" [disabled]="nbVotesRestants() <= 0 || !!voting()" (click)="$event.stopPropagation(); toggleVote(soum.id)">
+                        {{ nbVotesRestants() > 0 ? 'Voter' : '—' }}
+                      </button>
+                      @if (isAdmin()) {
+                        <button class="btn-del-sm btn-del-admin" title="Supprimer (admin)" (click)="$event.stopPropagation(); supprimerSoumission(soum)">🗑</button>
+                      }
                     }
-                  } @else if (isLoggedIn()) {
-                    <button class="footer-action" [disabled]="nbVotesRestants() <= 0 || !!voting()" (click)="$event.stopPropagation(); toggleVote(soum.id)">
-                      {{ nbVotesRestants() > 0 ? 'Voter' : '—' }}
-                    </button>
-                    @if (isAdmin()) {
-                      <button class="btn-del-sm btn-del-admin" title="Supprimer (admin)" (click)="$event.stopPropagation(); supprimerSoumission(soum)">🗑</button>
-                    }
-                  } @else if (isAdmin()) {
-                    <button class="btn-del-sm btn-del-admin" title="Supprimer (admin)" (click)="$event.stopPropagation(); supprimerSoumission(soum)">🗑</button>
-                  }
+                  </div>
                 </div>
-              </div>
-            }
-          </div>
+              }
+            </div>
+          }
         }
       </section>
     }
@@ -172,7 +177,9 @@
 
         @if (soumissions().length === 0) {
           <p class="empty-state">Aucune photo soumise.</p>
-        } @else {
+        } @else if (isLoggedIn()) {
+
+          <!-- Classement complet pour les membres -->
           <div class="results-grid">
             @for (soum of resultats(); track soum.id; let i = $index) {
               @let votes = votesParSoumission()[soum.id] ?? 0;
@@ -201,6 +208,32 @@
               </div>
             }
           </div>
+
+        } @else {
+
+          <!-- Top 3 seulement pour les visiteurs -->
+          <div class="results-grid">
+            @for (soum of top3Resultats(); track soum.id; let i = $index) {
+              @let rank = computeRank(top3Resultats(), i);
+              <div class="result-card"
+                [class.rank-1]="rank === 1"
+                [class.rank-2]="rank === 2"
+                [class.rank-3]="rank === 3"
+                (click)="openLightbox(soum)">
+                <div class="rank-badge" [class.gold]="rank === 1" [class.silver]="rank === 2" [class.bronze]="rank === 3">
+                  {{ rank }}
+                </div>
+                <img [src]="soum.url" class="result-thumb" loading="lazy" alt="">
+                <div class="result-footer">
+                  <span class="result-name">{{ soum.nomMembre }}</span>
+                </div>
+              </div>
+            }
+          </div>
+          @if (authReady()) {
+            <p class="info-msg top3-hint"><button class="inline-link" (click)="loginModal.open()">Connectez-vous</button> pour voir le classement complet.</p>
+          }
+
         }
       </section>
     }

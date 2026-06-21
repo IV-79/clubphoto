@@ -1,8 +1,10 @@
-import { Component, input, output, computed, OnInit, OnDestroy, HostListener } from '@angular/core';
+import { Component, input, output, computed, inject, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Article, getArticleTypeMeta } from '../../models/article.model';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-article-lightbox',
@@ -44,7 +46,7 @@ import { Article, getArticleTypeMeta } from '../../models/article.model';
                 {{ article().date | date:'d MMMM yyyy':'':'fr' }}
               </span>
             }
-            @if (article().lieu) {
+            @if (profile() && article().lieu) {
               <span class="lb-meta">
                 <mat-icon>place</mat-icon>
                 <a [href]="mapsUrl(article().lieu!)" target="_blank" rel="noopener noreferrer" class="lieu-link">
@@ -132,6 +134,9 @@ import { Article, getArticleTypeMeta } from '../../models/article.model';
   `]
 })
 export class ArticleLightbox implements OnInit, OnDestroy {
+  private authService = inject(AuthService);
+  profile = toSignal(this.authService.currentUserProfile$);
+
   article = input.required<Article>();
   closed  = output<void>();
   meta = computed(() => getArticleTypeMeta(this.article().type));

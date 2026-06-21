@@ -35,14 +35,16 @@
               </div>
               <div class="sortie-meta">
                 <span class="meta-date">📅 {{ formatDate(sortie.date) }}</span>
-                @if (sortie.lieu) {
+                @if (profile() && sortie.lieu) {
                   <a class="meta-lieu" [href]="mapsUrl(sortie.lieu)" target="_blank" (click)="$event.stopPropagation()">
                     📍 {{ sortie.lieu }}
                   </a>
                 }
               </div>
               <div class="sortie-footer">
-                <span class="sortie-organisateur">par {{ sortie.nomOrganisateur }}</span>
+                @if (profile()) {
+                  <span class="sortie-organisateur">par {{ sortie.nomOrganisateur }}</span>
+                }
                 @if (sortie.inscriptionObligatoire) {
                   <span class="inscription-badge">Inscription requise</span>
                 }
@@ -76,13 +78,15 @@
               </div>
               <div class="sortie-meta">
                 <span class="meta-date">📅 {{ formatDate(sortie.date) }}</span>
-                @if (sortie.lieu) {
+                @if (profile() && sortie.lieu) {
                   <a class="meta-lieu" [href]="mapsUrl(sortie.lieu)" target="_blank" (click)="$event.stopPropagation()">
                     📍 {{ sortie.lieu }}
                   </a>
                 }
               </div>
-              <span class="sortie-organisateur">par {{ sortie.nomOrganisateur }}</span>
+              @if (profile()) {
+                <span class="sortie-organisateur">par {{ sortie.nomOrganisateur }}</span>
+              }
             </div>
           </a>
         }

@@ -1,7 +1,7 @@
 import { Component, inject, signal, computed, ViewChild, ElementRef } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { startWith } from 'rxjs';
+import { toSignal, toObservable } from '@angular/core/rxjs-interop';
+import { startWith, switchMap, of } from 'rxjs';
 import { SortieService } from '../../../services/sortie.service';
 import { AuthService } from '../../../services/auth.service';
 import { ConfirmService } from '../../../services/confirm.service';
@@ -40,7 +40,12 @@ export class SortieDetail {
 
   sortie = toSignal(this.sortieService.getSortie(this.sortieId).pipe(startWith(null as Sortie | null)));
   photos = toSignal(this.sortieService.getPhotos(this.sortieId), { initialValue: [] as SortieImage[] });
-  inscriptions = toSignal(this.sortieService.getInscriptions(this.sortieId), { initialValue: [] });
+  inscriptions = toSignal(
+    toObservable(this.profile).pipe(
+      switchMap(p => p ? this.sortieService.getInscriptions(this.sortieId) : of([]))
+    ),
+    { initialValue: [] }
+  );
 
   lightboxIndex = signal<number | null>(null);
   uploads = signal<UploadTask[]>([]);

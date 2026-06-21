@@ -5,6 +5,25 @@
 ## En cours (alpha)
 
 ### Corrections
+- **OneShot — visibilité selon connexion** — mêmes règles que les Thèmes du mois appliquées aux pages OneShot :
+  - `vote` : les visiteurs non connectés voient uniquement un message d'invitation à se connecter, sans accès aux photos. Les membres voient la grille de vote en mode anonyme.
+  - `resultats` : les visiteurs voient uniquement le top 3 par thème (rang + photo + nom), sans décompte de votes ni likes, avec invitation à se connecter pour le classement complet. Les membres voient le classement intégral avec votes et likes.
+  - `inscription` / `fermeture_inscriptions` : organisateur et participants masqués pour les visiteurs.
+  - `oneshots-liste` : nom du créateur masqué pour les visiteurs.
+  - La lightbox est restreinte selon le même principe que les thèmes du mois.
+- **Thèmes du mois — visibilité selon connexion** — règles par phase :
+  - `ouvert` / `vote` : les photos sont invisibles pour les visiteurs non connectés (uniquement les infos générales + invitation à se connecter). Les membres voient les photos en mode anonyme et peuvent soumettre / voter.
+  - `resultats` : les visiteurs voient uniquement le podium (top 3, rang + photo + nom du photographe) avec invitation à se connecter pour le classement complet. Les membres voient le classement intégral avec le décompte des votes.
+  - La lightbox est restreinte en conséquence (public : top 3 seulement en phase résultats, aucune photo en phases ouvert/vote).
+- **Standard public/membre — convergence visibilité** — règle appliquée sur tout le site : les visiteurs non connectés ne voient pas les informations de lieu/localisation, ni l'organisateur des activités, ni les participants des sorties, ni les commentaires sur les photos. Détail des changements :
+  - **Lieu** masqué pour public : sorties-liste, sortie-detail, calendrier (sorties + oneshots), article-lightbox
+  - **Organisateur** masqué pour public : sorties-liste, sortie-detail, calendrier (sorties + oneshots)
+  - **Participants** masqués pour public : sortie-detail (comptage + liste). Le chargement Firestore est aussi conditionnel (pas de requête si non connecté)
+  - **Commentaires** masqués pour public : photo-lightbox — section commentaires conditionnée à `userUid()` au lieu de seulement `!anonyme()`
+  - **Firestore rules** : `inscriptions` (sorties + oneshots) et tous les `commentaires` photo passés de `read: if true` à `read: if isLoggedIn()` ⚠️ Déployer : `firebase deploy --only firestore:rules`
+- **Calendrier — réunions visibles membres seulement** — les réunions du club n'apparaissent dans le calendrier que pour les membres connectés. Pour les visiteurs : liste vide, filtre "Réunion" masqué, message "Connectez-vous pour voir les réunions". Règle Firestore `reunions` passée de `read: if true` à `read: if isLoggedIn()`. ⚠️ Déployer les règles : `firebase deploy --only firestore:rules`.
+- **Suppression de couverture article — suppression différée** — cliquer sur la poubelle de la photo de couverture dans le formulaire d'édition ne supprimait immédiatement le fichier Storage et Firestore sans possibilité d'annulation. Désormais, le clic efface uniquement l'affichage local (soft-delete) ; la suppression réelle n'a lieu qu'à l'enregistrement. Si l'utilisateur annule ou navigue en arrière, la couverture est intacte. Si l'utilisateur avait juste sélectionné un nouveau fichier local (pas encore uploadé), cliquer retire la sélection locale et restaure l'image existante.
+- **Suppression de photo OneShot — icône distincte** — le bouton de suppression utilisait `×`, identique au bouton d'annulation d'édition affiché au même endroit de la carte. Remplacé par 🗑 pour éviter toute confusion ; la confirmation `ConfirmService` est déjà en place pour toutes les suppressions de photos (OneShot et Sorties).
 - **Menu desktop — refonte des dropdowns** — les menus déroulants utilisaient `MatMenu` (overlay CDK avec backdrop) qui bloquait toute interaction avec le reste de la nav tant qu'un menu était ouvert : impossible de naviguer vers un lien direct ou d'ouvrir un autre dropdown en un seul clic. Remplacement par des panels custom Angular (signal `openMenu` + `@HostListener('document:click')`), sans backdrop. Un clic sur n'importe quel élément de la nav ferme le menu ouvert et agit immédiatement. La nav mobile (accordion) est inchangée.
 - **Carte Actualités — icône épinglé supprimée** — l'icône push_pin (en haut à droite) se superposait au bouton crayon d'édition. La fonctionnalité "épingler" étant encore en réflexion, l'icône est retirée provisoirement.
 - **Documents — ordre du formulaire d'upload inversé** — la zone de dépôt est maintenant en premier. Déposer un fichier remplit automatiquement le nom (base sans extension) ; l'extension est extraite du fichier, affichée en suffixe verrouillé et non modifiable. Si le champ nom est déjà rempli, il n'est pas écrasé au drop.
