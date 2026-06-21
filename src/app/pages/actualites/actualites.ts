@@ -92,10 +92,13 @@ export class Actualites {
   });
 
   articles = toSignal(
-    this.authService.user$.pipe(
-      switchMap(user =>
-        user ? this.articleService.getPublishedArticles() : this.articleService.getPublicArticles()
-      )
+    this.authService.currentUserProfile$.pipe(
+      switchMap(profile => {
+        const role = profile?.role;
+        if (role === 'admin' || role === 'redacteur') return this.articleService.getAllArticles();
+        if (profile) return this.articleService.getPublishedArticles();
+        return this.articleService.getPublicArticles();
+      })
     ),
     { initialValue: [] as Article[] }
   );

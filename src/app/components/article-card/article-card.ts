@@ -40,6 +40,11 @@ import { Article, getArticleTypeMeta } from '../../models/article.model';
             </div>
           </div>
         }
+        @if (isEditor() && article().statut !== 'publie') {
+          <span class="statut-badge" [class.brouillon]="article().statut === 'brouillon'" [class.expire]="article().statut === 'expire'">
+            {{ article().statut === 'brouillon' ? 'Brouillon' : 'Expiré' }}
+          </span>
+        }
         <h3 class="titre">{{ article().titre }}</h3>
         @if (article().date) {
           <p class="meta"><mat-icon>calendar_today</mat-icon>{{ article().date | date:'d MMM yyyy':'':'fr' }}</p>
@@ -112,6 +117,13 @@ import { Article, getArticleTypeMeta } from '../../models/article.model';
     .card:hover .edit-btn { opacity: 1; }
     @media (hover: none) { .card .edit-btn { opacity: 1; } }
     .edit-btn mat-icon { font-size: 17px; width: 17px; height: 17px; }
+    .statut-badge {
+      display: inline-block; padding: 2px 9px; border-radius: 10px;
+      font-size: .68rem; font-weight: 700; letter-spacing: .4px;
+      text-transform: uppercase; margin-bottom: 6px;
+    }
+    .statut-badge.brouillon { background: #eeeeee; color: #616161; }
+    .statut-badge.expire    { background: #ffebee; color: #c62828; }
   `]
 })
 export class ArticleCard {
