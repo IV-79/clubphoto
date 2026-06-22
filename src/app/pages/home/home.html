@@ -6,14 +6,19 @@
       <h1 class="hero-title">Club Photo<br><span class="hero-accent">Tain · Tournon</span></h1>
       <p class="hero-sub">Partageons notre passion pour la photographie</p>
     </div>
-    <div class="hero-scroll-hint">
-      <span class="hero-scroll-icon">↓</span>
-    </div>
   </div>
 </section>
 
+<!-- ── Flèche bas fixe (section suivante) ── -->
+@if (activeNav() !== 'rejoindre') {
+  <button class="scroll-down-btn" (click)="scrollDown()" aria-label="Section suivante">
+    <mat-icon class="scroll-down-icon">keyboard_arrow_down</mat-icon>
+  </button>
+}
+
 <!-- ── À la une (GSAP pin) ── -->
 @if (articles().length) {
+  <div class="film-strip"><div class="film-strip-line"></div></div>
   <section class="home-section actu-section bg-white">
     <div class="section-wrap">
       <p class="eyebrow">À la une</p>
@@ -47,6 +52,7 @@
 
 <!-- ── Activités (GSAP pin) ── -->
 @if (derniereSortie() || dernierTheme()) {
+  <div class="film-strip"><div class="film-strip-line"></div></div>
   <section class="home-section act-section bg-dark">
     <div class="section-wrap">
       <p class="eyebrow eyebrow-light">Nos activités</p>
@@ -90,8 +96,9 @@
   </section>
 }
 
-<!-- ── Galerie (CSS reveal, pas de pin) ── -->
+<!-- ── Galerie (GSAP pin) ── -->
 @if (recentPhotos().length) {
+  <div class="film-strip"><div class="film-strip-line"></div></div>
   <section class="home-section gallery-section bg-light">
     <div class="section-wrap">
       <p class="eyebrow">Galerie</p>
@@ -111,6 +118,7 @@
 
 <!-- ── Les photographes (GSAP pin) ── -->
 @if (membres().length) {
+  <div class="film-strip"><div class="film-strip-line"></div></div>
   <section class="home-section membres-section bg-white">
     <div class="section-wrap">
       <p class="eyebrow">Les photographes</p>
@@ -141,7 +149,23 @@
   </section>
 }
 
+<!-- ── Navigation verticale (dots) ── -->
+@if (navItems().length) {
+  <nav class="section-nav" aria-label="Navigation sections">
+    <div class="section-nav-track"></div>
+    @for (item of navItems(); track item.id) {
+      <button class="section-nav-item" [class.active]="activeNav() === item.id"
+        (click)="scrollToSection(item.target)"
+        [title]="item.label">
+        <span class="section-nav-tooltip">{{ item.label }}</span>
+        <div class="section-nav-dot"></div>
+      </button>
+    }
+  </nav>
+}
+
 <!-- ── CTA Rejoindre ── -->
+<div class="film-strip"><div class="film-strip-line"></div></div>
 <section class="cta-section">
   <div class="cta-inner reveal-fade" style="--rs: 0%; --re: 60%">
     <h2 class="cta-titre">Rejoignez-nous</h2>

@@ -1,6 +1,7 @@
-import { Component, inject, computed, OnInit, OnDestroy, AfterViewInit, ElementRef, NgZone, Injector } from '@angular/core';
+import { Component, inject, computed, OnInit, OnDestroy, AfterViewInit, ElementRef, NgZone, Injector, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
 import { DomSanitizer, SafeStyle } from '@angular/platform-browser';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { map, filter, take } from 'rxjs/operators';
@@ -19,9 +20,16 @@ import { UserProfile } from '../../models/user.model';
 
 gsap.registerPlugin(ScrollTrigger);
 
+interface NavItem {
+  id:     string;
+  label:  string;
+  target: number; // scrollY cible au clic (début de la section)
+  from:   number; // scrollY à partir duquel ce dot devient actif
+}
+
 @Component({
   selector: 'app-home',
-  imports: [RouterLink, DatePipe],
+  imports: [RouterLink, DatePipe, MatIconModule],
   templateUrl: './home.html',
   styleUrl: './home.css',
 })
@@ -75,15 +83,19 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
     { initialValue: [] as UserProfile[] }
   );
 
+  // Navigation verticale
+  navItems  = signal<NavItem[]>([]);
+  activeNav = signal<string>('hero');
+
   private gsapCtx?: gsap.Context;
   private sub?: Subscription;
+  private scrollHandler?: () => void;
 
   ngOnInit() {
     document.documentElement.style.setProperty('scroll-padding-top', '122px');
   }
 
   ngAfterViewInit() {
-    // Wait for first real data, then init GSAP (2 s fallback if no data)
     this.sub = race(
       toObservable(this.articles, { injector: this.injector }).pipe(
         filter(a => a.length > 0),
@@ -91,7 +103,6 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
       ),
       timer(2000)
     ).pipe(take(1)).subscribe(() => {
-      // setTimeout(0) waits for Angular to flush @if DOM changes before GSAP reads the DOM
       setTimeout(() => this.zone.runOutsideAngular(() => this.initGsap()), 0);
     });
   }
@@ -100,33 +111,96 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
     document.documentElement.style.removeProperty('scroll-padding-top');
     this.gsapCtx?.revert();
     this.sub?.unsubscribe();
+    if (this.scrollHandler) window.removeEventListener('scroll', this.scrollHandler);
   }
 
   private initGsap() {
     this.gsapCtx?.revert();
     const root = this.el.nativeElement as HTMLElement;
 
+    // Capturer les ST en dehors du context pour les lire après refresh
+    let actuST:    ScrollTrigger | undefined;
+    let actST:     ScrollTrigger | undefined;
+    let galleryST: ScrollTrigger | undefined;
+    let membresST: ScrollTrigger | undefined;
+
     this.gsapCtx = gsap.context(() => {
-      this.pinSection(root, '.actu-section',    '.actu-card',   ['right', 'right', 'right']);
-      this.pinSection(root, '.act-section',     '.act-card',    ['left',  'right']);
-      this.pinGallery(root);
-      this.pinSection(root, '.membres-section', '.membre-card', ['left',  'right', 'up']);
+      actuST    = this.pinSection(root, '.actu-section',    '.actu-card',   ['right', 'right', 'right']);
+      actST     = this.pinSection(root, '.act-section',     '.act-card',    ['left',  'right']);
+      galleryST = this.pinGallery(root);
+      membresST = this.pinSection(root, '.membres-section', '.membre-card', ['left',  'right', 'up']);
     });
+
+    // Forcer GSAP à recalculer les positions avec les spacers en place,
+    // puis lire dans le frame suivant (les spacers sont mesurés de façon asynchrone)
+    ScrollTrigger.refresh();
+    requestAnimationFrame(() => {
+      const vh = window.innerHeight;
+      const actuStart    = actuST?.start    ?? vh;
+      const actuEnd      = actuST?.end      ?? actuStart + vh * 3;
+      const actStart     = actST?.start     ?? actuEnd;
+      const actEnd       = actST?.end       ?? actStart + vh * 2;
+      const galleryStart = galleryST?.start ?? actEnd;
+      const galleryEnd   = galleryST?.end   ?? galleryStart + vh * 4;
+      const membresStart = membresST?.start ?? galleryEnd;
+      const membresEnd   = membresST?.end   ?? membresStart + vh * 3;
+
+      // Position réelle du CTA dans le document (spacers GSAP déjà en place)
+      const ctaEl    = root.querySelector<HTMLElement>('.cta-section');
+      const ctaStart = ctaEl
+        ? ctaEl.getBoundingClientRect().top + window.scrollY
+        : membresEnd + 56;
+
+      this.zone.run(() => this.navItems.set([
+        { id: 'hero',      label: 'Accueil',        target: 0,              from: 0          },
+        { id: 'actu',      label: 'À la une',       target: actuEnd - 1,    from: actuStart  },
+        { id: 'act',       label: 'Nos activités',  target: actEnd - 1,     from: actStart   },
+        { id: 'gallery',   label: 'Galerie',        target: galleryEnd - 1, from: galleryStart },
+        { id: 'membres',   label: 'Photographes',   target: membresEnd - 1, from: membresStart },
+        { id: 'rejoindre', label: 'Rejoignez-nous', target: ctaStart,       from: membresEnd },
+      ]));
+    });
+
+    // Mise à jour du dot actif au scroll
+    if (this.scrollHandler) window.removeEventListener('scroll', this.scrollHandler);
+    this.scrollHandler = () => {
+      const y     = window.scrollY;
+      const items = this.navItems();
+      if (!items.length) return;
+      let active = 'hero';
+      for (const item of items) {
+        if (y >= item.from) active = item.id;
+      }
+      this.zone.run(() => this.activeNav.set(active));
+    };
+    window.addEventListener('scroll', this.scrollHandler, { passive: true });
   }
 
-  // ── section avec pin + scrub : chaque carte arrive l'une après l'autre ──
+  scrollToSection(target: number) {
+    window.scrollTo({ top: target, behavior: 'smooth' });
+  }
+
+  /** Flèche bas fixe : descend vers la section suivante selon la position courante */
+  scrollDown() {
+    const items   = this.navItems();
+    const current = this.activeNav();
+    const idx     = items.findIndex(i => i.id === current);
+    const next    = items[idx + 1];
+    window.scrollTo({ top: next?.target ?? window.innerHeight, behavior: 'smooth' });
+  }
+
+  // ── section avec pin + scrub ──
   private pinSection(
     root:       HTMLElement,
     sectionSel: string,
     cardSel:    string,
     dirs:       Array<'left' | 'right' | 'up'>,
-  ) {
+  ): ScrollTrigger | undefined {
     const section = root.querySelector<HTMLElement>(sectionSel);
     if (!section) return;
     const cards = Array.from(section.querySelectorAll<HTMLElement>(cardSel));
     if (!cards.length) return;
 
-    // Place les cartes hors champ selon leur direction
     cards.forEach((card, i) => {
       const dir = dirs[i] ?? 'right';
       gsap.set(card, {
@@ -140,34 +214,32 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
       scrollTrigger: {
         trigger:       section,
         start:         'top top',
-        // ~120 % viewport par carte → chaque carte = ~120 vh de scroll
         end:           `+=${cards.length * 120}%`,
         pin:           true,
         pinSpacing:    true,
-        scrub:         0.8,    // suit le scroll avec légère inertie
+        scrub:         0.8,
         anticipatePin: 1,
       },
     });
 
-    // Cartes en séquence : '>' = "commence quand la précédente est terminée"
     cards.forEach(card => {
       tl.to(card, { x: 0, y: 0, opacity: 1, ease: 'power3.out', duration: 1 }, '>');
     });
+
+    return tl.scrollTrigger ?? undefined;
   }
 
-  // ── galerie : chaque cellule arrive grande depuis un côté, se réduit à sa place ──
-  private pinGallery(root: HTMLElement) {
+  // ── galerie : chaque cellule arrive grande puis se réduit à sa place ──
+  private pinGallery(root: HTMLElement): ScrollTrigger | undefined {
     const section = root.querySelector<HTMLElement>('.gallery-section');
     if (!section) return;
     const cells = Array.from(section.querySelectorAll<HTMLElement>('.mosaic-cell'));
     if (!cells.length) return;
 
-    // État initial : grande (scale 1.8), hors champ en alternant gauche/droite
     cells.forEach((cell, i) => {
-      const fromRight = i % 2 === 0;
       gsap.set(cell, {
         scale:           1.8,
-        x:               fromRight ? 250 : -250,
+        x:               i % 2 === 0 ? 250 : -250,
         opacity:         0,
         transformOrigin: '50% 50%',
       });
@@ -177,7 +249,6 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
       scrollTrigger: {
         trigger:       section,
         start:         'top top',
-        // ~55 % viewport par photo → rapide mais distinct
         end:           `+=${cells.length * 55}%`,
         pin:           true,
         pinSpacing:    true,
@@ -186,16 +257,11 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
       },
     });
 
-    // Chaque cellule se place en séquence : arrive grande, se réduit et glisse en place
     cells.forEach(cell => {
-      tl.to(cell, {
-        scale:   1,
-        x:       0,
-        opacity: 1,
-        ease:    'power3.out',
-        duration: 1,
-      }, '>');
+      tl.to(cell, { scale: 1, x: 0, opacity: 1, ease: 'power3.out', duration: 1 }, '>');
     });
+
+    return tl.scrollTrigger ?? undefined;
   }
 
   // ── helpers template ──

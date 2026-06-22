@@ -55,22 +55,41 @@
   margin: 0;
 }
 
-.hero-scroll-hint {
-  position: absolute;
+/* Flèche de scroll fixe en bas de l'écran, toujours visible jusqu'à la dernière section */
+.scroll-down-btn {
+  position: fixed;
   bottom: 36px;
   left: 50%;
   transform: translateX(-50%);
+  z-index: 80;
+  background: rgba(0,0,0,0.28);
+  border: 2px solid rgba(255,255,255,0.45);
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  animation: bounce-hint 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  transition: border-color 0.2s, background 0.2s;
+}
+.scroll-down-btn:hover {
+  border-color: rgba(255,255,255,0.9);
+  background: rgba(255,255,255,0.15);
 }
 
-.hero-scroll-icon {
-  color: rgba(255,255,255,0.4);
-  font-size: 1.5rem;
-  animation: bounce 2s ease infinite;
+.scroll-down-icon {
+  color: rgba(255,255,255,0.85);
+  font-size: 28px !important;
+  width: 28px !important;
+  height: 28px !important;
 }
 
-@keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(8px); }
+@keyframes bounce-hint {
+  0%, 100% { transform: translateX(-50%) translateY(0);   box-shadow: none; }
+  50%       { transform: translateX(-50%) translateY(8px); box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
 }
 
 /* ═══════════════════════════════════════
@@ -465,6 +484,146 @@
 
 @media (max-width: 900px) {
   .membres-row { grid-template-columns: 1fr; max-width: 380px; margin: 0 auto; }
+}
+
+/* ═══════════════════════════════════════
+   SÉPARATEUR PELLICULE
+═══════════════════════════════════════ */
+.film-strip {
+  height: 56px;
+  background: #080808;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+/* Perforations haut et bas (motif de pellicule cinéma) */
+.film-strip::before,
+.film-strip::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 10px;
+  background-image: repeating-linear-gradient(
+    to right,
+    transparent 0px, transparent 4px,
+    #222 4px, #222 14px,
+    transparent 14px, transparent 20px
+  );
+  background-size: 20px 10px;
+}
+.film-strip::before { top: 8px; }
+.film-strip::after  { bottom: 8px; }
+
+/* Ligne rouge centrale */
+.film-strip-line {
+  position: absolute;
+  top: 50%;
+  left: 4%;
+  right: 4%;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(204,0,0,0.55) 15%,
+    rgba(204,0,0,0.55) 85%,
+    transparent
+  );
+  transform: translateY(-50%);
+}
+
+/* ═══════════════════════════════════════
+   NAV VERTICALE (dots sections)
+═══════════════════════════════════════ */
+.section-nav {
+  position: fixed;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 6px;
+  background: rgba(0,0,0,0.18);
+  backdrop-filter: blur(6px);
+  border-radius: 24px;
+  gap: 2px;
+}
+
+.section-nav-track {
+  position: absolute;
+  top: 18px;
+  bottom: 18px;
+  left: 50%;
+  width: 1px;
+  background: rgba(255,255,255,0.2);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.section-nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.section-nav-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.35);
+  border: 1.5px solid rgba(255,255,255,0.5);
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+}
+
+.section-nav-item:hover .section-nav-dot {
+  background: rgba(255,255,255,0.75);
+  transform: scale(1.4);
+}
+
+.section-nav-item.active .section-nav-dot {
+  background: #cc0000;
+  border-color: #cc0000;
+  transform: scale(1.6);
+  box-shadow: 0 0 10px rgba(204,0,0,0.5);
+}
+
+/* Tooltip à gauche du dot */
+.section-nav-tooltip {
+  position: absolute;
+  right: calc(100% + 10px);
+  background: rgba(10,10,10,0.82);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(4px);
+  transition: opacity 0.18s, transform 0.18s;
+}
+
+.section-nav-item:hover .section-nav-tooltip,
+.section-nav-item.active .section-nav-tooltip {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+@media (max-width: 768px) {
+  .section-nav { display: none; }
 }
 
 /* ═══════════════════════════════════════
