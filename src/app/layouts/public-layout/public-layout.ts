@@ -20,8 +20,7 @@ import { Header } from '../../components/header/header';
     </footer>
   `,
   styles: [`
-    .page-content { min-height: calc(100vh - 120px); }
-    @media (max-width: 768px) { .page-content { padding-top: 120px; } }
+    .page-content { min-height: calc(100vh - 122px); padding-top: 122px; }
     .site-footer {
       background: #1a1a1a;
       color: rgba(255,255,255,0.45);

@@ -1,6 +1,9 @@
 .site-header {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
   z-index: 100;
   box-shadow: 0 2px 8px rgba(0,0,0,0.4);
 }
@@ -531,12 +534,6 @@
 .mobile-connexion:hover { background: #ffffff; color: #c0392b; }
 
 @media (max-width: 768px) {
-  .site-header {
-    position: fixed;
-    left: 0;
-    right: 0;
-    width: 100%;
-  }
   .nav-links, .nav-actions { display: none; }
   .mobile-menu-btn { display: flex; }
   .mobile-nav {

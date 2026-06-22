@@ -19,22 +19,32 @@ function toSlug(label: string): string {
   styleUrl: './config.css',
 })
 export class AdminConfig implements OnInit {
-  private configService = inject(ConfigService);
+  private configService  = inject(ConfigService);
   private confirmService = inject(ConfirmService);
 
-  categories = signal<CategorieConfig[]>([]);
+  // Catégories
+  categories       = signal<CategorieConfig[]>([]);
   sortedCategories = computed(() =>
     [...this.categories()].sort((a, b) => a.label.localeCompare(b.label, 'fr', { sensitivity: 'base' }))
   );
-  saving = signal(false);
-  newLabel = '';
-  errorMsg = '';
+  saving     = signal(false);
+  newLabel   = '';
+  errorMsg   = '';
   confirmReset = signal(false);
+
+  // Image hero
+  siteConfig    = toSignal(this.configService.getSiteConfig(), { initialValue: {} as any });
+  heroCurrentUrl = computed(() => (this.siteConfig() as any)?.heroImageUrl as string ?? '');
+  heroPreview   = signal<string | null>(null);
+  heroFile      = signal<File | null>(null);
+  heroUploading = signal(false);
+  heroError     = signal('');
 
   ngOnInit() {
     this.configService.getCategories().subscribe(cats => this.categories.set(cats));
   }
 
+  // ---- Catégories ----
   addCategorie() {
     const label = this.newLabel.trim();
     if (!label) return;
@@ -67,5 +77,49 @@ export class AdminConfig implements OnInit {
     this.categories.set(PHOTO_CATEGORIES as CategorieConfig[]);
     this.confirmReset.set(false);
     this.save();
+  }
+
+  // ---- Image hero ----
+  onHeroSelected(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    this.heroFile.set(file);
+    this.heroError.set('');
+    const reader = new FileReader();
+    reader.onload = e => this.heroPreview.set(e.target?.result as string);
+    reader.readAsDataURL(file);
+  }
+
+  cancelHero() {
+    this.heroFile.set(null);
+    this.heroPreview.set(null);
+    this.heroError.set('');
+  }
+
+  async saveHero() {
+    const file = this.heroFile();
+    if (!file) return;
+    this.heroUploading.set(true);
+    this.heroError.set('');
+    try {
+      const { url, storagePath } = await this.configService.uploadHeroImage(file);
+      await this.configService.saveSiteConfig({ heroImageUrl: url, heroImageStoragePath: storagePath });
+      this.heroFile.set(null);
+      this.heroPreview.set(null);
+    } catch {
+      this.heroError.set('Erreur lors de l\'upload.');
+    } finally {
+      this.heroUploading.set(false);
+    }
+  }
+
+  async deleteHero() {
+    const ok = await this.confirmService.confirm('Supprimer l\'image hero de la page d\'accueil ?');
+    if (!ok) return;
+    const cfg = this.siteConfig() as any;
+    if (cfg?.heroImageStoragePath) {
+      await this.configService.deleteHeroImage(cfg.heroImageStoragePath).catch(() => {});
+    }
+    await this.configService.saveSiteConfig({ heroImageUrl: '', heroImageStoragePath: '' });
   }
 }

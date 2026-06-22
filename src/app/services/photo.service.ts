@@ -1,7 +1,7 @@
 import { Injectable, inject, Injector, runInInjectionContext } from '@angular/core';
 import { Storage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from '@angular/fire/storage';
 import {
-  Firestore, collection, collectionData, doc, addDoc, deleteDoc, updateDoc, query, where, orderBy, deleteField, arrayUnion, arrayRemove, increment
+  Firestore, collection, collectionData, doc, addDoc, deleteDoc, updateDoc, query, where, orderBy, limit, deleteField, arrayUnion, arrayRemove, increment
 } from '@angular/fire/firestore';
 import { Observable, map } from 'rxjs';
 import { Photo, PhotoExif, PhotoVisibilite, UploadState } from '../models/photo.model';
@@ -108,6 +108,19 @@ export class PhotoService {
     ) as Observable<Photo[]>).pipe(
       map(photos => [...photos].sort((a, b) => b.dateUpload.localeCompare(a.dateUpload)))
     );
+  }
+
+  /** Dernières photos publiques toutes sections confondues. */
+  getRecentPublicPhotos(limitCount = 8): Observable<Photo[]> {
+    const q = query(
+      collection(this.firestore, 'photos'),
+      where('visibilite', '==', 'public'),
+      orderBy('dateUpload', 'desc'),
+      limit(limitCount)
+    );
+    return runInInjectionContext(this.injector, () =>
+      collectionData(q, { idField: 'id' })
+    ) as Observable<Photo[]>;
   }
 
   async deletePhoto(photo: Photo): Promise<void> {

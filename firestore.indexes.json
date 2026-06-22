@@ -16,6 +16,14 @@
         { "fieldPath": "portee", "order": "ASCENDING" },
         { "fieldPath": "dateCreation", "order": "DESCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "photos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "visibilite", "order": "ASCENDING" },
+        { "fieldPath": "dateUpload", "order": "DESCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

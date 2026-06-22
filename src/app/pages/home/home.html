@@ -1,96 +1,151 @@
-<!-- Hero plein écran -->
-<section class="hero">
+<!-- ── Hero ── -->
+<section class="hero" [style.backgroundImage]="heroStyle()">
   <div class="hero-overlay">
     <div class="hero-content">
-      <p class="hero-since">Depuis 2015</p>
-      <h1 class="hero-title">Club Photo<br><span>Tain-Tournon</span></h1>
+      <p class="hero-eyebrow">Depuis 2015</p>
+      <h1 class="hero-title">Club Photo<br><span class="hero-accent">Tain · Tournon</span></h1>
       <p class="hero-sub">Partageons notre passion pour la photographie</p>
-      <div class="hero-actions">
-        <a routerLink="/le-club/adhesion" class="btn-primary">Rejoindre le club</a>
-        <a routerLink="/galeries" class="btn-outline">Voir les galeries</a>
-      </div>
+    </div>
+    <div class="hero-scroll-hint">
+      <span class="hero-scroll-icon">↓</span>
     </div>
   </div>
 </section>
 
-<!-- Cartes d'introduction -->
-<section class="intro-section">
-  <div class="section-inner">
-    <div class="intro-grid">
-      <div class="intro-card">
-        <div class="intro-card-icon" style="background:#cc0000">
-          <mat-icon>info</mat-icon>
-        </div>
-        <h3>Qui sommes-nous ?</h3>
-        <p>Un club passionné de photographie, ouvert à tous les niveaux, du débutant au confirmé.</p>
-        <a routerLink="/le-club/histoire" class="card-link">Découvrir <mat-icon class="link-arrow">arrow_forward</mat-icon></a>
-      </div>
-      <div class="intro-card">
-        <div class="intro-card-icon" style="background:#222">
-          <mat-icon>photo_library</mat-icon>
-        </div>
-        <h3>Nos galeries</h3>
-        <p>Découvrez les photos prises par les membres lors de nos sorties et expositions.</p>
-        <a routerLink="/galeries" class="card-link">Consulter <mat-icon class="link-arrow">arrow_forward</mat-icon></a>
-      </div>
-      <div class="intro-card">
-        <div class="intro-card-icon" style="background:#cc0000">
-          <mat-icon>event</mat-icon>
-        </div>
-        <h3>Nos activités</h3>
-        <p>Sorties photo, ateliers, expositions… Consultez notre programme d'activités.</p>
-        <a routerLink="/calendrier" class="card-link">Voir le calendrier <mat-icon class="link-arrow">arrow_forward</mat-icon></a>
-      </div>
-      <div class="intro-card">
-        <div class="intro-card-icon" style="background:#222">
-          <mat-icon>person_add</mat-icon>
-        </div>
-        <h3>Adhérer au club</h3>
-        <p>Rejoignez notre communauté et participez à toutes nos activités tout au long de l'année.</p>
-        <a routerLink="/le-club/adhesion" class="card-link">En savoir plus <mat-icon class="link-arrow">arrow_forward</mat-icon></a>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- Articles récents -->
-<section class="articles-section">
-  <div class="section-inner">
-    <div class="section-header">
-      <h2 class="section-title">Actualités récentes</h2>
-      <a routerLink="/actualites" class="see-all">Toutes les actualités →</a>
-    </div>
-
-    @if (articles$ | async; as articles) {
-      @if (articles.length === 0) {
-        <div class="no-articles">
-          <mat-icon>article</mat-icon>
-          <p>Aucun article publié pour l'instant.</p>
-        </div>
-      } @else {
-        <div class="articles-grid">
-          @for (article of articles; track article.id) {
-            <div class="article-card">
-              @if (article.couvertureUrl) {
-                <img class="article-img" [src]="article.couvertureUrl" [alt]="article.titre">
-              } @else {
-                <div class="article-img-placeholder">
-                  <mat-icon>photo_camera</mat-icon>
-                </div>
-              }
-              <div class="article-body">
-                <span class="article-categorie">{{ article.type }}</span>
-                <h3 class="article-title">{{ article.titre }}</h3>
-                <p class="article-date">{{ article.dateCreation | date:'d MMMM yyyy':'':'fr' }}</p>
-                <p class="article-extrait">{{ article.description }}</p>
-                <a routerLink="/actualites" class="card-link">
-                  Voir les actualités <mat-icon class="link-arrow">arrow_forward</mat-icon>
-                </a>
-              </div>
+<!-- ── À la une (GSAP pin) ── -->
+@if (articles().length) {
+  <section class="home-section actu-section bg-white">
+    <div class="section-wrap">
+      <p class="eyebrow">À la une</p>
+      <div class="actu-grid">
+        @for (article of articles(); track article.id) {
+          <article class="actu-card">
+            <div class="actu-top">
+              <span class="actu-type" [style.color]="articleColor(article.type)">{{ articleLabel(article.type) }}</span>
+              @if (article.epingle) { <span class="actu-pin">📌</span> }
             </div>
-          }
-        </div>
-      }
-    }
+            @if (article.couvertureUrl) {
+              <img [src]="article.couvertureUrl" [alt]="article.titre" class="actu-img" loading="lazy">
+            } @else {
+              <div class="actu-img-ph" [style.background]="articleColor(article.type)">
+                <span class="actu-ph-icon">{{ articleIcon(article.type) }}</span>
+              </div>
+            }
+            <div class="actu-body">
+              <h3 class="actu-titre">{{ article.titre }}</h3>
+              @if (article.description) {
+                <p class="actu-desc">{{ article.description }}</p>
+              }
+              <span class="actu-date">{{ article.dateCreation | date:'d MMMM yyyy':'':'fr' }}</span>
+            </div>
+          </article>
+        }
+      </div>
+    </div>
+  </section>
+}
+
+<!-- ── Activités (GSAP pin) ── -->
+@if (derniereSortie() || dernierTheme()) {
+  <section class="home-section act-section bg-dark">
+    <div class="section-wrap">
+      <p class="eyebrow eyebrow-light">Nos activités</p>
+      <div class="act-duo">
+
+        @if (derniereSortie(); as sortie) {
+          <div class="act-card">
+            @if (sortie.photoCouvertureUrl) {
+              <img [src]="sortie.photoCouvertureUrl" [alt]="sortie.titre" class="act-img" loading="lazy">
+            } @else {
+              <div class="act-img-ph">📸</div>
+            }
+            <div class="act-info">
+              <span class="act-label">Dernière sortie</span>
+              <h2 class="act-titre">{{ sortie.titre }}</h2>
+              @if (sortie.lieu) { <p class="act-meta">📍 {{ sortie.lieu }}</p> }
+              <p class="act-meta">{{ sortie.date | date:'d MMMM yyyy':'':'fr' }}</p>
+            </div>
+          </div>
+        }
+
+        @if (dernierTheme(); as theme) {
+          <div class="act-card act-card-theme">
+            <div class="act-theme-visual">
+              <span class="act-theme-num">{{ theme.mois.split('-')[1] }}</span>
+              <span class="act-theme-yr">{{ theme.mois.split('-')[0] }}</span>
+            </div>
+            <div class="act-info">
+              <span class="act-label">Thème du mois</span>
+              <h2 class="act-titre">{{ theme.titre }}</h2>
+              <p class="act-meta">{{ formatMois(theme.mois) }}</p>
+              <span class="theme-badge theme-badge--{{ computeStatut(theme) }}">
+                {{ statutLabel(computeStatut(theme)) }}
+              </span>
+            </div>
+          </div>
+        }
+
+      </div>
+    </div>
+  </section>
+}
+
+<!-- ── Galerie (CSS reveal, pas de pin) ── -->
+@if (recentPhotos().length) {
+  <section class="home-section gallery-section bg-light">
+    <div class="section-wrap">
+      <p class="eyebrow">Galerie</p>
+      <div class="gallery-mosaic">
+        @for (photo of recentPhotos(); track photo.id) {
+          <div class="mosaic-cell">
+            <img [src]="photo.url" [alt]="photo.titre" class="mosaic-img" loading="lazy">
+          </div>
+        }
+      </div>
+      <div class="section-cta-row">
+        <a routerLink="/galeries/membres" class="link-cta">Voir tous les portfolios →</a>
+      </div>
+    </div>
+  </section>
+}
+
+<!-- ── Les photographes (GSAP pin) ── -->
+@if (membres().length) {
+  <section class="home-section membres-section bg-white">
+    <div class="section-wrap">
+      <p class="eyebrow">Les photographes</p>
+      <div class="membres-row">
+        @for (m of membres(); track m.uid) {
+          <a [routerLink]="['/galeries/membres', m.uid]" class="membre-card">
+            <div class="membre-visual">
+              @if (m.photoProfilUrl) {
+                <img [src]="m.photoProfilUrl" [alt]="nomComplet(m)" class="membre-avatar" loading="lazy">
+              } @else {
+                <div class="membre-initiales">{{ initiales(m) }}</div>
+              }
+            </div>
+            <h3 class="membre-nom">{{ nomComplet(m) }}</h3>
+            @if (m.bio) { <p class="membre-bio">{{ m.bio }}</p> }
+            @if (m.stylesPhoto?.length) {
+              <div class="membre-themes">
+                @for (style of m.stylesPhoto!.slice(0, 2); track style) {
+                  <span class="membre-chip">{{ style }}</span>
+                }
+              </div>
+            }
+            <span class="membre-cta-lnk">Voir le portfolio →</span>
+          </a>
+        }
+      </div>
+    </div>
+  </section>
+}
+
+<!-- ── CTA Rejoindre ── -->
+<section class="cta-section">
+  <div class="cta-inner reveal-fade" style="--rs: 0%; --re: 60%">
+    <h2 class="cta-titre">Rejoignez-nous</h2>
+    <p class="cta-sub">Partagez votre passion, développez votre regard et participez à toutes nos activités.</p>
+    <a routerLink="/le-club/adhesion" class="btn-cta">Adhérer au club</a>
   </div>
 </section>

@@ -25,19 +25,7 @@ export class ArticleService {
     ) as Observable<Article[]>;
   }
 
-  getPublishedArticles(): Observable<Article[]> {
-    return runInInjectionContext(this.injector, () =>
-      collectionData(
-        query(
-          collection(this.firestore, 'articles'),
-          where('statut', '==', 'publie'),
-          orderBy('dateCreation', 'desc')
-        ),
-        { idField: 'id' }
-      )
-    ) as Observable<Article[]>;
-  }
-
+  // Articles publics visibles par tout le monde (y compris anonymes)
   getPublicArticles(): Observable<Article[]> {
     return runInInjectionContext(this.injector, () =>
       collectionData(
@@ -45,6 +33,19 @@ export class ArticleService {
           collection(this.firestore, 'articles'),
           where('statut', '==', 'publie'),
           where('portee', '==', 'public'),
+          orderBy('dateCreation', 'desc')
+        ),
+        { idField: 'id' }
+      )
+    ) as Observable<Article[]>;
+  }
+
+  getPublishedArticles(): Observable<Article[]> {
+    return runInInjectionContext(this.injector, () =>
+      collectionData(
+        query(
+          collection(this.firestore, 'articles'),
+          where('statut', '==', 'publie'),
           orderBy('dateCreation', 'desc')
         ),
         { idField: 'id' }

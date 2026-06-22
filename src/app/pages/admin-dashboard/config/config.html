@@ -4,6 +4,43 @@
     <h2 class="page-title">Configuration du site</h2>
   </div>
 
+  <!-- Section Apparence : image hero -->
+  <section class="config-section" style="margin-bottom: 24px">
+    <div class="section-header">
+      <div>
+        <h3 class="section-title">Image hero (page d'accueil)</h3>
+        <p class="section-sub">Photo plein écran affichée en fond sur la page d'accueil. Format recommandé : paysage, ≥ 1920 px.</p>
+      </div>
+    </div>
+
+    <!-- Aperçu actuel ou preview -->
+    <div class="hero-preview-wrap">
+      @if (heroPreview()) {
+        <img [src]="heroPreview()!" class="hero-preview" alt="Aperçu">
+        <div class="hero-preview-actions">
+          <button class="btn-cancel" (click)="cancelHero()" [disabled]="heroUploading()">Annuler</button>
+          <button class="btn-add" (click)="saveHero()" [disabled]="heroUploading()">
+            {{ heroUploading() ? 'Upload…' : 'Sauvegarder' }}
+          </button>
+        </div>
+      } @else if (heroCurrentUrl()) {
+        <img [src]="heroCurrentUrl()" class="hero-preview" alt="Image hero actuelle">
+        <div class="hero-preview-actions">
+          <button class="btn-reset" (click)="heroInput.click()">Changer</button>
+          <button class="btn-delete" (click)="deleteHero()" title="Supprimer">× Supprimer</button>
+        </div>
+      } @else {
+        <div class="hero-empty">Aucune image hero configurée.</div>
+        <button class="btn-add" style="margin-top: 12px" (click)="heroInput.click()">+ Choisir une image</button>
+      }
+      <input #heroInput type="file" accept="image/*" hidden (change)="onHeroSelected($event)">
+    </div>
+
+    @if (heroError()) {
+      <p class="error-msg">{{ heroError() }}</p>
+    }
+  </section>
+
   <!-- Section catégories -->
   <section class="config-section">
     <div class="section-header">
