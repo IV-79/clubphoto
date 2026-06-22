@@ -205,10 +205,49 @@
         }
       </div>
 
-      <!-- Bouton menu mobile -->
-      <button class="mobile-menu-btn" (click)="mobileMenuOpen.set(!mobileMenuOpen()); mobileOpenSection.set(null)">
-        <mat-icon>{{ mobileMenuOpen() ? 'close' : 'menu' }}</mat-icon>
-      </button>
+      <!-- Groupe cloche + burger (mobile) -->
+      <div class="mobile-right">
+        @if (isLoggedIn$ | async) {
+          <div class="has-dropdown">
+            <button class="mobile-notif-btn" (click)="toggleMenu('notifs', $event)" [class.has-unread]="unreadCount() > 0" title="Notifications">
+              <mat-icon>notifications</mat-icon>
+              @if (unreadCount() > 0) {
+                <span class="notif-badge">{{ unreadCount() > 9 ? '9+' : unreadCount() }}</span>
+              }
+            </button>
+            @if (openMenu() === 'notifs') {
+              <div class="nav-panel nav-panel-right notif-panel" (click)="$event.stopPropagation()">
+                <div class="notif-panel-header">
+                  <span class="notif-panel-title">Notifications</span>
+                  @if (unreadCount() > 0) {
+                    <button class="notif-mark-all" (click)="markAllRead()">Tout marquer lu</button>
+                  }
+                </div>
+                @if (recentNotifs().length === 0) {
+                  <p class="notif-panel-empty">Aucune notification</p>
+                } @else {
+                  @for (n of recentNotifs(); track n.id) {
+                    <button class="notif-panel-item" [class.unread]="!n.lu" (click)="navigateFromNotif(n)">
+                      <span class="notif-item-icon">{{ notifIcon(n.type) }}</span>
+                      <div class="notif-item-body">
+                        <p class="notif-item-msg">{{ n.message }}</p>
+                        <span class="notif-item-date">{{ formatNotifDate(n.createdAt) }}</span>
+                      </div>
+                      @if (!n.lu) { <span class="notif-unread-dot"></span> }
+                    </button>
+                  }
+                }
+                <div class="notif-panel-footer">
+                  <a routerLink="/membre/notifications" class="notif-voir-tout" (click)="openMenu.set(null)">Toutes les notifications →</a>
+                </div>
+              </div>
+            }
+          </div>
+        }
+        <button class="mobile-menu-btn" (click)="mobileMenuOpen.set(!mobileMenuOpen()); mobileOpenSection.set(null)">
+          <mat-icon>{{ mobileMenuOpen() ? 'close' : 'menu' }}</mat-icon>
+        </button>
+      </div>
     </div>
 
     <!-- Menu mobile (inchangé) -->
