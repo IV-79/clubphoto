@@ -91,7 +91,7 @@ import { ClubDocument, getExtensionMeta, extractExtension } from '../../../model
         </div>
       }
 
-      <!-- Filtre dossiers -->
+      <!-- Filtres -->
       <div class="folder-chips">
         <button class="chip" [class.active]="selectedDossier() === null"
           (click)="selectedDossier.set(null)">
@@ -103,6 +103,17 @@ import { ClubDocument, getExtensionMeta, extractExtension } from '../../../model
             {{ d.nom }} ({{ countForDossier(d.nom) }})
           </button>
         }
+      </div>
+      <div class="filter-bar">
+        <button class="chip" [class.active]="showMine()" (click)="showMine.set(!showMine())">
+          <mat-icon class="chip-icon">person</mat-icon>
+          Mes documents
+        </button>
+        <button class="sort-btn" (click)="sortDir.set(sortDir() === 'desc' ? 'asc' : 'desc')"
+          [matTooltip]="sortDir() === 'desc' ? 'Plus récent en premier' : 'Plus ancien en premier'">
+          <mat-icon>{{ sortDir() === 'desc' ? 'arrow_downward' : 'arrow_upward' }}</mat-icon>
+          Date {{ sortDir() === 'desc' ? '↓' : '↑' }}
+        </button>
       </div>
 
       <!-- Liste documents -->
@@ -134,26 +145,17 @@ import { ClubDocument, getExtensionMeta, extractExtension } from '../../../model
                   <span class="meta-tag">{{ doc.dossier }}</span>
                   <span>{{ doc.uploadeurNom }}</span>
                   <span>{{ formatTaille(doc.taille) }}</span>
-                  <span>{{ doc.dateCreation | date:'d MMM yyyy':'':'fr' }}</span>
-                  @if (doc.dateMiseAJour) {
-                    <span class="meta-updated"
-                      [matTooltip]="'Mis à jour le ' + (doc.dateMiseAJour | date:'d MMM yyyy':'':'fr')">
-                      (mis à jour)
-                    </span>
-                  }
+                  <span [matTooltip]="doc.dateMiseAJour ? 'Mis à jour (créé le ' + (doc.dateCreation | date:'d MMM yyyy':'':'fr') + ')' : ''">
+                    {{ dateEffective(doc) | date:'d MMM yyyy':'':'fr' }}
+                    @if (doc.dateMiseAJour) { <span class="meta-updated">✎</span> }
+                  </span>
                 </div>
               </div>
 
               <!-- Actions -->
               <div class="doc-actions">
-                @if (doc.url) {
-                  <a [href]="doc.url" target="_blank" rel="noopener noreferrer"
-                    mat-icon-button matTooltip="Télécharger">
-                    <mat-icon>download</mat-icon>
-                  </a>
-                }
                 @if (canEdit(doc)) {
-                  <button mat-icon-button matTooltip="Remplacer"
+                  <button mat-icon-button matTooltip="Modifier"
                     (click)="openReplace(doc)">
                     <mat-icon>edit</mat-icon>
                   </button>
@@ -163,6 +165,12 @@ import { ClubDocument, getExtensionMeta, extractExtension } from '../../../model
                     (click)="deleteDoc(doc)">
                     <mat-icon>delete</mat-icon>
                   </button>
+                }
+                @if (doc.url) {
+                  <a [href]="doc.url" target="_blank" rel="noopener noreferrer"
+                    mat-icon-button matTooltip="Télécharger">
+                    <mat-icon>download</mat-icon>
+                  </a>
                 }
               </div>
             </div>
@@ -241,14 +249,25 @@ import { ClubDocument, getExtensionMeta, extractExtension } from '../../../model
     .ext-suffix { color: #888; font-size: .9rem; padding-right: 4px; }
 
     /* Folder chips */
-    .folder-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+    .folder-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+    .filter-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
     .chip {
+      display: flex; align-items: center; gap: 4px;
       padding: 6px 14px; border-radius: 20px; border: 1px solid #ddd;
       background: #fff; cursor: pointer; font-size: .85rem; color: #555;
       transition: background .15s, color .15s, border-color .15s;
     }
     .chip:hover { border-color: #1976d2; color: #1976d2; }
     .chip.active { background: #1976d2; color: #fff; border-color: #1976d2; }
+    .chip-icon { font-size: 16px; width: 16px; height: 16px; }
+    .sort-btn {
+      display: flex; align-items: center; gap: 4px;
+      padding: 6px 12px; border-radius: 8px; border: 1px solid #ddd;
+      background: #fff; cursor: pointer; font-size: .85rem; color: #555;
+      transition: background .15s, color .15s;
+    }
+    .sort-btn:hover { background: #f5f5f5; color: #1976d2; }
+    .sort-btn mat-icon { font-size: 16px; width: 16px; height: 16px; }
 
     /* Empty state */
     .empty { text-align: center; padding: 48px 0; color: #aaa; }
@@ -280,7 +299,7 @@ import { ClubDocument, getExtensionMeta, extractExtension } from '../../../model
       background: #f0f0f0; padding: 2px 8px; border-radius: 10px;
       color: #555; font-weight: 500;
     }
-    .meta-updated { color: #f57c00; font-style: italic; }
+    .meta-updated { color: #f57c00; font-size: .8rem; }
     .doc-actions { display: flex; align-items: center; flex-shrink: 0; }
 
     /* Replace panel */
@@ -314,6 +333,8 @@ export class Documents {
   documents = toSignal(this.documentService.getDocuments(), { initialValue: [] });
 
   selectedDossier = signal<string | null>(null);
+  showMine        = signal(false);
+  sortDir         = signal<'asc' | 'desc'>('desc');
   showUploadForm  = signal(false);
   expandedDocId   = signal<string | null>(null);
 
@@ -334,10 +355,24 @@ export class Documents {
 
   isAdmin = computed(() => this.profile()?.role === 'admin');
 
+  dateEffective(doc: ClubDocument): string {
+    return doc.dateMiseAJour ?? doc.dateCreation;
+  }
+
   filteredDocuments = computed(() => {
     const dossier = this.selectedDossier();
-    const docs = this.documents();
-    return dossier ? docs.filter(d => d.dossier === dossier) : docs;
+    const mine    = this.showMine();
+    const dir     = this.sortDir();
+    const uid     = this.currentUid();
+
+    let docs = this.documents();
+    if (dossier) docs = docs.filter(d => d.dossier === dossier);
+    if (mine)    docs = docs.filter(d => d.uploadeurUid === uid);
+
+    const sign = dir === 'asc' ? 1 : -1;
+    return [...docs].sort((a, b) =>
+      sign * this.dateEffective(a).localeCompare(this.dateEffective(b))
+    );
   });
 
   countForDossier(nom: string): number {
@@ -401,8 +436,9 @@ export class Documents {
       const docId = this.documentService.generateDocId();
       const extension = extractExtension(file.name);
 
+      const filename = extension ? `${this.uploadNomBase.trim()}.${extension}` : this.uploadNomBase.trim();
       const { url, storagePath } = await this.documentService.uploadFile(
-        docId, file, pct => this.uploadProgress.set(pct)
+        docId, file, filename, pct => this.uploadProgress.set(pct)
       );
 
       await this.documentService.createDocument(docId, {
@@ -469,8 +505,9 @@ export class Documents {
     try {
       if (file) {
         const extension = extractExtension(file.name);
+        const filename = extension ? `${this.replaceNom.trim()}.${extension}` : this.replaceNom.trim();
         const { url, storagePath } = await this.documentService.uploadFile(
-          doc.id!, file, pct => this.replaceProgress.set(pct)
+          doc.id!, file, filename, pct => this.replaceProgress.set(pct)
         );
         await this.documentService.updateDocument(doc.id!, {
           nom: this.replaceNom.trim(), dossier: this.replaceDossier,
@@ -480,9 +517,11 @@ export class Documents {
         if (diff > 0) await this.documentService.incrementStorage(profile.uid, diff);
         else if (diff < 0) await this.documentService.decrementStorage(profile.uid, -diff);
       } else {
+        const filename = doc.extension ? `${this.replaceNom.trim()}.${doc.extension}` : this.replaceNom.trim();
         await this.documentService.updateDocument(doc.id!, {
           nom: this.replaceNom.trim(), dossier: this.replaceDossier,
         });
+        await this.documentService.updateFileMetadata(doc.storagePath, filename);
       }
       this.expandedDocId.set(null);
       this.snackBar.open('Document mis à jour', '', { duration: 3000 });

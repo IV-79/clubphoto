@@ -133,11 +133,6 @@
           <div class="photo-card" [class.own-card]="isOwn" (click)="openLightbox(i)">
             <div class="photo-img-wrap">
               <img [src]="photo.url" [alt]="photo.nomUploader" loading="lazy" class="photo-img" />
-              <button class="card-heart" [class.liked]="isLiked(photo)"
-                (click)="toggleLike(photo, $event)"
-                [title]="isLiked(photo) ? 'Retirer le like' : 'J\'aime'">
-                <span class="hi">♥</span> @if (photo.likes.length > 0) { {{ photo.likes.length }} }
-              </button>
             </div>
             <div class="photo-footer">
               @if (isOwn) {
@@ -171,6 +166,7 @@
     [userName]="userName()"
     [canInteract]="!!profile()"
     [isAdmin]="isAdmin()"
+    [hideLikes]="true"
     (closed)="closeLightbox()"
   />
 }

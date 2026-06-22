@@ -84,7 +84,7 @@ export class Header {
     const uid = this.profile()?.uid;
     if (uid && !n.lu) await this.notifService.markAsRead(uid, n.id);
     this.openMenu.set(null);
-    if (n.lien) this.router.navigate([n.lien]);
+    if (n.lien) this.router.navigateByUrl(n.lien);
   }
 
   async markAllRead() {

@@ -21,14 +21,20 @@
     <div class="profil-meta">
       @if (membre()!.appareil) {
         <span class="meta-item">
-          <span class="meta-icon">📷</span> {{ membre()!.appareil }}
+          <span class="meta-icon">📷</span>
+          <span class="meta-lbl">Matériel</span>
+          <span class="meta-sep">·</span>
+          {{ membre()!.appareil }}
         </span>
       }
       @if (membre()!.stylesPhoto?.length) {
-        <div class="styles-chips">
-          @for (style of membre()!.stylesPhoto!; track style) {
-            <span class="chip">{{ style }}</span>
-          }
+        <div class="styles-block">
+          <span class="meta-lbl-block">Thèmes de prédilection</span>
+          <div class="styles-chips">
+            @for (style of membre()!.stylesPhoto!; track style) {
+              <span class="chip">{{ style }}</span>
+            }
+          </div>
         </div>
       }
       @if (membre()!.bio) {
@@ -92,13 +98,102 @@
     </div>
 
     <div class="photos-section">
-      <h2 class="section-title">Photos publiques <span class="count">{{ photos().length }}</span></h2>
+      <h2 class="section-title">
+        Photos
+        <span class="count">
+          @if (filteredPhotos().length !== photos().length) {
+            {{ filteredPhotos().length }} / {{ photos().length }}
+          } @else {
+            {{ photos().length }}
+          }
+        </span>
+      </h2>
+
+      @if (hasFilters()) {
+        <div class="filter-bar">
+          @if (availableCategories().length) {
+            <div class="filter-row">
+              <button class="f-chip" [class.active]="filterCategorie() === null"
+                (click)="filterCategorie.set(null)">Tous</button>
+              @for (cat of availableCategories(); track cat) {
+                <button class="f-chip" [class.active]="filterCategorie() === cat"
+                  (click)="filterCategorie.set(cat)">{{ getCategorieLabel(cat) }}</button>
+              }
+            </div>
+          }
+          @if (availableAppareils().length || availableObjectifs().length) {
+            <div class="filter-row">
+              @if (availableAppareils().length) {
+                <div class="f-dd-wrap" (click)="$event.stopPropagation()">
+                  <button class="f-dd-btn" [class.has-selection]="filterAppareils().length"
+                    (click)="openDropdown.set(openDropdown() === 'appareil' ? null : 'appareil')">
+                    Appareil
+                    @if (filterAppareils().length) {
+                      <span class="f-badge">{{ filterAppareils().length }}</span>
+                    }
+                    <span class="f-caret">{{ openDropdown() === 'appareil' ? '▲' : '▼' }}</span>
+                  </button>
+                  @if (openDropdown() === 'appareil') {
+                    <div class="f-panel">
+                      @for (app of availableAppareils(); track app) {
+                        <label class="f-option">
+                          <input type="checkbox" [checked]="filterAppareils().includes(app)"
+                            (change)="toggleAppareil(app)">
+                          {{ app }}
+                        </label>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+              @if (availableObjectifs().length) {
+                <div class="f-dd-wrap" (click)="$event.stopPropagation()">
+                  <button class="f-dd-btn" [class.has-selection]="filterObjectifs().length"
+                    (click)="openDropdown.set(openDropdown() === 'objectif' ? null : 'objectif')">
+                    Objectif
+                    @if (filterObjectifs().length) {
+                      <span class="f-badge">{{ filterObjectifs().length }}</span>
+                    }
+                    <span class="f-caret">{{ openDropdown() === 'objectif' ? '▲' : '▼' }}</span>
+                  </button>
+                  @if (openDropdown() === 'objectif') {
+                    <div class="f-panel">
+                      @for (obj of availableObjectifs(); track obj) {
+                        <label class="f-option">
+                          <input type="checkbox" [checked]="filterObjectifs().includes(obj)"
+                            (change)="toggleObjectif(obj)">
+                          {{ obj }}
+                        </label>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+          @if (filterAppareils().length || filterObjectifs().length) {
+            <div class="active-filter-chips">
+              @for (app of filterAppareils(); track app) {
+                <button class="active-chip" (click)="toggleAppareil(app)">{{ app }} ×</button>
+              }
+              @for (obj of filterObjectifs(); track obj) {
+                <button class="active-chip" (click)="toggleObjectif(obj)">{{ obj }} ×</button>
+              }
+            </div>
+          }
+          @if (filterCategorie() || filterAppareils().length || filterObjectifs().length) {
+            <button class="f-clear" (click)="clearFilters()">Effacer les filtres</button>
+          }
+        </div>
+      }
 
       @if (photos().length === 0) {
-        <div class="empty-state"><p>Aucune photo publique pour le moment.</p></div>
+        <div class="empty-state"><p>Aucune photo pour le moment.</p></div>
+      } @else if (filteredPhotos().length === 0) {
+        <div class="empty-state"><p>Aucune photo ne correspond aux filtres sélectionnés.</p></div>
       } @else {
         <div class="photos-grid">
-          @for (photo of photos(); track photo.id; let i = $index) {
+          @for (photo of filteredPhotos(); track photo.id; let i = $index) {
             <div class="photo-card" (click)="openLightbox(i)">
               <img [src]="photo.url" [alt]="photo.titre" loading="lazy" class="photo-img">
               @if (photo.categorie) {
@@ -125,7 +220,7 @@
 </div>
 
 <!-- Lightbox universelle -->
-@if (lightboxIndex() !== null && photos().length > 0) {
+@if (lightboxIndex() !== null && filteredPhotos().length > 0) {
   <app-photo-lightbox
     [photos]="lightboxPhotos()"
     [callbacks]="lightboxCallbacks()"

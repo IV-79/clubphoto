@@ -150,7 +150,7 @@ export class PhotoService {
     photoId: string,
     uid: string,
     currentlyLiked: boolean,
-    notif?: { ownerUid: string; likerNom: string; lien: string; ownerSubscriptions?: UserSubscriptions }
+    notif?: { ownerUid: string; likerNom: string; lien: string; photoTitre?: string; ownerSubscriptions?: UserSubscriptions }
   ): Promise<void> {
     await runInInjectionContext(this.injector, () =>
       updateDoc(doc(this.firestore, 'photos', photoId), {
@@ -158,8 +158,10 @@ export class PhotoService {
       })
     );
     if (notif && !currentlyLiked) {
-      await this.notifService.createPersonalNotif(notif.ownerUid, 'like',
-        `${notif.likerNom} a aimé une de vos photos`,
+      const msg = notif.photoTitre
+        ? `${notif.likerNom} a aimé votre photo «${notif.photoTitre}»`
+        : `${notif.likerNom} a aimé une de vos photos`;
+      await this.notifService.createPersonalNotif(notif.ownerUid, 'like', msg,
         { lien: notif.lien, sourceNom: notif.likerNom, sourceUid: uid, toSubscriptions: notif.ownerSubscriptions }
       );
     }
@@ -180,7 +182,7 @@ export class PhotoService {
   async addCommentaire(
     photoId: string,
     data: { texte: string; auteurUid: string; nomAuteur: string },
-    notif?: { ownerUid: string; lien: string; ownerSubscriptions?: UserSubscriptions }
+    notif?: { ownerUid: string; lien: string; photoTitre?: string; ownerSubscriptions?: UserSubscriptions }
   ): Promise<void> {
     await runInInjectionContext(this.injector, () =>
       addDoc(collection(this.firestore, `photos/${photoId}/commentaires`), {
@@ -188,8 +190,10 @@ export class PhotoService {
       })
     );
     if (notif) {
-      await this.notifService.createPersonalNotif(notif.ownerUid, 'comment',
-        `${data.nomAuteur} a commenté une de vos photos`,
+      const msg = notif.photoTitre
+        ? `${data.nomAuteur} a commenté votre photo «${notif.photoTitre}»`
+        : `${data.nomAuteur} a commenté une de vos photos`;
+      await this.notifService.createPersonalNotif(notif.ownerUid, 'comment', msg,
         { lien: notif.lien, sourceNom: data.nomAuteur, sourceUid: data.auteurUid, toSubscriptions: notif.ownerSubscriptions }
       );
     }

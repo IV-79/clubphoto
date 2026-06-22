@@ -2,13 +2,17 @@ import { Injectable, inject, Injector, runInInjectionContext } from '@angular/co
 import {
   Firestore, collection, collectionData, doc, addDoc, deleteDoc, updateDoc, query, orderBy
 } from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 import { Reunion } from '../models/reunion.model';
+import { NotificationService } from './notification.service';
+import { AuthService } from './auth.service';
 
 @Injectable({ providedIn: 'root' })
 export class ReunionService {
   private firestore = inject(Firestore);
   private injector = inject(Injector);
+  private notifService = inject(NotificationService);
+  private authService = inject(AuthService);
 
   getReunions(): Observable<Reunion[]> {
     const q = query(collection(this.firestore, 'reunions'), orderBy('date', 'asc'));
@@ -18,13 +22,23 @@ export class ReunionService {
   }
 
   async creer(data: Omit<Reunion, 'id' | 'dateCreation' | 'type'>): Promise<void> {
-    await runInInjectionContext(this.injector, () =>
+    const ref = await runInInjectionContext(this.injector, () =>
       addDoc(collection(this.firestore, 'reunions'), {
         ...data,
         type: 'reunion',
         dateCreation: new Date().toISOString(),
       })
     );
+
+    const profile = await firstValueFrom(this.authService.currentUserProfile$);
+    const adminNom = profile ? `${profile.prenom} ${profile.nom}` : 'Admin';
+    const adminUid = profile?.uid ?? undefined;
+
+    await this.notifService.broadcast('reunion', `Nouvelle réunion : ${data.titre}`, {
+      lien: `/calendrier?reunion=${ref.id}`,
+      sourceNom: adminNom,
+      excludeUid: adminUid,
+    });
   }
 
   async modifier(id: string, data: Partial<Omit<Reunion, 'id' | 'dateCreation' | 'type'>>): Promise<void> {

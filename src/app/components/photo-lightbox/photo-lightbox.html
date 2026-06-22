@@ -47,10 +47,12 @@
                 <p class="lb-description">{{ photo.description }}</p>
               }
               <div class="lb-actions-row">
-                <button class="lb-like-btn" [class.liked]="isLikedPhoto()"
-                  (click)="toggleLikePhoto()" [disabled]="!canInteract()">
-                  <span class="like-icon">♥</span> {{ photo.likes.length }}
-                </button>
+                @if (!hideLikes()) {
+                  <button class="lb-like-btn" [class.liked]="isLikedPhoto()"
+                    (click)="toggleLikePhoto()" [disabled]="!canInteract()">
+                    <span class="like-icon">♥</span> {{ photo.likes.length }}
+                  </button>
+                }
                 @if (canDeletePhoto()) {
                   <button class="lb-delete-photo" (click)="deleteCurrentPhoto()" title="Supprimer la photo">
                     🗑
@@ -95,6 +97,10 @@
                 }
                 @if (photo.exif!.dateCapture) {
                   <span class="lb-exif-lbl">Date</span><span class="lb-exif-val">{{ formatDateExif(photo.exif!.dateCapture!) }}</span>
+                }
+                @if (photo.exif!.largeur && photo.exif!.hauteur) {
+                  <span class="lb-exif-lbl">Définition</span>
+                  <span class="lb-exif-val">{{ formatDefinition(photo.exif!.largeur!, photo.exif!.hauteur!) }}</span>
                 }
                 @if (photo.exif!.gps) {
                   <span class="lb-exif-lbl">Lieu</span>

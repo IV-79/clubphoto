@@ -47,6 +47,19 @@
           <span class="toggle-thumb"></span>
         </button>
       </div>
+
+      <div class="pref-item">
+        <div class="pref-info">
+          <span class="pref-icon">📅</span>
+          <div>
+            <p class="pref-label">Réunions</p>
+            <p class="pref-hint">Annonce d'une nouvelle réunion du club</p>
+          </div>
+        </div>
+        <button class="toggle" [class.on]="subs().reunions" (click)="toggle('reunions')" [disabled]="saving()">
+          <span class="toggle-thumb"></span>
+        </button>
+      </div>
     </div>
   </section>
 

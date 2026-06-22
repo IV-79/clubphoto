@@ -174,18 +174,6 @@ export class OneShotDetail {
     return `${p.prenom ?? ''} ${p.nom}`.trim();
   });
 
-  isLiked(photo: OneShotPhoto): boolean {
-    const uid = this.profile()?.uid;
-    return !!uid && (photo.likes ?? []).includes(uid);
-  }
-
-  async toggleLike(photo: OneShotPhoto, event: Event) {
-    event.stopPropagation();
-    const uid = this.profile()?.uid;
-    if (!uid) return;
-    await this.oneShotService.toggleLikePhoto(this.id, photo.id, uid, this.isLiked(photo));
-  }
-
   openLightbox(photo: OneShotPhoto, $event?: MouseEvent) {
     $event?.stopPropagation();
     const idx = this.lightboxPhotoList().findIndex(p => p.id === photo.id);

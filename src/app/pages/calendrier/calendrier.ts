@@ -1,5 +1,5 @@
 import { Component, inject, signal, computed, effect, untracked } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { RouterLink, ActivatedRoute } from '@angular/router';
 import { SlicePipe } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { combineLatest, of, switchMap, map } from 'rxjs';
@@ -36,6 +36,7 @@ export class Calendrier {
   private sortieService = inject(SortieService);
   private authService = inject(AuthService);
   private loginModal = inject(LoginModalService);
+  private route = inject(ActivatedRoute);
 
   // --- Filtres ---
   types = REUNION_TYPES;
@@ -101,12 +102,31 @@ export class Calendrier {
       this.filtre();
       untracked(() => { this.limitAVenir.set(INIT); this.limitPasses.set(INIT); });
     });
+
+    effect(() => {
+      const target = this.queryParams()?.get('reunion');
+      if (!target || this.reunionAutoExpanded()) return;
+      const itemId = 'e.' + target;
+      const allItems = [...this.aVenirAll(), ...this.passesAll()];
+      if (allItems.length === 0) return;
+      if (allItems.some(i => i.id === itemId)) {
+        const isInPasses = this.passesAll().some(i => i.id === itemId);
+        untracked(() => {
+          if (isInPasses) this.showPasses.set(true);
+          this.expandedId.set(itemId);
+          this.reunionAutoExpanded.set(true);
+        });
+      }
+    });
   }
 
   loadMoreAVenir() { this.limitAVenir.update(n => n + PAGE); }
   loadMorePasses()  { this.limitPasses.update(n => n + PAGE); }
 
   expandedId = signal<string | null>(null);
+  private reunionAutoExpanded = signal(false);
+  private queryParams = toSignal(this.route.queryParamMap);
+
   toggleExpand(id: string) {
     this.expandedId.set(this.expandedId() === id ? null : id);
   }

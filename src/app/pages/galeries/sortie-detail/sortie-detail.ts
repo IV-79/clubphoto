@@ -136,18 +136,6 @@ export class SortieDetail {
     };
   });
 
-  isLiked(photo: SortieImage): boolean {
-    const uid = this.profile()?.uid;
-    return !!uid && photo.likes.includes(uid);
-  }
-
-  async toggleLike(photo: SortieImage, event: Event) {
-    event.stopPropagation();
-    const uid = this.profile()?.uid;
-    if (!uid) return;
-    await this.sortieService.toggleLikePhoto(this.sortieId, photo.id, uid, this.isLiked(photo));
-  }
-
   async toggleInscription() {
     const p = this.profile();
     const s = this.sortie();

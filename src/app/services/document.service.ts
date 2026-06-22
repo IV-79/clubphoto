@@ -3,7 +3,7 @@ import {
   Firestore, collection, collectionData, doc,
   addDoc, updateDoc, deleteDoc, setDoc, query, orderBy, increment, getDocs, where
 } from '@angular/fire/firestore';
-import { Storage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from '@angular/fire/storage';
+import { Storage, ref, uploadBytesResumable, getDownloadURL, deleteObject, updateMetadata } from '@angular/fire/storage';
 import { Observable } from 'rxjs';
 import { ClubDocument, DocumentDossier } from '../models/document.model';
 
@@ -100,17 +100,27 @@ export class DocumentService {
   uploadFile(
     docId: string,
     file: File,
+    filename: string,
     onProgress?: (pct: number) => void
   ): Promise<{ url: string; storagePath: string }> {
     const path = `documents/${docId}/file`;
     const storageRef = ref(this.storage, path);
+    const metadata = {
+      contentDisposition: `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`,
+    };
     return new Promise((resolve, reject) => {
-      const task = uploadBytesResumable(storageRef, file);
+      const task = uploadBytesResumable(storageRef, file, metadata);
       task.on('state_changed',
         snap => onProgress?.(Math.round(snap.bytesTransferred / snap.totalBytes * 100)),
         reject,
         async () => resolve({ url: await getDownloadURL(task.snapshot.ref), storagePath: path })
       );
+    });
+  }
+
+  async updateFileMetadata(storagePath: string, filename: string): Promise<void> {
+    await updateMetadata(ref(this.storage, storagePath), {
+      contentDisposition: `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`,
     });
   }
 

@@ -160,11 +160,6 @@
                 <div class="result-card" [class.rank-1]="rank === 1" [class.rank-2]="rank === 2" [class.rank-3]="rank === 3" (click)="openLightbox(photo)">
                   <div class="rank-badge" [class.gold]="rank === 1" [class.silver]="rank === 2" [class.bronze]="rank === 3">{{ rank }}</div>
                   <img [src]="photo.url" class="result-thumb" loading="lazy">
-                  <button class="card-heart" [class.liked]="isLiked(photo)"
-                    (click)="toggleLike(photo, $event)"
-                    [title]="isLiked(photo) ? 'Retirer le like' : 'J\'aime'">
-                    <span class="hi">♥</span> @if ((photo.likes?.length ?? 0) > 0) { {{ photo.likes!.length }} }
-                  </button>
                   <div class="result-footer">
                     <span class="result-name">{{ photo.nomMembre }}</span>
                     <span class="result-votes">{{ votes }} vote{{ votes > 1 ? 's' : '' }}</span>
@@ -216,6 +211,7 @@
     [userName]="userName()"
     [canInteract]="!!profile()"
     [anonyme]="event()?.statut === 'vote'"
+    [hideLikes]="true"
     (closed)="closeLightbox()"
   />
 }

@@ -1,4 +1,4 @@
-export type NotifType = 'oneshot' | 'sortie' | 'article' | 'like' | 'comment';
+export type NotifType = 'oneshot' | 'sortie' | 'article' | 'reunion' | 'like' | 'comment';
 
 export interface AppNotification {
   id: string;
@@ -15,6 +15,7 @@ export interface UserSubscriptions {
   oneshots?: boolean;
   sorties?: boolean;
   articles?: boolean;
+  reunions?: boolean;
   likes?: boolean;
   comments?: boolean;
 }
@@ -23,6 +24,7 @@ const TYPE_TO_SUB: Record<NotifType, keyof UserSubscriptions> = {
   oneshot: 'oneshots',
   sortie:  'sorties',
   article: 'articles',
+  reunion: 'reunions',
   like:    'likes',
   comment: 'comments',
 };
@@ -40,6 +42,7 @@ export const NOTIF_ICONS: Record<NotifType, string> = {
   oneshot: '📸',
   sortie:  '🚶',
   article: '📰',
+  reunion: '📅',
   like:    '♥',
   comment: '💬',
 };
@@ -48,6 +51,7 @@ export const NOTIF_LABELS: Record<NotifType, string> = {
   oneshot: 'OneShot',
   sortie:  'Sortie photo',
   article: 'Actualité',
+  reunion: 'Réunion',
   like:    'J\'aime',
   comment: 'Commentaire',
 };

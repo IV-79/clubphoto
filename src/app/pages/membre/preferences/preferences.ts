@@ -22,6 +22,7 @@ export class Preferences {
       oneshots: isSubscribed(s, 'oneshot'),
       sorties:  isSubscribed(s, 'sortie'),
       articles: isSubscribed(s, 'article'),
+      reunions: isSubscribed(s, 'reunion'),
       likes:    isSubscribed(s, 'like'),
       comments: isSubscribed(s, 'comment'),
     };

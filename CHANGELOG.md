@@ -5,6 +5,20 @@
 ## En cours (alpha)
 
 ### Améliorations
+- **Notifications — réunions** — la création d'une réunion envoie maintenant une notification broadcast à tous les membres abonnés (lien direct vers le calendrier avec la réunion déjà ouverte). Toggle "Réunions" ajouté dans `/membre/preferences`.
+- **Notifications — like/commentaire** — le message indique désormais le titre de la photo (ex : "X a commenté votre photo «Coucher de soleil»"). Le lien ouvre le portfolio du membre ET déclenche automatiquement la lightbox de la photo concernée.
+- **Notifications — lien avec deep-link** — clic sur une notification navigue avec `navigateByUrl` pour préserver les query params (`?photo=id`, `?reunion=id`). Le calendrier et le portfolio détectent ces paramètres au chargement et ouvrent automatiquement l'élément ciblé.
+- **OneShot & Sorties photo — suppression des likes photos** — le bouton ♥ est retiré des cartes et de la lightbox dans ces deux sections pour éviter la confusion avec le système de vote. Nouveau input `hideLikes` sur `app-photo-lightbox` (distinct de `anonyme` qui masque aussi auteur et commentaires).
+- **Documents — filtre "Mes documents"** — chip toggle pour n'afficher que les documents uploadés par le membre connecté, combinable avec le filtre dossier.
+- **Documents — tri date** — bouton ↑/↓ pour basculer entre date croissante et décroissante (tri par date effective : date de mise à jour si elle existe, sinon date de création).
+- **Documents — date effective** — la date affichée est celle du dernier upload du fichier (`dateMiseAJour` si présente, sinon `dateCreation`). Un ✎ orange indique les documents mis à jour.
+- **Documents — ordre des actions** — réordonné : Modifier → Supprimer → Télécharger.
+- **Documents — nom de fichier au téléchargement** — le fichier téléchargé porte maintenant le vrai nom (ex : `Statuts 2024.pdf`) grâce au header `Content-Disposition` injecté dans les métadonnées Firebase Storage à l'upload. Un renommage sans re-upload met aussi à jour les métadonnées.
+- **EXIF — Définition** — ajout de la résolution originale de la photo (ex : `6 000 × 4 000 px · 24 Mpx`) dans les infos EXIF de la lightbox. La valeur est lue sur le fichier brut avant compression, ce qui reflète la définition exploitable pour l'impression ou le magazine.
+- **Portfolio membre — "Thèmes de prédilection"** — renommage de "Styles photographiques" sur la page de profil et sur le portfolio public. Libellés explicites ajoutés dans la section méta (Matériel · … et Thèmes de prédilection).
+- **Portfolio membre — filtres photos** — barre de filtres conditionnelle (n'apparaît que si ≥ 2 valeurs distinctes pour une catégorie) : chips de catégorie, dropdowns multi-sélection avec chips pour Appareil et Objectif. La lightbox suit l'index des photos filtrées. Titre de section passé de "Photos publiques" à "Photos".
+
+### Améliorations
 - **Système de notifications** — infrastructure complète in-app (pas d'email pour l'instant) :
   - **Cloche 🔔** dans la barre de navigation (desktop) à gauche de "Mon espace", avec badge rouge pour les non-lus. Panel dropdown avec les 8 dernières notifications, bouton "Tout marquer lu", lien vers la page complète.
   - **`/membre/notifications`** — liste complète, tri par date, suppression unitaire ou globale, lien direct vers l'élément concerné, marquage lu au clic.

@@ -33,6 +33,8 @@ export interface PhotoExif {
   iso?: number;
   dateCapture?: string;
   gps?: PhotoGps;
+  largeur?: number;
+  hauteur?: number;
 }
 
 export interface Photo {

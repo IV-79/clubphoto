@@ -1,11 +1,11 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, effect, HostListener } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { combineLatest, switchMap, startWith } from 'rxjs';
 import { AuthService } from '../../../services/auth.service';
 import { PhotoService } from '../../../services/photo.service';
 import { ConfirmService } from '../../../services/confirm.service';
-import { Photo, PHOTO_CATEGORIES } from '../../../models/photo.model';
+import { Photo, PhotoCategorie, PHOTO_CATEGORIES } from '../../../models/photo.model';
 import { UserProfile } from '../../../models/user.model';
 import { LightboxPhoto, PhotoLightboxCallbacks } from '../../../models/commentaire.model';
 import { PhotoLightbox } from '../../../components/photo-lightbox/photo-lightbox';
@@ -45,7 +45,79 @@ export class MembreDetail {
     { initialValue: [] as Photo[] }
   );
 
+  // Filters
+  filterCategorie = signal<PhotoCategorie | null>(null);
+  filterAppareils = signal<string[]>([]);
+  filterObjectifs = signal<string[]>([]);
+  openDropdown    = signal<'appareil' | 'objectif' | null>(null);
+
+  availableCategories = computed(() => {
+    const cats = [...new Set(this.photos().map(p => p.categorie).filter((c): c is PhotoCategorie => !!c))];
+    return cats.length >= 2 ? cats : [];
+  });
+
+  availableAppareils = computed(() => {
+    const apps = [...new Set(this.photos().map(p => p.exif?.appareil).filter((a): a is string => !!a))];
+    return apps.length >= 2 ? apps : [];
+  });
+
+  availableObjectifs = computed(() => {
+    const objs = [...new Set(this.photos().map(p => p.exif?.objectif).filter((o): o is string => !!o))];
+    return objs.length >= 2 ? objs : [];
+  });
+
+  hasFilters = computed(() =>
+    this.availableCategories().length > 0 ||
+    this.availableAppareils().length > 0 ||
+    this.availableObjectifs().length > 0
+  );
+
+  filteredPhotos = computed(() => {
+    let photos = this.photos();
+    const cat = this.filterCategorie();
+    if (cat) photos = photos.filter(p => p.categorie === cat);
+    const apps = this.filterAppareils();
+    if (apps.length) photos = photos.filter(p => apps.includes(p.exif?.appareil ?? ''));
+    const objs = this.filterObjectifs();
+    if (objs.length) photos = photos.filter(p => objs.includes(p.exif?.objectif ?? ''));
+    return photos;
+  });
+
+  toggleAppareil(val: string) {
+    this.filterAppareils.update(arr => arr.includes(val) ? arr.filter(a => a !== val) : [...arr, val]);
+  }
+
+  toggleObjectif(val: string) {
+    this.filterObjectifs.update(arr => arr.includes(val) ? arr.filter(o => o !== val) : [...arr, val]);
+  }
+
+  clearFilters() {
+    this.filterCategorie.set(null);
+    this.filterAppareils.set([]);
+    this.filterObjectifs.set([]);
+  }
+
+  @HostListener('document:click')
+  closeDropdown() { this.openDropdown.set(null); }
+
   lightboxIndex = signal<number | null>(null);
+
+  private queryParams        = toSignal(this.route.queryParamMap);
+  private lightboxAutoOpened = signal(false);
+
+  constructor() {
+    effect(() => {
+      const target = this.queryParams()?.get('photo');
+      if (!target || this.lightboxAutoOpened()) return;
+      const photos = this.filteredPhotos();
+      if (photos.length === 0) return;
+      const idx = photos.findIndex(p => p.id === target);
+      if (idx >= 0) {
+        this.lightboxIndex.set(idx);
+        this.lightboxAutoOpened.set(true);
+      }
+    });
+  }
 
   nomComplet(): string {
     const m = this.membre();
@@ -59,7 +131,7 @@ export class MembreDetail {
     return ((m.prenom?.[0] ?? '') + (m.nom?.[0] ?? '')).toUpperCase() || '?';
   }
 
-  getCategorieLabel(val?: Photo['categorie']): string {
+  getCategorieLabel(val?: PhotoCategorie): string {
     return val ? (this.categoriesMap.get(val) ?? val) : '';
   }
 
@@ -70,7 +142,7 @@ export class MembreDetail {
   });
 
   lightboxPhotos = computed((): LightboxPhoto[] =>
-    this.photos().map(p => ({
+    this.filteredPhotos().map(p => ({
       id: p.id,
       url: p.url,
       titre: p.titre,
@@ -84,21 +156,30 @@ export class MembreDetail {
 
   lightboxCallbacks = computed((): PhotoLightboxCallbacks => {
     const uid      = this.profile()?.uid ?? '';
-    const lien     = `/galeries/membres/${this.membre()?.uid ?? ''}`;
     const ownerUid = this.membre()?.uid ?? '';
     const ownerSubs = this.membre()?.subscriptions;
     return {
-      toggleLike: (photoId, liked) =>
-        this.photoService.toggleLikePhoto(photoId, uid, liked, uid ? {
-          ownerUid, likerNom: `${this.profile()?.prenom ?? ''} ${this.profile()?.nom ?? ''}`.trim(),
-          lien, ownerSubscriptions: ownerSubs,
-        } : undefined),
+      toggleLike: (photoId, liked) => {
+        const photo = this.photos().find(p => p.id === photoId);
+        return this.photoService.toggleLikePhoto(photoId, uid, liked, uid ? {
+          ownerUid,
+          likerNom: `${this.profile()?.prenom ?? ''} ${this.profile()?.nom ?? ''}`.trim(),
+          lien: `/galeries/membres/${ownerUid}?photo=${photoId}`,
+          photoTitre: photo?.titre,
+          ownerSubscriptions: ownerSubs,
+        } : undefined);
+      },
       getComments: (photoId) =>
         this.photoService.getCommentaires(photoId),
-      addComment: (photoId, texte, auteurUid, nomAuteur) =>
-        this.photoService.addCommentaire(photoId, { texte, auteurUid, nomAuteur }, uid ? {
-          ownerUid, lien, ownerSubscriptions: ownerSubs,
-        } : undefined),
+      addComment: (photoId, texte, auteurUid, nomAuteur) => {
+        const photo = this.photos().find(p => p.id === photoId);
+        return this.photoService.addCommentaire(photoId, { texte, auteurUid, nomAuteur }, uid ? {
+          ownerUid,
+          lien: `/galeries/membres/${ownerUid}?photo=${photoId}`,
+          photoTitre: photo?.titre,
+          ownerSubscriptions: ownerSubs,
+        } : undefined);
+      },
       deleteComment: (photoId, commentId) =>
         this.photoService.deleteCommentaire(photoId, commentId),
       toggleCommentLike: (photoId, commentId, cUid, liked) =>

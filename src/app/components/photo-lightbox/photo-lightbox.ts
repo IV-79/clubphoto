@@ -24,6 +24,7 @@ export class PhotoLightbox implements OnInit, OnDestroy {
   canInteract = input<boolean>(false);
   isAdmin     = input<boolean>(false);
   anonyme     = input<boolean>(false);
+  hideLikes   = input<boolean>(false);
   callbacks   = input.required<PhotoLightboxCallbacks>();
 
   closed = output<void>();
@@ -225,8 +226,14 @@ export class PhotoLightbox implements OnInit, OnDestroy {
   hasExifData = computed((): boolean => {
     const exif = this.currentPhoto()?.exif;
     if (!exif) return false;
-    return !!(exif.appareil || exif.objectif || exif.focale || exif.ouverture || exif.vitesse || exif.iso || exif.dateCapture || exif.gps);
+    return !!(exif.appareil || exif.objectif || exif.focale || exif.ouverture || exif.vitesse || exif.iso || exif.dateCapture || exif.gps || exif.largeur);
   });
+
+  formatDefinition(largeur: number, hauteur: number): string {
+    const mpx = (largeur * hauteur / 1_000_000);
+    const mpxStr = mpx >= 1 ? ` · ${mpx % 1 === 0 ? mpx : mpx.toFixed(1)} Mpx` : '';
+    return `${largeur.toLocaleString('fr-FR')} × ${hauteur.toLocaleString('fr-FR')} px${mpxStr}`;
+  }
 
   gpsMapUrl(): string {
     const gps = this.currentPhoto()?.exif?.gps;
