@@ -13,10 +13,10 @@ import { Header } from '../../components/header/header';
   `,
   styles: [`
     .member-content {
-      min-height: calc(100vh - 120px);
+      min-height: calc(100vh - 122px);
       background: #fff;
+      padding-top: 122px;
     }
-    @media (max-width: 768px) { .member-content { padding-top: 120px; } }
   `]
 })
 export class MemberLayout {}

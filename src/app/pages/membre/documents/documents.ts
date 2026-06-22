@@ -105,15 +105,28 @@ import { ClubDocument, getExtensionMeta, extractExtension } from '../../../model
         }
       </div>
       <div class="filter-bar">
-        <button class="chip" [class.active]="showMine()" (click)="showMine.set(!showMine())">
-          <mat-icon class="chip-icon">person</mat-icon>
-          Mes documents
-        </button>
-        <button class="sort-btn" (click)="sortDir.set(sortDir() === 'desc' ? 'asc' : 'desc')"
-          [matTooltip]="sortDir() === 'desc' ? 'Plus récent en premier' : 'Plus ancien en premier'">
-          <mat-icon>{{ sortDir() === 'desc' ? 'arrow_downward' : 'arrow_upward' }}</mat-icon>
-          Date {{ sortDir() === 'desc' ? '↓' : '↑' }}
-        </button>
+        <div class="search-wrap">
+          <mat-icon class="search-icon">search</mat-icon>
+          <input class="search-input" type="text" placeholder="Rechercher par nom…"
+            [value]="searchText()"
+            (input)="searchText.set($any($event.target).value)" />
+          @if (searchText()) {
+            <button class="search-clear" (click)="searchText.set('')" aria-label="Effacer">
+              <mat-icon>close</mat-icon>
+            </button>
+          }
+        </div>
+        <div class="filter-right">
+          <button class="chip" [class.active]="showMine()" (click)="showMine.set(!showMine())">
+            <mat-icon class="chip-icon">person</mat-icon>
+            Mes documents
+          </button>
+          <button class="sort-btn" (click)="sortDir.set(sortDir() === 'desc' ? 'asc' : 'desc')"
+            [matTooltip]="sortDir() === 'desc' ? 'Plus récent en premier' : 'Plus ancien en premier'">
+            <mat-icon>{{ sortDir() === 'desc' ? 'arrow_downward' : 'arrow_upward' }}</mat-icon>
+            Date {{ sortDir() === 'desc' ? '↓' : '↑' }}
+          </button>
+        </div>
       </div>
 
       <!-- Liste documents -->
@@ -250,7 +263,28 @@ import { ClubDocument, getExtensionMeta, extractExtension } from '../../../model
 
     /* Folder chips */
     .folder-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
-    .filter-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .filter-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+    .search-wrap {
+      flex: 1; min-width: 160px; max-width: 320px;
+      display: flex; align-items: center; gap: 6px;
+      border: 1px solid #ddd; border-radius: 20px;
+      padding: 5px 10px 5px 12px; background: #fff;
+      transition: border-color .15s;
+    }
+    .search-wrap:focus-within { border-color: #1976d2; }
+    .search-icon { font-size: 18px; width: 18px; height: 18px; color: #aaa; flex-shrink: 0; }
+    .search-input {
+      flex: 1; border: none; outline: none; font-size: .85rem;
+      color: #333; background: transparent; min-width: 0;
+    }
+    .search-clear {
+      display: flex; align-items: center; justify-content: center;
+      background: none; border: none; cursor: pointer; padding: 0;
+      color: #aaa; line-height: 1;
+    }
+    .search-clear mat-icon { font-size: 16px; width: 16px; height: 16px; }
+    .search-clear:hover { color: #555; }
+    .filter-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
     .chip {
       display: flex; align-items: center; gap: 4px;
       padding: 6px 14px; border-radius: 20px; border: 1px solid #ddd;
@@ -335,6 +369,7 @@ export class Documents {
   selectedDossier = signal<string | null>(null);
   showMine        = signal(false);
   sortDir         = signal<'asc' | 'desc'>('desc');
+  searchText      = signal('');
   showUploadForm  = signal(false);
   expandedDocId   = signal<string | null>(null);
 
@@ -364,10 +399,12 @@ export class Documents {
     const mine    = this.showMine();
     const dir     = this.sortDir();
     const uid     = this.currentUid();
+    const search  = this.searchText().toLowerCase().trim();
 
     let docs = this.documents();
     if (dossier) docs = docs.filter(d => d.dossier === dossier);
     if (mine)    docs = docs.filter(d => d.uploadeurUid === uid);
+    if (search)  docs = docs.filter(d => d.nom.toLowerCase().includes(search));
 
     const sign = dir === 'asc' ? 1 : -1;
     return [...docs].sort((a, b) =>
