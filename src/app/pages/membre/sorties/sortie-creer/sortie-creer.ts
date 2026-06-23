@@ -6,17 +6,19 @@ import { MatInputModule } from '@angular/material/input';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatButtonModule } from '@angular/material/button';
+import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { SortieService } from '../../../../services/sortie.service';
 import { AuthService } from '../../../../services/auth.service';
+import { SortieType, SORTIE_TYPE_META } from '../../../../models/sortie.model';
 
 @Component({
   selector: 'app-sortie-creer',
   imports: [
     RouterLink, ReactiveFormsModule,
     MatFormFieldModule, MatInputModule, MatCheckboxModule,
-    MatDatepickerModule, MatButtonModule, MatIconModule,
+    MatDatepickerModule, MatButtonModule, MatSelectModule, MatIconModule,
   ],
   templateUrl: './sortie-creer.html',
   styleUrl: './sortie-creer.css',
@@ -29,8 +31,10 @@ export class SortieCreer {
   profile = toSignal(this.authService.currentUserProfile$);
   saving = signal(false);
   minDate = new Date();
+  readonly typesMeta = SORTIE_TYPE_META;
 
   form = new FormGroup({
+    type:                  new FormControl<SortieType>('sortie_photo', { nonNullable: true }),
     titre:                 new FormControl('', { validators: [Validators.required, Validators.minLength(3)], nonNullable: true }),
     description:           new FormControl('', { nonNullable: true }),
     date:                  new FormControl<Date | null>(null, [Validators.required]),
@@ -62,9 +66,11 @@ export class SortieCreer {
 
       const nomOrganisateur = `${profile.prenom ?? ''} ${profile.nom}`.trim();
       const id = await this.sortieService.createSortie({
+        type: v.type,
         titre: v.titre.trim(),
         date: `${yyyy}-${mm}-${dd}`,
         lieu: v.lieu.trim(),
+        nbInscrits: 0,
         inscriptionObligatoire,
         uploadParticipantsOnly,
         organisateurUid: profile.uid,

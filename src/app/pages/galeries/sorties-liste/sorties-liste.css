@@ -122,13 +122,20 @@
 
 .sortie-titre-row {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
-  margin-bottom: 0.6rem;
+  margin-bottom: 0.5rem;
 }
 
-.sortie-titre-row .sortie-titre { margin-bottom: 0; }
+.type-badge {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  color: #c0392b;
+  white-space: nowrap;
+}
+.type-badge-dim { color: #666; }
 
 .status-avenir { background: #1a6b3a; color: #5dba82; }
 .status-passee { background: #333; color: #999; }

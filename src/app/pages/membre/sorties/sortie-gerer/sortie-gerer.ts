@@ -8,18 +8,19 @@ import { MatInputModule } from '@angular/material/input';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatButtonModule } from '@angular/material/button';
+import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { SortieService } from '../../../../services/sortie.service';
 import { AuthService } from '../../../../services/auth.service';
 import { ConfirmService } from '../../../../services/confirm.service';
-import { Sortie } from '../../../../models/sortie.model';
+import { Sortie, SortieType } from '../../../../models/sortie.model';
 
 @Component({
   selector: 'app-sortie-gerer',
   imports: [
     RouterLink, ReactiveFormsModule,
     MatFormFieldModule, MatInputModule, MatCheckboxModule,
-    MatDatepickerModule, MatButtonModule, MatIconModule,
+    MatDatepickerModule, MatButtonModule, MatSelectModule, MatIconModule,
   ],
   templateUrl: './sortie-gerer.html',
   styleUrl: './sortie-gerer.css',
@@ -47,6 +48,7 @@ export class SortieGerer {
   editMode = signal(false);
 
   form = new FormGroup({
+    type:                   new FormControl<SortieType>('sortie_photo', { nonNullable: true }),
     titre:                  new FormControl('', { validators: [Validators.required, Validators.minLength(3)], nonNullable: true }),
     description:            new FormControl('', { nonNullable: true }),
     date:                   new FormControl<Date | null>(null, [Validators.required]),
@@ -64,6 +66,7 @@ export class SortieGerer {
     const s = this.sortie();
     if (!s) return;
     this.form.reset({
+      type: s.type ?? 'sortie_photo',
       titre: s.titre,
       description: s.description ?? '',
       date: s.date ? new Date(s.date + 'T12:00:00') : null,
@@ -89,7 +92,9 @@ export class SortieGerer {
       const mm = String(date.getMonth() + 1).padStart(2, '0');
       const dd = String(date.getDate()).padStart(2, '0');
       const inscriptionObligatoire = v.inscriptionObligatoire;
+      const s = this.sortie()!;
       await this.sortieService.updateSortie(this.sortieId, {
+        type: v.type,
         titre: v.titre.trim(),
         description: v.description.trim() || undefined,
         date: `${yyyy}-${mm}-${dd}`,
@@ -97,6 +102,11 @@ export class SortieGerer {
         maxParticipants: v.maxParticipants ?? undefined,
         inscriptionObligatoire,
         uploadParticipantsOnly: inscriptionObligatoire ? v.uploadParticipantsOnly : false,
+      }, {
+        oldDate: s.date,
+        titre: s.titre,
+        nomOrganisateur: s.nomOrganisateur,
+        organisateurUid: s.organisateurUid,
       });
       this.editMode.set(false);
     } finally {

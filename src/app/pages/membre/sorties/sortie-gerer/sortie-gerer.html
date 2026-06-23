@@ -18,6 +18,7 @@
         <button class="btn-edit" (click)="startEdit()">Modifier</button>
       </div>
       <dl class="details-list">
+        <dt>Type</dt><dd>{{ sortie()!.type === 'atelier' ? '🎨 Atelier' : sortie()!.type === 'repas' ? '🍽️ Repas' : '📸 Sortie Photo' }}</dd>
         <dt>Date</dt><dd>{{ formatDate(sortie()!.date) }}</dd>
         @if (sortie()!.lieu) {
           <dt>Lieu</dt><dd>{{ sortie()!.lieu }}</dd>
@@ -38,6 +39,15 @@
     <section class="section card-section">
       <h2>Modifier les détails</h2>
       <form [formGroup]="form" (ngSubmit)="saveEdit()" class="sortie-form">
+
+        <mat-form-field appearance="outline" class="field-half">
+          <mat-label>Type</mat-label>
+          <mat-select formControlName="type">
+            <mat-option value="sortie_photo">📸 Sortie Photo</mat-option>
+            <mat-option value="atelier">🎨 Atelier</mat-option>
+            <mat-option value="repas">🍽️ Repas</mat-option>
+          </mat-select>
+        </mat-form-field>
 
         <mat-form-field appearance="outline" class="field-full">
           <mat-label>Titre *</mat-label>

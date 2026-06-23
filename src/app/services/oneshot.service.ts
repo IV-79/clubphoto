@@ -68,10 +68,23 @@ export class OneShotService {
     ) as Observable<OneShot[]>;
   }
 
-  async updateDate(id: string, date: string): Promise<void> {
+  async updateDate(
+    id: string,
+    date: string,
+    notifCtx?: { oldDate: string; titre: string; nomCreateur: string; creatorUid: string }
+  ): Promise<void> {
     await runInInjectionContext(this.injector, () =>
       updateDoc(doc(this.firestore, 'oneshots', id), { date })
     );
+    if (notifCtx && date && date !== notifCtx.oldDate) {
+      const dateStr = new Date(date + 'T00:00:00').toLocaleDateString('fr-FR', {
+        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+      });
+      this.notifService.broadcast('oneshot',
+        `La date du OneShot « ${notifCtx.titre} » a changé : ${dateStr}`,
+        { lien: `/galeries/oneshots/${id}`, sourceNom: notifCtx.nomCreateur, excludeUid: notifCtx.creatorUid }
+      ).catch(() => {});
+    }
   }
 
   async updateStatut(

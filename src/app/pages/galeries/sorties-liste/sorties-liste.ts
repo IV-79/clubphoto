@@ -5,7 +5,7 @@ import { switchMap, of } from 'rxjs';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { SortieService } from '../../../services/sortie.service';
 import { AuthService } from '../../../services/auth.service';
-import { Sortie } from '../../../models/sortie.model';
+import { Sortie, SORTIE_TYPE_META, SortieType } from '../../../models/sortie.model';
 
 @Component({
   selector: 'app-sorties-liste',
@@ -49,5 +49,13 @@ export class SortiesListe {
 
   mapsUrl(lieu: string): string {
     return `https://maps.google.com/?q=${encodeURIComponent(lieu)}`;
+  }
+
+  typeLabel(type: SortieType | undefined): string {
+    return type ? SORTIE_TYPE_META[type].label : 'Sortie Photo';
+  }
+
+  typeEmoji(type: SortieType | undefined): string {
+    return type ? SORTIE_TYPE_META[type].emoji : '📸';
   }
 }

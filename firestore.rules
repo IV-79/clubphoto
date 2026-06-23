@@ -140,13 +140,17 @@ service cloud.firestore {
       allow create, update: if isLoggedIn() && request.resource.data.voterUid == request.auth.uid;
     }
 
-    // Sorties Photo (lecture publique, création membres connectés)
+    // Événements (ex-Sorties Photo) – lecture publique, création membres connectés
     match /sorties/{sortieId} {
       allow read: if true;
       allow create: if isLoggedIn();
+      // Organisateur ou admin : mise à jour complète
       allow update: if isLoggedIn() && (
         resource.data.organisateurUid == request.auth.uid || isAdmin()
       );
+      // Tout membre connecté peut incrémenter/décrémenter nbInscrits (inscription/désinscription)
+      allow update: if isLoggedIn() &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nbInscrits']);
       allow delete: if isLoggedIn() && (
         resource.data.organisateurUid == request.auth.uid || isAdmin()
       );

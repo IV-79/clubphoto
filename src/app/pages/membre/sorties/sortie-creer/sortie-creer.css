@@ -28,6 +28,17 @@
   min-width: 0;
 }
 
+.field-label {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: rgba(0,0,0,0.6);
+  margin-bottom: 6px;
+}
+
+.type-toggle {
+  margin-bottom: 12px;
+}
+
 .checkboxes {
   display: flex;
   flex-direction: column;

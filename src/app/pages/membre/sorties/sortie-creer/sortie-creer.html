@@ -1,9 +1,19 @@
 <div class="creer-page">
   <div class="page-header">
-    <h1>Organiser une sortie photo</h1>
+    <h1>Organiser un événement</h1>
   </div>
 
   <form [formGroup]="form" (ngSubmit)="submit()" class="sortie-form">
+
+    <!-- Type -->
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Type d'événement *</mat-label>
+      <mat-select formControlName="type">
+        <mat-option value="sortie_photo">📸 Sortie Photo</mat-option>
+        <mat-option value="atelier">🎨 Atelier</mat-option>
+        <mat-option value="repas">🍽️ Repas</mat-option>
+      </mat-select>
+    </mat-form-field>
 
     <mat-form-field appearance="outline" class="field-full">
       <mat-label>Titre *</mat-label>
@@ -13,7 +23,7 @@
     <mat-form-field appearance="outline" class="field-full">
       <mat-label>Description</mat-label>
       <textarea matInput formControlName="description" rows="3"
-        placeholder="Décrivez la sortie, le thème, les objectifs..."></textarea>
+        placeholder="Décrivez l'événement, le thème, les objectifs..."></textarea>
     </mat-form-field>
 
     <div class="form-row">
@@ -53,7 +63,7 @@
     <div class="form-actions">
       <a routerLink="/galeries/sorties" class="btn-cancel">Annuler</a>
       <button type="submit" class="btn-submit" [disabled]="form.invalid || saving()">
-        {{ saving() ? 'Création…' : 'Créer la sortie' }}
+        {{ saving() ? 'Création…' : 'Créer l\'événement' }}
       </button>
     </div>
 

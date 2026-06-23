@@ -3,7 +3,7 @@ import { NotificationService } from './notification.service';
 import {
   Firestore, collection, collectionData, doc, docData,
   addDoc, updateDoc, deleteDoc, setDoc, getDocs, getDoc,
-  query, where, orderBy, arrayUnion, arrayRemove
+  query, where, orderBy, arrayUnion, arrayRemove, increment
 } from '@angular/fire/firestore';
 import { Storage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from '@angular/fire/storage';
 import { Observable } from 'rxjs';
@@ -55,20 +55,39 @@ export class SortieService {
     const docRef = await runInInjectionContext(this.injector, () =>
       addDoc(collection(this.firestore, 'sorties'), {
         ...data,
+        nbInscrits: data.nbInscrits ?? 0,
         dateCreation: new Date().toISOString(),
       })
     );
+    const { getSortieTypeLabel } = await import('../models/sortie.model');
+    const typeLabel = getSortieTypeLabel(data.type);
     this.notifService.broadcast('sortie',
-      `${data.nomOrganisateur} a organisé une nouvelle sortie photo : « ${data.titre} »`,
+      `${data.nomOrganisateur} a organisé un nouvel événement « ${data.titre} » (${typeLabel})`,
       { lien: `/galeries/sorties/${docRef.id}`, sourceNom: data.nomOrganisateur, excludeUid: data.organisateurUid }
     ).catch(() => {});
     return docRef.id;
   }
 
-  async updateSortie(id: string, data: Partial<Omit<Sortie, 'id' | 'dateCreation' | 'organisateurUid' | 'nomOrganisateur'>>): Promise<void> {
-    await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, 'sorties', id), { ...data })
+  async updateSortie(
+    id: string,
+    data: Partial<Omit<Sortie, 'id' | 'dateCreation' | 'organisateurUid' | 'nomOrganisateur'>>,
+    notifCtx?: { oldDate: string; titre: string; nomOrganisateur: string; organisateurUid: string }
+  ): Promise<void> {
+    const clean = Object.fromEntries(
+      Object.entries(data as Record<string, unknown>).filter(([, v]) => v !== undefined)
     );
+    await runInInjectionContext(this.injector, () =>
+      updateDoc(doc(this.firestore, 'sorties', id), clean)
+    );
+    if (notifCtx && data.date && data.date !== notifCtx.oldDate) {
+      const dateStr = new Date(data.date + 'T00:00:00').toLocaleDateString('fr-FR', {
+        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+      });
+      this.notifService.broadcast('sortie',
+        `La date de l'événement « ${notifCtx.titre} » a changé : ${dateStr}`,
+        { lien: `/galeries/sorties/${id}`, sourceNom: notifCtx.nomOrganisateur, excludeUid: notifCtx.organisateurUid }
+      ).catch(() => {});
+    }
   }
 
   async deleteSortie(sortieId: string): Promise<void> {
@@ -96,15 +115,21 @@ export class SortieService {
 
   async inscrire(sortieId: string, uid: string, nomMembre: string): Promise<void> {
     await runInInjectionContext(this.injector, () =>
-      setDoc(doc(this.firestore, `sorties/${sortieId}/inscriptions`, uid), {
-        uid, nomMembre, dateInscription: new Date().toISOString(),
-      })
+      Promise.all([
+        setDoc(doc(this.firestore, `sorties/${sortieId}/inscriptions`, uid), {
+          uid, nomMembre, dateInscription: new Date().toISOString(),
+        }),
+        updateDoc(doc(this.firestore, 'sorties', sortieId), { nbInscrits: increment(1) }),
+      ])
     );
   }
 
   async desinscrire(sortieId: string, uid: string): Promise<void> {
     await runInInjectionContext(this.injector, () =>
-      deleteDoc(doc(this.firestore, `sorties/${sortieId}/inscriptions`, uid))
+      Promise.all([
+        deleteDoc(doc(this.firestore, `sorties/${sortieId}/inscriptions`, uid)),
+        updateDoc(doc(this.firestore, 'sorties', sortieId), { nbInscrits: increment(-1) }),
+      ])
     );
   }
 

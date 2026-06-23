@@ -77,7 +77,13 @@ export class OneShotGerer implements OnInit {
   async saveDate() {
     if (this.savingDate()) return;
     this.savingDate.set(true);
-    await this.oneShotService.updateDate(this.id, this.dateValue);
+    const ev = this.event();
+    await this.oneShotService.updateDate(this.id, this.dateValue, ev ? {
+      oldDate: ev.date ?? '',
+      titre: ev.titre,
+      nomCreateur: ev.nomCreateur,
+      creatorUid: ev.creatorUid,
+    } : undefined);
     this.savingDate.set(false);
   }
 

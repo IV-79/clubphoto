@@ -97,6 +97,8 @@ dd { color: rgba(0,0,0,0.72); font-size: 0.9rem; margin: 0; }
 .form-row { display: flex; gap: 1rem; }
 .field-half { flex: 1; min-width: 0; }
 
+.field-label { font-size: 0.78rem; font-weight: 500; color: rgba(0,0,0,0.6); margin-bottom: 6px; }
+.type-toggle { margin-bottom: 12px; }
 .checkboxes { display: flex; flex-direction: column; gap: 0.75rem; padding: 0.5rem 0; }
 .sub-checkbox { margin-left: 1.5rem; }
 

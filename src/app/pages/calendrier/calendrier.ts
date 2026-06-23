@@ -10,7 +10,7 @@ import { AuthService } from '../../services/auth.service';
 import { LoginModalService } from '../../services/login-modal.service';
 import { Reunion, REUNION_TYPES } from '../../models/reunion.model';
 import { OneShot, ONESHOT_STATUT_LABELS } from '../../models/oneshot.model';
-import { Sortie } from '../../models/sortie.model';
+import { Sortie, SORTIE_TYPE_META, SortieType } from '../../models/sortie.model';
 
 const INIT = 3;
 const PAGE = 5;
@@ -199,6 +199,12 @@ export class Calendrier {
 
   mapsUrl(lieu: string): string {
     return `https://www.google.com/maps/search/?q=${encodeURIComponent(lieu)}`;
+  }
+
+  sortieTypeBadge(type: SortieType | undefined): string {
+    if (!type || !SORTIE_TYPE_META[type]) return 'Événement';
+    const m = SORTIE_TYPE_META[type];
+    return `${m.emoji} ${m.label}`;
   }
 
   openLogin() { this.loginModal.open(); }
