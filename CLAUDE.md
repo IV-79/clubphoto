@@ -65,19 +65,22 @@ All Firestore/Storage calls are wrapped in `runInInjectionContext` when called o
 ```
 users/           uid, nom, prenom, role (admin|membre), isSuspended,
                  storageUsed { portfolio, themes, oneshots },
-                 derniereConnexion, photoProfilUrl, photoBandeauUrl
+                 derniereConnexion, photoProfilUrl, photoBandeauUrl,
+                 visibilite ('public'|'membre'), photoCount
 
 photos/          uid, url, storagePath, fileSize, visibilite (public|membre),
                  categorie, exif, likes[]
   └ commentaires/  with embedded replies[] and likes[]
 
-themes/          titre, mois (YYYY-MM), dateOuverture, dateCloture,
-                 dateFinVote, maxPhotos, maxVotes
+themes/          titre, mois (YYYY-MM), joursVotation (default 15),
+                 maxPhotos, maxVotes
+                 — dates calculées à la volée via getThemeDates() dans theme.model.ts :
+                   ouverture=1er du mois, clôture=dernier jour, finVote=clôture+joursVotation
   ├ soumissions/   photo submissions with exif, likes[]
   ├ commentaires/  with replies[] and likes[]
   └ votes/         one doc per member per theme
 
-oneshots/        titre, creatorUid,
+oneshots/        titre, creatorUid, nbInscrits, nbThemes,
                  statut: preparation|inscription|fermeture_inscriptions|vote|resultats
   ├ themes/        competition themes with ordre
   ├ inscriptions/  member registrations
@@ -103,7 +106,11 @@ config/          site-wide settings (admin only)
 - **Storage tracking** — `storageUsed.portfolio / .themes / .oneshots` on user doc, incremented atomically on upload and decremented on delete; `fileSize` stored on the photo doc
 - **Comments** — replies embedded inside the `commentaires` doc (no separate collection)
 - **Photo visibility** — two tiers: `public` (everyone) and `membre` (logged-in only)
+- **Profile visibility** — `visibilite: 'public'|'membre'` on user doc; `membres-galerie` filters out `membre` profiles for anonymous visitors; `membre-detail` blocks direct URL access; `photoCount` (int64) tracks number of portfolio photos and is required to appear in the gallery (`photoCount > 0`)
+- **Denormalized counts** — `photoCount` on user (updated by `PhotoService` ±1 on upload/delete), `nbInscrits` and `nbThemes` on oneshot doc (updated by `OneShotService` ±1 on inscription/theme add-remove); `recalculateStorage()` in `AuthService` resets all three
+- **Theme dates computed** — `getThemeDates(theme)` in `theme.model.ts` derives `dateOuverture / dateCloture / dateFinVote` from `mois` + `joursVotation`; no date fields stored in Firestore
 - **OneShot status machine** — explicit `statut` enum drives what UI actions are available
+- **Discriminated union listing** — `sorties-liste` merges `Sortie[]` and `OneShot[]` into `ActiviteItem = { kind: 'sortie'|'oneshot'; data: Sortie|OneShot }` for a unified events page; `asSortie()` / `asOneShot()` helpers cast for template type narrowing
 - **EXIF** — `exifr` extracts metadata on upload; GPS requires explicit user consent (`GpsConsentService`)
 - **Auth** — email/password + invitation via sign-in link; user Firestore doc auto-created on first login
 

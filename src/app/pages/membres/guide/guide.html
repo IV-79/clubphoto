@@ -2,7 +2,7 @@
 
   <header class="guide-hero">
     <h1>Guide du site</h1>
-    <p class="guide-intro">Comment utiliser le site, partager des documents et participer aux activités du club : Actualités, Calendrier, Documents, Thème du mois, Sortie Photo et OneShot.</p>
+    <p class="guide-intro">Comment utiliser le site, partager des documents et participer aux activités du club : Actualités, Calendrier, Documents, Thème du mois, Événement et OneShot.</p>
   </header>
 
   <!-- Navigation rapide -->
@@ -28,8 +28,8 @@
       Thème du mois
     </a>
     <a (click)="scrollTo('sortie')" class="guide-nav-link">
-      <span class="guide-nav-icon">🚶</span>
-      Sortie Photo
+      <span class="guide-nav-icon">📸</span>
+      Événement
     </a>
     <a (click)="scrollTo('oneshot')" class="guide-nav-link">
       <span class="guide-nav-icon">📷</span>
@@ -282,7 +282,7 @@
       </p>
       <ul class="guide-steps">
         <li><strong>Réunions</strong> — assemblées, conseils d'administration, séances de travail.</li>
-        <li><strong>Sorties Photo</strong> — sorties organisées par les membres.</li>
+        <li><strong>Événements</strong> — sorties photo, ateliers, repas organisés par les membres.</li>
         <li><strong>OneShots</strong> — événements photo compétitifs créés par les membres.</li>
       </ul>
       <p>
@@ -390,22 +390,14 @@
         </div>
         <div class="admin-field-row">
           <span class="field-label">Mois</span>
+          <span class="field-desc">Sélecteur mois/année. Les 3 dates sont calculées automatiquement à partir de ce champ.</span>
+        </div>
+        <div class="admin-field-row">
+          <span class="field-label">Jours de vote</span>
           <span class="field-desc">
-            Sélecteur mois/année. <strong>Remplit automatiquement les 3 dates</strong> dès la sélection
-            (voir ci-dessous) — ajustez ensuite si besoin.
+            Nombre de jours de votation après la clôture des soumissions. <strong>Défaut : 15 jours.</strong>
+            Les dates découlent de ce paramètre : ouverture = 1ᵉʳ du mois · clôture = dernier jour du mois · fin du vote = clôture + N jours.
           </span>
-        </div>
-        <div class="admin-field-row">
-          <span class="field-label">Ouverture soumissions</span>
-          <span class="field-desc">Auto : <strong>1ᵉʳ du mois sélectionné.</strong> À partir de cette date, les membres peuvent soumettre une photo.</span>
-        </div>
-        <div class="admin-field-row">
-          <span class="field-label">Clôture soumissions</span>
-          <span class="field-desc">Auto : <strong>dernier jour du mois sélectionné.</strong> Plus de soumissions après cette date ; le vote s'ouvre.</span>
-        </div>
-        <div class="admin-field-row">
-          <span class="field-label">Fin du vote</span>
-          <span class="field-desc">Auto : <strong>15 du mois suivant.</strong> Après cette date, les résultats sont publiés automatiquement.</span>
         </div>
         <div class="admin-field-row">
           <span class="field-label">Photos / membre</span>
@@ -441,7 +433,8 @@
 
       <p class="guide-note">
         Il n'y a pas de bouton « passer à l'étape suivante » — le statut est calculé en temps réel
-        à partir des dates. Pour corriger une erreur, supprimez le thème et recréez-le
+        à partir du mois et du nombre de jours de vote. Pour ajuster les jours de vote, éditez le thème
+        (possible jusqu'au début du vote). Pour changer le mois, supprimez et recréez
         (possible tant qu'aucune soumission n'existe).
       </p>
     </div>
@@ -518,46 +511,49 @@
   </section>
 
 
-  <!-- ── SORTIE PHOTO ───────────────────────────────── -->
+  <!-- ── ÉVÉNEMENT ────────────────────────────────────── -->
   <section class="guide-section" id="sortie">
     <div class="section-header">
-      <h2>Sortie Photo</h2>
-      <p class="section-subtitle">Une sortie organisée par un membre — chacun uploade ses propres photos et les partage avec le groupe.</p>
+      <h2>Événement</h2>
+      <p class="section-subtitle">Un événement organisé par un membre (sortie photo, atelier, repas…) — chacun uploade ses propres photos et les partage avec le groupe.</p>
     </div>
 
     <!-- Concept -->
     <div class="guide-card">
       <h3>Le principe</h3>
       <p>
-        Une Sortie Photo est un événement organisé par un membre du club pour se retrouver et photographier ensemble.
-        L'organisateur crée la sortie (date, lieu, description), les membres s'inscrivent, et chacun uploade
-        ses propres photos après la sortie. Les photos peuvent recevoir des ♥ et des commentaires.
+        Un Événement est organisé par un membre du club pour se retrouver. Trois types sont disponibles :
+        📸 <strong>Sortie Photo</strong> (photographier ensemble), 🎨 <strong>Atelier</strong> (apprentissage, retouche…),
+        🍽️ <strong>Repas</strong> (repas de club). L'organisateur crée l'événement (titre, type, date, lieu),
+        les membres s'inscrivent, et chacun uploade ses propres photos. Les photos peuvent recevoir des ♥ et des commentaires.
       </p>
       <p class="guide-note">
         Contrairement au OneShot, il n'y a pas de vote ni de compétition — c'est un espace de partage libre.
+        Les OneShots actifs et terminés apparaissent également dans cette liste.
       </p>
     </div>
 
     <!-- Créer -->
     <div class="guide-card">
-      <h3>Organiser une sortie</h3>
+      <h3>Organiser un événement</h3>
       <ol class="guide-steps">
-        <li>Allez sur <a routerLink="/galeries/sorties" class="inline-link">Activités → Sorties Photo</a>.</li>
-        <li>Cliquez <strong>+ Nouvelle sortie</strong>.</li>
+        <li>Allez sur <a routerLink="/galeries/sorties" class="inline-link">Activités → Événements</a>.</li>
+        <li>Cliquez <strong>+ Organiser un événement</strong>.</li>
+        <li>Choisissez le <strong>type</strong> : 📸 Sortie Photo, 🎨 Atelier ou 🍽️ Repas.</li>
         <li>Renseignez le titre, la date, le lieu et une description.</li>
-        <li>La sortie est immédiatement visible par tous les membres.</li>
-        <li>Les membres intéressés peuvent s'inscrire depuis la page de la sortie.</li>
+        <li>L'événement est immédiatement visible par tous les membres.</li>
+        <li>Les membres intéressés peuvent s'inscrire depuis la page de l'événement.</li>
       </ol>
     </div>
 
     <!-- Participer -->
     <div class="guide-card">
-      <h3>Participer à une sortie</h3>
+      <h3>Participer à un événement</h3>
       <ol class="guide-steps">
-        <li>Rendez-vous sur <a routerLink="/galeries/sorties" class="inline-link">Activités → Sorties Photo</a>.</li>
-        <li>Ouvrez une sortie à venir et cliquez <strong>Je participe</strong> pour vous inscrire.</li>
-        <li>Après la sortie, revenez sur la page et uploadez vos photos dans la zone prévue à cet effet.</li>
-        <li>La photo la plus likée devient automatiquement la couverture de la sortie.</li>
+        <li>Rendez-vous sur <a routerLink="/galeries/sorties" class="inline-link">Activités → Événements</a>.</li>
+        <li>Ouvrez un événement à venir et cliquez <strong>Je participe</strong> pour vous inscrire.</li>
+        <li>Après l'événement, revenez sur la page et uploadez vos photos dans la zone prévue à cet effet.</li>
+        <li>La photo la plus likée devient automatiquement la couverture de l'événement.</li>
       </ol>
     </div>
 
@@ -658,7 +654,7 @@
     <div class="guide-card">
       <h3>Participer à un OneShot</h3>
       <ol class="guide-steps">
-        <li>Rendez-vous sur <a routerLink="/galeries/oneshots" class="inline-link">Activités → OneShot</a>.</li>
+        <li>Rendez-vous sur <a routerLink="/galeries/sorties" class="inline-link">Activités → Événements</a> (les OneShots y sont listés) ou directement sur <a routerLink="/galeries/oneshots" class="inline-link">Activités → OneShots</a>.</li>
         <li>Ouvrez un événement dont le statut est <span class="badge-inline inscription">Inscriptions ouvertes</span>.</li>
         <li>Inscrivez-vous — l'organisateur pourra ensuite uploader vos photos.</li>
         <li>Pendant la phase <span class="badge-inline vote">Vote</span>, parcourez les photos et votez pour celles que vous préférez (sauf les vôtres).</li>
@@ -681,3 +677,5 @@
   </section>
 
 </div>
+
+<button class="scroll-top-btn" [class.visible]="showScrollTop()" (click)="scrollToTop()" aria-label="Retour en haut">↑</button>
