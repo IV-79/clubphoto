@@ -327,6 +327,16 @@ a.card-lieu:hover { color: #1565c0; text-decoration: underline; }
   color: rgba(0,0,0,0.35);
 }
 
+@keyframes form-flash {
+  0%   { box-shadow: none; transform: translateX(0); }
+  15%  { box-shadow: 0 0 0 2px #c62828; transform: translateX(-5px); }
+  35%  { box-shadow: 0 0 0 2px #c62828; transform: translateX(5px); }
+  55%  { box-shadow: 0 0 0 2px #c62828; transform: translateX(-3px); }
+  75%  { box-shadow: 0 0 0 2px #c62828; transform: translateX(2px); }
+  100% { box-shadow: none; transform: translateX(0); }
+}
+.form-flash { animation: form-flash 0.5s ease; border-radius: 6px; }
+
 @media (max-width: 600px) {
   .reunions-page { padding: 24px 16px 48px; }
   .form-row { flex-direction: column; }

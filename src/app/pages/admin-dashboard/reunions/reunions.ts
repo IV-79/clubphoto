@@ -40,6 +40,8 @@ export class Reunions {
   expandedId = signal<string | null>(null);
   editingId = signal<string | null>(null);
   saving = signal(false);
+  flashEdit = signal(false);
+  private flashTimer: ReturnType<typeof setTimeout> | null = null;
 
   private limitAVenir = signal(INIT);
   private limitPasses = signal(INIT);
@@ -92,7 +94,20 @@ export class Reunions {
 
   toggleExpand(id: string) {
     if (this.editingId() === id) return;
+    if (this.editingId() !== null) {
+      this.triggerFlash();
+      return;
+    }
     this.expandedId.set(this.expandedId() === id ? null : id);
+  }
+
+  private triggerFlash() {
+    if (this.flashTimer) clearTimeout(this.flashTimer);
+    this.flashEdit.set(false);
+    setTimeout(() => {
+      this.flashEdit.set(true);
+      this.flashTimer = setTimeout(() => this.flashEdit.set(false), 600);
+    }, 0);
   }
 
   startEdit(r: Reunion) {

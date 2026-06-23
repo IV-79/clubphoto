@@ -76,35 +76,37 @@
                 <div class="card-detail" (click)="$event.stopPropagation()">
                   @if (editingId() === r.id) {
                     <!-- Formulaire d'édition inline -->
-                    <form [formGroup]="editForm" (ngSubmit)="sauvegarder(r.id)" class="r-form">
-                      <div class="form-row">
-                        <mat-form-field appearance="outline" class="field-grow">
-                          <mat-label>Titre *</mat-label>
-                          <input matInput formControlName="titre" />
+                    <div [class.form-flash]="flashEdit()">
+                      <form [formGroup]="editForm" (ngSubmit)="sauvegarder(r.id)" class="r-form">
+                        <div class="form-row">
+                          <mat-form-field appearance="outline" class="field-grow">
+                            <mat-label>Titre *</mat-label>
+                            <input matInput formControlName="titre" />
+                          </mat-form-field>
+                          <mat-form-field appearance="outline" class="field-date">
+                            <mat-label>Date *</mat-label>
+                            <input matInput [matDatepicker]="editPickerA" formControlName="date" />
+                            <mat-datepicker-toggle matIconSuffix [for]="editPickerA"></mat-datepicker-toggle>
+                            <mat-datepicker #editPickerA></mat-datepicker>
+                          </mat-form-field>
+                        </div>
+                        <mat-form-field appearance="outline" class="field-full">
+                          <mat-label>Lieu</mat-label>
+                          <input matInput formControlName="lieu" />
                         </mat-form-field>
-                        <mat-form-field appearance="outline" class="field-date">
-                          <mat-label>Date *</mat-label>
-                          <input matInput [matDatepicker]="editPickerA" formControlName="date" />
-                          <mat-datepicker-toggle matIconSuffix [for]="editPickerA"></mat-datepicker-toggle>
-                          <mat-datepicker #editPickerA></mat-datepicker>
+                        <mat-form-field appearance="outline" class="field-full">
+                          <mat-label>Description</mat-label>
+                          <textarea matInput formControlName="description" rows="2"></textarea>
                         </mat-form-field>
-                      </div>
-                      <mat-form-field appearance="outline" class="field-full">
-                        <mat-label>Lieu</mat-label>
-                        <input matInput formControlName="lieu" />
-                      </mat-form-field>
-                      <mat-form-field appearance="outline" class="field-full">
-                        <mat-label>Description</mat-label>
-                        <textarea matInput formControlName="description" rows="2"></textarea>
-                      </mat-form-field>
-                      <div class="form-actions">
-                        <button type="button" class="btn-cancel" (click)="cancelEdit()">Annuler</button>
-                        <button type="button" class="btn-delete-sm" (click)="supprimer(r)">Supprimer</button>
-                        <button type="submit" class="btn-save" [disabled]="editForm.invalid || saving()">
-                          {{ saving() ? 'Sauvegarde…' : 'Sauvegarder' }}
-                        </button>
-                      </div>
-                    </form>
+                        <div class="form-actions">
+                          <button type="button" class="btn-cancel" (click)="cancelEdit()">Annuler</button>
+                          <button type="button" class="btn-delete-sm" (click)="supprimer(r)">Supprimer</button>
+                          <button type="submit" class="btn-save" [disabled]="editForm.invalid || saving()">
+                            {{ saving() ? 'Sauvegarde…' : 'Sauvegarder' }}
+                          </button>
+                        </div>
+                      </form>
+                    </div>
                   } @else {
                     @if (r.lieu) {
                       <a class="card-lieu" [href]="mapsUrl(r.lieu)" target="_blank" rel="noopener" (click)="$event.stopPropagation()">
@@ -154,35 +156,37 @@
               @if (expandedId() === r.id) {
                 <div class="card-detail" (click)="$event.stopPropagation()">
                   @if (editingId() === r.id) {
-                    <form [formGroup]="editForm" (ngSubmit)="sauvegarder(r.id)" class="r-form">
-                      <div class="form-row">
-                        <mat-form-field appearance="outline" class="field-grow">
-                          <mat-label>Titre *</mat-label>
-                          <input matInput formControlName="titre" />
+                    <div [class.form-flash]="flashEdit()">
+                      <form [formGroup]="editForm" (ngSubmit)="sauvegarder(r.id)" class="r-form">
+                        <div class="form-row">
+                          <mat-form-field appearance="outline" class="field-grow">
+                            <mat-label>Titre *</mat-label>
+                            <input matInput formControlName="titre" />
+                          </mat-form-field>
+                          <mat-form-field appearance="outline" class="field-date">
+                            <mat-label>Date *</mat-label>
+                            <input matInput [matDatepicker]="editPickerB" formControlName="date" />
+                            <mat-datepicker-toggle matIconSuffix [for]="editPickerB"></mat-datepicker-toggle>
+                            <mat-datepicker #editPickerB></mat-datepicker>
+                          </mat-form-field>
+                        </div>
+                        <mat-form-field appearance="outline" class="field-full">
+                          <mat-label>Lieu</mat-label>
+                          <input matInput formControlName="lieu" />
                         </mat-form-field>
-                        <mat-form-field appearance="outline" class="field-date">
-                          <mat-label>Date *</mat-label>
-                          <input matInput [matDatepicker]="editPickerB" formControlName="date" />
-                          <mat-datepicker-toggle matIconSuffix [for]="editPickerB"></mat-datepicker-toggle>
-                          <mat-datepicker #editPickerB></mat-datepicker>
+                        <mat-form-field appearance="outline" class="field-full">
+                          <mat-label>Description</mat-label>
+                          <textarea matInput formControlName="description" rows="2"></textarea>
                         </mat-form-field>
-                      </div>
-                      <mat-form-field appearance="outline" class="field-full">
-                        <mat-label>Lieu</mat-label>
-                        <input matInput formControlName="lieu" />
-                      </mat-form-field>
-                      <mat-form-field appearance="outline" class="field-full">
-                        <mat-label>Description</mat-label>
-                        <textarea matInput formControlName="description" rows="2"></textarea>
-                      </mat-form-field>
-                      <div class="form-actions">
-                        <button type="button" class="btn-cancel" (click)="cancelEdit()">Annuler</button>
-                        <button type="button" class="btn-delete-sm" (click)="supprimer(r)">Supprimer</button>
-                        <button type="submit" class="btn-save" [disabled]="editForm.invalid || saving()">
-                          {{ saving() ? 'Sauvegarde…' : 'Sauvegarder' }}
-                        </button>
-                      </div>
-                    </form>
+                        <div class="form-actions">
+                          <button type="button" class="btn-cancel" (click)="cancelEdit()">Annuler</button>
+                          <button type="button" class="btn-delete-sm" (click)="supprimer(r)">Supprimer</button>
+                          <button type="submit" class="btn-save" [disabled]="editForm.invalid || saving()">
+                            {{ saving() ? 'Sauvegarde…' : 'Sauvegarder' }}
+                          </button>
+                        </div>
+                      </form>
+                    </div>
                   } @else {
                     @if (r.lieu) {
                       <a class="card-lieu" [href]="mapsUrl(r.lieu)" target="_blank" rel="noopener" (click)="$event.stopPropagation()">
