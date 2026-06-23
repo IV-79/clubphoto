@@ -9,7 +9,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { ThemeService } from '../../../services/theme.service';
 import { AuthService } from '../../../services/auth.service';
 import { ConfirmService } from '../../../services/confirm.service';
-import { ThemeMensuel, computeThemeStatut, ThemeStatut, THEME_STATUT_LABELS } from '../../../models/theme.model';
+import {
+  ThemeMensuel, computeThemeStatut, getThemeDates, ThemeStatut, THEME_STATUT_LABELS,
+} from '../../../models/theme.model';
 
 const INIT = 8;
 const PAGE = 8;
@@ -84,19 +86,12 @@ export class AdminThemes {
   createForm = this.buildForm();
   editForm   = this.buildForm();
 
-  get createCloturePasse(): boolean {
-    const v = this.createForm.controls.dateCloture.value;
-    return !!v && v <= this.todayStr;
-  }
-
-  get editCloturePasse(): boolean {
-    const v = this.editForm.controls.dateCloture.value;
-    return !!v && v <= this.todayStr;
-  }
-
   openCreate() {
     this.editingId.set(null);
-    this.createForm.reset({ maxPhotos: 1, maxVotes: 3, moisYear: String(new Date().getFullYear()) });
+    this.createForm.reset({
+      maxPhotos: 1, maxVotes: 3, joursVotation: 15,
+      moisYear: String(new Date().getFullYear()),
+    });
     this.createError.set('');
     this.showCreateForm.set(true);
     this.expandedId.set(null);
@@ -105,12 +100,6 @@ export class AdminThemes {
   cancelCreate() {
     this.showCreateForm.set(false);
     this.createError.set('');
-  }
-
-  onCreateMoisChange() {
-    const mm   = this.createForm.controls.moisMonth.value;
-    const yyyy = this.createForm.controls.moisYear.value;
-    if (mm && yyyy) this.fillDates(this.createForm, yyyy, mm);
   }
 
   async creer() {
@@ -127,15 +116,13 @@ export class AdminThemes {
         titre:         v.titre.trim(),
         description:   v.description.trim(),
         mois,
-        dateOuverture: v.dateOuverture,
-        dateCloture:   v.dateCloture,
-        dateFinVote:   v.dateFinVote,
+        joursVotation: Number(v.joursVotation),
         maxPhotos:     Number(v.maxPhotos),
         maxVotes:      Number(v.maxVotes),
         createdBy:     this.profile()?.uid ?? '',
       });
       this.showCreateForm.set(false);
-      this.createForm.reset({ maxPhotos: 1, maxVotes: 3 });
+      this.createForm.reset({ maxPhotos: 1, maxVotes: 3, joursVotation: 15 });
       this.createError.set('');
     } finally {
       this.saving.set(false);
@@ -169,24 +156,16 @@ export class AdminThemes {
       description:   theme.description ?? '',
       moisMonth,
       moisYear,
-      dateOuverture: theme.dateOuverture,
-      dateCloture:   theme.dateCloture,
-      dateFinVote:   theme.dateFinVote,
+      joursVotation: (theme.joursVotation as number | undefined) ?? 15,
       maxPhotos:     theme.maxPhotos,
       maxVotes:      theme.maxVotes,
     });
     if (s === 'en_attente') {
       this.editForm.controls.moisMonth.enable();
       this.editForm.controls.moisYear.enable();
-      this.editForm.controls.dateOuverture.enable();
-      this.editForm.controls.dateCloture.enable();
-      this.editForm.controls.dateFinVote.enable();
     } else {
       this.editForm.controls.moisMonth.disable();
       this.editForm.controls.moisYear.disable();
-      this.editForm.controls.dateOuverture.disable();
-      this.editForm.controls.dateCloture.disable();
-      this.editForm.controls.dateFinVote.disable();
     }
     this.editStatut.set(s);
     this.editError.set('');
@@ -197,12 +176,6 @@ export class AdminThemes {
   cancelEdit() {
     this.editingId.set(null);
     this.editError.set('');
-  }
-
-  onEditMoisChange() {
-    const mm   = this.editForm.controls.moisMonth.value;
-    const yyyy = this.editForm.controls.moisYear.value;
-    if (mm && yyyy) this.fillDates(this.editForm, yyyy, mm);
   }
 
   async sauvegarder(id: string) {
@@ -219,9 +192,7 @@ export class AdminThemes {
         titre:         v.titre.trim(),
         description:   v.description.trim(),
         mois,
-        dateOuverture: v.dateOuverture,
-        dateCloture:   v.dateCloture,
-        dateFinVote:   v.dateFinVote,
+        joursVotation: Number(v.joursVotation),
         maxPhotos:     Number(v.maxPhotos),
         maxVotes:      Number(v.maxVotes),
       });
@@ -250,6 +221,8 @@ export class AdminThemes {
     return s === 'en_attente' || s === 'ouvert';
   }
 
+  dates(theme: ThemeMensuel) { return getThemeDates(theme); }
+
   formatMoisShort(mois: string): string {
     const [year, month] = mois.split('-');
     return new Date(+year, +month - 1).toLocaleDateString('fr-FR', { month: 'short' });
@@ -265,22 +238,9 @@ export class AdminThemes {
       description:   new FormControl('', { nonNullable: true }),
       moisMonth:     new FormControl('', { validators: [Validators.required], nonNullable: true }),
       moisYear:      new FormControl('', { validators: [Validators.required], nonNullable: true }),
-      dateOuverture: new FormControl('', { validators: [Validators.required], nonNullable: true }),
-      dateCloture:   new FormControl('', { validators: [Validators.required], nonNullable: true }),
-      dateFinVote:   new FormControl('', { validators: [Validators.required], nonNullable: true }),
-      maxPhotos:     new FormControl(1, { validators: [Validators.required, Validators.min(1)], nonNullable: true }),
-      maxVotes:      new FormControl(3, { validators: [Validators.required, Validators.min(1)], nonNullable: true }),
+      joursVotation: new FormControl(15, { validators: [Validators.required, Validators.min(1)], nonNullable: true }),
+      maxPhotos:     new FormControl(1,  { validators: [Validators.required, Validators.min(1)], nonNullable: true }),
+      maxVotes:      new FormControl(3,  { validators: [Validators.required, Validators.min(1)], nonNullable: true }),
     });
-  }
-
-  private fillDates(form: FormGroup, yyyy: string, mm: string) {
-    const year      = +yyyy;
-    const month     = +mm;
-    const lastDay   = new Date(year, month, 0).getDate();
-    const nextMonth = month === 12 ? 1 : month + 1;
-    const nextYear  = month === 12 ? year + 1 : year;
-    form.controls['dateOuverture'].setValue(`${yyyy}-${mm}-01`);
-    form.controls['dateCloture'].setValue(`${yyyy}-${mm}-${String(lastDay).padStart(2, '0')}`);
-    form.controls['dateFinVote'].setValue(`${String(nextYear)}-${String(nextMonth).padStart(2, '0')}-15`);
   }
 }

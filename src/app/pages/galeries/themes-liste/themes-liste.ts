@@ -3,7 +3,7 @@ import { RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ThemeService } from '../../../services/theme.service';
 import { AuthService } from '../../../services/auth.service';
-import { ThemeMensuel, computeThemeStatut } from '../../../models/theme.model';
+import { ThemeMensuel, computeThemeStatut, getThemeDates } from '../../../models/theme.model';
 
 @Component({
   selector: 'app-themes-liste',
@@ -46,6 +46,8 @@ export class ThemesListe {
   );
 
   loadMore() { this.closedShown.update(n => n + 3); }
+
+  dates(theme: ThemeMensuel) { return getThemeDates(theme); }
 
   formatMois(mois: string): string {
     const [year, month] = mois.split('-');

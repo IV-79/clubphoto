@@ -4,15 +4,42 @@ export interface ThemeMensuel {
   id: string;
   titre: string;
   description?: string;
-  mois: string;          // "2026-07"
-  dateOuverture: string; // "2026-07-01" (YYYY-MM-DD)
-  dateCloture: string;   // "2026-07-31"
-  dateFinVote: string;   // "2026-08-15"
+  mois: string;           // "2026-07"
+  joursVotation?: number; // jours après fin du mois avant clôture du vote (défaut 15)
   maxPhotos: number;
   maxVotes: number;
   dateCreation: string;
   createdBy: string;
 }
+
+export function getThemeDates(theme: ThemeMensuel): {
+  dateOuverture: string; dateCloture: string; dateFinVote: string;
+} {
+  const [year, month] = theme.mois.split('-').map(Number);
+  const lastDay    = new Date(year, month, 0).getDate();
+  const jours      = (theme.joursVotation as number | undefined) ?? 15;
+  const dateOuverture = `${theme.mois}-01`;
+  const dateCloture   = `${theme.mois}-${String(lastDay).padStart(2, '0')}`;
+  const fin = new Date(year, month - 1, lastDay + jours);
+  const dateFinVote = fin.toISOString().slice(0, 10);
+  return { dateOuverture, dateCloture, dateFinVote };
+}
+
+export function computeThemeStatut(theme: ThemeMensuel): ThemeStatut {
+  const now = new Date().toISOString().slice(0, 10);
+  const { dateOuverture, dateCloture, dateFinVote } = getThemeDates(theme);
+  if (now < dateOuverture) return 'en_attente';
+  if (now <= dateCloture)  return 'ouvert';
+  if (now <= dateFinVote)  return 'vote';
+  return 'resultats';
+}
+
+export const THEME_STATUT_LABELS: Record<ThemeStatut, string> = {
+  en_attente: 'À venir',
+  ouvert:     'Ouvert',
+  vote:       'Vote en cours',
+  resultats:  'Résultats',
+};
 
 import { PhotoExif } from './photo.model';
 
@@ -34,18 +61,3 @@ export interface ThemeVote {
   soumissionId: string;
   votedAt: string;
 }
-
-export function computeThemeStatut(theme: ThemeMensuel): ThemeStatut {
-  const now = new Date().toISOString().slice(0, 10);
-  if (now < theme.dateOuverture) return 'en_attente';
-  if (now <= theme.dateCloture) return 'ouvert';
-  if (now <= theme.dateFinVote) return 'vote';
-  return 'resultats';
-}
-
-export const THEME_STATUT_LABELS: Record<ThemeStatut, string> = {
-  en_attente: 'À venir',
-  ouvert:     'Ouvert',
-  vote:       'Vote en cours',
-  resultats:  'Résultats',
-};

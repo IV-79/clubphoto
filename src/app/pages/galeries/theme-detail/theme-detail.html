@@ -18,18 +18,19 @@
         <p class="theme-desc">{{ t.description }}</p>
       }
       <div class="theme-dates">
-        <span>Ouverture {{ formatDate(t.dateOuverture) }}</span>
+        @let d = dates(t);
+        <span>Ouverture {{ formatDate(d.dateOuverture) }}</span>
         <span class="date-sep">·</span>
-        <span>Clôture {{ formatDate(t.dateCloture) }}</span>
+        <span>Clôture {{ formatDate(d.dateCloture) }}</span>
         <span class="date-sep">·</span>
-        <span>Fin du vote {{ formatDate(t.dateFinVote) }}</span>
+        <span>Fin du vote {{ formatDate(d.dateFinVote) }}</span>
       </div>
     </div>
 
     <!-- ── EN ATTENTE ─────────────────────────────── -->
     @if (s === 'en_attente') {
       <div class="info-panel">
-        <p class="info-msg">Les soumissions ouvrent le <strong>{{ formatDate(t.dateOuverture) }}</strong>. Préparez vos photos !</p>
+        <p class="info-msg">Les soumissions ouvrent le <strong>{{ formatDate(dates(t).dateOuverture) }}</strong>. Préparez vos photos !</p>
         <div class="config-chips">
           <span class="chip">{{ t.maxPhotos }} photo{{ t.maxPhotos > 1 ? 's' : '' }} / membre</span>
           <span class="chip">{{ t.maxVotes }} vote{{ t.maxVotes > 1 ? 's' : '' }} / membre</span>
@@ -43,9 +44,9 @@
         <div class="phase-header">
           <h2 class="phase-title">Photos</h2>
           @if (isLoggedIn()) {
-            <span class="phase-meta">{{ soumissions().length }} photo{{ soumissions().length !== 1 ? 's' : '' }} · Clôture {{ formatDate(t.dateCloture) }}</span>
+            <span class="phase-meta">{{ soumissions().length }} photo{{ soumissions().length !== 1 ? 's' : '' }} · Clôture {{ formatDate(dates(t).dateCloture) }}</span>
           } @else {
-            <span class="phase-meta">Clôture {{ formatDate(t.dateCloture) }}</span>
+            <span class="phase-meta">Clôture {{ formatDate(dates(t).dateCloture) }}</span>
           }
         </div>
 
@@ -110,7 +111,7 @@
         <div class="phase-header">
           <h2 class="phase-title">Vote</h2>
           @if (isLoggedIn()) {
-            <span class="phase-meta">{{ mesVotes().length }} / {{ t.maxVotes }} vote{{ t.maxVotes > 1 ? 's' : '' }} · Fin {{ formatDate(t.dateFinVote) }}</span>
+            <span class="phase-meta">{{ mesVotes().length }} / {{ t.maxVotes }} vote{{ t.maxVotes > 1 ? 's' : '' }} · Fin {{ formatDate(dates(t).dateFinVote) }}</span>
           }
         </div>
 

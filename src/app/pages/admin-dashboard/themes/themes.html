@@ -23,7 +23,7 @@
         <div class="form-row">
           <mat-form-field appearance="outline" class="field-mois">
             <mat-label>Mois *</mat-label>
-            <mat-select formControlName="moisMonth" (selectionChange)="onCreateMoisChange()">
+            <mat-select formControlName="moisMonth">
               @for (m of moisOptions; track m.value) {
                 <mat-option [value]="m.value">{{ m.label }}</mat-option>
               }
@@ -31,11 +31,15 @@
           </mat-form-field>
           <mat-form-field appearance="outline" class="field-year">
             <mat-label>Année *</mat-label>
-            <mat-select formControlName="moisYear" (selectionChange)="onCreateMoisChange()">
+            <mat-select formControlName="moisYear">
               @for (y of yearOptions; track y) {
                 <mat-option [value]="y">{{ y }}</mat-option>
               }
             </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="field-num">
+            <mat-label>Jours de vote</mat-label>
+            <input matInput type="number" formControlName="joursVotation" min="1">
           </mat-form-field>
         </div>
         <mat-form-field appearance="outline" class="field-full">
@@ -43,23 +47,6 @@
           <textarea matInput formControlName="description" rows="2"
             placeholder="Consignes, inspiration, règles…"></textarea>
         </mat-form-field>
-        <div class="form-row">
-          <mat-form-field appearance="outline" class="field-date">
-            <mat-label>Ouverture soumissions</mat-label>
-            <input matInput type="date" formControlName="dateOuverture">
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="field-date">
-            <mat-label>Clôture soumissions</mat-label>
-            <input matInput type="date" formControlName="dateCloture">
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="field-date">
-            <mat-label>Fin du vote</mat-label>
-            <input matInput type="date" formControlName="dateFinVote">
-          </mat-form-field>
-        </div>
-        @if (createCloturePasse) {
-          <p class="warning-msg">⚠️ La date de clôture est dans le passé ou aujourd'hui.</p>
-        }
         <div class="form-row">
           <mat-form-field appearance="outline" class="field-num">
             <mat-label>Photos / membre</mat-label>
@@ -97,6 +84,7 @@
       <div class="events-list">
         @for (t of actifs(); track t.id; let i = $index) {
           @let s = statut(t);
+          @let d = dates(t);
           @if (i === 0 || t.mois.slice(0, 4) !== actifs()[i - 1].mois.slice(0, 4)) {
             <div class="month-sep">{{ t.mois.slice(0, 4) }}</div>
           }
@@ -123,7 +111,7 @@
                       <div class="form-row">
                         <mat-form-field appearance="outline" class="field-mois">
                           <mat-label>Mois</mat-label>
-                          <mat-select formControlName="moisMonth" (selectionChange)="onEditMoisChange()">
+                          <mat-select formControlName="moisMonth">
                             @for (m of moisOptions; track m.value) {
                               <mat-option [value]="m.value">{{ m.label }}</mat-option>
                             }
@@ -131,37 +119,24 @@
                         </mat-form-field>
                         <mat-form-field appearance="outline" class="field-year">
                           <mat-label>Année</mat-label>
-                          <mat-select formControlName="moisYear" (selectionChange)="onEditMoisChange()">
+                          <mat-select formControlName="moisYear">
                             @for (y of yearOptions; track y) {
                               <mat-option [value]="y">{{ y }}</mat-option>
                             }
                           </mat-select>
                         </mat-form-field>
+                        <mat-form-field appearance="outline" class="field-num">
+                          <mat-label>Jours de vote</mat-label>
+                          <input matInput type="number" formControlName="joursVotation" min="1">
+                        </mat-form-field>
                       </div>
                       @if (editStatut() === 'ouvert') {
-                        <p class="lock-note">🔒 Mois et dates verrouillés — thème déjà ouvert aux soumissions.</p>
+                        <p class="lock-note">🔒 Mois verrouillé — thème déjà ouvert aux soumissions.</p>
                       }
                       <mat-form-field appearance="outline" class="field-full">
                         <mat-label>Description</mat-label>
                         <textarea matInput formControlName="description" rows="2"></textarea>
                       </mat-form-field>
-                      <div class="form-row">
-                        <mat-form-field appearance="outline" class="field-date">
-                          <mat-label>Ouverture soumissions</mat-label>
-                          <input matInput type="date" formControlName="dateOuverture">
-                        </mat-form-field>
-                        <mat-form-field appearance="outline" class="field-date">
-                          <mat-label>Clôture soumissions</mat-label>
-                          <input matInput type="date" formControlName="dateCloture">
-                        </mat-form-field>
-                        <mat-form-field appearance="outline" class="field-date">
-                          <mat-label>Fin du vote</mat-label>
-                          <input matInput type="date" formControlName="dateFinVote">
-                        </mat-form-field>
-                      </div>
-                      @if (editStatut() === 'en_attente' && editCloturePasse) {
-                        <p class="warning-msg">⚠️ La date de clôture est dans le passé ou aujourd'hui.</p>
-                      }
                       <div class="form-row">
                         <mat-form-field appearance="outline" class="field-num">
                           <mat-label>Photos / membre</mat-label>
@@ -187,11 +162,11 @@
                   } @else {
                     @if (t.description) { <p class="card-desc">{{ t.description }}</p> }
                     <div class="theme-dates">
-                      <span>Ouverture : {{ formatDate(t.dateOuverture) }}</span>
+                      <span>Ouverture : {{ formatDate(d.dateOuverture) }}</span>
                       <span class="dot">·</span>
-                      <span>Clôture : {{ formatDate(t.dateCloture) }}</span>
+                      <span>Clôture : {{ formatDate(d.dateCloture) }}</span>
                       <span class="dot">·</span>
-                      <span>Fin vote : {{ formatDate(t.dateFinVote) }}</span>
+                      <span>Fin vote : {{ formatDate(d.dateFinVote) }}</span>
                     </div>
                     <div class="theme-limits">
                       <span>{{ t.maxPhotos }} photo(s)/membre</span>
@@ -225,6 +200,7 @@
       <h2 class="section-title">Terminés <span class="count">{{ passesCount() }}</span></h2>
       <div class="events-list">
         @for (t of passes(); track t.id; let i = $index) {
+          @let d = dates(t);
           @if (i === 0 || t.mois.slice(0, 4) !== passes()[i - 1].mois.slice(0, 4)) {
             <div class="month-sep">{{ t.mois.slice(0, 4) }}</div>
           }
@@ -243,11 +219,11 @@
                 <div class="card-detail" (click)="$event.stopPropagation()">
                   @if (t.description) { <p class="card-desc">{{ t.description }}</p> }
                   <div class="theme-dates">
-                    <span>Ouverture : {{ formatDate(t.dateOuverture) }}</span>
+                    <span>Ouverture : {{ formatDate(d.dateOuverture) }}</span>
                     <span class="dot">·</span>
-                    <span>Clôture : {{ formatDate(t.dateCloture) }}</span>
+                    <span>Clôture : {{ formatDate(d.dateCloture) }}</span>
                     <span class="dot">·</span>
-                    <span>Fin vote : {{ formatDate(t.dateFinVote) }}</span>
+                    <span>Fin vote : {{ formatDate(d.dateFinVote) }}</span>
                   </div>
                   <div class="theme-limits">
                     <span>{{ t.maxPhotos }} photo(s)/membre</span>

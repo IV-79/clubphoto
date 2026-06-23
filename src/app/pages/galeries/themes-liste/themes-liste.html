@@ -17,7 +17,7 @@
         @if (t.description) {
           <p class="card-desc">{{ t.description }}</p>
         }
-        <p class="card-date">Clôture le <strong>{{ formatDate(t.dateCloture) }}</strong></p>
+        <p class="card-date">Clôture le <strong>{{ formatDate(dates(t).dateCloture) }}</strong></p>
         <div class="card-actions">
           <a [routerLink]="['/galeries/themesdumois', t.id]" class="btn-voir-photos">Voir les photos</a>
           @if (isLoggedIn()) {
@@ -40,7 +40,7 @@
         @if (t.description) {
           <p class="card-desc">{{ t.description }}</p>
         }
-        <p class="card-date">Votes jusqu'au <strong>{{ formatDate(t.dateFinVote) }}</strong></p>
+        <p class="card-date">Votes jusqu'au <strong>{{ formatDate(dates(t).dateFinVote) }}</strong></p>
         <div class="card-actions">
           <a [routerLink]="['/galeries/themesdumois', t.id]" class="btn-voir-photos btn-vote-theme">Voir les photos</a>
         </div>
@@ -57,7 +57,7 @@
           <div class="avenir-entry">
             <span class="avenir-mois">{{ formatMois(t.mois) }}</span>
             <span class="avenir-titre">{{ t.titre }}</span>
-            <span class="avenir-date">à partir du {{ formatDate(t.dateOuverture) }}</span>
+            <span class="avenir-date">à partir du {{ formatDate(dates(t).dateOuverture) }}</span>
           </div>
         }
       </div>
