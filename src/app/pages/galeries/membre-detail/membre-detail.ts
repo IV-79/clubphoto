@@ -146,6 +146,7 @@ export class MembreDetail {
       id: p.id,
       url: p.url,
       titre: p.titre,
+      description: p.description || undefined,
       nomAuteur: this.nomComplet(),
       uploaderUid: p.uid,
       likes: p.likes ?? [],

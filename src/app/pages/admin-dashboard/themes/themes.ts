@@ -96,7 +96,7 @@ export class AdminThemes {
 
   openCreate() {
     this.editingId.set(null);
-    this.createForm.reset({ maxPhotos: 1, maxVotes: 3 });
+    this.createForm.reset({ maxPhotos: 1, maxVotes: 3, moisYear: String(new Date().getFullYear()) });
     this.createError.set('');
     this.showCreateForm.set(true);
     this.expandedId.set(null);
