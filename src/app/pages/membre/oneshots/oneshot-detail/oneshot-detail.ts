@@ -4,11 +4,14 @@ import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { combineLatest, of, switchMap } from 'rxjs';
 import { OneShotService } from '../../../../services/oneshot.service';
 import { AuthService } from '../../../../services/auth.service';
+import { ConfirmService } from '../../../../services/confirm.service';
+import { NotificationService } from '../../../../services/notification.service';
 import { LoginModalService } from '../../../../services/login-modal.service';
 import {
   OneShotInscription, OneShotPhoto, OneShotTheme, OneShotVote,
   ONESHOT_STATUT_LABELS
 } from '../../../../models/oneshot.model';
+import { UserProfile } from '../../../../models/user.model';
 import { LightboxPhoto, PhotoLightboxCallbacks } from '../../../../models/commentaire.model';
 import { PhotoLightbox } from '../../../../components/photo-lightbox/photo-lightbox';
 
@@ -22,6 +25,8 @@ export class OneShotDetail {
   private route = inject(ActivatedRoute);
   private oneShotService = inject(OneShotService);
   private authService = inject(AuthService);
+  private confirmService = inject(ConfirmService);
+  private notifService = inject(NotificationService);
   readonly loginModal = inject(LoginModalService);
 
   readonly id = this.route.snapshot.paramMap.get('id')!;
@@ -43,6 +48,18 @@ export class OneShotDetail {
   isInscrit          = computed(() => this.inscriptions().some(i => i.uid === this.profile()?.uid));
   statutLabel        = computed(() => ONESHOT_STATUT_LABELS[this.event()?.statut ?? 'preparation']);
   inscriptionOuverte = computed(() => this.event()?.statut === 'inscription');
+
+  addingMembre      = signal(false);
+  selectedMembreUid = signal('');
+
+  allMembres = toSignal(this.authService.getAllMembers(), { initialValue: [] as UserProfile[] });
+
+  membresDisponibles = computed(() => {
+    const inscritUids = new Set(this.inscriptions().map(i => i.uid));
+    return this.allMembres()
+      .filter(m => !inscritUids.has(m.uid) && !m.isSuspended)
+      .sort((a, b) => `${a.prenom ?? ''} ${a.nom}`.localeCompare(`${b.prenom ?? ''} ${b.nom}`));
+  });
 
   // Photos groupées par thème (uniquement les thèmes qui ont des photos)
   photosByTheme = computed(() =>
@@ -199,6 +216,40 @@ export class OneShotDetail {
     this.voting.set(themeId);
     await this.oneShotService.vote(this.id, profile.uid, themeId, photoId);
     this.voting.set(null);
+  }
+
+  async retirerInscrit(targetUid: string, targetNom: string) {
+    const e = this.event(); const p = this.profile();
+    if (!e || !p) return;
+    const ok = await this.confirmService.confirm(`Désinscrire ${targetNom} de ce OneShot ?`);
+    if (!ok) return;
+    await this.oneShotService.desinscrire(this.id, targetUid);
+    if (targetUid !== p.uid) {
+      this.notifService.sendToUser(
+        targetUid, 'oneshot',
+        `${this.userName()} vous a désinscrit(e) du OneShot « ${e.titre} »`,
+        { lien: `/galeries/oneshots/${this.id}`, sourceNom: this.userName(), sourceUid: p.uid }
+      ).catch(() => {});
+    }
+  }
+
+  async inscrireSelected() {
+    const uid = this.selectedMembreUid();
+    if (!uid) return;
+    if (this.inscriptions().some(i => i.uid === uid)) return;
+    const e = this.event(); const p = this.profile();
+    if (!e || !p) return;
+    const membre = this.allMembres().find(m => m.uid === uid);
+    if (!membre) return;
+    const nom = `${membre.prenom ?? ''} ${membre.nom}`.trim();
+    await this.oneShotService.inscrire(this.id, uid, nom);
+    this.notifService.sendToUser(
+      uid, 'oneshot',
+      `${this.userName()} vous a inscrit(e) au OneShot « ${e.titre} »`,
+      { lien: `/galeries/oneshots/${this.id}`, sourceNom: this.userName(), sourceUid: p.uid }
+    ).catch(() => {});
+    this.selectedMembreUid.set('');
+    this.addingMembre.set(false);
   }
 
   // Inscription

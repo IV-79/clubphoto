@@ -23,7 +23,6 @@ export interface Sortie {
   maxParticipants?: number;
   nbInscrits?: number;
   inscriptionObligatoire: boolean;
-  uploadParticipantsOnly: boolean;
   organisateurUid: string;
   nomOrganisateur: string;
   photoCouvertureUrl?: string;

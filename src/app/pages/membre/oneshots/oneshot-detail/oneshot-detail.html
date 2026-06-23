@@ -1,7 +1,7 @@
 <div class="detail-page">
 
   <div class="page-nav">
-    <a routerLink="/galeries/oneshots" class="back-link">← OneShots</a>
+    <a routerLink="/galeries/sorties" class="back-link">← Activités</a>
     @if (isCreator()) {
       <a [routerLink]="['/membre/oneshots', id, 'gerer']" class="link-gerer">Gérer cet événement →</a>
     }
@@ -55,7 +55,29 @@
           @for (ins of inscriptions(); track ins.uid) {
             <span class="participant-name-chip" [class.me]="ins.uid === profile()?.uid">
               {{ ins.nomMembre }}
+              @if (isCreator() && inscriptionOuverte()) {
+                <button class="chip-remove" (click)="retirerInscrit(ins.uid, ins.nomMembre)" title="Désinscrire">×</button>
+              }
             </span>
+          }
+        </div>
+      }
+
+      @if (isCreator() && inscriptionOuverte()) {
+        <div class="add-participant-zone">
+          @if (!addingMembre()) {
+            <button class="btn-add-participant" (click)="addingMembre.set(true)">+ Inscrire un membre</button>
+          } @else {
+            <div class="add-participant-row">
+              <select class="add-participant-select" (change)="selectedMembreUid.set($any($event.target).value)">
+                <option value="">— Choisir un membre —</option>
+                @for (m of membresDisponibles(); track m.uid) {
+                  <option [value]="m.uid">{{ m.prenom }} {{ m.nom }}</option>
+                }
+              </select>
+              <button class="btn-add-confirm" (click)="inscrireSelected()" [disabled]="!selectedMembreUid()">Inscrire</button>
+              <button class="btn-add-cancel" (click)="addingMembre.set(false); selectedMembreUid.set('')">Annuler</button>
+            </div>
           }
         </div>
       }

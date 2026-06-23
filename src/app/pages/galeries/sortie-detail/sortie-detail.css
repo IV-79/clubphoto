@@ -43,19 +43,82 @@
 .status-avenir { background: #1a6b3a; color: #5dba82; }
 .status-ouverte { background: #1a3a6b; color: #5d9fba; }
 
-.btn-gerer {
+.header-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.btn-action {
   background: transparent;
   border: 1px solid #555;
   color: #aaa;
   border-radius: 4px;
   padding: 0.4rem 0.9rem;
   font-size: 0.85rem;
-  text-decoration: none;
+  cursor: pointer;
   white-space: nowrap;
   transition: all 0.2s;
-  flex-shrink: 0;
 }
-.btn-gerer:hover { border-color: #888; color: #e0e0e0; }
+.btn-action:hover { border-color: #888; color: #e0e0e0; }
+.btn-action-danger:hover { border-color: #c0392b; color: #e74c3c; }
+
+/* ── Edit form inline ── */
+.edit-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 1.25rem;
+}
+
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 720px;
+}
+
+.field-full { width: 100%; }
+.field-half { flex: 1; min-width: 0; }
+.form-row { display: flex; gap: 1rem; }
+
+.edit-checkboxes {
+  padding: 0.25rem 0;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+  align-items: center;
+}
+
+.btn-cancel-edit {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s;
+}
+.btn-cancel-edit:hover { color: #e0e0e0; }
+
+.btn-save-edit {
+  background: #c0392b;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-save-edit:hover:not(:disabled) { background: #a93226; }
+.btn-save-edit:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .header-meta {
   display: flex;
@@ -181,6 +244,76 @@
   border-color: #3a5a7a;
   background: #1a2a3e;
 }
+
+.chip-remove {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 0 0 0 4px;
+  line-height: 1;
+  transition: color 0.15s;
+}
+.chip-remove:hover { color: #e74c3c; }
+
+.add-participant-zone {
+  margin-top: 0.75rem;
+}
+
+.btn-add-participant {
+  background: none;
+  border: 1px dashed #444;
+  color: #777;
+  border-radius: 4px;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-add-participant:hover { border-color: #888; color: #ccc; }
+
+.add-participant-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.add-participant-select {
+  background: #1a1a2e;
+  border: 1px solid #444;
+  color: #ccc;
+  border-radius: 4px;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.85rem;
+  flex: 1;
+  min-width: 180px;
+}
+
+.btn-add-confirm {
+  background: #1a4a2a;
+  border: 1px solid #2a7a3a;
+  color: #5dba70;
+  border-radius: 4px;
+  padding: 0.35rem 0.8rem;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.btn-add-confirm:hover:not(:disabled) { background: #1e5a32; }
+.btn-add-confirm:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-add-cancel {
+  background: none;
+  border: none;
+  color: #666;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.btn-add-cancel:hover { color: #ccc; }
 
 /* ── Upload ── */
 

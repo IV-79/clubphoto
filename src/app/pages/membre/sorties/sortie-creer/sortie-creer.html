@@ -35,7 +35,7 @@
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="field-half">
-        <mat-label>Lieu *</mat-label>
+        <mat-label>Lieu</mat-label>
         <input matInput formControlName="lieu" placeholder="Ex: Parc de la Tête d'Or, Lyon" />
         <mat-icon matSuffix>place</mat-icon>
       </mat-form-field>
@@ -45,12 +45,6 @@
       <mat-checkbox formControlName="inscriptionObligatoire" color="primary">
         Inscription obligatoire pour participer
       </mat-checkbox>
-
-      @if (inscriptionObligatoire) {
-        <mat-checkbox formControlName="uploadParticipantsOnly" color="primary" class="sub-checkbox">
-          Limiter l'upload aux participants inscrits
-        </mat-checkbox>
-      }
     </div>
 
     @if (inscriptionObligatoire) {

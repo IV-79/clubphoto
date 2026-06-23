@@ -3,7 +3,7 @@ import { NotificationService } from './notification.service';
 import {
   Firestore, collection, collectionData, doc, docData,
   addDoc, updateDoc, deleteDoc, setDoc, getDocs, getDoc,
-  query, where, orderBy, arrayUnion, arrayRemove, increment
+  query, where, orderBy, arrayUnion, arrayRemove, increment, deleteField
 } from '@angular/fire/firestore';
 import { Storage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from '@angular/fire/storage';
 import { Observable } from 'rxjs';
@@ -73,9 +73,12 @@ export class SortieService {
     data: Partial<Omit<Sortie, 'id' | 'dateCreation' | 'organisateurUid' | 'nomOrganisateur'>>,
     notifCtx?: { oldDate: string; titre: string; nomOrganisateur: string; organisateurUid: string }
   ): Promise<void> {
-    const clean = Object.fromEntries(
-      Object.entries(data as Record<string, unknown>).filter(([, v]) => v !== undefined)
-    );
+    const clean: Record<string, unknown> = {};
+    for (const [key, val] of Object.entries(data as Record<string, unknown>)) {
+      if (val !== undefined) {
+        clean[key] = (typeof val === 'string' && val === '') ? deleteField() : val;
+      }
+    }
     await runInInjectionContext(this.injector, () =>
       updateDoc(doc(this.firestore, 'sorties', id), clean)
     );

@@ -30,7 +30,6 @@ import { ThemeDetail } from './pages/galeries/theme-detail/theme-detail';
 import { SortiesListe } from './pages/galeries/sorties-liste/sorties-liste';
 import { SortieDetail } from './pages/galeries/sortie-detail/sortie-detail';
 import { SortieCreer } from './pages/membre/sorties/sortie-creer/sortie-creer';
-import { SortieGerer } from './pages/membre/sorties/sortie-gerer/sortie-gerer';
 import { MembresGuide } from './pages/membres/guide/guide';
 import { CompleterProfilComponent } from './pages/completer-profil/completer-profil.component';
 import { Documents } from './pages/membre/documents/documents';
@@ -99,7 +98,6 @@ export const routes: Routes = [
       { path: 'notifications', component: Notifications },
       { path: 'preferences', component: Preferences },
       { path: 'sorties/creer', component: SortieCreer },
-      { path: 'sorties/:id/gerer', component: SortieGerer },
       { path: '', redirectTo: 'portfolio', pathMatch: 'full' }
     ]
   },

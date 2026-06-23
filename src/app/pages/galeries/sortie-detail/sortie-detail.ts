@@ -1,11 +1,20 @@
 import { Component, inject, signal, computed, ViewChild, ElementRef } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { startWith, switchMap, of } from 'rxjs';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatSelectModule } from '@angular/material/select';
+import { MatIconModule } from '@angular/material/icon';
 import { SortieService } from '../../../services/sortie.service';
 import { AuthService } from '../../../services/auth.service';
 import { ConfirmService } from '../../../services/confirm.service';
-import { Sortie, SortieImage } from '../../../models/sortie.model';
+import { NotificationService } from '../../../services/notification.service';
+import { Sortie, SortieImage, SortieType } from '../../../models/sortie.model';
+import { UserProfile } from '../../../models/user.model';
 import { LightboxPhoto, PhotoLightboxCallbacks } from '../../../models/commentaire.model';
 import { PhotoLightbox } from '../../../components/photo-lightbox/photo-lightbox';
 import { compressToJpeg } from '../../../utils/image-compress';
@@ -22,7 +31,12 @@ interface UploadTask {
 
 @Component({
   selector: 'app-sortie-detail',
-  imports: [RouterLink, PhotoLightbox],
+  imports: [
+    RouterLink, PhotoLightbox,
+    ReactiveFormsModule,
+    MatFormFieldModule, MatInputModule, MatCheckboxModule,
+    MatDatepickerModule, MatSelectModule, MatIconModule,
+  ],
   templateUrl: './sortie-detail.html',
   styleUrl: './sortie-detail.css',
 })
@@ -30,9 +44,11 @@ export class SortieDetail {
   @ViewChild('photoInput') photoInput!: ElementRef<HTMLInputElement>;
 
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private sortieService = inject(SortieService);
   private authService = inject(AuthService);
   private confirmService = inject(ConfirmService);
+  private notifService = inject(NotificationService);
   private gpsConsentService = inject(GpsConsentService);
 
   sortieId = this.route.snapshot.paramMap.get('id')!;
@@ -47,9 +63,27 @@ export class SortieDetail {
     { initialValue: [] }
   );
 
-  lightboxIndex = signal<number | null>(null);
-  uploads = signal<UploadTask[]>([]);
-  inscribing = signal(false);
+  lightboxIndex      = signal<number | null>(null);
+  uploads            = signal<UploadTask[]>([]);
+  inscribing         = signal(false);
+  saving             = signal(false);
+  editMode           = signal(false);
+  addingMembre       = signal(false);
+  selectedMembreUid  = signal('');
+
+  allMembres = toSignal(this.authService.getAllMembers(), { initialValue: [] as UserProfile[] });
+
+  form = new FormGroup({
+    type:                   new FormControl<SortieType>('sortie_photo', { nonNullable: true }),
+    titre:                  new FormControl('', { validators: [Validators.required, Validators.minLength(3)], nonNullable: true }),
+    description:            new FormControl('', { nonNullable: true }),
+    date:                   new FormControl<Date | null>(null, [Validators.required]),
+    lieu:                   new FormControl('', { nonNullable: true }),
+    maxParticipants:        new FormControl<number | null>(null),
+    inscriptionObligatoire: new FormControl(true, { nonNullable: true }),
+  });
+
+  get inscriptionObligatoire() { return this.form.get('inscriptionObligatoire')!.value; }
 
   isAVenir = computed(() => {
     const s = this.sortie();
@@ -58,8 +92,7 @@ export class SortieDetail {
   });
 
   isOrganisateur = computed(() => {
-    const s = this.sortie();
-    const p = this.profile();
+    const s = this.sortie(); const p = this.profile();
     return !!s && !!p && s.organisateurUid === p.uid;
   });
 
@@ -72,8 +105,7 @@ export class SortieDetail {
   });
 
   canInscrire = computed(() => {
-    const s = this.sortie();
-    const p = this.profile();
+    const s = this.sortie(); const p = this.profile();
     if (!s || !p || !s.inscriptionObligatoire) return false;
     if (this.isInscrit()) return false;
     if (s.maxParticipants && this.inscriptions().length >= s.maxParticipants) return false;
@@ -81,11 +113,17 @@ export class SortieDetail {
   });
 
   canUpload = computed(() => {
-    const s = this.sortie();
-    const p = this.profile();
+    const s = this.sortie(); const p = this.profile();
     if (!s || !p || this.isAVenir()) return false;
-    if (!s.uploadParticipantsOnly) return true;
+    if (!s.inscriptionObligatoire) return true;
     return this.isInscrit() || this.isOrganisateur() || this.isAdmin();
+  });
+
+  membresDisponibles = computed(() => {
+    const inscritUids = new Set(this.inscriptions().map(i => i.uid));
+    return this.allMembres()
+      .filter(m => !inscritUids.has(m.uid) && !m.isSuspended)
+      .sort((a, b) => `${a.prenom ?? ''} ${a.nom}`.localeCompare(`${b.prenom ?? ''} ${b.nom}`));
   });
 
   userName = computed(() => {
@@ -94,23 +132,17 @@ export class SortieDetail {
     return `${p.prenom ?? ''} ${p.nom}`.trim();
   });
 
-  // Lightbox
   lightboxPhotos = computed((): LightboxPhoto[] =>
     this.photos().map(p => ({
-      id: p.id,
-      url: p.url,
-      nomAuteur: p.nomUploader,
-      uploaderUid: p.uploaderUid,
-      likes: p.likes,
-      uploadedAt: p.uploadedAt,
-      exif: p.exif,
+      id: p.id, url: p.url, nomAuteur: p.nomUploader,
+      uploaderUid: p.uploaderUid, likes: p.likes,
+      uploadedAt: p.uploadedAt, exif: p.exif,
     }))
   );
 
   lightboxCallbacks = computed((): PhotoLightboxCallbacks => {
     const sortieId = this.sortieId;
     const uid = this.profile()?.uid ?? '';
-    const canDel = (_photo: LightboxPhoto) => this.isAdmin();
     return {
       toggleLike: (photoId, liked) =>
         this.sortieService.toggleLikePhoto(sortieId, photoId, uid, liked),
@@ -128,7 +160,7 @@ export class SortieDetail {
         }),
       deleteReply: (photoId, commentId, replyId, allReplies) =>
         this.sortieService.deleteReply(sortieId, photoId, commentId, replyId, allReplies),
-      canDeletePhoto: canDel,
+      canDeletePhoto: () => this.isAdmin(),
       deletePhoto: (photo) => {
         const img = this.photos().find(p => p.id === photo.id)!;
         return this.sortieService.deletePhoto(sortieId, img, this.sortie()?.photoCouvertureUrl);
@@ -136,9 +168,98 @@ export class SortieDetail {
     };
   });
 
-  async toggleInscription() {
-    const p = this.profile();
+  startEdit() {
     const s = this.sortie();
+    if (!s) return;
+    this.form.reset({
+      type: s.type ?? 'sortie_photo',
+      titre: s.titre,
+      description: s.description ?? '',
+      date: s.date ? new Date(s.date + 'T12:00:00') : null,
+      lieu: s.lieu ?? '',
+      maxParticipants: s.maxParticipants ?? null,
+      inscriptionObligatoire: s.inscriptionObligatoire,
+    });
+    this.editMode.set(true);
+  }
+
+  cancelEdit() { this.editMode.set(false); }
+
+  async saveEdit() {
+    if (this.form.invalid || this.saving()) return;
+    this.saving.set(true);
+    try {
+      const v = this.form.getRawValue();
+      const date = v.date!;
+      const yyyy = date.getFullYear();
+      const mm = String(date.getMonth() + 1).padStart(2, '0');
+      const dd = String(date.getDate()).padStart(2, '0');
+      const s = this.sortie()!;
+      await this.sortieService.updateSortie(this.sortieId, {
+        type: v.type,
+        titre: v.titre.trim(),
+        description: v.description.trim(),
+        date: `${yyyy}-${mm}-${dd}`,
+        lieu: v.lieu.trim(),
+        maxParticipants: v.maxParticipants ?? undefined,
+        inscriptionObligatoire: v.inscriptionObligatoire,
+      }, {
+        oldDate: s.date,
+        titre: s.titre,
+        nomOrganisateur: s.nomOrganisateur,
+        organisateurUid: s.organisateurUid,
+      });
+      this.editMode.set(false);
+    } finally {
+      this.saving.set(false);
+    }
+  }
+
+  async deleteSortie() {
+    const s = this.sortie();
+    const ok = await this.confirmService.confirm(
+      `Supprimer « ${s?.titre ?? 'cet événement'} » et toutes ses photos définitivement ?`
+    );
+    if (!ok) return;
+    await this.sortieService.deleteSortie(this.sortieId);
+    this.router.navigate(['/galeries/sorties']);
+  }
+
+  async retirerInscrit(targetUid: string, targetNom: string) {
+    const s = this.sortie(); const p = this.profile();
+    if (!s || !p) return;
+    const ok = await this.confirmService.confirm(`Désinscrire ${targetNom} de cet événement ?`);
+    if (!ok) return;
+    await this.sortieService.desinscrire(this.sortieId, targetUid);
+    if (targetUid !== p.uid) {
+      this.notifService.sendToUser(
+        targetUid, 'sortie',
+        `${this.userName()} vous a désinscrit(e) de l'événement « ${s.titre} »`,
+        { lien: `/galeries/sorties/${this.sortieId}`, sourceNom: this.userName(), sourceUid: p.uid }
+      ).catch(() => {});
+    }
+  }
+
+  async inscrireSelected() {
+    const uid = this.selectedMembreUid();
+    if (!uid) return;
+    const s = this.sortie(); const p = this.profile();
+    if (!s || !p) return;
+    const membre = this.allMembres().find(m => m.uid === uid);
+    if (!membre) return;
+    const nom = `${membre.prenom ?? ''} ${membre.nom}`.trim();
+    await this.sortieService.inscrire(this.sortieId, uid, nom);
+    this.notifService.sendToUser(
+      uid, 'sortie',
+      `${this.userName()} vous a inscrit(e) à l'événement « ${s.titre} »`,
+      { lien: `/galeries/sorties/${this.sortieId}`, sourceNom: this.userName(), sourceUid: p.uid }
+    ).catch(() => {});
+    this.selectedMembreUid.set('');
+    this.addingMembre.set(false);
+  }
+
+  async toggleInscription() {
+    const p = this.profile(); const s = this.sortie();
     if (!p || !s || this.inscribing()) return;
     this.inscribing.set(true);
     try {
@@ -162,9 +283,11 @@ export class SortieDetail {
     for (const file of files) {
       const id = Math.random().toString(36).slice(2);
       this.uploads.update(u => [...u, { id, name: file.name, progress: 0, done: false }]);
-
       try {
-        const [exif, compressed] = await Promise.all([readExifWithConsent(file, this.gpsConsentService), compressToJpeg(file)]);
+        const [exif, compressed] = await Promise.all([
+          readExifWithConsent(file, this.gpsConsentService),
+          compressToJpeg(file),
+        ]);
         this.sortieService.uploadPhoto(compressed, this.sortieId, {
           uploaderUid: p.uid,
           nomUploader: this.userName(),

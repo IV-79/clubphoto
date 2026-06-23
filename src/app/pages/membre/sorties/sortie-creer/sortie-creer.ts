@@ -38,10 +38,9 @@ export class SortieCreer {
     titre:                 new FormControl('', { validators: [Validators.required, Validators.minLength(3)], nonNullable: true }),
     description:           new FormControl('', { nonNullable: true }),
     date:                  new FormControl<Date | null>(null, [Validators.required]),
-    lieu:                  new FormControl('', { validators: [Validators.required], nonNullable: true }),
+    lieu:                  new FormControl('', { nonNullable: true }),
     maxParticipants:       new FormControl<number | null>(null),
     inscriptionObligatoire: new FormControl(true, { nonNullable: true }),
-    uploadParticipantsOnly: new FormControl(true, { nonNullable: true }),
   });
 
   get inscriptionObligatoire() {
@@ -62,19 +61,16 @@ export class SortieCreer {
       const dd = String(date.getDate()).padStart(2, '0');
 
       const inscriptionObligatoire = v.inscriptionObligatoire;
-      const uploadParticipantsOnly = inscriptionObligatoire ? v.uploadParticipantsOnly : false;
-
       const nomOrganisateur = `${profile.prenom ?? ''} ${profile.nom}`.trim();
       const id = await this.sortieService.createSortie({
         type: v.type,
         titre: v.titre.trim(),
         date: `${yyyy}-${mm}-${dd}`,
-        lieu: v.lieu.trim(),
         nbInscrits: 0,
         inscriptionObligatoire,
-        uploadParticipantsOnly,
         organisateurUid: profile.uid,
         nomOrganisateur,
+        ...(v.lieu.trim() ? { lieu: v.lieu.trim() } : {}),
         ...(v.description.trim() ? { description: v.description.trim() } : {}),
         ...(inscriptionObligatoire && v.maxParticipants != null ? { maxParticipants: v.maxParticipants } : {}),
       });

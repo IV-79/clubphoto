@@ -5,32 +5,94 @@
   <div class="detail-header">
     <a routerLink="/galeries/sorties" class="back-link">← Sorties Photo</a>
 
-    <div class="header-title-row">
-      <div>
-        <span class="status-badge" [class.status-avenir]="isAVenir()" [class.status-ouverte]="!isAVenir()">
-          {{ isAVenir() ? 'À venir' : 'Ouverte aux photos' }}
-        </span>
-        <h1>{{ s.titre }}</h1>
+    @if (!editMode()) {
+      <div class="header-title-row">
+        <div>
+          <span class="status-badge" [class.status-avenir]="isAVenir()" [class.status-ouverte]="!isAVenir()">
+            {{ isAVenir() ? 'À venir' : 'Ouverte aux photos' }}
+          </span>
+          <h1>{{ s.titre }}</h1>
+        </div>
+        @if (isOrganisateur() || isAdmin()) {
+          <div class="header-actions">
+            <button class="btn-action" (click)="startEdit()">✏ Modifier</button>
+            <button class="btn-action btn-action-danger" (click)="deleteSortie()">🗑 Supprimer</button>
+          </div>
+        }
       </div>
-      @if (isOrganisateur() || isAdmin()) {
-        <a [routerLink]="['/membre/sorties', sortieId, 'gerer']" class="btn-gerer">⚙ Gérer</a>
-      }
-    </div>
 
-    <div class="header-meta">
-      <span class="meta-item">📅 {{ formatDate(s.date) }}</span>
-      @if (profile() && s.lieu) {
-        <a [href]="mapsUrl(s.lieu)" target="_blank" class="meta-item meta-lieu">
-          📍 {{ s.lieu }}
-        </a>
-      }
-      @if (profile()) {
-        <span class="meta-item meta-org">par {{ s.nomOrganisateur }}</span>
-      }
-    </div>
+      <div class="header-meta">
+        <span class="meta-item">📅 {{ formatDate(s.date) }}</span>
+        @if (profile() && s.lieu) {
+          <a [href]="mapsUrl(s.lieu)" target="_blank" class="meta-item meta-lieu">
+            📍 {{ s.lieu }}
+          </a>
+        }
+        @if (profile()) {
+          <span class="meta-item meta-org">par {{ s.nomOrganisateur }}</span>
+        }
+      </div>
 
-    @if (s.description) {
-      <p class="detail-desc">{{ s.description }}</p>
+      @if (s.description) {
+        <p class="detail-desc">{{ s.description }}</p>
+      }
+    } @else {
+      <!-- Formulaire d'édition inline -->
+      <p class="edit-title">Modifier l'événement</p>
+      <form [formGroup]="form" (ngSubmit)="saveEdit()" class="edit-form">
+
+        <mat-form-field appearance="outline" class="field-half">
+          <mat-label>Type</mat-label>
+          <mat-select formControlName="type">
+            <mat-option value="sortie_photo">📸 Sortie Photo</mat-option>
+            <mat-option value="atelier">🎨 Atelier</mat-option>
+            <mat-option value="repas">🍽️ Repas</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="field-full">
+          <mat-label>Titre *</mat-label>
+          <input matInput formControlName="titre" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="field-full">
+          <mat-label>Description</mat-label>
+          <textarea matInput formControlName="description" rows="3"></textarea>
+        </mat-form-field>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="field-half">
+            <mat-label>Date *</mat-label>
+            <input matInput [matDatepicker]="picker" formControlName="date" />
+            <mat-datepicker-toggle matIconSuffix [for]="picker" />
+            <mat-datepicker #picker />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="field-half">
+            <mat-label>Lieu</mat-label>
+            <input matInput formControlName="lieu" />
+            <mat-icon matSuffix>place</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="field-half">
+          <mat-label>Max participants</mat-label>
+          <input matInput type="number" formControlName="maxParticipants" min="1" placeholder="Optionnel" />
+        </mat-form-field>
+
+        <div class="edit-checkboxes">
+          <mat-checkbox formControlName="inscriptionObligatoire" color="primary">
+            Inscription obligatoire
+          </mat-checkbox>
+        </div>
+
+        <div class="edit-actions">
+          <button type="button" class="btn-cancel-edit" (click)="cancelEdit()">Annuler</button>
+          <button type="submit" class="btn-save-edit" [disabled]="form.invalid || saving()">
+            {{ saving() ? 'Sauvegarde…' : 'Sauvegarder' }}
+          </button>
+        </div>
+
+      </form>
     }
   </div>
 
@@ -70,7 +132,29 @@
           @for (p of inscriptions(); track p.uid) {
             <span class="participant-chip" [class.me]="p.uid === profile()?.uid">
               {{ p.nomMembre }}
+              @if (isOrganisateur() || isAdmin()) {
+                <button class="chip-remove" (click)="retirerInscrit(p.uid, p.nomMembre)" title="Désinscrire">×</button>
+              }
             </span>
+          }
+        </div>
+      }
+
+      @if (isOrganisateur() || isAdmin()) {
+        <div class="add-participant-zone">
+          @if (!addingMembre()) {
+            <button class="btn-add-participant" (click)="addingMembre.set(true)">+ Inscrire un membre</button>
+          } @else {
+            <div class="add-participant-row">
+              <select class="add-participant-select" (change)="selectedMembreUid.set($any($event.target).value)">
+                <option value="">— Choisir un membre —</option>
+                @for (m of membresDisponibles(); track m.uid) {
+                  <option [value]="m.uid">{{ m.prenom }} {{ m.nom }}</option>
+                }
+              </select>
+              <button class="btn-add-confirm" (click)="inscrireSelected()" [disabled]="!selectedMembreUid()">Inscrire</button>
+              <button class="btn-add-cancel" (click)="addingMembre.set(false); selectedMembreUid.set('')">Annuler</button>
+            </div>
           }
         </div>
       }

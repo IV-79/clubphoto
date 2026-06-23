@@ -55,6 +55,27 @@ export class NotificationService {
     );
   }
 
+  // ── Notification directe vers un utilisateur (actions admin) ──
+
+  async sendToUser(
+    toUid: string,
+    type: NotifType,
+    message: string,
+    options: { lien?: string; sourceNom: string; sourceUid?: string }
+  ): Promise<void> {
+    await runInInjectionContext(this.injector, () =>
+      addDoc(collection(this.firestore, `notifications/${toUid}/items`), {
+        type,
+        message,
+        lien: options.lien ?? null,
+        lu: false,
+        createdAt: new Date().toISOString(),
+        sourceNom: options.sourceNom,
+        ...(options.sourceUid ? { sourceUid: options.sourceUid } : {}),
+      })
+    );
+  }
+
   // ── Broadcast vers tous les membres abonnés ──────────────────
 
   async broadcast(
