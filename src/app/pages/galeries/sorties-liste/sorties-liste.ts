@@ -1,11 +1,16 @@
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject, computed, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { switchMap, of } from 'rxjs';
-import { toObservable } from '@angular/core/rxjs-interop';
 import { SortieService } from '../../../services/sortie.service';
 import { AuthService } from '../../../services/auth.service';
+import { OneShotService } from '../../../services/oneshot.service';
 import { Sortie, SORTIE_TYPE_META, SortieType } from '../../../models/sortie.model';
+import { OneShot, ONESHOT_STATUT_LABELS, OneShotStatut } from '../../../models/oneshot.model';
+
+export type ActiviteItem =
+  | { kind: 'sortie'; data: Sortie }
+  | { kind: 'oneshot'; data: OneShot };
 
 @Component({
   selector: 'app-sorties-liste',
@@ -14,28 +19,93 @@ import { Sortie, SORTIE_TYPE_META, SortieType } from '../../../models/sortie.mod
   styleUrl: './sorties-liste.css',
 })
 export class SortiesListe {
-  private sortieService = inject(SortieService);
-  private authService = inject(AuthService);
+  private sortieService  = inject(SortieService);
+  private oneShotService = inject(OneShotService);
+  private authService    = inject(AuthService);
 
-  profile = toSignal(this.authService.currentUserProfile$);
-  sorties = toSignal(this.sortieService.getSorties(), { initialValue: [] as Sortie[] });
+  profile  = toSignal(this.authService.currentUserProfile$);
+  sorties  = toSignal(this.sortieService.getSorties(), { initialValue: [] as Sortie[] });
+  oneshots = toSignal(this.oneShotService.getPublicOneShots(), { initialValue: [] as OneShot[] });
 
   private mesSorties$ = toObservable(this.profile).pipe(
     switchMap(p => p ? this.sortieService.getMesSorties(p.uid) : of([] as Sortie[]))
   );
   mesSorties = toSignal(this.mesSorties$, { initialValue: [] as Sortie[] });
 
-  aVenir = computed(() =>
-    this.sorties()
-      .filter(s => this.isAVenir(s.date))
-      .sort((a, b) => a.date.localeCompare(b.date))
+  readonly sortieTypes = Object.entries(SORTIE_TYPE_META) as [SortieType, { label: string; emoji: string }][];
+
+  filterTexte  = signal('');
+  filterType   = signal<SortieType | 'oneshot' | null>(null);
+  filterDateDu = signal('');
+  filterDateAu = signal('');
+
+  hasFilters = computed(() =>
+    !!this.filterTexte().trim() || this.filterType() !== null ||
+    !!this.filterDateDu() || !!this.filterDateAu()
   );
 
-  passees = computed(() =>
-    this.sorties()
+  onTypeChange(value: string): void {
+    this.filterType.set(value ? value as SortieType | 'oneshot' : null);
+  }
+
+  resetFilters(): void {
+    this.filterTexte.set('');
+    this.filterType.set(null);
+    this.filterDateDu.set('');
+    this.filterDateAu.set('');
+  }
+
+  aVenir = computed((): ActiviteItem[] => {
+    const sorties: ActiviteItem[] = this.sorties()
+      .filter(s => this.isAVenir(s.date))
+      .sort((a, b) => a.date.localeCompare(b.date))
+      .map(data => ({ kind: 'sortie' as const, data }));
+
+    const oneshots: ActiviteItem[] = this.oneshots()
+      .filter(o => o.statut !== 'resultats')
+      .sort((a, b) => a.dateCreation.localeCompare(b.dateCreation))
+      .map(data => ({ kind: 'oneshot' as const, data }));
+
+    return [...sorties, ...oneshots];
+  });
+
+  passees = computed((): ActiviteItem[] => {
+    const sorties: ActiviteItem[] = this.sorties()
       .filter(s => !this.isAVenir(s.date))
       .sort((a, b) => b.date.localeCompare(a.date))
-  );
+      .map(data => ({ kind: 'sortie' as const, data }));
+
+    const oneshots: ActiviteItem[] = this.oneshots()
+      .filter(o => o.statut === 'resultats')
+      .sort((a, b) => b.dateCreation.localeCompare(a.dateCreation))
+      .map(data => ({ kind: 'oneshot' as const, data }));
+
+    return [...sorties, ...oneshots];
+  });
+
+  passeesFiltrees = computed((): ActiviteItem[] => {
+    const texte  = this.filterTexte().toLowerCase().trim();
+    const type   = this.filterType();
+    const dateDu = this.filterDateDu();
+    const dateAu = this.filterDateAu();
+
+    return this.passees().filter(item => {
+      if (texte && !item.data.titre.toLowerCase().includes(texte)) return false;
+
+      if (type !== null) {
+        if (type === 'oneshot' && item.kind !== 'oneshot') return false;
+        if (type !== 'oneshot' && (item.kind !== 'sortie' || (item.data as Sortie).type !== type)) return false;
+      }
+
+      const date = item.kind === 'sortie'
+        ? (item.data as Sortie).date
+        : ((item.data as OneShot).date ?? (item.data as OneShot).dateCreation.slice(0, 10));
+      if (dateDu && date < dateDu) return false;
+      if (dateAu && date > dateAu) return false;
+
+      return true;
+    });
+  });
 
   isAVenir(date: string): boolean {
     return new Date(date + 'T00:00:00') > new Date();
@@ -57,5 +127,27 @@ export class SortiesListe {
 
   typeEmoji(type: SortieType | undefined): string {
     return type ? SORTIE_TYPE_META[type].emoji : '📸';
+  }
+
+  oneShotStatutLabel(statut: OneShotStatut): string {
+    return ONESHOT_STATUT_LABELS[statut];
+  }
+
+  oneShotStatutClass(statut: OneShotStatut): string {
+    switch (statut) {
+      case 'inscription':            return 'sortie-status status-oneshot-inscription';
+      case 'fermeture_inscriptions': return 'sortie-status status-oneshot-fermee';
+      case 'vote':                   return 'sortie-status status-oneshot-vote';
+      case 'resultats':              return 'sortie-status status-passee';
+      default:                       return 'sortie-status';
+    }
+  }
+
+  asSortie(item: ActiviteItem): Sortie {
+    return item.data as Sortie;
+  }
+
+  asOneShot(item: ActiviteItem): OneShot {
+    return item.data as OneShot;
   }
 }

@@ -24,6 +24,13 @@
   font-size: 0.95rem;
 }
 
+.create-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  align-items: flex-end;
+}
+
 .btn-create {
   background: #c0392b;
   color: #fff;
@@ -38,6 +45,9 @@
 }
 
 .btn-create:hover { background: #a93226; }
+
+.btn-create-oneshot { background: #1a5040; }
+.btn-create-oneshot:hover { background: #2e6b5a; }
 
 .section { margin-bottom: 3rem; }
 
@@ -86,8 +96,6 @@
   border-color: #555;
 }
 
-.sortie-card-passee { opacity: 0.8; }
-.sortie-card-passee:hover { opacity: 1; }
 
 .sortie-cover {
   position: relative;
@@ -139,6 +147,33 @@
 
 .status-avenir { background: #1a6b3a; color: #5dba82; }
 .status-passee { background: #333; color: #999; }
+.status-oneshot-inscription { background: #1a4a2a; color: #5dba70; }
+.status-oneshot-fermee      { background: #4a3a0a; color: #e0b04a; }
+.status-oneshot-vote        { background: #2a1a4a; color: #9d70e0; }
+
+.oneshot-card { background: #0e1e1a; border-color: #1e3d35; }
+.oneshot-card:hover { border-color: #2e6b5a; }
+
+.oneshot-type-badge     { color: #4ab896; }
+.oneshot-type-badge-dim { color: #555; }
+
+.oneshot-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-top: 0.6rem;
+}
+
+.oneshot-badge {
+  font-size: 0.7rem;
+  background: #091a14;
+  border: 1px solid #1a5040;
+  color: #4ab896;
+  border-radius: 4px;
+  padding: 0.1rem 0.45rem;
+  white-space: nowrap;
+}
 
 .sortie-info { padding: 1rem; }
 
@@ -190,7 +225,86 @@
   white-space: nowrap;
 }
 
+/* Filtres Passés */
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+
+.filter-text {
+  flex: 1;
+  min-width: 140px;
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 4px;
+  color: #e0e0e0;
+  padding: 0.4rem 0.7rem;
+  font-size: 0.85rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.filter-text:focus { border-color: #555; }
+.filter-text::placeholder { color: #555; }
+
+.filter-select {
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 4px;
+  color: #e0e0e0;
+  padding: 0.4rem 0.5rem;
+  font-size: 0.82rem;
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  color-scheme: dark;
+}
+.filter-select:focus { border-color: #555; }
+
+.filter-dates {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.filter-date {
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 4px;
+  color: #e0e0e0;
+  padding: 0.4rem 0.5rem;
+  font-size: 0.82rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+  color-scheme: dark;
+  width: 130px;
+}
+.filter-date:focus { border-color: #555; }
+
+.date-sep { color: #555; font-size: 0.8rem; }
+
+.btn-reset-filter {
+  background: none;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: #888;
+  padding: 0.38rem 0.6rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.btn-reset-filter:hover { border-color: #888; color: #e0e0e0; }
+
 @media (max-width: 600px) {
   .page-header { flex-direction: column; }
   .sorties-grid { grid-template-columns: 1fr; }
+  .filter-bar { flex-direction: column; align-items: stretch; }
+  .filter-select { width: 100%; }
+  .filter-dates { justify-content: space-between; }
 }

@@ -128,6 +128,9 @@ export class OneShotService {
     await runInInjectionContext(this.injector, () =>
       addDoc(collection(this.firestore, `oneshots/${oneShotId}/themes`), { nom, ordre })
     );
+    await runInInjectionContext(this.injector, () =>
+      updateDoc(doc(this.firestore, 'oneshots', oneShotId), { nbThemes: increment(1) })
+    ).catch(() => {});
   }
 
   async updateTheme(oneShotId: string, themeId: string, nom: string): Promise<void> {
@@ -140,6 +143,9 @@ export class OneShotService {
     await runInInjectionContext(this.injector, () =>
       deleteDoc(doc(this.firestore, `oneshots/${oneShotId}/themes`, themeId))
     );
+    await runInInjectionContext(this.injector, () =>
+      updateDoc(doc(this.firestore, 'oneshots', oneShotId), { nbThemes: increment(-1) })
+    ).catch(() => {});
   }
 
   // --- Inscriptions ---
@@ -156,12 +162,18 @@ export class OneShotService {
         uid, nomMembre, dateInscription: new Date().toISOString(),
       })
     );
+    await runInInjectionContext(this.injector, () =>
+      updateDoc(doc(this.firestore, 'oneshots', oneShotId), { nbInscrits: increment(1) })
+    ).catch(() => {});
   }
 
   async desinscrire(oneShotId: string, uid: string): Promise<void> {
     await runInInjectionContext(this.injector, () =>
       deleteDoc(doc(this.firestore, `oneshots/${oneShotId}/inscriptions`, uid))
     );
+    await runInInjectionContext(this.injector, () =>
+      updateDoc(doc(this.firestore, 'oneshots', oneShotId), { nbInscrits: increment(-1) })
+    ).catch(() => {});
   }
 
   // --- Photos ---

@@ -19,7 +19,9 @@ export interface OneShot {
   nomCreateur: string;
   statut: OneShotStatut;
   dateCreation: string;
-  date?: string;  // YYYY-MM-DD, facultatif — si défini, apparaît dans le calendrier
+  date?: string;        // YYYY-MM-DD, facultatif — si défini, apparaît dans le calendrier
+  nbInscrits?: number;  // dénormalisé, mis à jour atomiquement
+  nbThemes?: number;    // dénormalisé, mis à jour atomiquement
 }
 
 export interface OneShotTheme {

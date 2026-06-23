@@ -6,7 +6,10 @@
       <p class="subtitle">Événements et activités organisés par les membres</p>
     </div>
     @if (profile()) {
-      <a routerLink="/membre/sorties/creer" class="btn-create">+ Organiser un événement</a>
+      <div class="create-btns">
+        <a routerLink="/membre/sorties/creer" class="btn-create">+ Organiser un événement</a>
+        <a routerLink="/membre/oneshots/creer" class="btn-create btn-create-oneshot">+ Organiser un OneShot</a>
+      </div>
     }
   </div>
 
@@ -18,83 +21,154 @@
       <p class="empty-msg">Aucun événement planifié pour le moment.</p>
     } @else {
       <div class="sorties-grid">
-        @for (sortie of aVenir(); track sortie.id) {
-          <a [routerLink]="['/galeries/sorties', sortie.id]" class="sortie-card">
-            @if (sortie.photoCouvertureUrl) {
-              <div class="sortie-cover">
-                <img [src]="sortie.photoCouvertureUrl" [alt]="sortie.titre" class="cover-img" />
-                <span class="sortie-status status-avenir">À venir</span>
-              </div>
-            }
-            <div class="sortie-info">
-              <div class="sortie-titre-row">
-                <span class="type-badge">{{ typeEmoji(sortie.type) }} {{ typeLabel(sortie.type) }}</span>
-                @if (!sortie.photoCouvertureUrl) {
+        @for (item of aVenir(); track item.kind + ':' + item.data.id) {
+          @if (item.kind === 'sortie') {
+            @let sortie = asSortie(item);
+            <a [routerLink]="['/galeries/sorties', sortie.id]" class="sortie-card">
+              @if (sortie.photoCouvertureUrl) {
+                <div class="sortie-cover">
+                  <img [src]="sortie.photoCouvertureUrl" [alt]="sortie.titre" class="cover-img" />
                   <span class="sortie-status status-avenir">À venir</span>
-                }
+                </div>
+              }
+              <div class="sortie-info">
+                <div class="sortie-titre-row">
+                  <span class="type-badge">{{ typeEmoji(sortie.type) }} {{ typeLabel(sortie.type) }}</span>
+                  @if (!sortie.photoCouvertureUrl) {
+                    <span class="sortie-status status-avenir">À venir</span>
+                  }
+                </div>
+                <h3 class="sortie-titre">{{ sortie.titre }}</h3>
+                <div class="sortie-meta">
+                  <span class="meta-date">📅 {{ formatDate(sortie.date) }}</span>
+                  @if (profile() && sortie.lieu) {
+                    <a class="meta-lieu" [href]="mapsUrl(sortie.lieu)" target="_blank" (click)="$event.stopPropagation()">
+                      📍 {{ sortie.lieu }}
+                    </a>
+                  }
+                </div>
+                <div class="sortie-footer">
+                  @if (profile()) {
+                    <span class="sortie-organisateur">par {{ sortie.nomOrganisateur }}</span>
+                  }
+                  @if (sortie.inscriptionObligatoire) {
+                    <span class="inscription-badge">
+                      {{ (sortie.nbInscrits ?? 0) }}{{ sortie.maxParticipants ? ' / ' + sortie.maxParticipants : '' }} inscrit(s)
+                    </span>
+                  }
+                </div>
               </div>
-              <h3 class="sortie-titre">{{ sortie.titre }}</h3>
-              <div class="sortie-meta">
-                <span class="meta-date">📅 {{ formatDate(sortie.date) }}</span>
-                @if (profile() && sortie.lieu) {
-                  <a class="meta-lieu" [href]="mapsUrl(sortie.lieu)" target="_blank" (click)="$event.stopPropagation()">
-                    📍 {{ sortie.lieu }}
-                  </a>
-                }
+            </a>
+          } @else {
+            @let os = asOneShot(item);
+            <a [routerLink]="['/galeries/oneshots', os.id]" class="sortie-card oneshot-card">
+              <div class="sortie-info">
+                <div class="sortie-titre-row">
+                  <span class="type-badge oneshot-type-badge">🏆 OneShot</span>
+                  <span [class]="oneShotStatutClass(os.statut)">{{ oneShotStatutLabel(os.statut) }}</span>
+                </div>
+                <h3 class="sortie-titre">{{ os.titre }}</h3>
+                <div class="oneshot-meta">
+                  <span class="oneshot-badge">{{ os.nbThemes ?? 0 }} thème(s)</span>
+                  <span class="oneshot-badge">{{ os.nbInscrits ?? 0 }} inscrit(s)</span>
+                </div>
               </div>
-              <div class="sortie-footer">
-                @if (profile()) {
-                  <span class="sortie-organisateur">par {{ sortie.nomOrganisateur }}</span>
-                }
-                @if (sortie.inscriptionObligatoire) {
-                  <span class="inscription-badge">
-                    {{ (sortie.nbInscrits ?? 0) }}{{ sortie.maxParticipants ? ' / ' + sortie.maxParticipants : '' }} inscrit(s)
-                  </span>
-                }
-              </div>
-            </div>
-          </a>
+            </a>
+          }
         }
       </div>
     }
   </section>
 
-  <!-- Passées -->
+  <!-- Passés -->
   @if (passees().length > 0) {
     <section class="section">
-      <h2 class="section-title">Passés <span class="count">{{ passees().length }}</span></h2>
-      <div class="sorties-grid">
-        @for (sortie of passees(); track sortie.id) {
-          <a [routerLink]="['/galeries/sorties', sortie.id]" class="sortie-card sortie-card-passee">
-            @if (sortie.photoCouvertureUrl) {
-              <div class="sortie-cover">
-                <img [src]="sortie.photoCouvertureUrl" [alt]="sortie.titre" class="cover-img" />
-                <span class="sortie-status status-passee">Terminé</span>
-              </div>
-            }
-            <div class="sortie-info">
-              <div class="sortie-titre-row">
-                <span class="type-badge type-badge-dim">{{ typeEmoji(sortie.type) }} {{ typeLabel(sortie.type) }}</span>
-                @if (!sortie.photoCouvertureUrl) {
-                  <span class="sortie-status status-passee">Terminé</span>
-                }
-              </div>
-              <h3 class="sortie-titre">{{ sortie.titre }}</h3>
-              <div class="sortie-meta">
-                <span class="meta-date">📅 {{ formatDate(sortie.date) }}</span>
-                @if (profile() && sortie.lieu) {
-                  <a class="meta-lieu" [href]="mapsUrl(sortie.lieu)" target="_blank" (click)="$event.stopPropagation()">
-                    📍 {{ sortie.lieu }}
-                  </a>
-                }
-              </div>
-              @if (profile()) {
-                <span class="sortie-organisateur">par {{ sortie.nomOrganisateur }}</span>
-              }
-            </div>
-          </a>
+      <h2 class="section-title">
+        Passés
+        <span class="count">{{ hasFilters() ? passeesFiltrees().length + ' / ' + passees().length : passees().length }}</span>
+      </h2>
+
+      <!-- Filtres -->
+      <div class="filter-bar">
+        <input type="text" class="filter-text" placeholder="Rechercher par titre…"
+               [value]="filterTexte()"
+               (input)="filterTexte.set($any($event.target).value)" />
+
+        <select class="filter-select" (change)="onTypeChange($any($event.target).value)">
+          <option value="" [selected]="filterType() === null">Tous les types</option>
+          @for (t of sortieTypes; track t[0]) {
+            <option [value]="t[0]" [selected]="filterType() === t[0]">{{ t[1].emoji }} {{ t[1].label }}</option>
+          }
+          <option value="oneshot" [selected]="filterType() === 'oneshot'">🏆 OneShot</option>
+        </select>
+
+        <div class="filter-dates">
+          <input type="date" class="filter-date" [value]="filterDateDu()"
+                 (input)="filterDateDu.set($any($event.target).value)" />
+          <span class="date-sep">→</span>
+          <input type="date" class="filter-date" [value]="filterDateAu()"
+                 (input)="filterDateAu.set($any($event.target).value)" />
+        </div>
+
+        @if (hasFilters()) {
+          <button class="btn-reset-filter" (click)="resetFilters()">✕</button>
         }
       </div>
+
+      @if (passeesFiltrees().length === 0) {
+        <p class="empty-msg">Aucun résultat pour ces filtres.</p>
+      } @else {
+      <div class="sorties-grid">
+        @for (item of passeesFiltrees(); track item.kind + ':' + item.data.id) {
+          @if (item.kind === 'sortie') {
+            @let sortie = asSortie(item);
+            <a [routerLink]="['/galeries/sorties', sortie.id]" class="sortie-card">
+              @if (sortie.photoCouvertureUrl) {
+                <div class="sortie-cover">
+                  <img [src]="sortie.photoCouvertureUrl" [alt]="sortie.titre" class="cover-img" />
+                  <span class="sortie-status status-passee">Terminé</span>
+                </div>
+              }
+              <div class="sortie-info">
+                <div class="sortie-titre-row">
+                  <span class="type-badge type-badge-dim">{{ typeEmoji(sortie.type) }} {{ typeLabel(sortie.type) }}</span>
+                  @if (!sortie.photoCouvertureUrl) {
+                    <span class="sortie-status status-passee">Terminé</span>
+                  }
+                </div>
+                <h3 class="sortie-titre">{{ sortie.titre }}</h3>
+                <div class="sortie-meta">
+                  <span class="meta-date">📅 {{ formatDate(sortie.date) }}</span>
+                  @if (profile() && sortie.lieu) {
+                    <a class="meta-lieu" [href]="mapsUrl(sortie.lieu)" target="_blank" (click)="$event.stopPropagation()">
+                      📍 {{ sortie.lieu }}
+                    </a>
+                  }
+                </div>
+                @if (profile()) {
+                  <span class="sortie-organisateur">par {{ sortie.nomOrganisateur }}</span>
+                }
+              </div>
+            </a>
+          } @else {
+            @let os = asOneShot(item);
+            <a [routerLink]="['/galeries/oneshots', os.id]" class="sortie-card oneshot-card">
+              <div class="sortie-info">
+                <div class="sortie-titre-row">
+                  <span class="type-badge type-badge-dim oneshot-type-badge-dim">🏆 OneShot</span>
+                  <span [class]="oneShotStatutClass(os.statut)">{{ oneShotStatutLabel(os.statut) }}</span>
+                </div>
+                <h3 class="sortie-titre">{{ os.titre }}</h3>
+                <div class="oneshot-meta">
+                  <span class="oneshot-badge">{{ os.nbThemes ?? 0 }} thème(s)</span>
+                  <span class="oneshot-badge">{{ os.nbInscrits ?? 0 }} inscrit(s)</span>
+                </div>
+              </div>
+            </a>
+          }
+        }
+      </div>
+      }
     </section>
   }
 
