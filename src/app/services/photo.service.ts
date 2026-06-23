@@ -59,6 +59,7 @@ export class PhotoService {
             await runInInjectionContext(this.injector, () =>
               updateDoc(doc(this.firestore, 'users', uid), {
                 'storageUsed.portfolio': increment(file.size),
+                'photoCount': increment(1),
               })
             ).catch(() => {});
             observer.next({ state: 'done', progress: 100, photo: { id: docRef.id, ...data } });
@@ -130,13 +131,11 @@ export class PhotoService {
         deleteDoc(doc(this.firestore, 'photos', photo.id)),
       ])
     );
-    if (photo.fileSize) {
-      await runInInjectionContext(this.injector, () =>
-        updateDoc(doc(this.firestore, 'users', photo.uid), {
-          'storageUsed.portfolio': increment(-photo.fileSize!),
-        })
-      ).catch(() => {});
-    }
+    const update: Record<string, unknown> = { 'photoCount': increment(-1) };
+    if (photo.fileSize) update['storageUsed.portfolio'] = increment(-photo.fileSize);
+    await runInInjectionContext(this.injector, () =>
+      updateDoc(doc(this.firestore, 'users', photo.uid), update)
+    ).catch(() => {});
   }
 
   async updatePhotoMeta(photoId: string, data: { titre: string; description: string; visibilite: PhotoVisibilite; categorie: string }): Promise<void> {

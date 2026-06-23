@@ -19,6 +19,8 @@ export interface UserProfile {
   px500?: string;
   flickr?: string;
   siteWeb?: string;
+  visibilite?: 'public' | 'membre';
+  photoCount?: number;
   photoProfilUrl?: string;
   photoBandeauUrl?: string;
 }

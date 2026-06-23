@@ -16,7 +16,8 @@
 .back-link:hover { color: #1a1a1a; }
 
 .loading,
-.empty-state {
+.empty-state,
+.access-denied {
   text-align: center;
   padding: 80px 24px;
   color: rgba(0, 0, 0, 0.35);

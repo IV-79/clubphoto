@@ -206,7 +206,10 @@ export class AuthService {
     }
 
     await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, 'users', uid), { storageUsed: { portfolio, themes, oneshots, documents } })
+      updateDoc(doc(this.firestore, 'users', uid), {
+        storageUsed: { portfolio, themes, oneshots, documents },
+        photoCount: photosSnap.docs.length,
+      })
     );
   }
 

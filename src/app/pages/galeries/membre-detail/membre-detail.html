@@ -6,6 +6,10 @@
     <div class="loading">Chargement…</div>
   } @else if (membre() === null) {
     <div class="empty-state"><p>Membre introuvable.</p></div>
+  } @else if (membre()!.visibilite === 'membre' && !profile()) {
+    <div class="access-denied">
+      <p>Ce portfolio est réservé aux membres connectés.</p>
+    </div>
   } @else {
 
     @if (membre()!.photoBandeauUrl) {

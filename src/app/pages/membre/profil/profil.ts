@@ -32,6 +32,7 @@ export class MembreProfil implements OnInit {
     px500: '',
     flickr: '',
     siteWeb: '',
+    visibilite: 'public' as 'public' | 'membre',
   };
 
   saving = signal(false);
@@ -59,6 +60,7 @@ export class MembreProfil implements OnInit {
       this.form.px500      = p.px500 ?? '';
       this.form.flickr     = p.flickr ?? '';
       this.form.siteWeb    = p.siteWeb ?? '';
+      this.form.visibilite = p.visibilite ?? 'public';
     });
   }
 
@@ -98,6 +100,7 @@ export class MembreProfil implements OnInit {
         px500:       this.form.px500.trim(),
         flickr:      this.form.flickr.trim(),
         siteWeb:     this.form.siteWeb.trim(),
+        visibilite:  this.form.visibilite,
       });
       this.saved.set(true);
       setTimeout(() => this.saved.set(false), 3000);

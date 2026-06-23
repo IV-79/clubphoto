@@ -85,6 +85,24 @@
 
   <form class="profil-form" (ngSubmit)="save()">
 
+    <!-- Visibilité du portfolio -->
+    <section class="form-section">
+      <h2>Visibilité du portfolio</h2>
+      <p class="section-hint">Choisissez qui peut voir votre portfolio dans la galerie des membres.</p>
+      <div class="visibilite-row">
+        <label class="visibilite-option" [class.selected]="form.visibilite === 'public'">
+          <input type="radio" name="visibilite" value="public" [(ngModel)]="form.visibilite">
+          <span class="visibilite-label">Public</span>
+          <span class="visibilite-desc">Visible par tout le monde, y compris les visiteurs non connectés</span>
+        </label>
+        <label class="visibilite-option" [class.selected]="form.visibilite === 'membre'">
+          <input type="radio" name="visibilite" value="membre" [(ngModel)]="form.visibilite">
+          <span class="visibilite-label">Membres</span>
+          <span class="visibilite-desc">Visible uniquement par les membres connectés</span>
+        </label>
+      </div>
+    </section>
+
     <!-- Identité -->
     <section class="form-section">
       <h2>Identité</h2>
