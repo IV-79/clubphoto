@@ -5,6 +5,7 @@
 ## En cours (alpha)
 
 ### Améliorations
+- **Page d'accueil — animations d'entrée de section** — les cartes (À la une, Activités, Photographes) et les cellules (Galerie) arrivent toutes simultanément depuis des directions différentes (gauche, droite, haut) pendant que la section scrolle naturellement dans le viewport (`top 80%` → `top top`, scrub 0.8 sans pin). Chaque section se verrouille brièvement à l'écran une fois installée (`+=30%`). Navigation via les dots ou la flèche bas : vitesse proportionnelle à la distance (500 px/s, ease linéaire) pour que toutes les sections défilent au même rythme quel que soit le saut.
 - **Page d'accueil — navigation verticale & flèche de scroll** — pilule de dots cliquables sur le côté droit (masquée sur mobile) : chaque dot correspond à une section, s'active en rouge avec la position de scroll, et un clic saute directement à la fin des animations de la section ciblée. "Accueil" remonte en haut de page ; "Rejoignez-nous" descend jusqu'au CTA. Les positions sont lues dans un `requestAnimationFrame` post-`ScrollTrigger.refresh()` pour tenir compte des spacers GSAP. Flèche rebondissante `position: fixed` en bas de l'écran : progresse de section en section selon la position courante, disparaît sur la dernière section.
 - **Page d'accueil — séparateurs pellicule cinéma** — bande noire 56px avec perforations (repeating-linear-gradient) et ligne rouge centrale entre chaque section GSAP, renforçant l'identité photo du club.
 - **Header — cloche de notifications sur mobile** — la cloche apparaît à gauche du burger ; elle ouvre/ferme le même panneau de notifications que le desktop (badge rouge si non-lus), avec largeur adaptée à l'écran.
@@ -143,7 +144,7 @@
 - Portfolio : suppression du bouton étoile (photo de couverture de carte) — simplification de l'interface.
 
 ---
-
+claudes
 ## Précédent
 
 - **Photo de profil et bandeau** — les membres peuvent uploader une photo de profil et une photo de bandeau visible sur leur page publique.

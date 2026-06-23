@@ -8,6 +8,7 @@ import { map, filter, take } from 'rxjs/operators';
 import { Subscription, race, timer } from 'rxjs';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 import { ConfigService } from '../../services/config.service';
 import { ArticleService } from '../../services/article.service';
 import { SortieService } from '../../services/sortie.service';
@@ -18,7 +19,7 @@ import { Article, getArticleTypeMeta } from '../../models/article.model';
 import { ThemeMensuel, computeThemeStatut, ThemeStatut } from '../../models/theme.model';
 import { UserProfile } from '../../models/user.model';
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
 interface NavItem {
   id:     string;
@@ -125,7 +126,7 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
     let membresST: ScrollTrigger | undefined;
 
     this.gsapCtx = gsap.context(() => {
-      actuST    = this.pinSection(root, '.actu-section',    '.actu-card',   ['right', 'right', 'right']);
+      actuST    = this.pinSection(root, '.actu-section',    '.actu-card',   ['left', 'right', 'up']);
       actST     = this.pinSection(root, '.act-section',     '.act-card',    ['left',  'right']);
       galleryST = this.pinGallery(root);
       membresST = this.pinSection(root, '.membres-section', '.membre-card', ['left',  'right', 'up']);
@@ -137,13 +138,13 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
     requestAnimationFrame(() => {
       const vh = window.innerHeight;
       const actuStart    = actuST?.start    ?? vh;
-      const actuEnd      = actuST?.end      ?? actuStart + vh * 3;
+      const actuEnd      = actuST?.end      ?? actuStart + vh * 0.3;
       const actStart     = actST?.start     ?? actuEnd;
-      const actEnd       = actST?.end       ?? actStart + vh * 2;
+      const actEnd       = actST?.end       ?? actStart + vh * 0.3;
       const galleryStart = galleryST?.start ?? actEnd;
-      const galleryEnd   = galleryST?.end   ?? galleryStart + vh * 4;
+      const galleryEnd   = galleryST?.end   ?? galleryStart + vh * 0.3;
       const membresStart = membresST?.start ?? galleryEnd;
-      const membresEnd   = membresST?.end   ?? membresStart + vh * 3;
+      const membresEnd   = membresST?.end   ?? membresStart + vh * 0.3;
 
       // Position réelle du CTA dans le document (spacers GSAP déjà en place)
       const ctaEl    = root.querySelector<HTMLElement>('.cta-section');
@@ -176,8 +177,14 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
     window.addEventListener('scroll', this.scrollHandler, { passive: true });
   }
 
+  private smoothScrollTo(y: number) {
+    const distance = Math.abs(y - window.scrollY);
+    const duration = Math.min(Math.max(distance / 500, 1), 5);
+    gsap.to(window, { scrollTo: { y }, duration, ease: 'none' });
+  }
+
   scrollToSection(target: number) {
-    window.scrollTo({ top: target, behavior: 'smooth' });
+    this.smoothScrollTo(target);
   }
 
   /** Flèche bas fixe : descend vers la section suivante selon la position courante */
@@ -186,10 +193,10 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
     const current = this.activeNav();
     const idx     = items.findIndex(i => i.id === current);
     const next    = items[idx + 1];
-    window.scrollTo({ top: next?.target ?? window.innerHeight, behavior: 'smooth' });
+    this.smoothScrollTo(next?.target ?? window.innerHeight);
   }
 
-  // ── section avec pin + scrub ──
+  // ── section : cartes animent pendant la montée, pin pour contempler ──
   private pinSection(
     root:       HTMLElement,
     sectionSel: string,
@@ -210,26 +217,33 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
       });
     });
 
-    const tl = gsap.timeline({
+    // Cartes animent pendant que la section scrolle dans le viewport (pas de pin)
+    const animTL = gsap.timeline({
       scrollTrigger: {
-        trigger:       section,
-        start:         'top top',
-        end:           `+=${cards.length * 120}%`,
-        pin:           true,
-        pinSpacing:    true,
-        scrub:         0.8,
-        anticipatePin: 1,
+        trigger: section,
+        start:   'top 80%',
+        end:     'top top',
+        scrub:   0.8,
       },
     });
-
     cards.forEach(card => {
-      tl.to(card, { x: 0, y: 0, opacity: 1, ease: 'power3.out', duration: 1 }, '>');
+      animTL.to(card, { x: 0, y: 0, opacity: 1, ease: 'power3.out', duration: 1 }, 0);
     });
 
-    return tl.scrollTrigger ?? undefined;
+    // Pin séparé : verrouille la section à l'écran une fois arrivée
+    const pinST = ScrollTrigger.create({
+      trigger:       section,
+      start:         'top top',
+      end:           '+=30%',
+      pin:           true,
+      pinSpacing:    true,
+      anticipatePin: 1,
+    });
+
+    return pinST;
   }
 
-  // ── galerie : chaque cellule arrive grande puis se réduit à sa place ──
+  // ── galerie : cellules animent pendant la montée + pin ──
   private pinGallery(root: HTMLElement): ScrollTrigger | undefined {
     const section = root.querySelector<HTMLElement>('.gallery-section');
     if (!section) return;
@@ -245,23 +259,30 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
       });
     });
 
-    const tl = gsap.timeline({
+    // Cellules animent pendant que la galerie scrolle dans le viewport (pas de pin)
+    const animTL = gsap.timeline({
       scrollTrigger: {
-        trigger:       section,
-        start:         'top top',
-        end:           `+=${cells.length * 55}%`,
-        pin:           true,
-        pinSpacing:    true,
-        scrub:         0.8,
-        anticipatePin: 1,
+        trigger: section,
+        start:   'top 80%',
+        end:     'top top',
+        scrub:   0.8,
       },
     });
-
     cells.forEach(cell => {
-      tl.to(cell, { scale: 1, x: 0, opacity: 1, ease: 'power3.out', duration: 1 }, '>');
+      animTL.to(cell, { scale: 1, x: 0, opacity: 1, ease: 'power3.out', duration: 1 }, 0);
     });
 
-    return tl.scrollTrigger ?? undefined;
+    // Pin séparé
+    const pinST = ScrollTrigger.create({
+      trigger:       section,
+      start:         'top top',
+      end:           '+=30%',
+      pin:           true,
+      pinSpacing:    true,
+      anticipatePin: 1,
+    });
+
+    return pinST;
   }
 
   // ── helpers template ──
