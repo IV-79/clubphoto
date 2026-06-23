@@ -76,6 +76,21 @@ export class ThemeService {
     });
   }
 
+  async modifierTheme(id: string, data: {
+    titre: string;
+    description: string;
+    mois: string;
+    dateOuverture: string;
+    dateCloture: string;
+    dateFinVote: string;
+    maxPhotos: number;
+    maxVotes: number;
+  }): Promise<void> {
+    await runInInjectionContext(this.injector, () =>
+      updateDoc(doc(this.firestore, 'themes', id), data as Record<string, unknown>)
+    );
+  }
+
   async supprimerTheme(id: string): Promise<void> {
     await deleteDoc(doc(this.firestore, 'themes', id));
   }
