@@ -131,10 +131,10 @@ export class Reunions {
       const v = this.editForm.getRawValue();
       const oldReunion = this.reunions().find(r => r.id === id);
       await this.service.modifier(id, {
-        titre: v.titre.trim(),
-        date: this.dateToString(v.date),
-        ...(v.lieu.trim()        ? { lieu: v.lieu.trim() }               : {}),
-        ...(v.description.trim() ? { description: v.description.trim() } : {}),
+        titre:       v.titre.trim(),
+        date:        this.dateToString(v.date),
+        lieu:        v.lieu.trim(),
+        description: v.description.trim(),
       }, oldReunion ? { oldDate: oldReunion.date, titre: v.titre.trim() } : undefined);
       this.editingId.set(null);
     } finally { this.saving.set(false); }

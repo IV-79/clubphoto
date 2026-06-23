@@ -1,6 +1,6 @@
 import { Injectable, inject, Injector, runInInjectionContext } from '@angular/core';
 import {
-  Firestore, collection, collectionData, doc, addDoc, deleteDoc, updateDoc, query, orderBy
+  Firestore, collection, collectionData, doc, addDoc, deleteDoc, updateDoc, query, orderBy, deleteField
 } from '@angular/fire/firestore';
 import { Observable, firstValueFrom } from 'rxjs';
 import { Reunion } from '../models/reunion.model';
@@ -46,8 +46,12 @@ export class ReunionService {
     data: Partial<Omit<Reunion, 'id' | 'dateCreation' | 'type'>>,
     notifCtx?: { oldDate: string; titre: string }
   ): Promise<void> {
+    const update: Record<string, unknown> = {};
+    for (const [key, val] of Object.entries(data as Record<string, unknown>)) {
+      update[key] = (typeof val === 'string' && val === '') ? deleteField() : val;
+    }
     await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, 'reunions', id), data as Record<string, unknown>)
+      updateDoc(doc(this.firestore, 'reunions', id), update)
     );
     if (notifCtx && data.date && data.date !== notifCtx.oldDate) {
       const profile = await firstValueFrom(this.authService.currentUserProfile$);
