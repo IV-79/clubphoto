@@ -1,7 +1,7 @@
 import { Component, inject, signal, computed } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
-import { combineLatest, of, switchMap } from 'rxjs';
+import { combineLatest, of, switchMap, map, distinctUntilChanged, catchError } from 'rxjs';
 import { OneShotService } from '../../../../services/oneshot.service';
 import { AuthService } from '../../../../services/auth.service';
 import { ConfirmService } from '../../../../services/confirm.service';
@@ -32,10 +32,18 @@ export class OneShotDetail {
 
   readonly id = this.route.snapshot.paramMap.get('id')!;
 
-  event   = toSignal(this.oneShotService.getOneShot(this.id));
+  profile = toSignal(this.authService.currentUserProfile$);
+
+  // Re-souscrit quand l'auth change : évite que la lecture du doc "preparation"
+  // échoue si Firestore évalue la règle avant que le token soit disponible
+  private event$ = toObservable(this.profile).pipe(
+    map(p => p?.uid ?? null),
+    distinctUntilChanged(),
+    switchMap(() => this.oneShotService.getOneShot(this.id).pipe(catchError(() => of(undefined))))
+  );
+  event   = toSignal(this.event$);
   themes  = toSignal(this.oneShotService.getThemes(this.id),  { initialValue: [] as OneShotTheme[] });
   photos  = toSignal(this.oneShotService.getPhotos(this.id),  { initialValue: [] as OneShotPhoto[] });
-  profile = toSignal(this.authService.currentUserProfile$);
 
   isLoggedIn = computed(() => !!this.profile());
   authReady  = computed(() => this.profile() !== undefined);
@@ -81,18 +89,24 @@ export class OneShotDetail {
     if (!next || this.transitioning()) return;
     this.transitioning.set(true);
     this.confirmTransition.set(false);
-    const ev = this.event();
-    await this.oneShotService.updateStatut(this.id, next, ev ? {
-      titre: ev.titre, nomCreateur: ev.nomCreateur, creatorUid: ev.creatorUid,
-    } : undefined);
-    this.transitioning.set(false);
+    try {
+      const ev = this.event();
+      await this.oneShotService.updateStatut(this.id, next, ev ? {
+        titre: ev.titre, nomCreateur: ev.nomCreateur, creatorUid: ev.creatorUid,
+      } : undefined);
+    } finally {
+      this.transitioning.set(false);
+    }
   }
 
   async fermerInscriptions() {
     if (this.transitioning()) return;
     this.transitioning.set(true);
-    await this.oneShotService.updateStatut(this.id, 'fermeture_inscriptions');
-    this.transitioning.set(false);
+    try {
+      await this.oneShotService.updateStatut(this.id, 'fermeture_inscriptions');
+    } finally {
+      this.transitioning.set(false);
+    }
   }
   statutLabel        = computed(() => ONESHOT_STATUT_LABELS[this.event()?.statut ?? 'preparation']);
   inscriptionOuverte = computed(() => this.event()?.statut === 'inscription');

@@ -32,6 +32,12 @@ export class SortiesListe {
   );
   mesSorties = toSignal(this.mesSorties$, { initialValue: [] as Sortie[] });
 
+  // OneSHots du créateur connecté — pour afficher les brouillons (préparation) uniquement à lui
+  private mesOneShots$ = toObservable(this.profile).pipe(
+    switchMap(p => p ? this.oneShotService.getMyOneShots(p.uid) : of([] as OneShot[]))
+  );
+  mesOneShots = toSignal(this.mesOneShots$, { initialValue: [] as OneShot[] });
+
   readonly sortieTypes = Object.entries(SORTIE_TYPE_META) as [SortieType, { label: string; emoji: string }][];
 
   filterTexte  = signal('');
@@ -61,8 +67,12 @@ export class SortiesListe {
       .sort((a, b) => a.date.localeCompare(b.date))
       .map(data => ({ kind: 'sortie' as const, data }));
 
-    const oneshots: ActiviteItem[] = this.oneshots()
-      .filter(o => o.statut !== 'resultats')
+    // Merge public oneshots with creator's preparation ones (deduplicate by id)
+    const publicOneShots = this.oneshots().filter(o => o.statut !== 'resultats');
+    const publicIds = new Set(publicOneShots.map(o => o.id));
+    const mesEnPrep = this.mesOneShots().filter(o => o.statut === 'preparation' && !publicIds.has(o.id));
+
+    const oneshots: ActiviteItem[] = [...publicOneShots, ...mesEnPrep]
       .sort((a, b) => a.dateCreation.localeCompare(b.dateCreation))
       .map(data => ({ kind: 'oneshot' as const, data }));
 

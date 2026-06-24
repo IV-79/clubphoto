@@ -98,13 +98,24 @@ service cloud.firestore {
                   || (isLoggedIn() && resource.data.creatorUid == request.auth.uid)
                   || isAdmin();
       allow create: if isLoggedIn();
-      allow update: if isLoggedIn() && resource.data.creatorUid == request.auth.uid;
+      // Créateur ou admin : mise à jour complète (statut, titre, lieu, date…)
+      allow update: if isLoggedIn() && (
+        resource.data.creatorUid == request.auth.uid || isAdmin()
+      );
+      // Tout membre connecté peut incrémenter/décrémenter nbInscrits ou nbThemes
+      allow update: if isLoggedIn() &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nbInscrits', 'nbThemes']);
+      allow delete: if isLoggedIn() && (
+        resource.data.creatorUid == request.auth.uid || isAdmin()
+      );
     }
 
     match /oneshots/{oneShotId}/themes/{themeId} {
       allow read: if true;
-      allow write: if isLoggedIn() &&
-        get(/databases/$(database)/documents/oneshots/$(oneShotId)).data.creatorUid == request.auth.uid;
+      allow write: if isLoggedIn() && (
+        get(/databases/$(database)/documents/oneshots/$(oneShotId)).data.creatorUid == request.auth.uid ||
+        isAdmin()
+      );
     }
 
     match /oneshots/{oneShotId}/inscriptions/{uid} {

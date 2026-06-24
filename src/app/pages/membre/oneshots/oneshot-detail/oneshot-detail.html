@@ -112,7 +112,7 @@
           @for (ins of inscriptions(); track ins.uid) {
             <span class="participant-name-chip" [class.me]="ins.uid === profile()?.uid">
               {{ ins.nomMembre }}
-              @if (isCreator() && inscriptionOuverte()) {
+              @if (canManage() && inscriptionOuverte()) {
                 <button class="chip-remove" (click)="retirerInscrit(ins.uid, ins.nomMembre)" title="Désinscrire">×</button>
               }
             </span>
@@ -120,7 +120,7 @@
         </div>
       }
 
-      @if (isCreator() && inscriptionOuverte()) {
+      @if (canManage() && inscriptionOuverte()) {
         <div class="add-participant-zone">
           @if (!addingMembre()) {
             <button class="btn-add-participant" (click)="addingMembre.set(true)">+ Inscrire un membre</button>
