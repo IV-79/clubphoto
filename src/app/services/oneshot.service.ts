@@ -1,7 +1,7 @@
 import { Injectable, inject, Injector, runInInjectionContext } from '@angular/core';
 import {
   Firestore, collection, collectionData, doc, docData,
-  addDoc, updateDoc, deleteDoc, setDoc, query, where, orderBy, arrayUnion, arrayRemove, increment
+  addDoc, updateDoc, deleteDoc, setDoc, query, where, orderBy, arrayUnion, arrayRemove, increment, getDocs
 } from '@angular/fire/firestore';
 import { Storage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from '@angular/fire/storage';
 import { Observable } from 'rxjs';
@@ -85,6 +85,27 @@ export class OneShotService {
         { lien: `/galeries/oneshots/${id}`, sourceNom: notifCtx.nomCreateur, excludeUid: notifCtx.creatorUid }
       ).catch(() => {});
     }
+  }
+
+  async updateLieu(id: string, lieu: string): Promise<void> {
+    await runInInjectionContext(this.injector, () =>
+      updateDoc(doc(this.firestore, 'oneshots', id), { lieu })
+    );
+  }
+
+  async deleteOneShot(id: string): Promise<void> {
+    const photosSnap = await runInInjectionContext(this.injector, () =>
+      getDocs(collection(this.firestore, `oneshots/${id}/photos`))
+    );
+    await Promise.all(
+      photosSnap.docs
+        .map(d => d.data()['storagePath'] as string)
+        .filter(Boolean)
+        .map(path => deleteObject(ref(this.storage, path)).catch(() => {}))
+    );
+    await runInInjectionContext(this.injector, () =>
+      deleteDoc(doc(this.firestore, 'oneshots', id))
+    );
   }
 
   async updateStatut(

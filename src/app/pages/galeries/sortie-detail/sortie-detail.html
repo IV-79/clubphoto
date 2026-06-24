@@ -3,7 +3,11 @@
 
   <!-- En-tête -->
   <div class="detail-header">
-    <a routerLink="/galeries/sorties" class="back-link">← Sorties Photo</a>
+    @if (!editMode()) {
+      <a routerLink="/galeries/sorties" class="back-link">← Activités</a>
+    } @else {
+      <button class="back-link back-link-btn" (click)="cancelEdit()">← Retour à l'événement</button>
+    }
 
     @if (!editMode()) {
       <div class="header-title-row">
@@ -97,7 +101,7 @@
   </div>
 
   <!-- Inscription -->
-  @if (s.inscriptionObligatoire) {
+  @if (s.inscriptionObligatoire && !editMode()) {
     <section class="inscription-section">
       <div class="inscription-header">
         <h2>

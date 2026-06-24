@@ -2,13 +2,10 @@ import { Component, inject, signal, computed, effect, untracked, OnInit } from '
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { switchMap } from 'rxjs';
 import { OneShotService } from '../../../../services/oneshot.service';
 import { AuthService } from '../../../../services/auth.service';
 import { ConfirmService } from '../../../../services/confirm.service';
-import {
-  OneShotTheme, OneShotStatut, ONESHOT_STATUT_LABELS
-} from '../../../../models/oneshot.model';
+import { OneShotTheme, ONESHOT_STATUT_LABELS } from '../../../../models/oneshot.model';
 
 @Component({
   selector: 'app-oneshot-gerer',
@@ -25,70 +22,58 @@ export class OneShotGerer implements OnInit {
 
   private id = this.route.snapshot.paramMap.get('id')!;
 
-  event = toSignal(this.oneShotService.getOneShot(this.id));
+  event  = toSignal(this.oneShotService.getOneShot(this.id));
   themes = toSignal(this.oneShotService.getThemes(this.id), { initialValue: [] as OneShotTheme[] });
-  inscriptions = toSignal(this.oneShotService.getInscriptions(this.id), { initialValue: [] });
   profile = toSignal(this.authService.currentUserProfile$);
 
   statutLabel = computed(() => ONESHOT_STATUT_LABELS[this.event()?.statut ?? 'preparation']);
 
-  // Transitions
-  nextStatut = computed<OneShotStatut | null>(() => {
-    switch (this.event()?.statut) {
-      case 'preparation':            return 'inscription';
-      case 'inscription':            return 'vote';
-      case 'fermeture_inscriptions': return 'vote';
-      case 'vote':                   return 'resultats';
-      default:                       return null;
-    }
-  });
-  nextStatutLabel = computed(() => {
-    switch (this.event()?.statut) {
-      case 'preparation':            return 'Ouvrir les inscriptions';
-      case 'inscription':            return 'Ouvrir les votes (sans fermer les inscriptions)';
-      case 'fermeture_inscriptions': return 'Ouvrir les votes';
-      case 'vote':                   return 'Publier les résultats';
-      default:                       return '';
-    }
-  });
-  peutFermerInscriptions = computed(() => this.event()?.statut === 'inscription');
-  peutEditerThemes = computed(() =>
-    ['preparation', 'inscription', 'fermeture_inscriptions'].includes(this.event()?.statut ?? '')
-  );
-  peutEditerDate = computed(() =>
+  peutEditer = computed(() =>
     ['preparation', 'inscription', 'fermeture_inscriptions'].includes(this.event()?.statut ?? '')
   );
 
-  transitioning = signal(false);
-  confirmTransition = signal(false);
+  dateValue = '';
+  lieuValue = '';
+  saving = signal(false);
 
   constructor() {
-    // Synchronise dateValue depuis Firestore quand l'event charge
     effect(() => {
-      const d = this.event()?.date ?? '';
-      untracked(() => { this.dateValue = d; });
+      const ev = this.event();
+      untracked(() => {
+        this.dateValue = ev?.date ?? '';
+        this.lieuValue = ev?.lieu ?? '';
+      });
     });
   }
 
-  // Date
-  dateValue = '';
-  savingDate = signal(false);
-
-  async saveDate() {
-    if (this.savingDate()) return;
-    this.savingDate.set(true);
-    const ev = this.event();
-    await this.oneShotService.updateDate(this.id, this.dateValue, ev ? {
-      oldDate: ev.date ?? '',
-      titre: ev.titre,
-      nomCreateur: ev.nomCreateur,
-      creatorUid: ev.creatorUid,
-    } : undefined);
-    this.savingDate.set(false);
+  ngOnInit() {
+    this.authService.currentUserProfile$.subscribe(profile => {
+      const ev = this.event();
+      if (ev && profile && ev.creatorUid !== profile.uid) {
+        this.router.navigate(['/galeries/oneshots', this.id]);
+      }
+    });
   }
 
-  formatDate(dateStr: string): string {
-    return new Date(dateStr + 'T00:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  cancel() {
+    this.router.navigate(['/galeries/oneshots', this.id]);
+  }
+
+  async save() {
+    if (this.saving()) return;
+    this.saving.set(true);
+    const ev = this.event();
+    await Promise.all([
+      this.oneShotService.updateDate(this.id, this.dateValue, ev ? {
+        oldDate: ev.date ?? '',
+        titre: ev.titre,
+        nomCreateur: ev.nomCreateur,
+        creatorUid: ev.creatorUid,
+      } : undefined),
+      this.oneShotService.updateLieu(this.id, this.lieuValue.trim()),
+    ]);
+    this.saving.set(false);
+    this.router.navigate(['/galeries/oneshots', this.id]);
   }
 
   // Thèmes
@@ -96,35 +81,6 @@ export class OneShotGerer implements OnInit {
   editingThemeId = signal<string | null>(null);
   editingThemeNom = '';
   savingTheme = signal(false);
-
-  ngOnInit() {
-    // Vérifier que l'utilisateur est bien le créateur
-    this.authService.currentUserProfile$.subscribe(profile => {
-      const ev = this.event();
-      if (ev && profile && ev.creatorUid !== profile.uid) {
-        this.router.navigate(['/membre/oneshots']);
-      }
-    });
-  }
-
-  async avancer() {
-    const next = this.nextStatut();
-    if (!next || this.transitioning()) return;
-    this.transitioning.set(true);
-    this.confirmTransition.set(false);
-    const ev = this.event();
-    await this.oneShotService.updateStatut(this.id, next, ev ? {
-      titre: ev.titre, nomCreateur: ev.nomCreateur, creatorUid: ev.creatorUid
-    } : undefined);
-    this.transitioning.set(false);
-  }
-
-  async fermerInscriptions() {
-    if (this.transitioning()) return;
-    this.transitioning.set(true);
-    await this.oneShotService.updateStatut(this.id, 'fermeture_inscriptions');
-    this.transitioning.set(false);
-  }
 
   async addTheme() {
     const nom = this.newThemeNom.trim();

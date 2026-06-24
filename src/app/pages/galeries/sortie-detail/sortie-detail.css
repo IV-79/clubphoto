@@ -13,6 +13,14 @@
 }
 .back-link:hover { color: #e0e0e0; }
 
+.back-link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+
 .detail-header {
   margin-bottom: 2rem;
 }

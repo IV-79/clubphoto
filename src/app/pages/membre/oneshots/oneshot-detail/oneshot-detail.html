@@ -2,8 +2,11 @@
 
   <div class="page-nav">
     <a routerLink="/galeries/sorties" class="back-link">← Activités</a>
-    @if (isCreator()) {
-      <a [routerLink]="['/membre/oneshots', id, 'gerer']" class="link-gerer">Gérer cet événement →</a>
+    @if (canManage()) {
+      <div class="header-actions">
+        <a [routerLink]="['/membre/oneshots', id, 'gerer']" class="btn-action">✏ Modifier</a>
+        <button class="btn-action btn-action-danger" (click)="deleteOneShot()">🗑 Supprimer</button>
+      </div>
     }
   </div>
 
@@ -14,13 +17,67 @@
     <div class="event-header">
       <span class="statut-badge statut-{{ event()!.statut }}">{{ statutLabel() }}</span>
       <h1>{{ event()!.titre }}</h1>
-      @if (isLoggedIn()) {
-        <p class="event-createur">Organisé par {{ event()!.nomCreateur }}</p>
-      }
+      <div class="event-meta">
+        @if (event()!.date) {
+          <span class="meta-item">📅 {{ formatDate(event()!.date!) }}</span>
+        }
+        @if (event()!.lieu) {
+          <span class="meta-item">📍 {{ event()!.lieu }}</span>
+        }
+        @if (isLoggedIn()) {
+          <span class="meta-item meta-org">Organisé par {{ event()!.nomCreateur }}</span>
+        }
+      </div>
       @if (event()!.description) {
         <p class="event-desc">{{ event()!.description }}</p>
       }
     </div>
+
+    <!-- ── GESTION (créateur / admin) ──────────────── -->
+    @if (canManage()) {
+      <section class="gestion-section">
+        <h2 class="gestion-title">Gestion</h2>
+
+        <!-- Avancement -->
+        <div class="panel">
+          <h3 class="panel-title">Avancement de l'événement</h3>
+          @if (nextStatut()) {
+            @if (!confirmTransition()) {
+              <div class="transition-actions">
+                <button class="btn-avancer" (click)="confirmTransition.set(true)" [disabled]="transitioning()">
+                  {{ nextStatutLabel() }}
+                </button>
+                @if (peutFermerInscriptions()) {
+                  <button class="btn-fermer" (click)="fermerInscriptions()" [disabled]="transitioning()">
+                    Fermer les inscriptions d'abord
+                  </button>
+                }
+              </div>
+            } @else {
+              <div class="confirm-zone">
+                <span class="confirm-msg">Cette action est irréversible. Confirmer ?</span>
+                <button class="btn-avancer" (click)="avancer()" [disabled]="transitioning()">
+                  {{ transitioning() ? 'En cours…' : 'Confirmer' }}
+                </button>
+                <button class="btn-cancel" (click)="confirmTransition.set(false)">Annuler</button>
+              </div>
+            }
+          } @else {
+            <p class="event-clos">Résultats publiés — événement terminé.</p>
+          }
+        </div>
+
+        <!-- Photos -->
+        @if (['inscription', 'fermeture_inscriptions', 'vote', 'resultats'].includes(event()!.statut)) {
+          <div class="panel">
+            <h3 class="panel-title">Photos</h3>
+            <a [routerLink]="['/membre/oneshots', id, 'photos']" class="btn-photos-link">
+              Gérer les photos →
+            </a>
+          </div>
+        }
+      </section>
+    }
 
     <!-- Inscription + Participants -->
     <section class="inscription-section">

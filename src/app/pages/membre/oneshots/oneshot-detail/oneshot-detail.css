@@ -17,14 +17,34 @@
   margin-bottom: 28px;
 }
 
-.back-link, .link-gerer {
+.back-link {
   color: rgba(0,0,0,0.35);
   text-decoration: none;
   font-size: 0.85rem;
   transition: color 0.2s;
 }
+.back-link:hover { color: #1a1a1a; }
 
-.back-link:hover, .link-gerer:hover { color: #1a1a1a; }
+.header-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.btn-action {
+  background: transparent;
+  border: 1px solid #bbb;
+  color: #555;
+  border-radius: 4px;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+.btn-action:hover { border-color: #888; color: #1a1a1a; }
+.btn-action-danger:hover { border-color: #c0392b; color: #c0392b; }
 
 .loading { color: rgba(0,0,0,0.3); padding: 40px 0; }
 
@@ -37,11 +57,19 @@
   margin: 8px 0 4px;
 }
 
-.event-createur {
-  color: rgba(0,0,0,0.3);
-  font-size: 0.82rem;
-  margin: 0 0 8px;
+.event-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.25rem;
+  margin: 4px 0 8px;
 }
+
+.meta-item {
+  font-size: 0.85rem;
+  color: rgba(0,0,0,0.42);
+}
+
+.meta-org { color: rgba(0,0,0,0.3); }
 
 .event-desc {
   color: rgba(0,0,0,0.5);
@@ -427,6 +455,84 @@
 
 .result-name  { color: #1a1a1a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .result-votes { color: rgba(0,0,0,0.38); flex-shrink: 0; margin-left: 6px; font-weight: 600; }
+
+/* ── Gestion (créateur / admin) ─────────── */
+
+.gestion-section {
+  margin-bottom: 8px;
+}
+
+.gestion-title {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: rgba(0,0,0,0.25);
+  margin: 0 0 14px;
+}
+
+.gestion-section .panel { background: #fafafa; }
+.gestion-section .panel h3 { font-size: 0.7rem; }
+
+.transition-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.confirm-zone { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+.confirm-msg { color: rgba(0,0,0,0.45); font-size: 0.85rem; }
+
+.event-clos {
+  color: rgba(0,0,0,0.35);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.btn-avancer {
+  background: #cc0000;
+  color: white;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-avancer:hover:not(:disabled) { background: #aa0000; }
+.btn-avancer:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.btn-fermer {
+  background: none;
+  border: 1px solid rgba(0,0,0,0.14);
+  color: rgba(0,0,0,0.45);
+  padding: 8px 18px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-fermer:hover:not(:disabled) { border-color: rgba(0,0,0,0.26); color: rgba(0,0,0,0.7); }
+.btn-fermer:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-cancel {
+  background: none;
+  border: 1px solid rgba(0,0,0,0.12);
+  color: rgba(0,0,0,0.4);
+  padding: 7px 14px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.btn-photos-link {
+  display: inline-block;
+  color: rgba(0,0,0,0.5);
+  text-decoration: none;
+  font-size: 0.88rem;
+  padding: 7px 14px;
+  border: 1px solid rgba(0,0,0,0.12);
+  border-radius: 4px;
+  transition: all 0.15s;
+}
+.btn-photos-link:hover { color: #1a1a1a; border-color: rgba(0,0,0,0.22); background: rgba(0,0,0,0.03); }
 
 /* ── Expand button ───────────────────────── */
 

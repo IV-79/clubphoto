@@ -1,214 +1,133 @@
-:host {
-  display: block;
-  background: white;
-  min-height: calc(100vh - 120px);
-}
-
-.gerer-page {
+.modifier-page {
   max-width: 720px;
   margin: 0 auto;
-  padding: 32px 24px 80px;
+  padding: 2rem 1.5rem 80px;
 }
-
-.page-nav {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 28px;
-}
-
-.back-link, .link-voir {
-  color: rgba(0,0,0,0.35);
-  text-decoration: none;
-  font-size: 0.85rem;
-  transition: color 0.2s;
-}
-
-.back-link:hover, .link-voir:hover { color: #1a1a1a; }
 
 .loading { color: rgba(0,0,0,0.3); padding: 40px 0; }
 
-.event-header { margin-bottom: 28px; }
-
-.event-header h1 {
-  color: #1a1a1a;
-  font-size: 1.6rem;
-  font-weight: 300;
-  margin: 8px 0 4px;
-}
-
-.event-desc {
-  color: rgba(0,0,0,0.4);
+.back-link {
+  color: rgba(0,0,0,0.35);
+  text-decoration: none;
   font-size: 0.85rem;
-  margin: 0;
-}
-
-.statut-badge {
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-  padding: 3px 10px;
-  border-radius: 10px;
   display: inline-block;
+  margin-bottom: 1.5rem;
+  transition: color 0.2s;
 }
+.back-link:hover { color: #1a1a1a; }
 
-.statut-preparation            { background: rgba(0,0,0,0.06);         color: rgba(0,0,0,0.42); }
-.statut-inscription            { background: rgba(76,175,80,0.12);      color: #2e7d32; }
-.statut-fermeture_inscriptions { background: rgba(255,152,0,0.12);      color: #e65100; }
-.statut-vote                   { background: rgba(33,150,243,0.12);     color: #1565c0; }
-.statut-resultats              { background: rgba(255,193,7,0.15);      color: #c8a000; }
-
-.panel {
-  background: #f8f8f8;
-  border: 1px solid rgba(0,0,0,0.08);
-  border-radius: 6px;
-  padding: 20px 24px;
-  margin-bottom: 16px;
-}
-
-.panel-placeholder { opacity: 0.5; }
-
-.panel-title {
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 1.5px;
+.edit-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #888;
   text-transform: uppercase;
-  color: rgba(0,0,0,0.3);
-  margin: 0 0 16px;
+  letter-spacing: 0.08em;
+  margin: 0 0 1.25rem;
+}
+
+.edit-form {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  flex-direction: column;
+  gap: 1.25rem;
 }
 
-.count {
-  background: rgba(0,0,0,0.06);
-  color: rgba(0,0,0,0.3);
-  font-size: 0.68rem;
-  padding: 1px 7px;
-  border-radius: 10px;
-}
-
-.panel-note {
-  color: rgba(0,0,0,0.35);
-  font-size: 0.82rem;
-  margin: 0 0 12px;
-}
-
-.empty-msg {
-  color: rgba(0,0,0,0.28);
-  font-size: 0.85rem;
-  margin: 0;
-}
-
-.event-clos {
-  color: rgba(0,0,0,0.35);
-  font-size: 0.85rem;
-  padding: 12px 0;
-  margin-bottom: 16px;
-}
-
-.date-field-row {
+.form-row {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  gap: 1rem;
   flex-wrap: wrap;
-  margin-bottom: 10px;
 }
 
-.date-input-lg {
+.field-half {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field-label {
+  font-size: 0.78rem;
+  color: rgba(0,0,0,0.5);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.field-optional {
+  font-size: 0.72rem;
+  color: rgba(0,0,0,0.28);
+  font-weight: normal;
+}
+
+.field-input {
+  width: 100%;
   background: white;
-  border: 1px solid rgba(0,0,0,0.18);
+  border: 1px solid rgba(0,0,0,0.22);
   color: #1a1a1a;
-  padding: 8px 12px;
+  padding: 0.55rem 0.75rem;
   border-radius: 4px;
   font-size: 0.9rem;
   font-family: inherit;
   outline: none;
-  min-width: 180px;
+  box-sizing: border-box;
   transition: border-color 0.15s;
 }
+.field-input:focus { border-color: #cc0000; border-width: 2px; }
+.field-input:disabled { opacity: 0.5; background: #f5f5f5; }
 
-.date-input-lg:focus { border-color: #cc0000; }
-.date-input-lg:disabled { opacity: 0.5; }
-
-.btn-save-date {
-  background: rgba(0,0,0,0.04);
-  border: 1px solid rgba(0,0,0,0.14);
-  color: rgba(0,0,0,0.55);
-  padding: 8px 16px;
-  border-radius: 4px;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: all 0.15s;
+.field-note {
+  font-size: 0.76rem;
+  color: rgba(0,0,0,0.32);
+  margin: 0;
 }
 
-.btn-save-date:hover:not(:disabled) { background: rgba(0,0,0,0.08); color: #1a1a1a; }
-.btn-save-date:disabled { opacity: 0.4; cursor: not-allowed; }
+/* ── Thèmes ── */
 
-.date-readonly {
-  color: rgba(0,0,0,0.55);
-  font-size: 0.9rem;
-  margin: 0 0 8px;
+.themes-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.transition-actions { display: flex; gap: 10px; flex-wrap: wrap; }
-
-.confirm-zone { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-
-.confirm-msg { color: rgba(0,0,0,0.45); font-size: 0.85rem; }
-
-.btn-avancer {
-  background: #cc0000;
-  color: white;
-  border: none;
-  padding: 9px 18px;
-  border-radius: 4px;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.btn-avancer:hover:not(:disabled) { background: #aa0000; }
-.btn-avancer:disabled { opacity: 0.45; cursor: not-allowed; }
-
-.btn-fermer-inscriptions {
-  background: none;
-  border: 1px solid rgba(0,0,0,0.14);
-  color: rgba(0,0,0,0.45);
-  padding: 9px 18px;
-  border-radius: 4px;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.btn-fermer-inscriptions:hover:not(:disabled) { border-color: rgba(0,0,0,0.26); color: rgba(0,0,0,0.7); }
-.btn-fermer-inscriptions:disabled { opacity: 0.4; cursor: not-allowed; }
-
-.btn-cancel {
-  background: none;
-  border: 1px solid rgba(0,0,0,0.12);
+.themes-count {
+  background: rgba(0,0,0,0.07);
   color: rgba(0,0,0,0.4);
-  padding: 8px 16px;
-  border-radius: 4px;
-  font-size: 0.85rem;
-  cursor: pointer;
+  font-size: 0.68rem;
+  font-weight: normal;
+  padding: 1px 7px;
+  border-radius: 10px;
 }
 
-.themes-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.themes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.themes-empty {
+  color: rgba(0,0,0,0.28);
+  font-size: 0.85rem;
+  margin: 4px 0;
+  font-style: italic;
+}
 
 .theme-row {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 10px;
-  background: white;
+  padding: 7px 10px;
+  background: #f8f8f8;
   border: 1px solid rgba(0,0,0,0.07);
   border-radius: 4px;
 }
 
-.theme-nom { flex: 1; color: rgba(0,0,0,0.72); font-size: 0.9rem; }
+.theme-nom {
+  flex: 1;
+  color: rgba(0,0,0,0.72);
+  font-size: 0.9rem;
+}
 
 .theme-input {
   flex: 1;
@@ -221,7 +140,6 @@
   font-family: inherit;
   outline: none;
 }
-
 .theme-input:focus { border-color: #cc0000; }
 
 .btn-sm {
@@ -234,7 +152,6 @@
   border-radius: 3px;
   transition: background 0.15s;
 }
-
 .btn-edit { color: rgba(0,0,0,0.3); }
 .btn-edit:hover { color: rgba(0,0,0,0.65); background: rgba(0,0,0,0.05); }
 .btn-del  { color: rgba(0,0,0,0.22); }
@@ -245,7 +162,10 @@
 .btn-x:hover    { color: #1a1a1a; }
 .btn-sm:disabled { opacity: 0.3; cursor: not-allowed; }
 
-.add-theme-form { display: flex; gap: 8px; }
+.add-theme-form {
+  display: flex;
+  gap: 8px;
+}
 
 .btn-add-theme {
   background: rgba(0,0,0,0.04);
@@ -258,37 +178,45 @@
   white-space: nowrap;
   transition: all 0.15s;
 }
-
 .btn-add-theme:hover:not(:disabled) { background: rgba(0,0,0,0.08); color: #1a1a1a; }
 .btn-add-theme:disabled { opacity: 0.35; cursor: not-allowed; }
 
-.btn-photos-link {
-  display: inline-block;
-  color: rgba(0,0,0,0.5);
-  text-decoration: none;
-  font-size: 0.88rem;
-  padding: 8px 16px;
-  border: 1px solid rgba(0,0,0,0.12);
-  border-radius: 4px;
-  transition: all 0.15s;
-}
+/* ── Actions ── */
 
-.btn-photos-link:hover { color: #1a1a1a; border-color: rgba(0,0,0,0.22); background: rgba(0,0,0,0.03); }
-
-.inscrits-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+.edit-actions {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  gap: 1rem;
+  align-items: center;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(0,0,0,0.07);
 }
 
-.inscrits-list li {
-  color: rgba(0,0,0,0.65);
+.btn-cancel-edit {
+  background: none;
+  border: none;
+  color: rgba(0,0,0,0.4);
   font-size: 0.9rem;
-  padding: 6px 10px;
-  background: white;
-  border: 1px solid rgba(0,0,0,0.06);
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s;
+}
+.btn-cancel-edit:hover:not(:disabled) { color: #1a1a1a; }
+.btn-cancel-edit:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-save-edit {
+  background: #cc0000;
+  color: #fff;
+  border: none;
   border-radius: 4px;
+  padding: 0.6rem 1.4rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-save-edit:hover:not(:disabled) { background: #aa0000; }
+.btn-save-edit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+@media (max-width: 600px) {
+  .form-row { flex-direction: column; }
 }

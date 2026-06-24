@@ -83,13 +83,13 @@ export class SortiesListe {
     return [...sorties, ...oneshots];
   });
 
-  passeesFiltrees = computed((): ActiviteItem[] => {
+  private applyFilters(items: ActiviteItem[]): ActiviteItem[] {
     const texte  = this.filterTexte().toLowerCase().trim();
     const type   = this.filterType();
     const dateDu = this.filterDateDu();
     const dateAu = this.filterDateAu();
 
-    return this.passees().filter(item => {
+    return items.filter(item => {
       if (texte && !item.data.titre.toLowerCase().includes(texte)) return false;
 
       if (type !== null) {
@@ -105,7 +105,10 @@ export class SortiesListe {
 
       return true;
     });
-  });
+  }
+
+  aVenirFiltrees  = computed(() => this.applyFilters(this.aVenir()));
+  passeesFiltrees = computed(() => this.applyFilters(this.passees()));
 
   isAVenir(date: string): boolean {
     return new Date(date + 'T00:00:00') > new Date();

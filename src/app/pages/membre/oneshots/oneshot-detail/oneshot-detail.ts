@@ -1,5 +1,5 @@
 import { Component, inject, signal, computed } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { combineLatest, of, switchMap } from 'rxjs';
 import { OneShotService } from '../../../../services/oneshot.service';
@@ -9,7 +9,7 @@ import { NotificationService } from '../../../../services/notification.service';
 import { LoginModalService } from '../../../../services/login-modal.service';
 import {
   OneShotInscription, OneShotPhoto, OneShotTheme, OneShotVote,
-  ONESHOT_STATUT_LABELS
+  OneShotStatut, ONESHOT_STATUT_LABELS
 } from '../../../../models/oneshot.model';
 import { UserProfile } from '../../../../models/user.model';
 import { LightboxPhoto, PhotoLightboxCallbacks } from '../../../../models/commentaire.model';
@@ -23,6 +23,7 @@ import { PhotoLightbox } from '../../../../components/photo-lightbox/photo-light
 })
 export class OneShotDetail {
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private oneShotService = inject(OneShotService);
   private authService = inject(AuthService);
   private confirmService = inject(ConfirmService);
@@ -45,7 +46,54 @@ export class OneShotDetail {
   inscriptions = toSignal(this.inscriptions$, { initialValue: [] as OneShotInscription[] });
 
   isCreator          = computed(() => this.event()?.creatorUid === this.profile()?.uid);
+  isAdmin            = computed(() => this.profile()?.role === 'admin');
+  canManage          = computed(() => this.isCreator() || this.isAdmin());
   isInscrit          = computed(() => this.inscriptions().some(i => i.uid === this.profile()?.uid));
+
+  // Avancement (gestion)
+  nextStatut = computed<OneShotStatut | null>(() => {
+    switch (this.event()?.statut) {
+      case 'preparation':            return 'inscription';
+      case 'inscription':            return 'vote';
+      case 'fermeture_inscriptions': return 'vote';
+      case 'vote':                   return 'resultats';
+      default:                       return null;
+    }
+  });
+
+  nextStatutLabel = computed(() => {
+    switch (this.event()?.statut) {
+      case 'preparation':            return 'Ouvrir les inscriptions';
+      case 'inscription':            return 'Passer directement au vote';
+      case 'fermeture_inscriptions': return 'Ouvrir les votes';
+      case 'vote':                   return 'Publier les résultats';
+      default:                       return '';
+    }
+  });
+
+  peutFermerInscriptions = computed(() => this.event()?.statut === 'inscription');
+
+  transitioning   = signal(false);
+  confirmTransition = signal(false);
+
+  async avancer() {
+    const next = this.nextStatut();
+    if (!next || this.transitioning()) return;
+    this.transitioning.set(true);
+    this.confirmTransition.set(false);
+    const ev = this.event();
+    await this.oneShotService.updateStatut(this.id, next, ev ? {
+      titre: ev.titre, nomCreateur: ev.nomCreateur, creatorUid: ev.creatorUid,
+    } : undefined);
+    this.transitioning.set(false);
+  }
+
+  async fermerInscriptions() {
+    if (this.transitioning()) return;
+    this.transitioning.set(true);
+    await this.oneShotService.updateStatut(this.id, 'fermeture_inscriptions');
+    this.transitioning.set(false);
+  }
   statutLabel        = computed(() => ONESHOT_STATUT_LABELS[this.event()?.statut ?? 'preparation']);
   inscriptionOuverte = computed(() => this.event()?.statut === 'inscription');
 
@@ -202,6 +250,22 @@ export class OneShotDetail {
   computeRank(photos: OneShotPhoto[], index: number): number {
     const currentVotes = this.voteCountByPhoto()[photos[index].id] ?? 0;
     return photos.filter(p => (this.voteCountByPhoto()[p.id] ?? 0) > currentVotes).length + 1;
+  }
+
+  formatDate(date: string): string {
+    return new Date(date + 'T12:00:00').toLocaleDateString('fr-FR', {
+      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+    });
+  }
+
+  async deleteOneShot() {
+    const e = this.event();
+    const ok = await this.confirmService.confirm(
+      `Supprimer « ${e?.titre ?? 'ce OneShot'} » et toutes ses photos définitivement ?`
+    );
+    if (!ok) return;
+    await this.oneShotService.deleteOneShot(this.id);
+    this.router.navigate(['/galeries/sorties']);
   }
 
   // Vote
