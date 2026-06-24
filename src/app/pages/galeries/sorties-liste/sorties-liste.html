@@ -44,7 +44,7 @@
   <section class="section">
     <h2 class="section-title">
       À venir
-      <span class="count">{{ hasFilters() ? aVenirFiltrees().length + ' / ' + aVenir().length : aVenir().length }}</span>
+      <span class="count">{{ aVenirFiltrees().length < aVenir().length ? aVenirFiltrees().length + ' / ' + aVenir().length : aVenir().length }}</span>
     </h2>
 
     @if (aVenirFiltrees().length === 0) {
@@ -123,7 +123,7 @@
     <section class="section">
       <h2 class="section-title">
         Passés
-        <span class="count">{{ hasFilters() ? passeesFiltrees().length + ' / ' + passees().length : passees().length }}</span>
+        <span class="count">{{ passeesFiltrees().length < passees().length ? passeesFiltrees().length + ' / ' + passees().length : passees().length }}</span>
       </h2>
 
       @if (passeesFiltrees().length === 0) {

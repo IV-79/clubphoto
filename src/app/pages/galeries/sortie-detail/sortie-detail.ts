@@ -161,9 +161,18 @@ export class SortieDetail {
       deleteReply: (photoId, commentId, replyId, allReplies) =>
         this.sortieService.deleteReply(sortieId, photoId, commentId, replyId, allReplies),
       canDeletePhoto: () => this.isAdmin(),
-      deletePhoto: (photo) => {
+      deletePhoto: async (photo) => {
         const img = this.photos().find(p => p.id === photo.id)!;
-        return this.sortieService.deletePhoto(sortieId, img, this.sortie()?.photoCouvertureUrl);
+        await this.sortieService.deletePhoto(sortieId, img, this.sortie()?.photoCouvertureUrl);
+        const actor = this.profile();
+        if (actor && img.uploaderUid !== actor.uid) {
+          const titre = photo.titre ? ` « ${photo.titre} »` : '';
+          this.notifService.sendToUser(
+            img.uploaderUid, 'admin',
+            `L'admin ${this.userName()} a supprimé votre photo${titre} dans l'événement « ${this.sortie()?.titre ?? ''} »`,
+            { sourceNom: this.userName(), sourceUid: actor.uid }
+          ).catch(() => {});
+        }
       },
     };
   });
@@ -320,10 +329,30 @@ export class SortieDetail {
     const ok = await this.confirmService.confirm('Supprimer cette photo définitivement ?');
     if (!ok) return;
     await this.sortieService.deletePhoto(this.sortieId, photo, this.sortie()?.photoCouvertureUrl);
+    const actor = this.profile();
+    if (actor && photo.uploaderUid !== actor.uid) {
+      const role = this.isAdmin() ? "L'admin" : "L'organisateur";
+      this.notifService.sendToUser(
+        photo.uploaderUid, 'admin',
+        `${role} ${this.userName()} a supprimé votre photo dans l'événement « ${this.sortie()?.titre ?? ''} »`,
+        { sourceNom: this.userName(), sourceUid: actor.uid }
+      ).catch(() => {});
+    }
   }
 
   openLightbox(index: number) { this.lightboxIndex.set(index); }
   closeLightbox() { this.lightboxIndex.set(null); }
+
+  isLikedPhoto(photo: SortieImage): boolean {
+    return (photo.likes ?? []).includes(this.profile()?.uid ?? '');
+  }
+
+  async toggleLikeOnCard(photo: SortieImage, $event: MouseEvent) {
+    $event.stopPropagation();
+    const uid = this.profile()?.uid;
+    if (!uid) return;
+    await this.sortieService.toggleLikePhoto(this.sortieId, photo.id, uid, this.isLikedPhoto(photo));
+  }
 
   formatDate(date: string): string {
     return new Date(date + 'T12:00:00').toLocaleDateString('fr-FR', {

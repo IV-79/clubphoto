@@ -5,6 +5,7 @@ import { combineLatest, switchMap, startWith } from 'rxjs';
 import { AuthService } from '../../../services/auth.service';
 import { PhotoService } from '../../../services/photo.service';
 import { ConfirmService } from '../../../services/confirm.service';
+import { NotificationService } from '../../../services/notification.service';
 import { Photo, PhotoCategorie, PHOTO_CATEGORIES } from '../../../models/photo.model';
 import { UserProfile } from '../../../models/user.model';
 import { LightboxPhoto, PhotoLightboxCallbacks } from '../../../models/commentaire.model';
@@ -21,6 +22,7 @@ export class MembreDetail {
   private authService    = inject(AuthService);
   private photoService   = inject(PhotoService);
   private confirmService = inject(ConfirmService);
+  private notifService   = inject(NotificationService);
 
   private readonly categoriesMap = new Map(PHOTO_CATEGORIES.map(c => [c.value, c.label]));
 
@@ -195,6 +197,15 @@ export class MembreDetail {
         const photo = this.photos().find(p => p.id === lbPhoto.id);
         if (!photo) return;
         await this.photoService.deletePhoto(photo);
+        const actor = this.profile();
+        if (actor && photo.uid !== actor.uid) {
+          const titre = lbPhoto.titre ? ` « ${lbPhoto.titre} »` : '';
+          this.notifService.sendToUser(
+            photo.uid, 'admin',
+            `L'admin ${this.userName()} a supprimé votre photo${titre} de votre portfolio`,
+            { sourceNom: this.userName(), sourceUid: actor.uid }
+          ).catch(() => {});
+        }
       },
     };
   });

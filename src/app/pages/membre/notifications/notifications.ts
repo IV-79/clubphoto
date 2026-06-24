@@ -49,7 +49,7 @@ export class Notifications {
     const uid = this.profile()?.uid;
     if (!uid) return;
     if (!n.lu) await this.notifService.markAsRead(uid, n.id);
-    if (n.lien) this.router.navigateByUrl(n.lien);
+    if (n.type !== 'admin' && n.lien) this.router.navigateByUrl(n.lien);
   }
 
   async markAllRead() {

@@ -6,6 +6,7 @@ import { ThemeService } from '../../../services/theme.service';
 import { AuthService } from '../../../services/auth.service';
 import { LoginModalService } from '../../../services/login-modal.service';
 import { ConfirmService } from '../../../services/confirm.service';
+import { NotificationService } from '../../../services/notification.service';
 import { compressToJpeg } from '../../../utils/image-compress';
 import { readExifWithConsent } from '../../../utils/exif-reader';
 import { GpsConsentService } from '../../../services/gps-consent.service';
@@ -27,6 +28,7 @@ export class ThemeDetail {
   private themeService   = inject(ThemeService);
   private authService    = inject(AuthService);
   private confirmService = inject(ConfirmService);
+  private notifService   = inject(NotificationService);
   private gpsConsentService = inject(GpsConsentService);
   readonly loginModal = inject(LoginModalService);
 
@@ -149,6 +151,15 @@ export class ThemeDetail {
         const soum = this.soumissions().find(s => s.id === lbPhoto.id);
         if (!soum) return;
         await this.themeService.deleteSoumission(themeId, soum.id, soum.storagePath, soum.membreUid, soum.fileSize);
+        const actor = this.profile();
+        if (actor && soum.membreUid !== actor.uid) {
+          const titre = lbPhoto.titre ? ` « ${lbPhoto.titre} »` : '';
+          this.notifService.sendToUser(
+            soum.membreUid, 'admin',
+            `L'admin ${this.userName()} a supprimé votre soumission${titre} au thème « ${this.theme()?.titre ?? ''} »`,
+            { sourceNom: this.userName(), sourceUid: actor.uid }
+          ).catch(() => {});
+        }
       },
     };
   });

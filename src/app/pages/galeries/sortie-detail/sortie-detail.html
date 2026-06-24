@@ -221,6 +221,14 @@
           <div class="photo-card" [class.own-card]="isOwn" (click)="openLightbox(i)">
             <div class="photo-img-wrap">
               <img [src]="photo.url" [alt]="photo.nomUploader" loading="lazy" class="photo-img" />
+              @if (profile()) {
+                <button class="card-heart" [class.liked]="isLikedPhoto(photo)"
+                  (click)="toggleLikeOnCard(photo, $event)"
+                  [title]="isLikedPhoto(photo) ? 'Retirer le like' : 'J\'aime'">
+                  <span class="hi">♥</span>
+                  @if (photo.likes.length > 0) { {{ photo.likes.length }} }
+                </button>
+              }
             </div>
             <div class="photo-footer">
               @if (isOwn) {
@@ -254,7 +262,7 @@
     [userName]="userName()"
     [canInteract]="!!profile()"
     [isAdmin]="isAdmin()"
-    [hideLikes]="true"
+    [hideLikes]="false"
     (closed)="closeLightbox()"
   />
 }

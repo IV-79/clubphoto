@@ -226,9 +226,19 @@ export class OneShotDetail {
         this.oneShotService.deleteReply(oneShotId, photoId, commentId, replyId, allReplies),
       canDeletePhoto: (photo) =>
         this.isCreator() || photo.uploaderUid === uid,
-      deletePhoto: (photo) => {
+      deletePhoto: async (photo) => {
         const p = this.photos().find(p => p.id === photo.id)!;
-        return this.oneShotService.deletePhoto(oneShotId, p);
+        await this.oneShotService.deletePhoto(oneShotId, p);
+        const actor = this.profile();
+        if (actor && photo.uploaderUid && photo.uploaderUid !== actor.uid) {
+          const role = this.isAdmin() ? "L'admin" : 'Le créateur';
+          const titre = photo.titre ? ` « ${photo.titre} »` : '';
+          this.notifService.sendToUser(
+            photo.uploaderUid, 'admin',
+            `${role} ${this.userName()} a supprimé votre photo${titre} dans le OneShot « ${this.event()?.titre ?? ''} »`,
+            { sourceNom: this.userName(), sourceUid: actor.uid }
+          ).catch(() => {});
+        }
       },
     };
   });

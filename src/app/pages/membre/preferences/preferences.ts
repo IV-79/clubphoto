@@ -25,6 +25,7 @@ export class Preferences {
       reunions: isSubscribed(s, 'reunion'),
       likes:    isSubscribed(s, 'like'),
       comments: isSubscribed(s, 'comment'),
+      admin:    isSubscribed(s, 'admin'),
     };
   });
 
