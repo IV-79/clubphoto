@@ -30,7 +30,7 @@ export class OneShotService {
 
   // --- OneShot ---
 
-  async create(data: { titre: string; description?: string; creatorUid: string; nomCreateur: string; date?: string }): Promise<string> {
+  async create(data: { titre: string; description?: string; lieu?: string; creatorUid: string; nomCreateur: string; date?: string }): Promise<string> {
     const ref = await runInInjectionContext(this.injector, () =>
       addDoc(collection(this.firestore, 'oneshots'), {
         ...data,

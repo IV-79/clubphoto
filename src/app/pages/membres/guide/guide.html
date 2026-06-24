@@ -641,22 +641,24 @@
     <div class="guide-card">
       <h3>Créer un OneShot</h3>
       <ol class="guide-steps">
-        <li>Allez dans <strong>Mon espace → Mes OneShots</strong> via le menu en haut à droite.</li>
-        <li>Cliquez sur <strong>+ Créer un événement</strong>.</li>
-        <li>Renseignez le titre (obligatoire), une description et une date optionnelles.</li>
-        <li>L'événement démarre en mode <strong>Préparation</strong> — personne ne le voit encore.</li>
-        <li>Depuis la page de gestion, ajoutez vos <strong>thèmes</strong> (ex : "Paysage", "Portrait").</li>
-        <li>Quand tout est prêt, cliquez <strong>Ouvrir les inscriptions</strong> pour le rendre visible.</li>
+        <li>Allez sur <a routerLink="/galeries/sorties" class="inline-link">Activités → Événements</a>.</li>
+        <li>Cliquez <strong>+ Organiser un événement</strong>.</li>
+        <li>Sélectionnez le type <strong>🏆 OneShot</strong>.</li>
+        <li>Renseignez le titre (obligatoire), une description, une date et un lieu (tous optionnels).</li>
+        <li>Cliquez <strong>Créer le OneShot</strong> — vous arrivez directement sur la page de l'événement.</li>
+        <li>Dans la section <strong>Gestion</strong>, ajoutez vos <strong>thèmes</strong> (ex : "Paysage", "Portrait").</li>
+        <li>Quand tout est prêt, cliquez <strong>Ouvrir les inscriptions</strong> pour le rendre visible à tous.</li>
       </ol>
+      <p class="guide-note">L'événement démarre en mode <strong>Préparation</strong> — personne ne le voit tant que vous n'avez pas ouvert les inscriptions.</p>
     </div>
 
     <!-- Participer -->
     <div class="guide-card">
       <h3>Participer à un OneShot</h3>
       <ol class="guide-steps">
-        <li>Rendez-vous sur <a routerLink="/galeries/sorties" class="inline-link">Activités → Événements</a> (les OneShots y sont listés) ou directement sur <a routerLink="/galeries/oneshots" class="inline-link">Activités → OneShots</a>.</li>
+        <li>Rendez-vous sur <a routerLink="/galeries/sorties" class="inline-link">Activités → Événements</a> — les OneShots y apparaissent avec les événements.</li>
         <li>Ouvrez un événement dont le statut est <span class="badge-inline inscription">Inscriptions ouvertes</span>.</li>
-        <li>Inscrivez-vous — l'organisateur pourra ensuite uploader vos photos.</li>
+        <li>Cliquez <strong>Je participe</strong> — l'organisateur pourra ensuite uploader vos photos.</li>
         <li>Pendant la phase <span class="badge-inline vote">Vote</span>, parcourez les photos et votez pour celles que vous préférez (sauf les vôtres).</li>
         <li>Les <span class="badge-inline resultats">Résultats</span> sont visibles dès que l'organisateur clôture le vote.</li>
       </ol>
@@ -667,11 +669,13 @@
     <div class="guide-card">
       <h3>Gérer son OneShot (organisateur)</h3>
       <ol class="guide-steps">
-        <li>Depuis <strong>Mon espace → Mes OneShots</strong>, cliquez <strong>Gérer</strong> sur votre événement.</li>
+        <li>Ouvrez votre OneShot depuis <a routerLink="/galeries/sorties" class="inline-link">Activités → Événements</a>.</li>
+        <li>La section <strong>Gestion</strong> est visible uniquement pour vous (créateur) et les admins, directement sur la page de l'événement.</li>
         <li>Ajoutez et renommez les thèmes tant que vous êtes en Préparation, Inscriptions ou Inscriptions fermées. Dès le passage en Vote, les thèmes sont verrouillés et révélés aux participants.</li>
-        <li>Pour ajouter des photos : section <strong>Photos → Gérer les photos</strong>. Glissez plusieurs fichiers en une fois. Assignez chaque photo à un membre et un thème.</li>
+        <li>Pour ajouter des photos : cliquez <strong>Gérer les photos</strong> dans la section Gestion. Glissez plusieurs fichiers en une fois et assignez chaque photo à un membre et un thème.</li>
         <li>Avancez les étapes dans l'ordre avec le bouton <strong>Avancer</strong> (action irréversible, une confirmation est demandée).</li>
-        <li>Le bouton <strong>Fermer les inscriptions d'abord</strong> est optionnel : il vous permet de bloquer les nouvelles inscriptions et uploads le temps de tout vérifier, avant d'ouvrir le vote.</li>
+        <li>Le bouton <strong>Fermer les inscriptions d'abord</strong> est optionnel : il vous permet de bloquer les nouvelles inscriptions le temps de tout vérifier, avant d'ouvrir le vote.</li>
+        <li>Pour modifier le titre, la date ou le lieu, cliquez <strong>✏ Modifier</strong> en haut de la page.</li>
       </ol>
     </div>
   </section>
