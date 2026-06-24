@@ -19,11 +19,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'npm' # <-- Active la mise en cache ultra-rapide
+          node-version: 22
+          cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       - name: Generate Environment Files
         env:
@@ -37,9 +37,7 @@ jobs:
         run: node set-env.js
 
       - name: Build Angular App
-        run: |
-          timeout 120 npm run build || [ $? -eq 124 ]
-          test -d dist/club-photo/browser
+        run: npm run build
 
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
