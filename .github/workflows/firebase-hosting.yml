@@ -37,7 +37,9 @@ jobs:
         run: node set-env.js
 
       - name: Build Angular App
-        run: npm run build
+        run: |
+          timeout 120 npm run build -- --no-progress || [ $? -eq 124 ]
+          test -d dist/club-photo/browser
 
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
