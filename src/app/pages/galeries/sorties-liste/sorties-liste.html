@@ -34,6 +34,13 @@
              (input)="filterDateAu.set($any($event.target).value)" />
     </div>
 
+    @if (profile()) {
+      <button class="filter-chip" [class.filter-chip-active]="filterMesActivites()"
+              (click)="filterMesActivites.set(!filterMesActivites())">
+        Mes activités
+      </button>
+    }
+
     @if (hasFilters()) {
       <button class="btn-reset-filter" (click)="resetFilters()">✕</button>
     }

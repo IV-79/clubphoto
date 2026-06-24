@@ -40,14 +40,15 @@ export class SortiesListe {
 
   readonly sortieTypes = Object.entries(SORTIE_TYPE_META) as [SortieType, { label: string; emoji: string }][];
 
-  filterTexte  = signal('');
-  filterType   = signal<SortieType | 'oneshot' | null>(null);
-  filterDateDu = signal('');
-  filterDateAu = signal('');
+  filterTexte        = signal('');
+  filterType         = signal<SortieType | 'oneshot' | null>(null);
+  filterDateDu       = signal('');
+  filterDateAu       = signal('');
+  filterMesActivites = signal(false);
 
   hasFilters = computed(() =>
     !!this.filterTexte().trim() || this.filterType() !== null ||
-    !!this.filterDateDu() || !!this.filterDateAu()
+    !!this.filterDateDu() || !!this.filterDateAu() || this.filterMesActivites()
   );
 
   onTypeChange(value: string): void {
@@ -59,6 +60,7 @@ export class SortiesListe {
     this.filterType.set(null);
     this.filterDateDu.set('');
     this.filterDateAu.set('');
+    this.filterMesActivites.set(false);
   }
 
   aVenir = computed((): ActiviteItem[] => {
@@ -94,10 +96,12 @@ export class SortiesListe {
   });
 
   private applyFilters(items: ActiviteItem[]): ActiviteItem[] {
-    const texte  = this.filterTexte().toLowerCase().trim();
-    const type   = this.filterType();
-    const dateDu = this.filterDateDu();
-    const dateAu = this.filterDateAu();
+    const texte          = this.filterTexte().toLowerCase().trim();
+    const type           = this.filterType();
+    const dateDu         = this.filterDateDu();
+    const dateAu         = this.filterDateAu();
+    const mesActivites   = this.filterMesActivites();
+    const uid            = this.profile()?.uid;
 
     return items.filter(item => {
       if (texte && !item.data.titre.toLowerCase().includes(texte)) return false;
@@ -112,6 +116,13 @@ export class SortiesListe {
         : ((item.data as OneShot).date ?? (item.data as OneShot).dateCreation.slice(0, 10));
       if (dateDu && date < dateDu) return false;
       if (dateAu && date > dateAu) return false;
+
+      if (mesActivites && uid) {
+        const creatorUid = item.kind === 'sortie'
+          ? (item.data as Sortie).organisateurUid
+          : (item.data as OneShot).creatorUid;
+        if (creatorUid !== uid) return false;
+      }
 
       return true;
     });
