@@ -38,17 +38,33 @@ export class SortiesListe {
   );
   mesOneShots = toSignal(this.mesOneShots$, { initialValue: [] as OneShot[] });
 
+  private mesSortiesInscritesIds$ = toObservable(this.profile).pipe(
+    switchMap(p => p ? this.sortieService.getMesSortiesInscritesIds(p.uid) : of([] as string[]))
+  );
+  mesSortiesInscritesIds = toSignal(this.mesSortiesInscritesIds$, { initialValue: [] as string[] });
+
+  private mesOneShotsInscritsIds$ = toObservable(this.profile).pipe(
+    switchMap(p => p ? this.oneShotService.getMesOneShotsInscritsIds(p.uid) : of([] as string[]))
+  );
+  mesOneShotsInscritsIds = toSignal(this.mesOneShotsInscritsIds$, { initialValue: [] as string[] });
+
+  hasOrganisees = computed(() =>
+    this.mesSorties().length > 0 || this.mesOneShots().length > 0
+  );
+
   readonly sortieTypes = Object.entries(SORTIE_TYPE_META) as [SortieType, { label: string; emoji: string }][];
 
-  filterTexte        = signal('');
-  filterType         = signal<SortieType | 'oneshot' | null>(null);
-  filterDateDu       = signal('');
-  filterDateAu       = signal('');
-  filterMesActivites = signal(false);
+  filterTexte      = signal('');
+  filterType       = signal<SortieType | 'oneshot' | null>(null);
+  filterDateDu     = signal('');
+  filterDateAu     = signal('');
+  filterOrganisees = signal(false);
+  filterParticipe  = signal(false);
 
   hasFilters = computed(() =>
     !!this.filterTexte().trim() || this.filterType() !== null ||
-    !!this.filterDateDu() || !!this.filterDateAu() || this.filterMesActivites()
+    !!this.filterDateDu() || !!this.filterDateAu() ||
+    this.filterOrganisees() || this.filterParticipe()
   );
 
   onTypeChange(value: string): void {
@@ -60,7 +76,8 @@ export class SortiesListe {
     this.filterType.set(null);
     this.filterDateDu.set('');
     this.filterDateAu.set('');
-    this.filterMesActivites.set(false);
+    this.filterOrganisees.set(false);
+    this.filterParticipe.set(false);
   }
 
   aVenir = computed((): ActiviteItem[] => {
@@ -96,12 +113,15 @@ export class SortiesListe {
   });
 
   private applyFilters(items: ActiviteItem[]): ActiviteItem[] {
-    const texte          = this.filterTexte().toLowerCase().trim();
-    const type           = this.filterType();
-    const dateDu         = this.filterDateDu();
-    const dateAu         = this.filterDateAu();
-    const mesActivites   = this.filterMesActivites();
-    const uid            = this.profile()?.uid;
+    const texte        = this.filterTexte().toLowerCase().trim();
+    const type         = this.filterType();
+    const dateDu       = this.filterDateDu();
+    const dateAu       = this.filterDateAu();
+    const organisees   = this.filterOrganisees();
+    const participe    = this.filterParticipe();
+    const uid          = this.profile()?.uid;
+    const inscritsSortieIds   = new Set(this.mesSortiesInscritesIds());
+    const inscritsOneShotIds  = new Set(this.mesOneShotsInscritsIds());
 
     return items.filter(item => {
       if (texte && !item.data.titre.toLowerCase().includes(texte)) return false;
@@ -117,11 +137,14 @@ export class SortiesListe {
       if (dateDu && date < dateDu) return false;
       if (dateAu && date > dateAu) return false;
 
-      if (mesActivites && uid) {
-        const creatorUid = item.kind === 'sortie'
-          ? (item.data as Sortie).organisateurUid
-          : (item.data as OneShot).creatorUid;
-        if (creatorUid !== uid) return false;
+      if (uid && (organisees || participe)) {
+        const isOrganisateur = item.kind === 'sortie'
+          ? (item.data as Sortie).organisateurUid === uid
+          : (item.data as OneShot).creatorUid === uid;
+        const isInscrit = item.kind === 'sortie'
+          ? inscritsSortieIds.has(item.data.id!)
+          : inscritsOneShotIds.has(item.data.id!);
+        if (!((organisees && isOrganisateur) || (participe && isInscrit))) return false;
       }
 
       return true;

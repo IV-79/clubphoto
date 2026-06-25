@@ -1,12 +1,13 @@
 import { Injectable, inject, Injector, runInInjectionContext } from '@angular/core';
 import { NotificationService } from './notification.service';
 import {
-  Firestore, collection, collectionData, doc, docData,
+  Firestore, collection, collectionData, collectionGroup, doc, docData,
   addDoc, updateDoc, deleteDoc, setDoc, getDocs, getDoc,
   query, where, orderBy, arrayUnion, arrayRemove, increment, deleteField
 } from '@angular/fire/firestore';
 import { Storage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from '@angular/fire/storage';
-import { Observable } from 'rxjs';
+import { Observable, from } from 'rxjs';
+import { map } from 'rxjs/operators';
 import {
   Sortie, SortieInscription, SortieImage, SortieCommentaire, SortieReply
 } from '../models/sortie.model';
@@ -109,6 +110,18 @@ export class SortieService {
   }
 
   // --- Inscriptions ---
+
+  getMesSortiesInscritesIds(uid: string): Observable<string[]> {
+    return runInInjectionContext(this.injector, () => {
+      const q = query(collectionGroup(this.firestore, 'inscriptions'), where('uid', '==', uid));
+      return from(getDocs(q)).pipe(
+        map(snap => snap.docs
+          .filter(d => d.ref.parent.parent?.path.startsWith('sorties/'))
+          .map(d => d.ref.parent.parent!.id)
+        )
+      );
+    });
+  }
 
   getInscriptions(sortieId: string): Observable<SortieInscription[]> {
     return runInInjectionContext(this.injector, () =>

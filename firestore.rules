@@ -211,6 +211,11 @@ service cloud.firestore {
       );
     }
 
+    // Lecture collectionGroup inscriptions — pour le filtre "Participe" dans sorties-liste
+    match /{parentPath=**}/inscriptions/{inscriptionId} {
+      allow read: if isLoggedIn() && resource.data.uid == request.auth.uid;
+    }
+
     // Dossiers de documents (lecture membres, écriture admin)
     match /documentDossiers/{dossierId} {
       allow read: if isLoggedIn();

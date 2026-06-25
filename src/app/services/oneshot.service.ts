@@ -1,10 +1,11 @@
 import { Injectable, inject, Injector, runInInjectionContext } from '@angular/core';
 import {
-  Firestore, collection, collectionData, doc, docData,
+  Firestore, collection, collectionData, collectionGroup, doc, docData,
   addDoc, updateDoc, deleteDoc, setDoc, query, where, orderBy, arrayUnion, arrayRemove, increment, getDocs
 } from '@angular/fire/firestore';
 import { Storage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from '@angular/fire/storage';
-import { Observable } from 'rxjs';
+import { Observable, from } from 'rxjs';
+import { map } from 'rxjs/operators';
 import {
   OneShot, OneShotTheme, OneShotInscription,
   OneShotPhoto, OneShotVote, OneShotStatut
@@ -170,6 +171,18 @@ export class OneShotService {
   }
 
   // --- Inscriptions ---
+
+  getMesOneShotsInscritsIds(uid: string): Observable<string[]> {
+    return runInInjectionContext(this.injector, () => {
+      const q = query(collectionGroup(this.firestore, 'inscriptions'), where('uid', '==', uid));
+      return from(getDocs(q)).pipe(
+        map(snap => snap.docs
+          .filter(d => d.ref.parent.parent?.path.startsWith('oneshots/'))
+          .map(d => d.ref.parent.parent!.id)
+        )
+      );
+    });
+  }
 
   getInscriptions(oneShotId: string): Observable<OneShotInscription[]> {
     return runInInjectionContext(this.injector, () =>
