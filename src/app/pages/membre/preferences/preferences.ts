@@ -19,13 +19,14 @@ export class Preferences {
   subs = computed((): Required<UserSubscriptions> => {
     const s = this.profile()?.subscriptions;
     return {
-      oneshots: isSubscribed(s, 'oneshot'),
-      sorties:  isSubscribed(s, 'sortie'),
-      articles: isSubscribed(s, 'article'),
-      reunions: isSubscribed(s, 'reunion'),
-      likes:    isSubscribed(s, 'like'),
-      comments: isSubscribed(s, 'comment'),
-      admin:    isSubscribed(s, 'admin'),
+      oneshots:  isSubscribed(s, 'oneshot'),
+      sorties:   isSubscribed(s, 'sortie'),
+      articles:  isSubscribed(s, 'article'),
+      reunions:  isSubscribed(s, 'reunion'),
+      documents: isSubscribed(s, 'document'),
+      likes:     isSubscribed(s, 'like'),
+      comments:  isSubscribed(s, 'comment'),
+      admin:     isSubscribed(s, 'admin'),
     };
   });
 

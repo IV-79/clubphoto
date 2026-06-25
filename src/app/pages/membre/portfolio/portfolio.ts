@@ -52,6 +52,7 @@ export class MembrePortfolio implements OnInit {
   uploadDescription = '';
   uploadVisibilite: PhotoVisibilite = 'public';
   uploadCategorie = '';
+  uploadTitreError = signal(false);
   private pendingExif: PhotoExif = {};
   uploading = signal(false);
   uploadProgress = signal(0);
@@ -63,6 +64,42 @@ export class MembrePortfolio implements OnInit {
   editVisibilite: PhotoVisibilite = 'membre';
   editCategorie = '';
   editSaving = signal(false);
+
+  // --- Multi-select ---
+  selectMode   = signal(false);
+  selectedIds  = signal(new Set<string>());
+  selectedCount = computed(() => this.selectedIds().size);
+  deleting     = signal(false);
+
+  toggleSelectMode() {
+    if (this.selectMode()) {
+      this.selectMode.set(false);
+      this.selectedIds.set(new Set());
+    } else {
+      this.selectMode.set(true);
+    }
+  }
+
+  toggleSelect(photoId: string) {
+    const s = new Set(this.selectedIds());
+    s.has(photoId) ? s.delete(photoId) : s.add(photoId);
+    this.selectedIds.set(s);
+  }
+
+  async deleteSelected() {
+    const count = this.selectedCount();
+    if (!count || this.deleting()) return;
+    const ok = await this.confirmService.confirm(
+      `Supprimer ${count} photo${count > 1 ? 's' : ''} définitivement ?`
+    );
+    if (!ok) return;
+    this.deleting.set(true);
+    const ids = this.selectedIds();
+    const toDelete = this.photos().filter(p => ids.has(p.id));
+    await Promise.all(toDelete.map(p => this.photoService.deletePhoto(p)));
+    this.deleting.set(false);
+    this.toggleSelectMode();
+  }
 
   // --- Lightbox ---
   lightboxIndex = signal<number | null>(null);
@@ -123,6 +160,7 @@ export class MembrePortfolio implements OnInit {
   onKeydown(e: KeyboardEvent) {
     if (e.key === 'Escape') {
       if (this.lightboxIndex() !== null) { this.closeLightbox(); return; }
+      if (this.selectMode()) { this.toggleSelectMode(); return; }
       if (this.editPhoto()) { this.closeEdit(); return; }
       if (this.showModal()) { this.closeModal(); return; }
     }
@@ -153,7 +191,7 @@ export class MembrePortfolio implements OnInit {
     this.pendingExif = await readExifWithConsent(file, this.gpsConsentService);
     const compressed = await compressToJpeg(file);
     this.selectedFile.set(compressed);
-    this.uploadTitre = file.name.replace(/\.[^.]+$/, '');
+    this.uploadTitre = '';
     const reader = new FileReader();
     reader.onload = e => this.previewUrl.set(e.target?.result as string);
     reader.readAsDataURL(compressed);
@@ -166,6 +204,7 @@ export class MembrePortfolio implements OnInit {
     this.uploadDescription = '';
     this.uploadVisibilite = 'public';
     this.uploadCategorie = '';
+    this.uploadTitreError.set(false);
     this.pendingExif = {};
     this.uploadProgress.set(0);
     if (this.fileInput?.nativeElement) this.fileInput.nativeElement.value = '';
@@ -175,6 +214,7 @@ export class MembrePortfolio implements OnInit {
     const file = this.selectedFile();
     const profile = this.profile();
     if (!file || !profile) return;
+    if (!this.uploadTitre.trim()) { this.uploadTitreError.set(true); return; }
     this.uploading.set(true);
     this.photoService.uploadPhoto(file, profile.uid, profile.nom, {
       titre: this.uploadTitre,

@@ -100,10 +100,6 @@
           } @else if (!inscriptionOuverte() && !isInscrit() && !isCreator() && event()!.statut === 'fermeture_inscriptions') {
             <span class="closed-hint">Inscriptions fermées</span>
           }
-        } @else {
-          @if (inscriptionOuverte()) {
-            <span class="login-hint">Connectez-vous pour vous inscrire</span>
-          }
         }
       </div>
 
@@ -212,8 +208,6 @@
           </section>
         }
 
-      } @else if (authReady()) {
-        <div class="panel panel-info"><button class="inline-link" (click)="loginModal.open()">Connectez-vous</button> pour voir les photos et voter.</div>
       }
     }
 
@@ -268,9 +262,6 @@
               }
             </div>
           </section>
-        }
-        @if (authReady()) {
-          <p class="panel-info top3-hint"><button class="inline-link" (click)="loginModal.open()">Connectez-vous</button> pour voir le classement complet.</p>
         }
 
       }

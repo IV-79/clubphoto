@@ -14,6 +14,7 @@ import { SortieService } from '../../../../services/sortie.service';
 import { OneShotService } from '../../../../services/oneshot.service';
 import { AuthService } from '../../../../services/auth.service';
 import { SortieType } from '../../../../models/sortie.model';
+import { compressToJpeg } from '../../../../utils/image-compress';
 
 type CreationType = SortieType | 'oneshot';
 
@@ -37,6 +38,10 @@ export class SortieCreer {
   profile = toSignal(this.authService.currentUserProfile$);
   saving  = signal(false);
   minDate = new Date();
+
+  pendingCoverFile = signal<File | null>(null);
+  coverPreviewUrl  = signal<string | null>(null);
+  coverDragOver    = signal(false);
 
   form = new FormGroup({
     type:                   new FormControl<CreationType>('sortie_photo', { nonNullable: true }),
@@ -98,6 +103,10 @@ export class SortieCreer {
           ...(v.lieu.trim() ? { lieu: v.lieu.trim() } : {}),
         });
         await this.oneShotService.inscrire(id, profile.uid, nom);
+        if (this.pendingCoverFile()) {
+          const compressed = await compressToJpeg(this.pendingCoverFile()!);
+          await this.oneShotService.setCouverture(id, compressed);
+        }
         this.router.navigate(['/galeries/oneshots', id]);
       } else {
         const inscriptionObligatoire = v.inscriptionObligatoire;
@@ -116,11 +125,42 @@ export class SortieCreer {
         if (inscriptionObligatoire) {
           await this.sortieService.inscrire(id, profile.uid, nom);
         }
+        if (this.pendingCoverFile()) {
+          const compressed = await compressToJpeg(this.pendingCoverFile()!);
+          await this.sortieService.setImageEvenement(id, compressed);
+        }
         this.router.navigate(['/galeries/sorties', id]);
       }
     } finally {
       this.saving.set(false);
     }
+  }
+
+  onCoverDrop(event: DragEvent) {
+    event.preventDefault();
+    this.coverDragOver.set(false);
+    const file = event.dataTransfer?.files?.[0];
+    if (file && file.type.startsWith('image/')) this.setCoverFile(file);
+  }
+
+  onCoverSelected(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (file) this.setCoverFile(file);
+    (event.target as HTMLInputElement).value = '';
+  }
+
+  clearCover() {
+    const prev = this.coverPreviewUrl();
+    if (prev) URL.revokeObjectURL(prev);
+    this.pendingCoverFile.set(null);
+    this.coverPreviewUrl.set(null);
+  }
+
+  private setCoverFile(file: File) {
+    const prev = this.coverPreviewUrl();
+    if (prev) URL.revokeObjectURL(prev);
+    this.pendingCoverFile.set(file);
+    this.coverPreviewUrl.set(URL.createObjectURL(file));
   }
 
   private dateToStr(date: Date): string {

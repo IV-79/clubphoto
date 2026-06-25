@@ -72,7 +72,7 @@ import { Article, getArticleTypeMeta } from '../../models/article.model';
       position: relative; aspect-ratio: 16/9; overflow: hidden;
       background: #f0f0f0; flex-shrink: 0;
     }
-    .cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .cover img { width: 100%; height: 100%; object-fit: contain; display: block; }
     .type-badge {
       position: absolute; bottom: 8px; left: 8px;
       display: inline-flex; align-items: center; gap: 4px;

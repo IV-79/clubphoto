@@ -50,9 +50,7 @@
           }
         </div>
 
-        @if (authReady() && !isLoggedIn()) {
-          <p class="info-msg"><button class="inline-link" (click)="loginModal.open()">Connectez-vous</button> pour soumettre une photo.</p>
-        } @else if (peutSoumettre()) {
+        @if (peutSoumettre()) {
           <div class="upload-zone"
             [class.drag-over]="dragOver()"
             (dragover)="$event.preventDefault(); dragOver.set(true)"
@@ -115,11 +113,7 @@
           }
         </div>
 
-        @if (!isLoggedIn()) {
-          @if (authReady()) {
-            <p class="info-msg"><button class="inline-link" (click)="loginModal.open()">Connectez-vous</button> pour voir les photos et participer au vote.</p>
-          }
-        } @else {
+        @if (isLoggedIn()) {
           <div class="vote-progress">
             <div class="vote-track">
               <div class="vote-fill" [style.width.%]="t.maxVotes ? mesVotes().length / t.maxVotes * 100 : 0"></div>
@@ -231,9 +225,6 @@
               </div>
             }
           </div>
-          @if (authReady()) {
-            <p class="info-msg top3-hint"><button class="inline-link" (click)="loginModal.open()">Connectez-vous</button> pour voir le classement complet.</p>
-          }
 
         }
       </section>

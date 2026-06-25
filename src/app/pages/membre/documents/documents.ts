@@ -14,6 +14,7 @@ import { Auth } from '@angular/fire/auth';
 import { DocumentService } from '../../../services/document.service';
 import { AuthService } from '../../../services/auth.service';
 import { ConfirmService } from '../../../services/confirm.service';
+import { NotificationService } from '../../../services/notification.service';
 import { ClubDocument, getExtensionMeta, extractExtension } from '../../../models/document.model';
 
 @Component({
@@ -354,11 +355,12 @@ import { ClubDocument, getExtensionMeta, extractExtension } from '../../../model
   `]
 })
 export class Documents {
-  private documentService = inject(DocumentService);
-  private authService     = inject(AuthService);
-  private confirmService  = inject(ConfirmService);
-  private snackBar        = inject(MatSnackBar);
-  private auth            = inject(Auth);
+  private documentService  = inject(DocumentService);
+  private authService      = inject(AuthService);
+  private confirmService   = inject(ConfirmService);
+  private notifService     = inject(NotificationService);
+  private snackBar         = inject(MatSnackBar);
+  private auth             = inject(Auth);
 
   currentUid = signal(this.auth.currentUser?.uid ?? '');
   private profile = toSignal(this.authService.currentUserProfile$);
@@ -491,6 +493,10 @@ export class Documents {
       });
 
       await this.documentService.incrementStorage(profile.uid, file.size);
+      await this.notifService.broadcast('document',
+        `Nouveau document : ${this.uploadNomBase.trim()}`,
+        { lien: '/membre/documents', sourceNom: `${profile.prenom ?? ''} ${profile.nom}`.trim() }
+      ).catch(() => {});
       this.resetUploadForm();
       this.snackBar.open('Document uploadé', '', { duration: 3000 });
     } catch (e) {
@@ -553,6 +559,10 @@ export class Documents {
         const diff = file.size - doc.taille;
         if (diff > 0) await this.documentService.incrementStorage(profile.uid, diff);
         else if (diff < 0) await this.documentService.decrementStorage(profile.uid, -diff);
+        await this.notifService.broadcast('document',
+          `Document mis à jour : ${this.replaceNom.trim()}`,
+          { lien: '/membre/documents', sourceNom: `${profile.prenom ?? ''} ${profile.nom}`.trim() }
+        ).catch(() => {});
       } else {
         const filename = doc.extension ? `${this.replaceNom.trim()}.${doc.extension}` : this.replaceNom.trim();
         await this.documentService.updateDocument(doc.id!, {

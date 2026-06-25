@@ -1,9 +1,9 @@
 import { Injectable, inject, Injector, runInInjectionContext } from '@angular/core';
 import {
   Firestore, collection, collectionData, collectionGroup, doc, docData,
-  addDoc, updateDoc, deleteDoc, setDoc, query, where, orderBy, arrayUnion, arrayRemove, increment, getDocs
+  addDoc, updateDoc, deleteDoc, setDoc, query, where, orderBy, arrayUnion, arrayRemove, increment, getDocs, deleteField
 } from '@angular/fire/firestore';
-import { Storage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from '@angular/fire/storage';
+import { Storage, ref, uploadBytes, uploadBytesResumable, getDownloadURL, deleteObject } from '@angular/fire/storage';
 import { Observable, from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {
@@ -94,19 +94,58 @@ export class OneShotService {
     );
   }
 
-  async deleteOneShot(id: string): Promise<void> {
-    const photosSnap = await runInInjectionContext(this.injector, () =>
-      getDocs(collection(this.firestore, `oneshots/${id}/photos`))
+  async setCouverture(id: string, file: File): Promise<void> {
+    const path = `oneshots/${id}/couverture`;
+    const storageRef = ref(this.storage, path);
+    await uploadBytes(storageRef, file);
+    const url = await getDownloadURL(storageRef);
+    await runInInjectionContext(this.injector, () =>
+      updateDoc(doc(this.firestore, 'oneshots', id), { photoCouvertureUrl: url, photoCouverturePath: path })
     );
-    await Promise.all(
-      photosSnap.docs
-        .map(d => d.data()['storagePath'] as string)
-        .filter(Boolean)
-        .map(path => deleteObject(ref(this.storage, path)).catch(() => {}))
+  }
+
+  async removeCouverture(id: string, path: string): Promise<void> {
+    await deleteObject(ref(this.storage, path)).catch(() => {});
+    await runInInjectionContext(this.injector, () =>
+      updateDoc(doc(this.firestore, 'oneshots', id), {
+        photoCouvertureUrl: deleteField(),
+        photoCouverturePath: deleteField(),
+      })
     );
+  }
+
+  async deleteOneShot(
+    id: string,
+    notifCtx?: { titre: string; nomCreateur: string; creatorUid: string; photoCouverturePath?: string }
+  ): Promise<void> {
+    const [photosSnap, inscritsSnap] = await runInInjectionContext(this.injector, () =>
+      Promise.all([
+        getDocs(collection(this.firestore, `oneshots/${id}/photos`)),
+        getDocs(collection(this.firestore, `oneshots/${id}/inscriptions`)),
+      ])
+    );
+    const storageDeletions = photosSnap.docs
+      .map(d => d.data()['storagePath'] as string)
+      .filter(Boolean)
+      .map(path => deleteObject(ref(this.storage, path)).catch(() => {}));
+    if (notifCtx?.photoCouverturePath) {
+      storageDeletions.push(deleteObject(ref(this.storage, notifCtx.photoCouverturePath)).catch(() => {}));
+    }
+    await Promise.all(storageDeletions);
     await runInInjectionContext(this.injector, () =>
       deleteDoc(doc(this.firestore, 'oneshots', id))
     );
+    if (notifCtx && inscritsSnap.docs.length > 0) {
+      const msg = `Le OneShot « ${notifCtx.titre} » auquel vous étiez inscrit(e) a été annulé.`;
+      Promise.all(
+        inscritsSnap.docs
+          .map(d => (d.data() as OneShotInscription).uid)
+          .filter(uid => uid !== notifCtx.creatorUid)
+          .map(uid => this.notifService.sendToUser(uid, 'oneshot', msg, {
+            sourceNom: notifCtx.nomCreateur
+          }))
+      ).catch(() => {});
+    }
   }
 
   async updateStatut(

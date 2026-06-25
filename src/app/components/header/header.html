@@ -48,14 +48,11 @@
                 <mat-icon>event</mat-icon>Calendrier
               </a>
               <div class="nav-panel-divider"></div>
-              <a routerLink="/galeries/themesdumois" class="nav-panel-item" (click)="openMenu.set(null)">
-                <mat-icon>photo_camera</mat-icon>Thèmes du mois
-              </a>
               <a routerLink="/galeries/sorties" class="nav-panel-item" (click)="openMenu.set(null)">
                 <mat-icon>directions_walk</mat-icon>Événements
               </a>
-              <a routerLink="/galeries/oneshots" class="nav-panel-item" (click)="openMenu.set(null)">
-                <mat-icon>camera_roll</mat-icon>OneShot
+              <a routerLink="/galeries/themesdumois" class="nav-panel-item" (click)="openMenu.set(null)">
+                <mat-icon>photo_camera</mat-icon>Thèmes du mois
               </a>
             </div>
           }
@@ -172,9 +169,6 @@
                   <mat-icon>dashboard</mat-icon>Tableau de bord
                 </a>
                 <div class="nav-panel-divider"></div>
-                <a routerLink="/membre/articles" class="nav-panel-item" (click)="openMenu.set(null)">
-                  <mat-icon>article</mat-icon>Articles
-                </a>
                 <a routerLink="/admin/reunions" class="nav-panel-item" (click)="openMenu.set(null)">
                   <mat-icon>event</mat-icon>Réunions
                 </a>
@@ -281,9 +275,8 @@
         @if (mobileOpenSection() === 'galeries') {
         <ul class="mobile-sub">
           <li><a routerLink="/calendrier" (click)="closeMobileMenu()">Calendrier</a></li>
-          <li><a routerLink="/galeries/themesdumois" (click)="closeMobileMenu()">Thèmes du mois</a></li>
           <li><a routerLink="/galeries/sorties" (click)="closeMobileMenu()">Événements</a></li>
-          <li><a routerLink="/galeries/oneshots" (click)="closeMobileMenu()">OneShot</a></li>
+          <li><a routerLink="/galeries/themesdumois" (click)="closeMobileMenu()">Thèmes du mois</a></li>
         </ul>
         }
       </li>
@@ -333,7 +326,6 @@
           @if (mobileOpenSection() === 'admin') {
             <ul class="mobile-sub">
               <li><a routerLink="/admin" (click)="closeMobileMenu()">Tableau de bord</a></li>
-              <li><a routerLink="/membre/articles" (click)="closeMobileMenu()">Articles</a></li>
               <li><a routerLink="/admin/reunions" (click)="closeMobileMenu()">Réunions</a></li>
               <li><a routerLink="/admin/themes" (click)="closeMobileMenu()">Thèmes du mois</a></li>
               <li><a routerLink="/admin/membres" (click)="closeMobileMenu()">Membres</a></li>

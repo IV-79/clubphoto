@@ -1,7 +1,7 @@
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -10,14 +10,14 @@
 }
 
 .modal-card {
-  background: #1a1a2e;
-  border: 1px solid #333;
+  background: white;
+  border: 1px solid rgba(0,0,0,0.1);
   border-radius: 8px;
   padding: 2rem;
   width: 100%;
   max-width: 420px;
   position: relative;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
 }
 
 .modal-close {
@@ -26,7 +26,7 @@
   right: 0.75rem;
   background: none;
   border: none;
-  color: #aaa;
+  color: rgba(0,0,0,0.4);
   font-size: 1.5rem;
   cursor: pointer;
   line-height: 1;
@@ -36,14 +36,14 @@
 }
 
 .modal-close:hover {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.1);
+  color: #1a1a1a;
+  background: rgba(0,0,0,0.06);
 }
 
 .modal-title {
   margin: 0 0 1.5rem;
   font-size: 1.4rem;
-  color: #e0e0e0;
+  color: #1a1a1a;
   text-align: center;
 }
 
@@ -58,14 +58,14 @@
   flex-direction: column;
   gap: 0.4rem;
   font-size: 0.875rem;
-  color: #bbb;
+  color: rgba(0,0,0,0.55);
 }
 
 .field-label input {
-  background: #0f0f1e;
-  border: 1px solid #444;
+  background: white;
+  border: 1px solid #d4d4d4;
   border-radius: 4px;
-  color: #e0e0e0;
+  color: #1a1a1a;
   padding: 0.6rem 0.75rem;
   font-size: 1rem;
   transition: border-color 0.2s;
@@ -73,17 +73,17 @@
 
 .field-label input:focus {
   outline: none;
-  border-color: #c0392b;
+  border-color: #cc0000;
 }
 
 .error-msg {
-  color: #e74c3c;
+  color: #cc0000;
   font-size: 0.875rem;
   margin: 0;
 }
 
 .btn-submit {
-  background: #c0392b;
+  background: #cc0000;
   color: #fff;
   border: none;
   border-radius: 4px;
@@ -95,7 +95,7 @@
 }
 
 .btn-submit:hover:not(:disabled) {
-  background: #a93226;
+  background: #aa0000;
 }
 
 .btn-submit:disabled {
@@ -114,7 +114,7 @@
   border: none;
   cursor: pointer;
   font-size: 0.8rem;
-  color: #aaa;
+  color: rgba(0,0,0,0.4);
   padding: 0;
   text-decoration: underline;
   text-underline-offset: 2px;
@@ -122,19 +122,19 @@
 }
 
 .btn-forgot:hover {
-  color: #e0e0e0;
+  color: #1a1a1a;
 }
 
 .btn-forgot:disabled {
-  color: #666;
+  color: rgba(0,0,0,0.25);
   cursor: default;
   text-decoration: none;
 }
 
 .reset-success {
   font-size: 0.8rem;
-  color: #81c784;
-  background: #1b3a1b;
+  color: #2e7d32;
+  background: rgba(76,175,80,0.1);
   border-radius: 4px;
   padding: 8px 12px;
   margin: 0;
@@ -144,11 +144,11 @@
   text-align: center;
   margin: 1.25rem 0 0;
   font-size: 0.875rem;
-  color: #aaa;
+  color: rgba(0,0,0,0.5);
 }
 
 .register-hint a {
-  color: #c0392b;
+  color: #cc0000;
   text-decoration: none;
 }
 

@@ -26,6 +26,8 @@ export interface Sortie {
   organisateurUid: string;
   nomOrganisateur: string;
   photoCouvertureUrl?: string;
+  imageEvenementUrl?: string;
+  imageEvenementPath?: string;
   dateCreation: string;
 }
 

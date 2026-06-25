@@ -100,8 +100,8 @@ import { AuthService } from '../../services/auth.service';
       transition: background .15s;
     }
     .lb-close:hover { background: rgba(0,0,0,.7); }
-    .lb-cover { aspect-ratio: 16/9; overflow: hidden; }
-    .lb-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .lb-cover { overflow: hidden; background: #f0f0f0; }
+    .lb-cover img { width: 100%; height: auto; display: block; }
 .lb-content { padding: 20px 24px 28px; }
     .lb-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
     .chip-type {

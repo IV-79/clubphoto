@@ -82,7 +82,7 @@ export const loginGuard: CanActivateFn = () => {
       return from(authService.getUserRole()).pipe(
         map(role => {
           if (role === 'admin') router.navigate(['/admin']);
-          else if (role === 'redacteur') router.navigate(['/membre/articles']);
+          else if (role === 'redacteur') router.navigate(['/actualites']);
           else router.navigate(['/membre/portfolio']);
           return false;
         })

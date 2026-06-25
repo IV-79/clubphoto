@@ -132,8 +132,8 @@
 }
 
 .inscription-section {
-  background: #1a1a2e;
-  border: 1px solid #333;
+  background: #f8f8f8;
+  border: 1px solid rgba(0,0,0,0.08);
   border-radius: 6px;
   padding: 20px 24px;
   margin-bottom: 14px;
@@ -151,7 +151,7 @@
 .inscription-header:has(+ .participants-row) { margin-bottom: 12px; }
 
 .inscription-section .inscription-header .panel-title {
-  color: #e0e0e0;
+  color: #1a1a1a;
   font-size: 1rem;
   font-weight: 400;
   letter-spacing: 0;
@@ -160,8 +160,8 @@
 }
 
 .inscription-section .count {
-  background: #333;
-  color: #aaa;
+  background: rgba(0,0,0,0.06);
+  color: rgba(0,0,0,0.4);
 }
 
 .participants-row {
@@ -172,31 +172,31 @@
 }
 
 .participant-name-chip {
-  background: #2a2a3e;
-  border: 1px solid #444;
+  background: rgba(0,0,0,0.04);
+  border: 1px solid #e0e0e0;
   border-radius: 20px;
   padding: 3px 12px;
   font-size: 0.82rem;
-  color: #ccc;
+  color: #1a1a1a;
 }
 
 .participant-name-chip.me {
-  color: #7ab3e0;
-  border-color: #3a5a7a;
-  background: #1a2a3e;
+  color: #1565c0;
+  border-color: rgba(21,101,192,0.3);
+  background: rgba(21,101,192,0.07);
 }
 
 .chip-remove {
   background: none;
   border: none;
-  color: #888;
+  color: rgba(0,0,0,0.3);
   cursor: pointer;
   font-size: 0.85rem;
   padding: 0 0 0 4px;
   line-height: 1;
   transition: color 0.15s;
 }
-.chip-remove:hover { color: #e74c3c; }
+.chip-remove:hover { color: #cc0000; }
 
 .add-participant-zone {
   margin-top: 0.75rem;
@@ -204,15 +204,15 @@
 
 .btn-add-participant {
   background: none;
-  border: 1px dashed #444;
-  color: #777;
+  border: 1px dashed #ccc;
+  color: rgba(0,0,0,0.4);
   border-radius: 4px;
   padding: 0.3rem 0.8rem;
   font-size: 0.82rem;
   cursor: pointer;
   transition: all 0.2s;
 }
-.btn-add-participant:hover { border-color: #888; color: #ccc; }
+.btn-add-participant:hover { border-color: #999; color: #1a1a1a; }
 
 .add-participant-row {
   display: flex;
@@ -222,20 +222,22 @@
 }
 
 .add-participant-select {
-  background: #1a1a2e;
-  border: 1px solid #444;
-  color: #ccc;
+  background: white;
+  border: 1px solid #d4d4d4;
+  color: #1a1a1a;
   border-radius: 4px;
   padding: 0.35rem 0.6rem;
   font-size: 0.85rem;
   flex: 1;
   min-width: 180px;
+  outline: none;
 }
+.add-participant-select:focus { border-color: #cc0000; }
 
 .btn-add-confirm {
-  background: #1a4a2a;
-  border: 1px solid #2a7a3a;
-  color: #5dba70;
+  background: rgba(76,175,80,0.1);
+  border: 1px solid rgba(76,175,80,0.4);
+  color: #2e7d32;
   border-radius: 4px;
   padding: 0.35rem 0.8rem;
   font-size: 0.82rem;
@@ -243,24 +245,24 @@
   transition: all 0.2s;
   white-space: nowrap;
 }
-.btn-add-confirm:hover:not(:disabled) { background: #1e5a32; }
+.btn-add-confirm:hover:not(:disabled) { background: rgba(76,175,80,0.18); }
 .btn-add-confirm:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .btn-add-cancel {
   background: none;
   border: none;
-  color: #666;
+  color: rgba(0,0,0,0.4);
   font-size: 0.82rem;
   cursor: pointer;
   transition: color 0.15s;
 }
-.btn-add-cancel:hover { color: #ccc; }
+.btn-add-cancel:hover { color: #1a1a1a; }
 
-.login-hint { font-size: 0.82rem; color: #777; }
-.closed-hint { font-size: 0.82rem; color: #777; }
+.login-hint { font-size: 0.82rem; color: rgba(0,0,0,0.4); }
+.closed-hint { font-size: 0.82rem; color: rgba(0,0,0,0.4); }
 
 .btn-inscrire {
-  background: #c0392b;
+  background: #cc0000;
   color: white;
   border: none;
   padding: 7px 18px;
@@ -271,13 +273,13 @@
   transition: background 0.15s;
 }
 
-.btn-inscrire:hover:not(:disabled) { background: #a93226; }
+.btn-inscrire:hover:not(:disabled) { background: #aa0000; }
 .btn-inscrire:disabled { opacity: 0.45; cursor: not-allowed; }
 
 .btn-desinscrire {
   background: transparent;
-  border: 1px solid #555;
-  color: #5dba82;
+  border: 1px solid #ddd;
+  color: #2e7d32;
   padding: 6px 14px;
   border-radius: 4px;
   font-size: 0.82rem;
@@ -286,7 +288,7 @@
   white-space: nowrap;
 }
 
-.btn-desinscrire:hover:not(:disabled) { border-color: #c0392b; color: #e74c3c; }
+.btn-desinscrire:hover:not(:disabled) { border-color: #cc0000; color: #cc0000; }
 .btn-desinscrire:disabled { opacity: 0.4; cursor: not-allowed; }
 
 /* ── Vote ─────────────────────────────────── */
@@ -455,6 +457,64 @@
 
 .result-name  { color: #1a1a1a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .result-votes { color: rgba(0,0,0,0.38); flex-shrink: 0; margin-left: 6px; font-weight: 600; }
+
+/* ── Image de la carte ── */
+
+.cover-manager {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 10px 14px;
+  background: #f8f8f8;
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 6px;
+  margin-bottom: 14px;
+}
+.cover-label {
+  font-size: 0.72rem;
+  color: rgba(0,0,0,0.4);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  flex-shrink: 0;
+  margin-right: 4px;
+}
+.cover-thumb {
+  width: 72px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 3px;
+  border: 1px solid #e0e0e0;
+}
+.btn-cover-set,
+.btn-cover-change,
+.btn-cover-remove {
+  font-size: 0.78rem;
+  padding: 4px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.btn-cover-set,
+.btn-cover-change {
+  background: #f0f0f0;
+  border: 1px solid #ddd;
+  color: rgba(0,0,0,0.6);
+}
+.btn-cover-set:hover:not(:disabled),
+.btn-cover-change:hover:not(:disabled) { border-color: #aaa; color: #1a1a1a; }
+.btn-cover-remove {
+  background: none;
+  border: 1px solid transparent;
+  color: rgba(200,0,0,0.55);
+}
+.btn-cover-remove:hover:not(:disabled) { color: #cc0000; background: rgba(200,0,0,0.06); border-color: rgba(200,0,0,0.2); }
+.btn-cover-set:disabled,
+.btn-cover-change:disabled,
+.btn-cover-remove:disabled { opacity: 0.45; cursor: not-allowed; }
 
 /* ── Gestion (créateur / admin) ─────────── */
 

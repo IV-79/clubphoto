@@ -42,6 +42,7 @@ interface UploadTask {
 })
 export class SortieDetail {
   @ViewChild('photoInput') photoInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('coverInput') coverInput!: ElementRef<HTMLInputElement>;
 
   private route = inject(ActivatedRoute);
   private router = inject(Router);
@@ -70,6 +71,8 @@ export class SortieDetail {
   editMode           = signal(false);
   addingMembre       = signal(false);
   selectedMembreUid  = signal('');
+  coverUploading     = signal(false);
+  coverDragOver      = signal(false);
 
   allMembres = toSignal(this.authService.getAllMembers(), { initialValue: [] as UserProfile[] });
 
@@ -230,7 +233,12 @@ export class SortieDetail {
       `Supprimer « ${s?.titre ?? 'cet événement'} » et toutes ses photos définitivement ?`
     );
     if (!ok) return;
-    await this.sortieService.deleteSortie(this.sortieId);
+    await this.sortieService.deleteSortie(this.sortieId, s ? {
+      titre: s.titre,
+      nomOrganisateur: s.nomOrganisateur,
+      organisateurUid: s.organisateurUid,
+      imageEvenementPath: s.imageEvenementPath,
+    } : undefined);
     this.router.navigate(['/galeries/sorties']);
   }
 
@@ -362,5 +370,37 @@ export class SortieDetail {
 
   mapsUrl(lieu: string): string {
     return `https://maps.google.com/?q=${encodeURIComponent(lieu)}`;
+  }
+
+  onCoverDrop(event: DragEvent) {
+    event.preventDefault();
+    this.coverDragOver.set(false);
+    const file = event.dataTransfer?.files?.[0];
+    if (file && file.type.startsWith('image/')) this.uploadCoverFile(file);
+  }
+
+  async onCoverSelected(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    (event.target as HTMLInputElement).value = '';
+    if (file) this.uploadCoverFile(file);
+  }
+
+  private async uploadCoverFile(file: File) {
+    this.coverUploading.set(true);
+    try {
+      const compressed = await compressToJpeg(file);
+      await this.sortieService.setImageEvenement(this.sortieId, compressed);
+    } finally {
+      this.coverUploading.set(false);
+    }
+  }
+
+  async removeCover(path: string) {
+    this.coverUploading.set(true);
+    try {
+      await this.sortieService.removeImageEvenement(this.sortieId, path);
+    } finally {
+      this.coverUploading.set(false);
+    }
   }
 }

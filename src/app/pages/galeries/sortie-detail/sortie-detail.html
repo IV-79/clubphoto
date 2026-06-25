@@ -89,6 +89,37 @@
           </mat-checkbox>
         </div>
 
+        <!-- Image de la carte -->
+        <div class="field-cover">
+          <label class="edit-cover-label">Image de la carte <span class="field-opt">optionnel</span></label>
+          <div class="cover-drop"
+               [class.drag-over]="coverDragOver()"
+               (dragover)="$event.preventDefault(); coverDragOver.set(true)"
+               (dragleave)="coverDragOver.set(false)"
+               (drop)="onCoverDrop($event)">
+            @if (s.imageEvenementUrl) {
+              <img [src]="s.imageEvenementUrl" class="cover-preview" alt="Image actuelle" />
+              <div class="cover-overlay-actions">
+                <button type="button" class="cover-browse-btn" (click)="coverInput.click()" [disabled]="coverUploading()">
+                  {{ coverUploading() ? 'Upload…' : '🔄 Changer' }}
+                </button>
+                <button type="button" class="cover-remove-btn" (click)="removeCover(s.imageEvenementPath!)" [disabled]="coverUploading()">
+                  × Retirer
+                </button>
+              </div>
+            } @else {
+              <div class="cover-placeholder">
+                <span class="cover-icon">🖼</span>
+                <span>Glisser une image ici ou</span>
+                <button type="button" class="cover-browse-btn" (click)="coverInput.click()" [disabled]="coverUploading()">
+                  {{ coverUploading() ? 'Upload…' : 'parcourir' }}
+                </button>
+              </div>
+            }
+            <input #coverInput type="file" accept="image/*" class="hidden-input" (change)="onCoverSelected($event)" />
+          </div>
+        </div>
+
         <div class="edit-actions">
           <button type="button" class="btn-cancel-edit" (click)="cancelEdit()">Annuler</button>
           <button type="submit" class="btn-save-edit" [disabled]="form.invalid || saving()">
@@ -126,8 +157,6 @@
           } @else if (s.maxParticipants && inscriptions().length >= s.maxParticipants) {
             <span class="full-badge">Complet</span>
           }
-        } @else if (isAVenir()) {
-          <span class="login-hint">Connectez-vous pour vous inscrire</span>
         }
       </div>
 

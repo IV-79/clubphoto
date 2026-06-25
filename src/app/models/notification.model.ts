@@ -1,4 +1,4 @@
-export type NotifType = 'oneshot' | 'sortie' | 'article' | 'reunion' | 'like' | 'comment' | 'admin';
+export type NotifType = 'oneshot' | 'sortie' | 'article' | 'reunion' | 'document' | 'like' | 'comment' | 'admin';
 
 export interface AppNotification {
   id: string;
@@ -16,19 +16,21 @@ export interface UserSubscriptions {
   sorties?: boolean;
   articles?: boolean;
   reunions?: boolean;
+  documents?: boolean;
   likes?: boolean;
   comments?: boolean;
   admin?: boolean; // undefined = toujours livré, pas d'opt-out exposé en UI
 }
 
 const TYPE_TO_SUB: Record<NotifType, keyof UserSubscriptions> = {
-  oneshot: 'oneshots',
-  sortie:  'sorties',
-  article: 'articles',
-  reunion: 'reunions',
-  like:    'likes',
-  comment: 'comments',
-  admin:   'admin',
+  oneshot:  'oneshots',
+  sortie:   'sorties',
+  article:  'articles',
+  reunion:  'reunions',
+  document: 'documents',
+  like:     'likes',
+  comment:  'comments',
+  admin:    'admin',
 };
 
 export function isSubscribed(
@@ -41,21 +43,23 @@ export function isSubscribed(
 }
 
 export const NOTIF_ICONS: Record<NotifType, string> = {
-  oneshot: '📸',
-  sortie:  '🚶',
-  article: '📰',
-  reunion: '📅',
-  like:    '♥',
-  comment: '💬',
-  admin:   '🛡️',
+  oneshot:  '📸',
+  sortie:   '🚶',
+  article:  '📰',
+  reunion:  '📅',
+  document: '📁',
+  like:     '♥',
+  comment:  '💬',
+  admin:    '🛡️',
 };
 
 export const NOTIF_LABELS: Record<NotifType, string> = {
-  oneshot: 'OneShot',
-  sortie:  'Sortie photo',
-  article: 'Actualité',
-  reunion: 'Réunion',
-  like:    'J\'aime',
-  comment: 'Commentaire',
-  admin:   'Administration',
+  oneshot:  'OneShot',
+  sortie:   'Sortie photo',
+  article:  'Actualité',
+  reunion:  'Réunion',
+  document: 'Documents',
+  like:     'J\'aime',
+  comment:  'Commentaire',
+  admin:    'Administration',
 };

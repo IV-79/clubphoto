@@ -59,6 +59,28 @@
       }
     }
 
+    <!-- Image de la carte -->
+    <div class="field-cover">
+      <label class="field-label">Image de la carte <span class="field-opt">optionnel</span></label>
+      <div class="cover-drop"
+           [class.drag-over]="coverDragOver()"
+           (dragover)="$event.preventDefault(); coverDragOver.set(true)"
+           (dragleave)="coverDragOver.set(false)"
+           (drop)="onCoverDrop($event)">
+        @if (coverPreviewUrl()) {
+          <img [src]="coverPreviewUrl()!" class="cover-preview" alt="Aperçu" />
+          <button type="button" class="cover-remove-btn" (click)="clearCover()">× Retirer</button>
+        } @else {
+          <div class="cover-placeholder">
+            <span class="cover-icon">🖼</span>
+            <span>Glisser une image ici ou</span>
+            <button type="button" class="cover-browse-btn" (click)="coverInputEl.click()">parcourir</button>
+          </div>
+        }
+        <input #coverInputEl type="file" accept="image/*" class="hidden-input" (change)="onCoverSelected($event)" />
+      </div>
+    </div>
+
     <div class="form-actions">
       <a routerLink="/galeries/sorties" class="btn-cancel">Annuler</a>
       <button type="submit" class="btn-submit" [disabled]="form.invalid || saving()">

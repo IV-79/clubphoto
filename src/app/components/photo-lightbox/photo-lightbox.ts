@@ -35,6 +35,10 @@ export class PhotoLightbox implements OnInit, OnDestroy {
   ngOnInit() {
     this.currentIdx.set(this.startIndex());
     document.body.style.overflow = 'hidden';
+    if (this.anonyme()) {
+      this.fullscreen.set(true);
+      document.documentElement.requestFullscreen?.().catch(() => {});
+    }
   }
 
   ngOnDestroy() {
@@ -89,13 +93,15 @@ export class PhotoLightbox implements OnInit, OnDestroy {
   }
 
   closeFullscreen() {
-    this.fullscreen.set(false);
     if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    if (this.anonyme()) { this.closed.emit(); return; }
+    this.fullscreen.set(false);
   }
 
   @HostListener('document:fullscreenchange')
   onFullscreenChange() {
     if (!document.fullscreenElement && this.fullscreen()) {
+      if (this.anonyme()) { this.closed.emit(); return; }
       this.fullscreen.set(false);
     }
   }

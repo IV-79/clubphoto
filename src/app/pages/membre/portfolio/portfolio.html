@@ -12,7 +12,17 @@
         <span>{{ membreCount() }} membres</span>
       </div>
     </div>
-    <button class="btn-add" (click)="openUpload()">+ Ajouter une photo</button>
+    <div class="header-actions">
+      @if (!selectMode()) {
+        <button class="btn-select" (click)="toggleSelectMode()" [disabled]="photos().length === 0">Sélectionner</button>
+        <button class="btn-add" (click)="openUpload()">+ Ajouter une photo</button>
+      } @else {
+        <button class="btn-select" (click)="toggleSelectMode()">Annuler</button>
+        <button class="btn-delete-selected" (click)="deleteSelected()" [disabled]="selectedCount() === 0 || deleting()">
+          {{ deleting() ? 'Suppression…' : selectedCount() === 0 ? 'Aucune sélectionnée' : 'Supprimer (' + selectedCount() + ')' }}
+        </button>
+      }
+    </div>
   </div>
 
   <!-- État vide -->
@@ -29,28 +39,36 @@
   @if (photos().length > 0) {
     <div class="photos-grid">
       @for (photo of photos(); track photo.id; let i = $index) {
-        <div class="photo-card" (click)="openLightbox(i)">
+        <div class="photo-card"
+             [class.is-selected]="selectMode() && selectedIds().has(photo.id)"
+             (click)="selectMode() ? toggleSelect(photo.id) : openLightbox(i)">
           <img [src]="photo.url" [alt]="photo.titre" loading="lazy">
-          @if (photo.categorie) {
+          @if (photo.categorie && !selectMode()) {
             <span class="card-cat">{{ getCategorieLabel(photo.categorie) }}</span>
           }
-          <div class="photo-overlay">
-            <div class="overlay-bottom" (click)="$event.stopPropagation()">
-              <div class="overlay-row">
-                <span class="photo-title">{{ photo.titre }}</span>
-              </div>
-              <div class="overlay-row">
-                <button
-                  (click)="toggleVisibilite(photo)"
-                  [title]="visibiliteTitle(photo.visibilite)"
-                  class="btn-icon btn-vis vis-{{ photo.visibilite }}">
-                  {{ visibiliteLabel(photo.visibilite) }}
-                </button>
-                <button (click)="openEdit(photo)" title="Modifier" class="btn-icon">✎</button>
-                <button (click)="deletePhoto(photo)" title="Supprimer" class="btn-icon btn-delete">Suppr.</button>
+          @if (selectMode()) {
+            <div class="select-check" [class.checked]="selectedIds().has(photo.id)">
+              @if (selectedIds().has(photo.id)) { ✓ }
+            </div>
+          } @else {
+            <div class="photo-overlay">
+              <div class="overlay-bottom" (click)="$event.stopPropagation()">
+                <div class="overlay-row">
+                  <span class="photo-title">{{ photo.titre }}</span>
+                </div>
+                <div class="overlay-row">
+                  <button
+                    (click)="toggleVisibilite(photo)"
+                    [title]="visibiliteTitle(photo.visibilite)"
+                    class="btn-icon btn-vis vis-{{ photo.visibilite }}">
+                    {{ visibiliteLabel(photo.visibilite) }}
+                  </button>
+                  <button (click)="openEdit(photo)" title="Modifier" class="btn-icon">✎</button>
+                  <button (click)="deletePhoto(photo)" title="Supprimer" class="btn-icon btn-delete">Suppr.</button>
+                </div>
               </div>
             </div>
-          </div>
+          }
         </div>
       }
     </div>
@@ -81,8 +99,14 @@
           <img [src]="previewUrl()" alt="Aperçu" class="preview-img">
         </div>
         <div class="upload-form">
-          <label>Titre
-            <input type="text" [(ngModel)]="uploadTitre" placeholder="Titre de la photo">
+          <label>Titre <span class="required-star">*</span>
+            <input type="text" [(ngModel)]="uploadTitre"
+                   (ngModelChange)="uploadTitreError.set(false)"
+                   placeholder="Donnez un titre à cette photo"
+                   [class.input-error]="uploadTitreError()">
+            @if (uploadTitreError()) {
+              <span class="field-error">Le titre est obligatoire</span>
+            }
           </label>
           <label>Description <span class="optional">(optionnel)</span>
             <textarea [(ngModel)]="uploadDescription" rows="3" placeholder="Décrivez votre photo…"></textarea>

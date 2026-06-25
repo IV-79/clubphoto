@@ -5,13 +5,14 @@
 }
 
 .back-link {
-  color: #aaa;
+  color: rgba(0,0,0,0.35);
   text-decoration: none;
   font-size: 0.85rem;
   display: inline-block;
   margin-bottom: 0.75rem;
+  transition: color 0.2s;
 }
-.back-link:hover { color: #e0e0e0; }
+.back-link:hover { color: #1a1a1a; }
 
 .back-link-btn {
   background: none;
@@ -36,7 +37,9 @@
 .detail-header h1 {
   margin: 0.3rem 0 0;
   font-size: 2rem;
-  color: #e0e0e0;
+  font-weight: 300;
+  letter-spacing: 0.5px;
+  color: #1a1a1a;
 }
 
 .status-badge {
@@ -48,8 +51,8 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
-.status-avenir { background: #1a6b3a; color: #5dba82; }
-.status-ouverte { background: #1a3a6b; color: #5d9fba; }
+.status-avenir { background: rgba(76,175,80,0.12);  color: #2e7d32; }
+.status-ouverte { background: rgba(33,150,243,0.12); color: #1565c0; }
 
 .header-actions {
   display: flex;
@@ -59,8 +62,8 @@
 
 .btn-action {
   background: transparent;
-  border: 1px solid #555;
-  color: #aaa;
+  border: 1px solid #bbb;
+  color: #555;
   border-radius: 4px;
   padding: 0.4rem 0.9rem;
   font-size: 0.85rem;
@@ -68,14 +71,14 @@
   white-space: nowrap;
   transition: all 0.2s;
 }
-.btn-action:hover { border-color: #888; color: #e0e0e0; }
-.btn-action-danger:hover { border-color: #c0392b; color: #e74c3c; }
+.btn-action:hover { border-color: #888; color: #1a1a1a; }
+.btn-action-danger:hover { border-color: #cc0000; color: #cc0000; }
 
 /* ── Edit form inline ── */
 .edit-title {
   font-size: 0.85rem;
   font-weight: 600;
-  color: #888;
+  color: rgba(0,0,0,0.4);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   margin: 0 0 1.25rem;
@@ -92,9 +95,7 @@
 .field-half { flex: 1; min-width: 0; }
 .form-row { display: flex; gap: 1rem; }
 
-.edit-checkboxes {
-  padding: 0.25rem 0;
-}
+.edit-checkboxes { padding: 0.25rem 0; }
 
 .edit-actions {
   display: flex;
@@ -106,16 +107,16 @@
 .btn-cancel-edit {
   background: none;
   border: none;
-  color: #888;
+  color: rgba(0,0,0,0.45);
   font-size: 0.9rem;
   cursor: pointer;
   padding: 0;
   transition: color 0.2s;
 }
-.btn-cancel-edit:hover { color: #e0e0e0; }
+.btn-cancel-edit:hover { color: #1a1a1a; }
 
 .btn-save-edit {
-  background: #c0392b;
+  background: #cc0000;
   color: #fff;
   border: none;
   border-radius: 4px;
@@ -125,7 +126,7 @@
   cursor: pointer;
   transition: background 0.2s;
 }
-.btn-save-edit:hover:not(:disabled) { background: #a93226; }
+.btn-save-edit:hover:not(:disabled) { background: #aa0000; }
 .btn-save-edit:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .header-meta {
@@ -137,29 +138,110 @@
 
 .meta-item {
   font-size: 0.9rem;
-  color: #aaa;
+  color: rgba(0,0,0,0.45);
 }
 
 .meta-lieu {
-  color: #7ab3e0;
+  color: #1565c0;
   text-decoration: none;
 }
 .meta-lieu:hover { text-decoration: underline; }
 
-.meta-org { color: #888; }
+.meta-org { color: rgba(0,0,0,0.35); }
 
 .detail-desc {
-  color: #bbb;
+  color: rgba(0,0,0,0.5);
   line-height: 1.6;
   max-width: 700px;
   margin: 0;
 }
 
+/* ── Image de la carte (edit form drop zone) ── */
+
+.field-cover { display: flex; flex-direction: column; gap: 6px; margin-bottom: 0.5rem; }
+
+.edit-cover-label {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: rgba(0,0,0,0.6);
+}
+
+.field-opt { font-size: 0.72rem; color: rgba(0,0,0,0.28); font-weight: normal; }
+
+.cover-drop {
+  position: relative;
+  border: 2px dashed rgba(0,0,0,0.16);
+  border-radius: 6px;
+  background: #fafafa;
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.2s, background 0.2s;
+  overflow: hidden;
+  cursor: pointer;
+}
+.cover-drop.drag-over { border-color: #cc0000; background: rgba(204,0,0,0.04); }
+
+.cover-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: rgba(0,0,0,0.38);
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 1.5rem;
+  pointer-events: none;
+}
+.cover-placeholder .cover-browse-btn { pointer-events: auto; }
+
+.cover-icon { font-size: 1.8rem; line-height: 1; }
+
+.cover-browse-btn {
+  background: none;
+  border: none;
+  color: #cc0000;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+.cover-browse-btn:hover:not(:disabled) { color: #a00; }
+.cover-browse-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.cover-preview {
+  width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  display: block;
+}
+
+.cover-overlay-actions {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: flex;
+  gap: 6px;
+}
+
+.cover-remove-btn {
+  background: rgba(0,0,0,0.55);
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  font-size: 0.78rem;
+  padding: 3px 8px;
+  cursor: pointer;
+}
+.cover-remove-btn:hover:not(:disabled) { background: rgba(180,0,0,0.85); }
+.cover-remove-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
 /* ── Inscription ── */
 
 .inscription-section {
-  background: #1a1a2e;
-  border: 1px solid #333;
+  background: #f8f8f8;
+  border: 1px solid rgba(0,0,0,0.08);
   border-radius: 8px;
   padding: 1.25rem;
   margin-bottom: 2rem;
@@ -177,24 +259,24 @@
 .inscription-header h2 {
   margin: 0;
   font-size: 1rem;
-  color: #e0e0e0;
+  color: #1a1a1a;
   display: flex;
   align-items: center;
   gap: 0.4rem;
 }
 
 .count {
-  background: #333;
-  color: #aaa;
+  background: rgba(0,0,0,0.06);
+  color: rgba(0,0,0,0.4);
   border-radius: 12px;
   padding: 0.1rem 0.5rem;
   font-size: 0.8rem;
 }
 
-.max-count { font-size: 0.8rem; color: #777; font-weight: normal; }
+.max-count { font-size: 0.8rem; color: rgba(0,0,0,0.35); font-weight: normal; }
 
 .btn-inscrire {
-  background: #c0392b;
+  background: #cc0000;
   color: #fff;
   border: none;
   border-radius: 4px;
@@ -204,31 +286,31 @@
   cursor: pointer;
   transition: background 0.2s;
 }
-.btn-inscrire:hover:not(:disabled) { background: #a93226; }
+.btn-inscrire:hover:not(:disabled) { background: #aa0000; }
 .btn-inscrire:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .btn-desinscrit {
   background: transparent;
-  border: 1px solid #555;
-  color: #5dba82;
+  border: 1px solid #ddd;
+  color: #2e7d32;
   border-radius: 4px;
   padding: 0.5rem 1rem;
   font-size: 0.85rem;
   cursor: pointer;
   transition: all 0.2s;
 }
-.btn-desinscrit:hover:not(:disabled) { border-color: #c0392b; color: #e74c3c; }
+.btn-desinscrit:hover:not(:disabled) { border-color: #cc0000; color: #cc0000; }
 
 .full-badge {
   font-size: 0.85rem;
-  color: #e0a050;
-  background: #3a2a10;
-  border: 1px solid #6b4a10;
+  color: #e65100;
+  background: rgba(255,152,0,0.1);
+  border: 1px solid rgba(255,152,0,0.3);
   padding: 0.3rem 0.7rem;
   border-radius: 4px;
 }
 
-.login-hint { font-size: 0.85rem; color: #777; }
+.login-hint { font-size: 0.85rem; color: rgba(0,0,0,0.4); }
 
 .participants-row {
   display: flex;
@@ -237,49 +319,47 @@
 }
 
 .participant-chip {
-  background: #2a2a3e;
-  border: 1px solid #444;
+  background: rgba(0,0,0,0.04);
+  border: 1px solid #e0e0e0;
   border-radius: 20px;
   padding: 3px 12px;
   font-size: 0.82rem;
-  color: #ccc;
+  color: #1a1a1a;
   cursor: default;
   white-space: nowrap;
 }
 
 .participant-chip.me {
-  color: #7ab3e0;
-  border-color: #3a5a7a;
-  background: #1a2a3e;
+  color: #1565c0;
+  border-color: rgba(21,101,192,0.3);
+  background: rgba(21,101,192,0.07);
 }
 
 .chip-remove {
   background: none;
   border: none;
-  color: #666;
+  color: rgba(0,0,0,0.3);
   cursor: pointer;
   font-size: 0.85rem;
   padding: 0 0 0 4px;
   line-height: 1;
   transition: color 0.15s;
 }
-.chip-remove:hover { color: #e74c3c; }
+.chip-remove:hover { color: #cc0000; }
 
-.add-participant-zone {
-  margin-top: 0.75rem;
-}
+.add-participant-zone { margin-top: 0.75rem; }
 
 .btn-add-participant {
   background: none;
-  border: 1px dashed #444;
-  color: #777;
+  border: 1px dashed #ccc;
+  color: rgba(0,0,0,0.4);
   border-radius: 4px;
   padding: 0.3rem 0.8rem;
   font-size: 0.82rem;
   cursor: pointer;
   transition: all 0.2s;
 }
-.btn-add-participant:hover { border-color: #888; color: #ccc; }
+.btn-add-participant:hover { border-color: #999; color: #1a1a1a; }
 
 .add-participant-row {
   display: flex;
@@ -289,20 +369,22 @@
 }
 
 .add-participant-select {
-  background: #1a1a2e;
-  border: 1px solid #444;
-  color: #ccc;
+  background: white;
+  border: 1px solid #d4d4d4;
+  color: #1a1a1a;
   border-radius: 4px;
   padding: 0.35rem 0.6rem;
   font-size: 0.85rem;
   flex: 1;
   min-width: 180px;
+  outline: none;
 }
+.add-participant-select:focus { border-color: #cc0000; }
 
 .btn-add-confirm {
-  background: #1a4a2a;
-  border: 1px solid #2a7a3a;
-  color: #5dba70;
+  background: rgba(76,175,80,0.1);
+  border: 1px solid rgba(76,175,80,0.4);
+  color: #2e7d32;
   border-radius: 4px;
   padding: 0.35rem 0.8rem;
   font-size: 0.82rem;
@@ -310,24 +392,24 @@
   transition: all 0.2s;
   white-space: nowrap;
 }
-.btn-add-confirm:hover:not(:disabled) { background: #1e5a32; }
+.btn-add-confirm:hover:not(:disabled) { background: rgba(76,175,80,0.18); }
 .btn-add-confirm:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .btn-add-cancel {
   background: none;
   border: none;
-  color: #666;
+  color: rgba(0,0,0,0.4);
   font-size: 0.82rem;
   cursor: pointer;
   transition: color 0.15s;
 }
-.btn-add-cancel:hover { color: #ccc; }
+.btn-add-cancel:hover { color: #1a1a1a; }
 
 /* ── Upload ── */
 
 .upload-section {
-  background: #1a1a2e;
-  border: 1px solid #333;
+  background: #f8f8f8;
+  border: 1px solid rgba(0,0,0,0.08);
   border-radius: 8px;
   padding: 1.25rem;
   margin-bottom: 2rem;
@@ -343,12 +425,12 @@
 .upload-header h2 {
   margin: 0;
   font-size: 1rem;
-  color: #e0e0e0;
+  color: #1a1a1a;
   flex: 1;
 }
 
 .btn-upload {
-  background: #c0392b;
+  background: #cc0000;
   color: #fff;
   border: none;
   border-radius: 4px;
@@ -359,7 +441,7 @@
   transition: background 0.2s;
   white-space: nowrap;
 }
-.btn-upload:hover { background: #a93226; }
+.btn-upload:hover { background: #aa0000; }
 
 .hidden-input { display: none; }
 
@@ -374,7 +456,7 @@
   align-items: center;
   gap: 0.75rem;
   font-size: 0.82rem;
-  color: #aaa;
+  color: rgba(0,0,0,0.45);
 }
 
 .upload-name {
@@ -388,7 +470,7 @@
 .upload-bar-wrap {
   width: 120px;
   height: 4px;
-  background: #333;
+  background: #e0e0e0;
   border-radius: 2px;
   overflow: hidden;
   flex-shrink: 0;
@@ -396,26 +478,27 @@
 
 .upload-bar {
   height: 100%;
-  background: #c0392b;
+  background: #cc0000;
   transition: width 0.2s;
 }
 
-.upload-check { color: #5dba82; font-size: 1rem; }
-.upload-err { color: #e74c3c; font-size: 0.75rem; }
+.upload-check { color: #2e7d32; font-size: 1rem; }
+.upload-err { color: #cc0000; font-size: 0.75rem; }
 
 .btn-clear {
   background: none;
   border: none;
-  color: #888;
+  color: rgba(0,0,0,0.4);
   font-size: 0.8rem;
   cursor: pointer;
   text-decoration: underline;
   align-self: flex-start;
+  transition: color 0.15s;
 }
-.btn-clear:hover { color: #e0e0e0; }
+.btn-clear:hover { color: #1a1a1a; }
 
 .upload-locked {
-  color: #888;
+  color: rgba(0,0,0,0.4);
   font-size: 0.9rem;
   margin-bottom: 2rem;
   font-style: italic;
@@ -424,18 +507,21 @@
 /* ── Photos grid ── */
 
 .photos-section h2 {
-  font-size: 1.2rem;
-  color: #e0e0e0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(0,0,0,0.4);
   margin: 0 0 1.25rem;
   padding-bottom: 0.5rem;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid #e8e8e8;
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
 .empty-msg {
-  color: #666;
+  color: rgba(0,0,0,0.35);
   font-style: italic;
 }
 
@@ -461,7 +547,7 @@
   aspect-ratio: 1;
   overflow: hidden;
   cursor: pointer;
-  background: #111;
+  background: #f0f0f0;
 }
 
 .photo-img {
@@ -509,7 +595,7 @@
 .btn-del-sm:hover { color: #cc0000; background: rgba(200,0,0,0.08); }
 .btn-del-sm.btn-del-admin { margin-left: auto; }
 
-/* Infobox button — always visible, top-right */
+/* Infobox — sur photo, garde blanc */
 .btn-fs {
   position: absolute;
   top: 8px;
@@ -531,7 +617,7 @@
 }
 .btn-fs:hover { color: white; text-shadow: 0 1px 6px rgba(0,0,0,0.9); }
 
-/* Heart button — always visible, bottom-right */
+/* Heart — sur photo, garde blanc */
 .card-heart {
   position: absolute;
   bottom: 8px;
@@ -557,7 +643,7 @@
 .loading-page {
   text-align: center;
   padding: 3rem;
-  color: #666;
+  color: rgba(0,0,0,0.3);
 }
 
 @media (max-width: 600px) {

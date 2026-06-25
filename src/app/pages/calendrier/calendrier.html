@@ -19,9 +19,6 @@
       <button class="filtre-btn" [class.actif]="filtre() === 'oneshot'" (click)="filtre.set('oneshot')">OneShot</button>
       <button class="filtre-btn" [class.actif]="filtre() === 'sortie'" (click)="filtre.set('sortie')">Événement</button>
     </div>
-    @if (!isMembre()) {
-      <p class="membres-note">🔒 <button class="membres-note-link" (click)="openLogin()">Connectez-vous</button> pour voir les réunions du club.</p>
-    }
     <div class="filtre-sep"></div>
     <div class="filtre-group">
       <button class="filtre-btn filtre-toggle" [class.actif]="showPasses()" (click)="showPasses.set(!showPasses())">

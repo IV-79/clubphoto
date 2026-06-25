@@ -4,7 +4,6 @@ import { Overview } from './pages/admin-dashboard/overview/overview';
 import { Membres } from './pages/admin-dashboard/membres/membres';
 import { Reunions } from './pages/admin-dashboard/reunions/reunions';
 import { AdminConfig } from './pages/admin-dashboard/config/config';
-import { AdminArticles } from './pages/admin-dashboard/articles/articles';
 import { AdminThemes } from './pages/admin-dashboard/themes/themes';
 import { authGuard, memberGuard, loginGuard, editorGuard } from './guards/auth.guard';
 import { PublicLayout } from './layouts/public-layout/public-layout';
@@ -16,10 +15,7 @@ import { Calendrier } from './pages/calendrier/calendrier';
 import { Contact } from './pages/contact/contact';
 import { MembrePortfolio } from './pages/membre/portfolio/portfolio';
 import { MembreProfil } from './pages/membre/profil/profil';
-import { ArticlesGestion } from './pages/membre/articles/articles-gestion';
 import { ArticleForm } from './pages/membre/articles/article-form';
-import { OneShotsListe } from './pages/membre/oneshots/oneshots-liste/oneshots-liste';
-import { OneShotCreer } from './pages/membre/oneshots/oneshot-creer/oneshot-creer';
 import { OneShotGerer } from './pages/membre/oneshots/oneshot-gerer/oneshot-gerer';
 import { OneShotDetail } from './pages/membre/oneshots/oneshot-detail/oneshot-detail';
 import { OneShotPhotos } from './pages/membre/oneshots/oneshot-photos/oneshot-photos';
@@ -59,7 +55,7 @@ export const routes: Routes = [
       { path: 'galeries/membres/:uid', component: MembreDetail },
       { path: 'galeries/themesdumois', component: ThemesListe },
       { path: 'galeries/themesdumois/:id', component: ThemeDetail },
-      { path: 'galeries/oneshots', component: OneShotsListe },
+      { path: 'galeries/oneshots', redirectTo: 'galeries/sorties', pathMatch: 'full' },
       { path: 'galeries/oneshots/:id', component: OneShotDetail },
       { path: 'galeries/sorties', component: SortiesListe },
       { path: 'galeries/sorties/:id', component: SortieDetail },
@@ -71,7 +67,6 @@ export const routes: Routes = [
         canActivate: [authGuard],
         children: [
           { path: '', component: Overview },
-          { path: 'articles', component: AdminArticles },
           { path: 'membres', component: Membres },
           { path: 'reunions', component: Reunions },
           { path: 'themes', component: AdminThemes },
@@ -88,10 +83,8 @@ export const routes: Routes = [
     children: [
       { path: 'portfolio', component: MembrePortfolio },
       { path: 'profil', component: MembreProfil },
-      { path: 'articles', component: ArticlesGestion, canActivate: [editorGuard] },
       { path: 'articles/creer', component: ArticleForm, canActivate: [editorGuard] },
       { path: 'articles/:id/editer', component: ArticleForm, canActivate: [editorGuard] },
-      { path: 'oneshots/creer', component: OneShotCreer },
       { path: 'oneshots/:id/gerer', component: OneShotGerer },
       { path: 'oneshots/:id/photos', component: OneShotPhotos },
       { path: 'documents', component: Documents },

@@ -23,6 +23,8 @@ export interface OneShot {
   lieu?: string;
   nbInscrits?: number;  // dénormalisé, mis à jour atomiquement
   nbThemes?: number;    // dénormalisé, mis à jour atomiquement
+  photoCouvertureUrl?: string;
+  photoCouverturePath?: string;
 }
 
 export interface OneShotTheme {

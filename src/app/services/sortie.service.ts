@@ -5,7 +5,7 @@ import {
   addDoc, updateDoc, deleteDoc, setDoc, getDocs, getDoc,
   query, where, orderBy, arrayUnion, arrayRemove, increment, deleteField
 } from '@angular/fire/firestore';
-import { Storage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from '@angular/fire/storage';
+import { Storage, ref, uploadBytes, uploadBytesResumable, getDownloadURL, deleteObject } from '@angular/fire/storage';
 import { Observable, from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {
@@ -94,19 +94,58 @@ export class SortieService {
     }
   }
 
-  async deleteSortie(sortieId: string): Promise<void> {
-    const photosSnap = await runInInjectionContext(this.injector, () =>
-      getDocs(collection(this.firestore, `sorties/${sortieId}/photos`))
+  async setImageEvenement(sortieId: string, file: File): Promise<void> {
+    const path = `sorties/${sortieId}/evenement-cover`;
+    const storageRef = ref(this.storage, path);
+    await uploadBytes(storageRef, file);
+    const url = await getDownloadURL(storageRef);
+    await runInInjectionContext(this.injector, () =>
+      updateDoc(doc(this.firestore, 'sorties', sortieId), { imageEvenementUrl: url, imageEvenementPath: path })
     );
-    await Promise.all(
-      photosSnap.docs
-        .map(d => d.data()['storagePath'] as string)
-        .filter(Boolean)
-        .map(path => deleteObject(ref(this.storage, path)).catch(() => {}))
+  }
+
+  async removeImageEvenement(sortieId: string, path: string): Promise<void> {
+    await deleteObject(ref(this.storage, path)).catch(() => {});
+    await runInInjectionContext(this.injector, () =>
+      updateDoc(doc(this.firestore, 'sorties', sortieId), {
+        imageEvenementUrl: deleteField(),
+        imageEvenementPath: deleteField(),
+      })
     );
+  }
+
+  async deleteSortie(
+    sortieId: string,
+    notifCtx?: { titre: string; nomOrganisateur: string; organisateurUid: string; imageEvenementPath?: string }
+  ): Promise<void> {
+    const [photosSnap, inscritsSnap] = await runInInjectionContext(this.injector, () =>
+      Promise.all([
+        getDocs(collection(this.firestore, `sorties/${sortieId}/photos`)),
+        getDocs(collection(this.firestore, `sorties/${sortieId}/inscriptions`)),
+      ])
+    );
+    const storageDeletions = photosSnap.docs
+      .map(d => d.data()['storagePath'] as string)
+      .filter(Boolean)
+      .map(path => deleteObject(ref(this.storage, path)).catch(() => {}));
+    if (notifCtx?.imageEvenementPath) {
+      storageDeletions.push(deleteObject(ref(this.storage, notifCtx.imageEvenementPath)).catch(() => {}));
+    }
+    await Promise.all(storageDeletions);
     await runInInjectionContext(this.injector, () =>
       deleteDoc(doc(this.firestore, 'sorties', sortieId))
     );
+    if (notifCtx && inscritsSnap.docs.length > 0) {
+      const msg = `L'événement « ${notifCtx.titre} » auquel vous étiez inscrit(e) a été annulé.`;
+      Promise.all(
+        inscritsSnap.docs
+          .map(d => (d.data() as SortieInscription).uid)
+          .filter(uid => uid !== notifCtx.organisateurUid)
+          .map(uid => this.notifService.sendToUser(uid, 'sortie', msg, {
+            sourceNom: notifCtx.nomOrganisateur
+          }))
+      ).catch(() => {});
+    }
   }
 
   // --- Inscriptions ---

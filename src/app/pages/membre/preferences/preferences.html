@@ -60,6 +60,19 @@
           <span class="toggle-thumb"></span>
         </button>
       </div>
+
+      <div class="pref-item">
+        <div class="pref-info">
+          <span class="pref-icon">📁</span>
+          <div>
+            <p class="pref-label">Documents</p>
+            <p class="pref-hint">Nouveau document ou mise à jour d'un fichier existant</p>
+          </div>
+        </div>
+        <button class="toggle" [class.on]="subs().documents" (click)="toggle('documents')" [disabled]="saving()">
+          <span class="toggle-thumb"></span>
+        </button>
+      </div>
     </div>
   </section>
 

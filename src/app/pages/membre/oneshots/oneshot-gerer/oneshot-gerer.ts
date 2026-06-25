@@ -6,6 +6,7 @@ import { OneShotService } from '../../../../services/oneshot.service';
 import { AuthService } from '../../../../services/auth.service';
 import { ConfirmService } from '../../../../services/confirm.service';
 import { OneShotTheme, ONESHOT_STATUT_LABELS } from '../../../../models/oneshot.model';
+import { compressToJpeg } from '../../../../utils/image-compress';
 
 @Component({
   selector: 'app-oneshot-gerer',
@@ -34,7 +35,9 @@ export class OneShotGerer implements OnInit {
 
   dateValue = '';
   lieuValue = '';
-  saving = signal(false);
+  saving        = signal(false);
+  coverUploading = signal(false);
+  coverDragOver  = signal(false);
 
   constructor() {
     effect(() => {
@@ -111,5 +114,39 @@ export class OneShotGerer implements OnInit {
     const ok = await this.confirmService.confirm(`Supprimer le thème « ${theme.nom} » définitivement ?`);
     if (!ok) return;
     await this.oneShotService.deleteTheme(this.id, theme.id);
+  }
+
+  onCoverDrop(event: DragEvent) {
+    event.preventDefault();
+    this.coverDragOver.set(false);
+    const file = event.dataTransfer?.files?.[0];
+    if (file && file.type.startsWith('image/')) this.uploadCoverFile(file);
+  }
+
+  async onCoverSelected(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    (event.target as HTMLInputElement).value = '';
+    if (file) this.uploadCoverFile(file);
+  }
+
+  async removeCover() {
+    const path = this.event()?.photoCouverturePath;
+    if (!path) return;
+    this.coverUploading.set(true);
+    try {
+      await this.oneShotService.removeCouverture(this.id, path);
+    } finally {
+      this.coverUploading.set(false);
+    }
+  }
+
+  private async uploadCoverFile(file: File) {
+    this.coverUploading.set(true);
+    try {
+      const compressed = await compressToJpeg(file);
+      await this.oneShotService.setCouverture(this.id, compressed);
+    } finally {
+      this.coverUploading.set(false);
+    }
   }
 }

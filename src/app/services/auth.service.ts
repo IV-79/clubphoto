@@ -9,7 +9,7 @@ import {
 } from '@angular/fire/firestore';
 import { Storage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from '@angular/fire/storage';
 import { Router } from '@angular/router';
-import { from, switchMap, of, Observable, map, shareReplay } from 'rxjs';
+import { from, switchMap, of, Observable, map, shareReplay, pairwise, filter } from 'rxjs';
 import { DocumentService } from './document.service';
 import { UserProfile } from '../models/user.model';
 
@@ -35,6 +35,14 @@ export class AuthService {
     }),
     shareReplay(1)
   );
+
+  constructor() {
+    // Force-logout si un admin suspend le membre pendant sa session active
+    this.currentUserProfile$.pipe(
+      pairwise(),
+      filter(([prev, curr]) => prev !== null && !prev?.isSuspended && !!curr?.isSuspended)
+    ).subscribe(() => this.logout());
+  }
 
   login(email: string, password: string) {
     return runInInjectionContext(this.injector, () =>

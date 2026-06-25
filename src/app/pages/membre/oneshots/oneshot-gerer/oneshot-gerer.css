@@ -217,6 +217,80 @@
 .btn-save-edit:hover:not(:disabled) { background: #aa0000; }
 .btn-save-edit:disabled { opacity: 0.5; cursor: not-allowed; }
 
+/* ── Cover drop zone ── */
+.field-cover { display: flex; flex-direction: column; gap: 6px; }
+
+.cover-drop {
+  position: relative;
+  border: 2px dashed rgba(0,0,0,0.16);
+  border-radius: 6px;
+  background: #fafafa;
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.2s, background 0.2s;
+  overflow: hidden;
+  cursor: pointer;
+}
+.cover-drop.drag-over { border-color: #cc0000; background: rgba(204,0,0,0.04); }
+
+.cover-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: rgba(0,0,0,0.38);
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 1.5rem;
+  pointer-events: none;
+}
+.cover-placeholder .cover-browse-btn { pointer-events: auto; }
+
+.cover-icon { font-size: 1.8rem; line-height: 1; }
+
+.cover-browse-btn {
+  background: none;
+  border: none;
+  color: #cc0000;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+.cover-browse-btn:hover:not(:disabled) { color: #a00; }
+.cover-browse-btn:disabled { opacity: 0.5; cursor: not-allowed; text-decoration: none; }
+
+.cover-preview {
+  width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  display: block;
+}
+
+.cover-overlay-actions {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: flex;
+  gap: 6px;
+}
+
+.cover-remove-btn {
+  background: rgba(0,0,0,0.55);
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  font-size: 0.78rem;
+  padding: 3px 8px;
+  cursor: pointer;
+}
+.cover-remove-btn:hover:not(:disabled) { background: rgba(180,0,0,0.85); }
+.cover-remove-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.hidden-input { display: none; }
+
 @media (max-width: 600px) {
   .form-row { flex-direction: column; }
 }

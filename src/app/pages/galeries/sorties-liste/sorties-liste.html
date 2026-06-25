@@ -67,16 +67,16 @@
           @if (item.kind === 'sortie') {
             @let sortie = asSortie(item);
             <a [routerLink]="['/galeries/sorties', sortie.id]" class="sortie-card">
-              @if (sortie.photoCouvertureUrl) {
+              @if (sortie.imageEvenementUrl) {
                 <div class="sortie-cover">
-                  <img [src]="sortie.photoCouvertureUrl" [alt]="sortie.titre" class="cover-img" />
+                  <img [src]="sortie.imageEvenementUrl" [alt]="sortie.titre" class="cover-img" />
                   <span class="sortie-status status-avenir">À venir</span>
                 </div>
               }
               <div class="sortie-info">
                 <div class="sortie-titre-row">
                   <span class="type-badge">{{ typeEmoji(sortie.type) }} {{ typeLabel(sortie.type) }}</span>
-                  @if (!sortie.photoCouvertureUrl) {
+                  @if (!sortie.imageEvenementUrl) {
                     <span class="sortie-status status-avenir">À venir</span>
                   }
                 </div>
@@ -104,10 +104,18 @@
           } @else {
             @let os = asOneShot(item);
             <a [routerLink]="['/galeries/oneshots', os.id]" class="sortie-card oneshot-card">
+              @if (os.photoCouvertureUrl) {
+                <div class="sortie-cover">
+                  <img [src]="os.photoCouvertureUrl" [alt]="os.titre" class="cover-img" />
+                  <span [class]="oneShotStatutClass(os.statut)">{{ oneShotStatutLabel(os.statut) }}</span>
+                </div>
+              }
               <div class="sortie-info">
                 <div class="sortie-titre-row">
                   <span class="type-badge oneshot-type-badge">🏆 OneShot</span>
-                  <span [class]="oneShotStatutClass(os.statut)">{{ oneShotStatutLabel(os.statut) }}</span>
+                  @if (!os.photoCouvertureUrl) {
+                    <span [class]="oneShotStatutClass(os.statut)">{{ oneShotStatutLabel(os.statut) }}</span>
+                  }
                 </div>
                 <h3 class="sortie-titre">{{ os.titre }}</h3>
                 <div class="sortie-meta">
@@ -176,10 +184,18 @@
           } @else {
             @let os = asOneShot(item);
             <a [routerLink]="['/galeries/oneshots', os.id]" class="sortie-card oneshot-card">
+              @if (os.photoCouvertureUrl) {
+                <div class="sortie-cover">
+                  <img [src]="os.photoCouvertureUrl" [alt]="os.titre" class="cover-img" />
+                  <span [class]="oneShotStatutClass(os.statut)">{{ oneShotStatutLabel(os.statut) }}</span>
+                </div>
+              }
               <div class="sortie-info">
                 <div class="sortie-titre-row">
                   <span class="type-badge type-badge-dim oneshot-type-badge-dim">🏆 OneShot</span>
-                  <span [class]="oneShotStatutClass(os.statut)">{{ oneShotStatutLabel(os.statut) }}</span>
+                  @if (!os.photoCouvertureUrl) {
+                    <span [class]="oneShotStatutClass(os.statut)">{{ oneShotStatutLabel(os.statut) }}</span>
+                  }
                 </div>
                 <h3 class="sortie-titre">{{ os.titre }}</h3>
                 <div class="sortie-meta">

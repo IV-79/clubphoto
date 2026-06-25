@@ -27,6 +27,43 @@
 
 .sep { margin: 0 8px; }
 
+/* Actions en-tête */
+.header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.btn-select {
+  background: none;
+  border: 1px solid #bbb;
+  color: #555;
+  padding: 9px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+.btn-select:hover:not(:disabled) { border-color: #888; color: #222; }
+.btn-select:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.btn-delete-selected {
+  background: #cc0000;
+  color: white;
+  border: none;
+  padding: 9px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  min-width: 170px;
+  transition: background 0.2s;
+}
+.btn-delete-selected:hover:not(:disabled) { background: #aa0000; }
+.btn-delete-selected:disabled { opacity: 0.45; cursor: not-allowed; }
+
 /* Bouton ajouter */
 .btn-add {
   background: #cc0000;
@@ -87,6 +124,34 @@
 }
 
 .photo-card:hover img { transform: scale(1.03); }
+
+/* Mode sélection */
+.photo-card.is-selected { outline: 2px solid #cc0000; }
+.photo-card.is-selected img { opacity: 0.75; }
+
+.select-check {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.75);
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 700;
+  z-index: 2;
+  pointer-events: none;
+  transition: background 0.15s, border-color 0.15s;
+}
+.select-check.checked {
+  background: #cc0000;
+  border-color: #cc0000;
+}
 
 /* Category badge: top-left, always visible */
 .card-cat {
@@ -413,6 +478,15 @@
 }
 
 .upload-form input[type="text"]:focus { border-color: #cc0000; }
+.upload-form input.input-error { border-color: #cc0000; }
+
+.required-star { color: #cc0000; margin-left: 2px; }
+
+.field-error {
+  color: #cc0000;
+  font-size: 0.75rem;
+  margin-top: 2px;
+}
 
 .upload-form select {
   background: #111;

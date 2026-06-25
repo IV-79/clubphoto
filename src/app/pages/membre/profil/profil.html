@@ -7,18 +7,124 @@
     }
   </div>
 
-  <!-- Photos publiques (en haut) -->
-  <div class="photos-profil-section">
-    <h2 class="section-title-photos">Photos publiques</h2>
+  <div class="profil-layout">
 
-    <!-- Photo de profil (avatar) -->
-    <div class="photo-upload-row">
-      <div class="photo-upload-info">
-        <span class="upload-title">Photo de profil</span>
-        <span class="upload-hint">Visible sur votre carte et votre page publique</span>
+    <!-- Colonne gauche : formulaire -->
+    <form class="profil-form" (ngSubmit)="save()">
+
+      <!-- Informations -->
+      <section class="form-section">
+        <h2>Informations</h2>
+        <div class="field-row">
+          <label>
+            <span>Prénom</span>
+            <input type="text" [(ngModel)]="form.prenom" name="prenom" placeholder="Votre prénom">
+          </label>
+          <label>
+            <span>Nom</span>
+            <input type="text" [(ngModel)]="form.nom" name="nom" placeholder="Votre nom" required>
+          </label>
+        </div>
+        <label class="full field-mt">
+          <span>Biographie courte</span>
+          <textarea [(ngModel)]="form.bio" name="bio" rows="2"
+            placeholder="Quelques mots sur vous, votre parcours photographique…"></textarea>
+        </label>
+        <label class="full field-mt">
+          <span>Appareil principal</span>
+          <input type="text" [(ngModel)]="form.appareil" name="appareil"
+            placeholder="Ex : Sony A7 IV, Canon EOS R6, Fujifilm X-T5…">
+        </label>
+      </section>
+
+      <!-- Visibilité -->
+      <section class="form-section">
+        <h2>Visibilité du portfolio</h2>
+        <div class="visibilite-row">
+          <label class="visibilite-option" [class.selected]="form.visibilite === 'public'">
+            <input type="radio" name="visibilite" value="public" [(ngModel)]="form.visibilite">
+            <span class="visibilite-label">Public</span>
+            <span class="visibilite-desc">Visible par tout le monde, y compris les visiteurs non connectés</span>
+          </label>
+          <label class="visibilite-option" [class.selected]="form.visibilite === 'membre'">
+            <input type="radio" name="visibilite" value="membre" [(ngModel)]="form.visibilite">
+            <span class="visibilite-label">Membres</span>
+            <span class="visibilite-desc">Visible uniquement par les membres connectés</span>
+          </label>
+        </div>
+      </section>
+
+      <!-- Thèmes de prédilection -->
+      <section class="form-section">
+        <h2>Thèmes de prédilection</h2>
+        <div class="styles-grid">
+          @for (style of stylesDisponibles; track style) {
+            <button type="button" class="style-chip"
+                    [class.selected]="isStyleSelected(style)"
+                    (click)="toggleStyle(style)">
+              {{ style }}
+            </button>
+          }
+        </div>
+      </section>
+
+      <!-- Réseaux & liens -->
+      <section class="form-section">
+        <h2>Réseaux &amp; liens</h2>
+        <div class="reseaux-grid">
+          <label>
+            <span>Instagram</span>
+            <div class="input-prefix">
+              <span class="prefix">instagram.com/</span>
+              <input type="text" [(ngModel)]="form.instagram" name="instagram" placeholder="pseudo">
+            </div>
+          </label>
+          <label>
+            <span>Facebook</span>
+            <div class="input-prefix">
+              <span class="prefix">facebook.com/</span>
+              <input type="text" [(ngModel)]="form.facebook" name="facebook" placeholder="profil">
+            </div>
+          </label>
+          <label>
+            <span>500px</span>
+            <div class="input-prefix">
+              <span class="prefix">500px.com/p/</span>
+              <input type="text" [(ngModel)]="form.px500" name="px500" placeholder="pseudo">
+            </div>
+          </label>
+          <label>
+            <span>Flickr</span>
+            <div class="input-prefix">
+              <span class="prefix">flickr.com/photos/</span>
+              <input type="text" [(ngModel)]="form.flickr" name="flickr" placeholder="pseudo">
+            </div>
+          </label>
+          <label class="reseau-full">
+            <span>Site web / portfolio</span>
+            <input type="url" [(ngModel)]="form.siteWeb" name="siteWeb" placeholder="https://votre-site.com">
+          </label>
+        </div>
+      </section>
+
+      <!-- Actions -->
+      <div class="form-actions">
+        @if (saved()) { <span class="feedback-ok">Profil enregistré.</span> }
+        @if (error()) { <span class="feedback-err">{{ error() }}</span> }
+        <button type="submit" class="btn-save" [disabled]="saving()">
+          {{ saving() ? 'Enregistrement…' : 'Enregistrer' }}
+        </button>
       </div>
-      <div class="photo-upload-ctrl">
-        <div class="avatar-current">
+
+    </form>
+
+    <!-- Colonne droite : photos -->
+    <aside class="profil-sidebar">
+
+      <div class="sidebar-section">
+        <h2 class="sidebar-title">Photo de profil</h2>
+        <p class="sidebar-hint">Visible sur votre carte membre</p>
+        <div class="avatar-wrap">
           @if (profilPreviewUrl()) {
             <img [src]="profilPreviewUrl()" class="avatar-thumb" alt="Aperçu">
           } @else if (profile()?.photoProfilUrl) {
@@ -30,9 +136,7 @@
         <input #profilInput type="file" accept="image/*" hidden (change)="onProfilSelected($event)">
         @if (!profilPreviewUrl()) {
           <button type="button" class="btn-photo-change" (click)="profilInput.click()"
-            [disabled]="uploadingProfil()">
-            Changer
-          </button>
+            [disabled]="uploadingProfil()">Changer</button>
         } @else {
           <div class="upload-preview-actions">
             <button type="button" class="btn-photo-cancel" (click)="cancelProfil()"
@@ -44,15 +148,10 @@
           </div>
         }
       </div>
-    </div>
 
-    <!-- Photo bandeau -->
-    <div class="photo-upload-row photo-upload-row-bandeau">
-      <div class="photo-upload-info">
-        <span class="upload-title">Photo bandeau</span>
-        <span class="upload-hint">En-tête de votre page publique — format recommandé : 4:1 paysage (ex. 2400 × 600 px)</span>
-      </div>
-      <div class="photo-upload-ctrl photo-upload-ctrl-bandeau">
+      <div class="sidebar-section">
+        <h2 class="sidebar-title">Photo bandeau</h2>
+        <p class="sidebar-hint">En-tête de votre page publique — format 4:1 paysage (ex. 2400×600 px)</p>
         <div class="bandeau-current">
           @if (bandeauPreviewUrl()) {
             <img [src]="bandeauPreviewUrl()" class="bandeau-thumb" alt="Aperçu bandeau">
@@ -65,9 +164,7 @@
         <input #bandeauInput type="file" accept="image/*" hidden (change)="onBandeauSelected($event)">
         @if (!bandeauPreviewUrl()) {
           <button type="button" class="btn-photo-change" (click)="bandeauInput.click()"
-            [disabled]="uploadingBandeau()">
-            Changer
-          </button>
+            [disabled]="uploadingBandeau()">Changer</button>
         } @else {
           <div class="upload-preview-actions">
             <button type="button" class="btn-photo-cancel" (click)="cancelBandeau()"
@@ -79,134 +176,9 @@
           </div>
         }
       </div>
-    </div>
+
+    </aside>
 
   </div>
-
-  <form class="profil-form" (ngSubmit)="save()">
-
-    <!-- Visibilité du portfolio -->
-    <section class="form-section">
-      <h2>Visibilité du portfolio</h2>
-      <p class="section-hint">Choisissez qui peut voir votre portfolio dans la galerie des membres.</p>
-      <div class="visibilite-row">
-        <label class="visibilite-option" [class.selected]="form.visibilite === 'public'">
-          <input type="radio" name="visibilite" value="public" [(ngModel)]="form.visibilite">
-          <span class="visibilite-label">Public</span>
-          <span class="visibilite-desc">Visible par tout le monde, y compris les visiteurs non connectés</span>
-        </label>
-        <label class="visibilite-option" [class.selected]="form.visibilite === 'membre'">
-          <input type="radio" name="visibilite" value="membre" [(ngModel)]="form.visibilite">
-          <span class="visibilite-label">Membres</span>
-          <span class="visibilite-desc">Visible uniquement par les membres connectés</span>
-        </label>
-      </div>
-    </section>
-
-    <!-- Identité -->
-    <section class="form-section">
-      <h2>Identité</h2>
-      <div class="field-row">
-        <label>
-          <span>Prénom</span>
-          <input type="text" [(ngModel)]="form.prenom" name="prenom" placeholder="Votre prénom">
-        </label>
-        <label>
-          <span>Nom</span>
-          <input type="text" [(ngModel)]="form.nom" name="nom" placeholder="Votre nom" required>
-        </label>
-      </div>
-    </section>
-
-    <!-- À propos -->
-    <section class="form-section">
-      <h2>À propos</h2>
-      <label class="full">
-        <span>Biographie courte</span>
-        <textarea [(ngModel)]="form.bio" name="bio" rows="3"
-          placeholder="Quelques mots sur vous, votre parcours photographique…"></textarea>
-      </label>
-    </section>
-
-    <!-- Matériel -->
-    <section class="form-section">
-      <h2>Matériel</h2>
-      <label class="full">
-        <span>Appareil principal</span>
-        <input type="text" [(ngModel)]="form.appareil" name="appareil"
-          placeholder="Ex : Sony A7 IV, Canon EOS R6, Fujifilm X-T5…">
-      </label>
-    </section>
-
-    <!-- Thèmes de prédilection -->
-    <section class="form-section">
-      <h2>Thèmes de prédilection</h2>
-      <p class="section-hint">Sélectionnez vos thèmes de prédilection</p>
-      <div class="styles-grid">
-        @for (style of stylesDisponibles; track style) {
-          <button
-            type="button"
-            class="style-chip"
-            [class.selected]="isStyleSelected(style)"
-            (click)="toggleStyle(style)">
-            {{ style }}
-          </button>
-        }
-      </div>
-    </section>
-
-    <!-- Réseaux sociaux -->
-    <section class="form-section">
-      <h2>Réseaux &amp; liens</h2>
-      <div class="field-col">
-        <label>
-          <span>Instagram</span>
-          <div class="input-prefix">
-            <span class="prefix">instagram.com/</span>
-            <input type="text" [(ngModel)]="form.instagram" name="instagram" placeholder="votre_pseudo">
-          </div>
-        </label>
-        <label>
-          <span>Facebook</span>
-          <div class="input-prefix">
-            <span class="prefix">facebook.com/</span>
-            <input type="text" [(ngModel)]="form.facebook" name="facebook" placeholder="votre.profil">
-          </div>
-        </label>
-        <label>
-          <span>500px</span>
-          <div class="input-prefix">
-            <span class="prefix">500px.com/p/</span>
-            <input type="text" [(ngModel)]="form.px500" name="px500" placeholder="votre_pseudo">
-          </div>
-        </label>
-        <label>
-          <span>Flickr</span>
-          <div class="input-prefix">
-            <span class="prefix">flickr.com/photos/</span>
-            <input type="text" [(ngModel)]="form.flickr" name="flickr" placeholder="votre_pseudo">
-          </div>
-        </label>
-        <label>
-          <span>Site web / portfolio</span>
-          <input type="url" [(ngModel)]="form.siteWeb" name="siteWeb" placeholder="https://votre-site.com">
-        </label>
-      </div>
-    </section>
-
-    <!-- Actions -->
-    <div class="form-actions">
-      @if (saved()) {
-        <span class="feedback-ok">Profil enregistré.</span>
-      }
-      @if (error()) {
-        <span class="feedback-err">{{ error() }}</span>
-      }
-      <button type="submit" class="btn-save" [disabled]="saving()">
-        {{ saving() ? 'Enregistrement…' : 'Enregistrer' }}
-      </button>
-    </div>
-
-  </form>
 
 </div>

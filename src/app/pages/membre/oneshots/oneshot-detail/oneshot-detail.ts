@@ -288,7 +288,12 @@ export class OneShotDetail {
       `Supprimer « ${e?.titre ?? 'ce OneShot'} » et toutes ses photos définitivement ?`
     );
     if (!ok) return;
-    await this.oneShotService.deleteOneShot(this.id);
+    await this.oneShotService.deleteOneShot(this.id, e ? {
+      titre: e.titre,
+      nomCreateur: e.nomCreateur,
+      creatorUid: e.creatorUid,
+      photoCouverturePath: e.photoCouverturePath,
+    } : undefined);
     this.router.navigate(['/galeries/sorties']);
   }
 
@@ -358,4 +363,5 @@ export class OneShotDetail {
     await this.oneShotService.desinscrire(this.id, profile.uid);
     this.saving.set(false);
   }
+
 }
