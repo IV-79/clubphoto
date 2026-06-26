@@ -188,9 +188,15 @@ export class OneShotDetail {
       .filter(g => g.photos.length > 0)
   );
 
-  top3ResultsByTheme = computed(() =>
-    this.resultsByTheme().map(g => ({ ...g, photos: g.photos.slice(0, 3) }))
-  );
+  top3ResultsByTheme = computed(() => {
+    const counts = this.voteCountByPhoto();
+    return this.resultsByTheme().map(g => ({
+      ...g,
+      photos: g.photos.filter(p =>
+        g.photos.filter(q => (counts[q.id] ?? 0) > (counts[p.id] ?? 0)).length < 3
+      ),
+    }));
+  });
 
   // Lightbox
   lightboxIndex = signal<number | null>(null);
