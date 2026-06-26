@@ -269,7 +269,7 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
       this.navItems.set(items.map(item => {
         if (item.id === 'gallery')   return { ...item, target: galleryStart,   from: galleryStart };
         if (item.id === 'membres')   return { ...item, from: galleryEnd };
-        if (item.id === 'rejoindre') return { ...item, target: ctaStart, from: membresItem.from };
+        if (item.id === 'rejoindre') return { ...item, target: ctaStart, from: membresItem.target + 1 };
         return item;
       }));
     });

@@ -1,12 +1,12 @@
 export type { Commentaire as SortieCommentaire, Reponse as SortieReply } from './commentaire.model';
 import { PhotoExif } from './photo.model';
 
-export type SortieType = 'sortie_photo' | 'atelier' | 'repas';
+export type SortieType = 'sortie_photo' | 'sortie_club' | 'atelier';
 
 export const SORTIE_TYPE_META: Record<SortieType, { label: string; emoji: string }> = {
   sortie_photo: { label: 'Sortie Photo', emoji: '📸' },
+  sortie_club:  { label: 'Sortie Club',  emoji: '🚶' },
   atelier:      { label: 'Atelier',      emoji: '🎨' },
-  repas:        { label: 'Repas',        emoji: '🍽️' },
 };
 
 export function getSortieTypeLabel(type: SortieType | undefined): string {
