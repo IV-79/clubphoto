@@ -42,9 +42,21 @@ jobs:
           test -d dist/club-photo/browser
 
       - name: Deploy to Firebase Hosting
-        uses: FirebaseExtended/action-hosting-deploy@v0
-        with:
-          repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_CLUBPHOTOPJ }}
-          projectId: clubphotopj
-          channelId: live
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_CLUBPHOTOPJ }}
+        run: |
+          echo "$FIREBASE_SERVICE_ACCOUNT" > /tmp/sa.json
+          set +e
+          GOOGLE_APPLICATION_CREDENTIALS=/tmp/sa.json npx firebase-tools@latest \
+            deploy --only hosting --project clubphotopj --non-interactive \
+            2>&1 | tee /tmp/firebase_deploy.log
+          EXIT=${PIPESTATUS[0]}
+          set -e
+          if [ $EXIT -ne 0 ]; then
+            if grep -q "is the current active version" /tmp/firebase_deploy.log; then
+              echo "✓ Version already active — aucun changement depuis le dernier déploiement"
+              exit 0
+            fi
+            cat /tmp/firebase_deploy.log
+            exit $EXIT
+          fi
