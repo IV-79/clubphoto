@@ -122,7 +122,7 @@
                   @if (os.date) {
                     <span class="meta-date">📅 {{ formatDate(os.date) }}</span>
                   }
-                  @if (os.lieu) {
+                  @if (profile() && os.lieu) {
                     <span class="meta-lieu">📍 {{ os.lieu }}</span>
                   }
                 </div>
@@ -203,7 +203,7 @@
                   @if (os.date) {
                     <span class="meta-date">📅 {{ formatDate(os.date) }}</span>
                   }
-                  @if (os.lieu) {
+                  @if (profile() && os.lieu) {
                     <span class="meta-lieu">📍 {{ os.lieu }}</span>
                   }
                 </div>

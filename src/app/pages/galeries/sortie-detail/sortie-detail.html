@@ -37,7 +37,7 @@
         }
       </div>
 
-      @if (s.description) {
+      @if (profile() && s.description) {
         <p class="detail-desc">{{ s.description }}</p>
       }
     } @else {

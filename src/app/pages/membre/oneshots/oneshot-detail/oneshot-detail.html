@@ -21,14 +21,14 @@
         @if (event()!.date) {
           <span class="meta-item">📅 {{ formatDate(event()!.date!) }}</span>
         }
-        @if (event()!.lieu) {
+        @if (isLoggedIn() && event()!.lieu) {
           <span class="meta-item">📍 {{ event()!.lieu }}</span>
         }
         @if (isLoggedIn()) {
           <span class="meta-item meta-org">Organisé par {{ event()!.nomCreateur }}</span>
         }
       </div>
-      @if (event()!.description) {
+      @if (isLoggedIn() && event()!.description) {
         <p class="event-desc">{{ event()!.description }}</p>
       }
     </div>
