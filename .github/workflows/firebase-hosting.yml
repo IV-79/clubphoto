@@ -21,7 +21,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
-          node-version: 22
+          node-version: 24
           cache: 'npm'
 
       # Le reste de votre pipeline Angular / Firebase reste identique et valide
