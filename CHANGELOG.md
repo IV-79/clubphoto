@@ -5,6 +5,12 @@
 ## En cours (alpha)
 
 ### Améliorations
+- **Types d'événements mis à jour** — la liste passe à : Sortie Photo, Sortie Club, Atelier (suppression de "Repas"). Le filtre, les formulaires création/édition et le guide membre sont mis à jour en conséquence.
+- **Photo de couverture — proportions respectées** — sur les cartes événements et OneShots, la photo s'affiche désormais en entier (`object-fit: contain`) avec fond sombre, sans recadrage.
+- **Galerie accueil — sélection aléatoire** — les photos affichées sur la page d'accueil sont tirées aléatoirement parmi les photos publiques de membres à profil public (double condition membre public + photo publique), avec un pool de 60 photos renouvelé à chaque visite.
+- **Galerie accueil — proportions respectées** — la mosaïque passe en colonnes CSS : chaque photo s'affiche à son ratio naturel, sans recadrage. 4 colonnes desktop, 2 sur mobile.
+- **Nav dots accueil — stabilisée** — la section Galerie n'est plus pincée par GSAP (hauteur variable selon les photos). Les positions des dots sont recalculées depuis le DOM après chargement des photos pour rester précises.
+- **CI/CD — faux échec déploiement corrigé** — le workflow GitHub Actions traite désormais l'erreur Firebase "already current active version" comme un succès, évitant le pipeline rouge quand aucun fichier n'a changé depuis le dernier déploiement.
 - **Pages du site éditables (Markdown)** — Histoire, Le Bureau, Adhésion, Charte du site et Contact sont désormais éditables par les admins via Admin → Pages du site. Chaque page est rédigée en Markdown (titres, listes, liens, tableaux) et rendue automatiquement sur le site. Un lien "Aide Markdown ↗" est disponible dans l'éditeur.
 - **Charte du site — validation obligatoire** — après connexion, si un membre n'a pas encore accepté la version courante de la charte, un modal plein écran non-dismissable lui présente le texte et l'oblige à accepter ou à se déconnecter. En refusant, il est déconnecté immédiatement. L'admin peut cocher "Obliger tous les membres à accepter la nouvelle version" lors de la sauvegarde de la charte pour déclencher une nouvelle vague d'acceptation.
 - **Page Contact éditable** — la page `/contact` utilise le même système Markdown que les autres pages du site ; le comité peut y mettre à jour coordonnées, adresse et horaires sans intervention technique.
