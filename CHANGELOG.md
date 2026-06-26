@@ -19,6 +19,9 @@
 - **Top 3 visiteurs — gestion des égalités** — en cas d'ex-æquo, tous les concernés sont affichés (ex : 1er-1er-3e-3e-3e = 5 photos affichées, pas de 2e place).
 - **Liste des participants — toujours visible** — en phase vote et résultats, la liste des membres inscrits reste affichée pour les connectés (auparavant masquée).
 - **Informations visiteurs — lieu et description masqués** — le lieu et la description des OneShots, événements et sorties ne sont plus visibles par les visiteurs non connectés (pages liste, détail, calendrier). Le bouton "Connexion pour s'inscrire" sur les OneShots du calendrier est supprimé.
+- **Gestion — masquée en résultats** — la boîte Gestion disparaît une fois les résultats publiés (plus d'actions possibles à ce stade).
+- **Guide du site — section OneShot mise à jour** — nouvelles cartes "Voter dans un OneShot" et "Gérer les photos", précisions sur les droits par phase, barre de progression et messages de blocage documentés.
+- **Build — budgets Angular ajustés** — seuils JS (3 MB) et CSS (20 kB) mis à jour dans `angular.json` pour refléter la réalité de la stack (Angular + Material + PrimeNG + AngularFire). Zéro warning en build.
 
 ### Améliorations
 - **Types d'événements mis à jour** — la liste passe à : Sortie Photo, Sortie Club, Atelier (suppression de "Repas"). Le filtre, les formulaires création/édition et le guide membre sont mis à jour en conséquence.

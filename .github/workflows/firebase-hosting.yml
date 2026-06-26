@@ -13,15 +13,18 @@ jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
     steps:
+      # Passé de v4 à v6 pour le support natif de Node 24
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
+      # Passé de v4 à v5 pour supprimer l'avertissement de runtime
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: 'npm'
 
+      # Le reste de votre pipeline Angular / Firebase reste identique et valide
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
 
