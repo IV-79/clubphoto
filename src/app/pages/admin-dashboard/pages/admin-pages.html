@@ -1,0 +1,51 @@
+<div class="pages-editor">
+
+  <div class="page-header">
+    <h2 class="page-title">Pages du site</h2>
+  </div>
+
+  <!-- Sélecteur de page -->
+  <div class="page-selector">
+    @for (p of pages; track p) {
+      <button class="page-tab" [class.active]="currentPage() === p" (click)="selectPage(p)">
+        {{ pageLabels[p] }}
+      </button>
+    }
+  </div>
+
+  <!-- Éditeur -->
+  @if (loaded() === null) {
+    <div class="editor-loading">Chargement…</div>
+  } @else {
+    <textarea
+      class="md-editor"
+      [(ngModel)]="editorValue"
+      placeholder="Rédigez le contenu en Markdown…"
+      spellcheck="false">
+    </textarea>
+  }
+
+  <!-- Option charte uniquement -->
+  @if (currentPage() === 'charte') {
+    <label class="charte-reaccept-label">
+      <input type="checkbox" [(ngModel)]="forceReaccept" />
+      Obliger tous les membres à accepter la nouvelle version lors du prochain login
+    </label>
+  }
+
+  <!-- Actions -->
+  <div class="editor-actions">
+    <button class="btn-save" (click)="save()" [disabled]="saving() || loaded() === null">
+      {{ saving() ? 'Sauvegarde…' : 'Sauvegarder' }}
+    </button>
+    @if (saved()) {
+      <span class="save-confirm">✓ Sauvegardé</span>
+    }
+    <a class="md-help-link"
+       href="https://www.markdownguide.org/cheat-sheet/"
+       target="_blank" rel="noopener">
+      Aide Markdown ↗
+    </a>
+  </div>
+
+</div>

@@ -5,6 +5,7 @@ import { Membres } from './pages/admin-dashboard/membres/membres';
 import { Reunions } from './pages/admin-dashboard/reunions/reunions';
 import { AdminConfig } from './pages/admin-dashboard/config/config';
 import { AdminThemes } from './pages/admin-dashboard/themes/themes';
+import { AdminPages } from './pages/admin-dashboard/pages/admin-pages';
 import { authGuard, memberGuard, loginGuard, editorGuard } from './guards/auth.guard';
 import { PublicLayout } from './layouts/public-layout/public-layout';
 import { MemberLayout } from './layouts/member-layout/member-layout';
@@ -27,6 +28,7 @@ import { SortiesListe } from './pages/galeries/sorties-liste/sorties-liste';
 import { SortieDetail } from './pages/galeries/sortie-detail/sortie-detail';
 import { SortieCreer } from './pages/membre/sorties/sortie-creer/sortie-creer';
 import { MembresGuide } from './pages/membres/guide/guide';
+import { Charte } from './pages/membres/charte/charte';
 import { CompleterProfilComponent } from './pages/completer-profil/completer-profil.component';
 import { Documents } from './pages/membre/documents/documents';
 import { DocumentDossiers } from './pages/admin-dashboard/document-dossiers/document-dossiers';
@@ -61,6 +63,7 @@ export const routes: Routes = [
       { path: 'galeries/sorties/:id', component: SortieDetail },
       { path: 'calendrier', component: Calendrier },
       { path: 'membres/guide', component: MembresGuide, canActivate: [memberGuard] },
+      { path: 'membres/charte', component: Charte, canActivate: [memberGuard] },
       { path: 'contact', component: Contact },
       {
         path: 'admin',
@@ -72,6 +75,7 @@ export const routes: Routes = [
           { path: 'themes', component: AdminThemes },
           { path: 'config', component: AdminConfig },
           { path: 'dossiers', component: DocumentDossiers },
+          { path: 'pages', component: AdminPages },
         ]
       },
     ]

@@ -32,13 +32,15 @@ export class AdminConfig implements OnInit {
   errorMsg   = '';
   confirmReset = signal(false);
 
-  // Image hero
-  siteConfig    = toSignal(this.configService.getSiteConfig(), { initialValue: {} as any });
+  // Image page d'accueil
+  siteConfig     = toSignal(this.configService.getSiteConfig(), { initialValue: {} as any });
   heroCurrentUrl = computed(() => (this.siteConfig() as any)?.heroImageUrl as string ?? '');
-  heroPreview   = signal<string | null>(null);
-  heroFile      = signal<File | null>(null);
-  heroUploading = signal(false);
-  heroError     = signal('');
+  heroSource     = computed<'manuel' | 'theme_du_mois'>(() => (this.siteConfig() as any)?.heroSource ?? 'manuel');
+  heroPreview    = signal<string | null>(null);
+  heroFile       = signal<File | null>(null);
+  heroUploading  = signal(false);
+  heroError      = signal('');
+  isDragging     = signal(false);
 
   ngOnInit() {
     this.configService.getCategories().subscribe(cats => this.categories.set(cats));
@@ -79,15 +81,41 @@ export class AdminConfig implements OnInit {
     this.save();
   }
 
-  // ---- Image hero ----
-  onHeroSelected(event: Event) {
-    const file = (event.target as HTMLInputElement).files?.[0];
-    if (!file) return;
+  // ---- Source hero ----
+  async setHeroSource(source: 'manuel' | 'theme_du_mois') {
+    await this.configService.saveSiteConfig({ heroSource: source });
+  }
+
+  // ---- Image hero (mode manuel) ----
+  private handleHeroFile(file: File) {
     this.heroFile.set(file);
     this.heroError.set('');
     const reader = new FileReader();
     reader.onload = e => this.heroPreview.set(e.target?.result as string);
     reader.readAsDataURL(file);
+  }
+
+  onHeroSelected(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (file) this.handleHeroFile(file);
+  }
+
+  onDragOver(e: DragEvent) {
+    e.preventDefault();
+    this.isDragging.set(true);
+  }
+
+  onDragLeave(e: DragEvent) {
+    if (!(e.currentTarget as HTMLElement).contains(e.relatedTarget as Node)) {
+      this.isDragging.set(false);
+    }
+  }
+
+  onDrop(e: DragEvent) {
+    e.preventDefault();
+    this.isDragging.set(false);
+    const file = e.dataTransfer?.files?.[0];
+    if (file && file.type.startsWith('image/')) this.handleHeroFile(file);
   }
 
   cancelHero() {
@@ -114,7 +142,7 @@ export class AdminConfig implements OnInit {
   }
 
   async deleteHero() {
-    const ok = await this.confirmService.confirm('Supprimer l\'image hero de la page d\'accueil ?');
+    const ok = await this.confirmService.confirm('Supprimer l\'image de la page d\'accueil ?');
     if (!ok) return;
     const cfg = this.siteConfig() as any;
     if (cfg?.heroImageStoragePath) {

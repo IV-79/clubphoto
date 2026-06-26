@@ -54,6 +54,14 @@ export class AuthService {
     await runInInjectionContext(this.injector, () => signOut(this.auth));
   }
 
+  async acceptCharte(version: number): Promise<void> {
+    const uid = this.auth.currentUser?.uid;
+    if (!uid) return;
+    await runInInjectionContext(this.injector, () =>
+      updateDoc(doc(this.firestore, 'users', uid), { charteAccepteeVersion: version })
+    );
+  }
+
   async register(email: string, password: string, nom: string) {
     const credential = await runInInjectionContext(this.injector, () =>
       createUserWithEmailAndPassword(this.auth, email, password)

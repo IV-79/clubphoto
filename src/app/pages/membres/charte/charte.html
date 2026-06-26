@@ -1,0 +1,10 @@
+<div class="club-page-wrap">
+  <h1 class="club-page-title">Charte du site</h1>
+  @if (loading()) {
+    <p class="club-placeholder">Chargement…</p>
+  } @else if (raw()) {
+    <div class="club-md-content" [innerHTML]="safeHtml()"></div>
+  } @else {
+    <p class="club-placeholder">Contenu à venir.</p>
+  }
+</div>

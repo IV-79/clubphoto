@@ -1,0 +1,128 @@
+.pages-editor {
+  max-width: 900px;
+  padding: 32px 24px;
+}
+
+.page-header { margin-bottom: 24px; }
+
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 300;
+  color: #1a1a1a;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+/* Tabs */
+.page-selector {
+  display: flex;
+  border-bottom: 2px solid #e8e8e8;
+  margin-bottom: 20px;
+}
+
+.page-tab {
+  background: none;
+  border: none;
+  padding: 10px 22px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  color: rgba(0, 0, 0, 0.45);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.page-tab:hover { color: #1a1a1a; }
+
+.page-tab.active {
+  color: #cc0000;
+  border-bottom-color: #cc0000;
+  font-weight: 500;
+}
+
+/* Textarea */
+.md-editor {
+  width: 100%;
+  min-height: 420px;
+  padding: 16px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.9rem;
+  line-height: 1.65;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  resize: vertical;
+  outline: none;
+  box-sizing: border-box;
+  color: #1a1a1a;
+  background: #fafafa;
+  transition: border-color 0.15s;
+  margin-bottom: 14px;
+}
+
+.md-editor:focus {
+  border-color: #cc0000;
+  background: #fff;
+}
+
+.editor-loading {
+  padding: 40px;
+  text-align: center;
+  color: rgba(0, 0, 0, 0.35);
+  font-size: 0.88rem;
+  margin-bottom: 14px;
+}
+
+/* Option charte */
+.charte-reaccept-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: rgba(0, 0, 0, 0.6);
+  margin-bottom: 14px;
+  cursor: pointer;
+}
+
+.charte-reaccept-label input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  accent-color: #cc0000;
+  cursor: pointer;
+}
+
+/* Actions */
+.editor-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.btn-save {
+  background: #cc0000;
+  color: #fff;
+  border: none;
+  padding: 9px 24px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-save:hover:not(:disabled) { background: #aa0000; }
+.btn-save:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.save-confirm {
+  font-size: 0.85rem;
+  color: #2d6a4f;
+  font-weight: 500;
+}
+
+.md-help-link {
+  margin-left: auto;
+  font-size: 0.82rem;
+  color: rgba(0, 0, 0, 0.4);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.md-help-link:hover { color: #cc0000; }

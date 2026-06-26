@@ -5,6 +5,13 @@
 ## En cours (alpha)
 
 ### Améliorations
+- **Pages du site éditables (Markdown)** — Histoire, Le Bureau, Adhésion, Charte du site et Contact sont désormais éditables par les admins via Admin → Pages du site. Chaque page est rédigée en Markdown (titres, listes, liens, tableaux) et rendue automatiquement sur le site. Un lien "Aide Markdown ↗" est disponible dans l'éditeur.
+- **Charte du site — validation obligatoire** — après connexion, si un membre n'a pas encore accepté la version courante de la charte, un modal plein écran non-dismissable lui présente le texte et l'oblige à accepter ou à se déconnecter. En refusant, il est déconnecté immédiatement. L'admin peut cocher "Obliger tous les membres à accepter la nouvelle version" lors de la sauvegarde de la charte pour déclencher une nouvelle vague d'acceptation.
+- **Page Contact éditable** — la page `/contact` utilise le même système Markdown que les autres pages du site ; le comité peut y mettre à jour coordonnées, adresse et horaires sans intervention technique.
+- **Image hero — source configurable** — dans Admin → Configuration du site, l'admin peut choisir entre une image uploadée manuellement (drag & drop) ou utiliser automatiquement la photo gagnante du dernier Thème du mois comme fond de la page d'accueil.
+- **Admin → Pages du site** — renommage de "Pages du club" en "Pages du site" dans le menu admin (desktop + mobile) et dans le titre de la page, maintenant que la section inclut aussi Contact.
+
+### Améliorations
 - **Lightbox — fullscreen direct en mode vote** — dans les contextes à votation (OneShot en phase vote, Thème du mois en phase soumission/vote), cliquer sur une photo déclenche directement le fullscreen natif du navigateur (barre du browser masquée, plein écran OS) sans passer par le panneau lightbox. Un bouton × ferme la lightbox depuis le fullscreen. Le système `anonyme`/`hideLikes` reste actif si l'utilisateur revient au panneau via ESC.
 - **Notifications — documents** — les membres abonnés reçoivent une notification `📁` lors du dépôt d'un nouveau document et lors du remplacement d'un fichier existant (pas lors d'un simple renommage). Une nouvelle préférence "Documents" est disponible dans `/membre/preferences` ; activée par défaut.
 - **Suspension en temps réel** — un membre suspendu par un admin est déconnecté automatiquement sans attendre sa prochaine reconnexion. Un watcher Firestore sur le profil détecte le passage `isSuspended: false → true` et appelle `logout()` immédiatement.

@@ -83,6 +83,7 @@
         </div>
       </div>
       <p class="guide-note">Le plein écran est réservé aux photos. Pour les actualités et les documents, la navigation s'arrête à la fiche info.</p>
+      <p class="guide-note">Lors des votes (Thème du mois, OneShot), la fiche info n'est pas disponible avant la clôture du vote — un clic sur une photo ouvre directement le plein écran, sans nom d'auteur ni commentaires.</p>
       <p class="guide-note">Dans la fiche info, naviguez entre les éléments avec les <strong>flèches à l'écran</strong> ou les touches <kbd>←</kbd> <kbd>→</kbd> du clavier. Sur mobile, glissez horizontalement sur la photo.</p>
     </div>
 
@@ -232,8 +233,8 @@
       </div>
       <p>
         Le bouton <strong>+ Nouvel article</strong> est visible en haut de la page Actualités pour les
-        administrateurs et les rédacteurs. Depuis la page de gestion (<strong>Admin → Articles</strong>),
-        retrouvez la liste de tous vos articles.
+        administrateurs et les rédacteurs. La liste de tous vos articles est accessible directement
+        depuis cette même page.
       </p>
       <div class="admin-fields">
         <div class="admin-field-row">
@@ -325,6 +326,15 @@
         <li>Cliquez <strong>Uploader</strong> — une barre de progression s'affiche.</li>
       </ol>
       <p class="guide-note">Tous les types de fichiers sont acceptés. La taille maximale n'est pas limitée par le site.</p>
+    </div>
+
+    <div class="guide-card">
+      <h3>Notifications</h3>
+      <p>
+        Les membres reçoivent une notification lorsqu'un nouveau document est déposé et lorsqu'un fichier
+        existant est remplacé. Vous pouvez activer ou désactiver cette notification dans
+        <strong>Membres → Préférences</strong>.
+      </p>
     </div>
 
     <div class="guide-card">
@@ -493,9 +503,9 @@
       <h3>Voter</h3>
       <ol class="guide-steps">
         <li>Pendant la phase <span class="badge-inline step-vote">Vote</span>, ouvrez le thème.</li>
-        <li>Cliquez sur une photo pour voter pour elle. Les photos sont anonymes.</li>
+        <li>Un bouton <strong>Voter</strong> apparaît sous chaque photo. Cliquez-le pour voter. Les photos sont anonymes.</li>
         <li>La barre de progression en haut indique vos votes restants.</li>
-        <li>Cliquez à nouveau sur une photo votée pour retirer votre vote et le déposer ailleurs.</li>
+        <li>Cliquez <strong>✓ Retirer</strong> sous une photo votée pour reprendre votre vote et le déposer ailleurs.</li>
         <li>Vous ne pouvez pas voter pour votre propre photo.</li>
       </ol>
     </div>
@@ -504,8 +514,10 @@
     <div class="guide-card">
       <h3>Visionner les photos</h3>
       <p>
-        Dans toutes les phases, <strong>cliquez sur une photo</strong> pour ouvrir sa fiche info.
-        Naviguez avec les flèches à l'écran ou les touches <kbd>←</kbd> <kbd>→</kbd> du clavier.
+        Dans toutes les phases, <strong>cliquez sur une photo</strong> pour l'agrandir et naviguer avec les flèches à l'écran ou les touches <kbd>←</kbd> <kbd>→</kbd> du clavier.
+      </p>
+      <p class="guide-note">
+        Pendant les phases <span class="badge-inline step-ouvert">Ouvert</span> et <span class="badge-inline step-vote">Vote</span>, la fiche info complète n'est pas disponible — la visionneuse s'ouvre sans nom d'auteur, likes ni commentaires (les soumissions sont anonymes jusqu'aux résultats).
       </p>
     </div>
   </section>

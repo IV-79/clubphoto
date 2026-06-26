@@ -13,6 +13,7 @@ export interface CategorieConfig {
 export interface SiteConfig {
   heroImageUrl?: string;
   heroImageStoragePath?: string;
+  heroSource?: 'manuel' | 'theme_du_mois';
 }
 
 const CONFIG_CATEGORIES = 'config/photoCategories';

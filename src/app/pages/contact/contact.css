@@ -1,0 +1,71 @@
+.contact-wrap {
+  max-width: 860px;
+  margin: 40px auto;
+  padding: 0 24px 60px;
+}
+
+.contact-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1a237e;
+  border-bottom: 3px solid #ffb300;
+  padding-bottom: 10px;
+  display: inline-block;
+  margin-bottom: 32px;
+}
+
+.contact-placeholder {
+  color: rgba(0, 0, 0, 0.4);
+  font-style: italic;
+}
+
+/* Rendu Markdown — même styles que le-club */
+.club-md-content {
+  line-height: 1.75;
+  color: #1a1a1a;
+  font-size: 1rem;
+}
+
+.club-md-content h1,
+.club-md-content h2,
+.club-md-content h3 {
+  font-weight: 700;
+  margin: 1.6em 0 0.5em;
+  line-height: 1.25;
+}
+
+.club-md-content h1 { font-size: 1.5rem; color: #1a237e; }
+.club-md-content h2 { font-size: 1.2rem; color: #1a237e; }
+.club-md-content h3 { font-size: 1rem; }
+
+.club-md-content p { margin: 0 0 1em; }
+
+.club-md-content ul,
+.club-md-content ol {
+  padding-left: 1.5rem;
+  margin: 0 0 1em;
+}
+
+.club-md-content li { margin-bottom: 0.3em; }
+
+.club-md-content strong { font-weight: 700; }
+.club-md-content em     { font-style: italic; }
+
+.club-md-content a {
+  color: #cc0000;
+  text-decoration: underline;
+}
+
+.club-md-content hr {
+  border: none;
+  border-top: 1px solid #e0e0e0;
+  margin: 2em 0;
+}
+
+.club-md-content blockquote {
+  border-left: 3px solid #ffb300;
+  margin: 1em 0;
+  padding: 0.4em 1em;
+  color: rgba(0, 0, 0, 0.6);
+  font-style: italic;
+}

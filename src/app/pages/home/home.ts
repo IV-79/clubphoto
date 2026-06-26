@@ -4,8 +4,8 @@ import { DatePipe } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { DomSanitizer, SafeStyle } from '@angular/platform-browser';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
-import { map, filter, take } from 'rxjs/operators';
-import { Subscription, race, timer } from 'rxjs';
+import { map, filter, take, switchMap } from 'rxjs/operators';
+import { Subscription, race, timer, combineLatest, of } from 'rxjs';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
@@ -48,8 +48,41 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
 
   private siteConfig = toSignal(this.configService.getSiteConfig(), { initialValue: {} as any });
 
+  private heroThemeUrl = toSignal(
+    this.configService.getSiteConfig().pipe(
+      switchMap(cfg => {
+        if (cfg?.heroSource !== 'theme_du_mois') return of(null);
+        return this.themeService.getThemes().pipe(
+          map(themes => themes.find(t => computeThemeStatut(t) === 'resultats') ?? null),
+          switchMap(theme => {
+            if (!theme) return of(null);
+            return combineLatest([
+              this.themeService.getSoumissions(theme.id),
+              this.themeService.getTousVotes(theme.id),
+            ]).pipe(
+              map(([soumissions, votes]) => {
+                if (!soumissions.length) return null;
+                const count = new Map<string, number>();
+                votes.forEach(v => count.set(v.soumissionId, (count.get(v.soumissionId) ?? 0) + 1));
+                const winner = [...soumissions].sort((a, b) => {
+                  const diff = (count.get(b.id) ?? 0) - (count.get(a.id) ?? 0);
+                  return diff !== 0 ? diff : a.uploadedAt.localeCompare(b.uploadedAt);
+                })[0];
+                return winner?.url ?? null;
+              })
+            );
+          })
+        );
+      })
+    ),
+    { initialValue: null as string | null }
+  );
+
   heroStyle = computed((): SafeStyle => {
-    const url = this.siteConfig()?.heroImageUrl as string | undefined;
+    const cfg = this.siteConfig();
+    const url = cfg?.heroSource === 'theme_du_mois'
+      ? (this.heroThemeUrl() ?? cfg?.heroImageUrl ?? '')
+      : (cfg?.heroImageUrl ?? '');
     if (!url) return this.sanitizer.bypassSecurityTrustStyle('none');
     return this.sanitizer.bypassSecurityTrustStyle(`url('${url}')`);
   });

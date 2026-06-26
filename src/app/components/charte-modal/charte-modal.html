@@ -1,0 +1,21 @@
+<div class="charte-backdrop">
+  <div class="charte-dialog">
+
+    <div class="charte-header">
+      <h2 class="charte-title">Charte du site</h2>
+      <p class="charte-subtitle">Veuillez lire et accepter la charte pour accéder au site.</p>
+    </div>
+
+    <div class="charte-body">
+      <div class="club-md-content" [innerHTML]="safeHtml()"></div>
+    </div>
+
+    <div class="charte-footer">
+      <button class="btn-refuse" (click)="refuse()">Refuser et se déconnecter</button>
+      <button class="btn-accept" (click)="accept()" [disabled]="accepting">
+        {{ accepting ? 'Enregistrement…' : 'J\'accepte la charte' }}
+      </button>
+    </div>
+
+  </div>
+</div>

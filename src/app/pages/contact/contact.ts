@@ -1,9 +1,35 @@
-import { Component } from '@angular/core';
+import { Component, inject, computed } from '@angular/core';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { marked } from 'marked';
+import { PageContentService } from '../../services/page-content.service';
 
 @Component({
   selector: 'app-contact',
   imports: [],
-  template: `<div class="page-wrap"><h1>Contact</h1><p>Contenu à venir...</p></div>`,
-  styles: [`.page-wrap{max-width:900px;margin:40px auto;padding:0 24px}h1{color:#1a237e;border-bottom:3px solid #ffb300;padding-bottom:8px;display:inline-block}`]
+  template: `
+    <div class="contact-wrap">
+      <h1 class="contact-title">Contact</h1>
+      @if (loading()) {
+        <p class="contact-placeholder">Chargement…</p>
+      } @else if (raw()) {
+        <div class="club-md-content" [innerHTML]="safeHtml()"></div>
+      } @else {
+        <p class="contact-placeholder">Contenu à venir.</p>
+      }
+    </div>
+  `,
+  styleUrl: './contact.css',
 })
-export class Contact {}
+export class Contact {
+  private pageService = inject(PageContentService);
+  private sanitizer   = inject(DomSanitizer);
+
+  raw      = toSignal(this.pageService.getContent('contact'), { initialValue: null as any });
+  loading  = computed(() => this.raw() === null);
+  safeHtml = computed((): SafeHtml =>
+    this.sanitizer.bypassSecurityTrustHtml(
+      marked.parse(this.raw() ?? '', { async: false }) as string
+    )
+  );
+}

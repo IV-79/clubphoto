@@ -48,4 +48,3 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_CLUBPHOTOPJ }}
           projectId: clubphotopj
           channelId: live
-        continue-on-error: true

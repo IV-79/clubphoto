@@ -2,3 +2,6 @@
 <app-login-modal />
 <app-confirm-modal />
 <app-gps-consent-modal />
+@if (mustAcceptCharte()) {
+  <app-charte-modal />
+}

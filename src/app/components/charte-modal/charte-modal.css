@@ -1,0 +1,116 @@
+.charte-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.charte-dialog {
+  background: #fff;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 680px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+}
+
+.charte-header {
+  padding: 24px 28px 16px;
+  border-bottom: 1px solid #e8e8e8;
+  flex-shrink: 0;
+}
+
+.charte-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1a237e;
+  margin: 0 0 4px;
+}
+
+.charte-subtitle {
+  font-size: 0.85rem;
+  color: rgba(0, 0, 0, 0.5);
+  margin: 0;
+}
+
+.charte-body {
+  padding: 20px 28px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Réutilise les styles Markdown de le-club.css */
+.charte-body .club-md-content {
+  line-height: 1.75;
+  color: #1a1a1a;
+  font-size: 0.95rem;
+}
+
+.charte-body .club-md-content h2 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1a237e;
+  margin: 1.4em 0 0.4em;
+}
+
+.charte-body .club-md-content ul {
+  padding-left: 1.4rem;
+  margin: 0 0 0.8em;
+}
+
+.charte-body .club-md-content li {
+  margin-bottom: 0.25em;
+}
+
+.charte-body .club-md-content p { margin: 0 0 0.8em; }
+
+.charte-footer {
+  padding: 16px 28px;
+  border-top: 1px solid #e8e8e8;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+.btn-refuse {
+  background: none;
+  border: 1px solid #ddd;
+  color: rgba(0, 0, 0, 0.5);
+  padding: 9px 18px;
+  border-radius: 5px;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-refuse:hover {
+  border-color: #cc0000;
+  color: #cc0000;
+}
+
+.btn-accept {
+  background: #1a237e;
+  color: #fff;
+  border: none;
+  padding: 9px 22px;
+  border-radius: 5px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-accept:hover:not(:disabled) { background: #283593; }
+.btn-accept:disabled { opacity: 0.5; cursor: not-allowed; }
+
+@media (max-width: 480px) {
+  .charte-footer { flex-direction: column-reverse; }
+  .btn-refuse, .btn-accept { width: 100%; text-align: center; }
+}

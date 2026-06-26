@@ -71,6 +71,9 @@
               <a routerLink="/membres/guide" class="nav-panel-item" (click)="openMenu.set(null)">
                 <mat-icon>menu_book</mat-icon>Guide du site
               </a>
+              <a routerLink="/membres/charte" class="nav-panel-item" (click)="openMenu.set(null)">
+                <mat-icon>gavel</mat-icon>Charte du site
+              </a>
             </div>
           }
         </li>
@@ -183,8 +186,11 @@
                 <a routerLink="/admin/dossiers" class="nav-panel-item" (click)="openMenu.set(null)">
                   <mat-icon>folder_shared</mat-icon>Dossiers documents
                 </a>
+                <a routerLink="/admin/pages" class="nav-panel-item" (click)="openMenu.set(null)">
+                  <mat-icon>article</mat-icon>Pages du site
+                </a>
                 <a routerLink="/admin/config" class="nav-panel-item" (click)="openMenu.set(null)">
-                  <mat-icon>category</mat-icon>Catégories photos
+                  <mat-icon>settings</mat-icon>Configuration du site
                 </a>
                 <div class="nav-panel-divider"></div>
                 <button class="nav-panel-item nav-panel-btn" (click)="logout(); openMenu.set(null)">
@@ -291,6 +297,7 @@
             <ul class="mobile-sub">
               <li><a routerLink="/membre/documents" (click)="closeMobileMenu()">Documents</a></li>
               <li><a routerLink="/membres/guide" (click)="closeMobileMenu()">Guide du site</a></li>
+              <li><a routerLink="/membres/charte" (click)="closeMobileMenu()">Charte du site</a></li>
             </ul>
           }
         </li>
@@ -330,7 +337,8 @@
               <li><a routerLink="/admin/themes" (click)="closeMobileMenu()">Thèmes du mois</a></li>
               <li><a routerLink="/admin/membres" (click)="closeMobileMenu()">Membres</a></li>
               <li><a routerLink="/admin/dossiers" (click)="closeMobileMenu()">Dossiers documents</a></li>
-              <li><a routerLink="/admin/config" (click)="closeMobileMenu()">Catégories photos</a></li>
+              <li><a routerLink="/admin/pages" (click)="closeMobileMenu()">Pages du site</a></li>
+              <li><a routerLink="/admin/config" (click)="closeMobileMenu()">Configuration du site</a></li>
             </ul>
           }
         </li>
