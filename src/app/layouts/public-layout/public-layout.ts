@@ -23,7 +23,7 @@ import { Header } from '../../components/header/header';
     .page-content { min-height: calc(100vh - 122px); padding-top: 122px; }
     .site-footer {
       background: #1a1a1a;
-      color: rgba(255,255,255,0.45);
+      color: rgba(255,255,255,0.65);
       text-align: center;
       padding: 24px;
       font-size: 0.8rem;
@@ -31,11 +31,11 @@ import { Header } from '../../components/header/header';
       border-top: 3px solid #cc0000;
     }
     .site-footer a {
-      color: rgba(255,255,255,0.6);
-      text-decoration: none;
+      color: rgba(255,255,255,0.85);
+      text-decoration: underline;
       margin: 0 8px;
     }
-    .site-footer a:hover { color: white; }
+    .site-footer a:hover { color: white; text-decoration: none; }
   `]
 })
 export class PublicLayout {
