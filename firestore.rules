@@ -157,6 +157,7 @@ service cloud.firestore {
     match /oneshots/{oneShotId}/votes/{voteId} {
       allow read: if true;
       allow create, update: if isLoggedIn() && request.resource.data.voterUid == request.auth.uid;
+      allow delete: if isLoggedIn() && resource.data.voterUid == request.auth.uid;
     }
 
     // Événements (ex-Sorties Photo) – lecture publique, création membres connectés

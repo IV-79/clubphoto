@@ -44,6 +44,7 @@ export interface OneShotPhoto {
   url: string;
   storagePath: string;
   fileSize?: number;
+  titre?: string;
   membreUid: string;
   nomMembre: string;
   themeId: string;

@@ -260,7 +260,7 @@ export class OneShotService {
   uploadPhoto(
     file: File,
     oneShotId: string,
-    meta: { membreUid: string; nomMembre: string; themeId: string; exif?: PhotoExif }
+    meta: { membreUid: string; nomMembre: string; themeId: string; titre?: string; exif?: PhotoExif }
   ): Observable<OneShotUploadState> {
     return new Observable(observer => {
       const ext = file.name.split('.').pop() ?? 'jpg';
@@ -277,6 +277,7 @@ export class OneShotService {
             url, storagePath, uploadedAt: new Date().toISOString(),
             fileSize: file.size,
             membreUid: meta.membreUid, nomMembre: meta.nomMembre, themeId: meta.themeId,
+            ...(meta.titre ? { titre: meta.titre } : {}),
             ...(hasExif(meta.exif) ? { exif: meta.exif } : {}),
           };
           const docRef = await runInInjectionContext(this.injector, () =>
@@ -348,6 +349,12 @@ export class OneShotService {
       setDoc(doc(this.firestore, `oneshots/${oneShotId}/votes`, `${voterUid}_${themeId}`), {
         voterUid, themeId, photoId, votedAt: new Date().toISOString(),
       })
+    );
+  }
+
+  async unvote(oneShotId: string, voterUid: string, themeId: string): Promise<void> {
+    await runInInjectionContext(this.injector, () =>
+      deleteDoc(doc(this.firestore, `oneshots/${oneShotId}/votes`, `${voterUid}_${themeId}`))
     );
   }
 

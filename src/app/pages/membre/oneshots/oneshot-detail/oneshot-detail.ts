@@ -57,6 +57,8 @@ export class OneShotDetail {
   isAdmin            = computed(() => this.profile()?.role === 'admin');
   canManage          = computed(() => this.isCreator() || this.isAdmin());
   isInscrit          = computed(() => this.inscriptions().some(i => i.uid === this.profile()?.uid));
+  // Vue "admin" pendant le vote : créateur non-inscrit (inscrit → vote comme membre)
+  viewAsAdmin        = computed(() => this.isCreator() && !this.isInscrit());
 
   // Avancement (gestion)
   nextStatut = computed<OneShotStatut | null>(() => {
@@ -110,6 +112,60 @@ export class OneShotDetail {
   }
   statutLabel        = computed(() => ONESHOT_STATUT_LABELS[this.event()?.statut ?? 'preparation']);
   inscriptionOuverte = computed(() => this.event()?.statut === 'inscription');
+  canManageInscriptions = computed(() =>
+    ['inscription', 'fermeture_inscriptions'].includes(this.event()?.statut ?? '')
+  );
+
+  hasUnassignedPhotos = computed(() =>
+    this.photos().some(p => !p.membreUid || !p.themeId)
+  );
+
+  dupeCount = computed(() => {
+    const counts = new Map<string, number>();
+    for (const p of this.photos()) {
+      if (p.membreUid && p.themeId) {
+        const key = `${p.membreUid}:${p.themeId}`;
+        counts.set(key, (counts.get(key) ?? 0) + 1);
+      }
+    }
+    return [...counts.values()].filter(n => n > 1).length;
+  });
+
+  submissionProgress = computed(() => {
+    const themes   = this.themes();
+    const inscrits = this.inscriptions();
+    const photos   = this.photos();
+    if (!themes.length || !inscrits.length) return null;
+
+    const total   = themes.length * inscrits.length;
+    const covered = new Set(
+      photos.filter(p => p.membreUid && p.themeId).map(p => `${p.membreUid}:${p.themeId}`)
+    ).size;
+
+    const byTheme = themes.map(t => ({
+      theme: t,
+      submitted: photos.filter(p => p.themeId === t.id && p.membreUid).length,
+    }));
+
+    return { covered, total, pct: Math.round(covered / total * 100), byTheme, nbMembers: inscrits.length };
+  });
+
+  voteProgress = computed(() => {
+    const themes   = this.themes();
+    const inscrits = this.inscriptions();
+    const votes    = this.allVotes();
+    if (!themes.length || !inscrits.length) return null;
+
+    const total = themes.length * inscrits.length;
+    const cast  = votes.length;
+
+    const byTheme = themes.map(t => ({
+      theme: t,
+      votes: votes.filter(v => v.themeId === t.id).length,
+    }));
+
+    return { cast, total, pct: Math.round(cast / total * 100), byTheme, nbMembers: inscrits.length };
+  });
 
   addingMembre      = signal(false);
   selectedMembreUid = signal('');
@@ -152,7 +208,8 @@ export class OneShotDetail {
       if (!event) return of([] as OneShotVote[]);
       if (event.statut === 'resultats') return this.oneShotService.getAllVotes(this.id);
       if (!profile) return of([] as OneShotVote[]);
-      return event.creatorUid === profile.uid ? this.oneShotService.getAllVotes(this.id) : of([] as OneShotVote[]);
+      const canSeeVotes = event.creatorUid === profile.uid || profile.role === 'admin';
+      return canSeeVotes ? this.oneShotService.getAllVotes(this.id) : of([] as OneShotVote[]);
     })
   );
   allVotes = toSignal(this.allVotes$, { initialValue: [] as OneShotVote[] });
@@ -216,7 +273,7 @@ export class OneShotDetail {
     return this.lightboxPhotoList().map(p => ({
       id: p.id,
       url: p.url,
-      nomAuteur: isVote && !this.isCreator() && p.membreUid !== uid ? '' : p.nomMembre,
+      nomAuteur: isVote && !this.viewAsAdmin() && p.membreUid !== uid ? '' : p.nomMembre,
       uploaderUid: p.membreUid,
       likes: p.likes ?? [],
       uploadedAt: p.uploadedAt,
@@ -309,12 +366,24 @@ export class OneShotDetail {
   async castVote(themeId: string, photoId: string) {
     const profile = this.profile();
     if (!profile || this.voting()) return;
-    if (this.myVoteByTheme()[themeId] === photoId) return;
     const photo = this.photos().find(p => p.id === photoId);
     if (photo?.membreUid === profile.uid) return;
     this.voting.set(themeId);
-    await this.oneShotService.vote(this.id, profile.uid, themeId, photoId);
+    if (this.myVoteByTheme()[themeId] === photoId) {
+      await this.oneShotService.unvote(this.id, profile.uid, themeId);
+    } else {
+      await this.oneShotService.vote(this.id, profile.uid, themeId, photoId);
+    }
     this.voting.set(null);
+  }
+
+  onFooterClick(event: Event, themeId: string, photo: OneShotPhoto) {
+    const profile = this.profile();
+    if (!profile || this.viewAsAdmin()) return;
+    if (photo.membreUid === profile.uid) return;
+    event.stopPropagation(); // toujours bloquer la lightbox dès qu'on est en mode vote
+    if (this.voting()) return;
+    this.castVote(themeId, photo.id);
   }
 
   async retirerInscrit(targetUid: string, targetNom: string) {

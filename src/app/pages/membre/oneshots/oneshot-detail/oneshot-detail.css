@@ -360,6 +360,7 @@
 }
 
 .vote-footer {
+  cursor: default;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -374,15 +375,11 @@
 .footer-voted  { color: #2e7d32; font-weight: 600; }
 .footer-own    { color: rgba(0,0,0,0.28); font-style: italic; }
 .footer-loading{ color: rgba(0,0,0,0.3); }
-.footer-action {
-  background: none; border: none; padding: 0;
-  font-size: inherit; font-family: inherit;
-  cursor: pointer; color: rgba(0,0,0,0.4);
-}
-.footer-action:hover:not(:disabled) { color: rgba(0,0,0,0.7); }
-.footer-action:disabled { color: rgba(0,0,0,0.2); cursor: default; }
-.footer-action.footer-voted { color: #2e7d32; font-weight: 600; }
-.vote-card:hover .footer-action { color: rgba(0,0,0,0.65); }
+.vote-footer.footer-votable { cursor: pointer; }
+.vote-footer.footer-votable:hover .footer-action { color: rgba(0,0,0,0.7); }
+.vote-footer.footer-votable:hover .footer-voted  { color: #1b5e20; }
+
+.footer-action { color: rgba(0,0,0,0.4); }
 .vote-card.own-photo { border-color: rgba(0,0,0,0.08); }
 
 /* ── Résultats ───────────────────────────── */
@@ -519,7 +516,14 @@
 /* ── Gestion (créateur / admin) ─────────── */
 
 .gestion-section {
-  margin-bottom: 8px;
+  margin-bottom: 14px;
+}
+
+.gestion-box {
+  background: #fafafa;
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 6px;
+  padding: 18px 24px 20px;
 }
 
 .gestion-title {
@@ -528,13 +532,45 @@
   letter-spacing: 1.8px;
   text-transform: uppercase;
   color: rgba(0,0,0,0.25);
-  margin: 0 0 14px;
+  margin: 0 0 16px;
 }
 
-.gestion-section .panel { background: #fafafa; }
-.gestion-section .panel h3 { font-size: 0.7rem; }
+.gestion-cols {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  flex-wrap: wrap;
+}
 
-.transition-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.gestion-col {
+  flex: 2;
+  min-width: 0;
+}
+
+.gestion-col:last-child {
+  flex: 1;
+}
+
+.gestion-col + .gestion-sep + .gestion-col { padding-left: 24px; }
+.gestion-col:first-child { padding-right: 24px; }
+
+.gestion-sep {
+  width: 1px;
+  background: rgba(0,0,0,0.08);
+  align-self: stretch;
+  flex-shrink: 0;
+}
+
+.gestion-col-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(0,0,0,0.3);
+  margin: 0 0 12px;
+}
+
+.transition-actions { display: flex; gap: 10px; flex-wrap: nowrap; align-items: center; }
 
 .confirm-zone { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 
@@ -559,18 +595,45 @@
 .btn-avancer:hover:not(:disabled) { background: #aa0000; }
 .btn-avancer:disabled { opacity: 0.45; cursor: not-allowed; }
 
-.btn-fermer {
+.btn-fermer-primary {
+  background: #cc0000;
+  color: white;
+  border: none;
+  padding: 7px 14px;
+  border-radius: 4px;
+  font-size: 0.82rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.btn-fermer-primary:hover:not(:disabled) { background: #aa0000; }
+.btn-fermer-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.btn-avancer-ghost {
   background: none;
   border: 1px solid rgba(0,0,0,0.14);
   color: rgba(0,0,0,0.45);
-  padding: 8px 18px;
+  padding: 7px 14px;
   border-radius: 4px;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   cursor: pointer;
+  white-space: nowrap;
   transition: all 0.15s;
 }
-.btn-fermer:hover:not(:disabled) { border-color: rgba(0,0,0,0.26); color: rgba(0,0,0,0.7); }
-.btn-fermer:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-avancer-ghost:hover:not(:disabled) { border-color: rgba(0,0,0,0.26); color: rgba(0,0,0,0.7); }
+.btn-avancer-ghost:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.vote-block-error {
+  margin: 8px 0 0;
+  font-size: 0.78rem;
+  color: #cc0000;
+}
+
+.vote-block-hint {
+  margin: 8px 0 0;
+  font-size: 0.78rem;
+  color: #e65100;
+}
 
 .btn-cancel {
   background: none;
@@ -581,6 +644,113 @@
   font-size: 0.85rem;
   cursor: pointer;
 }
+
+/* ── Progress soumissions ── */
+
+.prog-section {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(0,0,0,0.07);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.prog-global {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.prog-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: rgba(0,0,0,0.28);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.prog-track {
+  flex: 1;
+  height: 5px;
+  background: rgba(0,0,0,0.08);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.prog-fill {
+  height: 100%;
+  background: #e65100;
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+.prog-fill.prog-complete { background: #2e7d32; }
+
+.prog-ratio {
+  font-size: 0.75rem;
+  color: rgba(0,0,0,0.4);
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-width: 36px;
+  text-align: right;
+}
+.prog-ratio.prog-complete { color: #2e7d32; font-weight: 600; }
+
+.prog-themes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+}
+
+.prog-theme {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.prog-theme-name {
+  font-size: 0.72rem;
+  color: rgba(0,0,0,0.45);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 110px;
+  flex-shrink: 0;
+}
+
+.prog-theme-track {
+  width: 48px;
+  height: 4px;
+  background: rgba(0,0,0,0.08);
+  border-radius: 2px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.prog-theme-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+.prog-theme-fill.prog-complete { background: #2e7d32; }
+.prog-theme-fill.prog-partial  { background: #e65100; }
+.prog-theme-fill.prog-empty    { background: transparent; }
+.prog-theme-fill.prog-overflow { background: #cc0000; }
+
+.prog-theme-ratio {
+  font-size: 0.7rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.prog-theme-ratio.prog-complete { color: #2e7d32; font-weight: 600; }
+.prog-theme-ratio.prog-partial  { color: #e65100; }
+.prog-theme-ratio.prog-empty    { color: rgba(0,0,0,0.3); }
+.prog-theme-ratio.prog-overflow { color: #cc0000; font-weight: 600; }
+
+/* ── */
 
 .btn-photos-link {
   display: inline-block;

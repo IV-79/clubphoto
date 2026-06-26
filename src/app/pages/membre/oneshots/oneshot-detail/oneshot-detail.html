@@ -36,46 +36,147 @@
     <!-- ── GESTION (créateur / admin) ──────────────── -->
     @if (canManage()) {
       <section class="gestion-section">
-        <h2 class="gestion-title">Gestion</h2>
+        <div class="gestion-box">
+          <h2 class="gestion-title">Gestion</h2>
+          <div class="gestion-cols">
 
-        <!-- Avancement -->
-        <div class="panel">
-          <h3 class="panel-title">Avancement de l'événement</h3>
-          @if (nextStatut()) {
-            @if (!confirmTransition()) {
-              <div class="transition-actions">
-                <button class="btn-avancer" (click)="confirmTransition.set(true)" [disabled]="transitioning()">
-                  {{ nextStatutLabel() }}
-                </button>
-                @if (peutFermerInscriptions()) {
-                  <button class="btn-fermer" (click)="fermerInscriptions()" [disabled]="transitioning()">
-                    Fermer les inscriptions d'abord
-                  </button>
+            <!-- Avancement -->
+            <div class="gestion-col">
+              <p class="gestion-col-label">Avancement de l'événement</p>
+              @if (nextStatut()) {
+                @if (!confirmTransition()) {
+                  <div class="transition-actions">
+                    @if (peutFermerInscriptions()) {
+                      <button class="btn-fermer-primary" (click)="fermerInscriptions()" [disabled]="transitioning()">
+                        Fermer les inscriptions
+                      </button>
+                      <button class="btn-avancer-ghost"
+                              (click)="confirmTransition.set(true)"
+                              [disabled]="transitioning() || hasUnassignedPhotos()">
+                        {{ nextStatutLabel() }}
+                      </button>
+                    } @else {
+                      <button class="btn-avancer"
+                              (click)="confirmTransition.set(true)"
+                              [disabled]="transitioning() || hasUnassignedPhotos()">
+                        {{ nextStatutLabel() }}
+                      </button>
+                    }
+                  </div>
+                  @if (hasUnassignedPhotos()) {
+                    <p class="vote-block-error">
+                      🚫 Des photos ne sont pas encore assignées à un membre et/ou un thème.
+                    </p>
+                  }
+                  @if (dupeCount() > 0) {
+                    <p class="vote-block-hint">
+                      ⚠ {{ dupeCount() }} doublon{{ dupeCount() > 1 ? 's' : '' }} — un membre a plusieurs photos dans un même thème.
+                    </p>
+                  }
+                } @else {
+                  <div class="confirm-zone">
+                    <span class="confirm-msg">Cette action est irréversible. Confirmer ?</span>
+                    <button class="btn-avancer" (click)="avancer()" [disabled]="transitioning()">
+                      {{ transitioning() ? 'En cours…' : 'Confirmer' }}
+                    </button>
+                    <button class="btn-cancel" (click)="confirmTransition.set(false)">Annuler</button>
+                  </div>
                 }
-              </div>
-            } @else {
-              <div class="confirm-zone">
-                <span class="confirm-msg">Cette action est irréversible. Confirmer ?</span>
-                <button class="btn-avancer" (click)="avancer()" [disabled]="transitioning()">
-                  {{ transitioning() ? 'En cours…' : 'Confirmer' }}
-                </button>
-                <button class="btn-cancel" (click)="confirmTransition.set(false)">Annuler</button>
+              } @else {
+                <p class="event-clos">Résultats publiés — événement terminé.</p>
+              }
+            </div>
+
+            <!-- Séparateur + Photos (si applicable) -->
+            @if (['inscription', 'fermeture_inscriptions'].includes(event()!.statut)) {
+              <div class="gestion-sep"></div>
+              <div class="gestion-col">
+                <p class="gestion-col-label">Photos</p>
+                <a [routerLink]="['/membre/oneshots', id, 'photos']" class="btn-photos-link">
+                  Gérer les photos →
+                </a>
               </div>
             }
-          } @else {
-            <p class="event-clos">Résultats publiés — événement terminé.</p>
-          }
-        </div>
 
-        <!-- Photos -->
-        @if (['inscription', 'fermeture_inscriptions', 'vote', 'resultats'].includes(event()!.statut)) {
-          <div class="panel">
-            <h3 class="panel-title">Photos</h3>
-            <a [routerLink]="['/membre/oneshots', id, 'photos']" class="btn-photos-link">
-              Gérer les photos →
-            </a>
           </div>
-        }
+
+          <!-- Barre de progression : soumissions avant vote, votes pendant vote -->
+          @if (canManage()) {
+            @if (event()!.statut === 'vote' && voteProgress(); as prog) {
+              <div class="prog-section">
+                <div class="prog-global">
+                  <span class="prog-label">Votes</span>
+                  <div class="prog-track">
+                    <div class="prog-fill" [style.width.%]="prog.pct"
+                         [class.prog-complete]="prog.cast === prog.total"></div>
+                  </div>
+                  <span class="prog-ratio" [class.prog-complete]="prog.cast === prog.total">
+                    {{ prog.cast }}&thinsp;/&thinsp;{{ prog.total }}
+                  </span>
+                </div>
+                <div class="prog-themes">
+                  @for (item of prog.byTheme; track item.theme.id) {
+                    @let pct = prog.nbMembers ? item.votes / prog.nbMembers * 100 : 0;
+                    <div class="prog-theme">
+                      <span class="prog-theme-name" [title]="item.theme.nom">{{ item.theme.nom }}</span>
+                      <div class="prog-theme-track">
+                        <div class="prog-theme-fill"
+                             [style.width.%]="pct"
+                             [class.prog-complete]="item.votes === prog.nbMembers"
+                             [class.prog-partial]="item.votes > 0 && item.votes < prog.nbMembers"
+                             [class.prog-empty]="item.votes === 0"></div>
+                      </div>
+                      <span class="prog-theme-ratio"
+                            [class.prog-complete]="item.votes === prog.nbMembers"
+                            [class.prog-partial]="item.votes > 0 && item.votes < prog.nbMembers"
+                            [class.prog-empty]="item.votes === 0">
+                        {{ item.votes }}/{{ prog.nbMembers }}
+                      </span>
+                    </div>
+                  }
+                </div>
+              </div>
+            } @else if (event()!.statut !== 'vote' && submissionProgress(); as prog) {
+              <div class="prog-section">
+                <div class="prog-global">
+                  <span class="prog-label">Soumissions</span>
+                  <div class="prog-track">
+                    <div class="prog-fill" [style.width.%]="prog.pct"
+                         [class.prog-complete]="prog.covered === prog.total"></div>
+                  </div>
+                  <span class="prog-ratio" [class.prog-complete]="prog.covered === prog.total">
+                    {{ prog.covered }}&thinsp;/&thinsp;{{ prog.total }}
+                  </span>
+                </div>
+                <div class="prog-themes">
+                  @for (item of prog.byTheme; track item.theme.id) {
+                    @let pct = prog.nbMembers ? item.submitted / prog.nbMembers * 100 : 0;
+                    @let overflow = item.submitted > prog.nbMembers;
+                    <div class="prog-theme">
+                      <span class="prog-theme-name" [title]="item.theme.nom">{{ item.theme.nom }}</span>
+                      <div class="prog-theme-track">
+                        <div class="prog-theme-fill"
+                             [style.width.%]="pct"
+                             [class.prog-overflow]="overflow"
+                             [class.prog-complete]="!overflow && item.submitted === prog.nbMembers"
+                             [class.prog-partial]="!overflow && item.submitted > 0 && item.submitted < prog.nbMembers"
+                             [class.prog-empty]="item.submitted === 0"></div>
+                      </div>
+                      <span class="prog-theme-ratio"
+                            [class.prog-overflow]="overflow"
+                            [class.prog-complete]="!overflow && item.submitted === prog.nbMembers"
+                            [class.prog-partial]="!overflow && item.submitted > 0 && item.submitted < prog.nbMembers"
+                            [class.prog-empty]="item.submitted === 0">
+                        {{ item.submitted }}/{{ prog.nbMembers }}
+                      </span>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          }
+
+        </div>
       </section>
     }
 
@@ -103,12 +204,12 @@
         }
       </div>
 
-      @if (isLoggedIn() && inscriptions().length > 0 && event()!.statut !== 'vote' && event()!.statut !== 'resultats') {
+      @if (isLoggedIn() && inscriptions().length > 0) {
         <div class="participants-row">
           @for (ins of inscriptions(); track ins.uid) {
             <span class="participant-name-chip" [class.me]="ins.uid === profile()?.uid">
               {{ ins.nomMembre }}
-              @if (canManage() && inscriptionOuverte()) {
+              @if (canManage() && canManageInscriptions()) {
                 <button class="chip-remove" (click)="retirerInscrit(ins.uid, ins.nomMembre)" title="Désinscrire">×</button>
               }
             </span>
@@ -116,7 +217,7 @@
         </div>
       }
 
-      @if (canManage() && inscriptionOuverte()) {
+      @if (canManage() && canManageInscriptions()) {
         <div class="add-participant-zone">
           @if (!addingMembre()) {
             <button class="btn-add-participant" (click)="addingMembre.set(true)">+ Inscrire un membre</button>
@@ -141,7 +242,7 @@
 
       @if (profile()) {
 
-        @if (!isCreator()) {
+        @if (!viewAsAdmin()) {
           <div class="vote-progress-bar">
             <span class="vote-progress-label">
               {{ themesVoted().size }} / {{ photosByTheme().length }} thème{{ photosByTheme().length > 1 ? 's' : '' }} voté{{ themesVoted().size > 1 ? 's' : '' }}
@@ -158,10 +259,10 @@
           <section class="panel theme-section">
             <h2 class="panel-title">
               {{ group.theme.nom }}
-              @if (!isCreator() && themesVoted().has(group.theme.id)) {
+              @if (!viewAsAdmin() && themesVoted().has(group.theme.id)) {
                 <span class="voted-chip">Voté</span>
               }
-              @if (isCreator()) {
+              @if (viewAsAdmin()) {
                 <span class="count">{{ voteCountByTheme()[group.theme.id] ?? 0 }} vote{{ (voteCountByTheme()[group.theme.id] ?? 0) > 1 ? 's' : '' }}</span>
               }
             </h2>
@@ -169,7 +270,7 @@
             <div class="vote-grid">
               @for (photo of group.photos; track photo.id) {
                 @let isSelected  = myVoteByTheme()[group.theme.id] === photo.id;
-                @let isOwnPhoto  = !isCreator() && photo.membreUid === profile()?.uid;
+                @let isOwnPhoto  = !viewAsAdmin() && photo.membreUid === profile()?.uid;
                 @let isFaded     = !!myVoteByTheme()[group.theme.id] && !isSelected && !isOwnPhoto;
                 @let isVoting    = voting() === group.theme.id;
 
@@ -182,24 +283,20 @@
 
                   <img [src]="photo.url" class="vote-thumb" loading="lazy">
 
-                  <div class="vote-footer">
-                    @if (isCreator()) {
+                  <div class="vote-footer"
+                       [class.footer-votable]="!viewAsAdmin() && !isOwnPhoto && !isVoting"
+                       (click)="onFooterClick($event, group.theme.id, photo)">
+                    @if (viewAsAdmin()) {
                       <span class="footer-name">{{ photo.nomMembre }}</span>
-                      @if (isOwnPhoto) {
-                        <span class="footer-own">Ma photo</span>
-                      } @else if (isSelected) {
-                        <span class="footer-voted">Mon vote</span>
-                      } @else {
-                        <span class="footer-count">{{ voteCountByPhoto()[photo.id] ?? 0 }}</span>
-                      }
+                      <span class="footer-count">{{ voteCountByPhoto()[photo.id] ?? 0 }}</span>
                     } @else if (isOwnPhoto) {
                       <span class="footer-own">Ma photo</span>
                     } @else if (isSelected) {
-                      <button class="footer-action footer-voted" (click)="$event.stopPropagation(); castVote(group.theme.id, photo.id)">✓ Retirer</button>
+                      <span class="footer-voted">✓ Retirer</span>
                     } @else if (isVoting) {
                       <span class="footer-loading">…</span>
                     } @else {
-                      <button class="footer-action" [disabled]="!!voting()" (click)="$event.stopPropagation(); castVote(group.theme.id, photo.id)">Voter</button>
+                      <span class="footer-action">Voter</span>
                     }
                   </div>
                 </div>

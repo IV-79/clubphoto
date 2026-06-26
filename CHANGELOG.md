@@ -4,6 +4,22 @@
 
 ## En cours (alpha)
 
+### OneShot — flux complet vote
+
+- **Gestion — section compacte** — la boîte "Gestion" dans la page OneShot est redessinée en deux colonnes côte à côte : avancement à gauche, lien vers les photos à droite (visible uniquement pendant les phases inscription/fermeture). "Fermer les inscriptions" devient le bouton rouge principal ; "Passer directement au vote" passe en fantôme à droite.
+- **Droits d'inscription** — les membres peuvent s'inscrire/se désinscrire uniquement pendant la phase `inscription`. L'organisateur et l'admin gardent la main sur la liste jusqu'à l'ouverture des votes (`fermeture_inscriptions` inclus).
+- **Page gestion des photos (`membre/oneshots/:id/photos`) — refonte complète** — photos regroupées par thème (non-assignées en tête), drag & drop entre sections pour changer le thème, selects membre/thème directement sur chaque carte (sauvegarde immédiate), nom de fichier affiché sous la vignette. En statut `vote` ou `resultats`, toutes les opérations sont bloquées (drag, selects, suppression).
+- **Barre de progression des soumissions** — objectif 1 photo par membre par thème, visible dans la gestion et sur la page photos. Couleurs : vert = complet, orange = partiel, gris = vide, rouge = dépassement (un membre a plusieurs photos dans le même thème).
+- **Détection des doublons membre/thème** — si un membre a plusieurs photos dans un même thème : avertissement ⚠ orange sur chaque carte concernée + bannière en haut de la page photos + message dans la gestion.
+- **Blocage passage au vote** — les boutons "Passer directement au vote" et "Ouvrir les votes" sont désactivés si des photos ne sont pas entièrement assignées (membre + thème manquants). Message 🚫 rouge bloquant + ⚠ orange pour les doublons (informatif, non bloquant).
+- **Barre de progression des votes** — pendant la phase `vote`, la barre de soumissions est remplacée par une barre de votes (X/Y votes par thème), visible par l'organisateur et l'admin. Aide à décider quand publier les résultats.
+- **Organisateur inscrit — peut voter** — si l'organisateur est inscrit à son propre OneShot, il vote comme un membre (vue anonyme, boutons Voter). S'il n'est pas inscrit, il garde la vue admin (compteurs, noms visibles).
+- **Vote — zone cliquable élargie** — toute la box blanche du bas de chaque carte est cliquable pour voter ou retirer un vote (plus seulement le texte du bouton).
+- **Vote — retirer un vote** — cliquer sur une carte déjà votée retire le vote (`deleteDoc` Firestore). Règle Firestore `allow delete` ajoutée pour `oneshots/{id}/votes`.
+- **Top 3 visiteurs — gestion des égalités** — en cas d'ex-æquo, tous les concernés sont affichés (ex : 1er-1er-3e-3e-3e = 5 photos affichées, pas de 2e place).
+- **Liste des participants — toujours visible** — en phase vote et résultats, la liste des membres inscrits reste affichée pour les connectés (auparavant masquée).
+- **Informations visiteurs — lieu et description masqués** — le lieu et la description des OneShots, événements et sorties ne sont plus visibles par les visiteurs non connectés (pages liste, détail, calendrier). Le bouton "Connexion pour s'inscrire" sur les OneShots du calendrier est supprimé.
+
 ### Améliorations
 - **Types d'événements mis à jour** — la liste passe à : Sortie Photo, Sortie Club, Atelier (suppression de "Repas"). Le filtre, les formulaires création/édition et le guide membre sont mis à jour en conséquence.
 - **Photo de couverture — proportions respectées** — sur les cartes événements et OneShots, la photo s'affiche désormais en entier (`object-fit: contain`) avec fond sombre, sans recadrage.
