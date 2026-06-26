@@ -83,7 +83,6 @@ export class SortiesListe {
   aVenir = computed((): ActiviteItem[] => {
     const sorties: ActiviteItem[] = this.sorties()
       .filter(s => this.isAVenir(s.date))
-      .sort((a, b) => a.date.localeCompare(b.date))
       .map(data => ({ kind: 'sortie' as const, data }));
 
     // Merge public oneshots with creator's preparation ones (deduplicate by id)
@@ -92,24 +91,30 @@ export class SortiesListe {
     const mesEnPrep = this.mesOneShots().filter(o => o.statut === 'preparation' && !publicIds.has(o.id));
 
     const oneshots: ActiviteItem[] = [...publicOneShots, ...mesEnPrep]
-      .sort((a, b) => a.dateCreation.localeCompare(b.dateCreation))
       .map(data => ({ kind: 'oneshot' as const, data }));
 
-    return [...sorties, ...oneshots];
+    return [...sorties, ...oneshots]
+      .sort((a, b) => {
+        const da = a.kind === 'sortie' ? (a.data as Sortie).date : (a.data as OneShot).date;
+        const db = b.kind === 'sortie' ? (b.data as Sortie).date : (b.data as OneShot).date;
+        if (!da && !db) return 0;
+        if (!da) return 1;
+        if (!db) return -1;
+        return da.localeCompare(db);
+      });
   });
 
   passees = computed((): ActiviteItem[] => {
     const sorties: ActiviteItem[] = this.sorties()
       .filter(s => !this.isAVenir(s.date))
-      .sort((a, b) => b.date.localeCompare(a.date))
       .map(data => ({ kind: 'sortie' as const, data }));
 
     const oneshots: ActiviteItem[] = this.oneshots()
       .filter(o => o.statut === 'resultats')
-      .sort((a, b) => b.dateCreation.localeCompare(a.dateCreation))
       .map(data => ({ kind: 'oneshot' as const, data }));
 
-    return [...sorties, ...oneshots];
+    return [...sorties, ...oneshots]
+      .sort((a, b) => this.effectiveDate(b).localeCompare(this.effectiveDate(a)));
   });
 
   private applyFilters(items: ActiviteItem[]): ActiviteItem[] {
@@ -153,6 +158,12 @@ export class SortiesListe {
 
   aVenirFiltrees  = computed(() => this.applyFilters(this.aVenir()));
   passeesFiltrees = computed(() => this.applyFilters(this.passees()));
+
+  private effectiveDate(item: ActiviteItem): string {
+    return item.kind === 'sortie'
+      ? (item.data as Sortie).date
+      : ((item.data as OneShot).date ?? (item.data as OneShot).dateCreation.slice(0, 10));
+  }
 
   isAVenir(date: string): boolean {
     return new Date(date + 'T00:00:00') > new Date();

@@ -145,6 +145,9 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
   private gsapReady = signal(false);
 
   private gsapCtx?: gsap.Context;
+  private actuST?:    ScrollTrigger;
+  private actST?:     ScrollTrigger;
+  private membresST?: ScrollTrigger;
   private sub?: Subscription;
   private scrollHandler?: () => void;
 
@@ -190,21 +193,16 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
     this.gsapCtx?.revert();
     const root = this.el.nativeElement as HTMLElement;
 
-    // Capturer les ST en dehors du context pour les lire après refresh
-    let actuST:    ScrollTrigger | undefined;
-    let actST:     ScrollTrigger | undefined;
-    let membresST: ScrollTrigger | undefined;
-
     this.gsapCtx = gsap.context(() => {
-      actuST    = this.pinSection(root, '.actu-section',    '.actu-card',   ['left', 'right', 'up']);
-      actST     = this.pinSection(root, '.act-section',     '.act-card',    ['left',  'right']);
+      this.actuST    = this.pinSection(root, '.actu-section',    '.actu-card',   ['left', 'right', 'up']);
+      this.actST     = this.pinSection(root, '.act-section',     '.act-card',    ['left',  'right']);
       this.animateGallery(root);
-      membresST = this.pinSection(root, '.membres-section', '.membre-card', ['left',  'right', 'up']);
+      this.membresST = this.pinSection(root, '.membres-section', '.membre-card', ['left',  'right', 'up']);
     });
 
     ScrollTrigger.refresh();
     requestAnimationFrame(() => {
-      this.buildNavItems(root, actuST, actST, membresST);
+      this.buildNavItems(root);
       this.zone.run(() => this.gsapReady.set(true));
     });
 
@@ -223,53 +221,47 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
     window.addEventListener('scroll', this.scrollHandler, { passive: true });
   }
 
-  private buildNavItems(
-    root:      HTMLElement,
-    actuST?:   ScrollTrigger,
-    actST?:    ScrollTrigger,
-    membresST?: ScrollTrigger,
-  ) {
+  private buildNavItems(root: HTMLElement) {
     const vh           = window.innerHeight;
-    const actuStart    = actuST?.start    ?? vh;
-    const actuEnd      = actuST?.end      ?? actuStart + vh * 0.3;
-    const actStart     = actST?.start     ?? actuEnd;
-    const actEnd       = actST?.end       ?? actStart + vh * 0.3;
+    const actuStart    = this.actuST?.start    ?? vh;
+    const actuEnd      = this.actuST?.end      ?? actuStart + vh * 0.3;
+    const actStart     = this.actST?.start     ?? actuEnd;
+    const actEnd       = this.actST?.end       ?? actStart + vh * 0.3;
     const galleryEl    = root.querySelector<HTMLElement>('.gallery-section');
     const galleryStart = galleryEl ? galleryEl.getBoundingClientRect().top + window.scrollY : actEnd;
     const galleryEnd   = galleryEl ? galleryStart + galleryEl.offsetHeight : galleryStart + vh;
-    const membresStart = membresST?.start ?? galleryEnd;
-    const membresEnd   = membresST?.end   ?? membresStart + vh * 0.3;
+    const membresStart = this.membresST?.start ?? galleryEnd;
+    const membresEnd   = this.membresST?.end   ?? membresStart + vh * 0.3;
     const ctaEl        = root.querySelector<HTMLElement>('.cta-section');
     const ctaStart     = ctaEl ? ctaEl.getBoundingClientRect().top + window.scrollY : membresEnd + 56;
 
     this.zone.run(() => this.navItems.set([
-      { id: 'hero',      label: 'Accueil',        target: 0,              from: 0           },
-      { id: 'actu',      label: 'À la une',       target: actuEnd - 1,    from: actuStart   },
-      { id: 'act',       label: 'Nos activités',  target: actEnd - 1,     from: actStart    },
-      { id: 'gallery',   label: 'Galerie',        target: galleryStart,   from: galleryStart },
-      { id: 'membres',   label: 'Photographes',   target: membresEnd - 1, from: membresStart },
-      { id: 'rejoindre', label: 'Rejoignez-nous', target: ctaStart,       from: membresEnd  },
+      { id: 'hero',      label: 'Accueil',        target: 0,            from: 0            },
+      { id: 'actu',      label: 'À la une',       target: actuStart,    from: actuStart    },
+      { id: 'act',       label: 'Nos activités',  target: actStart,     from: actStart     },
+      { id: 'gallery',   label: 'Galerie',        target: galleryStart, from: galleryStart },
+      { id: 'membres',   label: 'Photographes',   target: membresStart, from: membresStart },
+      { id: 'rejoindre', label: 'Rejoignez-nous', target: ctaStart,     from: membresEnd   },
     ]));
   }
 
   // Recalcule uniquement les positions gallery→fin quand les photos chargent après init GSAP
   private recalcNavGallery() {
-    const root      = this.el.nativeElement as HTMLElement;
-    const galleryEl = root.querySelector<HTMLElement>('.gallery-section');
+    const root         = this.el.nativeElement as HTMLElement;
+    const galleryEl    = root.querySelector<HTMLElement>('.gallery-section');
     if (!galleryEl) return;
-    const galleryStart = galleryEl.getBoundingClientRect().top + window.scrollY;
-    const galleryEnd   = galleryStart + galleryEl.offsetHeight;
-    const ctaEl        = root.querySelector<HTMLElement>('.cta-section');
-    const ctaStart     = ctaEl ? ctaEl.getBoundingClientRect().top + window.scrollY : galleryEnd + 56;
+    const galleryStart  = galleryEl.getBoundingClientRect().top + window.scrollY;
+    const galleryEnd    = galleryStart + galleryEl.offsetHeight;
+    const membresStart  = this.membresST?.start ?? galleryEnd;
+    const membresEnd    = this.membresST?.end   ?? membresStart + window.innerHeight * 0.3;
+    const ctaEl         = root.querySelector<HTMLElement>('.cta-section');
+    const ctaStart      = ctaEl ? ctaEl.getBoundingClientRect().top + window.scrollY : membresEnd + 56;
 
     this.zone.run(() => {
-      const items = this.navItems();
-      const membresItem = items.find(i => i.id === 'membres');
-      if (!membresItem) return;
-      this.navItems.set(items.map(item => {
-        if (item.id === 'gallery')   return { ...item, target: galleryStart,   from: galleryStart };
-        if (item.id === 'membres')   return { ...item, from: galleryEnd };
-        if (item.id === 'rejoindre') return { ...item, target: ctaStart, from: membresItem.target + 1 };
+      this.navItems.set(this.navItems().map(item => {
+        if (item.id === 'gallery')   return { ...item, target: galleryStart, from: galleryStart };
+        if (item.id === 'membres')   return { ...item, target: membresStart, from: galleryEnd   };
+        if (item.id === 'rejoindre') return { ...item, target: ctaStart,     from: membresEnd   };
         return item;
       }));
     });
