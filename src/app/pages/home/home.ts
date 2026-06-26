@@ -1,4 +1,4 @@
-import { Component, inject, computed, OnInit, OnDestroy, AfterViewInit, ElementRef, NgZone, Injector, signal } from '@angular/core';
+import { Component, inject, computed, OnInit, OnDestroy, AfterViewInit, ElementRef, NgZone, Injector, signal, effect } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
@@ -108,7 +108,28 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
     { initialValue: null as any }
   );
 
-  recentPhotos = toSignal(this.photoService.getRecentPublicPhotos(8), { initialValue: [] });
+  recentPhotos = toSignal(
+    combineLatest([
+      this.photoService.getRecentPublicPhotos(60),
+      this.authService.getAllMembers().pipe(
+        map(members => new Set(
+          members
+            .filter(m => m.visibilite === 'public' && !m.isSuspended)
+            .map(m => m.uid)
+        ))
+      ),
+    ]).pipe(
+      map(([photos, publicUids]) => {
+        const filtered = photos.filter(p => publicUids.has(p.uid));
+        for (let i = filtered.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [filtered[i], filtered[j]] = [filtered[j], filtered[i]];
+        }
+        return filtered.slice(0, 8);
+      })
+    ),
+    { initialValue: [] }
+  );
 
   membres = toSignal(
     this.authService.getAllMembers().pipe(
@@ -121,9 +142,26 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
   navItems  = signal<NavItem[]>([]);
   activeNav = signal<string>('hero');
 
+  private gsapReady = signal(false);
+
   private gsapCtx?: gsap.Context;
   private sub?: Subscription;
   private scrollHandler?: () => void;
+
+  constructor() {
+    // Quand les photos arrivent après init GSAP, recalculer les positions des dots
+    effect(() => {
+      const photos = this.recentPhotos();
+      if (photos.length > 0 && this.gsapReady()) {
+        this.zone.runOutsideAngular(() => {
+          setTimeout(() => {
+            ScrollTrigger.refresh();
+            this.recalcNavGallery();
+          }, 300);
+        });
+      }
+    });
+  }
 
   ngOnInit() {
     document.documentElement.style.setProperty('scroll-padding-top', '122px');
@@ -155,44 +193,19 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
     // Capturer les ST en dehors du context pour les lire après refresh
     let actuST:    ScrollTrigger | undefined;
     let actST:     ScrollTrigger | undefined;
-    let galleryST: ScrollTrigger | undefined;
     let membresST: ScrollTrigger | undefined;
 
     this.gsapCtx = gsap.context(() => {
       actuST    = this.pinSection(root, '.actu-section',    '.actu-card',   ['left', 'right', 'up']);
       actST     = this.pinSection(root, '.act-section',     '.act-card',    ['left',  'right']);
-      galleryST = this.pinGallery(root);
+      this.animateGallery(root);
       membresST = this.pinSection(root, '.membres-section', '.membre-card', ['left',  'right', 'up']);
     });
 
-    // Forcer GSAP à recalculer les positions avec les spacers en place,
-    // puis lire dans le frame suivant (les spacers sont mesurés de façon asynchrone)
     ScrollTrigger.refresh();
     requestAnimationFrame(() => {
-      const vh = window.innerHeight;
-      const actuStart    = actuST?.start    ?? vh;
-      const actuEnd      = actuST?.end      ?? actuStart + vh * 0.3;
-      const actStart     = actST?.start     ?? actuEnd;
-      const actEnd       = actST?.end       ?? actStart + vh * 0.3;
-      const galleryStart = galleryST?.start ?? actEnd;
-      const galleryEnd   = galleryST?.end   ?? galleryStart + vh * 0.3;
-      const membresStart = membresST?.start ?? galleryEnd;
-      const membresEnd   = membresST?.end   ?? membresStart + vh * 0.3;
-
-      // Position réelle du CTA dans le document (spacers GSAP déjà en place)
-      const ctaEl    = root.querySelector<HTMLElement>('.cta-section');
-      const ctaStart = ctaEl
-        ? ctaEl.getBoundingClientRect().top + window.scrollY
-        : membresEnd + 56;
-
-      this.zone.run(() => this.navItems.set([
-        { id: 'hero',      label: 'Accueil',        target: 0,              from: 0          },
-        { id: 'actu',      label: 'À la une',       target: actuEnd - 1,    from: actuStart  },
-        { id: 'act',       label: 'Nos activités',  target: actEnd - 1,     from: actStart   },
-        { id: 'gallery',   label: 'Galerie',        target: galleryEnd - 1, from: galleryStart },
-        { id: 'membres',   label: 'Photographes',   target: membresEnd - 1, from: membresStart },
-        { id: 'rejoindre', label: 'Rejoignez-nous', target: ctaStart,       from: membresEnd },
-      ]));
+      this.buildNavItems(root, actuST, actST, membresST);
+      this.zone.run(() => this.gsapReady.set(true));
     });
 
     // Mise à jour du dot actif au scroll
@@ -208,6 +221,58 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
       this.zone.run(() => this.activeNav.set(active));
     };
     window.addEventListener('scroll', this.scrollHandler, { passive: true });
+  }
+
+  private buildNavItems(
+    root:      HTMLElement,
+    actuST?:   ScrollTrigger,
+    actST?:    ScrollTrigger,
+    membresST?: ScrollTrigger,
+  ) {
+    const vh           = window.innerHeight;
+    const actuStart    = actuST?.start    ?? vh;
+    const actuEnd      = actuST?.end      ?? actuStart + vh * 0.3;
+    const actStart     = actST?.start     ?? actuEnd;
+    const actEnd       = actST?.end       ?? actStart + vh * 0.3;
+    const galleryEl    = root.querySelector<HTMLElement>('.gallery-section');
+    const galleryStart = galleryEl ? galleryEl.getBoundingClientRect().top + window.scrollY : actEnd;
+    const galleryEnd   = galleryEl ? galleryStart + galleryEl.offsetHeight : galleryStart + vh;
+    const membresStart = membresST?.start ?? galleryEnd;
+    const membresEnd   = membresST?.end   ?? membresStart + vh * 0.3;
+    const ctaEl        = root.querySelector<HTMLElement>('.cta-section');
+    const ctaStart     = ctaEl ? ctaEl.getBoundingClientRect().top + window.scrollY : membresEnd + 56;
+
+    this.zone.run(() => this.navItems.set([
+      { id: 'hero',      label: 'Accueil',        target: 0,              from: 0           },
+      { id: 'actu',      label: 'À la une',       target: actuEnd - 1,    from: actuStart   },
+      { id: 'act',       label: 'Nos activités',  target: actEnd - 1,     from: actStart    },
+      { id: 'gallery',   label: 'Galerie',        target: galleryStart,   from: galleryStart },
+      { id: 'membres',   label: 'Photographes',   target: membresEnd - 1, from: membresStart },
+      { id: 'rejoindre', label: 'Rejoignez-nous', target: ctaStart,       from: membresEnd  },
+    ]));
+  }
+
+  // Recalcule uniquement les positions gallery→fin quand les photos chargent après init GSAP
+  private recalcNavGallery() {
+    const root      = this.el.nativeElement as HTMLElement;
+    const galleryEl = root.querySelector<HTMLElement>('.gallery-section');
+    if (!galleryEl) return;
+    const galleryStart = galleryEl.getBoundingClientRect().top + window.scrollY;
+    const galleryEnd   = galleryStart + galleryEl.offsetHeight;
+    const ctaEl        = root.querySelector<HTMLElement>('.cta-section');
+    const ctaStart     = ctaEl ? ctaEl.getBoundingClientRect().top + window.scrollY : galleryEnd + 56;
+
+    this.zone.run(() => {
+      const items = this.navItems();
+      const membresItem = items.find(i => i.id === 'membres');
+      if (!membresItem) return;
+      this.navItems.set(items.map(item => {
+        if (item.id === 'gallery')   return { ...item, target: galleryStart,   from: galleryStart };
+        if (item.id === 'membres')   return { ...item, from: galleryEnd };
+        if (item.id === 'rejoindre') return { ...item, target: ctaStart, from: membresItem.from };
+        return item;
+      }));
+    });
   }
 
   private smoothScrollTo(y: number) {
@@ -276,8 +341,8 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
     return pinST;
   }
 
-  // ── galerie : cellules animent pendant la montée + pin ──
-  private pinGallery(root: HTMLElement): ScrollTrigger | undefined {
+  // ── galerie : animation d'entrée sans pin (hauteur auto variable selon les photos) ──
+  private animateGallery(root: HTMLElement): void {
     const section = root.querySelector<HTMLElement>('.gallery-section');
     if (!section) return;
     const cells = Array.from(section.querySelectorAll<HTMLElement>('.mosaic-cell'));
@@ -285,37 +350,21 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
 
     cells.forEach((cell, i) => {
       gsap.set(cell, {
-        scale:           1.8,
-        x:               i % 2 === 0 ? 250 : -250,
+        scale:           1.5,
+        x:               i % 2 === 0 ? 200 : -200,
         opacity:         0,
         transformOrigin: '50% 50%',
       });
     });
 
-    // Cellules animent pendant que la galerie scrolle dans le viewport (pas de pin)
-    const animTL = gsap.timeline({
+    gsap.timeline({
       scrollTrigger: {
         trigger: section,
         start:   'top 80%',
-        end:     'top top',
+        end:     'top 20%',
         scrub:   0.8,
       },
-    });
-    cells.forEach(cell => {
-      animTL.to(cell, { scale: 1, x: 0, opacity: 1, ease: 'power3.out', duration: 1 }, 0);
-    });
-
-    // Pin séparé
-    const pinST = ScrollTrigger.create({
-      trigger:       section,
-      start:         'top top',
-      end:           '+=30%',
-      pin:           true,
-      pinSpacing:    true,
-      anticipatePin: 1,
-    });
-
-    return pinST;
+    }).to(cells, { scale: 1, x: 0, opacity: 1, ease: 'power3.out', duration: 1 }, 0);
   }
 
   // ── helpers template ──
