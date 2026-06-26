@@ -34,7 +34,7 @@
     </div>
 
     <!-- ── GESTION (créateur / admin) ──────────────── -->
-    @if (canManage()) {
+    @if (canManage() && event()!.statut !== 'resultats') {
       <section class="gestion-section">
         <div class="gestion-box">
           <h2 class="gestion-title">Gestion</h2>
