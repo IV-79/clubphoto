@@ -618,16 +618,16 @@
         <div class="step">
           <span class="step-badge step-inscription">Inscriptions ouvertes</span>
           <div class="step-body">
-            <strong>Les membres peuvent s'inscrire.</strong>
-            L'organisateur uploade les photos et peut encore ajouter ou renommer des thèmes.
+            <strong>Les membres peuvent s'inscrire et se désinscrire librement.</strong>
+            L'organisateur gère les photos et peut encore ajouter ou renommer des thèmes.
             Les thèmes restent une information interne — les participants ne les voient pas encore.
           </div>
         </div>
         <div class="step">
           <span class="step-badge step-fermeture">Inscriptions fermées <em class="optional-label">(optionnel)</em></span>
           <div class="step-body">
-            <strong>Les inscriptions sont closes mais le vote n'a pas encore démarré.</strong>
-            L'organisateur peut encore ajuster les thèmes et finaliser les photos.
+            <strong>Les membres ne peuvent plus s'inscrire ni se désinscrire eux-mêmes.</strong>
+            L'organisateur et l'admin peuvent encore modifier la liste et finaliser les photos.
             Utile pour tout vérifier avant d'ouvrir le vote.
           </div>
         </div>
@@ -635,7 +635,7 @@
           <span class="step-badge step-vote">Vote</span>
           <div class="step-body">
             <strong>Les thèmes et les photos sont révélés aux participants.</strong>
-            Plus d'inscriptions, d'uploads ni de modification des thèmes.
+            Plus d'inscriptions ni de modifications des photos ou des thèmes.
             Chaque participant vote pour une photo par thème (pas la sienne). Les noms sont masqués.
           </div>
         </div>
@@ -677,6 +677,22 @@
       <p class="guide-note">Les photos sont uploadées par l'organisateur, pas par les participants eux-mêmes.</p>
     </div>
 
+    <!-- Participer — vote -->
+    <div class="guide-card">
+      <h3>Voter dans un OneShot</h3>
+      <ol class="guide-steps">
+        <li>Pendant la phase <span class="badge-inline vote">Vote</span>, ouvrez le OneShot.</li>
+        <li>Les thèmes et les photos sont révélés — les noms d'auteurs sont masqués.</li>
+        <li><strong>Cliquez n'importe où sur la bande blanche sous une photo</strong> pour voter pour elle.</li>
+        <li>La photo sélectionnée s'encadre et affiche <strong>✓ Retirer</strong> — cliquez à nouveau dessus pour retirer votre vote et le déposer ailleurs.</li>
+        <li>Vous votez pour <strong>une photo par thème</strong>. Vous ne pouvez pas voter pour votre propre photo.</li>
+        <li>La barre de progression en haut indique combien de thèmes vous avez déjà votés.</li>
+      </ol>
+      <p class="guide-note">
+        Si vous êtes l'organisateur <strong>et</strong> que vous êtes inscrit au OneShot, vous pouvez voter comme n'importe quel participant. Si vous n'êtes pas inscrit, vous voyez uniquement les compteurs de votes (vue admin).
+      </p>
+    </div>
+
     <!-- Gérer -->
     <div class="guide-card">
       <h3>Gérer son OneShot (organisateur)</h3>
@@ -684,11 +700,31 @@
         <li>Ouvrez votre OneShot depuis <a routerLink="/galeries/sorties" class="inline-link">Activités → Événements</a>.</li>
         <li>La section <strong>Gestion</strong> est visible uniquement pour vous (créateur) et les admins, directement sur la page de l'événement.</li>
         <li>Ajoutez et renommez les thèmes tant que vous êtes en Préparation, Inscriptions ou Inscriptions fermées. Dès le passage en Vote, les thèmes sont verrouillés et révélés aux participants.</li>
-        <li>Pour ajouter des photos : cliquez <strong>Gérer les photos</strong> dans la section Gestion. Glissez plusieurs fichiers en une fois et assignez chaque photo à un membre et un thème.</li>
-        <li>Avancez les étapes dans l'ordre avec le bouton <strong>Avancer</strong> (action irréversible, une confirmation est demandée).</li>
-        <li>Le bouton <strong>Fermer les inscriptions d'abord</strong> est optionnel : il vous permet de bloquer les nouvelles inscriptions le temps de tout vérifier, avant d'ouvrir le vote.</li>
+        <li>Cliquez <strong>Gérer les photos →</strong> dans la section Gestion pour accéder à la page photos (disponible uniquement en phase Inscriptions et Inscriptions fermées).</li>
+        <li>Avancez les étapes dans l'ordre avec le bouton rouge <strong>Fermer les inscriptions</strong> puis <strong>Ouvrir les votes</strong> (action irréversible, une confirmation est demandée).</li>
+        <li>Le bouton <strong>Passer directement au vote</strong> (fantôme, à droite) saute l'étape "Inscriptions fermées".</li>
         <li>Pour modifier le titre, la date ou le lieu, cliquez <strong>✏ Modifier</strong> en haut de la page.</li>
       </ol>
+      <p class="guide-note">
+        Les boutons de passage au vote sont <strong>bloqués</strong> tant qu'il reste des photos sans membre ou sans thème assigné — le site l'indique par un message 🚫 rouge. Un message ⚠ orange signale les doublons (un membre avec plusieurs photos dans le même thème) sans bloquer.
+      </p>
+      <p class="guide-note">
+        Pendant la phase Vote, une barre de progression indique combien de membres ont voté pour chaque thème — utile pour décider quand publier les résultats.
+      </p>
+    </div>
+
+    <!-- Gérer les photos -->
+    <div class="guide-card">
+      <h3>Gérer les photos (organisateur)</h3>
+      <p>La page <strong>Gérer les photos</strong> regroupe toutes les photos par thème.</p>
+      <ul class="guide-steps">
+        <li><strong>Ajouter des photos</strong> — glissez plusieurs fichiers en une fois dans la zone d'upload. Vous pouvez pré-assigner un membre et un thème avant d'uploader.</li>
+        <li><strong>Assigner membre et thème</strong> — chaque carte affiche deux menus déroulants (Membre / Thème) directement sous la vignette. La modification est sauvegardée immédiatement.</li>
+        <li><strong>Changer de thème par glisser-déposer</strong> — faites glisser une photo d'une section à l'autre pour la réassigner à un autre thème.</li>
+        <li><strong>Barre de progression</strong> — indique combien de membres ont soumis une photo pour chaque thème (objectif : 1 par membre par thème). La barre passe en rouge si un membre a plusieurs photos dans le même thème.</li>
+        <li><strong>Supprimer une photo</strong> — bouton 🗑 en bas de la carte.</li>
+      </ul>
+      <p class="guide-note">La page photos est verrouillée (lecture seule) dès que les votes sont ouverts.</p>
     </div>
   </section>
 
