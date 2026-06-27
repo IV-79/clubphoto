@@ -29,17 +29,18 @@ export class DefiDetail {
   private refreshTick = signal(0);
   private refresh() { this.refreshTick.update(n => n + 1); }
 
+  private inscriptionsTrigger = computed(() => ({ profile: this.profile(), tick: this.refreshTick() }));
+  private monVoteTrigger      = computed(() => ({ profile: this.profile(), tick: this.refreshTick() }));
+
   defi = toSignal(
     toObservable(this.refreshTick).pipe(switchMap(() => this.defiService.getDefiOnce(this.id))),
     { initialValue: null as Defi | null }
   );
 
   inscriptions = toSignal(
-    toObservable(this.profile).pipe(
-      switchMap(p => !p ? of([]) :
-        toObservable(this.refreshTick).pipe(
-          switchMap(() => this.defiService.getInscriptionsOnce(this.id))
-        )
+    toObservable(this.inscriptionsTrigger).pipe(
+      switchMap(({ profile }) => !profile ? of([]) :
+        this.defiService.getInscriptionsOnce(this.id)
       )
     ),
     { initialValue: [] }
@@ -56,11 +57,9 @@ export class DefiDetail {
   );
 
   monVote = toSignal(
-    toObservable(this.profile).pipe(
-      switchMap(p => !p ? of(null) :
-        toObservable(this.refreshTick).pipe(
-          switchMap(() => this.defiService.getMonVoteOnce(this.id, p.uid))
-        )
+    toObservable(this.monVoteTrigger).pipe(
+      switchMap(({ profile }) => !profile ? of(null) :
+        this.defiService.getMonVoteOnce(this.id, profile.uid)
       )
     ),
     { initialValue: null }
