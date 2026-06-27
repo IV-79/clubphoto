@@ -27,9 +27,14 @@ export class DefiDetail {
   profile = toSignal(this.authService.currentUserProfile$);
 
   defi         = toSignal(this.defiService.getDefi(this.id),           { initialValue: null as Defi | null });
-  inscriptions = toSignal(this.defiService.getInscriptions(this.id),   { initialValue: [] });
-  photos       = toSignal(this.defiService.getPhotos(this.id),         { initialValue: [] });
-  votes        = toSignal(this.defiService.getVotes(this.id),          { initialValue: [] });
+  inscriptions = toSignal(
+    toObservable(this.profile).pipe(
+      switchMap(p => p ? this.defiService.getInscriptions(this.id) : of([]))
+    ),
+    { initialValue: [] }
+  );
+  photos = toSignal(this.defiService.getPhotos(this.id), { initialValue: [] });
+  votes  = toSignal(this.defiService.getVotes(this.id),  { initialValue: [] });
 
   monVote = toSignal(
     toObservable(this.profile).pipe(

@@ -32,6 +32,17 @@ export class DefiService {
     ) as Observable<Defi[]>;
   }
 
+  getPublicDefis(): Observable<Defi[]> {
+    return runInInjectionContext(this.injector, () =>
+      collectionData(
+        query(collection(this.firestore, 'defis'),
+          where('visibilite', '==', 'public'),
+          orderBy('dateCreation', 'desc')),
+        { idField: 'id' }
+      )
+    ) as Observable<Defi[]>;
+  }
+
   getDefi(id: string): Observable<Defi | null> {
     return runInInjectionContext(this.injector, () =>
       docData(doc(this.firestore, 'defis', id), { idField: 'id' })

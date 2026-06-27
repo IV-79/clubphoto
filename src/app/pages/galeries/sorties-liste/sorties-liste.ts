@@ -32,7 +32,10 @@ export class SortiesListe {
   profile  = toSignal(this.authService.currentUserProfile$);
   sorties  = toSignal(this.sortieService.getSorties(), { initialValue: [] as Sortie[] });
   oneshots = toSignal(this.oneShotService.getPublicOneShots(), { initialValue: [] as OneShot[] });
-  defis    = toSignal(this.defiService.getDefis(), { initialValue: [] as Defi[] });
+  private defis$ = toObservable(this.profile).pipe(
+    switchMap(p => p ? this.defiService.getDefis() : this.defiService.getPublicDefis())
+  );
+  defis = toSignal(this.defis$, { initialValue: [] as Defi[] });
 
   private mesSorties$ = toObservable(this.profile).pipe(
     switchMap(p => p ? this.sortieService.getMesSorties(p.uid) : of([] as Sortie[]))

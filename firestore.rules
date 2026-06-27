@@ -290,7 +290,8 @@ service cloud.firestore {
     }
 
     match /defis/{defiId}/votes/{voteId} {
-      allow read: if isLoggedIn();
+      allow read: if isLoggedIn()
+                  || get(/databases/$(database)/documents/defis/$(defiId)).data.visibilite == 'public';
       allow create, update: if isLoggedIn() && request.resource.data.voterUid == request.auth.uid;
       allow delete: if isLoggedIn() && resource.data.voterUid == request.auth.uid;
     }
