@@ -26,19 +26,42 @@ export class DefiDetail {
 
   profile = toSignal(this.authService.currentUserProfile$);
 
-  defi         = toSignal(this.defiService.getDefi(this.id),           { initialValue: null as Defi | null });
+  private refreshTick = signal(0);
+  private refresh() { this.refreshTick.update(n => n + 1); }
+
+  defi = toSignal(
+    toObservable(this.refreshTick).pipe(switchMap(() => this.defiService.getDefiOnce(this.id))),
+    { initialValue: null as Defi | null }
+  );
+
   inscriptions = toSignal(
     toObservable(this.profile).pipe(
-      switchMap(p => p ? this.defiService.getInscriptions(this.id) : of([]))
+      switchMap(p => !p ? of([]) :
+        toObservable(this.refreshTick).pipe(
+          switchMap(() => this.defiService.getInscriptionsOnce(this.id))
+        )
+      )
     ),
     { initialValue: [] }
   );
-  photos = toSignal(this.defiService.getPhotos(this.id), { initialValue: [] });
-  votes  = toSignal(this.defiService.getVotes(this.id),  { initialValue: [] });
+
+  photos = toSignal(
+    toObservable(this.refreshTick).pipe(switchMap(() => this.defiService.getPhotosOnce(this.id))),
+    { initialValue: [] }
+  );
+
+  votes = toSignal(
+    toObservable(this.refreshTick).pipe(switchMap(() => this.defiService.getVotesOnce(this.id))),
+    { initialValue: [] }
+  );
 
   monVote = toSignal(
     toObservable(this.profile).pipe(
-      switchMap(p => p ? this.defiService.getMonVote(this.id, p.uid) : of(null))
+      switchMap(p => !p ? of(null) :
+        toObservable(this.refreshTick).pipe(
+          switchMap(() => this.defiService.getMonVoteOnce(this.id, p.uid))
+        )
+      )
     ),
     { initialValue: null }
   );
@@ -151,10 +174,12 @@ export class DefiDetail {
     this.uploadProgress.set(null);
     this.uploadCurrent.set(0);
     this.uploadBatchSize.set(0);
+    this.refresh();
   }
 
   async deletePhoto(photo: DefiPhoto) {
     await this.defiService.deletePhoto(this.id, photo);
+    this.refresh();
   }
 
   // ── Votes ─────────────────────────────────────────────────────────────
@@ -168,6 +193,7 @@ export class DefiDetail {
       if (this.votesRestants() <= 0) return;
       await this.defiService.voter(this.id, uid, photoId);
     }
+    this.refresh();
   }
 
   // ── Inscription ───────────────────────────────────────────────────────
@@ -178,7 +204,7 @@ export class DefiDetail {
     const profile = this.profile();
     if (!profile || this.inscribing()) return;
     this.inscribing.set(true);
-    try { await this.defiService.inscrire(this.id, profile); }
+    try { await this.defiService.inscrire(this.id, profile); this.refresh(); }
     finally { this.inscribing.set(false); }
   }
 
@@ -186,6 +212,7 @@ export class DefiDetail {
     const uid = this.profile()?.uid;
     if (!uid || !confirm('Se désinscrire ? Vos photos soumises seront supprimées.')) return;
     await this.defiService.desinscrire(this.id, uid);
+    this.refresh();
   }
 
   // ── Edit mode ─────────────────────────────────────────────────────────
@@ -232,6 +259,7 @@ export class DefiDetail {
         maxVotes:            this.editMaxVotes,
         visibilite:          this.editVisibilite,
       });
+      this.refresh();
       this.editMode.set(false);
     } finally { this.saving.set(false); }
   }
@@ -253,6 +281,7 @@ export class DefiDetail {
     try {
       await this.defiService.extendVotes(this.id, this.extensionDate);
       this.extensionDate = '';
+      this.refresh();
     } finally { this.extendingVotes.set(false); }
   }
 
@@ -292,6 +321,7 @@ export class DefiDetail {
       URL.revokeObjectURL(this.coverPreview()!);
       this.pendingCover.set(null);
       this.coverPreview.set(null);
+      this.refresh();
     } finally { this.uploadingCover.set(false); }
   }
 
@@ -299,6 +329,7 @@ export class DefiDetail {
     const path = this.defi()?.photoCouverturePath;
     if (!path) return;
     await this.defiService.removeCouverture(this.id, path);
+    this.refresh();
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────

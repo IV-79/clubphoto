@@ -123,6 +123,12 @@ export class AuthService {
     ) as Observable<UserProfile[]>;
   }
 
+  getAllMembersOnce(): Observable<UserProfile[]> {
+    return from(runInInjectionContext(this.injector, () =>
+      getDocs(collection(this.firestore, 'users'))
+    )).pipe(map(snap => snap.docs.map(d => ({ uid: d.id, ...d.data() } as UserProfile))));
+  }
+
   getMemberProfile(uid: string): Observable<UserProfile | null> {
     return from(
       runInInjectionContext(this.injector, () =>

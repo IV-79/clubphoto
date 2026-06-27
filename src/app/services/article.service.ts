@@ -1,10 +1,11 @@
 import { Injectable, inject, Injector, runInInjectionContext } from '@angular/core';
 import {
   Firestore, collection, collectionData, doc,
-  addDoc, updateDoc, deleteDoc, query, orderBy, where, deleteField
+  addDoc, updateDoc, deleteDoc, query, orderBy, where, deleteField, getDocs
 } from '@angular/fire/firestore';
 import { Storage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from '@angular/fire/storage';
-import { Observable } from 'rxjs';
+import { Observable, from } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Article } from '../models/article.model';
 import { compressToJpeg } from '../utils/image-compress';
 import { NotificationService } from './notification.service';
@@ -38,6 +39,14 @@ export class ArticleService {
         { idField: 'id' }
       )
     ) as Observable<Article[]>;
+  }
+
+  getPublicArticlesOnce(): Observable<Article[]> {
+    return from(runInInjectionContext(this.injector, () =>
+      getDocs(query(collection(this.firestore, 'articles'),
+        where('statut', '==', 'publie'), where('portee', '==', 'public'),
+        orderBy('dateCreation', 'desc')))
+    )).pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as Article))));
   }
 
   getPublishedArticles(): Observable<Article[]> {

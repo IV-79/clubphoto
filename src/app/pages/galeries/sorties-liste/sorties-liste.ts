@@ -30,25 +30,25 @@ export class SortiesListe {
   private authService    = inject(AuthService);
 
   profile  = toSignal(this.authService.currentUserProfile$);
-  sorties  = toSignal(this.sortieService.getSorties(), { initialValue: [] as Sortie[] });
-  oneshots = toSignal(this.oneShotService.getPublicOneShots(), { initialValue: [] as OneShot[] });
+  sorties  = toSignal(this.sortieService.getSortiesOnce(), { initialValue: [] as Sortie[] });
+  oneshots = toSignal(this.oneShotService.getPublicOneShotsOnce(), { initialValue: [] as OneShot[] });
   private defis$ = toObservable(this.profile).pipe(
-    switchMap(p => p ? this.defiService.getDefis() : this.defiService.getPublicDefis())
+    switchMap(p => p ? this.defiService.getDefisOnce() : this.defiService.getPublicDefisOnce())
   );
   defis = toSignal(this.defis$, { initialValue: [] as Defi[] });
 
   private mesSorties$ = toObservable(this.profile).pipe(
-    switchMap(p => p ? this.sortieService.getMesSorties(p.uid) : of([] as Sortie[]))
+    switchMap(p => p ? this.sortieService.getMesSortiesOnce(p.uid) : of([] as Sortie[]))
   );
   mesSorties = toSignal(this.mesSorties$, { initialValue: [] as Sortie[] });
 
   private mesOneShots$ = toObservable(this.profile).pipe(
-    switchMap(p => p ? this.oneShotService.getMyOneShots(p.uid) : of([] as OneShot[]))
+    switchMap(p => p ? this.oneShotService.getMyOneShotsOnce(p.uid) : of([] as OneShot[]))
   );
   mesOneShots = toSignal(this.mesOneShots$, { initialValue: [] as OneShot[] });
 
   private mesDefis$ = toObservable(this.profile).pipe(
-    switchMap(p => p ? this.defiService.getMesDefis(p.uid) : of([] as Defi[]))
+    switchMap(p => p ? this.defiService.getMesDefisOnce(p.uid) : of([] as Defi[]))
   );
   mesDefis = toSignal(this.mesDefis$, { initialValue: [] as Defi[] });
 

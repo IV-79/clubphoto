@@ -1,7 +1,7 @@
 import { Injectable, inject, Injector, runInInjectionContext } from '@angular/core';
 import {
   Firestore, collection, collectionData, collectionGroup, doc, docData,
-  addDoc, updateDoc, deleteDoc, setDoc, query, where, orderBy, arrayUnion, arrayRemove, increment, getDocs, deleteField
+  addDoc, updateDoc, deleteDoc, setDoc, query, where, orderBy, arrayUnion, arrayRemove, increment, getDocs, getDoc, deleteField
 } from '@angular/fire/firestore';
 import { Storage, ref, uploadBytes, uploadBytesResumable, getDownloadURL, deleteObject } from '@angular/fire/storage';
 import { Observable, from } from 'rxjs';
@@ -67,6 +67,58 @@ export class OneShotService {
     return runInInjectionContext(this.injector, () =>
       collectionData(q, { idField: 'id' })
     ) as Observable<OneShot[]>;
+  }
+
+  getPublicOneShotsOnce(): Observable<OneShot[]> {
+    const q = query(
+      collection(this.firestore, 'oneshots'),
+      where('statut', 'in', ['inscription', 'fermeture_inscriptions', 'vote', 'resultats'])
+    );
+    return from(runInInjectionContext(this.injector, () => getDocs(q)))
+      .pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as OneShot))));
+  }
+
+  getMyOneShotsOnce(uid: string): Observable<OneShot[]> {
+    return from(runInInjectionContext(this.injector, () =>
+      getDocs(query(collection(this.firestore, 'oneshots'),
+        where('creatorUid', '==', uid), orderBy('dateCreation', 'desc')))
+    )).pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as OneShot))));
+  }
+
+  getOneShotOnce(id: string): Observable<OneShot | undefined> {
+    return from(runInInjectionContext(this.injector, () =>
+      getDoc(doc(this.firestore, 'oneshots', id))
+    )).pipe(map(d => d.exists() ? { id: d.id, ...d.data() } as OneShot : undefined));
+  }
+
+  getThemesOnce(oneShotId: string): Observable<OneShotTheme[]> {
+    return from(runInInjectionContext(this.injector, () =>
+      getDocs(query(collection(this.firestore, `oneshots/${oneShotId}/themes`), orderBy('ordre')))
+    )).pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as OneShotTheme))));
+  }
+
+  getPhotosOnce(oneShotId: string): Observable<OneShotPhoto[]> {
+    return from(runInInjectionContext(this.injector, () =>
+      getDocs(collection(this.firestore, `oneshots/${oneShotId}/photos`))
+    )).pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as OneShotPhoto))));
+  }
+
+  getInscriptionsOnce(oneShotId: string): Observable<OneShotInscription[]> {
+    return from(runInInjectionContext(this.injector, () =>
+      getDocs(collection(this.firestore, `oneshots/${oneShotId}/inscriptions`))
+    )).pipe(map(snap => snap.docs.map(d => d.data() as OneShotInscription)));
+  }
+
+  getMyVotesOnce(oneShotId: string, voterUid: string): Observable<OneShotVote[]> {
+    return from(runInInjectionContext(this.injector, () =>
+      getDocs(query(collection(this.firestore, `oneshots/${oneShotId}/votes`), where('voterUid', '==', voterUid)))
+    )).pipe(map(snap => snap.docs.map(d => d.data() as OneShotVote)));
+  }
+
+  getAllVotesOnce(oneShotId: string): Observable<OneShotVote[]> {
+    return from(runInInjectionContext(this.injector, () =>
+      getDocs(collection(this.firestore, `oneshots/${oneShotId}/votes`))
+    )).pipe(map(snap => snap.docs.map(d => d.data() as OneShotVote)));
   }
 
   async updateDate(

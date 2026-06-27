@@ -1,10 +1,11 @@
 import { Injectable, inject, Injector, runInInjectionContext } from '@angular/core';
 import {
   Firestore, collection, collectionData, doc, docData,
-  addDoc, deleteDoc, setDoc, updateDoc, query, where, orderBy, arrayUnion, arrayRemove, increment,
+  addDoc, deleteDoc, setDoc, updateDoc, query, where, orderBy, arrayUnion, arrayRemove, increment, getDocs,
 } from '@angular/fire/firestore';
 import { Storage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from '@angular/fire/storage';
-import { Observable } from 'rxjs';
+import { Observable, from } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { ThemeMensuel, ThemeSoumission, ThemeVote } from '../models/theme.model';
 import { PhotoExif } from '../models/photo.model';
 import { Commentaire, Reponse } from '../models/commentaire.model';
@@ -22,6 +23,24 @@ export class ThemeService {
     return runInInjectionContext(this.injector, () =>
       collectionData(q, { idField: 'id' })
     ) as Observable<ThemeMensuel[]>;
+  }
+
+  getThemesOnce(): Observable<ThemeMensuel[]> {
+    return from(runInInjectionContext(this.injector, () =>
+      getDocs(query(collection(this.firestore, 'themes'), orderBy('mois', 'desc')))
+    )).pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as ThemeMensuel))));
+  }
+
+  getSoumissionsOnce(themeId: string): Observable<ThemeSoumission[]> {
+    return from(runInInjectionContext(this.injector, () =>
+      getDocs(query(collection(this.firestore, 'themes', themeId, 'soumissions'), orderBy('uploadedAt', 'asc')))
+    )).pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as ThemeSoumission))));
+  }
+
+  getTousVotesOnce(themeId: string): Observable<ThemeVote[]> {
+    return from(runInInjectionContext(this.injector, () =>
+      getDocs(collection(this.firestore, 'themes', themeId, 'votes'))
+    )).pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as ThemeVote))));
   }
 
   getTheme(id: string): Observable<ThemeMensuel | undefined> {

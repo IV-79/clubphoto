@@ -2,7 +2,7 @@ import { Component, inject, signal, computed, ViewChild, ElementRef } from '@ang
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
-import { startWith, switchMap, of } from 'rxjs';
+import { switchMap, of } from 'rxjs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -57,11 +57,26 @@ export class SortieDetail {
   sortieId = this.route.snapshot.paramMap.get('id')!;
   profile = toSignal(this.authService.currentUserProfile$);
 
-  sortie = toSignal(this.sortieService.getSortie(this.sortieId).pipe(startWith(null as Sortie | null)));
-  photos = toSignal(this.sortieService.getPhotos(this.sortieId), { initialValue: [] as SortieImage[] });
+  private refreshTick = signal(0);
+  private refresh() { this.refreshTick.update(n => n + 1); }
+
+  sortie = toSignal(
+    toObservable(this.refreshTick).pipe(switchMap(() => this.sortieService.getSortieOnce(this.sortieId))),
+    { initialValue: null as Sortie | null }
+  );
+
+  photos = toSignal(
+    toObservable(this.refreshTick).pipe(switchMap(() => this.sortieService.getPhotosOnce(this.sortieId))),
+    { initialValue: [] as SortieImage[] }
+  );
+
   inscriptions = toSignal(
     toObservable(this.profile).pipe(
-      switchMap(p => p ? this.sortieService.getInscriptions(this.sortieId) : of([]))
+      switchMap(p => !p ? of([]) :
+        toObservable(this.refreshTick).pipe(
+          switchMap(() => this.sortieService.getInscriptionsOnce(this.sortieId))
+        )
+      )
     ),
     { initialValue: [] }
   );
@@ -76,7 +91,18 @@ export class SortieDetail {
   coverUploading     = signal(false);
   coverDragOver      = signal(false);
 
-  allMembres = toSignal(this.authService.getAllMembers(), { initialValue: [] as UserProfile[] });
+  isOrganisateur = computed(() => {
+    const s = this.sortie(); const p = this.profile();
+    return !!s && !!p && s.organisateurUid === p.uid;
+  });
+
+  isAdmin = computed(() => this.profile()?.role === 'admin');
+  canManage = computed(() => this.isOrganisateur() || this.isAdmin());
+
+  private allMembres$ = toObservable(this.canManage).pipe(
+    switchMap(can => can ? this.authService.getAllMembersOnce() : of([] as UserProfile[]))
+  );
+  allMembres = toSignal(this.allMembres$, { initialValue: [] as UserProfile[] });
 
   form = new FormGroup({
     type:                   new FormControl<SortieType>('sortie_photo', { nonNullable: true }),
@@ -95,13 +121,6 @@ export class SortieDetail {
     if (!s) return true;
     return new Date(s.date + 'T00:00:00') > new Date();
   });
-
-  isOrganisateur = computed(() => {
-    const s = this.sortie(); const p = this.profile();
-    return !!s && !!p && s.organisateurUid === p.uid;
-  });
-
-  isAdmin = computed(() => this.profile()?.role === 'admin');
 
   isInscrit = computed(() => {
     const uid = this.profile()?.uid;
@@ -178,6 +197,7 @@ export class SortieDetail {
             { sourceNom: this.userName(), sourceUid: actor.uid }
           ).catch(() => {});
         }
+        this.refresh();
       },
     };
   });
@@ -220,6 +240,7 @@ export class SortieDetail {
         organisateurUid: s.organisateurUid,
       });
       this.editMode.set(false);
+      this.refresh();
     } finally {
       this.saving.set(false);
     }
@@ -253,6 +274,7 @@ export class SortieDetail {
         { lien: `/galeries/sorties/${this.sortieId}`, sourceNom: this.userName(), sourceUid: p.uid }
       ).catch(() => {});
     }
+    this.refresh();
   }
 
   async inscrireSelected() {
@@ -271,6 +293,7 @@ export class SortieDetail {
     ).catch(() => {});
     this.selectedMembreUid.set('');
     this.addingMembre.set(false);
+    this.refresh();
   }
 
   async toggleInscription() {
@@ -283,6 +306,7 @@ export class SortieDetail {
       } else {
         await this.sortieService.inscrire(this.sortieId, p.uid, this.userName());
       }
+      this.refresh();
     } finally {
       this.inscribing.set(false);
     }
@@ -312,6 +336,7 @@ export class SortieDetail {
             this.uploads.update(u =>
               u.map(item => item.id === id ? { ...item, progress: state.progress, done: state.done } : item)
             );
+            if (state.done) this.refresh();
           },
           error: () => {
             this.uploads.update(u =>
@@ -344,6 +369,7 @@ export class SortieDetail {
         { sourceNom: this.userName(), sourceUid: actor.uid }
       ).catch(() => {});
     }
+    this.refresh();
   }
 
   openLightbox(index: number) { this.lightboxIndex.set(index); }
@@ -358,6 +384,7 @@ export class SortieDetail {
     const uid = this.profile()?.uid;
     if (!uid) return;
     await this.sortieService.toggleLikePhoto(this.sortieId, photo.id, uid, this.isLikedPhoto(photo));
+    this.refresh();
   }
 
   formatDate(date: string): string {
@@ -388,6 +415,7 @@ export class SortieDetail {
     try {
       const compressed = await compressToJpeg(file);
       await this.sortieService.setImageEvenement(this.sortieId, compressed);
+      this.refresh();
     } finally {
       this.coverUploading.set(false);
     }
@@ -397,6 +425,7 @@ export class SortieDetail {
     this.coverUploading.set(true);
     try {
       await this.sortieService.removeImageEvenement(this.sortieId, path);
+      this.refresh();
     } finally {
       this.coverUploading.set(false);
     }

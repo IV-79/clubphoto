@@ -1,7 +1,7 @@
 import { Injectable, inject, Injector, runInInjectionContext } from '@angular/core';
-import { Firestore, doc, docData, setDoc } from '@angular/fire/firestore';
+import { Firestore, doc, docData, setDoc, getDoc } from '@angular/fire/firestore';
 import { Storage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from '@angular/fire/storage';
-import { Observable, map, catchError, of } from 'rxjs';
+import { Observable, from, map, catchError, of } from 'rxjs';
 import { PHOTO_CATEGORIES } from '../models/photo.model';
 import { compressToJpeg } from '../utils/image-compress';
 
@@ -45,6 +45,15 @@ export class ConfigService {
       docData(doc(this.firestore, CONFIG_SITE))
     ).pipe(
       map((data: any) => (data ?? {}) as SiteConfig),
+      catchError(() => of({} as SiteConfig))
+    );
+  }
+
+  getSiteConfigOnce(): Observable<SiteConfig> {
+    return from(runInInjectionContext(this.injector, () =>
+      getDoc(doc(this.firestore, CONFIG_SITE))
+    )).pipe(
+      map((d: any) => (d.exists() ? d.data() : {}) as SiteConfig),
       catchError(() => of({} as SiteConfig))
     );
   }

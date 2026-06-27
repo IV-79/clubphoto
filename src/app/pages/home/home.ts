@@ -4,7 +4,7 @@ import { DatePipe } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { DomSanitizer, SafeStyle } from '@angular/platform-browser';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
-import { map, filter, take, switchMap } from 'rxjs/operators';
+import { map, filter, take, switchMap, shareReplay } from 'rxjs/operators';
 import { Subscription, race, timer, combineLatest, of } from 'rxjs';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -47,19 +47,19 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
   private el             = inject(ElementRef);
   private injector       = inject(Injector);
 
-  private siteConfig = toSignal(this.configService.getSiteConfig(), { initialValue: {} as any });
+  private siteConfig = toSignal(this.configService.getSiteConfigOnce(), { initialValue: {} as any });
 
   private heroThemeUrl = toSignal(
-    this.configService.getSiteConfig().pipe(
+    this.configService.getSiteConfigOnce().pipe(
       switchMap(cfg => {
         if (cfg?.heroSource !== 'theme_du_mois') return of(null);
-        return this.themeService.getThemes().pipe(
+        return this.themeService.getThemesOnce().pipe(
           map(themes => themes.find(t => computeThemeStatut(t) === 'resultats') ?? null),
           switchMap(theme => {
             if (!theme) return of(null);
             return combineLatest([
-              this.themeService.getSoumissions(theme.id),
-              this.themeService.getTousVotes(theme.id),
+              this.themeService.getSoumissionsOnce(theme.id),
+              this.themeService.getTousVotesOnce(theme.id),
             ]).pipe(
               map(([soumissions, votes]) => {
                 if (!soumissions.length) return null;
@@ -89,7 +89,7 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
   });
 
   articles = toSignal(
-    this.articleService.getPublicArticles().pipe(
+    this.articleService.getPublicArticlesOnce().pipe(
       map(list =>
         list
           .sort((a, b) => (+!!b.epingle) - (+!!a.epingle) || b.dateCreation.localeCompare(a.dateCreation))
@@ -100,19 +100,22 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
   );
 
   derniereSortie = toSignal(
-    this.sortieService.getSorties().pipe(map(list => list[0] ?? null)),
+    this.sortieService.getSortiesOnce().pipe(map(list => list[0] ?? null)),
     { initialValue: null }
   );
 
   dernierTheme = toSignal(
-    this.themeService.getThemes().pipe(map(list => list[0] ?? null)),
+    this.themeService.getThemesOnce().pipe(map(list => list[0] ?? null)),
     { initialValue: null as any }
   );
 
+  // Shared one-time read — both recentPhotos and membres derive from it without double read
+  private membresOnce$ = this.authService.getAllMembersOnce().pipe(shareReplay(1));
+
   recentPhotos = toSignal(
     combineLatest([
-      this.photoService.getRecentPublicPhotos(60),
-      this.authService.getAllMembers().pipe(
+      this.photoService.getRecentPublicPhotosOnce(60),
+      this.membresOnce$.pipe(
         map(members => new Set(
           members
             .filter(m => m.visibilite === 'public' && !m.isSuspended)
@@ -133,7 +136,7 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
   );
 
   membres = toSignal(
-    this.authService.getAllMembers().pipe(
+    this.membresOnce$.pipe(
       map(list => list.filter(m => !m.isSuspended && m.photoProfilUrl).slice(0, 3))
     ),
     { initialValue: [] as UserProfile[] }

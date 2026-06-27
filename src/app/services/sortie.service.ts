@@ -4,6 +4,7 @@ import {
   Firestore, collection, collectionData, collectionGroup, doc, docData,
   addDoc, updateDoc, deleteDoc, setDoc, getDocs, getDoc,
   query, where, orderBy, arrayUnion, arrayRemove, increment, deleteField
+
 } from '@angular/fire/firestore';
 import { Storage, ref, uploadBytes, uploadBytesResumable, getDownloadURL, deleteObject } from '@angular/fire/storage';
 import { Observable, from } from 'rxjs';
@@ -33,6 +34,37 @@ export class SortieService {
     return runInInjectionContext(this.injector, () =>
       collectionData(q, { idField: 'id' })
     ) as Observable<Sortie[]>;
+  }
+
+  getSortiesOnce(): Observable<Sortie[]> {
+    return from(runInInjectionContext(this.injector, () =>
+      getDocs(query(collection(this.firestore, 'sorties'), orderBy('date', 'desc')))
+    )).pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as Sortie))));
+  }
+
+  getMesSortiesOnce(uid: string): Observable<Sortie[]> {
+    return from(runInInjectionContext(this.injector, () =>
+      getDocs(query(collection(this.firestore, 'sorties'),
+        where('organisateurUid', '==', uid), orderBy('date', 'desc')))
+    )).pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as Sortie))));
+  }
+
+  getSortieOnce(id: string): Observable<Sortie | null> {
+    return from(runInInjectionContext(this.injector, () =>
+      getDoc(doc(this.firestore, 'sorties', id))
+    )).pipe(map(d => d.exists() ? { id: d.id, ...d.data() } as Sortie : null));
+  }
+
+  getPhotosOnce(sortieId: string): Observable<SortieImage[]> {
+    return from(runInInjectionContext(this.injector, () =>
+      getDocs(query(collection(this.firestore, `sorties/${sortieId}/photos`), orderBy('uploadedAt', 'asc')))
+    )).pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as SortieImage))));
+  }
+
+  getInscriptionsOnce(sortieId: string): Observable<SortieInscription[]> {
+    return from(runInInjectionContext(this.injector, () =>
+      getDocs(collection(this.firestore, `sorties/${sortieId}/inscriptions`))
+    )).pipe(map(snap => snap.docs.map(d => d.data() as SortieInscription)));
   }
 
   getSortie(id: string): Observable<Sortie> {

@@ -16,7 +16,7 @@ export class MembresGalerie {
   private authService = inject(AuthService);
 
   private allMembres = toSignal(
-    this.authService.getAllMembers().pipe(
+    this.authService.getAllMembersOnce().pipe(
       map(membres => membres.sort((a, b) => this.nomComplet(a).localeCompare(this.nomComplet(b), 'fr')))
     ),
     { initialValue: [] as UserProfile[] }

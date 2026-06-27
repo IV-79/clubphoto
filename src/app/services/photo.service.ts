@@ -1,9 +1,9 @@
 import { Injectable, inject, Injector, runInInjectionContext } from '@angular/core';
 import { Storage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from '@angular/fire/storage';
 import {
-  Firestore, collection, collectionData, doc, addDoc, deleteDoc, updateDoc, query, where, orderBy, limit, deleteField, arrayUnion, arrayRemove, increment
+  Firestore, collection, collectionData, doc, addDoc, deleteDoc, updateDoc, query, where, orderBy, limit, deleteField, arrayUnion, arrayRemove, increment, getDocs
 } from '@angular/fire/firestore';
-import { Observable, map } from 'rxjs';
+import { Observable, from, map } from 'rxjs';
 import { Photo, PhotoExif, PhotoVisibilite, UploadState } from '../models/photo.model';
 import { Commentaire, Reponse } from '../models/commentaire.model';
 import { hasExif } from '../utils/exif-reader';
@@ -122,6 +122,13 @@ export class PhotoService {
     return runInInjectionContext(this.injector, () =>
       collectionData(q, { idField: 'id' })
     ) as Observable<Photo[]>;
+  }
+
+  getRecentPublicPhotosOnce(limitCount = 8): Observable<Photo[]> {
+    return from(runInInjectionContext(this.injector, () =>
+      getDocs(query(collection(this.firestore, 'photos'),
+        where('visibilite', '==', 'public'), orderBy('dateUpload', 'desc'), limit(limitCount)))
+    )).pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as Photo))));
   }
 
   async deletePhoto(photo: Photo): Promise<void> {

@@ -43,6 +43,55 @@ export class DefiService {
     ) as Observable<Defi[]>;
   }
 
+  getDefisOnce(): Observable<Defi[]> {
+    return from(runInInjectionContext(this.injector, () =>
+      getDocs(query(collection(this.firestore, 'defis'), orderBy('dateCreation', 'desc')))
+    )).pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as Defi))));
+  }
+
+  getPublicDefisOnce(): Observable<Defi[]> {
+    return from(runInInjectionContext(this.injector, () =>
+      getDocs(query(collection(this.firestore, 'defis'),
+        where('visibilite', '==', 'public'), orderBy('dateCreation', 'desc')))
+    )).pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as Defi))));
+  }
+
+  getMesDefisOnce(uid: string): Observable<Defi[]> {
+    return from(runInInjectionContext(this.injector, () =>
+      getDocs(query(collection(this.firestore, 'defis'), where('organisateurUid', '==', uid)))
+    )).pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as Defi))));
+  }
+
+  getDefiOnce(id: string): Observable<Defi | null> {
+    return from(runInInjectionContext(this.injector, () =>
+      getDoc(doc(this.firestore, 'defis', id))
+    )).pipe(map(d => d.exists() ? { id: d.id, ...d.data() } as Defi : null));
+  }
+
+  getInscriptionsOnce(defiId: string): Observable<DefiInscription[]> {
+    return from(runInInjectionContext(this.injector, () =>
+      getDocs(collection(this.firestore, `defis/${defiId}/inscriptions`))
+    )).pipe(map(snap => snap.docs.map(d => ({ uid: d.id, ...d.data() } as DefiInscription))));
+  }
+
+  getPhotosOnce(defiId: string): Observable<DefiPhoto[]> {
+    return from(runInInjectionContext(this.injector, () =>
+      getDocs(query(collection(this.firestore, `defis/${defiId}/photos`), orderBy('uploadedAt', 'asc')))
+    )).pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as DefiPhoto))));
+  }
+
+  getVotesOnce(defiId: string): Observable<DefiVote[]> {
+    return from(runInInjectionContext(this.injector, () =>
+      getDocs(collection(this.firestore, `defis/${defiId}/votes`))
+    )).pipe(map(snap => snap.docs.map(d => ({ voterUid: d.id, ...d.data() } as DefiVote))));
+  }
+
+  getMonVoteOnce(defiId: string, voterUid: string): Observable<DefiVote | null> {
+    return from(runInInjectionContext(this.injector, () =>
+      getDoc(doc(this.firestore, `defis/${defiId}/votes`, voterUid))
+    )).pipe(map(d => d.exists() ? { voterUid, ...d.data() } as DefiVote : null));
+  }
+
   getDefi(id: string): Observable<Defi | null> {
     return runInInjectionContext(this.injector, () =>
       docData(doc(this.firestore, 'defis', id), { idField: 'id' })

@@ -4,6 +4,20 @@
 
 ## En cours (alpha)
 
+### Optimisation lectures Firestore — pages publiques (visiteurs anonymes)
+
+- **`home.ts`** — page d'accueil : 6 listeners temps-réel supprimés (articles, sorties, thèmes, photos, config hero, membres ×2) ; remplacés par des lectures ponctuelles `Once`. La liste membres est mutualisée via `shareReplay(1)` pour éviter deux lectures Firestore (`recentPhotos` et la section "Photographes" lisent le même snapshot sans double appel).
+- **`membres-galerie.ts`** — galerie des membres publics : `getAllMembers()` (WebSocket persistant sur toute la collection `users`) → `getAllMembersOnce()`.
+- **Services** — ajout des méthodes ponctuelles : `ArticleService.getPublicArticlesOnce()`, `ThemeService.getThemesOnce()` / `getSoumissionsOnce()` / `getTousVotesOnce()`, `PhotoService.getRecentPublicPhotosOnce()`, `ConfigService.getSiteConfigOnce()`.
+
+### Optimisation lectures Firestore — passage aux lectures ponctuelles
+
+- **Pattern « fetch + refresh »** — remplacement des abonnements temps-réel (`collectionData` / `docData`) par des lectures ponctuelles (`getDocs` / `getDoc`) sur toutes les pages événements et galeries, afin de limiter la consommation de quota Firestore (était à 26 % avec 2 testeurs).
+- **`sortie-detail`** — `sortie`, `photos`, `inscriptions` convertis en `Once` + signal `refreshTick` ; `refresh()` appelé après chaque mutation (save, inscription, upload, like, couverture). Liste des membres (`allMembres`) chargée en une seule fois uniquement si l'utilisateur est organisateur ou admin.
+- **`oneshot-detail`** — même traitement : `event`, `themes`, `photos`, `inscriptions`, `myVotes`, `allVotes` convertis en lectures ponctuelles avec `refreshTick`. `allVotes` ne charge les votes que si `statut === resultats` ou si créateur/admin. `allMembres` gardé derrière `canManage`.
+- **Services** — ajout de `getSortieOnce`, `getPhotosOnce`, `getInscriptionsOnce` dans `SortieService` ; `getOneShotOnce`, `getThemesOnce`, `getPhotosOnce`, `getInscriptionsOnce`, `getMyVotesOnce`, `getAllVotesOnce` dans `OneShotService` ; `getAllMembersOnce` dans `AuthService`.
+- **`sorties-liste`** — déjà converti lors de la session précédente ; `defi-detail` idem.
+
 ### Défi photo — visibilité soumissions phase de soumission
 
 - **Organisateur traité comme un membre** — durant la phase de soumission, l'organisateur ne voit que ses propres photos (plus la vue « toutes les soumissions » réservée à l'admin).

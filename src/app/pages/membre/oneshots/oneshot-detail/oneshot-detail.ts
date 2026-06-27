@@ -1,14 +1,14 @@
 import { Component, inject, signal, computed } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
-import { combineLatest, of, switchMap, map, distinctUntilChanged, catchError } from 'rxjs';
+import { combineLatest, of, switchMap } from 'rxjs';
 import { OneShotService } from '../../../../services/oneshot.service';
 import { AuthService } from '../../../../services/auth.service';
 import { ConfirmService } from '../../../../services/confirm.service';
 import { NotificationService } from '../../../../services/notification.service';
 import { LoginModalService } from '../../../../services/login-modal.service';
 import {
-  OneShotInscription, OneShotPhoto, OneShotTheme, OneShotVote,
+  OneShot, OneShotInscription, OneShotPhoto, OneShotTheme, OneShotVote,
   OneShotStatut, ONESHOT_STATUT_LABELS
 } from '../../../../models/oneshot.model';
 import { UserProfile } from '../../../../models/user.model';
@@ -35,31 +35,81 @@ export class OneShotDetail {
 
   profile = toSignal(this.authService.currentUserProfile$);
 
-  // Re-souscrit quand l'auth change : évite que la lecture du doc "preparation"
-  // échoue si Firestore évalue la règle avant que le token soit disponible
-  private event$ = toObservable(this.profile).pipe(
-    map(p => p?.uid ?? null),
-    distinctUntilChanged(),
-    switchMap(() => this.oneShotService.getOneShot(this.id).pipe(catchError(() => of(undefined))))
+  private refreshTick = signal(0);
+  private refresh() { this.refreshTick.update(n => n + 1); }
+
+  event = toSignal(
+    toObservable(this.refreshTick).pipe(switchMap(() => this.oneShotService.getOneShotOnce(this.id))),
+    { initialValue: undefined as OneShot | undefined }
   );
-  event   = toSignal(this.event$);
-  themes  = toSignal(this.oneShotService.getThemes(this.id),  { initialValue: [] as OneShotTheme[] });
-  photos  = toSignal(this.oneShotService.getPhotos(this.id),  { initialValue: [] as OneShotPhoto[] });
+
+  themes = toSignal(
+    toObservable(this.refreshTick).pipe(switchMap(() => this.oneShotService.getThemesOnce(this.id))),
+    { initialValue: [] as OneShotTheme[] }
+  );
+
+  photos = toSignal(
+    toObservable(this.refreshTick).pipe(switchMap(() => this.oneShotService.getPhotosOnce(this.id))),
+    { initialValue: [] as OneShotPhoto[] }
+  );
+
+  inscriptions = toSignal(
+    toObservable(this.profile).pipe(
+      switchMap(p => !p ? of([] as OneShotInscription[]) :
+        toObservable(this.refreshTick).pipe(
+          switchMap(() => this.oneShotService.getInscriptionsOnce(this.id))
+        )
+      )
+    ),
+    { initialValue: [] as OneShotInscription[] }
+  );
 
   isLoggedIn = computed(() => !!this.profile());
   authReady  = computed(() => this.profile() !== undefined);
-
-  private inscriptions$ = toObservable(this.profile).pipe(
-    switchMap(p => p ? this.oneShotService.getInscriptions(this.id) : of([] as OneShotInscription[]))
-  );
-  inscriptions = toSignal(this.inscriptions$, { initialValue: [] as OneShotInscription[] });
 
   isCreator          = computed(() => this.event()?.creatorUid === this.profile()?.uid);
   isAdmin            = computed(() => this.profile()?.role === 'admin');
   canManage          = computed(() => this.isCreator() || this.isAdmin());
   isInscrit          = computed(() => this.inscriptions().some(i => i.uid === this.profile()?.uid));
-  // Vue "admin" pendant le vote : créateur non-inscrit (inscrit → vote comme membre)
   viewAsAdmin        = computed(() => this.isCreator() && !this.isInscrit());
+
+  private allMembres$ = toObservable(this.canManage).pipe(
+    switchMap(can => can ? this.authService.getAllMembersOnce() : of([] as UserProfile[]))
+  );
+  allMembres = toSignal(this.allMembres$, { initialValue: [] as UserProfile[] });
+
+  membresDisponibles = computed(() => {
+    const inscritUids = new Set(this.inscriptions().map(i => i.uid));
+    return this.allMembres()
+      .filter(m => !inscritUids.has(m.uid) && !m.isSuspended)
+      .sort((a, b) => `${a.prenom ?? ''} ${a.nom}`.localeCompare(`${b.prenom ?? ''} ${b.nom}`));
+  });
+
+  myVotes = toSignal(
+    toObservable(this.profile).pipe(
+      switchMap(p => !p ? of([] as OneShotVote[]) :
+        toObservable(this.refreshTick).pipe(
+          switchMap(() => this.oneShotService.getMyVotesOnce(this.id, p.uid))
+        )
+      )
+    ),
+    { initialValue: [] as OneShotVote[] }
+  );
+
+  private allVotes$ = combineLatest([
+    toObservable(this.profile),
+    toObservable(this.event),
+    toObservable(this.refreshTick),
+  ]).pipe(
+    switchMap(([profile, event]) => {
+      if (!event) return of([] as OneShotVote[]);
+      if (event.statut === 'resultats') return this.oneShotService.getAllVotesOnce(this.id);
+      if (!profile) return of([] as OneShotVote[]);
+      const canSeeVotes = event.creatorUid === profile.uid || profile.role === 'admin';
+      return canSeeVotes ? this.oneShotService.getAllVotesOnce(this.id) : of([] as OneShotVote[]);
+    })
+  );
+  allVotes = toSignal(this.allVotes$, { initialValue: [] as OneShotVote[] });
 
   // Avancement (gestion)
   nextStatut = computed<OneShotStatut | null>(() => {
@@ -97,6 +147,7 @@ export class OneShotDetail {
       await this.oneShotService.updateStatut(this.id, next, ev ? {
         titre: ev.titre, nomCreateur: ev.nomCreateur, creatorUid: ev.creatorUid,
       } : undefined);
+      this.refresh();
     } finally {
       this.transitioning.set(false);
     }
@@ -107,10 +158,12 @@ export class OneShotDetail {
     this.transitioning.set(true);
     try {
       await this.oneShotService.updateStatut(this.id, 'fermeture_inscriptions');
+      this.refresh();
     } finally {
       this.transitioning.set(false);
     }
   }
+
   statutLabel        = computed(() => ONESHOT_STATUT_LABELS[this.event()?.statut ?? 'preparation']);
   inscriptionOuverte = computed(() => this.event()?.statut === 'inscription');
   canManageInscriptions = computed(() =>
@@ -171,50 +224,6 @@ export class OneShotDetail {
   addingMembre      = signal(false);
   selectedMembreUid = signal('');
 
-  allMembres = toSignal(this.authService.getAllMembers(), { initialValue: [] as UserProfile[] });
-
-  membresDisponibles = computed(() => {
-    const inscritUids = new Set(this.inscriptions().map(i => i.uid));
-    return this.allMembres()
-      .filter(m => !inscritUids.has(m.uid) && !m.isSuspended)
-      .sort((a, b) => `${a.prenom ?? ''} ${a.nom}`.localeCompare(`${b.prenom ?? ''} ${b.nom}`));
-  });
-
-  // Photos groupées par thème (uniquement les thèmes qui ont des photos)
-  photosByTheme = computed(() =>
-    this.themes()
-      .map(t => ({ theme: t, photos: this.photos().filter(p => p.themeId === t.id) }))
-      .filter(g => g.photos.length > 0)
-  );
-
-  // Mes votes (réactif sur le profil)
-  private myVotes$ = this.authService.currentUserProfile$.pipe(
-    switchMap(p => p
-      ? this.oneShotService.getMyVotes(this.id, p.uid)
-      : of([] as OneShotVote[])
-    )
-  );
-  myVotes = toSignal(this.myVotes$, { initialValue: [] as OneShotVote[] });
-
-  myVoteByTheme = computed((): Record<string, string> =>
-    Object.fromEntries(this.myVotes().map(v => [v.themeId, v.photoId]))
-  );
-
-  // Tous les votes — public en resultats, créateur pendant vote, sinon vide
-  private allVotes$ = combineLatest([
-    this.authService.currentUserProfile$,
-    toObservable(this.event),
-  ]).pipe(
-    switchMap(([profile, event]) => {
-      if (!event) return of([] as OneShotVote[]);
-      if (event.statut === 'resultats') return this.oneShotService.getAllVotes(this.id);
-      if (!profile) return of([] as OneShotVote[]);
-      const canSeeVotes = event.creatorUid === profile.uid || profile.role === 'admin';
-      return canSeeVotes ? this.oneShotService.getAllVotes(this.id) : of([] as OneShotVote[]);
-    })
-  );
-  allVotes = toSignal(this.allVotes$, { initialValue: [] as OneShotVote[] });
-
   voteCountByPhoto = computed((): Record<string, number | undefined> => {
     const counts: Record<string, number> = {};
     for (const v of this.allVotes()) {
@@ -231,11 +240,20 @@ export class OneShotDetail {
     return counts;
   });
 
+  myVoteByTheme = computed((): Record<string, string> =>
+    Object.fromEntries(this.myVotes().map(v => [v.themeId, v.photoId]))
+  );
+
   themesVoted = computed(() =>
     new Set(this.myVotes().map(v => v.themeId))
   );
 
-  // Résultats : photos triées par votes décroissants par thème
+  photosByTheme = computed(() =>
+    this.themes()
+      .map(t => ({ theme: t, photos: this.photos().filter(p => p.themeId === t.id) }))
+      .filter(g => g.photos.length > 0)
+  );
+
   resultsByTheme = computed(() =>
     this.themes()
       .map(t => ({
@@ -256,7 +274,6 @@ export class OneShotDetail {
     }));
   });
 
-  // Lightbox
   lightboxIndex = signal<number | null>(null);
 
   lightboxPhotoList = computed(() => {
@@ -317,6 +334,7 @@ export class OneShotDetail {
             { sourceNom: this.userName(), sourceUid: actor.uid }
           ).catch(() => {});
         }
+        this.refresh();
       },
     };
   });
@@ -361,7 +379,6 @@ export class OneShotDetail {
     this.router.navigate(['/galeries/sorties']);
   }
 
-  // Vote
   voting = signal<string | null>(null);
 
   async castVote(themeId: string, photoId: string) {
@@ -376,13 +393,14 @@ export class OneShotDetail {
       await this.oneShotService.vote(this.id, profile.uid, themeId, photoId);
     }
     this.voting.set(null);
+    this.refresh();
   }
 
   onFooterClick(event: Event, themeId: string, photo: OneShotPhoto) {
     const profile = this.profile();
     if (!profile || this.viewAsAdmin()) return;
     if (photo.membreUid === profile.uid) return;
-    event.stopPropagation(); // toujours bloquer la lightbox dès qu'on est en mode vote
+    event.stopPropagation();
     if (this.voting()) return;
     this.castVote(themeId, photo.id);
   }
@@ -400,6 +418,7 @@ export class OneShotDetail {
         { lien: `/galeries/oneshots/${this.id}`, sourceNom: this.userName(), sourceUid: p.uid }
       ).catch(() => {});
     }
+    this.refresh();
   }
 
   async inscrireSelected() {
@@ -419,25 +438,32 @@ export class OneShotDetail {
     ).catch(() => {});
     this.selectedMembreUid.set('');
     this.addingMembre.set(false);
+    this.refresh();
   }
 
-  // Inscription
   saving = signal(false);
 
   async inscrire() {
     const profile = this.profile();
     if (!profile || this.saving()) return;
     this.saving.set(true);
-    await this.oneShotService.inscrire(this.id, profile.uid, `${profile.prenom ?? ''} ${profile.nom}`.trim());
-    this.saving.set(false);
+    try {
+      await this.oneShotService.inscrire(this.id, profile.uid, `${profile.prenom ?? ''} ${profile.nom}`.trim());
+      this.refresh();
+    } finally {
+      this.saving.set(false);
+    }
   }
 
   async desinscrire() {
     const profile = this.profile();
     if (!profile || this.saving()) return;
     this.saving.set(true);
-    await this.oneShotService.desinscrire(this.id, profile.uid);
-    this.saving.set(false);
+    try {
+      await this.oneShotService.desinscrire(this.id, profile.uid);
+      this.refresh();
+    } finally {
+      this.saving.set(false);
+    }
   }
-
 }
