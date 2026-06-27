@@ -26,6 +26,30 @@ service firebase.storage {
       allow write: if request.auth != null;
     }
 
+    // Photos Défis photo
+    match /defis/{defiId}/{file} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // Photos portfolio membres
+    match /photos/{uid}/{file} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // Photos soumissions thèmes du mois
+    match /themes/{themeId}/{file} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // Image hero (admin uniquement en écriture)
+    match /config/{file} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
     // Documents partagés membres
     match /documents/{docId}/{file} {
       allow read: if request.auth != null;

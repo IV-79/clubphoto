@@ -60,6 +60,8 @@ export class SortieDetail {
   private refreshTick = signal(0);
   private refresh() { this.refreshTick.update(n => n + 1); }
 
+  private inscriptionsTrigger = computed(() => ({ profile: this.profile(), tick: this.refreshTick() }));
+
   sortie = toSignal(
     toObservable(this.refreshTick).pipe(switchMap(() => this.sortieService.getSortieOnce(this.sortieId))),
     { initialValue: null as Sortie | null }
@@ -71,11 +73,9 @@ export class SortieDetail {
   );
 
   inscriptions = toSignal(
-    toObservable(this.profile).pipe(
-      switchMap(p => !p ? of([]) :
-        toObservable(this.refreshTick).pipe(
-          switchMap(() => this.sortieService.getInscriptionsOnce(this.sortieId))
-        )
+    toObservable(this.inscriptionsTrigger).pipe(
+      switchMap(({ profile }) => !profile ? of([]) :
+        this.sortieService.getInscriptionsOnce(this.sortieId)
       )
     ),
     { initialValue: [] }

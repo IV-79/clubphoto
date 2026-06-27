@@ -38,6 +38,9 @@ export class OneShotDetail {
   private refreshTick = signal(0);
   private refresh() { this.refreshTick.update(n => n + 1); }
 
+  private inscriptionsTrigger = computed(() => ({ profile: this.profile(), tick: this.refreshTick() }));
+  private myVotesTrigger      = computed(() => ({ profile: this.profile(), tick: this.refreshTick() }));
+
   event = toSignal(
     toObservable(this.refreshTick).pipe(switchMap(() => this.oneShotService.getOneShotOnce(this.id))),
     { initialValue: undefined as OneShot | undefined }
@@ -54,11 +57,9 @@ export class OneShotDetail {
   );
 
   inscriptions = toSignal(
-    toObservable(this.profile).pipe(
-      switchMap(p => !p ? of([] as OneShotInscription[]) :
-        toObservable(this.refreshTick).pipe(
-          switchMap(() => this.oneShotService.getInscriptionsOnce(this.id))
-        )
+    toObservable(this.inscriptionsTrigger).pipe(
+      switchMap(({ profile }) => !profile ? of([] as OneShotInscription[]) :
+        this.oneShotService.getInscriptionsOnce(this.id)
       )
     ),
     { initialValue: [] as OneShotInscription[] }
@@ -86,11 +87,9 @@ export class OneShotDetail {
   });
 
   myVotes = toSignal(
-    toObservable(this.profile).pipe(
-      switchMap(p => !p ? of([] as OneShotVote[]) :
-        toObservable(this.refreshTick).pipe(
-          switchMap(() => this.oneShotService.getMyVotesOnce(this.id, p.uid))
-        )
+    toObservable(this.myVotesTrigger).pipe(
+      switchMap(({ profile }) => !profile ? of([] as OneShotVote[]) :
+        this.oneShotService.getMyVotesOnce(this.id, profile.uid)
       )
     ),
     { initialValue: [] as OneShotVote[] }
