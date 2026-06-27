@@ -330,11 +330,11 @@
 .defi-card { background: white; border-color: rgba(217,119,6,0.25); }
 .defi-card:hover { border-color: rgba(217,119,6,0.5); }
 
-.defi-type-badge     { color: #d97706; }
-.defi-type-badge-dim { color: rgba(0,0,0,0.3); }
+.defi-type-badge     { background: rgba(245,158,11,0.12); color: #d97706; }
+.defi-type-badge-dim { background: rgba(0,0,0,0.04);      color: rgba(0,0,0,0.3); }
 
 .status-defi-avenir    { background: rgba(245,158,11,0.12); color: #d97706; }
-.status-defi-soumission{ background: rgba(59,130,246,0.12); color: #1d4ed8; }
+.status-defi-soumission{ background: rgba(76,175,80,0.12);  color: #2e7d32; }
 .status-defi-vote      { background: rgba(139,92,246,0.12); color: #6d28d9; }
 
 .defi-meta {

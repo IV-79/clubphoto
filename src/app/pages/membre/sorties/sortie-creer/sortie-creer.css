@@ -20,6 +20,7 @@
 
 .form-row {
   display: flex;
+  align-items: flex-end;
   gap: 1rem;
 }
 
@@ -88,9 +89,65 @@
 .btn-submit:hover:not(:disabled) { background: #a93226; }
 .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
 
+/* ── Thèmes (OneShot) ─────────────────────────────────── */
+
+.field-themes { display: flex; flex-direction: column; gap: 8px; }
+
+.themes-list { display: flex; flex-direction: column; gap: 6px; }
+
+.theme-tag {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(0,0,0,0.04);
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 0.88rem;
+}
+
+.btn-theme-del {
+  background: none;
+  border: none;
+  color: rgba(0,0,0,0.3);
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0 2px;
+}
+.btn-theme-del:hover { color: #cc0000; }
+
+.add-theme-row { display: flex; gap: 8px; }
+
+.theme-input-field {
+  flex: 1;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 0.45rem 0.75rem;
+  font-size: 0.9rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.theme-input-field:focus { border-color: #c0392b; }
+
+.btn-add-theme {
+  background: none;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 0.45rem 0.75rem;
+  font-size: 0.85rem;
+  color: rgba(0,0,0,0.55);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.2s, color 0.2s;
+}
+.btn-add-theme:hover:not(:disabled) { border-color: #999; color: #1a1a1a; }
+.btn-add-theme:disabled { opacity: 0.4; cursor: default; }
+
 /* ── Cover drop zone ── */
-.field-cover { display: flex; flex-direction: column; gap: 6px; margin-bottom: 0.25rem; }
+.field-cover { display: flex; flex-direction: column; gap: 6px; margin-bottom: 1rem; }
 .field-opt { font-size: 0.72rem; color: rgba(0,0,0,0.28); font-weight: normal; }
+.field-cover-hint { font-size: 0.75rem; color: rgba(0,0,0,0.38); margin: 0; }
 
 .cover-drop {
   position: relative;

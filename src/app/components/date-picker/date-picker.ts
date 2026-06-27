@@ -40,6 +40,7 @@ export class DatePickerComponent implements ControlValueAccessor {
   @Input() placeholder = 'JJ/MM/AAAA';
   @Input() min = '';
   @Input() max = '';
+  @Input() set disabled(v: boolean) { this.setDisabledState(v); }
 
   @Input() set value(v: string) { this._applyValue(v ?? ''); }
   @Output() valueChange = new EventEmitter<string>();

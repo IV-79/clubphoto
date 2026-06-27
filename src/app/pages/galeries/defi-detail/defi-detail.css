@@ -27,8 +27,8 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  background: #111;
+  object-fit: contain;
+  background: transparent;
 }
 
 .hero-overlay {
@@ -64,19 +64,7 @@
   margin-bottom: 0.6rem;
 }
 
-.type-badge {
-  display: inline-block;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  background: rgba(255,255,255,0.15);
-  border: 1px solid rgba(255,255,255,0.3);
-  border-radius: 4px;
-  padding: 0.2rem 0.6rem;
-  color: #d97706;
-}
-
-.statut-badge {
+.hero-badge {
   display: inline-block;
   font-size: 0.72rem;
   font-weight: 700;
@@ -84,11 +72,16 @@
   border-radius: 4px;
   padding: 0.2rem 0.6rem;
   text-transform: uppercase;
+  background: rgba(255,255,255,0.88);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.12);
 }
-.badge-avenir    { background: rgba(245,158,11,0.12); color: #d97706; border: 1px solid rgba(245,158,11,0.3); }
-.badge-soumission{ background: rgba(59,130,246,0.12); color: #1d4ed8; border: 1px solid rgba(59,130,246,0.3); }
-.badge-vote      { background: rgba(139,92,246,0.12); color: #6d28d9; border: 1px solid rgba(139,92,246,0.3); }
-.badge-resultats { background: rgba(0,0,0,0.06);      color: rgba(0,0,0,0.45); border: 1px solid rgba(0,0,0,0.1); }
+.badge-type      { color: #d97706; }
+.badge-avenir    { color: #d97706; }
+.badge-soumission{ color: #2e7d32; }
+.badge-vote      { color: #6d28d9; }
+.badge-resultats { color: rgba(0,0,0,0.55); }
 
 .defi-titre {
   margin: 0 0 0.25rem;
@@ -247,7 +240,10 @@
   color: rgba(0,0,0,0.4);
 }
 .cover-drop-sm.drag-over { border-color: #d97706; }
-.cover-preview-sm { width: 100%; max-height: 100px; object-fit: cover; border-radius: 4px; margin-bottom: 0.4rem; }
+.edit-cover-section { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; }
+.edit-cover-label   { font-size: 0.78rem; font-weight: 600; color: rgba(0,0,0,0.55); margin: 0; }
+.edit-cover-hint    { font-size: 0.72rem; color: rgba(0,0,0,0.38); margin: 0; font-style: italic; }
+.cover-preview-sm   { width: 100%; max-height: 180px; object-fit: contain; background: #111; border-radius: 4px; }
 
 .btn-sm {
   display: inline-block;
@@ -446,10 +442,11 @@
 .photo-img {
   width: 100%;
   aspect-ratio: 1;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
   background: #111;
 }
+.photo-clickable { cursor: pointer; }
 
 .photo-author {
   margin: 0;
@@ -520,7 +517,7 @@
 
 .podium {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 1rem;
   margin-bottom: 2rem;
 }
@@ -536,7 +533,7 @@
 .podium-item.rank-3 { border-color: #d97706; }
 
 .podium-medal { font-size: 1.5rem; padding: 0.5rem 0; }
-.podium-img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
+.podium-img { width: 100%; aspect-ratio: 1; object-fit: contain; display: block; background: #111; }
 .podium-info { padding: 0.5rem; }
 .podium-author { margin: 0; font-size: 0.85rem; font-weight: 600; }
 .podium-votes { margin: 0; font-size: 0.75rem; color: rgba(0,0,0,0.4); }
@@ -566,6 +563,24 @@
 .result-votes { margin: 0; font-size: 0.72rem; color: rgba(0,0,0,0.4); }
 
 .hint { font-size: 0.85rem; color: rgba(0,0,0,0.4); }
+
+.btn-suite {
+  display: block;
+  width: 100%;
+  margin-top: 1.25rem;
+  padding: 0.65rem 1rem;
+  background: none;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: rgba(0,0,0,0.5);
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 0.2s, color 0.2s;
+}
+.btn-suite:hover { border-color: #999; color: #1a1a1a; }
+
+.suite-grid { margin-top: 1rem; }
 
 /* ── Responsive ──────────────────────────────────────────────── */
 

@@ -94,7 +94,7 @@ export class Reunions {
   }
 
   toggleExpand(id: string) {
-    if (this.editingId() === id) return;
+    if (this.editingId() === id) { this.cancelEdit(); return; }
     if (this.editingId() !== null) {
       this.triggerFlash();
       return;

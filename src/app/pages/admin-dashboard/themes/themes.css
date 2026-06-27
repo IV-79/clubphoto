@@ -82,17 +82,18 @@
 }
 
 .btn-cancel {
-  background: none;
-  border: none;
-  color: rgba(0,0,0,0.4);
+  background: transparent;
+  border: 1px solid rgba(0,0,0,0.22);
+  border-radius: 4px;
+  color: rgba(0,0,0,0.55);
   font-size: 0.9rem;
   font-family: inherit;
   cursor: pointer;
-  padding: 0;
+  padding: 8px 16px;
   margin-right: auto;
-  transition: color 0.2s;
+  transition: border-color 0.2s, color 0.2s;
 }
-.btn-cancel:hover { color: #1a1a1a; }
+.btn-cancel:hover { border-color: rgba(0,0,0,0.45); color: #1a1a1a; }
 
 .btn-save {
   background: #1976d2;

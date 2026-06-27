@@ -47,7 +47,7 @@ export class DefiCreer {
     titre:               new FormControl('', { validators: [Validators.required, Validators.minLength(3)], nonNullable: true }),
     theme:               new FormControl('', { validators: [Validators.required, Validators.minLength(3)], nonNullable: true }),
     description:         new FormControl('', { nonNullable: true }),
-    dateDebutSoumission: new FormControl('', { validators: [Validators.required], nonNullable: true }),
+    dateDebutSoumission: new FormControl(this.today, { validators: [Validators.required], nonNullable: true }),
     dateFinSoumission:   new FormControl('', { validators: [Validators.required], nonNullable: true }),
     dateCloturVotes:     new FormControl('', { validators: [Validators.required], nonNullable: true }),
     maxPhotos:           new FormControl(2, { validators: [Validators.required, Validators.min(1), Validators.max(10)], nonNullable: true }),

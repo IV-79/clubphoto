@@ -16,11 +16,12 @@ import {
 } from '../../../models/theme.model';
 import { LightboxPhoto, PhotoLightboxCallbacks } from '../../../models/commentaire.model';
 import { PhotoLightbox } from '../../../components/photo-lightbox/photo-lightbox';
+import { VoteRankingComponent, RankingItem } from '../../../components/vote-ranking/vote-ranking';
 import { ImgRetryDirective } from '../../../directives/img-retry.directive';
 
 @Component({
   selector: 'app-theme-detail',
-  imports: [RouterLink, PhotoLightbox, ImgRetryDirective],
+  imports: [RouterLink, PhotoLightbox, ImgRetryDirective, VoteRankingComponent],
   templateUrl: './theme-detail.html',
   styleUrl: './theme-detail.css',
 })
@@ -93,11 +94,18 @@ export class ThemeDetail {
     )
   );
 
-  top3Resultats = computed(() => this.resultats().slice(0, 3));
+  allRankingItems = computed((): RankingItem[] =>
+    this.resultats().map(s => ({
+      id: s.id,
+      url: s.url,
+      authorName: s.nomMembre,
+      votes: this.votesParSoumission()[s.id] ?? 0,
+    }))
+  );
 
-  computeRank(soumissions: ThemeSoumission[], index: number): number {
-    const currentVotes = this.votesParSoumission()[soumissions[index].id] ?? 0;
-    return soumissions.filter(s => (this.votesParSoumission()[s.id] ?? 0) > currentVotes).length + 1;
+  onRankingClick(id: string): void {
+    const soum = this.resultats().find(s => s.id === id);
+    if (soum) this.openLightbox(soum);
   }
 
   statutLabel(theme: ThemeMensuel): string {
@@ -107,12 +115,9 @@ export class ThemeDetail {
   // Lightbox
   lightboxIndex = signal<number | null>(null);
 
-  lightboxSoumissions = computed(() => {
-    if (this.statut() === 'resultats') {
-      return this.isLoggedIn() ? this.resultats() : this.top3Resultats();
-    }
-    return this.soumissions();
-  });
+  lightboxSoumissions = computed(() =>
+    this.statut() === 'resultats' ? this.resultats() : this.soumissions()
+  );
 
   lightboxPhotos = computed((): LightboxPhoto[] => {
     const showAuteur = this.statut() === 'resultats';

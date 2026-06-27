@@ -1,4 +1,4 @@
-import { Component, inject, computed, signal } from '@angular/core';
+import { Component, inject, computed, signal, HostListener } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -6,21 +6,26 @@ import { switchMap, of } from 'rxjs';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { DefiService } from '../../../services/defi.service';
 import { AuthService } from '../../../services/auth.service';
+import { NotificationService } from '../../../services/notification.service';
 import { DatePickerComponent } from '../../../components/date-picker/date-picker';
+import { PhotoLightbox } from '../../../components/photo-lightbox/photo-lightbox';
+import { VoteRankingComponent, RankingItem } from '../../../components/vote-ranking/vote-ranking';
 import { Defi, DefiPhoto, DefiPhotoResult, DefiStatut, DEFI_STATUT_LABELS, getDefiStatut } from '../../../models/defi.model';
+import { LightboxPhoto, PhotoLightboxCallbacks } from '../../../models/commentaire.model';
 import { ImgRetryDirective } from '../../../directives/img-retry.directive';
 
 @Component({
   selector: 'app-defi-detail',
-  imports: [RouterLink, FormsModule, DatePickerComponent, ImgRetryDirective],
+  imports: [RouterLink, FormsModule, DatePickerComponent, PhotoLightbox, ImgRetryDirective, VoteRankingComponent],
   templateUrl: './defi-detail.html',
   styleUrl: './defi-detail.css',
 })
 export class DefiDetail {
   private route       = inject(ActivatedRoute);
   private router      = inject(Router);
-  private defiService = inject(DefiService);
-  private authService = inject(AuthService);
+  private defiService  = inject(DefiService);
+  private authService  = inject(AuthService);
+  private notifService = inject(NotificationService);
 
   readonly id = this.route.snapshot.paramMap.get('id')!;
 
@@ -65,7 +70,8 @@ export class DefiDetail {
     { initialValue: null }
   );
 
-  statut     = computed((): DefiStatut => this.defi() ? getDefiStatut(this.defi()!) : 'a_venir');
+  statut            = computed((): DefiStatut => this.defi() ? getDefiStatut(this.defi()!) : 'a_venir');
+  totalVotesDeposes = computed(() => this.votes().reduce((acc, v) => acc + v.photoIds.length, 0));
   isAdmin    = computed(() => this.profile()?.role === 'admin');
   isOrg      = computed(() => !!this.profile() && this.defi()?.organisateurUid === this.profile()!.uid);
   canManage  = computed(() => this.isOrg() || this.isAdmin());
@@ -74,6 +80,45 @@ export class DefiDetail {
     return uid ? this.inscriptions().some(i => i.uid === uid) : false;
   });
   canParticiper = computed(() => this.isInscrit() || this.canManage());
+
+  userName = computed(() => {
+    const p = this.profile();
+    return p ? `${p.prenom ?? ''} ${p.nom}`.trim() : '';
+  });
+
+  // ── Lightbox ─────────────────────────────────────────────────────────
+  lightboxIndex = signal<number | null>(null);
+
+  private toLb = (p: DefiPhoto): LightboxPhoto => ({
+    id: p.id, url: p.url, nomAuteur: p.membreNom,
+    likes: [], uploadedAt: p.uploadedAt, exif: p.exif,
+  });
+
+  private votePhotosLb   = computed<LightboxPhoto[]>(() => this.photosVisibles().map(p => this.toLb(p)));
+  private resultPhotosLb = computed<LightboxPhoto[]>(() => this.photosRanked().map(p => this.toLb(p)));
+  lightboxPhotos         = computed<LightboxPhoto[]>(() =>
+    this.statut() === 'vote' ? this.votePhotosLb() : this.resultPhotosLb()
+  );
+
+  readonly lightboxCallbacks: PhotoLightboxCallbacks = {
+    toggleLike:        async () => {},
+    getComments:       ()     => of([]),
+    addComment:        async () => {},
+    deleteComment:     async () => {},
+    toggleCommentLike: async () => {},
+    addReply:          async () => {},
+    deleteReply:       async () => {},
+  };
+
+  openLightbox(photo: { id: string }): void {
+    const idx = this.lightboxPhotos().findIndex(p => p.id === photo.id);
+    if (idx !== -1) this.lightboxIndex.set(idx);
+  }
+
+  closeLightbox(): void { this.lightboxIndex.set(null); }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void { this.closeLightbox(); }
 
   mesPhotos = computed(() => {
     const uid = this.profile()?.uid;
@@ -108,11 +153,29 @@ export class DefiDetail {
         counts.set(photoId, (counts.get(photoId) ?? 0) + 1);
       }
     }
-    return [...this.photos()]
+    const sorted = [...this.photos()]
       .map(p => ({ ...p, voteCount: counts.get(p.id) ?? 0, rank: 0 }))
-      .sort((a, b) => b.voteCount - a.voteCount)
-      .map((p, i) => ({ ...p, rank: i + 1 }));
+      .sort((a, b) => b.voteCount - a.voteCount);
+    let rank = 1;
+    return sorted.map((p, i) => {
+      if (i > 0 && p.voteCount < sorted[i - 1].voteCount) rank = i + 1;
+      return { ...p, rank };
+    });
   });
+
+  rankingItems = computed((): RankingItem[] =>
+    this.photosRanked().map(p => ({
+      id: p.id,
+      url: p.url,
+      authorName: p.membreNom,
+      votes: p.voteCount,
+    }))
+  );
+
+  onRankingClick(id: string): void {
+    const photo = this.photosRanked().find(p => p.id === id);
+    if (photo) this.openLightbox(photo);
+  }
 
   // ── Upload ────────────────────────────────────────────────────────────
 
@@ -245,6 +308,10 @@ export class DefiDetail {
 
   async saveEdit() {
     if (this.saving()) return;
+    const d = this.defi()!;
+    const finChanged   = this.editFin   !== d.dateFinSoumission;
+    const votesChanged = this.editVotes !== d.dateCloturVotes;
+
     this.saving.set(true);
     try {
       await this.defiService.updateDefi(this.id, {
@@ -258,6 +325,21 @@ export class DefiDetail {
         maxVotes:            this.editMaxVotes,
         visibilite:          this.editVisibilite,
       });
+
+      if (finChanged || votesChanged) {
+        const editorUid = this.profile()!.uid;
+        const editorNom = this.userName();
+        const lien      = `/galeries/defis/${this.id}`;
+        const parts: string[] = [];
+        if (finChanged)   parts.push(`fin de soumission le ${this.formatDate(this.editFin)}`);
+        if (votesChanged) parts.push(`clôture des votes le ${this.formatDate(this.editVotes)}`);
+        const msg = `🏅 Défi "${this.editTitre}" · Dates modifiées : ${parts.join(', ')}`;
+        const notifPromises = this.inscriptions()
+          .filter(i => i.uid !== editorUid)
+          .map(i => this.notifService.sendToUser(i.uid, 'defi', msg, { lien, sourceNom: editorNom }));
+        await Promise.all(notifPromises);
+      }
+
       this.refresh();
       this.editMode.set(false);
     } finally { this.saving.set(false); }
@@ -269,39 +351,23 @@ export class DefiDetail {
     this.router.navigate(['/galeries/sorties']);
   }
 
-  // ── Extension votes ───────────────────────────────────────────────────
-
-  extensionDate   = '';
-  extendingVotes  = signal(false);
-
-  async extendVotes() {
-    if (!this.extensionDate || this.extendingVotes()) return;
-    this.extendingVotes.set(true);
-    try {
-      await this.defiService.extendVotes(this.id, this.extensionDate);
-      this.extensionDate = '';
-      this.refresh();
-    } finally { this.extendingVotes.set(false); }
-  }
-
-  // ── Cover ─────────────────────────────────────────────────────────────
+  // ── Cover (dans le formulaire d'édition) ─────────────────────────────
 
   pendingCover   = signal<File | null>(null);
   coverPreview   = signal<string | null>(null);
-  coverDragOver  = signal(false);
   uploadingCover = signal(false);
-
-  onCoverDrop(event: DragEvent) {
-    event.preventDefault();
-    this.coverDragOver.set(false);
-    const f = event.dataTransfer?.files?.[0];
-    if (f && f.type.startsWith('image/')) this.setCover(f);
-  }
 
   onCoverSelected(event: Event) {
     const f = (event.target as HTMLInputElement).files?.[0];
     (event.target as HTMLInputElement).value = '';
     if (f) this.setCover(f);
+  }
+
+  clearCoverPreview() {
+    const prev = this.coverPreview();
+    if (prev) URL.revokeObjectURL(prev);
+    this.pendingCover.set(null);
+    this.coverPreview.set(null);
   }
 
   private setCover(file: File) {
@@ -317,9 +383,7 @@ export class DefiDetail {
     this.uploadingCover.set(true);
     try {
       await this.defiService.setCouverture(this.id, file);
-      URL.revokeObjectURL(this.coverPreview()!);
-      this.pendingCover.set(null);
-      this.coverPreview.set(null);
+      this.clearCoverPreview();
       this.refresh();
     } finally { this.uploadingCover.set(false); }
   }

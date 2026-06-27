@@ -219,6 +219,7 @@
 
 /* ── Cover drop zone ── */
 .field-cover { display: flex; flex-direction: column; gap: 6px; }
+.field-cover-hint { font-size: 0.75rem; color: rgba(0,0,0,0.38); margin: 0; }
 
 .cover-drop {
   position: relative;

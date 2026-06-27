@@ -46,6 +46,20 @@ export class SortieCreer {
   coverPreviewUrl  = signal<string | null>(null);
   coverDragOver    = signal(false);
 
+  pendingThemes = signal<string[]>([]);
+  newThemeNom   = signal('');
+
+  addPendingTheme(): void {
+    const nom = this.newThemeNom().trim();
+    if (!nom) return;
+    this.pendingThemes.update(ts => [...ts, nom]);
+    this.newThemeNom.set('');
+  }
+
+  removePendingTheme(index: number): void {
+    this.pendingThemes.update(ts => ts.filter((_, i) => i !== index));
+  }
+
   form = new FormGroup({
     type:                   new FormControl<CreationType>('sortie_photo', { nonNullable: true }),
     titre:                  new FormControl('', { validators: [Validators.required, Validators.minLength(3)], nonNullable: true }),
@@ -174,6 +188,7 @@ export class SortieCreer {
           ...(v.date ? { date: v.date } : {}),
           ...(v.lieu.trim() ? { lieu: v.lieu.trim() } : {}),
         });
+        await Promise.all(this.pendingThemes().map((t, i) => this.oneShotService.addTheme(id, t, i)));
         await this.oneShotService.inscrire(id, profile.uid, nom);
         if (this.pendingCoverFile()) {
           const compressed = await compressToJpeg(this.pendingCoverFile()!);

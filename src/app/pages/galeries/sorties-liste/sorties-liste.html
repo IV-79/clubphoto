@@ -147,7 +147,7 @@
               }
               <div class="sortie-info">
                 <div class="sortie-titre-row">
-                  <span class="type-badge defi-type-badge">🏅 Défi Photo</span>
+                  <span class="sortie-status defi-type-badge">🏅 Défi Photo</span>
                   @if (!defi.photoCouvertureUrl) {
                     <span [class]="defiStatutClass(defi)">{{ defiStatutLabel(defi) }}</span>
                   }
@@ -263,7 +263,7 @@
               }
               <div class="sortie-info">
                 <div class="sortie-titre-row">
-                  <span class="type-badge type-badge-dim defi-type-badge-dim">🏅 Défi Photo</span>
+                  <span class="sortie-status defi-type-badge-dim">🏅 Défi Photo</span>
                   @if (!defi.photoCouvertureUrl) {
                     <span class="sortie-status status-passee">Terminé</span>
                   }

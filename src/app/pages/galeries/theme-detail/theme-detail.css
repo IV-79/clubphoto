@@ -423,3 +423,21 @@
 .card-heart:hover { background: rgba(192,57,43,0.6); color: #fff; }
 .card-heart.liked { background: rgba(0,0,0,0.45); }
 .card-heart.liked .hi { color: #f87070; }
+
+.btn-suite {
+  display: block;
+  width: 100%;
+  margin-top: 1.25rem;
+  padding: 0.65rem 1rem;
+  background: none;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: rgba(0,0,0,0.5);
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 0.2s, color 0.2s;
+}
+.btn-suite:hover { border-color: #999; color: #1a1a1a; }
+
+.suite-grid { margin-top: 1rem; }

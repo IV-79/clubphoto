@@ -17,7 +17,7 @@
       <h2 class="form-card-title">Nouvelle réunion</h2>
       <form [formGroup]="createForm" (ngSubmit)="creer()" class="r-form">
         <div class="form-row">
-          <mat-form-field appearance="outline" class="field-grow">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-grow">
             <mat-label>Titre *</mat-label>
             <input matInput formControlName="titre" />
           </mat-form-field>
@@ -70,11 +70,10 @@
               @if (expandedId() === r.id) {
                 <div class="card-detail" (click)="$event.stopPropagation()">
                   @if (editingId() === r.id) {
-                    <!-- Formulaire d'édition inline -->
                     <div [class.form-flash]="flashEdit()">
                       <form [formGroup]="editForm" (ngSubmit)="sauvegarder(r.id)" class="r-form">
                         <div class="form-row">
-                          <mat-form-field appearance="outline" class="field-grow">
+                          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-grow">
                             <mat-label>Titre *</mat-label>
                             <input matInput formControlName="titre" />
                           </mat-form-field>
@@ -89,7 +88,6 @@
                           <textarea matInput formControlName="description" rows="2"></textarea>
                         </mat-form-field>
                         <div class="form-actions">
-                          <button type="button" class="btn-cancel" (click)="cancelEdit()">Annuler</button>
                           <button type="button" class="btn-delete-sm" (click)="supprimer(r)">Supprimer</button>
                           <button type="submit" class="btn-save" [disabled]="editForm.invalid || saving()">
                             {{ saving() ? 'Sauvegarde…' : 'Sauvegarder' }}
@@ -149,7 +147,7 @@
                     <div [class.form-flash]="flashEdit()">
                       <form [formGroup]="editForm" (ngSubmit)="sauvegarder(r.id)" class="r-form">
                         <div class="form-row">
-                          <mat-form-field appearance="outline" class="field-grow">
+                          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-grow">
                             <mat-label>Titre *</mat-label>
                             <input matInput formControlName="titre" />
                           </mat-form-field>
@@ -164,7 +162,6 @@
                           <textarea matInput formControlName="description" rows="2"></textarea>
                         </mat-form-field>
                         <div class="form-actions">
-                          <button type="button" class="btn-cancel" (click)="cancelEdit()">Annuler</button>
                           <button type="button" class="btn-delete-sm" (click)="supprimer(r)">Supprimer</button>
                           <button type="submit" class="btn-save" [disabled]="editForm.invalid || saving()">
                             {{ saving() ? 'Sauvegarde…' : 'Sauvegarder' }}

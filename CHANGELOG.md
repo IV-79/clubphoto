@@ -4,6 +4,42 @@
 
 ## En cours (alpha)
 
+### Alignement visuel des événements — héros, couvertures, formulaires (2026-06-27)
+
+#### Héros photo de couverture — Sortie, OneShot, Défi
+
+- **`galeries/sortie-detail`** — mode vue restructuré en héro pleine largeur : photo de couverture (`imageEvenementUrl`) en fond avec overlay sombre dégradé, titre/statut/meta/actions en surimpression. Sans photo : zone gris clair neutre. `object-fit: contain` pour afficher l'image entière sans rogner.
+- **`galeries/oneshots/:id` (OneShotDetail)** — même héro pleine largeur avec `photoCouvertureUrl`. Héro sorti du conteneur `max-width: 860px` pour occuper toute la fenêtre, le contenu (gestion, inscriptions, thèmes, photos) reste centré à 860px.
+- **`galeries/defi-detail`** — même correction `object-fit: contain`.
+- **Badges de statut sur photo sombre** : fond blanc/verre dépoli (`backdrop-filter`) pour lisibilité maximale.
+
+#### Photo de couverture dans les formulaires
+
+- Renommé partout "Image de la carte" → **"Photo de couverture"** + conseil de format _16/9 — 1280×720 px (JPG ou PNG)_.
+- **Formulaire "Organiser un événement"** (`sortie-creer`) — section couverture déplacée **en haut** du formulaire (avant Type/Titre), cohérent avec Défi.
+- **Formulaire "Modifier l'événement"** (`sortie-detail` mode édition) — couverture déplacée en premier dans le formulaire.
+- **Formulaire "Modifier le OneShot"** (`oneshot-gerer`) — couverture déplacée en premier (avant Date/Lieu/Thèmes).
+
+#### Corrections UX formulaires admin
+
+- **Alignement date-picker / mat-form-field** (`sortie-creer`, `sortie-detail`, `reunions`, `themes`) — `align-items: flex-end` sur les `.form-row` + `subscriptSizing="dynamic"` sur les mat-form-field côte à côte ; corrige le décalage vertical entre le champ date custom et les champs Material.
+- **Admin Réunions & Thèmes du mois** — bouton "Annuler" rendu visible (bordure légère, couleur neutre). Clic sur l'en-tête d'une card en mode édition → annule l'édition (au lieu de ne rien faire) ; clic sur une autre card → flash rouge de la card en cours d'édition.
+
+### Thèmes optionnels à la création d'un OneShot
+
+- La section "Thèmes" apparaît dans le formulaire de création quand le type sélectionné est OneShot.
+- L'utilisateur peut ajouter / supprimer des thèmes avant de valider ; ils sont écrits en Firestore juste après la création du doc OneShot.
+- Entièrement optionnel : si aucun thème n'est saisi, le comportement existant est inchangé (ajout via "Modifier" après coup).
+
+### Composant partagé `<app-vote-ranking>` — classement unifié (Défi, Thème du mois, OneShot)
+
+- **Nouveau composant** `src/app/components/vote-ranking/` — carte de résultat unifiée : médaille 🥇🥈🥉 centrée au-dessus de la photo (rank ≤ 3), cercle numéroté `(N)` pour rank > 3, cadre coloré or/argent/bronze, photo carrée, nom + nombre de votes en dessous.
+- **Classement dense** — ex-aequo gérés : 1-1-1-4, 1-1-3-3-5, etc. sur les 3 systèmes de vote.
+- **Toggle "Voir la suite"** — photos rank > 3 cachées derrière un bouton ; les images ne sont pas dans le DOM avant le clic (économie de bande passante Firebase Storage).
+- **`defi-detail`** — section résultats remplacée par `<app-vote-ranking>`.
+- **`theme-detail`** — section résultats (membres et visiteurs) remplacée par `<app-vote-ranking>` ; likes retirés des cartes de résultats (accessibles via la lightbox).
+- **`oneshot-detail`** — section résultats remplacée par `<app-vote-ranking>` par thème, état du toggle indépendant par thème ; visiteurs voient désormais toutes les photos (avec suite) sans les décomptes de votes.
+
 ### Optimisation lectures Firestore — pages publiques (visiteurs anonymes)
 
 - **`home.ts`** — page d'accueil : 6 listeners temps-réel supprimés (articles, sorties, thèmes, photos, config hero, membres ×2) ; remplacés par des lectures ponctuelles `Once`. La liste membres est mutualisée via `shareReplay(1)` pour éviter deux lectures Firestore (`recentPhotos` et la section "Photographes" lisent le même snapshot sans double appel).

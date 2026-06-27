@@ -1,21 +1,23 @@
-<div class="detail-page">
-
-  <div class="page-nav">
-    <a routerLink="/galeries/sorties" class="back-link">← Activités</a>
-    @if (canManage()) {
-      <div class="header-actions">
-        <a [routerLink]="['/membre/oneshots', id, 'gerer']" class="btn-action">✏ Modifier</a>
-        <button class="btn-action btn-action-danger" (click)="deleteOneShot()">🗑 Supprimer</button>
-      </div>
+<!-- Hero (pleine largeur) -->
+@if (event()) {
+  <div class="event-hero" [class.has-cover]="event()!.photoCouvertureUrl">
+    @if (event()!.photoCouvertureUrl) {
+      <img [src]="event()!.photoCouvertureUrl" [alt]="event()!.titre" class="hero-img" imgRetry />
+      <div class="hero-overlay"></div>
     }
-  </div>
-
-  @if (!event()) {
-    <p class="loading">Chargement…</p>
-  } @else {
-
-    <div class="event-header">
-      <span class="statut-badge statut-{{ event()!.statut }}">{{ statutLabel() }}</span>
+    <div class="hero-content" [class.dark]="!!event()!.photoCouvertureUrl">
+      <div class="hero-nav">
+        <a routerLink="/galeries/sorties" class="back-link">← Activités</a>
+        @if (canManage()) {
+          <div class="header-actions">
+            <a [routerLink]="['/membre/oneshots', id, 'gerer']" class="btn-action">✏ Modifier</a>
+            <button class="btn-action btn-action-danger" (click)="deleteOneShot()">🗑 Supprimer</button>
+          </div>
+        }
+      </div>
+      <div class="hero-badges">
+        <span class="statut-badge statut-{{ event()!.statut }}">{{ statutLabel() }}</span>
+      </div>
       <h1>{{ event()!.titre }}</h1>
       <div class="event-meta">
         @if (event()!.date) {
@@ -32,6 +34,17 @@
         <p class="event-desc">{{ event()!.description }}</p>
       }
     </div>
+  </div>
+}
+
+<div class="detail-page">
+
+  @if (!event()) {
+    <div class="page-nav">
+      <a routerLink="/galeries/sorties" class="back-link">← Activités</a>
+    </div>
+    <p class="loading">Chargement…</p>
+  } @else {
 
     <!-- ── GESTION (créateur / admin) ──────────────── -->
     @if (canManage() && event()!.statut !== 'resultats') {
@@ -315,52 +328,22 @@
       </div>
 
       @if (isLoggedIn()) {
-
-        <!-- Classement complet pour les membres -->
-        @for (group of resultsByTheme(); track group.theme.id) {
+        @for (group of memberRankingByTheme(); track group.theme.id) {
           <section class="panel theme-section">
             <h2 class="panel-title">
               {{ group.theme.nom }}
-              <span class="count">{{ voteCountByTheme()[group.theme.id] ?? 0 }} vote{{ (voteCountByTheme()[group.theme.id] ?? 0) > 1 ? 's' : '' }}</span>
+              <span class="count">{{ group.voteCount }} vote{{ group.voteCount > 1 ? 's' : '' }}</span>
             </h2>
-            <div class="results-grid">
-              @for (photo of group.photos; track photo.id; let i = $index) {
-                @let votes = voteCountByPhoto()[photo.id] ?? 0;
-                @let rank = computeRank(group.photos, i);
-                <div class="result-card" [class.rank-1]="rank === 1" [class.rank-2]="rank === 2" [class.rank-3]="rank === 3" (click)="openLightbox(photo)">
-                  <div class="rank-badge" [class.gold]="rank === 1" [class.silver]="rank === 2" [class.bronze]="rank === 3">{{ rank }}</div>
-                  <img [src]="photo.url" class="result-thumb" loading="lazy">
-                  <div class="result-footer">
-                    <span class="result-name">{{ photo.nomMembre }}</span>
-                    <span class="result-votes">{{ votes }} vote{{ votes > 1 ? 's' : '' }}</span>
-                  </div>
-                </div>
-              }
-            </div>
+            <app-vote-ranking [items]="group.items" (itemClicked)="onRankingClick($event)" />
           </section>
         }
-
       } @else {
-
-        <!-- Top 3 par thème pour les visiteurs -->
-        @for (group of top3ResultsByTheme(); track group.theme.id) {
+        @for (group of visitorRankingByTheme(); track group.theme.id) {
           <section class="panel theme-section">
             <h2 class="panel-title">{{ group.theme.nom }}</h2>
-            <div class="results-grid">
-              @for (photo of group.photos; track photo.id; let i = $index) {
-                @let rank = computeRank(group.photos, i);
-                <div class="result-card" [class.rank-1]="rank === 1" [class.rank-2]="rank === 2" [class.rank-3]="rank === 3" (click)="openLightbox(photo)">
-                  <div class="rank-badge" [class.gold]="rank === 1" [class.silver]="rank === 2" [class.bronze]="rank === 3">{{ rank }}</div>
-                  <img [src]="photo.url" class="result-thumb" loading="lazy">
-                  <div class="result-footer">
-                    <span class="result-name">{{ photo.nomMembre }}</span>
-                  </div>
-                </div>
-              }
-            </div>
+            <app-vote-ranking [items]="group.items" [showVotes]="false" (itemClicked)="onRankingClick($event)" />
           </section>
         }
-
       }
     }
 

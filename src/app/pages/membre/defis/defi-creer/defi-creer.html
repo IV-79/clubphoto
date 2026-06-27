@@ -64,8 +64,8 @@
       <h3 class="dates-title">Calendrier</h3>
       <div class="dates-grid">
         <app-date-picker label="Début des soumissions" [required]="true" formControlName="dateDebutSoumission" [min]="today"></app-date-picker>
-        <app-date-picker label="Fin des soumissions"   [required]="true" formControlName="dateFinSoumission"></app-date-picker>
-        <app-date-picker label="Clôture des votes"     [required]="true" formControlName="dateCloturVotes"></app-date-picker>
+        <app-date-picker label="Fin des soumissions"   [required]="true" formControlName="dateFinSoumission"   [min]="today"></app-date-picker>
+        <app-date-picker label="Clôture des votes"     [required]="true" formControlName="dateCloturVotes"     [min]="today"></app-date-picker>
       </div>
       @if (form.touched && dateErrors) {
         <p class="date-error">{{ dateErrors }}</p>
@@ -75,7 +75,7 @@
     <!-- Paramètres -->
     <div class="params-grid">
       <mat-form-field appearance="outline">
-        <mat-label>Photos max par participant</mat-label>
+        <mat-label>Max photos par participant</mat-label>
         <input matInput type="number" formControlName="maxPhotos" min="1" max="10" />
         @if (form.get('maxPhotos')?.invalid && form.get('maxPhotos')?.touched) {
           <mat-error>Valeur entre 1 et 10</mat-error>
@@ -83,7 +83,7 @@
       </mat-form-field>
 
       <mat-form-field appearance="outline">
-        <mat-label>Votes max par participant</mat-label>
+        <mat-label>Max votes par participant</mat-label>
         <input matInput type="number" formControlName="maxVotes" min="1" max="20" />
         @if (form.get('maxVotes')?.invalid && form.get('maxVotes')?.touched) {
           <mat-error>Valeur entre 1 et 20</mat-error>

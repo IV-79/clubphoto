@@ -14,11 +14,12 @@ import {
 import { UserProfile } from '../../../../models/user.model';
 import { LightboxPhoto, PhotoLightboxCallbacks } from '../../../../models/commentaire.model';
 import { PhotoLightbox } from '../../../../components/photo-lightbox/photo-lightbox';
+import { VoteRankingComponent, RankingItem } from '../../../../components/vote-ranking/vote-ranking';
 import { ImgRetryDirective } from '../../../../directives/img-retry.directive';
 
 @Component({
   selector: 'app-oneshot-detail',
-  imports: [RouterLink, PhotoLightbox, ImgRetryDirective],
+  imports: [RouterLink, PhotoLightbox, ImgRetryDirective, VoteRankingComponent],
   templateUrl: './oneshot-detail.html',
   styleUrl: './oneshot-detail.css',
 })
@@ -263,24 +264,42 @@ export class OneShotDetail {
       .filter(g => g.photos.length > 0)
   );
 
-  top3ResultsByTheme = computed(() => {
-    const counts = this.voteCountByPhoto();
-    return this.resultsByTheme().map(g => ({
-      ...g,
-      photos: g.photos.filter(p =>
-        g.photos.filter(q => (counts[q.id] ?? 0) > (counts[p.id] ?? 0)).length < 3
-      ),
-    }));
-  });
+  memberRankingByTheme = computed(() =>
+    this.resultsByTheme().map(g => ({
+      theme:     g.theme,
+      voteCount: this.voteCountByTheme()[g.theme.id] ?? 0,
+      items:     g.photos.map(p => ({
+        id:         p.id,
+        url:        p.url,
+        authorName: p.nomMembre,
+        votes:      this.voteCountByPhoto()[p.id] ?? 0,
+      })) as RankingItem[],
+    }))
+  );
+
+  visitorRankingByTheme = computed(() =>
+    this.resultsByTheme().map(g => ({
+      theme: g.theme,
+      items: g.photos.map(p => ({
+        id:         p.id,
+        url:        p.url,
+        authorName: p.nomMembre,
+        votes:      this.voteCountByPhoto()[p.id] ?? 0,
+      })) as RankingItem[],
+    }))
+  );
+
+  onRankingClick(id: string): void {
+    for (const g of this.resultsByTheme()) {
+      const photo = g.photos.find(p => p.id === id);
+      if (photo) { this.openLightbox(photo); return; }
+    }
+  }
 
   lightboxIndex = signal<number | null>(null);
 
   lightboxPhotoList = computed(() => {
-    const statut = this.event()?.statut;
-    if (statut === 'resultats') {
-      const groups = this.isLoggedIn() ? this.resultsByTheme() : this.top3ResultsByTheme();
-      return groups.flatMap(g => g.photos);
-    }
+    if (this.event()?.statut === 'resultats') return this.resultsByTheme().flatMap(g => g.photos);
     return this.photosByTheme().flatMap(g => g.photos);
   });
 
@@ -351,11 +370,6 @@ export class OneShotDetail {
   }
 
   closeLightbox() { this.lightboxIndex.set(null); }
-
-  computeRank(photos: OneShotPhoto[], index: number): number {
-    const currentVotes = this.voteCountByPhoto()[photos[index].id] ?? 0;
-    return photos.filter(p => (this.voteCountByPhoto()[p.id] ?? 0) > currentVotes).length + 1;
-  }
 
   formatDate(date: string): string {
     return new Date(date + 'T12:00:00').toLocaleDateString('fr-FR', {

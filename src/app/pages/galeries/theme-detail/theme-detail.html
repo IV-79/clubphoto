@@ -173,59 +173,16 @@
         @if (soumissions().length === 0) {
           <p class="empty-state">Aucune photo soumise.</p>
         } @else if (isLoggedIn()) {
-
-          <!-- Classement complet pour les membres -->
-          <div class="results-grid">
-            @for (soum of resultats(); track soum.id; let i = $index) {
-              @let votes = votesParSoumission()[soum.id] ?? 0;
-              @let rank  = computeRank(resultats(), i);
-              <div class="result-card"
-                [class.rank-1]="rank === 1"
-                [class.rank-2]="rank === 2"
-                [class.rank-3]="rank === 3"
-                (click)="openLightbox(soum)">
-                <div class="rank-badge" [class.gold]="rank === 1" [class.silver]="rank === 2" [class.bronze]="rank === 3">
-                  {{ rank }}
-                </div>
-                <img [src]="soum.url" class="result-thumb" loading="lazy" alt="">
-                <button class="card-heart" [class.liked]="isLiked(soum)"
-                  (click)="toggleLike(soum, $event)"
-                  [title]="isLiked(soum) ? 'Retirer le like' : 'J\'aime'">
-                  <span class="hi">♥</span> @if ((soum.likes?.length ?? 0) > 0) { {{ soum.likes!.length }} }
-                </button>
-                <div class="result-footer">
-                  <span class="result-name">{{ soum.nomMembre }}</span>
-                  <span class="result-votes">{{ votes }} vote{{ votes > 1 ? 's' : '' }}</span>
-                  @if (isAdmin()) {
-                    <button class="btn-del-sm btn-del-admin" title="Supprimer (admin)" (click)="$event.stopPropagation(); supprimerSoumission(soum)">🗑</button>
-                  }
-                </div>
-              </div>
-            }
-          </div>
-
+          <app-vote-ranking
+            [items]="allRankingItems()"
+            (itemClicked)="onRankingClick($event)"
+          />
         } @else {
-
-          <!-- Top 3 seulement pour les visiteurs -->
-          <div class="results-grid">
-            @for (soum of top3Resultats(); track soum.id; let i = $index) {
-              @let rank = computeRank(top3Resultats(), i);
-              <div class="result-card"
-                [class.rank-1]="rank === 1"
-                [class.rank-2]="rank === 2"
-                [class.rank-3]="rank === 3"
-                (click)="openLightbox(soum)">
-                <div class="rank-badge" [class.gold]="rank === 1" [class.silver]="rank === 2" [class.bronze]="rank === 3">
-                  {{ rank }}
-                </div>
-                <img [src]="soum.url" class="result-thumb" loading="lazy" alt="">
-                <div class="result-footer">
-                  <span class="result-name">{{ soum.nomMembre }}</span>
-                </div>
-              </div>
-            }
-          </div>
-
+          <app-vote-ranking
+            [items]="allRankingItems()"
+            [showVotes]="false"
+            (itemClicked)="onRankingClick($event)"
+          />
         }
       </section>
     }

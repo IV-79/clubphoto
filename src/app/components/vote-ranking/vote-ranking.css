@@ -1,0 +1,98 @@
+/* ── Grilles ─────────────────────────────────────────────── */
+
+.podium-grid,
+.suite-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.suite-grid { margin-top: 1rem; }
+
+/* ── Carte ───────────────────────────────────────────────── */
+
+.rank-card {
+  border: 2px solid #e8e8e8;
+  border-radius: 8px;
+  overflow: hidden;
+  text-align: center;
+  cursor: pointer;
+  background: white;
+  transition: box-shadow 0.15s;
+}
+
+.rank-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+
+.rank-card.rank-1 { border-color: #fbbf24; }
+.rank-card.rank-2 { border-color: #94a3b8; }
+.rank-card.rank-3 { border-color: #d97706; }
+
+/* ── Indicateur de rang ─────────────────────────────────── */
+
+.rank-indicator {
+  font-size: 1.5rem;
+  padding: 0.5rem 0;
+  line-height: 1;
+}
+
+.rank-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.07);
+  color: rgba(0,0,0,0.5);
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0.5rem auto;
+}
+
+/* ── Photo ───────────────────────────────────────────────── */
+
+.rank-photo {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: contain;
+  display: block;
+  background: #111;
+}
+
+/* ── Infos sous la photo ─────────────────────────────────── */
+
+.rank-info { padding: 0.5rem; }
+
+.rank-author {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rank-votes {
+  margin: 0;
+  font-size: 0.75rem;
+  color: rgba(0,0,0,0.4);
+}
+
+/* ── Bouton suite ────────────────────────────────────────── */
+
+.btn-suite {
+  display: block;
+  width: 100%;
+  margin-top: 1.25rem;
+  padding: 0.65rem 1rem;
+  background: none;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: rgba(0,0,0,0.5);
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 0.2s, color 0.2s;
+}
+.btn-suite:hover { border-color: #999; color: #1a1a1a; }

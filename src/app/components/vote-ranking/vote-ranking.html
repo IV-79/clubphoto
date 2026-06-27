@@ -1,0 +1,41 @@
+<!-- Podium (rank ≤ 3) -->
+<div class="podium-grid">
+  @for (item of podiumItems(); track item.id) {
+    @let rank = rankMap().get(item.id)!;
+    <div class="rank-card rank-{{ rank }}" (click)="itemClicked.emit(item.id)">
+      <div class="rank-indicator">{{ medalEmoji(rank) }}</div>
+      <img [src]="item.url" [alt]="item.authorName" class="rank-photo" />
+      <div class="rank-info">
+        <p class="rank-author">{{ item.authorName }}</p>
+        @if (showVotes()) {
+          <p class="rank-votes">{{ item.votes }} vote{{ item.votes > 1 ? 's' : '' }}</p>
+        }
+      </div>
+    </div>
+  }
+</div>
+
+<!-- Suite (rank > 3) -->
+@if (suiteItems().length > 0) {
+  @if (!suiteVisible()) {
+    <button class="btn-suite" (click)="suiteVisible.set(true)">
+      Voir la suite du classement ({{ suiteItems().length }} photo{{ suiteItems().length > 1 ? 's' : '' }})
+    </button>
+  } @else {
+    <div class="suite-grid">
+      @for (item of suiteItems(); track item.id) {
+        @let rank = rankMap().get(item.id)!;
+        <div class="rank-card" (click)="itemClicked.emit(item.id)">
+          <div class="rank-circle">{{ rank }}</div>
+          <img [src]="item.url" [alt]="item.authorName" class="rank-photo" />
+          <div class="rank-info">
+            <p class="rank-author">{{ item.authorName }}</p>
+            @if (showVotes()) {
+              <p class="rank-votes">{{ item.votes }} vote{{ item.votes > 1 ? 's' : '' }}</p>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+}

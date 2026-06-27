@@ -1,22 +1,35 @@
 @if (sortie(); as s) {
 <div class="sortie-detail">
 
-  <!-- En-tête -->
-  <div class="detail-header">
-    @if (!editMode()) {
-      <a routerLink="/galeries/sorties" class="back-link">← Activités</a>
-    } @else {
-      <button class="back-link back-link-btn" (click)="cancelEdit()">← Retour à l'événement</button>
-    }
-
-    @if (!editMode()) {
-      <div class="header-title-row">
-        <div>
+  @if (!editMode()) {
+    <!-- Hero (mode vue) -->
+    <div class="sortie-hero" [class.has-cover]="s.imageEvenementUrl">
+      @if (s.imageEvenementUrl) {
+        <img [src]="s.imageEvenementUrl" [alt]="s.titre" class="hero-img" imgRetry />
+        <div class="hero-overlay"></div>
+      }
+      <div class="hero-content" [class.dark]="!!s.imageEvenementUrl">
+        <a routerLink="/galeries/sorties" class="back-link">← Activités</a>
+        <div class="hero-badges">
           <span class="status-badge" [class.status-avenir]="isAVenir()" [class.status-ouverte]="!isAVenir()">
             {{ isAVenir() ? 'À venir' : 'Ouverte aux photos' }}
           </span>
-          <h1>{{ s.titre }}</h1>
         </div>
+        <h1>{{ s.titre }}</h1>
+        <div class="header-meta">
+          <span class="meta-item">📅 {{ formatDate(s.date) }}</span>
+          @if (profile() && s.lieu) {
+            <a [href]="mapsUrl(s.lieu)" target="_blank" class="meta-item meta-lieu">
+              📍 {{ s.lieu }}
+            </a>
+          }
+          @if (profile()) {
+            <span class="meta-item meta-org">par {{ s.nomOrganisateur }}</span>
+          }
+        </div>
+        @if (profile() && s.description) {
+          <p class="detail-desc">{{ s.description }}</p>
+        }
         @if (isOrganisateur() || isAdmin()) {
           <div class="header-actions">
             <button class="btn-action" (click)="startEdit()">✏ Modifier</button>
@@ -24,69 +37,18 @@
           </div>
         }
       </div>
+    </div>
 
-      <div class="header-meta">
-        <span class="meta-item">📅 {{ formatDate(s.date) }}</span>
-        @if (profile() && s.lieu) {
-          <a [href]="mapsUrl(s.lieu)" target="_blank" class="meta-item meta-lieu">
-            📍 {{ s.lieu }}
-          </a>
-        }
-        @if (profile()) {
-          <span class="meta-item meta-org">par {{ s.nomOrganisateur }}</span>
-        }
-      </div>
-
-      @if (profile() && s.description) {
-        <p class="detail-desc">{{ s.description }}</p>
-      }
-    } @else {
-      <!-- Formulaire d'édition inline -->
+  } @else {
+    <div class="detail-header">
+      <button class="back-link back-link-btn" (click)="cancelEdit()">← Retour à l'événement</button>
       <p class="edit-title">Modifier l'événement</p>
       <form [formGroup]="form" (ngSubmit)="saveEdit()" class="edit-form">
 
-        <mat-form-field appearance="outline" class="field-half">
-          <mat-label>Type</mat-label>
-          <mat-select formControlName="type">
-            <mat-option value="sortie_photo">📸 Sortie Photo</mat-option>
-            <mat-option value="sortie_club">🚶 Sortie Club</mat-option>
-            <mat-option value="atelier">🎨 Atelier</mat-option>
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="field-full">
-          <mat-label>Titre *</mat-label>
-          <input matInput formControlName="titre" />
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="field-full">
-          <mat-label>Description</mat-label>
-          <textarea matInput formControlName="description" rows="3"></textarea>
-        </mat-form-field>
-
-        <div class="form-row">
-          <app-date-picker label="Date" [required]="true" formControlName="date" class="field-half"></app-date-picker>
-          <mat-form-field appearance="outline" class="field-half">
-            <mat-label>Lieu</mat-label>
-            <input matInput formControlName="lieu" />
-            <mat-icon matSuffix>place</mat-icon>
-          </mat-form-field>
-        </div>
-
-        <mat-form-field appearance="outline" class="field-half">
-          <mat-label>Max participants</mat-label>
-          <input matInput type="number" formControlName="maxParticipants" min="1" placeholder="Optionnel" />
-        </mat-form-field>
-
-        <div class="edit-checkboxes">
-          <mat-checkbox formControlName="inscriptionObligatoire" color="primary">
-            Inscription obligatoire
-          </mat-checkbox>
-        </div>
-
-        <!-- Image de la carte -->
+        <!-- Photo de couverture -->
         <div class="field-cover">
-          <label class="edit-cover-label">Image de la carte <span class="field-opt">optionnel</span></label>
+          <label class="edit-cover-label">Photo de couverture <span class="field-opt">optionnel</span></label>
+          <p class="edit-cover-hint">Format recommandé : 16/9 — 1280×720 px (JPG ou PNG)</p>
           <div class="cover-drop"
                [class.drag-over]="coverDragOver()"
                (dragover)="$event.preventDefault(); coverDragOver.set(true)"
@@ -115,6 +77,45 @@
           </div>
         </div>
 
+        <mat-form-field appearance="outline" class="field-half">
+          <mat-label>Type</mat-label>
+          <mat-select formControlName="type">
+            <mat-option value="sortie_photo">📸 Sortie Photo</mat-option>
+            <mat-option value="sortie_club">🚶 Sortie Club</mat-option>
+            <mat-option value="atelier">🎨 Atelier</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="field-full">
+          <mat-label>Titre *</mat-label>
+          <input matInput formControlName="titre" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="field-full">
+          <mat-label>Description</mat-label>
+          <textarea matInput formControlName="description" rows="3"></textarea>
+        </mat-form-field>
+
+        <div class="form-row">
+          <app-date-picker label="Date" [required]="true" formControlName="date" class="field-half"></app-date-picker>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-half">
+            <mat-label>Lieu</mat-label>
+            <input matInput formControlName="lieu" />
+            <mat-icon matSuffix>place</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="field-half">
+          <mat-label>Max participants</mat-label>
+          <input matInput type="number" formControlName="maxParticipants" min="1" placeholder="Optionnel" />
+        </mat-form-field>
+
+        <div class="edit-checkboxes">
+          <mat-checkbox formControlName="inscriptionObligatoire" color="primary">
+            Inscription obligatoire
+          </mat-checkbox>
+        </div>
+
         <div class="edit-actions">
           <button type="button" class="btn-cancel-edit" (click)="cancelEdit()">Annuler</button>
           <button type="submit" class="btn-save-edit" [disabled]="form.invalid || saving()">
@@ -123,8 +124,8 @@
         </div>
 
       </form>
-    }
-  </div>
+    </div>
+  }
 
   <!-- Inscription -->
   @if (s.inscriptionObligatoire && !editMode()) {

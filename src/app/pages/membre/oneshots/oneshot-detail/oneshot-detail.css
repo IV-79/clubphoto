@@ -7,14 +7,79 @@
 .detail-page {
   max-width: 860px;
   margin: 0 auto;
-  padding: 32px 24px 80px;
+  padding: 28px 24px 80px;
 }
+
+/* ── Hero ────────────────────────────────────────────────────── */
+
+.event-hero {
+  position: relative;
+  min-height: 180px;
+  background: #f5f5f5;
+  display: flex;
+  align-items: flex-end;
+}
+.event-hero.has-cover { min-height: 300px; }
+
+.hero-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: transparent;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 60%);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  padding: 1.25rem 24px;
+  width: 100%;
+}
+.hero-content.dark { color: white; }
+.hero-content.dark .back-link { color: rgba(255,255,255,0.75); }
+.hero-content.dark .back-link:hover { color: white; }
+.hero-content.dark .meta-item { color: rgba(255,255,255,0.75); }
+.hero-content.dark .meta-org { color: rgba(255,255,255,0.6); }
+.hero-content.dark .event-desc { color: rgba(255,255,255,0.7); }
+.hero-content.dark .btn-action { border-color: rgba(255,255,255,0.45); color: rgba(255,255,255,0.85); }
+.hero-content.dark .btn-action:hover { border-color: white; color: white; }
+
+.hero-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.hero-badges { margin-bottom: 4px; }
+.hero-content.dark .statut-badge {
+  background: rgba(255,255,255,0.88);
+  color: rgba(0,0,0,0.65);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.hero-content h1 {
+  font-size: 1.6rem;
+  font-weight: 300;
+  margin: 4px 0 4px;
+}
+
+/* ── Loading state ───────────────────────────────────────────── */
 
 .page-nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 28px;
+  padding: 24px 24px 0;
 }
 
 .back-link {
@@ -46,16 +111,7 @@
 .btn-action:hover { border-color: #888; color: #1a1a1a; }
 .btn-action-danger:hover { border-color: #c0392b; color: #c0392b; }
 
-.loading { color: rgba(0,0,0,0.3); padding: 40px 0; }
-
-.event-header { margin-bottom: 28px; }
-
-.event-header h1 {
-  color: #1a1a1a;
-  font-size: 1.6rem;
-  font-weight: 300;
-  margin: 8px 0 4px;
-}
+.loading { color: rgba(0,0,0,0.3); padding: 40px 24px; }
 
 .event-meta {
   display: flex;
@@ -810,3 +866,21 @@
 .card-heart:hover { background: rgba(192,57,43,0.6); color: #fff; }
 .card-heart.liked { background: rgba(0,0,0,0.45); }
 .card-heart.liked .hi { color: #f87070; }
+
+.btn-suite {
+  display: block;
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.65rem 1rem;
+  background: none;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: rgba(0,0,0,0.5);
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 0.2s, color 0.2s;
+}
+.btn-suite:hover { border-color: #999; color: #1a1a1a; }
+
+.suite-grid { margin-top: 0.75rem; }

@@ -4,7 +4,7 @@ export type DefiStatut = 'a_venir' | 'soumission' | 'vote' | 'resultats';
 
 export const DEFI_STATUT_LABELS: Record<DefiStatut, string> = {
   a_venir:    'À venir',
-  soumission: 'Soumissions ouvertes',
+  soumission: 'En cours',
   vote:       'Vote en cours',
   resultats:  'Résultats',
 };

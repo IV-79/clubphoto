@@ -1,8 +1,68 @@
 .sortie-detail {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: 0 1rem 2rem;
 }
+
+/* ── Hero (mode vue) ─────────────────────────────────────────── */
+
+.sortie-hero {
+  position: relative;
+  min-height: 180px;
+  background: #f5f5f5;
+  display: flex;
+  align-items: flex-end;
+  margin: 0 -1rem 2rem;
+}
+.sortie-hero.has-cover { min-height: 320px; }
+
+.hero-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: transparent;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 60%);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  padding: 1.5rem 1rem;
+  width: 100%;
+}
+.hero-content.dark { color: white; }
+.hero-content.dark .back-link { color: rgba(255,255,255,0.75); }
+.hero-content.dark .back-link:hover { color: white; }
+.hero-content.dark .meta-item { color: rgba(255,255,255,0.75); }
+.hero-content.dark .meta-lieu { color: rgba(255,255,255,0.85); }
+.hero-content.dark .meta-org { color: rgba(255,255,255,0.6); }
+.hero-content.dark .detail-desc { color: rgba(255,255,255,0.7); }
+.hero-content.dark .btn-action { border-color: rgba(255,255,255,0.45); color: rgba(255,255,255,0.85); }
+.hero-content.dark .btn-action:hover { border-color: white; color: white; }
+
+.hero-badges { margin-bottom: 0.5rem; }
+.hero-content.dark .status-badge {
+  background: rgba(255,255,255,0.88);
+  color: rgba(0,0,0,0.65);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.hero-content h1 {
+  margin: 0.25rem 0 0.5rem;
+  font-size: 2rem;
+  font-weight: 300;
+  letter-spacing: 0.5px;
+}
+
+/* ── Edit mode header ────────────────────────────────────────── */
 
 .back-link {
   color: rgba(0,0,0,0.35);
@@ -24,22 +84,7 @@
 
 .detail-header {
   margin-bottom: 2rem;
-}
-
-.header-title-row {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 0.75rem;
-}
-
-.detail-header h1 {
-  margin: 0.3rem 0 0;
-  font-size: 2rem;
-  font-weight: 300;
-  letter-spacing: 0.5px;
-  color: #1a1a1a;
+  padding-top: 1.5rem;
 }
 
 .status-badge {
@@ -93,7 +138,7 @@
 
 .field-full { width: 100%; }
 .field-half { flex: 1; min-width: 0; }
-.form-row { display: flex; gap: 1rem; }
+.form-row { display: flex; align-items: flex-end; gap: 1rem; }
 
 .edit-checkboxes { padding: 0.25rem 0; }
 
@@ -164,6 +209,12 @@
   font-size: 0.78rem;
   font-weight: 500;
   color: rgba(0,0,0,0.6);
+}
+
+.edit-cover-hint {
+  font-size: 0.75rem;
+  color: rgba(0,0,0,0.38);
+  margin: 0;
 }
 
 .field-opt { font-size: 0.72rem; color: rgba(0,0,0,0.28); font-weight: normal; }

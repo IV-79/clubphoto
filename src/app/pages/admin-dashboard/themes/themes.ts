@@ -147,7 +147,7 @@ export class AdminThemes {
   }
 
   toggleExpand(id: string) {
-    if (this.editingId() === id) return;
+    if (this.editingId() === id) { this.cancelEdit(); return; }
     if (this.editingId() !== null) {
       this.triggerFlash();
       return;
@@ -255,13 +255,13 @@ export class AdminThemes {
   }
 
   private secondSundayOfNextMonth(moisYear: string, moisMonth: string): string {
-    const m   = +moisMonth;  // 1-based
+    const m   = +moisMonth;
     const y   = +moisYear;
-    const nextM0 = m % 12;   // 0-based index of next month (12%12=0=Jan)
+    const nextM0 = m % 12;
     const nextY  = m === 12 ? y + 1 : y;
     const d = new Date(nextY, nextM0, 1);
-    while (d.getDay() !== 0) d.setDate(d.getDate() + 1); // 1er dimanche
-    d.setDate(d.getDate() + 7);                           // 2ème dimanche
+    while (d.getDay() !== 0) d.setDate(d.getDate() + 1);
+    d.setDate(d.getDate() + 7);
     const dy = d.getFullYear();
     const dm = String(d.getMonth() + 1).padStart(2, '0');
     const dd = String(d.getDate()).padStart(2, '0');
