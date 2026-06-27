@@ -117,6 +117,24 @@
   font-weight: 500;
 }
 
+.btn-template {
+  background: none;
+  border: 1px solid #ccc;
+  color: rgba(0, 0, 0, 0.55);
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-template:hover:not(:disabled) {
+  border-color: #1a237e;
+  color: #1a237e;
+}
+
+.btn-template:disabled { opacity: 0.45; cursor: not-allowed; }
+
 .md-help-link {
   margin-left: auto;
   font-size: 0.82rem;
@@ -126,3 +144,12 @@
 }
 
 .md-help-link:hover { color: #cc0000; }
+
+/* Tabs scrollable sur mobile */
+@media (max-width: 700px) {
+  .page-selector {
+    flex-wrap: wrap;
+    gap: 2px;
+  }
+  .page-tab { padding: 8px 14px; font-size: 0.82rem; }
+}

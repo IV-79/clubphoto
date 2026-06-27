@@ -7,10 +7,12 @@ import { AuthService } from '../../../../services/auth.service';
 import { ConfirmService } from '../../../../services/confirm.service';
 import { OneShotTheme, ONESHOT_STATUT_LABELS } from '../../../../models/oneshot.model';
 import { compressToJpeg } from '../../../../utils/image-compress';
+import { DatePickerComponent } from '../../../../components/date-picker/date-picker';
+import { ImgRetryDirective } from '../../../../directives/img-retry.directive';
 
 @Component({
   selector: 'app-oneshot-gerer',
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, DatePickerComponent, ImgRetryDirective],
   templateUrl: './oneshot-gerer.html',
   styleUrl: './oneshot-gerer.css',
 })

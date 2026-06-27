@@ -9,10 +9,11 @@ export class CharteService {
   private pageService = inject(PageContentService);
 
   private charteDoc$ = this.pageService.getCharteDoc().pipe(shareReplay(1));
+  private cguDoc$    = this.pageService.getCguDoc().pipe(shareReplay(1));
 
   charteContent$ = this.charteDoc$.pipe(map(d => d.contenu));
 
-  mustAccept$ = combineLatest([
+  mustAcceptCharte$ = combineLatest([
     this.authService.currentUserProfile$,
     this.charteDoc$,
   ]).pipe(
@@ -24,8 +25,33 @@ export class CharteService {
     shareReplay(1)
   );
 
-  async accept(version: number): Promise<void> {
+  mustAcceptCgu$ = combineLatest([
+    this.authService.currentUserProfile$,
+    this.cguDoc$,
+  ]).pipe(
+    map(([user, cgu]) => {
+      if (!user || cgu.cguVersion < 1) return false;
+      return (user.cguAccepteeVersion ?? 0) < cgu.cguVersion;
+    }),
+    distinctUntilChanged(),
+    shareReplay(1)
+  );
+
+  mustAccept$ = combineLatest([this.mustAcceptCharte$, this.mustAcceptCgu$]).pipe(
+    map(([charte, cgu]) => charte || cgu),
+    distinctUntilChanged(),
+    shareReplay(1)
+  );
+
+  getCharteDoc() { return this.charteDoc$; }
+  getCguDoc()    { return this.cguDoc$; }
+
+  async acceptCharte(version: number): Promise<void> {
     await this.authService.acceptCharte(version);
+  }
+
+  async acceptCgu(version: number): Promise<void> {
+    await this.authService.acceptCgu(version);
   }
 
   refuse(): void {

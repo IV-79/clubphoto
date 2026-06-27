@@ -6,9 +6,9 @@ import { startWith, switchMap, of } from 'rxjs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
+import { DatePickerComponent } from '../../../components/date-picker/date-picker';
 import { SortieService } from '../../../services/sortie.service';
 import { AuthService } from '../../../services/auth.service';
 import { ConfirmService } from '../../../services/confirm.service';
@@ -20,6 +20,7 @@ import { PhotoLightbox } from '../../../components/photo-lightbox/photo-lightbox
 import { compressToJpeg } from '../../../utils/image-compress';
 import { readExifWithConsent } from '../../../utils/exif-reader';
 import { GpsConsentService } from '../../../services/gps-consent.service';
+import { ImgRetryDirective } from '../../../directives/img-retry.directive';
 
 interface UploadTask {
   id: string;
@@ -32,10 +33,11 @@ interface UploadTask {
 @Component({
   selector: 'app-sortie-detail',
   imports: [
-    RouterLink, PhotoLightbox,
+    RouterLink, PhotoLightbox, ImgRetryDirective,
     ReactiveFormsModule,
     MatFormFieldModule, MatInputModule, MatCheckboxModule,
-    MatDatepickerModule, MatSelectModule, MatIconModule,
+    MatSelectModule, MatIconModule,
+    DatePickerComponent,
   ],
   templateUrl: './sortie-detail.html',
   styleUrl: './sortie-detail.css',
@@ -80,7 +82,7 @@ export class SortieDetail {
     type:                   new FormControl<SortieType>('sortie_photo', { nonNullable: true }),
     titre:                  new FormControl('', { validators: [Validators.required, Validators.minLength(3)], nonNullable: true }),
     description:            new FormControl('', { nonNullable: true }),
-    date:                   new FormControl<Date | null>(null, [Validators.required]),
+    date:                   new FormControl('', { validators: [Validators.required], nonNullable: true }),
     lieu:                   new FormControl('', { nonNullable: true }),
     maxParticipants:        new FormControl<number | null>(null),
     inscriptionObligatoire: new FormControl(true, { nonNullable: true }),
@@ -187,7 +189,7 @@ export class SortieDetail {
       type: s.type ?? 'sortie_photo',
       titre: s.titre,
       description: s.description ?? '',
-      date: s.date ? new Date(s.date + 'T12:00:00') : null,
+      date: s.date ?? '',
       lieu: s.lieu ?? '',
       maxParticipants: s.maxParticipants ?? null,
       inscriptionObligatoire: s.inscriptionObligatoire,
@@ -202,16 +204,12 @@ export class SortieDetail {
     this.saving.set(true);
     try {
       const v = this.form.getRawValue();
-      const date = v.date!;
-      const yyyy = date.getFullYear();
-      const mm = String(date.getMonth() + 1).padStart(2, '0');
-      const dd = String(date.getDate()).padStart(2, '0');
       const s = this.sortie()!;
       await this.sortieService.updateSortie(this.sortieId, {
         type: v.type,
         titre: v.titre.trim(),
         description: v.description.trim(),
-        date: `${yyyy}-${mm}-${dd}`,
+        date: v.date,
         lieu: v.lieu.trim(),
         maxParticipants: v.maxParticipants ?? undefined,
         inscriptionObligatoire: v.inscriptionObligatoire,

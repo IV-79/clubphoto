@@ -16,6 +16,8 @@ import { Header } from '../../components/header/header';
         <a routerLink="/contact">Contact</a>
         <a routerLink="/le-club/adhesion">Adhésion</a>
         <a routerLink="/mentions-legales">Mentions légales</a>
+        <a routerLink="/cgv">CGU</a>
+        <a routerLink="/confidentialite">Confidentialité</a>
       </p>
     </footer>
   `,

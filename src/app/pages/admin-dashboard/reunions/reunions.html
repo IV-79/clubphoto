@@ -21,12 +21,7 @@
             <mat-label>Titre *</mat-label>
             <input matInput formControlName="titre" />
           </mat-form-field>
-          <mat-form-field appearance="outline" class="field-date">
-            <mat-label>Date *</mat-label>
-            <input matInput [matDatepicker]="createPicker" formControlName="date" />
-            <mat-datepicker-toggle matIconSuffix [for]="createPicker"></mat-datepicker-toggle>
-            <mat-datepicker #createPicker></mat-datepicker>
-          </mat-form-field>
+          <app-date-picker label="Date" [required]="true" formControlName="date" class="field-date"></app-date-picker>
         </div>
         <mat-form-field appearance="outline" class="field-full">
           <mat-label>Lieu</mat-label>
@@ -83,12 +78,7 @@
                             <mat-label>Titre *</mat-label>
                             <input matInput formControlName="titre" />
                           </mat-form-field>
-                          <mat-form-field appearance="outline" class="field-date">
-                            <mat-label>Date *</mat-label>
-                            <input matInput [matDatepicker]="editPickerA" formControlName="date" />
-                            <mat-datepicker-toggle matIconSuffix [for]="editPickerA"></mat-datepicker-toggle>
-                            <mat-datepicker #editPickerA></mat-datepicker>
-                          </mat-form-field>
+                          <app-date-picker label="Date" [required]="true" formControlName="date" class="field-date"></app-date-picker>
                         </div>
                         <mat-form-field appearance="outline" class="field-full">
                           <mat-label>Lieu</mat-label>
@@ -163,12 +153,7 @@
                             <mat-label>Titre *</mat-label>
                             <input matInput formControlName="titre" />
                           </mat-form-field>
-                          <mat-form-field appearance="outline" class="field-date">
-                            <mat-label>Date *</mat-label>
-                            <input matInput [matDatepicker]="editPickerB" formControlName="date" />
-                            <mat-datepicker-toggle matIconSuffix [for]="editPickerB"></mat-datepicker-toggle>
-                            <mat-datepicker #editPickerB></mat-datepicker>
-                          </mat-form-field>
+                          <app-date-picker label="Date" [required]="true" formControlName="date" class="field-date"></app-date-picker>
                         </div>
                         <mat-form-field appearance="outline" class="field-full">
                           <mat-label>Lieu</mat-label>

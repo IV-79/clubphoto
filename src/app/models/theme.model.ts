@@ -4,8 +4,8 @@ export interface ThemeMensuel {
   id: string;
   titre: string;
   description?: string;
-  mois: string;           // "2026-07"
-  joursVotation?: number; // jours après fin du mois avant clôture du vote (défaut 15)
+  mois: string;        // "2026-07"
+  dateFinVote: string; // "2026-08-10" — stockée directement en Firestore
   maxPhotos: number;
   maxVotes: number;
   dateCreation: string;
@@ -16,13 +16,10 @@ export function getThemeDates(theme: ThemeMensuel): {
   dateOuverture: string; dateCloture: string; dateFinVote: string;
 } {
   const [year, month] = theme.mois.split('-').map(Number);
-  const lastDay    = new Date(year, month, 0).getDate();
-  const jours      = (theme.joursVotation as number | undefined) ?? 15;
+  const lastDay       = new Date(year, month, 0).getDate();
   const dateOuverture = `${theme.mois}-01`;
   const dateCloture   = `${theme.mois}-${String(lastDay).padStart(2, '0')}`;
-  const fin = new Date(year, month - 1, lastDay + jours);
-  const dateFinVote = fin.toISOString().slice(0, 10);
-  return { dateOuverture, dateCloture, dateFinVote };
+  return { dateOuverture, dateCloture, dateFinVote: theme.dateFinVote ?? dateCloture };
 }
 
 export function computeThemeStatut(theme: ThemeMensuel): ThemeStatut {

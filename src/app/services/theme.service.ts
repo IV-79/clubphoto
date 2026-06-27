@@ -63,7 +63,7 @@ export class ThemeService {
     titre: string;
     description: string;
     mois: string;
-    joursVotation: number;
+    dateFinVote: string;
     maxPhotos: number;
     maxVotes: number;
     createdBy: string;
@@ -78,7 +78,7 @@ export class ThemeService {
     titre: string;
     description: string;
     mois: string;
-    joursVotation: number;
+    dateFinVote: string;
     maxPhotos: number;
     maxVotes: number;
   }): Promise<void> {

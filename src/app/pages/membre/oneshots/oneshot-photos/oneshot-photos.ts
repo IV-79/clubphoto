@@ -9,6 +9,7 @@ import { OneShotPhoto, OneShotTheme, OneShotInscription } from '../../../../mode
 import { compressToJpeg } from '../../../../utils/image-compress';
 import { readExifWithConsent } from '../../../../utils/exif-reader';
 import { GpsConsentService } from '../../../../services/gps-consent.service';
+import { ImgRetryDirective } from '../../../../directives/img-retry.directive';
 
 interface FileEntry {
   file: File;
@@ -26,7 +27,7 @@ interface PhotoSection {
 
 @Component({
   selector: 'app-oneshot-photos',
-  imports: [FormsModule, RouterLink, CdkDrag, CdkDropList, CdkDropListGroup, CdkDragPreview],
+  imports: [FormsModule, RouterLink, CdkDrag, CdkDropList, CdkDropListGroup, CdkDragPreview, ImgRetryDirective],
   templateUrl: './oneshot-photos.html',
   styleUrl: './oneshot-photos.css',
 })

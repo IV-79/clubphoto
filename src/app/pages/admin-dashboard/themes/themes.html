@@ -16,43 +16,40 @@
     <div class="form-card">
       <h2 class="form-card-title">Nouveau thème</h2>
       <form [formGroup]="createForm" (ngSubmit)="creer()" class="t-form">
-        <mat-form-field appearance="outline" class="field-full">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-full">
           <mat-label>Titre *</mat-label>
           <input matInput formControlName="titre" placeholder="ex. Lumière naturelle" />
         </mat-form-field>
         <div class="form-row">
-          <mat-form-field appearance="outline" class="field-mois">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-mois">
             <mat-label>Mois *</mat-label>
-            <mat-select formControlName="moisMonth">
+            <mat-select formControlName="moisMonth" (selectionChange)="syncVoteDate()">
               @for (m of moisOptions; track m.value) {
                 <mat-option [value]="m.value">{{ m.label }}</mat-option>
               }
             </mat-select>
           </mat-form-field>
-          <mat-form-field appearance="outline" class="field-year">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-year">
             <mat-label>Année *</mat-label>
-            <mat-select formControlName="moisYear">
+            <mat-select formControlName="moisYear" (selectionChange)="syncVoteDate()">
               @for (y of yearOptions; track y) {
                 <mat-option [value]="y">{{ y }}</mat-option>
               }
             </mat-select>
           </mat-form-field>
-          <mat-form-field appearance="outline" class="field-num">
-            <mat-label>Jours de vote</mat-label>
-            <input matInput type="number" formControlName="joursVotation" min="1">
-          </mat-form-field>
+          <app-date-picker label="Fin du vote *" formControlName="dateFinVote" class="field-date"></app-date-picker>
         </div>
-        <mat-form-field appearance="outline" class="field-full">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-full">
           <mat-label>Description</mat-label>
           <textarea matInput formControlName="description" rows="2"
             placeholder="Consignes, inspiration, règles…"></textarea>
         </mat-form-field>
         <div class="form-row">
-          <mat-form-field appearance="outline" class="field-num">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-num">
             <mat-label>Photos / membre</mat-label>
             <input matInput type="number" formControlName="maxPhotos" min="1">
           </mat-form-field>
-          <mat-form-field appearance="outline" class="field-num">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-num">
             <mat-label>Votes / membre</mat-label>
             <input matInput type="number" formControlName="maxVotes" min="1">
           </mat-form-field>
@@ -104,12 +101,12 @@
                   @if (editingId() === t.id) {
                     <div [class.form-flash]="flashEdit()">
                     <form [formGroup]="editForm" (ngSubmit)="sauvegarder(t.id)" class="t-form">
-                      <mat-form-field appearance="outline" class="field-full">
+                      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-full">
                         <mat-label>Titre *</mat-label>
                         <input matInput formControlName="titre" />
                       </mat-form-field>
                       <div class="form-row">
-                        <mat-form-field appearance="outline" class="field-mois">
+                        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-mois">
                           <mat-label>Mois</mat-label>
                           <mat-select formControlName="moisMonth">
                             @for (m of moisOptions; track m.value) {
@@ -117,7 +114,7 @@
                             }
                           </mat-select>
                         </mat-form-field>
-                        <mat-form-field appearance="outline" class="field-year">
+                        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-year">
                           <mat-label>Année</mat-label>
                           <mat-select formControlName="moisYear">
                             @for (y of yearOptions; track y) {
@@ -125,24 +122,29 @@
                             }
                           </mat-select>
                         </mat-form-field>
-                        <mat-form-field appearance="outline" class="field-num">
-                          <mat-label>Jours de vote</mat-label>
-                          <input matInput type="number" formControlName="joursVotation" min="1">
-                        </mat-form-field>
+                        <app-date-picker
+                          label="Fin du vote *"
+                          formControlName="dateFinVote"
+                          [min]="editMinFinVote()"
+                          class="field-date">
+                        </app-date-picker>
                       </div>
                       @if (editStatut() === 'ouvert') {
                         <p class="lock-note">🔒 Mois verrouillé — thème déjà ouvert aux soumissions.</p>
                       }
-                      <mat-form-field appearance="outline" class="field-full">
+                      @if (editStatut() === 'vote') {
+                        <p class="lock-note">🗓 Vote en cours — la date de fin peut uniquement être étendue.</p>
+                      }
+                      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-full">
                         <mat-label>Description</mat-label>
                         <textarea matInput formControlName="description" rows="2"></textarea>
                       </mat-form-field>
                       <div class="form-row">
-                        <mat-form-field appearance="outline" class="field-num">
+                        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-num">
                           <mat-label>Photos / membre</mat-label>
                           <input matInput type="number" formControlName="maxPhotos" min="1">
                         </mat-form-field>
-                        <mat-form-field appearance="outline" class="field-num">
+                        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-num">
                           <mat-label>Votes / membre</mat-label>
                           <input matInput type="number" formControlName="maxVotes" min="1">
                         </mat-form-field>

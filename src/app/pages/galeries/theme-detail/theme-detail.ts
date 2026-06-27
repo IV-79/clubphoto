@@ -16,10 +16,11 @@ import {
 } from '../../../models/theme.model';
 import { LightboxPhoto, PhotoLightboxCallbacks } from '../../../models/commentaire.model';
 import { PhotoLightbox } from '../../../components/photo-lightbox/photo-lightbox';
+import { ImgRetryDirective } from '../../../directives/img-retry.directive';
 
 @Component({
   selector: 'app-theme-detail',
-  imports: [RouterLink, PhotoLightbox],
+  imports: [RouterLink, PhotoLightbox, ImgRetryDirective],
   templateUrl: './theme-detail.html',
   styleUrl: './theme-detail.css',
 })

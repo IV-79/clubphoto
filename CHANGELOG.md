@@ -4,6 +4,50 @@
 
 ## En cours (alpha)
 
+### Défi photo — visibilité soumissions phase de soumission
+
+- **Organisateur traité comme un membre** — durant la phase de soumission, l'organisateur ne voit que ses propres photos (plus la vue « toutes les soumissions » réservée à l'admin).
+- **Compteur total visible par tous** — le nombre total de soumissions s'affiche dans le sous-titre de phase pour tout le monde, pas seulement l'admin.
+- **Accès zone upload** — l'organisateur doit s'inscrire au défi (comme n'importe quel membre) pour accéder à la zone d'upload ; l'admin conserve un accès direct.
+
+### Sélecteur de date unifié
+
+- **Composant `app-date-picker`** — composant standalone implémentant `ControlValueAccessor` ; remplace tous les `<input type="date">` et datepickers Angular Material dans l'application.
+- **Semaine débutant le lundi** — colonnes Lun–Dim ; colonnes Sam/Dim en rouge pour distinction visuelle des week-ends.
+- **Navigation 3 niveaux** — vue jours (grille 6×7) → clic sur le mois → vue mois (grille 4×3) → clic sur l'année → vue années (grille 4×3, 12 ans) ; flèches ‹ / › pour naviguer dans chaque vue.
+- **Compatibilité double** — `formControlName` (ReactiveFormsModule), `[(ngModel)]` (NgModel), ou `[value]`/`(valueChange)` pour les filtres à signal.
+- **Mise en page compacte** — classe CSS sur l'hôte (ex. `.filter-date-picker`) permet de surcharger la hauteur pour une barre de filtres compacte (38px).
+- **Pages mises à jour** — `admin-dashboard/reunions`, `sortie-creer`, `sortie-detail`, `defi-creer`, `defi-detail`, `oneshot-gerer`, `sorties-liste`.
+
+### Défi Photo dans le flux de création d'événement
+
+- **Type "Défi Photo" intégré à `sortie-creer`** — plus besoin d'un bouton séparé ; le formulaire unique "Organiser un événement" propose Sortie Photo, Sortie Club, Défi Photo, Atelier et OneShot. Les champs spécifiques au défi (thème, 3 dates, quotas, visibilité) s'affichent dynamiquement.
+- **Bouton "Créer un défi" supprimé** — retiré du header (desktop + mobile) et de la page Événements.
+- **Guide du site mis à jour** — nouvelle section "Défi Photo" avec les 4 phases et les étapes de création/participation.
+
+### Défi Photo — nouveau type d'événement
+
+- **Modèle `Defi`** — statut calculé à la volée (`getDefiStatut()`) en 4 phases : `a_venir` → `soumission` → `vote` → `resultats`. Pas de statut stocké en Firestore.
+- **Page détail `/galeries/defis/:id`** — 4 affichages selon la phase : à venir (dates + inscription), soumissions (upload photo, quota par membre), vote (photos anonymes, compteur de votes restants), résultats (classement + podium top 3).
+- **Règles de confidentialité soumission** — pendant la phase de soumission, chaque inscrit ne voit que ses propres photos. L'organisateur et l'admin voient toutes les soumissions.
+- **Création `/membre/defis/creer`** — formulaire avec titre, thème (sujet à photographier), description, 3 dates (début/fin soumission, clôture votes), quota photos/votes, visibilité (public/membres). Validation croisée des dates.
+- **Inscription obligatoire** — seuls les inscrits peuvent soumettre et voter.
+- **Extension des votes** — l'organisateur peut prolonger la date de clôture des votes depuis la page détail.
+- **Intégration sorties-liste** — les défis apparaissent dans la page Événements avec filtre "Défi Photo" dans le dropdown type. Cartes en orange/ambre.
+- **Bouton "Créer un défi"** — ajouté dans la page Événements et dans le menu Activités du header (desktop + mobile).
+- **Préférences notifications** — nouvelle préférence "Défis photo" pour recevoir les annonces de nouveaux défis.
+- **Règles Firestore** — accès lecture selon visibilité (`public`/`membre`), écriture organisateur/admin, votes strictement par l'auteur du vote.
+
+
+
+### RGPD — CGU, Confidentialité, Mentions légales
+
+- **3 nouvelles pages éditables** — `/cgv` (Conditions Générales d'Utilisation), `/confidentialite` (Politique de confidentialité), `/mentions-legales` — même pattern Markdown que Histoire/Bureau, éditables dans Admin → Pages du site.
+- **Templates par défaut** — bouton "Charger le modèle" dans l'admin pour CGU, Confidentialité et Mentions légales ; modèles pré-rédigés adaptés au contexte d'un club photo (association loi 1901, Firebase, données membres, droits RGPD).
+- **Modale d'acceptation unifiée** — remplace l'ancienne modale charte-seule. Affiche 1 ou 2 sections selon ce qui doit être accepté : section "Documents légaux" (liens vers CGU + Confidentialité, checkbox) et/ou section "Charte du club" (texte scrollable, checkbox). Bouton "Continuer" activé uniquement quand toutes les cases requises sont cochées.
+- **Gestion des versions** — `cguVersion` dans `pages/cgv` (analogue à `charteVersion`), stockée sur le profil membre via `cguAccepteeVersion`. L'admin peut forcer une re-acceptation depuis Admin → Pages pour CGU ou Confidentialité.
+- **Footer** — liens "CGU" et "Confidentialité" ajoutés au footer (en plus du lien "Mentions légales" existant).
+
 ### OneShot — flux complet vote
 
 - **Gestion — section compacte** — la boîte "Gestion" dans la page OneShot est redessinée en deux colonnes côte à côte : avancement à gauche, lien vers les photos à droite (visible uniquement pendant les phases inscription/fermeture). "Fermer les inscriptions" devient le bouton rouge principal ; "Passer directement au vote" passe en fantôme à droite.

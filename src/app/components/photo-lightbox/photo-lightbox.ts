@@ -7,10 +7,11 @@ import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { switchMap, of } from 'rxjs';
 import { LightboxPhoto, Commentaire, PhotoLightboxCallbacks } from '../../models/commentaire.model';
 import { ConfirmService } from '../../services/confirm.service';
+import { ImgRetryDirective } from '../../directives/img-retry.directive';
 
 @Component({
   selector: 'app-photo-lightbox',
-  imports: [FormsModule],
+  imports: [FormsModule, ImgRetryDirective],
   templateUrl: './photo-lightbox.html',
   styleUrl: './photo-lightbox.css',
 })

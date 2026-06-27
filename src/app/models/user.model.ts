@@ -22,6 +22,7 @@ export interface UserProfile {
   visibilite?: 'public' | 'membre';
   photoCount?: number;
   charteAccepteeVersion?: number;
+  cguAccepteeVersion?: number;
   photoProfilUrl?: string;
   photoBandeauUrl?: string;
 }

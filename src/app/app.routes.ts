@@ -12,6 +12,9 @@ import { MemberLayout } from './layouts/member-layout/member-layout';
 import { Home } from './pages/home/home';
 import { Actualites } from './pages/actualites/actualites';
 import { LeClub, Histoire, Bureau, Adhesion } from './pages/le-club/le-club';
+import { MentionsLegales } from './pages/mentions-legales/mentions-legales';
+import { CGU } from './pages/mentions-legales/cgu/cgu';
+import { Confidentialite } from './pages/mentions-legales/confidentialite/confidentialite';
 import { Calendrier } from './pages/calendrier/calendrier';
 import { Contact } from './pages/contact/contact';
 import { MembrePortfolio } from './pages/membre/portfolio/portfolio';
@@ -27,6 +30,8 @@ import { ThemeDetail } from './pages/galeries/theme-detail/theme-detail';
 import { SortiesListe } from './pages/galeries/sorties-liste/sorties-liste';
 import { SortieDetail } from './pages/galeries/sortie-detail/sortie-detail';
 import { SortieCreer } from './pages/membre/sorties/sortie-creer/sortie-creer';
+import { DefiCreer } from './pages/membre/defis/defi-creer/defi-creer';
+import { DefiDetail } from './pages/galeries/defi-detail/defi-detail';
 import { MembresGuide } from './pages/membres/guide/guide';
 import { Charte } from './pages/membres/charte/charte';
 import { CompleterProfilComponent } from './pages/completer-profil/completer-profil.component';
@@ -61,10 +66,14 @@ export const routes: Routes = [
       { path: 'galeries/oneshots/:id', component: OneShotDetail },
       { path: 'galeries/sorties', component: SortiesListe },
       { path: 'galeries/sorties/:id', component: SortieDetail },
+      { path: 'galeries/defis/:id', component: DefiDetail },
       { path: 'calendrier', component: Calendrier },
       { path: 'membres/guide', component: MembresGuide, canActivate: [memberGuard] },
       { path: 'membres/charte', component: Charte, canActivate: [memberGuard] },
       { path: 'contact', component: Contact },
+      { path: 'mentions-legales', component: MentionsLegales },
+      { path: 'cgv', component: CGU },
+      { path: 'confidentialite', component: Confidentialite },
       {
         path: 'admin',
         canActivate: [authGuard],
@@ -95,6 +104,7 @@ export const routes: Routes = [
       { path: 'notifications', component: Notifications },
       { path: 'preferences', component: Preferences },
       { path: 'sorties/creer', component: SortieCreer },
+      { path: 'defis/creer', component: DefiCreer },
       { path: '', redirectTo: 'portfolio', pathMatch: 'full' }
     ]
   },

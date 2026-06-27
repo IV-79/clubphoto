@@ -19,7 +19,8 @@
   } @else {
     <textarea
       class="md-editor"
-      [(ngModel)]="editorValue"
+      [ngModel]="editorValue"
+      (ngModelChange)="onEditorChange($event)"
       placeholder="Rédigez le contenu en Markdown…"
       spellcheck="false">
     </textarea>
@@ -33,6 +34,14 @@
     </label>
   }
 
+  <!-- Option CGU/Confidentialité -->
+  @if (currentPage() === 'cgv' || currentPage() === 'confidentialite') {
+    <label class="charte-reaccept-label">
+      <input type="checkbox" [(ngModel)]="forceReaccept" />
+      Obliger tous les membres à accepter la nouvelle version des CGU lors du prochain login
+    </label>
+  }
+
   <!-- Actions -->
   <div class="editor-actions">
     <button class="btn-save" (click)="save()" [disabled]="saving() || loaded() === null">
@@ -40,6 +49,11 @@
     </button>
     @if (saved()) {
       <span class="save-confirm">✓ Sauvegardé</span>
+    }
+    @if (hasTemplate()) {
+      <button class="btn-template" (click)="loadTemplate()" [disabled]="saving()">
+        Charger le modèle
+      </button>
     }
     <a class="md-help-link"
        href="https://www.markdownguide.org/cheat-sheet/"

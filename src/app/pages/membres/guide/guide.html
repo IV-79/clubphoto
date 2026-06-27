@@ -2,7 +2,7 @@
 
   <header class="guide-hero">
     <h1>Guide du site</h1>
-    <p class="guide-intro">Comment utiliser le site, partager des documents et participer aux activités du club : Actualités, Calendrier, Documents, Thème du mois, Événement et OneShot.</p>
+    <p class="guide-intro">Comment utiliser le site, partager des documents et participer aux activités du club : Actualités, Calendrier, Documents, Thème du mois, Événement, Défi Photo et OneShot.</p>
   </header>
 
   <!-- Navigation rapide -->
@@ -34,6 +34,10 @@
     <a (click)="scrollTo('oneshot')" class="guide-nav-link">
       <span class="guide-nav-icon">📷</span>
       OneShot
+    </a>
+    <a (click)="scrollTo('defi')" class="guide-nav-link">
+      <span class="guide-nav-icon">🏅</span>
+      Défi Photo
     </a>
   </nav>
 
@@ -540,8 +544,9 @@
         les membres s'inscrivent, et chacun uploade ses propres photos. Les photos peuvent recevoir des ♥ et des commentaires.
       </p>
       <p class="guide-note">
-        Contrairement au OneShot, il n'y a pas de vote ni de compétition — c'est un espace de partage libre.
-        Les OneShots actifs et terminés apparaissent également dans cette liste.
+        Le même formulaire permet aussi de créer un <strong>🏅 Défi Photo</strong> (compétition thématique sur dates)
+        ou un <strong>🏆 OneShot</strong> (compétition gérée manuellement par l'organisateur). Ces deux types
+        ont leur propre section dans ce guide.
       </p>
     </div>
 
@@ -551,7 +556,7 @@
       <ol class="guide-steps">
         <li>Allez sur <a routerLink="/galeries/sorties" class="inline-link">Activités → Événements</a>.</li>
         <li>Cliquez <strong>+ Organiser un événement</strong>.</li>
-        <li>Choisissez le <strong>type</strong> : 📸 Sortie Photo, 🎨 Atelier ou 🍽️ Repas.</li>
+        <li>Choisissez le <strong>type</strong> : 📸 Sortie Photo, 🚶 Sortie Club, 🎨 Atelier, 🏅 Défi Photo ou 🏆 OneShot.</li>
         <li>Renseignez le titre, la date, le lieu et une description.</li>
         <li>L'événement est immédiatement visible par tous les membres.</li>
         <li>Les membres intéressés peuvent s'inscrire depuis la page de l'événement.</li>
@@ -713,7 +718,7 @@
       </p>
     </div>
 
-    <!-- Gérer les photos -->
+    <!-- Gérer les photos OneShot -->
     <div class="guide-card">
       <h3>Gérer les photos (organisateur)</h3>
       <p>La page <strong>Gérer les photos</strong> regroupe toutes les photos par thème.</p>
@@ -725,6 +730,89 @@
         <li><strong>Supprimer une photo</strong> — bouton 🗑 en bas de la carte.</li>
       </ul>
       <p class="guide-note">La page photos est verrouillée (lecture seule) dès que les votes sont ouverts.</p>
+    </div>
+  </section>
+
+
+  <!-- ── DÉFI PHOTO ─────────────────────────────────── -->
+  <section class="guide-section" id="defi">
+    <div class="section-header">
+      <h2>Défi Photo</h2>
+      <p class="section-subtitle">Une compétition thématique organisée par un membre — chaque participant uploade ses propres photos, les phases changent automatiquement selon les dates.</p>
+    </div>
+
+    <div class="guide-card">
+      <h3>Le principe</h3>
+      <p>
+        Un Défi Photo est lancé par un membre sur un thème précis à photographier (ex : « Reflets sur l'eau »).
+        Les participants s'inscrivent, puis uploadent eux-mêmes leurs photos pendant la phase de soumission.
+        Une fois les soumissions closes, un vote anonyme désigne les photos préférées du groupe.
+      </p>
+      <p class="guide-note">
+        Contrairement au <strong>OneShot</strong>, c'est chaque participant qui uploade ses propres photos — et non l'organisateur.
+        Contrairement au <strong>Thème du mois</strong>, un Défi est initié par n'importe quel membre et reste indépendant du calendrier mensuel.
+      </p>
+    </div>
+
+    <div class="guide-card">
+      <h3>Les 4 phases</h3>
+      <div class="steps-list">
+        <div class="step">
+          <span class="step-badge step-attente">À venir</span>
+          <div class="step-body">
+            Le défi est annoncé. L'inscription est possible dès maintenant.
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-badge step-ouvert">Soumissions ouvertes</span>
+          <div class="step-body">
+            <strong>Chaque inscrit uploade ses propres photos.</strong>
+            Les photos des autres participants sont masquées pour ne pas influencer les soumissions — vous ne voyez que les vôtres.
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-badge step-vote">Vote en cours</span>
+          <div class="step-body">
+            <strong>Toutes les photos sont révélées, les noms sont masqués.</strong>
+            Chaque inscrit vote pour ses photos préférées (nombre de votes défini par l'organisateur).
+            Vous pouvez retirer un vote et le redéposer ailleurs.
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-badge step-resultats">Résultats</span>
+          <div class="step-body">
+            Classement final avec podium et révélation des auteurs.
+          </div>
+        </div>
+      </div>
+      <p class="guide-note">
+        Les phases changent <strong>automatiquement selon les dates</strong> définies par l'organisateur à la création — aucune action manuelle n'est nécessaire.
+      </p>
+    </div>
+
+    <div class="guide-card">
+      <h3>Créer un défi</h3>
+      <ol class="guide-steps">
+        <li>Allez sur <a routerLink="/galeries/sorties" class="inline-link">Activités → Événements</a>.</li>
+        <li>Cliquez <strong>+ Organiser un événement</strong>.</li>
+        <li>Sélectionnez le type <strong>🏅 Défi Photo</strong>.</li>
+        <li>Renseignez le titre, le <strong>thème à photographier</strong> (obligatoire) et une description.</li>
+        <li>Définissez les 3 dates : début des soumissions, fin des soumissions, clôture des votes.</li>
+        <li>Choisissez le nombre max de photos par participant et le nombre de votes par participant.</li>
+        <li>Cliquez <strong>Créer le défi</strong> — le défi est immédiatement visible et une notification est envoyée aux membres.</li>
+      </ol>
+    </div>
+
+    <div class="guide-card">
+      <h3>Participer à un défi</h3>
+      <ol class="guide-steps">
+        <li>Rendez-vous sur <a routerLink="/galeries/sorties" class="inline-link">Activités → Événements</a> et ouvrez un défi.</li>
+        <li>Cliquez <strong>S'inscrire au défi</strong> (disponible pendant les phases <span class="badge-inline step-attente">À venir</span> et <span class="badge-inline step-ouvert">Soumissions ouvertes</span>).</li>
+        <li>Pendant la phase <span class="badge-inline step-ouvert">Soumissions ouvertes</span>, uploadez vos photos dans la zone prévue — vous ne voyez que les vôtres.</li>
+        <li>Pendant la phase <span class="badge-inline step-vote">Vote en cours</span>, parcourez toutes les photos et votez pour celles que vous préférez.</li>
+        <li>Les <span class="badge-inline step-resultats">Résultats</span> et le podium apparaissent automatiquement à la clôture des votes.</li>
+      </ol>
+      <p class="guide-note">Seuls les membres inscrits peuvent soumettre des photos et voter.</p>
     </div>
   </section>
 

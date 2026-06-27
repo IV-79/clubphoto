@@ -2,7 +2,7 @@ import { Injectable, inject, Injector, runInInjectionContext } from '@angular/co
 import { Firestore, doc, docData, setDoc } from '@angular/fire/firestore';
 import { Observable, map, catchError, of } from 'rxjs';
 
-export type PageId = 'histoire' | 'bureau' | 'adhesion' | 'charte' | 'contact';
+export type PageId = 'histoire' | 'bureau' | 'adhesion' | 'charte' | 'contact' | 'mentions-legales' | 'cgv' | 'confidentialite';
 
 @Injectable({ providedIn: 'root' })
 export class PageContentService {
@@ -33,7 +33,28 @@ export class PageContentService {
   async bumpCharteVersion(): Promise<void> {
     await runInInjectionContext(this.injector, () =>
       setDoc(doc(this.firestore, 'pages', 'charte'),
-        { charteVersion: (Date.now()) },  // timestamp unique comme version
+        { charteVersion: (Date.now()) },
+        { merge: true }
+      )
+    );
+  }
+
+  getCguDoc(): Observable<{ contenu: string; cguVersion: number }> {
+    return runInInjectionContext(this.injector, () =>
+      docData(doc(this.firestore, 'pages', 'cgv'))
+    ).pipe(
+      map((data: any) => ({
+        contenu:    data?.contenu    ?? '',
+        cguVersion: data?.cguVersion ?? 0,
+      })),
+      catchError(() => of({ contenu: '', cguVersion: 0 }))
+    );
+  }
+
+  async bumpCguVersion(): Promise<void> {
+    await runInInjectionContext(this.injector, () =>
+      setDoc(doc(this.firestore, 'pages', 'cgv'),
+        { cguVersion: Date.now() },
         { merge: true }
       )
     );

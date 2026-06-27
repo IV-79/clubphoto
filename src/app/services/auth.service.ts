@@ -62,6 +62,14 @@ export class AuthService {
     );
   }
 
+  async acceptCgu(version: number): Promise<void> {
+    const uid = this.auth.currentUser?.uid;
+    if (!uid) return;
+    await runInInjectionContext(this.injector, () =>
+      updateDoc(doc(this.firestore, 'users', uid), { cguAccepteeVersion: version })
+    );
+  }
+
   async register(email: string, password: string, nom: string) {
     const credential = await runInInjectionContext(this.injector, () =>
       createUserWithEmailAndPassword(this.auth, email, password)

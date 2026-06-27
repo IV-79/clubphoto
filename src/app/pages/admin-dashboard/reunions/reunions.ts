@@ -4,9 +4,9 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { DatePickerComponent } from '../../../components/date-picker/date-picker';
 import { ReunionService } from '../../../services/reunion.service';
 import { ConfirmService } from '../../../services/confirm.service';
 import { Reunion } from '../../../models/reunion.model';
@@ -18,8 +18,9 @@ const PAGE = 8;
   selector: 'app-reunions',
   imports: [
     SlicePipe, ReactiveFormsModule,
-    MatFormFieldModule, MatInputModule, MatDatepickerModule,
+    MatFormFieldModule, MatInputModule,
     MatButtonModule, MatIconModule,
+    DatePickerComponent,
   ],
   templateUrl: './reunions.html',
   styleUrl: './reunions.css',
@@ -69,7 +70,7 @@ export class Reunions {
 
   openCreate() {
     this.editingId.set(null);
-    this.createForm.reset({ titre: '', date: null, lieu: '', description: '' });
+    this.createForm.reset({ titre: '', date: '', lieu: '', description: '' });
     this.showCreateForm.set(true);
     this.expandedId.set(null);
   }
@@ -83,7 +84,7 @@ export class Reunions {
       const v = this.createForm.getRawValue();
       await this.service.creer({
         titre: v.titre.trim(),
-        date: this.dateToString(v.date),
+        date: v.date,
         ...(v.lieu.trim()        ? { lieu: v.lieu.trim() }               : {}),
         ...(v.description.trim() ? { description: v.description.trim() } : {}),
       });
@@ -114,7 +115,7 @@ export class Reunions {
     this.showCreateForm.set(false);
     this.editForm.reset({
       titre: r.titre,
-      date: new Date(r.date + 'T12:00:00'),
+      date: r.date,
       lieu: r.lieu ?? '',
       description: r.description ?? '',
     });
@@ -132,7 +133,7 @@ export class Reunions {
       const oldReunion = this.reunions().find(r => r.id === id);
       await this.service.modifier(id, {
         titre:       v.titre.trim(),
-        date:        this.dateToString(v.date),
+        date:        v.date,
         lieu:        v.lieu.trim(),
         description: v.description.trim(),
       }, oldReunion ? { oldDate: oldReunion.date, titre: v.titre.trim() } : undefined);
@@ -170,17 +171,9 @@ export class Reunions {
   private buildForm() {
     return new FormGroup({
       titre:       new FormControl('', { validators: [Validators.required], nonNullable: true }),
-      date:        new FormControl<Date | null>(null, [Validators.required]),
+      date:        new FormControl('', { validators: [Validators.required], nonNullable: true }),
       lieu:        new FormControl('', { nonNullable: true }),
       description: new FormControl('', { nonNullable: true }),
     });
-  }
-
-  private dateToString(d: Date | null): string {
-    if (!d) return '';
-    const yyyy = d.getFullYear();
-    const mm   = String(d.getMonth() + 1).padStart(2, '0');
-    const dd   = String(d.getDate()).padStart(2, '0');
-    return `${yyyy}-${mm}-${dd}`;
   }
 }

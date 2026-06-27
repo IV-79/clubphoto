@@ -10,10 +10,11 @@ import { Photo, PhotoCategorie, PHOTO_CATEGORIES } from '../../../models/photo.m
 import { UserProfile } from '../../../models/user.model';
 import { LightboxPhoto, PhotoLightboxCallbacks } from '../../../models/commentaire.model';
 import { PhotoLightbox } from '../../../components/photo-lightbox/photo-lightbox';
+import { ImgRetryDirective } from '../../../directives/img-retry.directive';
 
 @Component({
   selector: 'app-membre-detail',
-  imports: [RouterLink, PhotoLightbox],
+  imports: [RouterLink, PhotoLightbox, ImgRetryDirective],
   templateUrl: './membre-detail.html',
   styleUrl: './membre-detail.css',
 })

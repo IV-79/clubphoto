@@ -14,8 +14,7 @@
       @if (peutEditer()) {
         <div class="form-row">
           <div class="field-half">
-            <label class="field-label">Date</label>
-            <input type="date" class="field-input" [(ngModel)]="dateValue" [disabled]="saving()">
+            <app-date-picker label="Date" [(ngModel)]="dateValue" [disabled]="saving()"></app-date-picker>
             <p class="field-note">{{ dateValue ? 'Apparaîtra dans le calendrier.' : 'Non définie — n\'apparaîtra pas dans le calendrier.' }}</p>
           </div>
           <div class="field-half">

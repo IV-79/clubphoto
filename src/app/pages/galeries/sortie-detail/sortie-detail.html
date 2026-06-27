@@ -65,12 +65,7 @@
         </mat-form-field>
 
         <div class="form-row">
-          <mat-form-field appearance="outline" class="field-half">
-            <mat-label>Date *</mat-label>
-            <input matInput [matDatepicker]="picker" formControlName="date" />
-            <mat-datepicker-toggle matIconSuffix [for]="picker" />
-            <mat-datepicker #picker />
-          </mat-form-field>
+          <app-date-picker label="Date" [required]="true" formControlName="date" class="field-half"></app-date-picker>
           <mat-form-field appearance="outline" class="field-half">
             <mat-label>Lieu</mat-label>
             <input matInput formControlName="lieu" />

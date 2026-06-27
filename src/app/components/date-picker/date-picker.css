@@ -1,0 +1,216 @@
+:host { display: block; position: relative; }
+
+/* ── Label ──────────────────────────────────────── */
+.dp-label {
+  display: block;
+  font-size: 0.74rem;
+  font-weight: 500;
+  color: rgba(0,0,0,0.55);
+  margin-bottom: 5px;
+  letter-spacing: 0.015em;
+  user-select: none;
+}
+.dp-req { color: #cc0000; }
+
+/* ── Input field ────────────────────────────────── */
+.dp-field {
+  display: flex;
+  align-items: center;
+  height: var(--dp-field-height, 56px);
+  border: 1.5px solid rgba(0,0,0,0.28);
+  border-radius: 6px;
+  padding: 0 var(--dp-field-px, 14px);
+  cursor: pointer;
+  background: #fff;
+  gap: 10px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  user-select: none;
+  box-sizing: border-box;
+}
+.dp-field:hover { border-color: rgba(0,0,0,0.68); }
+.dp-field.dp-field-open {
+  border-color: #cc0000;
+  border-width: 2px;
+  box-shadow: 0 0 0 3px rgba(204,0,0,0.09);
+}
+
+.dp-text { flex: 1; font-size: var(--dp-field-font, 1rem); color: #1a1a1a; }
+.dp-empty { color: rgba(0,0,0,0.38); }
+
+.dp-icon {
+  width: 18px; height: 18px;
+  color: rgba(0,0,0,0.42);
+  flex-shrink: 0;
+}
+
+/* Disabled */
+.dp-disabled .dp-field {
+  background: #f5f5f5;
+  border-color: rgba(0,0,0,0.15);
+  cursor: default;
+  opacity: 0.65;
+}
+
+/* ── Popup ──────────────────────────────────────── */
+.dp-popup {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  z-index: 1200;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.14), 0 3px 10px rgba(0,0,0,0.08);
+  border: 1px solid rgba(0,0,0,0.07);
+  padding: 14px 12px 12px;
+  width: 285px;
+  animation: dp-in 0.14s ease;
+}
+
+@keyframes dp-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Header ─────────────────────────────────────── */
+.dp-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.dp-header-mid {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2px;
+}
+
+.dp-nav {
+  background: none; border: none; cursor: pointer;
+  width: 30px; height: 30px; border-radius: 50%;
+  font-size: 1.5rem; color: #555; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.12s;
+  flex-shrink: 0;
+  padding: 0;
+}
+.dp-nav:hover { background: #f0f0f0; }
+
+.dp-nav-label {
+  background: none; border: none; cursor: pointer;
+  font-size: 0.88rem; font-weight: 700; color: #1a1a1a;
+  padding: 5px 7px; border-radius: 6px;
+  transition: background 0.12s;
+  line-height: 1.2;
+}
+.dp-nav-label:hover { background: #f5f5f5; }
+
+.dp-range-label {
+  font-size: 0.88rem; font-weight: 700; color: #1a1a1a;
+  padding: 5px 0;
+}
+
+/* ── Weekday headers ────────────────────────────── */
+.dp-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 4px;
+}
+.dp-weekdays span {
+  text-align: center;
+  font-size: 0.64rem;
+  font-weight: 700;
+  color: rgba(0,0,0,0.38);
+  padding: 2px 0 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+/* Weekend column headers */
+.dp-wd-wknd { color: #b83232 !important; }
+
+/* ── Day grid ───────────────────────────────────── */
+.dp-days-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+}
+
+.dp-day {
+  aspect-ratio: 1;
+  border: none; background: none; cursor: pointer;
+  border-radius: 50%;
+  font-size: 0.8rem;
+  color: #1a1a1a;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.1s, color 0.1s;
+  position: relative;
+  padding: 0;
+}
+.dp-day:hover:not(:disabled):not(.dp-sel) { background: #f0f0f0; }
+.dp-day:disabled { opacity: 0.28; cursor: default; }
+
+/* Other-month days */
+.dp-other { color: rgba(0,0,0,0.27); }
+
+/* Weekend days (Sat & Sun) */
+.dp-wknd:not(.dp-sel):not(.dp-other) { color: #b83232; }
+.dp-wknd.dp-other { color: rgba(184,50,50,0.32); }
+
+/* Today indicator — red dot below number */
+.dp-today:not(.dp-sel)::after {
+  content: '';
+  position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%);
+  width: 3px; height: 3px; border-radius: 50%; background: #cc0000;
+}
+
+/* Selected day */
+.dp-sel {
+  background: #cc0000 !important;
+  color: #fff !important;
+  font-weight: 600;
+}
+.dp-sel:hover { background: #a30000 !important; }
+
+/* ── Month grid ─────────────────────────────────── */
+.dp-months-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  padding: 4px 0;
+}
+
+.dp-month-cell {
+  background: none; border: none; cursor: pointer;
+  padding: 11px 6px; border-radius: 8px;
+  font-size: 0.84rem; color: #1a1a1a;
+  text-align: center; transition: background 0.12s;
+}
+.dp-month-cell:hover { background: #f0f0f0; }
+
+/* ── Year grid ──────────────────────────────────── */
+.dp-years-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  padding: 4px 0;
+}
+
+.dp-year-cell {
+  background: none; border: none; cursor: pointer;
+  padding: 11px 4px; border-radius: 8px;
+  font-size: 0.84rem; color: #1a1a1a;
+  text-align: center; transition: background 0.12s;
+}
+.dp-year-cell:hover { background: #f0f0f0; }
+
+/* Shared selected state for month/year cells */
+.dp-cell-sel {
+  background: #cc0000 !important;
+  color: #fff !important;
+  font-weight: 600;
+}
+
+/* ── Responsive ─────────────────────────────────── */
+@media (max-width: 380px) {
+  .dp-popup { width: calc(100vw - 2.5rem); left: 50%; transform: translateX(-50%); }
+}

@@ -1,6 +1,6 @@
 <div class="creer-page">
   <div class="page-header">
-    <h1>{{ isOneShot() ? 'Organiser un OneShot' : 'Organiser un événement' }}</h1>
+    <h1>{{ isDefi() ? 'Créer un défi' : isOneShot() ? 'Organiser un OneShot' : 'Organiser un événement' }}</h1>
   </div>
 
   <form [formGroup]="form" (ngSubmit)="submit()" class="sortie-form">
@@ -11,6 +11,7 @@
       <mat-select formControlName="type">
         <mat-option value="sortie_photo">📸 Sortie Photo</mat-option>
         <mat-option value="sortie_club">🚶 Sortie Club</mat-option>
+        <mat-option value="defi">🏅 Défi Photo</mat-option>
         <mat-option value="atelier">🎨 Atelier</mat-option>
         <mat-option value="oneshot">🏆 OneShot</mat-option>
       </mat-select>
@@ -25,38 +26,77 @@
     <mat-form-field appearance="outline" class="field-full">
       <mat-label>Description</mat-label>
       <textarea matInput formControlName="description" rows="3"
-        placeholder="Décrivez l'événement, le thème, les objectifs..."></textarea>
+        [placeholder]="isDefi() ? 'Décrivez le défi, les règles, les attentes…' : 'Décrivez l\'événement, le thème, les objectifs...'"></textarea>
     </mat-form-field>
 
-    <div class="form-row">
-      <mat-form-field appearance="outline" class="field-half">
-        <mat-label>Date{{ isOneShot() ? '' : ' *' }}</mat-label>
-        <input matInput [matDatepicker]="picker" formControlName="date"
-          [min]="isOneShot() ? null : minDate" />
-        <mat-datepicker-toggle matIconSuffix [for]="picker" />
-        <mat-datepicker #picker />
-      </mat-form-field>
+    @if (!isDefi()) {
+      <div class="form-row">
+        <app-date-picker
+          [label]="isOneShot() ? 'Date' : 'Date'"
+          [required]="!isOneShot()"
+          formControlName="date"
+          [min]="isOneShot() ? '' : today"
+          class="field-half">
+        </app-date-picker>
 
-      <mat-form-field appearance="outline" class="field-half">
-        <mat-label>Lieu</mat-label>
-        <input matInput formControlName="lieu" placeholder="Ex: Parc de la Tête d'Or, Lyon" />
-        <mat-icon matSuffix>place</mat-icon>
-      </mat-form-field>
-    </div>
-
-    @if (!isOneShot()) {
-      <div class="checkboxes">
-        <mat-checkbox formControlName="inscriptionObligatoire" color="primary">
-          Inscription obligatoire pour participer
-        </mat-checkbox>
+        <mat-form-field appearance="outline" class="field-half">
+          <mat-label>Lieu</mat-label>
+          <input matInput formControlName="lieu" placeholder="Ex: Parc de la Tête d'Or, Lyon" />
+          <mat-icon matSuffix>place</mat-icon>
+        </mat-form-field>
       </div>
 
-      @if (inscriptionObligatoire) {
-        <mat-form-field appearance="outline" class="field-half">
-          <mat-label>Nombre max de participants</mat-label>
-          <input matInput type="number" formControlName="maxParticipants" min="1" placeholder="Optionnel" />
-        </mat-form-field>
+      @if (!isOneShot()) {
+        <div class="checkboxes">
+          <mat-checkbox formControlName="inscriptionObligatoire" color="primary">
+            Inscription obligatoire pour participer
+          </mat-checkbox>
+        </div>
+
+        @if (inscriptionObligatoire) {
+          <mat-form-field appearance="outline" class="field-half">
+            <mat-label>Nombre max de participants</mat-label>
+            <input matInput type="number" formControlName="maxParticipants" min="1" placeholder="Optionnel" />
+          </mat-form-field>
+        }
       }
+    }
+
+    @if (isDefi()) {
+      <mat-form-field appearance="outline" class="field-full">
+        <mat-label>Thème à photographier *</mat-label>
+        <input matInput formControlName="theme" placeholder="Ex: Reflets sur l'eau" />
+      </mat-form-field>
+
+      <div class="form-row">
+        <app-date-picker label="Début des soumissions" [required]="true" formControlName="dateDebutSoumission" [min]="today" class="field-half"></app-date-picker>
+        <app-date-picker label="Fin des soumissions"   [required]="true" formControlName="dateFinSoumission"   class="field-half"></app-date-picker>
+      </div>
+
+      <app-date-picker label="Clôture des votes" [required]="true" formControlName="dateCloturVotes" class="field-half"></app-date-picker>
+
+      @if (defiDateError) {
+        <p class="date-error">{{ defiDateError }}</p>
+      }
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="field-half">
+          <mat-label>Photos max par participant</mat-label>
+          <input matInput type="number" formControlName="maxPhotos" min="1" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="field-half">
+          <mat-label>Votes par participant</mat-label>
+          <input matInput type="number" formControlName="maxVotes" min="1" />
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline" class="field-half">
+        <mat-label>Visibilité</mat-label>
+        <mat-select formControlName="visibilite">
+          <mat-option value="public">Public (tout le monde)</mat-option>
+          <mat-option value="membre">Membres seulement</mat-option>
+        </mat-select>
+      </mat-form-field>
     }
 
     <!-- Image de la carte -->
@@ -83,8 +123,8 @@
 
     <div class="form-actions">
       <a routerLink="/galeries/sorties" class="btn-cancel">Annuler</a>
-      <button type="submit" class="btn-submit" [disabled]="form.invalid || saving()">
-        {{ saving() ? 'Création…' : (isOneShot() ? 'Créer le OneShot' : 'Créer l\'événement') }}
+      <button type="submit" class="btn-submit" [disabled]="form.invalid || saving() || (isDefi() && !!defiDateError)">
+        {{ saving() ? 'Création…' : (isDefi() ? 'Créer le défi' : isOneShot() ? 'Créer le OneShot' : 'Créer l\'événement') }}
       </button>
     </div>
 

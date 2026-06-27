@@ -2,18 +2,53 @@
   <div class="charte-dialog">
 
     <div class="charte-header">
-      <h2 class="charte-title">Charte du site</h2>
-      <p class="charte-subtitle">Veuillez lire et accepter la charte pour accéder au site.</p>
+      <h2 class="charte-title">Avant de continuer</h2>
+      <p class="charte-subtitle">Veuillez lire et accepter les documents suivants pour accéder au site.</p>
     </div>
 
     <div class="charte-body">
-      <div class="club-md-content" [innerHTML]="safeHtml()"></div>
+
+      <!-- Section CGU + Confidentialité -->
+      @if (mustAcceptCgu()) {
+        <div class="accept-section">
+          <h3 class="section-title">Documents légaux</h3>
+          <p class="section-text">
+            Veuillez lire les documents suivants avant d'accepter :
+          </p>
+          <ul class="doc-links">
+            <li><a routerLink="/cgv" target="_blank">Conditions Générales d'Utilisation</a></li>
+            <li><a routerLink="/confidentialite" target="_blank">Politique de confidentialité</a></li>
+          </ul>
+          <label class="accept-checkbox">
+            <input type="checkbox" [(ngModel)]="cguChecked" />
+            <span>J'ai lu et j'accepte les CGU et la politique de confidentialité</span>
+          </label>
+        </div>
+        @if (mustAcceptCharte()) {
+          <hr class="section-divider" />
+        }
+      }
+
+      <!-- Section Charte du club -->
+      @if (mustAcceptCharte()) {
+        <div class="accept-section">
+          <h3 class="section-title">Charte du club</h3>
+          <div class="charte-scroll">
+            <div class="club-md-content" [innerHTML]="safeCharteHtml()"></div>
+          </div>
+          <label class="accept-checkbox">
+            <input type="checkbox" [(ngModel)]="charteChecked" />
+            <span>J'ai lu et j'accepte la Charte du club</span>
+          </label>
+        </div>
+      }
+
     </div>
 
     <div class="charte-footer">
       <button class="btn-refuse" (click)="refuse()">Refuser et se déconnecter</button>
-      <button class="btn-accept" (click)="accept()" [disabled]="accepting">
-        {{ accepting ? 'Enregistrement…' : 'J\'accepte la charte' }}
+      <button class="btn-accept" (click)="accept()" [disabled]="!canAccept || accepting">
+        {{ accepting ? 'Enregistrement…' : 'Continuer' }}
       </button>
     </div>
 

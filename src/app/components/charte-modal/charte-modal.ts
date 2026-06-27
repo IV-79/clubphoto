@@ -1,40 +1,60 @@
 import { Component, inject, computed } from '@angular/core';
-import { Router } from '@angular/router';
+import { RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { marked } from 'marked';
 import { CharteService } from '../../services/charte.service';
-import { PageContentService } from '../../services/page-content.service';
 
 @Component({
   selector: 'app-charte-modal',
-  imports: [],
+  imports: [FormsModule, RouterLink],
   templateUrl: './charte-modal.html',
   styleUrl: './charte-modal.css',
 })
 export class CharteModal {
-  private charteService  = inject(CharteService);
-  private pageService    = inject(PageContentService);
-  private sanitizer      = inject(DomSanitizer);
-  private router         = inject(Router);
+  private charteService = inject(CharteService);
+  private sanitizer     = inject(DomSanitizer);
 
-  private doc = toSignal(this.pageService.getCharteDoc(), {
+  private charteDoc = toSignal(this.charteService.getCharteDoc(), {
     initialValue: { contenu: '', charteVersion: 0 }
   });
+  private cguDoc = toSignal(this.charteService.getCguDoc(), {
+    initialValue: { contenu: '', cguVersion: 0 }
+  });
 
-  safeHtml = computed((): SafeHtml =>
+  mustAcceptCharte = toSignal(this.charteService.mustAcceptCharte$, { initialValue: false });
+  mustAcceptCgu    = toSignal(this.charteService.mustAcceptCgu$,    { initialValue: false });
+
+  charteChecked = false;
+  cguChecked    = false;
+
+  safeCharteHtml = computed((): SafeHtml =>
     this.sanitizer.bypassSecurityTrustHtml(
-      marked.parse(this.doc().contenu, { async: false }) as string
+      marked.parse(this.charteDoc().contenu, { async: false }) as string
     )
   );
+
+  get canAccept(): boolean {
+    return (!this.mustAcceptCharte() || this.charteChecked) &&
+           (!this.mustAcceptCgu()    || this.cguChecked);
+  }
 
   accepting = false;
 
   async accept() {
+    if (!this.canAccept) return;
     this.accepting = true;
-    await this.charteService.accept(this.doc().charteVersion);
-    this.accepting = false;
-    this.router.navigate(['/membres/guide']);
+    try {
+      if (this.mustAcceptCharte()) {
+        await this.charteService.acceptCharte(this.charteDoc().charteVersion);
+      }
+      if (this.mustAcceptCgu()) {
+        await this.charteService.acceptCgu(this.cguDoc().cguVersion);
+      }
+    } finally {
+      this.accepting = false;
+    }
   }
 
   refuse() {

@@ -12,10 +12,11 @@ import { compressToJpeg } from '../../../utils/image-compress';
 import { readExifWithConsent } from '../../../utils/exif-reader';
 import { GpsConsentService } from '../../../services/gps-consent.service';
 import { switchMap, of } from 'rxjs';
+import { ImgRetryDirective } from '../../../directives/img-retry.directive';
 
 @Component({
   selector: 'app-portfolio',
-  imports: [FormsModule, PhotoLightbox],
+  imports: [FormsModule, PhotoLightbox, ImgRetryDirective],
   templateUrl: './portfolio.html',
   styleUrl: './portfolio.css'
 })

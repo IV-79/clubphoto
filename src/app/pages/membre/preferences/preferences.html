@@ -37,6 +37,19 @@
 
       <div class="pref-item">
         <div class="pref-info">
+          <span class="pref-icon">🏅</span>
+          <div>
+            <p class="pref-label">Défis photo</p>
+            <p class="pref-hint">Annonce d'un nouveau défi ouvert aux membres</p>
+          </div>
+        </div>
+        <button class="toggle" [class.on]="subs().defis" (click)="toggle('defis')" [disabled]="saving()">
+          <span class="toggle-thumb"></span>
+        </button>
+      </div>
+
+      <div class="pref-item">
+        <div class="pref-info">
           <span class="pref-icon">📰</span>
           <div>
             <p class="pref-label">Actualités</p>

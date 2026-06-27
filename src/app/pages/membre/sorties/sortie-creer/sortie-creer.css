@@ -156,6 +156,12 @@
 
 .hidden-input { display: none; }
 
+.date-error {
+  color: #c0392b;
+  font-size: 0.82rem;
+  margin: -0.25rem 0 0.25rem;
+}
+
 @media (max-width: 600px) {
   .form-row { flex-direction: column; gap: 0.5rem; }
 }

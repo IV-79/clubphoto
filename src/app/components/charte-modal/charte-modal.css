@@ -45,30 +45,96 @@
   flex: 1;
 }
 
-/* Réutilise les styles Markdown de le-club.css */
-.charte-body .club-md-content {
-  line-height: 1.75;
-  color: #1a1a1a;
-  font-size: 0.95rem;
+.accept-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.charte-body .club-md-content h2 {
+.section-title {
   font-size: 1rem;
   font-weight: 700;
   color: #1a237e;
-  margin: 1.4em 0 0.4em;
+  margin: 0;
 }
 
-.charte-body .club-md-content ul {
-  padding-left: 1.4rem;
-  margin: 0 0 0.8em;
+.section-text {
+  font-size: 0.9rem;
+  color: rgba(0, 0, 0, 0.65);
+  margin: 0;
 }
 
-.charte-body .club-md-content li {
-  margin-bottom: 0.25em;
+.doc-links {
+  margin: 0;
+  padding-left: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.charte-body .club-md-content p { margin: 0 0 0.8em; }
+.doc-links a {
+  color: #cc0000;
+  font-size: 0.9rem;
+  text-decoration: underline;
+}
+
+.doc-links a:hover { color: #990000; }
+
+.charte-scroll {
+  max-height: 260px;
+  overflow-y: auto;
+  border: 1px solid #e8e8e8;
+  border-radius: 6px;
+  padding: 14px 16px;
+  background: #fafafa;
+}
+
+.accept-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.88rem;
+  color: #1a1a1a;
+  cursor: pointer;
+}
+
+.accept-checkbox input[type="checkbox"] {
+  margin-top: 2px;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  accent-color: #1a237e;
+  cursor: pointer;
+}
+
+.section-divider {
+  border: none;
+  border-top: 1px solid #e8e8e8;
+  margin: 8px 0;
+}
+
+/* Markdown inline dans la modale */
+.charte-scroll .club-md-content {
+  line-height: 1.7;
+  color: #1a1a1a;
+  font-size: 0.9rem;
+}
+
+.charte-scroll .club-md-content h2 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1a237e;
+  margin: 1.2em 0 0.3em;
+}
+
+.charte-scroll .club-md-content p { margin: 0 0 0.7em; }
+
+.charte-scroll .club-md-content ul {
+  padding-left: 1.3rem;
+  margin: 0 0 0.7em;
+}
+
+.charte-scroll .club-md-content li { margin-bottom: 0.2em; }
 
 .charte-footer {
   padding: 16px 28px;
@@ -113,4 +179,6 @@
 @media (max-width: 480px) {
   .charte-footer { flex-direction: column-reverse; }
   .btn-refuse, .btn-accept { width: 100%; text-align: center; }
+  .charte-body { padding: 16px 18px; }
+  .charte-header { padding: 18px 18px 14px; }
 }

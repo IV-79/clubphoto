@@ -50,6 +50,9 @@
 .btn-create-oneshot { background: #2e7d5a; }
 .btn-create-oneshot:hover { background: #226044; }
 
+.btn-create-defi { background: #d97706; }
+.btn-create-defi:hover { background: #b45309; }
+
 .section { margin-bottom: 3rem; }
 
 .section-title {
@@ -281,19 +284,12 @@
   gap: 0.4rem;
 }
 
-.filter-date {
-  background: white;
-  border: 1px solid #d4d4d4;
-  border-radius: 4px;
-  color: #1a1a1a;
-  padding: 0.4rem 0.5rem;
-  font-size: 0.82rem;
-  font-family: inherit;
-  outline: none;
-  transition: border-color 0.2s;
-  width: 130px;
+.filter-date-picker {
+  width: 150px;
+  --dp-field-height: 36px;
+  --dp-field-font: 0.82rem;
+  --dp-field-px: 10px;
 }
-.filter-date:focus { border-color: #cc0000; }
 
 .date-sep { color: rgba(0,0,0,0.3); font-size: 0.8rem; }
 
@@ -329,6 +325,43 @@
   flex-shrink: 0;
 }
 .btn-reset-filter:hover { border-color: #aaa; color: #1a1a1a; }
+
+/* Défi cards */
+.defi-card { background: white; border-color: rgba(217,119,6,0.25); }
+.defi-card:hover { border-color: rgba(217,119,6,0.5); }
+
+.defi-type-badge     { color: #d97706; }
+.defi-type-badge-dim { color: rgba(0,0,0,0.3); }
+
+.status-defi-avenir    { background: rgba(245,158,11,0.12); color: #d97706; }
+.status-defi-soumission{ background: rgba(59,130,246,0.12); color: #1d4ed8; }
+.status-defi-vote      { background: rgba(139,92,246,0.12); color: #6d28d9; }
+
+.defi-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-top: 0.6rem;
+}
+
+.defi-badge {
+  font-size: 0.7rem;
+  background: rgba(217,119,6,0.08);
+  border: 1px solid rgba(217,119,6,0.25);
+  color: #d97706;
+  border-radius: 4px;
+  padding: 0.1rem 0.45rem;
+  white-space: nowrap;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.defi-badge-dim {
+  background: rgba(0,0,0,0.04);
+  border-color: rgba(0,0,0,0.1);
+  color: rgba(0,0,0,0.35);
+}
 
 @media (max-width: 600px) {
   .page-header { flex-direction: column; }

@@ -58,10 +58,11 @@
   margin: 0 0 16px;
 }
 
-.t-form { display: flex; flex-direction: column; gap: 0; }
+.t-form { display: flex; flex-direction: column; gap: 16px; }
 
 .form-row {
   display: flex;
+  align-items: flex-end;
   gap: 12px;
   flex-wrap: wrap;
 }

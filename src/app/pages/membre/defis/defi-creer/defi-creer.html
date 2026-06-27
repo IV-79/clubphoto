@@ -1,0 +1,113 @@
+<div class="creer-page">
+
+  <div class="page-header">
+    <a routerLink="/galeries/sorties" class="back-link">
+      <mat-icon>arrow_back</mat-icon> Événements
+    </a>
+    <h1>Créer un défi photo</h1>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" class="creer-form">
+
+    <!-- Photo de couverture -->
+    <div class="cover-section">
+      @if (coverPreviewUrl()) {
+        <div class="cover-preview-wrap">
+          <img [src]="coverPreviewUrl()!" class="cover-preview" alt="Aperçu couverture" />
+          <button type="button" class="btn-remove-cover" (click)="clearCover()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      } @else {
+        <div class="cover-drop"
+             [class.drag-over]="coverDragOver()"
+             (dragover)="$event.preventDefault(); coverDragOver.set(true)"
+             (dragleave)="coverDragOver.set(false)"
+             (drop)="onCoverDrop($event)">
+          <mat-icon class="cover-drop-icon">add_photo_alternate</mat-icon>
+          <p>Photo de couverture (optionnel)</p>
+          <p class="cover-drop-hint">Glissez une image ou</p>
+          <label class="btn-upload-cover">
+            Choisir un fichier
+            <input type="file" accept="image/*" (change)="onCoverSelected($event)" style="display:none" />
+          </label>
+        </div>
+      }
+    </div>
+
+    <!-- Informations principales -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Titre du défi</mat-label>
+      <input matInput formControlName="titre" placeholder="ex. Lumière du soir…" />
+      @if (form.get('titre')?.invalid && form.get('titre')?.touched) {
+        <mat-error>Titre requis (3 caractères minimum)</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Thème / sujet à photographier</mat-label>
+      <input matInput formControlName="theme" placeholder="ex. Reflets sur l'eau" />
+      <mat-hint>Décrivez précisément le sujet que les participants devront photographier</mat-hint>
+      @if (form.get('theme')?.invalid && form.get('theme')?.touched) {
+        <mat-error>Thème requis (3 caractères minimum)</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Description (optionnel)</mat-label>
+      <textarea matInput formControlName="description" rows="3"
+                placeholder="Contexte, règles spécifiques, conseils…"></textarea>
+    </mat-form-field>
+
+    <!-- Dates -->
+    <div class="dates-section">
+      <h3 class="dates-title">Calendrier</h3>
+      <div class="dates-grid">
+        <app-date-picker label="Début des soumissions" [required]="true" formControlName="dateDebutSoumission" [min]="today"></app-date-picker>
+        <app-date-picker label="Fin des soumissions"   [required]="true" formControlName="dateFinSoumission"></app-date-picker>
+        <app-date-picker label="Clôture des votes"     [required]="true" formControlName="dateCloturVotes"></app-date-picker>
+      </div>
+      @if (form.touched && dateErrors) {
+        <p class="date-error">{{ dateErrors }}</p>
+      }
+    </div>
+
+    <!-- Paramètres -->
+    <div class="params-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Photos max par participant</mat-label>
+        <input matInput type="number" formControlName="maxPhotos" min="1" max="10" />
+        @if (form.get('maxPhotos')?.invalid && form.get('maxPhotos')?.touched) {
+          <mat-error>Valeur entre 1 et 10</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Votes max par participant</mat-label>
+        <input matInput type="number" formControlName="maxVotes" min="1" max="20" />
+        @if (form.get('maxVotes')?.invalid && form.get('maxVotes')?.touched) {
+          <mat-error>Valeur entre 1 et 20</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Visibilité</mat-label>
+        <mat-select formControlName="visibilite">
+          <mat-option value="public">Public</mat-option>
+          <mat-option value="membre">Membres uniquement</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <!-- Actions -->
+    <div class="form-actions">
+      <button type="submit" mat-raised-button color="primary"
+              [disabled]="form.invalid || saving()">
+        {{ saving() ? 'Création…' : 'Créer le défi' }}
+      </button>
+      <a routerLink="/galeries/sorties" mat-button>Annuler</a>
+    </div>
+
+  </form>
+
+</div>

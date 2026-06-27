@@ -4,10 +4,11 @@ import { RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { AuthService } from '../../../services/auth.service';
 import { UserProfile } from '../../../models/user.model';
+import { ImgRetryDirective } from '../../../directives/img-retry.directive';
 
 @Component({
   selector: 'app-membres-galerie',
-  imports: [RouterLink],
+  imports: [RouterLink, ImgRetryDirective],
   templateUrl: './membres-galerie.html',
   styleUrl: './membres-galerie.css',
 })

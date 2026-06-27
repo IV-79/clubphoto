@@ -18,6 +18,7 @@ import { AuthService } from '../../services/auth.service';
 import { Article, getArticleTypeMeta } from '../../models/article.model';
 import { ThemeMensuel, computeThemeStatut, ThemeStatut } from '../../models/theme.model';
 import { UserProfile } from '../../models/user.model';
+import { ImgRetryDirective } from '../../directives/img-retry.directive';
 
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
@@ -30,7 +31,7 @@ interface NavItem {
 
 @Component({
   selector: 'app-home',
-  imports: [RouterLink, DatePipe, MatIconModule],
+  imports: [RouterLink, DatePipe, MatIconModule, ImgRetryDirective],
   templateUrl: './home.html',
   styleUrl: './home.css',
 })

@@ -6,6 +6,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { DatePickerComponent } from '../../../components/date-picker/date-picker';
 import { ThemeService } from '../../../services/theme.service';
 import { AuthService } from '../../../services/auth.service';
 import { ConfirmService } from '../../../services/confirm.service';
@@ -25,6 +26,7 @@ const MOIS_FR = ['', 'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
     ReactiveFormsModule,
     MatFormFieldModule, MatInputModule, MatSelectModule,
     MatButtonModule, MatIconModule,
+    DatePickerComponent,
   ],
   templateUrl: './themes.html',
   styleUrl: './themes.css',
@@ -46,8 +48,9 @@ export class AdminThemes {
   saving         = signal(false);
   createError    = signal('');
   editError      = signal('');
-  editStatut     = signal<ThemeStatut | null>(null);
-  flashEdit      = signal(false);
+  editStatut      = signal<ThemeStatut | null>(null);
+  editMinFinVote  = signal('');
+  flashEdit       = signal(false);
   private flashTimer: ReturnType<typeof setTimeout> | null = null;
 
   private limitActifs = signal(INIT);
@@ -88,13 +91,27 @@ export class AdminThemes {
 
   openCreate() {
     this.editingId.set(null);
+    const now       = new Date();
+    const next      = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    const moisMonth = String(next.getMonth() + 1).padStart(2, '0');
+    const moisYear  = String(next.getFullYear());
     this.createForm.reset({
-      maxPhotos: 1, maxVotes: 3, joursVotation: 15,
-      moisYear: String(new Date().getFullYear()),
+      maxPhotos: 1, maxVotes: 3,
+      moisMonth, moisYear,
+      dateFinVote: this.secondSundayOfNextMonth(moisYear, moisMonth),
     });
     this.createError.set('');
     this.showCreateForm.set(true);
     this.expandedId.set(null);
+  }
+
+  syncVoteDate() {
+    const { moisYear, moisMonth } = this.createForm.getRawValue();
+    if (moisYear && moisMonth) {
+      this.createForm.patchValue({
+        dateFinVote: this.secondSundayOfNextMonth(moisYear, moisMonth),
+      });
+    }
   }
 
   cancelCreate() {
@@ -113,16 +130,16 @@ export class AdminThemes {
     this.saving.set(true);
     try {
       await this.themeService.creerTheme({
-        titre:         v.titre.trim(),
-        description:   v.description.trim(),
+        titre:       v.titre.trim(),
+        description: v.description.trim(),
         mois,
-        joursVotation: Number(v.joursVotation),
-        maxPhotos:     Number(v.maxPhotos),
-        maxVotes:      Number(v.maxVotes),
-        createdBy:     this.profile()?.uid ?? '',
+        dateFinVote: v.dateFinVote,
+        maxPhotos:   Number(v.maxPhotos),
+        maxVotes:    Number(v.maxVotes),
+        createdBy:   this.profile()?.uid ?? '',
       });
       this.showCreateForm.set(false);
-      this.createForm.reset({ maxPhotos: 1, maxVotes: 3, joursVotation: 15 });
+      this.createForm.reset({ maxPhotos: 1, maxVotes: 3 });
       this.createError.set('');
     } finally {
       this.saving.set(false);
@@ -152,13 +169,13 @@ export class AdminThemes {
     const s = computeThemeStatut(theme);
     const [moisYear, moisMonth] = theme.mois.split('-');
     this.editForm.reset({
-      titre:         theme.titre,
-      description:   theme.description ?? '',
+      titre:       theme.titre,
+      description: theme.description ?? '',
       moisMonth,
       moisYear,
-      joursVotation: (theme.joursVotation as number | undefined) ?? 15,
-      maxPhotos:     theme.maxPhotos,
-      maxVotes:      theme.maxVotes,
+      dateFinVote: theme.dateFinVote,
+      maxPhotos:   theme.maxPhotos,
+      maxVotes:    theme.maxVotes,
     });
     if (s === 'en_attente') {
       this.editForm.controls.moisMonth.enable();
@@ -167,6 +184,7 @@ export class AdminThemes {
       this.editForm.controls.moisMonth.disable();
       this.editForm.controls.moisYear.disable();
     }
+    this.editMinFinVote.set(s === 'vote' ? theme.dateFinVote : '');
     this.editStatut.set(s);
     this.editError.set('');
     this.editingId.set(theme.id);
@@ -186,15 +204,20 @@ export class AdminThemes {
       this.editError.set('Un thème existe déjà pour ce mois.');
       return;
     }
+    const minFin = this.editMinFinVote();
+    if (minFin && v.dateFinVote < minFin) {
+      this.editError.set('En phase de vote, la date de fin ne peut qu\'être étendue, pas réduite.');
+      return;
+    }
     this.saving.set(true);
     try {
       await this.themeService.modifierTheme(id, {
-        titre:         v.titre.trim(),
-        description:   v.description.trim(),
+        titre:       v.titre.trim(),
+        description: v.description.trim(),
         mois,
-        joursVotation: Number(v.joursVotation),
-        maxPhotos:     Number(v.maxPhotos),
-        maxVotes:      Number(v.maxVotes),
+        dateFinVote: v.dateFinVote,
+        maxPhotos:   Number(v.maxPhotos),
+        maxVotes:    Number(v.maxVotes),
       });
       this.editingId.set(null);
       this.editError.set('');
@@ -217,8 +240,7 @@ export class AdminThemes {
   statut(theme: ThemeMensuel): ThemeStatut { return computeThemeStatut(theme); }
 
   canEdit(theme: ThemeMensuel): boolean {
-    const s = computeThemeStatut(theme);
-    return s === 'en_attente' || s === 'ouvert';
+    return computeThemeStatut(theme) !== 'resultats';
   }
 
   dates(theme: ThemeMensuel) { return getThemeDates(theme); }
@@ -232,15 +254,29 @@ export class AdminThemes {
     return new Date(iso + 'T00:00:00').toLocaleDateString('fr-FR');
   }
 
+  private secondSundayOfNextMonth(moisYear: string, moisMonth: string): string {
+    const m   = +moisMonth;  // 1-based
+    const y   = +moisYear;
+    const nextM0 = m % 12;   // 0-based index of next month (12%12=0=Jan)
+    const nextY  = m === 12 ? y + 1 : y;
+    const d = new Date(nextY, nextM0, 1);
+    while (d.getDay() !== 0) d.setDate(d.getDate() + 1); // 1er dimanche
+    d.setDate(d.getDate() + 7);                           // 2ème dimanche
+    const dy = d.getFullYear();
+    const dm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${dy}-${dm}-${dd}`;
+  }
+
   private buildForm() {
     return new FormGroup({
-      titre:         new FormControl('', { validators: [Validators.required], nonNullable: true }),
-      description:   new FormControl('', { nonNullable: true }),
-      moisMonth:     new FormControl('', { validators: [Validators.required], nonNullable: true }),
-      moisYear:      new FormControl('', { validators: [Validators.required], nonNullable: true }),
-      joursVotation: new FormControl(15, { validators: [Validators.required, Validators.min(1)], nonNullable: true }),
-      maxPhotos:     new FormControl(1,  { validators: [Validators.required, Validators.min(1)], nonNullable: true }),
-      maxVotes:      new FormControl(3,  { validators: [Validators.required, Validators.min(1)], nonNullable: true }),
+      titre:       new FormControl('', { validators: [Validators.required], nonNullable: true }),
+      description: new FormControl('', { nonNullable: true }),
+      moisMonth:   new FormControl('', { validators: [Validators.required], nonNullable: true }),
+      moisYear:    new FormControl('', { validators: [Validators.required], nonNullable: true }),
+      dateFinVote: new FormControl('', { validators: [Validators.required], nonNullable: true }),
+      maxPhotos:   new FormControl(1,  { validators: [Validators.required, Validators.min(1)], nonNullable: true }),
+      maxVotes:    new FormControl(3,  { validators: [Validators.required, Validators.min(1)], nonNullable: true }),
     });
   }
 }
