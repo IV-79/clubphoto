@@ -155,6 +155,9 @@
                 <h3 class="sortie-titre">{{ defi.titre }}</h3>
                 <div class="sortie-meta">
                   <span class="meta-date">📅 {{ formatDate(defi.dateDebutSoumission) }}</span>
+                  @if (profile()) {
+                    <span class="sortie-organisateur">par {{ defi.organisateurNom }}</span>
+                  }
                 </div>
                 <div class="defi-meta">
                   <span class="defi-badge">{{ defi.theme }}</span>
@@ -268,6 +271,9 @@
                 <h3 class="sortie-titre">{{ defi.titre }}</h3>
                 <div class="sortie-meta">
                   <span class="meta-date">📅 {{ formatDate(defi.dateDebutSoumission) }}</span>
+                  @if (profile()) {
+                    <span class="sortie-organisateur">par {{ defi.organisateurNom }}</span>
+                  }
                 </div>
                 <div class="defi-meta">
                   <span class="defi-badge defi-badge-dim">{{ defi.theme }}</span>
