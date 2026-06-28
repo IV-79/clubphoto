@@ -13,6 +13,7 @@
 - Label "Votes par participant" renommé "Votes par membre" partout (formulaires, fiches détail, guide).
 - Style de la box Participants du défi aligné sur celui de la sortie-detail (rouge, vert, chips).
 - **Cascade delete corrigée** : suppression d'un événement (sortie, oneshot, défi) efface maintenant tous les fichiers Storage associés (photos, miniatures, couverture) et toutes les sous-collections Firestore (inscriptions, thèmes, votes). La suppression d'une photo portfolio supprimait déjà correctement les deux fichiers.
+- **Hero événements** : double dégradé (haut+bas), `object-fit: cover`, hauteur responsive `clamp(280px, 42vw, 560px)`. Hero contraint à 1200px (même largeur que le contenu) sur les pages sortie-detail, defi-detail et oneshot-detail.
 
 ### Page Événements — 3 sections (En cours / À venir / Terminés) (2026-06-28)
 
