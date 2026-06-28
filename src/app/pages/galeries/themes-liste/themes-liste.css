@@ -65,8 +65,6 @@
 
 .pill-ouvert     { background: rgba(76, 175, 80, 0.14);  color: #2e7d32; }
 .pill-vote       { background: rgba(33, 150, 243, 0.14); color: #1565c0; }
-.pill-resultats  { background: rgba(255, 152, 0, 0.14);  color: #e65100; }
-.pill-en_attente { background: rgba(0,0,0,0.06);         color: rgba(0,0,0,0.4); }
 
 .card-mois {
   font-size: 0.78rem;
@@ -300,5 +298,4 @@
   .avenir-entry { flex-wrap: wrap; gap: 4px; }
   .avenir-mois { min-width: auto; }
   .avenir-date { display: none; }
-  .termines-grid { grid-template-columns: 1fr; }
 }

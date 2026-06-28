@@ -94,7 +94,6 @@
 }
 
 .info-msg:last-child { margin-bottom: 0; }
-.top3-hint { margin-top: 20px; text-align: center; }
 
 .config-chips {
   display: flex;
@@ -231,9 +230,6 @@
 .btn-del-sm:hover { color: #cc0000; background: rgba(200,0,0,0.08); }
 .btn-del-sm.btn-del-admin { margin-left: auto; }
 
-.inline-link { background: none; border: none; padding: 0; font: inherit; cursor: pointer; color: #cc0000; text-decoration: underline; }
-.inline-link:hover { color: #aa0000; }
-
 /* ── Vote grid ───────────────────────────────── */
 
 .vote-progress {
@@ -315,69 +311,6 @@
 .footer-action.footer-voted { color: #1565c0; font-weight: 600; }
 .vote-card:hover .footer-action { color: rgba(0,0,0,0.65); }
 
-/* ── Results grid ────────────────────────────── */
-
-.results-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 12px;
-}
-
-.result-card {
-  border-radius: 6px;
-  overflow: hidden;
-  cursor: pointer;
-  background: #f5f5f5;
-  border: 2px solid transparent;
-  position: relative;
-}
-
-.result-card.rank-1 { border-color: gold; }
-.result-card.rank-2 { border-color: #b0b0b0; }
-.result-card.rank-3 { border-color: #cd7f32; }
-
-.rank-badge {
-  position: absolute;
-  top: 6px;
-  left: 6px;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.85);
-  color: rgba(0,0,0,0.6);
-  font-size: 0.75rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1;
-  border: 1px solid rgba(0,0,0,0.1);
-}
-
-.rank-badge.gold   { background: gold;    color: #5a4000; border-color: #c8a000; }
-.rank-badge.silver { background: #d8d8d8; color: #444;    border-color: #aaa; }
-.rank-badge.bronze { background: #cd7f32; color: #fff;    border-color: #a85f1a; }
-
-.result-thumb {
-  width: 100%;
-  aspect-ratio: 4/3;
-  object-fit: contain;
-  background: #e0e0e0;
-  display: block;
-}
-
-.result-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 10px;
-  background: white;
-  font-size: 0.78rem;
-}
-
-.result-name  { color: #1a1a1a; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.result-votes { color: rgba(0,0,0,0.38); flex-shrink: 0; margin-left: 6px; }
-
 /* ── Expand button ───────────────────────────── */
 
 /* ⤢ Fullscreen — always visible, top-right */
@@ -423,21 +356,3 @@
 .card-heart:hover { background: rgba(192,57,43,0.6); color: #fff; }
 .card-heart.liked { background: rgba(0,0,0,0.45); }
 .card-heart.liked .hi { color: #f87070; }
-
-.btn-suite {
-  display: block;
-  width: 100%;
-  margin-top: 1.25rem;
-  padding: 0.65rem 1rem;
-  background: none;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  color: rgba(0,0,0,0.5);
-  cursor: pointer;
-  text-align: center;
-  transition: border-color 0.2s, color 0.2s;
-}
-.btn-suite:hover { border-color: #999; color: #1a1a1a; }
-
-.suite-grid { margin-top: 1rem; }

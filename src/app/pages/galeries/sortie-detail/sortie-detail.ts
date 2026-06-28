@@ -404,10 +404,6 @@ export class SortieDetail {
     });
   }
 
-  mapsUrl(lieu: string): string {
-    return `https://maps.google.com/?q=${encodeURIComponent(lieu)}`;
-  }
-
   onCoverDrop(event: DragEvent) {
     event.preventDefault();
     this.coverDragOver.set(false);

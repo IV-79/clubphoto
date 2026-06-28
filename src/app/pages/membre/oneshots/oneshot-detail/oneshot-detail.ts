@@ -386,12 +386,6 @@ export class OneShotDetail {
 
   closeLightbox() { this.lightboxIndex.set(null); }
 
-  formatDate(date: string): string {
-    return new Date(date + 'T12:00:00').toLocaleDateString('fr-FR', {
-      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
-    });
-  }
-
   goToGestion() { this.router.navigate(['/membre/oneshots', this.id, 'gerer']); }
 
   async deleteOneShot() {

@@ -52,12 +52,6 @@
   display: inline-block;
 }
 
-.section-hint {
-  color: rgba(0,0,0,0.38);
-  font-size: 0.8rem;
-  margin: -8px 0 14px;
-}
-
 /* Visibilité portfolio */
 .visibilite-row {
   display: flex;

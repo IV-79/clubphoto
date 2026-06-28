@@ -418,9 +418,4 @@ export class DefiDetail {
     });
   }
 
-  statutLabel(s: DefiStatut): string { return DEFI_STATUT_LABELS[s]; }
-
-  statutClass(s: DefiStatut): string {
-    return { a_venir: 'badge-avenir', soumission: 'badge-soumission', vote: 'badge-vote', resultats: 'badge-resultats' }[s];
-  }
 }

@@ -34,68 +34,6 @@
   padding: 28px 24px 80px;
 }
 
-/* ── Hero ────────────────────────────────────────────────────── */
-
-.event-hero {
-  position: relative;
-  min-height: 180px;
-  background: #f5f5f5;
-  display: flex;
-  align-items: flex-end;
-}
-.event-hero.has-cover { min-height: 300px; }
-
-.hero-img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  background: transparent;
-}
-
-.hero-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 60%);
-}
-
-.hero-content {
-  position: relative;
-  z-index: 1;
-  padding: 1.25rem 24px;
-  width: 100%;
-}
-.hero-content.dark { color: white; }
-.hero-content.dark .back-link { color: rgba(255,255,255,0.75); }
-.hero-content.dark .back-link:hover { color: white; }
-.hero-content.dark .meta-item { color: rgba(255,255,255,0.75); }
-.hero-content.dark .meta-org { color: rgba(255,255,255,0.6); }
-.hero-content.dark .event-desc { color: rgba(255,255,255,0.7); }
-.hero-content.dark .btn-action { border-color: rgba(255,255,255,0.45); color: rgba(255,255,255,0.85); }
-.hero-content.dark .btn-action:hover { border-color: white; color: white; }
-
-.hero-nav {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.75rem;
-}
-
-.hero-badges { margin-bottom: 4px; }
-.hero-content.dark .statut-badge {
-  background: rgba(255,255,255,0.88);
-  color: rgba(0,0,0,0.65);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-}
-
-.hero-content h1 {
-  font-size: 1.6rem;
-  font-weight: 300;
-  margin: 4px 0 4px;
-}
-
 /* ── Loading state ───────────────────────────────────────────── */
 
 .page-nav {
@@ -114,65 +52,7 @@
 }
 .back-link:hover { color: #1a1a1a; }
 
-.header-actions {
-  display: flex;
-  gap: 0.5rem;
-  flex-shrink: 0;
-}
-
-.btn-action {
-  background: transparent;
-  border: 1px solid #bbb;
-  color: #555;
-  border-radius: 4px;
-  padding: 0.4rem 0.9rem;
-  font-size: 0.85rem;
-  cursor: pointer;
-  white-space: nowrap;
-  text-decoration: none;
-  transition: all 0.2s;
-}
-.btn-action:hover { border-color: #888; color: #1a1a1a; }
-.btn-action-danger:hover { border-color: #c0392b; color: #c0392b; }
-
 .loading { color: rgba(0,0,0,0.3); padding: 40px 24px; }
-
-.event-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem 1.25rem;
-  margin: 4px 0 8px;
-}
-
-.meta-item {
-  font-size: 0.85rem;
-  color: rgba(0,0,0,0.42);
-}
-
-.meta-org { color: rgba(0,0,0,0.3); }
-
-.event-desc {
-  color: rgba(0,0,0,0.5);
-  font-size: 0.9rem;
-  margin: 8px 0 0;
-  line-height: 1.6;
-}
-
-.statut-badge {
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-  padding: 3px 10px;
-  border-radius: 10px;
-  display: inline-block;
-}
-
-.statut-preparation            { background: rgba(0,0,0,0.06);         color: rgba(0,0,0,0.42); }
-.statut-inscription            { background: rgba(76,175,80,0.12);      color: #2e7d32; }
-.statut-fermeture_inscriptions { background: rgba(255,152,0,0.12);      color: #e65100; }
-.statut-vote                   { background: rgba(33,150,243,0.12);     color: #1565c0; }
-.statut-resultats              { background: rgba(255,193,7,0.15);      color: #c8a000; }
 
 .panel {
   background: #f8f8f8;

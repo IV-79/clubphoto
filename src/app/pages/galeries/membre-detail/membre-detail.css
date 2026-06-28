@@ -224,28 +224,6 @@
   text-overflow: ellipsis;
 }
 
-/* ⓘ Infobox — always visible, top-right */
-.btn-fs {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  z-index: 3;
-  background: transparent;
-  border: none;
-  color: rgba(255,255,255,0.85);
-  text-shadow: 0 1px 4px rgba(0,0,0,0.7);
-  width: 26px;
-  height: 26px;
-  font-size: 1.05rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: color 0.15s, text-shadow 0.15s;
-  padding: 0;
-}
-.btn-fs:hover { color: white; text-shadow: 0 1px 6px rgba(0,0,0,0.9); }
-
 /* ♥ Heart — always visible, bottom-right */
 .card-heart {
   position: absolute;
@@ -268,94 +246,6 @@
 .card-heart:hover { background: rgba(192,57,43,0.6); color: #fff; }
 .card-heart.liked { background: rgba(0,0,0,0.45); }
 .card-heart.liked .hi { color: #f87070; }
-
-/* Modal EXIF */
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.82);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 3000;
-  padding: 24px;
-}
-
-.modal {
-  background: #1e1e1e;
-  border: 1px solid #333;
-  border-radius: 6px;
-  padding: 28px;
-  width: 100%;
-  max-width: 420px;
-  position: relative;
-}
-
-.modal h2 {
-  color: white;
-  font-size: 1.1rem;
-  font-weight: 400;
-  margin: 0 0 6px;
-}
-
-.modal-close {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  background: none;
-  border: none;
-  color: rgba(255,255,255,0.4);
-  font-size: 1.5rem;
-  cursor: pointer;
-  line-height: 1;
-  padding: 0 4px;
-}
-
-.modal-close:hover { color: white; }
-
-.exif-titre {
-  color: rgba(255,255,255,0.4);
-  font-size: 0.82rem;
-  margin: 0 0 18px;
-  font-style: italic;
-}
-
-.exif-list {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 0.6rem 1.2rem;
-  margin: 0;
-}
-
-.exif-list dt {
-  color: rgba(255,255,255,0.4);
-  font-size: 0.78rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  padding-top: 2px;
-  white-space: nowrap;
-}
-
-.exif-list dd {
-  color: #e0e0e0;
-  font-size: 0.88rem;
-  margin: 0;
-}
-
-.exif-settings {
-  display: flex;
-  gap: 0.6rem;
-  flex-wrap: wrap;
-}
-
-.exif-settings span {
-  background: rgba(255,255,255,0.07);
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 4px;
-  padding: 2px 7px;
-  font-size: 0.82rem;
-  font-family: monospace;
-}
 
 /* Meta labels */
 .meta-lbl {
