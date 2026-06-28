@@ -1,6 +1,6 @@
 import { Component, inject, computed } from '@angular/core';
 import { Router } from '@angular/router';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { switchMap, of } from 'rxjs';
 import { AuthService } from '../../../services/auth.service';
 import { NotificationService } from '../../../services/notification.service';
@@ -19,10 +19,11 @@ export class Notifications {
   private router       = inject(Router);
 
   profile = toSignal(this.authService.currentUserProfile$);
+  private readonly uid = computed(() => this.profile()?.uid ?? null);
 
   notifications = toSignal(
-    this.authService.currentUserProfile$.pipe(
-      switchMap(p => p ? this.notifService.getNotifications(p.uid) : of([] as AppNotification[]))
+    toObservable(this.uid).pipe(
+      switchMap(uid => uid ? this.notifService.getNotifications(uid) : of([] as AppNotification[]))
     ),
     { initialValue: [] as AppNotification[] }
   );

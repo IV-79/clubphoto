@@ -205,9 +205,9 @@ export class ThemeService {
       collection(this.firestore, `themes/${themeId}/soumissions/${soumissionId}/commentaires`),
       orderBy('createdAt', 'asc')
     );
-    return runInInjectionContext(this.injector, () =>
-      collectionData(q, { idField: 'id' })
-    ) as Observable<Commentaire[]>;
+    return from(runInInjectionContext(this.injector, () => getDocs(q))).pipe(
+      map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as Commentaire)))
+    );
   }
 
   async addCommentaire(themeId: string, soumissionId: string, data: { texte: string; auteurUid: string; nomAuteur: string }): Promise<void> {

@@ -334,9 +334,9 @@ export class SortieService {
       collection(this.firestore, `sorties/${sortieId}/photos/${photoId}/commentaires`),
       orderBy('createdAt', 'asc')
     );
-    return runInInjectionContext(this.injector, () =>
-      collectionData(q, { idField: 'id' })
-    ) as Observable<SortieCommentaire[]>;
+    return from(runInInjectionContext(this.injector, () => getDocs(q))).pipe(
+      map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as SortieCommentaire)))
+    );
   }
 
   async addCommentaire(

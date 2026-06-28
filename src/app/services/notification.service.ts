@@ -3,7 +3,8 @@ import {
   Firestore, collection, doc, addDoc, updateDoc, deleteDoc,
   getDocs, collectionData, query, orderBy, limit, writeBatch, where
 } from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
+import { Observable, from } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { AppNotification, NotifType, UserSubscriptions, isSubscribed } from '../models/notification.model';
 import { UserProfile } from '../models/user.model';
 
@@ -15,16 +16,15 @@ export class NotificationService {
   // ── Lecture ─────────────────────────────────────────────────
 
   getNotifications(uid: string): Observable<AppNotification[]> {
-    return runInInjectionContext(this.injector, () =>
-      collectionData(
-        query(
-          collection(this.firestore, `notifications/${uid}/items`),
-          orderBy('createdAt', 'desc'),
-          limit(50)
-        ),
-        { idField: 'id' }
-      )
-    ) as Observable<AppNotification[]>;
+    return from(runInInjectionContext(this.injector, () =>
+      getDocs(query(
+        collection(this.firestore, `notifications/${uid}/items`),
+        orderBy('createdAt', 'desc'),
+        limit(50)
+      ))
+    )).pipe(
+      map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as AppNotification)))
+    );
   }
 
   // ── Notification personnelle (like / commentaire) ────────────

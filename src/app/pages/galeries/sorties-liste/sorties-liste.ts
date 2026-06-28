@@ -28,52 +28,57 @@ export class SortiesListe {
 
   profile = toSignal(this.authService.currentUserProfile$);
 
-  private sorties$ = toObservable(this.profile).pipe(
-    switchMap(p => this.sortieService.getSortiesOnce().pipe(
-      map(list => p ? list : list.filter(s => (s.visibilite ?? 'public') === 'public'))
+  // Computed stables sur valeurs primitives — ne se propagent que si login/uid change réellement,
+  // pas sur chaque mise à jour de champ (ex. derniereConnexion après login).
+  private readonly loggedIn = computed(() => !!this.profile());
+  private readonly uid      = computed(() => this.profile()?.uid ?? null);
+
+  private sorties$ = toObservable(this.loggedIn).pipe(
+    switchMap(loggedIn => this.sortieService.getSortiesOnce().pipe(
+      map(list => loggedIn ? list : list.filter(s => (s.visibilite ?? 'public') === 'public'))
     ))
   );
   sorties = toSignal(this.sorties$, { initialValue: [] as Sortie[] });
 
-  private oneshots$ = toObservable(this.profile).pipe(
-    switchMap(p => this.oneShotService.getPublicOneShotsOnce().pipe(
-      map(list => p ? list : list.filter(o => (o.visibilite ?? 'public') === 'public'))
+  private oneshots$ = toObservable(this.loggedIn).pipe(
+    switchMap(loggedIn => this.oneShotService.getPublicOneShotsOnce().pipe(
+      map(list => loggedIn ? list : list.filter(o => (o.visibilite ?? 'public') === 'public'))
     ))
   );
   oneshots = toSignal(this.oneshots$, { initialValue: [] as OneShot[] });
 
-  private defis$ = toObservable(this.profile).pipe(
-    switchMap(p => p ? this.defiService.getDefisOnce() : this.defiService.getPublicDefisOnce())
+  private defis$ = toObservable(this.loggedIn).pipe(
+    switchMap(loggedIn => loggedIn ? this.defiService.getDefisOnce() : this.defiService.getPublicDefisOnce())
   );
   defis = toSignal(this.defis$, { initialValue: [] as Defi[] });
 
-  private mesSorties$ = toObservable(this.profile).pipe(
-    switchMap(p => p ? this.sortieService.getMesSortiesOnce(p.uid) : of([] as Sortie[]))
+  private mesSorties$ = toObservable(this.uid).pipe(
+    switchMap(uid => uid ? this.sortieService.getMesSortiesOnce(uid) : of([] as Sortie[]))
   );
   mesSorties = toSignal(this.mesSorties$, { initialValue: [] as Sortie[] });
 
-  private mesOneShots$ = toObservable(this.profile).pipe(
-    switchMap(p => p ? this.oneShotService.getMyOneShotsOnce(p.uid) : of([] as OneShot[]))
+  private mesOneShots$ = toObservable(this.uid).pipe(
+    switchMap(uid => uid ? this.oneShotService.getMyOneShotsOnce(uid) : of([] as OneShot[]))
   );
   mesOneShots = toSignal(this.mesOneShots$, { initialValue: [] as OneShot[] });
 
-  private mesDefis$ = toObservable(this.profile).pipe(
-    switchMap(p => p ? this.defiService.getMesDefisOnce(p.uid) : of([] as Defi[]))
+  private mesDefis$ = toObservable(this.uid).pipe(
+    switchMap(uid => uid ? this.defiService.getMesDefisOnce(uid) : of([] as Defi[]))
   );
   mesDefis = toSignal(this.mesDefis$, { initialValue: [] as Defi[] });
 
-  private mesSortiesInscritesIds$ = toObservable(this.profile).pipe(
-    switchMap(p => p ? this.sortieService.getMesSortiesInscritesIds(p.uid) : of([] as string[]))
+  private mesSortiesInscritesIds$ = toObservable(this.uid).pipe(
+    switchMap(uid => uid ? this.sortieService.getMesSortiesInscritesIds(uid) : of([] as string[]))
   );
   mesSortiesInscritesIds = toSignal(this.mesSortiesInscritesIds$, { initialValue: [] as string[] });
 
-  private mesOneShotsInscritsIds$ = toObservable(this.profile).pipe(
-    switchMap(p => p ? this.oneShotService.getMesOneShotsInscritsIds(p.uid) : of([] as string[]))
+  private mesOneShotsInscritsIds$ = toObservable(this.uid).pipe(
+    switchMap(uid => uid ? this.oneShotService.getMesOneShotsInscritsIds(uid) : of([] as string[]))
   );
   mesOneShotsInscritsIds = toSignal(this.mesOneShotsInscritsIds$, { initialValue: [] as string[] });
 
-  private mesDefisInscritsIds$ = toObservable(this.profile).pipe(
-    switchMap(p => p ? this.defiService.getMesDefisInscritsIds(p.uid) : of([] as string[]))
+  private mesDefisInscritsIds$ = toObservable(this.uid).pipe(
+    switchMap(uid => uid ? this.defiService.getMesDefisInscritsIds(uid) : of([] as string[]))
   );
   mesDefisInscritsIds = toSignal(this.mesDefisInscritsIds$, { initialValue: [] as string[] });
 

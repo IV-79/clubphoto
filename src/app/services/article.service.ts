@@ -18,30 +18,13 @@ export class ArticleService {
   private notifService = inject(NotificationService);
 
   getAllArticles(): Observable<Article[]> {
-    return runInInjectionContext(this.injector, () =>
-      collectionData(
-        query(collection(this.firestore, 'articles'), orderBy('dateCreation', 'desc')),
-        { idField: 'id' }
-      )
-    ) as Observable<Article[]>;
+    return from(runInInjectionContext(this.injector, () =>
+      getDocs(query(collection(this.firestore, 'articles'), orderBy('dateCreation', 'desc')))
+    )).pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as Article))));
   }
 
   // Articles publics visibles par tout le monde (y compris anonymes)
   getPublicArticles(): Observable<Article[]> {
-    return runInInjectionContext(this.injector, () =>
-      collectionData(
-        query(
-          collection(this.firestore, 'articles'),
-          where('statut', '==', 'publie'),
-          where('portee', '==', 'public'),
-          orderBy('dateCreation', 'desc')
-        ),
-        { idField: 'id' }
-      )
-    ) as Observable<Article[]>;
-  }
-
-  getPublicArticlesOnce(): Observable<Article[]> {
     return from(runInInjectionContext(this.injector, () =>
       getDocs(query(collection(this.firestore, 'articles'),
         where('statut', '==', 'publie'), where('portee', '==', 'public'),
@@ -49,17 +32,16 @@ export class ArticleService {
     )).pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as Article))));
   }
 
+  getPublicArticlesOnce(): Observable<Article[]> {
+    return this.getPublicArticles();
+  }
+
   getPublishedArticles(): Observable<Article[]> {
-    return runInInjectionContext(this.injector, () =>
-      collectionData(
-        query(
-          collection(this.firestore, 'articles'),
-          where('statut', '==', 'publie'),
-          orderBy('dateCreation', 'desc')
-        ),
-        { idField: 'id' }
-      )
-    ) as Observable<Article[]>;
+    return from(runInInjectionContext(this.injector, () =>
+      getDocs(query(collection(this.firestore, 'articles'),
+        where('statut', '==', 'publie'),
+        orderBy('dateCreation', 'desc')))
+    )).pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as Article))));
   }
 
   async addArticle(article: Omit<Article, 'id'>): Promise<string> {

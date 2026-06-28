@@ -1,6 +1,6 @@
 import { Component, inject, signal, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { switchMap } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -85,18 +85,15 @@ export class Actualites {
   selected   = signal<Article | null>(null);
 
   private profile = toSignal(this.authService.currentUserProfile$);
+  private readonly role = computed(() => this.profile()?.role ?? null);
 
-  canEdit = computed(() => {
-    const role = this.profile()?.role;
-    return role === 'admin' || role === 'contributeur';
-  });
+  canEdit = computed(() => this.role() === 'admin' || this.role() === 'contributeur');
 
   articles = toSignal(
-    this.authService.currentUserProfile$.pipe(
-      switchMap(profile => {
-        const role = profile?.role;
+    toObservable(this.role).pipe(
+      switchMap(role => {
         if (role === 'admin' || role === 'contributeur') return this.articleService.getAllArticles();
-        if (profile) return this.articleService.getPublishedArticles();
+        if (role) return this.articleService.getPublishedArticles();
         return this.articleService.getPublicArticles();
       })
     ),

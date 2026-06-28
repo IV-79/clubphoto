@@ -1,13 +1,12 @@
 import { Component, inject, signal, computed, effect, HostListener } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { combineLatest, switchMap, startWith } from 'rxjs';
+import { combineLatest, switchMap } from 'rxjs';
 import { AuthService } from '../../../services/auth.service';
 import { PhotoService } from '../../../services/photo.service';
 import { ConfirmService } from '../../../services/confirm.service';
 import { NotificationService } from '../../../services/notification.service';
 import { Photo, PhotoCategorie, PHOTO_CATEGORIES } from '../../../models/photo.model';
-import { UserProfile } from '../../../models/user.model';
 import { LightboxPhoto, PhotoLightboxCallbacks } from '../../../models/commentaire.model';
 import { PhotoLightbox } from '../../../components/photo-lightbox/photo-lightbox';
 import { ImgRetryDirective } from '../../../directives/img-retry.directive';
@@ -27,7 +26,8 @@ export class MembreDetail {
 
   private readonly categoriesMap = new Map(PHOTO_CATEGORIES.map(c => [c.value, c.label]));
 
-  profile = toSignal(this.authService.currentUserProfile$.pipe(startWith(null as UserProfile | null)));
+  profile = toSignal(this.authService.currentUserProfile$);
+  private readonly loggedIn = computed(() => !!this.profile());
 
   membre = toSignal(
     this.route.paramMap.pipe(
@@ -38,9 +38,9 @@ export class MembreDetail {
   photos = toSignal(
     combineLatest([
       this.route.paramMap,
-      this.authService.currentUserProfile$.pipe(startWith(null as UserProfile | null)),
+      toObservable(this.loggedIn),
     ]).pipe(
-      switchMap(([params, profile]) => profile
+      switchMap(([params, loggedIn]) => loggedIn
         ? this.photoService.getPhotosMembre(params.get('uid')!)
         : this.photoService.getPhotosVisiteur(params.get('uid')!)
       )

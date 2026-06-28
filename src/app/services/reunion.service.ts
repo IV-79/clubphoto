@@ -1,8 +1,9 @@
 import { Injectable, inject, Injector, runInInjectionContext } from '@angular/core';
 import {
-  Firestore, collection, collectionData, doc, addDoc, deleteDoc, updateDoc, query, orderBy, deleteField
+  Firestore, collection, collectionData, getDocs, doc, addDoc, deleteDoc, updateDoc, query, orderBy, deleteField
 } from '@angular/fire/firestore';
-import { Observable, firstValueFrom } from 'rxjs';
+import { Observable, firstValueFrom, from } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Reunion } from '../models/reunion.model';
 import { NotificationService } from './notification.service';
 import { AuthService } from './auth.service';
@@ -16,9 +17,9 @@ export class ReunionService {
 
   getReunions(): Observable<Reunion[]> {
     const q = query(collection(this.firestore, 'reunions'), orderBy('date', 'asc'));
-    return runInInjectionContext(this.injector, () =>
-      collectionData(q, { idField: 'id' })
-    ) as Observable<Reunion[]>;
+    return from(runInInjectionContext(this.injector, () => getDocs(q))).pipe(
+      map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as Reunion)))
+    );
   }
 
   async creer(data: Omit<Reunion, 'id' | 'dateCreation' | 'type'>): Promise<void> {

@@ -61,10 +61,11 @@ export class PhotoLightbox implements OnInit, OnDestroy {
 
   currentPhoto = computed(() => this.photos()[this.currentIdx()] ?? null);
   private currentPhotoId = computed(() => this.currentPhoto()?.id ?? null);
+  private commentRefresh = signal(0);
 
   commentaires = toSignal(
-    toObservable(this.currentPhotoId).pipe(
-      switchMap(photoId => {
+    toObservable(computed(() => ({ photoId: this.currentPhotoId(), r: this.commentRefresh() }))).pipe(
+      switchMap(({ photoId }) => {
         if (!photoId) return of([] as Commentaire[]);
         return this.callbacks().getComments(photoId);
       })
@@ -143,6 +144,7 @@ export class PhotoLightbox implements OnInit, OnDestroy {
     try {
       await this.callbacks().addComment(photo.id, texte, uid, this.userName() || 'Membre');
       this.newComment = '';
+      this.commentRefresh.update(n => n + 1);
     } finally {
       this.submitting.set(false);
     }
@@ -154,6 +156,7 @@ export class PhotoLightbox implements OnInit, OnDestroy {
     const ok = await this.confirmService.confirm('Supprimer ce commentaire ?');
     if (!ok) return;
     await this.callbacks().deleteComment(photo.id, commentId);
+    this.commentRefresh.update(n => n + 1);
   }
 
   isLikedComment(c: Commentaire): boolean {
@@ -166,6 +169,7 @@ export class PhotoLightbox implements OnInit, OnDestroy {
     const photo = this.currentPhoto();
     if (!uid || !photo) return;
     await this.callbacks().toggleCommentLike(photo.id, c.id, uid, this.isLikedComment(c));
+    this.commentRefresh.update(n => n + 1);
   }
 
   private touchStartX = 0;
@@ -200,6 +204,7 @@ export class PhotoLightbox implements OnInit, OnDestroy {
     );
     this.replyingTo.set(null);
     this.newReply = '';
+    this.commentRefresh.update(n => n + 1);
   }
 
   async deleteReply(c: Commentaire, replyId: string) {
@@ -208,6 +213,7 @@ export class PhotoLightbox implements OnInit, OnDestroy {
     const ok = await this.confirmService.confirm('Supprimer cette réponse ?');
     if (!ok) return;
     await this.callbacks().deleteReply(photo.id, c.id, replyId, c.replies);
+    this.commentRefresh.update(n => n + 1);
   }
 
   canDeleteComment(auteurUid: string): boolean {

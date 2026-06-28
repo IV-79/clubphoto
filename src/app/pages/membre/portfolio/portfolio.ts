@@ -1,5 +1,5 @@
 import { Component, inject, signal, computed, OnInit, ElementRef, ViewChild, HostListener } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { PhotoService } from '../../../services/photo.service';
 import { AuthService } from '../../../services/auth.service';
@@ -31,9 +31,10 @@ export class MembrePortfolio implements OnInit {
 
   private profile$ = this.authService.currentUserProfile$;
   profile = toSignal(this.profile$);
+  private readonly uid = computed(() => this.profile()?.uid ?? null);
 
-  private myPhotos$ = this.profile$.pipe(
-    switchMap(p => p ? this.photoService.getMyPhotos(p.uid) : of([]))
+  private myPhotos$ = toObservable(this.uid).pipe(
+    switchMap(uid => uid ? this.photoService.getMyPhotos(uid) : of([]))
   );
   photos = toSignal(this.myPhotos$, { initialValue: [] as Photo[] });
   photoCount   = computed(() => this.photos().length);

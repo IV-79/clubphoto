@@ -1,7 +1,7 @@
 import { Component, inject, signal, computed, effect, untracked } from '@angular/core';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { SlicePipe } from '@angular/common';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { combineLatest, of, switchMap, map } from 'rxjs';
 import { ReunionService } from '../../services/reunion.service';
 import { OneShotService } from '../../services/oneshot.service';
@@ -46,20 +46,22 @@ export class Calendrier {
   private limitAVenir = signal(INIT);
   private limitPasses = signal(INIT);
 
+  profile = toSignal(this.authService.currentUserProfile$);
+  private readonly loggedIn = computed(() => !!this.profile());
+  private readonly uid      = computed(() => this.profile()?.uid ?? null);
+
   private tous = toSignal(
-    this.authService.currentUserProfile$.pipe(
-      switchMap(profile => profile ? this.service.getReunions() : of([] as Reunion[]))
+    toObservable(this.loggedIn).pipe(
+      switchMap(loggedIn => loggedIn ? this.service.getReunions() : of([] as Reunion[]))
     ),
     { initialValue: [] as Reunion[] }
   );
 
-  // --- OneShots publics ---
-  profile = toSignal(this.authService.currentUserProfile$);
-  private publicOneShots$ = this.oneShotService.getPublicOneShots();
-  private oneshots = toSignal(this.publicOneShots$, { initialValue: [] as OneShot[] });
-  private sorties = toSignal(this.sortieService.getSorties(), { initialValue: [] as Sortie[] });
+  // --- OneShots publics + sorties (one-shot) ---
+  private oneshots = toSignal(this.oneShotService.getPublicOneShotsOnce(), { initialValue: [] as OneShot[] });
+  private sorties  = toSignal(this.sortieService.getSortiesOnce(), { initialValue: [] as Sortie[] });
 
-  isMembre = computed(() => !!this.profile());
+  isMembre = computed(() => this.loggedIn());
 
   // --- Items unifiés (événements + oneshots + sorties avec une date) ---
   private filtresItems = computed((): CalItem[] => {
@@ -132,18 +134,17 @@ export class Calendrier {
   }
 
   // --- Inscriptions OneShot ---
-  private inscriptionStatus$ = combineLatest([
-    this.authService.currentUserProfile$,
-    this.publicOneShots$,
-  ]).pipe(
-    switchMap(([profile, oneshots]) => {
-      if (!profile) return of({} as Record<string, boolean>);
+  private readonly inscriptionTrigger = computed(() => ({ uid: this.uid(), oneshots: this.oneshots() }));
+
+  private inscriptionStatus$ = toObservable(this.inscriptionTrigger).pipe(
+    switchMap(({ uid, oneshots }) => {
+      if (!uid) return of({} as Record<string, boolean>);
       const open = oneshots.filter(e => e.statut === 'inscription');
       if (open.length === 0) return of({} as Record<string, boolean>);
       return combineLatest(
         open.map(os =>
-          this.oneShotService.getInscriptions(os.id).pipe(
-            map(ins => [os.id, ins.some(i => i.uid === profile.uid)] as [string, boolean])
+          this.oneShotService.getInscriptionsOnce(os.id).pipe(
+            map(ins => [os.id, ins.some(i => i.uid === uid)] as [string, boolean])
           )
         )
       ).pipe(map(pairs => Object.fromEntries(pairs)));

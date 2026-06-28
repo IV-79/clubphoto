@@ -454,9 +454,9 @@ export class OneShotService {
       collection(this.firestore, `oneshots/${oneShotId}/photos/${photoId}/commentaires`),
       orderBy('createdAt', 'asc')
     );
-    return runInInjectionContext(this.injector, () =>
-      collectionData(q, { idField: 'id' })
-    ) as Observable<Commentaire[]>;
+    return from(runInInjectionContext(this.injector, () => getDocs(q))).pipe(
+      map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as Commentaire)))
+    );
   }
 
   async addCommentaire(oneShotId: string, photoId: string, data: { texte: string; auteurUid: string; nomAuteur: string }): Promise<void> {

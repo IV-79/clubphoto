@@ -2,7 +2,7 @@ import { Component, inject, signal, computed, HostListener } from '@angular/core
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AsyncPipe } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { switchMap, map, of } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { LoginModalService } from '../../services/login-modal.service';
@@ -56,9 +56,10 @@ export class Header {
 
   // Notifications
   private profile = toSignal(this.authService.currentUserProfile$);
+  private readonly uid = computed(() => this.profile()?.uid ?? null);
 
-  private notifs$ = this.authService.currentUserProfile$.pipe(
-    switchMap(p => p ? this.notifService.getNotifications(p.uid) : of([] as AppNotification[]))
+  private notifs$ = toObservable(this.uid).pipe(
+    switchMap(uid => uid ? this.notifService.getNotifications(uid) : of([] as AppNotification[]))
   );
   notifications = toSignal(this.notifs$, { initialValue: [] as AppNotification[] });
   unreadCount   = computed(() => this.notifications().filter(n => !n.lu).length);

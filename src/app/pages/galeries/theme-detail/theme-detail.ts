@@ -39,6 +39,7 @@ export class ThemeDetail {
   theme       = toSignal(this.themeService.getTheme(this.id));
   soumissions = toSignal(this.themeService.getSoumissions(this.id), { initialValue: [] as ThemeSoumission[] });
   profile     = toSignal(this.authService.currentUserProfile$);
+  private readonly uid = computed(() => this.profile()?.uid ?? null);
 
   statut = computed(() => {
     const t = this.theme();
@@ -60,9 +61,9 @@ export class ThemeDetail {
   );
 
   // Mes votes
-  private mesVotes$ = toObservable(this.profile).pipe(
-    switchMap(p => p
-      ? this.themeService.getMesVotes(this.id, p.uid)
+  private mesVotes$ = toObservable(this.uid).pipe(
+    switchMap(uid => uid
+      ? this.themeService.getMesVotes(this.id, uid)
       : of([] as ThemeVote[])
     )
   );
