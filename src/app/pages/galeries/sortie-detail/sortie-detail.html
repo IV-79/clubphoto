@@ -1,4 +1,11 @@
 @if (sortie(); as s) {
+  @if (accessDenied()) {
+    <div class="sortie-detail">
+      <div class="access-denied">
+        <p>Cet événement est réservé aux membres connectés.</p>
+      </div>
+    </div>
+  } @else {
   @if (!editMode()) {
     <app-event-hero
       [coverUrl]="s.imageEvenementUrl"
@@ -97,6 +104,14 @@
           </mat-checkbox>
         </div>
 
+        <mat-form-field appearance="outline" class="field-half">
+          <mat-label>Visibilité</mat-label>
+          <mat-select formControlName="visibilite">
+            <mat-option value="public">Public (tout le monde)</mat-option>
+            <mat-option value="membre">Membres seulement</mat-option>
+          </mat-select>
+        </mat-form-field>
+
         <div class="edit-actions">
           <button type="button" class="btn-cancel-edit" (click)="cancelEdit()">Annuler</button>
           <button type="submit" class="btn-save-edit" [disabled]="form.invalid || saving()">
@@ -181,11 +196,20 @@
   <!-- Upload -->
   @if (canUpload()) {
     <section class="upload-section">
-      <div class="upload-header">
-        <h2>Partager vos photos</h2>
-        <button class="btn-upload" (click)="photoInput.click()">+ Ajouter des photos</button>
-        <input #photoInput type="file" accept="image/*" multiple class="hidden-input"
-          (change)="onPhotosSelected($event)" />
+      <h2 class="upload-title">Partager vos photos</h2>
+
+      <div class="upload-zone"
+           [class.drag-over]="photoDragOver()"
+           (dragover)="$event.preventDefault(); photoDragOver.set(true)"
+           (dragleave)="photoDragOver.set(false)"
+           (drop)="onPhotosDrop($event)">
+        <span class="upload-icon">📷</span>
+        <p>Glissez vos photos ici ou</p>
+        <label class="btn-upload-photo">
+          Choisir des photos
+          <input type="file" accept="image/*" multiple hidden (change)="onPhotosSelected($event)" />
+        </label>
+        <p class="upload-hint">Plusieurs fichiers acceptés</p>
       </div>
 
       @if (uploads().length > 0) {
@@ -261,6 +285,7 @@
   </section>
 
 </div>
+  } <!-- @else (access control) -->
 } @else {
   <div class="loading-page">Chargement…</div>
 }

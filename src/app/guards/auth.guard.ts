@@ -44,7 +44,7 @@ export const editorGuard: CanActivateFn = (route, state) => {
       }
       return from(authService.getUserRole()).pipe(
         map(role => {
-          if (role === 'admin' || role === 'redacteur') return true;
+          if (role === 'admin' || role === 'contributeur') return true;
           router.navigate(['/']);
           return false;
         })
@@ -82,7 +82,7 @@ export const loginGuard: CanActivateFn = () => {
       return from(authService.getUserRole()).pipe(
         map(role => {
           if (role === 'admin') router.navigate(['/admin']);
-          else if (role === 'redacteur') router.navigate(['/actualites']);
+          else if (role === 'contributeur') router.navigate(['/actualites']);
           else router.navigate(['/membre/portfolio']);
           return false;
         })

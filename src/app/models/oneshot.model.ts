@@ -25,6 +25,7 @@ export interface OneShot {
   nbThemes?: number;    // dénormalisé, mis à jour atomiquement
   photoCouvertureUrl?: string;
   photoCouverturePath?: string;
+  visibilite?: 'public' | 'membre';
 }
 
 export interface OneShotTheme {

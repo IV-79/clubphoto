@@ -140,13 +140,14 @@
               <label class="edit-label">Max votes / participant
                 <input type="number" class="edit-input edit-input-sm" [(ngModel)]="editMaxVotes" min="1" max="20" />
               </label>
-              <label class="edit-label">Visibilité
-                <select class="edit-select" [(ngModel)]="editVisibilite">
-                  <option value="public">Public</option>
-                  <option value="membre">Membres uniquement</option>
-                </select>
-              </label>
             </div>
+
+            <label class="edit-label">Visibilité
+              <select class="edit-select" [(ngModel)]="editVisibilite">
+                <option value="public">Public (tout le monde)</option>
+                <option value="membre">Membres seulement</option>
+              </select>
+            </label>
 
             <div class="edit-actions">
               <button class="btn-save" (click)="saveEdit()" [disabled]="saving()">

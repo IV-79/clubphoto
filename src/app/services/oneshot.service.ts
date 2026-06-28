@@ -32,7 +32,7 @@ export class OneShotService {
 
   // --- OneShot ---
 
-  async create(data: { titre: string; description?: string; lieu?: string; creatorUid: string; nomCreateur: string; date?: string }): Promise<string> {
+  async create(data: { titre: string; description?: string; lieu?: string; creatorUid: string; nomCreateur: string; date?: string; visibilite?: 'public' | 'membre' }): Promise<string> {
     const ref = await runInInjectionContext(this.injector, () =>
       addDoc(collection(this.firestore, 'oneshots'), {
         ...data,
@@ -157,6 +157,12 @@ export class OneShotService {
     const value = description.trim();
     await runInInjectionContext(this.injector, () =>
       updateDoc(doc(this.firestore, 'oneshots', id), { description: value || deleteField() })
+    );
+  }
+
+  async updateVisibilite(id: string, visibilite: 'public' | 'membre'): Promise<void> {
+    await runInInjectionContext(this.injector, () =>
+      updateDoc(doc(this.firestore, 'oneshots', id), { visibilite })
     );
   }
 

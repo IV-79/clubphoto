@@ -29,6 +29,7 @@ export interface Sortie {
   imageEvenementUrl?: string;
   imageEvenementPath?: string;
   dateCreation: string;
+  visibilite?: 'public' | 'membre';
 }
 
 export interface SortieInscription {

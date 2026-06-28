@@ -139,14 +139,15 @@
         </mat-form-field>
       </div>
 
-      <mat-form-field appearance="outline" class="field-half">
-        <mat-label>Visibilité</mat-label>
-        <mat-select formControlName="visibilite">
-          <mat-option value="public">Public (tout le monde)</mat-option>
-          <mat-option value="membre">Membres seulement</mat-option>
-        </mat-select>
-      </mat-form-field>
     }
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Visibilité</mat-label>
+      <mat-select formControlName="visibilite">
+        <mat-option value="public">Public (tout le monde)</mat-option>
+        <mat-option value="membre">Membres seulement</mat-option>
+      </mat-select>
+    </mat-form-field>
 
     <div class="form-actions">
       <a routerLink="/galeries/sorties" class="btn-cancel">Annuler</a>

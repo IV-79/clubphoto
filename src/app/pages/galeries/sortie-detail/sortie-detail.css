@@ -367,42 +367,41 @@
 /* ── Upload ── */
 
 .upload-section {
-  background: #f8f8f8;
-  border: 1px solid rgba(0,0,0,0.08);
-  border-radius: 8px;
-  padding: 1.25rem;
   margin-bottom: 2rem;
 }
 
-.upload-header {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 0.75rem;
-}
-
-.upload-header h2 {
-  margin: 0;
+.upload-title {
   font-size: 1rem;
   color: #1a1a1a;
-  flex: 1;
+  margin: 0 0 0.75rem;
 }
 
-.btn-upload {
-  background: #cc0000;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  padding: 0.5rem 1rem;
-  font-size: 0.85rem;
-  font-weight: 600;
+.upload-zone {
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  padding: 2rem;
+  text-align: center;
   cursor: pointer;
-  transition: background 0.2s;
-  white-space: nowrap;
+  transition: border-color 0.15s, background 0.15s;
+  background: #fafafa;
+  margin-bottom: 1rem;
 }
-.btn-upload:hover { background: #aa0000; }
+.upload-zone.drag-over { border-color: #cc0000; background: rgba(204,0,0,0.04); }
+.upload-zone p { margin: 0.25rem 0; color: rgba(0,0,0,0.5); font-size: 0.9rem; }
+.upload-icon { font-size: 2rem; display: block; margin-bottom: 0.5rem; }
+.upload-hint { font-size: 0.8rem !important; color: rgba(0,0,0,0.35) !important; }
 
-.hidden-input { display: none; }
+.btn-upload-photo {
+  display: inline-block;
+  margin-top: 0.4rem;
+  padding: 0.4rem 1rem;
+  border: 1px solid #bbb;
+  border-radius: 4px;
+  background: #fff;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.btn-upload-photo:hover { border-color: #999; }
 
 .uploads-list {
   display: flex;

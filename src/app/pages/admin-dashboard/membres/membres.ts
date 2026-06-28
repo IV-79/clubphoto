@@ -37,7 +37,7 @@ export class Membres {
 
   currentUid = signal(this.auth.currentUser?.uid ?? '');
 
-  readonly roles = ['admin', 'redacteur', 'membre'];
+  readonly roles = ['admin', 'contributeur', 'membre'];
 
   membres = toSignal(this.authService.getAllMembers(), { initialValue: [] as UserProfile[] });
   filterText = signal('');

@@ -1,7 +1,7 @@
 import { Component, inject, computed, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
-import { switchMap, of } from 'rxjs';
+import { switchMap, of, map } from 'rxjs';
 import { SortieService } from '../../../services/sortie.service';
 import { AuthService } from '../../../services/auth.service';
 import { OneShotService } from '../../../services/oneshot.service';
@@ -26,9 +26,22 @@ export class SortiesListe {
   private defiService    = inject(DefiService);
   private authService    = inject(AuthService);
 
-  profile  = toSignal(this.authService.currentUserProfile$);
-  sorties  = toSignal(this.sortieService.getSortiesOnce(), { initialValue: [] as Sortie[] });
-  oneshots = toSignal(this.oneShotService.getPublicOneShotsOnce(), { initialValue: [] as OneShot[] });
+  profile = toSignal(this.authService.currentUserProfile$);
+
+  private sorties$ = toObservable(this.profile).pipe(
+    switchMap(p => this.sortieService.getSortiesOnce().pipe(
+      map(list => p ? list : list.filter(s => (s.visibilite ?? 'public') === 'public'))
+    ))
+  );
+  sorties = toSignal(this.sorties$, { initialValue: [] as Sortie[] });
+
+  private oneshots$ = toObservable(this.profile).pipe(
+    switchMap(p => this.oneShotService.getPublicOneShotsOnce().pipe(
+      map(list => p ? list : list.filter(o => (o.visibilite ?? 'public') === 'public'))
+    ))
+  );
+  oneshots = toSignal(this.oneshots$, { initialValue: [] as OneShot[] });
+
   private defis$ = toObservable(this.profile).pipe(
     switchMap(p => p ? this.defiService.getDefisOnce() : this.defiService.getPublicDefisOnce())
   );

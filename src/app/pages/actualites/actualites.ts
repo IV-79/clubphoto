@@ -88,14 +88,14 @@ export class Actualites {
 
   canEdit = computed(() => {
     const role = this.profile()?.role;
-    return role === 'admin' || role === 'redacteur';
+    return role === 'admin' || role === 'contributeur';
   });
 
   articles = toSignal(
     this.authService.currentUserProfile$.pipe(
       switchMap(profile => {
         const role = profile?.role;
-        if (role === 'admin' || role === 'redacteur') return this.articleService.getAllArticles();
+        if (role === 'admin' || role === 'contributeur') return this.articleService.getAllArticles();
         if (profile) return this.articleService.getPublishedArticles();
         return this.articleService.getPublicArticles();
       })

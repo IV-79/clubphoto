@@ -4,6 +4,15 @@
 
 ## En cours (alpha)
 
+### Visibilité Public/Membres pour Sorties et OneShots (2026-06-28)
+
+- La visibilité (Public / Membres seulement) s'applique désormais à tous les types d'événements : Sortie Photo, Sortie Club, Atelier et OneShot (le Défi Photo l'avait déjà).
+- Formulaire de création : le sélecteur Visibilité est sorti du bloc "Défi uniquement" pour s'afficher pour tous les types d'événement.
+- Formulaire d'édition sortie (inline dans sortie-detail) : champ Visibilité ajouté.
+- Page de gestion OneShot (`oneshot-gerer`) : sélecteur Visibilité ajouté, enregistrement via `updateVisibilite()`.
+- Liste des activités (`/galeries/sorties`) : les événements "Membres seulement" sont masqués pour les visiteurs non connectés (filtrage client-side, aucun index Firestore supplémentaire).
+- Pages détail (`/galeries/sorties/:id`, `/galeries/oneshots/:id`) : bandeau "Réservé aux membres connectés" si l'utilisateur n'est pas connecté.
+
 ### Miniatures 600 px pour grilles de cartes (2026-06-28)
 
 - À l'upload (portfolio, sorties, oneshots, défis, thèmes), génération automatique côté client d'une miniature WebP 600 px en plus de la photo pleine résolution.

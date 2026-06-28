@@ -72,6 +72,15 @@
         </div>
       }
 
+      <!-- Visibilité -->
+      <div class="field-half">
+        <label class="field-label">Visibilité</label>
+        <select class="field-input" [(ngModel)]="visibiliteValue" [disabled]="saving()">
+          <option value="public">Public (tout le monde)</option>
+          <option value="membre">Membres seulement</option>
+        </select>
+      </div>
+
       <!-- Thèmes -->
       <div class="themes-section">
         <label class="field-label">Thèmes <span class="themes-count">{{ themes().length }}</span></label>

@@ -345,10 +345,7 @@ export class DefiDetail {
         if (finChanged)   parts.push(`fin de soumission le ${this.formatDate(this.editFin)}`);
         if (votesChanged) parts.push(`clôture des votes le ${this.formatDate(this.editVotes)}`);
         const msg = `🏅 Défi "${this.editTitre}" · Dates modifiées : ${parts.join(', ')}`;
-        const notifPromises = this.inscriptions()
-          .filter(i => i.uid !== editorUid)
-          .map(i => this.notifService.sendToUser(i.uid, 'defi', msg, { lien, sourceNom: editorNom }));
-        await Promise.all(notifPromises);
+        this.notifService.broadcast('defi', msg, { lien, sourceNom: editorNom, excludeUid: editorUid }).catch(() => {});
       }
 
       this.refresh();

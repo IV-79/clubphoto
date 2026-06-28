@@ -103,8 +103,8 @@ export const routes: Routes = [
       { path: 'documents', component: Documents },
       { path: 'notifications', component: Notifications },
       { path: 'preferences', component: Preferences },
-      { path: 'sorties/creer', component: SortieCreer },
-      { path: 'defis/creer', component: DefiCreer },
+      { path: 'sorties/creer', component: SortieCreer, canActivate: [editorGuard] },
+      { path: 'defis/creer', component: DefiCreer, canActivate: [editorGuard] },
       { path: '', redirectTo: 'portfolio', pathMatch: 'full' }
     ]
   },

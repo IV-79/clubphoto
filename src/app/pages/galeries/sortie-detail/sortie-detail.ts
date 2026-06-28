@@ -44,7 +44,6 @@ interface UploadTask {
   styleUrl: './sortie-detail.css',
 })
 export class SortieDetail {
-  @ViewChild('photoInput') photoInput!: ElementRef<HTMLInputElement>;
   @ViewChild('coverInput') coverInput!: ElementRef<HTMLInputElement>;
 
   private route = inject(ActivatedRoute);
@@ -84,6 +83,7 @@ export class SortieDetail {
 
   lightboxIndex      = signal<number | null>(null);
   uploads            = signal<UploadTask[]>([]);
+  photoDragOver      = signal(false);
   inscribing         = signal(false);
   saving             = signal(false);
   editMode           = signal(false);
@@ -123,6 +123,12 @@ export class SortieDetail {
     lieu:                   new FormControl('', { nonNullable: true }),
     maxParticipants:        new FormControl<number | null>(null),
     inscriptionObligatoire: new FormControl(true, { nonNullable: true }),
+    visibilite:             new FormControl<'public' | 'membre'>('public', { nonNullable: true }),
+  });
+
+  accessDenied = computed(() => {
+    const s = this.sortie();
+    return !!s && (s.visibilite ?? 'public') === 'membre' && !this.profile();
   });
 
   get inscriptionObligatoire() { return this.form.get('inscriptionObligatoire')!.value; }
@@ -224,6 +230,7 @@ export class SortieDetail {
       lieu: s.lieu ?? '',
       maxParticipants: s.maxParticipants ?? null,
       inscriptionObligatoire: s.inscriptionObligatoire,
+      visibilite: s.visibilite ?? 'public',
     });
     this.editMode.set(true);
   }
@@ -244,6 +251,7 @@ export class SortieDetail {
         lieu: v.lieu.trim(),
         maxParticipants: v.maxParticipants ?? undefined,
         inscriptionObligatoire: v.inscriptionObligatoire,
+        visibilite: v.visibilite,
       }, {
         oldDate: s.date,
         titre: s.titre,
@@ -323,12 +331,23 @@ export class SortieDetail {
     }
   }
 
-  async onPhotosSelected(event: Event) {
+  onPhotosDrop(event: DragEvent) {
+    event.preventDefault();
+    this.photoDragOver.set(false);
+    const files = Array.from(event.dataTransfer?.files ?? []).filter(f => f.type.startsWith('image/'));
+    if (files.length) this.processPhotoFiles(files);
+  }
+
+  onPhotosSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     const files = Array.from(input.files ?? []);
     input.value = '';
+    if (files.length) this.processPhotoFiles(files);
+  }
+
+  private async processPhotoFiles(files: File[]) {
     const p = this.profile();
-    if (!p || !files.length) return;
+    if (!p) return;
 
     for (const file of files) {
       const id = Math.random().toString(36).slice(2);

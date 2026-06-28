@@ -25,6 +25,10 @@
       <a routerLink="/galeries/sorties" class="back-link">← Activités</a>
     </div>
     <p class="loading">Chargement…</p>
+  } @else if ((event()!.visibilite ?? 'public') === 'membre' && !profile()) {
+    <div class="access-denied">
+      <p>Cet événement est réservé aux membres connectés.</p>
+    </div>
   } @else {
 
     @if (event()!.description) {

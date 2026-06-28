@@ -39,6 +39,7 @@ export class OneShotGerer implements OnInit {
   dateValue        = '';
   lieuValue        = '';
   descriptionValue = '';
+  visibiliteValue: 'public' | 'membre' = 'public';
   saving        = signal(false);
   coverUploading = signal(false);
   coverDragOver  = signal(false);
@@ -51,6 +52,7 @@ export class OneShotGerer implements OnInit {
         this.dateValue        = ev?.date ?? '';
         this.lieuValue        = ev?.lieu ?? '';
         this.descriptionValue = ev?.description ?? '';
+        this.visibiliteValue  = ev?.visibilite ?? 'public';
       });
     });
   }
@@ -82,6 +84,7 @@ export class OneShotGerer implements OnInit {
       this.oneShotService.updateTitre(this.id, this.titreValue),
       this.oneShotService.updateLieu(this.id, this.lieuValue.trim()),
       this.oneShotService.updateDescription(this.id, this.descriptionValue),
+      this.oneShotService.updateVisibilite(this.id, this.visibiliteValue),
     ]);
     this.saving.set(false);
     this.router.navigate(['/galeries/oneshots', this.id]);
