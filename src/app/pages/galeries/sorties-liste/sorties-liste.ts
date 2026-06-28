@@ -109,28 +109,53 @@ export class SortiesListe {
     this.filterParticipe.set(false);
   }
 
-  aVenir = computed((): ActiviteItem[] => {
+  enCours = computed((): ActiviteItem[] => {
     const sorties: ActiviteItem[] = this.sorties()
-      .filter(s => this.isAVenir(s.date))
+      .filter(s => !this.isPastDate(s.date) && this.isWithin7Days(s.date))
       .map(data => ({ kind: 'sortie' as const, data }));
 
-    const publicOneShots = this.oneshots().filter(o => o.statut !== 'resultats');
-    const publicIds = new Set(publicOneShots.map(o => o.id));
-    const mesEnPrep = this.mesOneShots().filter(o => o.statut === 'preparation' && !publicIds.has(o.id));
-    const oneshots: ActiviteItem[] = [...publicOneShots, ...mesEnPrep]
+    const activeStatuts = ['inscription', 'fermeture_inscriptions', 'vote'];
+    const publicActive = this.oneshots().filter(o => activeStatuts.includes(o.statut));
+    const publicActiveIds = new Set(publicActive.map(o => o.id));
+    const mesActifs = this.mesOneShots().filter(o => activeStatuts.includes(o.statut) && !publicActiveIds.has(o.id));
+    const oneshots: ActiviteItem[] = [...publicActive, ...mesActifs]
       .map(data => ({ kind: 'oneshot' as const, data }));
 
     const defis: ActiviteItem[] = this.defis()
-      .filter(d => getDefiStatut(d) !== 'resultats')
+      .filter(d => {
+        const s = getDefiStatut(d);
+        return s === 'soumission' || s === 'vote' ||
+               (s === 'a_venir' && this.isWithin7Days(d.dateDebutSoumission));
+      })
       .map(data => ({ kind: 'defi' as const, data }));
 
     return [...sorties, ...oneshots, ...defis]
       .sort((a, b) => this.effectiveDate(a).localeCompare(this.effectiveDate(b)));
   });
 
+  enPreparation = computed((): ActiviteItem[] => {
+    const publicIds = new Set(this.oneshots().map(o => o.id));
+    return this.mesOneShots()
+      .filter(o => o.statut === 'preparation' && !publicIds.has(o.id))
+      .map(data => ({ kind: 'oneshot' as const, data }));
+  });
+
+  aVenir = computed((): ActiviteItem[] => {
+    const sorties: ActiviteItem[] = this.sorties()
+      .filter(s => !this.isPastDate(s.date) && !this.isWithin7Days(s.date))
+      .map(data => ({ kind: 'sortie' as const, data }));
+
+    const defis: ActiviteItem[] = this.defis()
+      .filter(d => getDefiStatut(d) === 'a_venir' && !this.isWithin7Days(d.dateDebutSoumission))
+      .map(data => ({ kind: 'defi' as const, data }));
+
+    return [...sorties, ...defis]
+      .sort((a, b) => this.effectiveDate(a).localeCompare(this.effectiveDate(b)));
+  });
+
   passees = computed((): ActiviteItem[] => {
     const sorties: ActiviteItem[] = this.sorties()
-      .filter(s => !this.isAVenir(s.date))
+      .filter(s => this.isPastDate(s.date))
       .map(data => ({ kind: 'sortie' as const, data }));
 
     const oneshots: ActiviteItem[] = this.oneshots()
@@ -188,6 +213,7 @@ export class SortiesListe {
     });
   }
 
+  enCoursFiltrees = computed(() => this.applyFilters(this.enCours()));
   aVenirFiltrees  = computed(() => this.applyFilters(this.aVenir()));
   passeesFiltrees = computed(() => this.applyFilters(this.passees()));
 
@@ -197,7 +223,22 @@ export class SortiesListe {
     return (item.data as Defi).dateDebutSoumission;
   }
 
-  isAVenir(date: string): boolean {
-    return new Date(date + 'T00:00:00') > new Date();
+  private get todayStr(): string {
+    const n = new Date();
+    return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}`;
+  }
+
+  private isPastDate(date: string): boolean {
+    return date < this.todayStr;
+  }
+
+  private isWithin7Days(date: string): boolean {
+    if (date < this.todayStr) return false;
+    const limit = new Date();
+    limit.setDate(limit.getDate() + 7);
+    const y = limit.getFullYear();
+    const m = String(limit.getMonth() + 1).padStart(2, '0');
+    const d = String(limit.getDate()).padStart(2, '0');
+    return date <= `${y}-${m}-${d}`;
   }
 }

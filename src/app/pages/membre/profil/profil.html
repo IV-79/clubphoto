@@ -3,7 +3,12 @@
   <div class="profil-header">
     <h1>Mon Profil</h1>
     @if (profile(); as p) {
-      <p class="membre-depuis">Membre depuis le {{ p.dateAdhesion }}</p>
+      <div class="profil-header-meta">
+        <p class="membre-depuis">Membre depuis le {{ p.dateAdhesion }}</p>
+        <span class="role-badge role-{{ p.role }}">
+          {{ p.role === 'admin' ? 'Administrateur' : p.role === 'contributeur' ? 'Contributeur' : 'Membre' }}
+        </span>
+      </div>
     }
   </div>
 

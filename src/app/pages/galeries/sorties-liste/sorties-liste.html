@@ -3,7 +3,7 @@
   <div class="page-header">
     <div>
       <h1>Événements</h1>
-      <p class="subtitle">Événements et activités organisés par les membres</p>
+      <p class="subtitle">Événements et activités organisés par les contributeurs et administrateurs</p>
     </div>
     @if (profile()) {
       <div class="create-btns">
@@ -51,29 +51,65 @@
     }
   </div>
 
+  <!-- En préparation (créateur uniquement) -->
+  @if (enPreparation().length > 0) {
+    <section class="section section-preparation">
+      <h2 class="section-title">
+        Mes OneShots en préparation
+        <span class="count">{{ enPreparation().length }}</span>
+      </h2>
+      <p class="section-hint">Visible uniquement par vous — passez le statut à "Inscriptions ouvertes" pour le rendre public.</p>
+      <div class="sorties-grid">
+        @for (item of enPreparation(); track item.data.id) {
+          <app-activite-card [item]="item" [loggedIn]="true" [isPast]="false" />
+        }
+      </div>
+    </section>
+  }
+
   <!-- En cours -->
   <section class="section">
     <h2 class="section-title">
-      En cours
-      <span class="count">{{ aVenirFiltrees().length < aVenir().length ? aVenirFiltrees().length + ' / ' + aVenir().length : aVenir().length }}</span>
+      En ce moment
+      <span class="count">{{ enCoursFiltrees().length < enCours().length ? enCoursFiltrees().length + ' / ' + enCours().length : enCours().length }}</span>
     </h2>
 
-    @if (aVenirFiltrees().length === 0) {
-      <p class="empty-msg">{{ aVenir().length === 0 ? 'Aucun événement planifié pour le moment.' : 'Aucun résultat pour ces filtres.' }}</p>
+    @if (enCoursFiltrees().length === 0) {
+      <p class="empty-msg">{{ enCours().length === 0 ? 'Aucun événement actif cette semaine.' : 'Aucun résultat pour ces filtres.' }}</p>
     } @else {
       <div class="sorties-grid">
-        @for (item of aVenirFiltrees(); track item.kind + ':' + item.data.id) {
+        @for (item of enCoursFiltrees(); track item.kind + ':' + item.data.id) {
           <app-activite-card [item]="item" [loggedIn]="!!profile()" [isPast]="false" />
         }
       </div>
     }
   </section>
 
-  <!-- Clos -->
+  <!-- À venir -->
+  @if (aVenir().length > 0 || hasFilters()) {
+    <section class="section">
+      <h2 class="section-title">
+        À venir
+        <span class="count">{{ aVenirFiltrees().length < aVenir().length ? aVenirFiltrees().length + ' / ' + aVenir().length : aVenir().length }}</span>
+      </h2>
+
+      @if (aVenirFiltrees().length === 0) {
+        <p class="empty-msg">{{ aVenir().length === 0 ? 'Aucun événement planifié prochainement.' : 'Aucun résultat pour ces filtres.' }}</p>
+      } @else {
+        <div class="sorties-grid">
+          @for (item of aVenirFiltrees(); track item.kind + ':' + item.data.id) {
+            <app-activite-card [item]="item" [loggedIn]="!!profile()" [isPast]="false" />
+          }
+        </div>
+      }
+    </section>
+  }
+
+  <!-- Terminés -->
   @if (passees().length > 0) {
     <section class="section">
       <h2 class="section-title">
-        Clos
+        Terminés
         <span class="count">{{ passeesFiltrees().length < passees().length ? passeesFiltrees().length + ' / ' + passees().length : passees().length }}</span>
       </h2>
 

@@ -167,13 +167,19 @@
 
 /* Role chips */
 mat-chip.admin {
-  background-color: #1565c0 !important;
-  color: white !important;
+  background-color: rgba(204,0,0,0.09) !important;
+  color: #cc0000 !important;
+  border: 1px solid rgba(204,0,0,0.2) !important;
 }
-
+mat-chip.contributeur {
+  background-color: rgba(21,128,61,0.09) !important;
+  color: #15803d !important;
+  border: 1px solid rgba(21,128,61,0.2) !important;
+}
 mat-chip.membre {
-  background-color: #e0e0e0 !important;
-  color: #333 !important;
+  background-color: rgba(0,0,0,0.05) !important;
+  color: rgba(0,0,0,0.5) !important;
+  border: 1px solid rgba(0,0,0,0.12) !important;
 }
 
 /* Statut chips */
@@ -196,15 +202,9 @@ mat-chip.membre {
   border: none;
 }
 
-.role-select-admin {
-  background: #1565c0;
-  color: white;
-}
-
-.role-select-membre {
-  background: #e0e0e0;
-  color: #333;
-}
+.role-select-admin        { background: rgba(204,0,0,0.08);   color: #cc0000; }
+.role-select-contributeur { background: rgba(21,128,61,0.08); color: #15803d; }
+.role-select-membre       { background: rgba(0,0,0,0.05);     color: rgba(0,0,0,0.5); }
 
 .self-label {
   font-size: 0.8rem;

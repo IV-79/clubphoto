@@ -16,12 +16,32 @@
   margin: 0 0 4px;
 }
 
+.profil-header-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
 .membre-depuis {
   color: rgba(0,0,0,0.38);
   font-size: 0.8rem;
   margin: 0;
   letter-spacing: 0.5px;
 }
+
+.role-badge {
+  display: inline-block;
+  padding: 0.15rem 0.65rem;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+.role-admin        { background: rgba(204,0,0,0.08);    color: #cc0000;  border: 1px solid rgba(204,0,0,0.2); }
+.role-contributeur { background: rgba(21,128,61,0.08);  color: #15803d;  border: 1px solid rgba(21,128,61,0.2); }
+.role-membre       { background: rgba(0,0,0,0.05);      color: rgba(0,0,0,0.45); border: 1px solid rgba(0,0,0,0.12); }
 
 /* Layout 2 colonnes */
 .profil-layout {

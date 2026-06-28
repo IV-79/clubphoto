@@ -59,10 +59,13 @@
 }
 
 .status-avenir              { background: rgba(76,175,80,0.12);  color: #2e7d32; }
+.status-bientot             { background: rgba(245,158,11,0.12); color: #d97706; }
+.status-encours             { background: rgba(22,163,74,0.15);  color: #15803d; }
 .status-passee              { background: rgba(0,0,0,0.06);       color: rgba(0,0,0,0.45); }
 .status-oneshot-inscription { background: rgba(76,175,80,0.12);  color: #2e7d32; }
 .status-oneshot-fermee      { background: rgba(255,152,0,0.14);  color: #e65100; }
 .status-oneshot-vote        { background: rgba(103,58,183,0.12); color: #4527a0; }
+.status-preparation         { background: rgba(103,58,183,0.10); color: #5e35b1; }
 .status-defi-avenir         { background: rgba(245,158,11,0.12); color: #d97706; }
 .status-defi-soumission     { background: rgba(76,175,80,0.12);  color: #2e7d32; }
 .status-defi-vote           { background: rgba(139,92,246,0.12); color: #6d28d9; }

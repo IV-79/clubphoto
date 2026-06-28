@@ -107,6 +107,12 @@ export class Membres {
     ].join('\n');
   }
 
+  roleLabel(role: string): string {
+    if (role === 'admin') return 'Administrateur';
+    if (role === 'contributeur') return 'Contributeur';
+    return 'Membre';
+  }
+
   formatDate(iso: string | undefined): string {
     if (!iso) return '—';
     return new Date(iso).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: '2-digit' });

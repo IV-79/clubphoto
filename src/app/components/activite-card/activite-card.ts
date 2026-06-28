@@ -60,23 +60,36 @@ export class ActiviteCard {
   protected statusBadge = computed((): { text: string; css: string } => {
     const { kind, data } = this.item();
     if (kind === 'sortie') {
-      return this.isPast()
-        ? { text: 'Terminé',  css: 'card-status status-passee' }
-        : { text: 'En cours', css: 'card-status status-avenir' };
+      if (this.isPast()) return { text: 'Terminé', css: 'card-status status-passee' };
+      const date = (data as Sortie).date;
+      const n = new Date();
+      const todayStr = `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}`;
+
+      if (date === todayStr)           return { text: 'En cours', css: 'card-status status-encours' };
+      if (this.isDateWithin7Days(date)) return { text: 'Bientôt',  css: 'card-status status-bientot' };
+      return { text: 'À venir', css: 'card-status status-avenir' };
     }
     if (kind === 'oneshot') {
-      const statut = (data as OneShot).statut;
+      const o = data as OneShot;
+      if (o.statut === 'preparation') {
+        return { text: 'En préparation', css: 'card-status status-preparation' };
+      }
       const cssMap: Record<string, string> = {
         inscription:            'card-status status-oneshot-inscription',
         fermeture_inscriptions: 'card-status status-oneshot-fermee',
         vote:                   'card-status status-oneshot-vote',
         resultats:              'card-status status-passee',
       };
-      return { text: ONESHOT_STATUT_LABELS[statut], css: cssMap[statut] ?? 'card-status' };
+      return { text: ONESHOT_STATUT_LABELS[o.statut], css: cssMap[o.statut] ?? 'card-status' };
     }
     const statut = getDefiStatut(data as Defi);
+    if (statut === 'a_venir') {
+      const debut = (data as Defi).dateDebutSoumission;
+      return this.isDateWithin7Days(debut)
+        ? { text: 'Bientôt',  css: 'card-status status-bientot' }
+        : { text: 'À venir',  css: 'card-status status-avenir' };
+    }
     const cssMap: Record<string, string> = {
-      a_venir:    'card-status status-defi-avenir',
       soumission: 'card-status status-defi-soumission',
       vote:       'card-status status-defi-vote',
       resultats:  'card-status status-passee',
@@ -120,5 +133,17 @@ export class ActiviteCard {
 
   protected mapsUrl(lieu: string): string {
     return `https://maps.google.com/?q=${encodeURIComponent(lieu)}`;
+  }
+
+  private isDateWithin7Days(date: string): boolean {
+    const n = new Date();
+    const todayStr = `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}`;
+    if (date < todayStr) return false;
+    const limit = new Date(n);
+    limit.setDate(limit.getDate() + 7);
+    const y = limit.getFullYear();
+    const m = String(limit.getMonth() + 1).padStart(2, '0');
+    const d = String(limit.getDate()).padStart(2, '0');
+    return date <= `${y}-${m}-${d}`;
   }
 }

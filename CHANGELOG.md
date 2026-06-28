@@ -4,6 +4,15 @@
 
 ## En cours (alpha)
 
+### Page Événements — 3 sections (En cours / À venir / Terminés) (2026-06-28)
+
+- La page `/galeries/sorties` passe de 2 à 3 sections : **En cours**, **À venir**, **Terminés**.
+- Règle "programme de la semaine" : un événement à venir apparaît dans "En cours" dès le lundi de la semaine où il se déroulera, même s'il n'a pas encore commencé. Cela donne une visibilité sur le programme de la semaine en cours.
+- Défis en phase `soumission` ou `vote en cours` → section "En cours" ; en `a_venir` → "À venir" (ou "En cours" si cette semaine).
+- OneShots en `inscription`, `fermeture_inscriptions`, `vote` → "En cours" ; en `preparation` (créateur seul) → "À venir".
+- Section "À venir" masquée automatiquement si vide et aucun filtre actif.
+- Sous-titre de la page mis à jour : "organisés par les contributeurs et administrateurs".
+
 ### Rôle Contributeur + restriction création d'événements (2026-06-28)
 
 - Rôle `redacteur` renommé `contributeur` partout : modèle `UserProfile`, garde `editorGuard`, `AuthService.getUserRole()`, sélecteur de rôle admin, page Actualités, règles Firestore.

@@ -49,6 +49,22 @@
 
 .section { margin-bottom: 3rem; }
 
+.section-preparation {
+  background: rgba(103,58,183,0.04);
+  border: 1px dashed rgba(103,58,183,0.25);
+  border-radius: 8px;
+  padding: 1.25rem 1.25rem 1.5rem;
+}
+.section-preparation .section-title { border-color: rgba(103,58,183,0.15); color: rgba(103,58,183,0.7); }
+.section-preparation .count { background: rgba(103,58,183,0.08); color: rgba(103,58,183,0.6); }
+
+.section-hint {
+  margin: -0.75rem 0 1.25rem;
+  font-size: 0.8rem;
+  color: rgba(103,58,183,0.55);
+  font-style: italic;
+}
+
 .section-title {
   font-size: 0.75rem;
   font-weight: 700;

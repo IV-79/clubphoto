@@ -47,7 +47,7 @@
 
         @if (profile() && isInscrit() && s === 'vote') {
           <div class="votes-restants">
-            {{ votesRestants() }} vote(s) restant(s) / {{ d.maxVotes }}
+            Votes effectués : {{ mesVotesIds().length }} / {{ d.maxVotes }}
           </div>
         }
 
@@ -304,23 +304,32 @@
 
           @if (profile()) {
             <div class="vote-counter">
-              Votes restants : <strong>{{ votesRestants() }}</strong> / {{ d.maxVotes }}
+              Votes effectués : <strong>{{ mesVotesIds().length }}</strong> / {{ d.maxVotes }}
             </div>
 
             @if (photosVisibles().length === 0) {
               <p class="empty-photos">Aucune photo soumise.</p>
             } @else {
-              <div class="photos-grid photos-vote-grid">
+              <div class="vote-grid">
                 @for (photo of photosVisibles(); track photo.id) {
                   @let voted = mesVotesIds().includes(photo.id);
-                  <div class="photo-card photo-vote-card" [class.voted]="voted"
-                       style="cursor:pointer" (click)="openLightbox(photo)">
-                    <img [src]="photo.thumbnailUrl ?? photo.url" alt="photo" class="photo-img" />
-                    <button class="btn-vote" [class.voted]="voted"
-                            (click)="$event.stopPropagation(); toggleVote(photo.id)"
-                            [disabled]="!voted && votesRestants() <= 0">
-                      {{ voted ? '♥ Voté' : '♡ Voter' }}
-                    </button>
+                  @let isOwn = photo.membreUid === profile()?.uid;
+                  <div class="vote-card" [class.voted]="voted" [class.own-card]="isOwn"
+                       (click)="openLightbox(photo)">
+                    <img [src]="photo.thumbnailUrl ?? photo.url" alt="photo" class="vote-thumb" loading="lazy" />
+                    <div class="vote-footer"
+                       [class.footer-votable]="!isOwn && (voted || votesRestants() > 0)"
+                       (click)="$event.stopPropagation(); !isOwn && (voted || votesRestants() > 0) && toggleVote(photo.id)">
+                      @if (isOwn) {
+                        <span class="footer-own">Ma photo</span>
+                      } @else if (voted) {
+                        <span class="footer-action footer-voted">✓ Retirer</span>
+                      } @else {
+                        <span class="footer-action" [class.footer-disabled]="votesRestants() <= 0">
+                          {{ votesRestants() > 0 ? 'Voter' : '—' }}
+                        </span>
+                      }
+                    </div>
                   </div>
                 }
               </div>

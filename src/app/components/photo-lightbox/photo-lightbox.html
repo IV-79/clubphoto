@@ -181,7 +181,7 @@
                         <div class="lb-reply-form-actions">
                           <button class="btn-cancel-reply" (click)="replyingTo.set(null)">Annuler</button>
                           <button class="btn-send" (click)="submitReply(c)"
-                            [disabled]="!newReply.trim()">Envoyer</button>
+                            [disabled]="!newReply.trim()">Enregistrer</button>
                         </div>
                       </div>
                     }
@@ -203,7 +203,7 @@
               (keydown.escape)="newComment = ''"></textarea>
             <button class="btn-send" (click)="submitComment()"
               [disabled]="!newComment.trim() || submitting()">
-              {{ submitting() ? '…' : 'Envoyer' }}
+              {{ submitting() ? '…' : 'Enregistrer' }}
             </button>
           </div>
         }
