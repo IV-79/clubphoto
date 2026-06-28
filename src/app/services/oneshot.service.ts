@@ -190,20 +190,34 @@ export class OneShotService {
     id: string,
     notifCtx?: { titre: string; nomCreateur: string; creatorUid: string; photoCouverturePath?: string }
   ): Promise<void> {
-    const [photosSnap, inscritsSnap] = await runInInjectionContext(this.injector, () =>
+    const [oneShotSnap, photosSnap, inscritsSnap, themesSnap, votesSnap] = await runInInjectionContext(this.injector, () =>
       Promise.all([
+        getDoc(doc(this.firestore, 'oneshots', id)),
         getDocs(collection(this.firestore, `oneshots/${id}/photos`)),
         getDocs(collection(this.firestore, `oneshots/${id}/inscriptions`)),
+        getDocs(collection(this.firestore, `oneshots/${id}/themes`)),
+        getDocs(collection(this.firestore, `oneshots/${id}/votes`)),
       ])
     );
-    const storageDeletions = photosSnap.docs
-      .map(d => d.data()['storagePath'] as string)
-      .filter(Boolean)
-      .map(path => deleteObject(ref(this.storage, path)).catch(() => {}));
-    if (notifCtx?.photoCouverturePath) {
-      storageDeletions.push(deleteObject(ref(this.storage, notifCtx.photoCouverturePath)).catch(() => {}));
+    const oneShotData = oneShotSnap.data() as { photoCouverturePath?: string } | undefined;
+
+    const storageDeletions: Promise<void>[] = [];
+    for (const p of photosSnap.docs) {
+      const d = p.data();
+      if (d['storagePath'])   storageDeletions.push(deleteObject(ref(this.storage, d['storagePath'])).catch(() => {}));
+      if (d['thumbnailPath']) storageDeletions.push(deleteObject(ref(this.storage, d['thumbnailPath'])).catch(() => {}));
     }
-    await Promise.all(storageDeletions);
+    const coverPath = oneShotData?.photoCouverturePath ?? notifCtx?.photoCouverturePath;
+    if (coverPath) storageDeletions.push(deleteObject(ref(this.storage, coverPath)).catch(() => {}));
+
+    const firestoreDeletes = [
+      ...photosSnap.docs.map(p  => runInInjectionContext(this.injector, () => deleteDoc(p.ref))),
+      ...inscritsSnap.docs.map(p => runInInjectionContext(this.injector, () => deleteDoc(p.ref))),
+      ...themesSnap.docs.map(p   => runInInjectionContext(this.injector, () => deleteDoc(p.ref))),
+      ...votesSnap.docs.map(p    => runInInjectionContext(this.injector, () => deleteDoc(p.ref))),
+    ];
+
+    await Promise.all([...storageDeletions, ...firestoreDeletes]);
     await runInInjectionContext(this.injector, () =>
       deleteDoc(doc(this.firestore, 'oneshots', id))
     );

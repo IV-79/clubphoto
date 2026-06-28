@@ -52,7 +52,8 @@ export class DefiCreer {
     dateCloturVotes:     new FormControl('', { validators: [Validators.required], nonNullable: true }),
     maxPhotos:           new FormControl(2, { validators: [Validators.required, Validators.min(1), Validators.max(10)], nonNullable: true }),
     maxVotes:            new FormControl(3, { validators: [Validators.required, Validators.min(1), Validators.max(20)], nonNullable: true }),
-    visibilite:          new FormControl<'public' | 'membre'>('public', { nonNullable: true }),
+    visibilite:              new FormControl<'public' | 'membre'>('public', { nonNullable: true }),
+    inscriptionObligatoire:  new FormControl(true, { nonNullable: true }),
   }, { validators: datesOrder });
 
   get dateErrors(): string | null {
@@ -79,9 +80,10 @@ export class DefiCreer {
         dateDebutSoumission: v.dateDebutSoumission,
         dateFinSoumission:   v.dateFinSoumission,
         dateCloturVotes:     v.dateCloturVotes,
-        maxPhotos:           v.maxPhotos,
-        maxVotes:            v.maxVotes,
-        visibilite:          v.visibilite,
+        maxPhotos:               v.maxPhotos,
+        maxVotes:                v.maxVotes,
+        visibilite:              v.visibilite,
+        inscriptionObligatoire:  v.inscriptionObligatoire,
         organisateurUid:     profile.uid,
         organisateurNom:     nom,
       });

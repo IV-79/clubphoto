@@ -1,7 +1,7 @@
 import { Injectable, inject, Injector, runInInjectionContext } from '@angular/core';
 import {
   Firestore, collection, collectionGroup, doc, addDoc, updateDoc, deleteDoc, setDoc,
-  collectionData, docData, query, orderBy, where, getDocs, getDoc, increment
+  collectionData, docData, query, orderBy, where, getDocs, getDoc, increment, limit
 } from '@angular/fire/firestore';
 import { Storage, ref, uploadBytesResumable, uploadBytes, getDownloadURL, deleteObject } from '@angular/fire/storage';
 import { Observable, from, map } from 'rxjs';
@@ -126,6 +126,7 @@ export class DefiService {
       addDoc(collection(this.firestore, 'defis'), {
         ...data,
         nbInscrits: 0,
+        nbParticipants: 0,
         dateCreation: new Date().toISOString(),
       })
     );
@@ -143,6 +144,38 @@ export class DefiService {
   }
 
   async deleteDefi(id: string): Promise<void> {
+    const defiSnap = await runInInjectionContext(this.injector, () =>
+      getDoc(doc(this.firestore, 'defis', id))
+    );
+    const defiData = defiSnap.data() as { photoCouverturePath?: string } | undefined;
+
+    const photosSnap = await runInInjectionContext(this.injector, () =>
+      getDocs(collection(this.firestore, `defis/${id}/photos`))
+    );
+    const inscritsSnap = await runInInjectionContext(this.injector, () =>
+      getDocs(collection(this.firestore, `defis/${id}/inscriptions`))
+    );
+    const votesSnap = await runInInjectionContext(this.injector, () =>
+      getDocs(collection(this.firestore, `defis/${id}/votes`))
+    );
+
+    const storageDeletes: Promise<void>[] = [];
+    for (const p of photosSnap.docs) {
+      const d = p.data() as { storagePath?: string; thumbnailPath?: string };
+      if (d.storagePath)   storageDeletes.push(deleteObject(ref(this.storage, d.storagePath)).catch(() => {}));
+      if (d.thumbnailPath) storageDeletes.push(deleteObject(ref(this.storage, d.thumbnailPath)).catch(() => {}));
+    }
+    if (defiData?.photoCouverturePath) {
+      storageDeletes.push(deleteObject(ref(this.storage, defiData.photoCouverturePath)).catch(() => {}));
+    }
+
+    const firestoreDeletes: Promise<void>[] = [
+      ...photosSnap.docs.map(p  => runInInjectionContext(this.injector, () => deleteDoc(p.ref))),
+      ...inscritsSnap.docs.map(p => runInInjectionContext(this.injector, () => deleteDoc(p.ref))),
+      ...votesSnap.docs.map(p   => runInInjectionContext(this.injector, () => deleteDoc(p.ref))),
+    ];
+
+    await Promise.all([...storageDeletes, ...firestoreDeletes]);
     await runInInjectionContext(this.injector, () =>
       deleteDoc(doc(this.firestore, 'defis', id))
     );
@@ -261,6 +294,14 @@ export class DefiService {
               const docRef = await runInInjectionContext(this.injector, () =>
                 addDoc(collection(this.firestore, `defis/${defiId}/photos`), photoData)
               );
+              const existingSnap = await runInInjectionContext(this.injector, () =>
+                getDocs(query(collection(this.firestore, `defis/${defiId}/photos`), where('membreUid', '==', user.uid), limit(2)))
+              );
+              if (existingSnap.size === 1) {
+                await runInInjectionContext(this.injector, () =>
+                  updateDoc(doc(this.firestore, 'defis', defiId), { nbParticipants: increment(1) })
+                );
+              }
               observer.next({ progress: 100, done: true, photo: { id: docRef.id, ...photoData } as DefiPhoto });
               observer.complete();
             }
@@ -281,6 +322,14 @@ export class DefiService {
     ];
     if (photo.thumbnailPath) deletes.push(deleteObject(ref(this.storage, photo.thumbnailPath)).catch(() => {}));
     await Promise.all(deletes);
+    const remainingSnap = await runInInjectionContext(this.injector, () =>
+      getDocs(query(collection(this.firestore, `defis/${defiId}/photos`), where('membreUid', '==', photo.membreUid), limit(1)))
+    );
+    if (remainingSnap.empty) {
+      await runInInjectionContext(this.injector, () =>
+        updateDoc(doc(this.firestore, 'defis', defiId), { nbParticipants: increment(-1) })
+      );
+    }
   }
 
   // ── Votes ─────────────────────────────────────────────────────────────

@@ -171,9 +171,10 @@ export class SortieCreer {
           dateCloturVotes:     v.dateCloturVotes,
           maxPhotos:           v.maxPhotos,
           maxVotes:            v.maxVotes,
-          visibilite:          v.visibilite,
-          organisateurUid:     profile.uid,
-          organisateurNom:     nom,
+          visibilite:              v.visibilite,
+          organisateurUid:         profile.uid,
+          organisateurNom:         nom,
+          inscriptionObligatoire:  v.inscriptionObligatoire,
         });
         if (this.pendingCoverFile()) {
           await this.defiService.setCouverture(id, this.pendingCoverFile()!);

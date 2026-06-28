@@ -55,7 +55,11 @@
             @if (d.theme) {
               <span class="badge badge-defi">{{ d.theme }}</span>
             }
-            <span class="badge badge-defi">{{ d.nbInscrits }} inscrit(s)</span>
+            @if (d.inscriptionObligatoire) {
+              <span class="badge badge-defi">{{ d.nbInscrits }} inscrit(s)</span>
+            } @else {
+              <span class="badge badge-defi">{{ d.nbParticipants ?? 0 }} participant(s)</span>
+            }
           }
         }
       </div>

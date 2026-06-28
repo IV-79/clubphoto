@@ -151,20 +151,30 @@ export class SortieService {
     sortieId: string,
     notifCtx?: { titre: string; nomOrganisateur: string; organisateurUid: string; imageEvenementPath?: string }
   ): Promise<void> {
-    const [photosSnap, inscritsSnap] = await runInInjectionContext(this.injector, () =>
+    const [sortieSnap, photosSnap, inscritsSnap] = await runInInjectionContext(this.injector, () =>
       Promise.all([
+        getDoc(doc(this.firestore, 'sorties', sortieId)),
         getDocs(collection(this.firestore, `sorties/${sortieId}/photos`)),
         getDocs(collection(this.firestore, `sorties/${sortieId}/inscriptions`)),
       ])
     );
-    const storageDeletions = photosSnap.docs
-      .map(d => d.data()['storagePath'] as string)
-      .filter(Boolean)
-      .map(path => deleteObject(ref(this.storage, path)).catch(() => {}));
-    if (notifCtx?.imageEvenementPath) {
-      storageDeletions.push(deleteObject(ref(this.storage, notifCtx.imageEvenementPath)).catch(() => {}));
+    const sortieData = sortieSnap.data() as { imageEvenementPath?: string } | undefined;
+
+    const storageDeletions: Promise<void>[] = [];
+    for (const p of photosSnap.docs) {
+      const d = p.data();
+      if (d['storagePath'])   storageDeletions.push(deleteObject(ref(this.storage, d['storagePath'])).catch(() => {}));
+      if (d['thumbnailPath']) storageDeletions.push(deleteObject(ref(this.storage, d['thumbnailPath'])).catch(() => {}));
     }
-    await Promise.all(storageDeletions);
+    const coverPath = sortieData?.imageEvenementPath ?? notifCtx?.imageEvenementPath;
+    if (coverPath) storageDeletions.push(deleteObject(ref(this.storage, coverPath)).catch(() => {}));
+
+    const firestoreDeletes = [
+      ...photosSnap.docs.map(p  => runInInjectionContext(this.injector, () => deleteDoc(p.ref))),
+      ...inscritsSnap.docs.map(p => runInInjectionContext(this.injector, () => deleteDoc(p.ref))),
+    ];
+
+    await Promise.all([...storageDeletions, ...firestoreDeletes]);
     await runInInjectionContext(this.injector, () =>
       deleteDoc(doc(this.firestore, 'sorties', sortieId))
     );

@@ -84,7 +84,7 @@
       </mat-form-field>
 
       <mat-form-field appearance="outline">
-        <mat-label>Max votes par participant</mat-label>
+        <mat-label>Max votes par membre</mat-label>
         <input matInput type="number" formControlName="maxVotes" min="1" max="20" />
         @if (form.get('maxVotes')?.invalid && form.get('maxVotes')?.touched) {
           <mat-error>Valeur entre 1 et 20</mat-error>
@@ -99,6 +99,12 @@
         </mat-select>
       </mat-form-field>
     </div>
+
+    <label class="field-toggle">
+      <input type="checkbox" formControlName="inscriptionObligatoire" />
+      <span class="toggle-label">Inscription obligatoire avant de soumettre</span>
+      <span class="toggle-hint">Décoché = tout membre connecté peut soumettre directement, sans s'inscrire.</span>
+    </label>
 
     <!-- Actions -->
     <div class="form-actions">

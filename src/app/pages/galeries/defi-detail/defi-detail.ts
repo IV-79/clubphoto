@@ -136,6 +136,18 @@ export class DefiDetail {
     return uid ? this.photos().filter(p => p.membreUid === uid) : [];
   });
 
+  uniqueSubmitters = computed(() => {
+    const seen = new Set<string>();
+    const result: { uid: string; nom: string }[] = [];
+    for (const p of this.photos()) {
+      if (!seen.has(p.membreUid)) {
+        seen.add(p.membreUid);
+        result.push({ uid: p.membreUid, nom: p.membreNom });
+      }
+    }
+    return result;
+  });
+
   photosVisibles = computed((): DefiPhoto[] => {
     const s = this.statut();
     const uid = this.profile()?.uid;
@@ -153,8 +165,9 @@ export class DefiDetail {
 
   canUpload = computed(() =>
     this.statut() === 'soumission' &&
-    this.isInscrit() &&
-    this.mesPhotos().length < (this.defi()?.maxPhotos ?? 1)
+    !!this.profile() &&
+    this.mesPhotos().length < (this.defi()?.maxPhotos ?? 1) &&
+    (!(this.defi()?.inscriptionObligatoire ?? true) || this.isInscrit())
   );
 
   photosRanked = computed((): DefiPhotoResult[] => {
@@ -301,6 +314,7 @@ export class DefiDetail {
   editMaxPhotos = 2;
   editMaxVotes  = 3;
   editVisibilite: 'public' | 'membre' = 'public';
+  editInscriptionObligatoire = true;
 
   enterEdit() {
     const d = this.defi();
@@ -311,9 +325,10 @@ export class DefiDetail {
     this.editDebut       = d.dateDebutSoumission;
     this.editFin         = d.dateFinSoumission;
     this.editVotes       = d.dateCloturVotes;
-    this.editMaxPhotos   = d.maxPhotos;
-    this.editMaxVotes    = d.maxVotes;
-    this.editVisibilite  = d.visibilite;
+    this.editMaxPhotos              = d.maxPhotos;
+    this.editMaxVotes               = d.maxVotes;
+    this.editVisibilite             = d.visibilite;
+    this.editInscriptionObligatoire = d.inscriptionObligatoire ?? true;
     this.editMode.set(true);
   }
 
@@ -326,15 +341,16 @@ export class DefiDetail {
     this.saving.set(true);
     try {
       await this.defiService.updateDefi(this.id, {
-        titre: this.editTitre,
-        theme: this.editTheme,
-        description: this.editDesc,
-        dateDebutSoumission: this.editDebut,
-        dateFinSoumission:   this.editFin,
-        dateCloturVotes:     this.editVotes,
-        maxPhotos:           this.editMaxPhotos,
-        maxVotes:            this.editMaxVotes,
-        visibilite:          this.editVisibilite,
+        titre:                  this.editTitre,
+        theme:                  this.editTheme,
+        description:            this.editDesc,
+        dateDebutSoumission:    this.editDebut,
+        dateFinSoumission:      this.editFin,
+        dateCloturVotes:        this.editVotes,
+        maxPhotos:              this.editMaxPhotos,
+        maxVotes:               this.editMaxVotes,
+        visibilite:             this.editVisibilite,
+        inscriptionObligatoire: this.editInscriptionObligatoire,
       });
 
       if (finChanged || votesChanged) {

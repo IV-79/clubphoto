@@ -134,9 +134,15 @@
           <input matInput type="number" formControlName="maxPhotos" min="1" />
         </mat-form-field>
         <mat-form-field appearance="outline" class="field-half">
-          <mat-label>Votes par participant</mat-label>
+          <mat-label>Votes par membre</mat-label>
           <input matInput type="number" formControlName="maxVotes" min="1" />
         </mat-form-field>
+      </div>
+
+      <div class="checkboxes">
+        <mat-checkbox formControlName="inscriptionObligatoire" color="primary">
+          Inscription obligatoire avant de soumettre
+        </mat-checkbox>
       </div>
 
     }

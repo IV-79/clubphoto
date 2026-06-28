@@ -96,32 +96,30 @@
 .stat-row > strong { font-size: 0.9rem; color: #1a1a1a; }
 
 .btn-inscrire {
-  width: 100%;
-  background: #d97706;
-  color: white;
+  background: #cc0000;
+  color: #fff;
   border: none;
-  border-radius: 6px;
-  padding: 0.75rem;
+  border-radius: 4px;
+  padding: 0.5rem 1.1rem;
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s;
 }
-.btn-inscrire:hover:not(:disabled) { background: #b45309; }
-.btn-inscrire:disabled { opacity: 0.6; cursor: default; }
+.btn-inscrire:hover:not(:disabled) { background: #aa0000; }
+.btn-inscrire:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .btn-desinscrire {
-  width: 100%;
-  background: none;
+  background: transparent;
   border: 1px solid #ddd;
-  border-radius: 6px;
-  padding: 0.6rem;
+  color: #2e7d32;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
   font-size: 0.85rem;
-  color: rgba(0,0,0,0.5);
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all 0.2s;
 }
-.btn-desinscrire:hover { border-color: #cc0000; color: #cc0000; }
+.btn-desinscrire:hover:not(:disabled) { border-color: #cc0000; color: #cc0000; }
 
 /* ── Box participants ─────────────────────────────────────────── */
 
@@ -130,7 +128,7 @@
   border: 1px solid rgba(0,0,0,0.08);
   border-radius: 8px;
   padding: 1.25rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 .inscription-header {
@@ -361,6 +359,42 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 0.75rem;
+}
+
+.edit-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  margin-top: 0.25rem;
+}
+.edit-toggle input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #d97706;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.edit-toggle-label {
+  font-size: 0.88rem;
+  color: #1a1a1a;
+}
+.edit-toggle input:disabled + .edit-toggle-label {
+  color: rgba(0,0,0,0.38);
+}
+
+.lock-note-sm {
+  font-size: 0.78rem;
+  color: rgba(0,0,0,0.38);
+  background: rgba(0,0,0,0.04);
+  border-radius: 4px;
+  padding: 4px 10px;
+  margin: 0;
+}
+
+.participation-libre {
+  color: #1565c0;
+  font-weight: 500;
 }
 
 .edit-actions {

@@ -22,9 +22,11 @@ export interface Defi {
   dateFinSoumission: string;
   dateCloturVotes: string;
   visibilite: 'public' | 'membre';
+  inscriptionObligatoire: boolean;
   organisateurUid: string;
   organisateurNom: string;
   nbInscrits: number;
+  nbParticipants?: number;
   dateCreation: string;
 }
 

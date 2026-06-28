@@ -126,6 +126,34 @@
   gap: 0.75rem;
 }
 
+/* Toggle inscription */
+.field-toggle {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  cursor: pointer;
+}
+.field-toggle input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #1976d2;
+  cursor: pointer;
+  margin: 0;
+}
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: #1a1a1a;
+  font-weight: 500;
+}
+.toggle-hint {
+  font-size: 0.78rem;
+  color: rgba(0,0,0,0.42);
+  padding-left: 24px;
+}
+
 /* Actions */
 .form-actions {
   display: flex;

@@ -4,6 +4,16 @@
 
 ## En cours (alpha)
 
+### Défi photo — inscription optionnelle + nettoyage Storage (2026-06-28)
+
+- Nouveau champ `inscriptionObligatoire` (coché par défaut) sur les défis : accessible à la création (formulaire dédié et formulaire unifié) et en édition.
+- Workflow adapté : sans inscription, tout membre connecté peut soumettre directement ; la section Participants est remplacée par la liste des membres ayant uploadé une photo.
+- Sidebar défi : ligne "Inscrits" renommée "Participants" pour les défis libres, avec le compte des soumetteurs uniques (`nbParticipants` dénormalisé) ; ligne "Photos soumises" ajoutée dès la phase soumission.
+- Carte événement : badge "X inscrit(s)" ou "X participant(s)" selon le mode de participation.
+- Label "Votes par participant" renommé "Votes par membre" partout (formulaires, fiches détail, guide).
+- Style de la box Participants du défi aligné sur celui de la sortie-detail (rouge, vert, chips).
+- **Cascade delete corrigée** : suppression d'un événement (sortie, oneshot, défi) efface maintenant tous les fichiers Storage associés (photos, miniatures, couverture) et toutes les sous-collections Firestore (inscriptions, thèmes, votes). La suppression d'une photo portfolio supprimait déjà correctement les deux fichiers.
+
 ### Page Événements — 3 sections (En cours / À venir / Terminés) (2026-06-28)
 
 - La page `/galeries/sorties` passe de 2 à 3 sections : **En cours**, **À venir**, **Terminés**.
