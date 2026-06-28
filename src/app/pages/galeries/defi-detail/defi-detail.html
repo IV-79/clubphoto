@@ -302,18 +302,9 @@
           </div>
 
           @if (profile()) {
-          @if (!isInscrit() && !canManage()) {
-            <div class="phase-card">
-              <p>Seuls les participants inscrits peuvent voter.</p>
+            <div class="vote-counter">
+              Votes restants : <strong>{{ votesRestants() }}</strong> / {{ d.maxVotes }}
             </div>
-          }
-
-          @if (canParticiper()) {
-            @if (isInscrit()) {
-              <div class="vote-counter">
-                Votes restants : <strong>{{ votesRestants() }}</strong> / {{ d.maxVotes }}
-              </div>
-            }
 
             @if (photosVisibles().length === 0) {
               <p class="empty-photos">Aucune photo soumise.</p>
@@ -324,18 +315,15 @@
                   <div class="photo-card photo-vote-card" [class.voted]="voted"
                        style="cursor:pointer" (click)="openLightbox(photo)">
                     <img [src]="photo.url" alt="photo" class="photo-img" />
-                    @if (isInscrit()) {
-                      <button class="btn-vote" [class.voted]="voted"
-                              (click)="$event.stopPropagation(); toggleVote(photo.id)"
-                              [disabled]="!voted && votesRestants() <= 0">
-                        {{ voted ? '♥ Voté' : '♡ Voter' }}
-                      </button>
-                    }
+                    <button class="btn-vote" [class.voted]="voted"
+                            (click)="$event.stopPropagation(); toggleVote(photo.id)"
+                            [disabled]="!voted && votesRestants() <= 0">
+                      {{ voted ? '♥ Voté' : '♡ Voter' }}
+                    </button>
                   </div>
                 }
               </div>
             }
-          }
           } <!-- fin @if (profile()) -->
         }
 

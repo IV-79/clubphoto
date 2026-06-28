@@ -221,11 +221,11 @@ export class OneShotDetail {
 
   voteProgress = computed(() => {
     const themes   = this.themes();
-    const inscrits = this.inscriptions();
+    const membres  = this.allMembres().filter(m => !m.isSuspended);
     const votes    = this.allVotes();
-    if (!themes.length || !inscrits.length) return null;
+    if (!themes.length || !membres.length) return null;
 
-    const total = themes.length * inscrits.length;
+    const total = themes.length * membres.length;
     const cast  = votes.length;
 
     const byTheme = themes.map(t => ({
@@ -233,7 +233,7 @@ export class OneShotDetail {
       votes: votes.filter(v => v.themeId === t.id).length,
     }));
 
-    return { cast, total, pct: Math.round(cast / total * 100), byTheme, nbMembers: inscrits.length };
+    return { cast, total, pct: Math.round(cast / total * 100), byTheme, nbMembers: membres.length };
   });
 
   addingMembre      = signal(false);

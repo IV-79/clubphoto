@@ -92,8 +92,6 @@ export class DefiDetail {
     const uid = this.profile()?.uid;
     return uid ? this.inscriptions().some(i => i.uid === uid) : false;
   });
-  canParticiper = computed(() => this.isInscrit() || this.canManage());
-
   userName = computed(() => {
     const p = this.profile();
     return p ? `${p.prenom ?? ''} ${p.nom}`.trim() : '';
