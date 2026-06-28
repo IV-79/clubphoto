@@ -57,9 +57,24 @@ export class Calendrier {
     { initialValue: [] as Reunion[] }
   );
 
-  // --- OneShots publics + sorties (one-shot) ---
-  private oneshots = toSignal(this.oneShotService.getPublicOneShotsOnce(), { initialValue: [] as OneShot[] });
-  private sorties  = toSignal(this.sortieService.getSortiesOnce(), { initialValue: [] as Sortie[] });
+  // --- OneShots publics + sorties (one-shot, filtrés par visibilité) ---
+  private oneshots = toSignal(
+    toObservable(this.loggedIn).pipe(
+      switchMap(loggedIn => this.oneShotService.getPublicOneShotsOnce().pipe(
+        map(list => loggedIn ? list : list.filter(o => (o.visibilite ?? 'public') === 'public'))
+      ))
+    ),
+    { initialValue: [] as OneShot[] }
+  );
+
+  private sorties = toSignal(
+    toObservable(this.loggedIn).pipe(
+      switchMap(loggedIn => this.sortieService.getSortiesOnce().pipe(
+        map(list => loggedIn ? list : list.filter(s => (s.visibilite ?? 'public') === 'public'))
+      ))
+    ),
+    { initialValue: [] as Sortie[] }
+  );
 
   isMembre = computed(() => this.loggedIn());
 

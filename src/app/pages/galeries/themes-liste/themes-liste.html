@@ -8,18 +8,22 @@
   <!-- THÈME OUVERT -->
   @if (themeOuvert(); as t) {
     <section class="section-featured">
-      <div class="featured-card featured-ouvert">
-        <div class="card-meta">
-          <span class="statut-pill pill-ouvert">Ouvert</span>
-          <span class="card-mois">{{ formatMois(t.mois) }}</span>
-        </div>
-        <h2 class="card-titre">{{ t.titre }}</h2>
-        @if (t.description) {
-          <p class="card-desc">{{ t.description }}</p>
-        }
-        <p class="card-date">Clôture le <strong>{{ formatDate(dates(t).dateCloture) }}</strong></p>
-        <div class="card-actions">
-          <a [routerLink]="['/galeries/themesdumois', t.id]" class="btn-voir-photos">Voir et soumettre</a>
+      <div class="featured-card featured-ouvert"
+           [class.has-cover]="!!t.photoCouvertureUrl"
+           [style.backgroundImage]="coverBgStyle(t.photoCouvertureUrl)">
+        <div class="featured-card-content">
+          <div class="card-meta">
+            <span class="statut-pill pill-ouvert">Ouvert</span>
+            <span class="card-mois">{{ formatMois(t.mois) }}</span>
+          </div>
+          <h2 class="card-titre">{{ t.titre }}</h2>
+          @if (t.description) {
+            <p class="card-desc">{{ t.description }}</p>
+          }
+          <p class="card-date">Clôture le <strong>{{ formatDate(dates(t).dateCloture) }}</strong></p>
+          <div class="card-actions">
+            <a [routerLink]="['/galeries/themesdumois', t.id]" class="btn-voir-photos">Voir et soumettre</a>
+          </div>
         </div>
       </div>
     </section>
@@ -28,30 +32,36 @@
   <!-- THÈME COMPAGNON : vote en cours ou dernier résultat -->
   @if (themeCompagnon(); as c) {
     <section class="section-featured">
-      <div class="featured-card" [class.featured-vote]="c.statut === 'vote'" [class.featured-resultats]="c.statut === 'resultats'">
-        <div class="card-meta">
-          @if (c.statut === 'vote') {
-            <span class="statut-pill pill-vote">Vote en cours</span>
-          } @else {
-            <span class="statut-pill pill-resultats">Résultats publiés</span>
+      <div class="featured-card"
+           [class.featured-vote]="c.statut === 'vote'"
+           [class.featured-resultats]="c.statut === 'resultats'"
+           [class.has-cover]="!!c.theme.photoCouvertureUrl"
+           [style.backgroundImage]="coverBgStyle(c.theme.photoCouvertureUrl)">
+        <div class="featured-card-content">
+          <div class="card-meta">
+            @if (c.statut === 'vote') {
+              <span class="statut-pill pill-vote">Vote en cours</span>
+            } @else {
+              <span class="statut-pill pill-resultats">Résultats publiés</span>
+            }
+            <span class="card-mois">{{ formatMois(c.theme.mois) }}</span>
+          </div>
+          <h2 class="card-titre">{{ c.theme.titre }}</h2>
+          @if (c.theme.description) {
+            <p class="card-desc">{{ c.theme.description }}</p>
           }
-          <span class="card-mois">{{ formatMois(c.theme.mois) }}</span>
-        </div>
-        <h2 class="card-titre">{{ c.theme.titre }}</h2>
-        @if (c.theme.description) {
-          <p class="card-desc">{{ c.theme.description }}</p>
-        }
-        @if (c.statut === 'vote') {
-          <p class="card-date">Votes jusqu'au <strong>{{ formatDate(dates(c.theme).dateFinVote) }}</strong></p>
-        } @else {
-          <p class="card-date">Résultats de <strong>{{ formatMois(c.theme.mois) }}</strong></p>
-        }
-        <div class="card-actions">
           @if (c.statut === 'vote') {
-            <a [routerLink]="['/galeries/themesdumois', c.theme.id]" class="btn-voir-photos btn-vote-theme">Voir & voter</a>
+            <p class="card-date">Votes jusqu'au <strong>{{ formatDate(dates(c.theme).dateFinVote) }}</strong></p>
           } @else {
-            <a [routerLink]="['/galeries/themesdumois', c.theme.id]" class="btn-voir-photos btn-resultats-theme">Voir les résultats</a>
+            <p class="card-date">Résultats de <strong>{{ formatMois(c.theme.mois) }}</strong></p>
           }
+          <div class="card-actions">
+            @if (c.statut === 'vote') {
+              <a [routerLink]="['/galeries/themesdumois', c.theme.id]" class="btn-voir-photos btn-vote-theme">Voir & voter</a>
+            } @else {
+              <a [routerLink]="['/galeries/themesdumois', c.theme.id]" class="btn-voir-photos btn-resultats-theme">Voir les résultats</a>
+            }
+          </div>
         </div>
       </div>
     </section>

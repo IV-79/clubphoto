@@ -1,6 +1,7 @@
 import { Component, inject, signal, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { DomSanitizer, SafeStyle } from '@angular/platform-browser';
 import { ThemeService } from '../../../services/theme.service';
 import { AuthService } from '../../../services/auth.service';
 import { ThemeMensuel, computeThemeStatut, getThemeDates, ThemeStatut } from '../../../models/theme.model';
@@ -14,6 +15,7 @@ import { ThemeMensuel, computeThemeStatut, getThemeDates, ThemeStatut } from '..
 export class ThemesListe {
   private themeService = inject(ThemeService);
   private authService  = inject(AuthService);
+  private sanitizer    = inject(DomSanitizer);
 
   private allThemes = toSignal(this.themeService.getThemes(), { initialValue: [] as ThemeMensuel[] });
   profile    = toSignal(this.authService.currentUserProfile$);
@@ -65,5 +67,10 @@ export class ThemesListe {
 
   formatDate(iso: string): string {
     return new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
+  }
+
+  coverBgStyle(url: string | undefined): SafeStyle | null {
+    if (!url) return null;
+    return this.sanitizer.bypassSecurityTrustStyle(`url('${url}')`);
   }
 }

@@ -10,6 +10,8 @@ export interface ThemeMensuel {
   maxVotes: number;
   dateCreation: string;
   createdBy: string;
+  photoCouvertureUrl?:  string;
+  photoCouverturePath?: string;
 }
 
 export function getThemeDates(theme: ThemeMensuel): {

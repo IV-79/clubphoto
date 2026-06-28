@@ -32,24 +32,62 @@
 
 .featured-card {
   border-radius: 12px;
-  padding: 32px 36px;
   border: 1px solid rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  position: relative;
+  background-size: cover;
+  background-position: center;
 }
 
-.featured-ouvert {
+.featured-card-content {
+  padding: 32px 36px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Scrim gradient when a cover image is set */
+.featured-card.has-cover::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.38) 55%, rgba(0,0,0,0.14) 100%);
+}
+
+/* Text color overrides for cards with a cover image */
+.featured-card.has-cover .card-titre       { color: #fff; }
+.featured-card.has-cover .card-desc        { color: rgba(255,255,255,0.82); }
+.featured-card.has-cover .card-date        { color: rgba(255,255,255,0.58); }
+.featured-card.has-cover .card-date strong { color: rgba(255,255,255,0.88); }
+.featured-card.has-cover .card-mois {
+  background: rgba(0,0,0,0.28);
+  color: rgba(255,255,255,0.82);
+  padding: 2px 9px;
+  border-radius: 20px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.featured-card.has-cover .statut-pill {
+  background: rgba(255,255,255,0.88);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+  border: none;
+}
+
+.featured-ouvert:not(.has-cover) {
   background: linear-gradient(135deg, rgba(76, 175, 80, 0.06) 0%, #fff 60%);
-  border-color: rgba(76, 175, 80, 0.28);
 }
+.featured-ouvert { border-color: rgba(76, 175, 80, 0.28); }
 
-.featured-vote {
+.featured-vote:not(.has-cover) {
   background: linear-gradient(135deg, rgba(33, 150, 243, 0.06) 0%, #fff 60%);
-  border-color: rgba(33, 150, 243, 0.28);
 }
+.featured-vote { border-color: rgba(33, 150, 243, 0.28); }
 
-.featured-resultats {
+.featured-resultats:not(.has-cover) {
   background: linear-gradient(135deg, rgba(245, 158, 11, 0.07) 0%, #fff 60%);
-  border-color: rgba(245, 158, 11, 0.3);
 }
+.featured-resultats { border-color: rgba(245, 158, 11, 0.3); }
 
 .card-meta {
   display: flex;
@@ -302,7 +340,7 @@
 
 @media (max-width: 600px) {
   .page { padding: 32px 20px 60px; }
-  .featured-card { padding: 22px 20px; }
+  .featured-card-content { padding: 22px 20px; }
   .card-titre { font-size: 1.3rem; }
   .avenir-entry { flex-wrap: wrap; gap: 4px; }
   .avenir-mois { min-width: auto; }

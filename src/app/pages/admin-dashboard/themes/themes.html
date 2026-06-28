@@ -16,6 +16,33 @@
     <div class="form-card">
       <h2 class="form-card-title">Nouveau thème</h2>
       <form [formGroup]="createForm" (ngSubmit)="creer()" class="t-form">
+
+        <!-- Photo de couverture -->
+        <div class="cover-field">
+          <label class="cover-label">Photo de couverture <span class="cover-optional">optionnel</span></label>
+          <p class="cover-hint">Arrière-plan de la carte — format paysage recommandé, redimensionné à 1280 px de large max.</p>
+          <div class="cover-drop"
+               [class.drag-over]="createCoverDrag()"
+               (dragover)="$event.preventDefault(); createCoverDrag.set(true)"
+               (dragleave)="createCoverDrag.set(false)"
+               (drop)="onCreateCoverDrop($event)">
+            @if (createPendingUrl()) {
+              <img [src]="createPendingUrl()!" class="cover-preview" alt="Aperçu" />
+              <div class="cover-overlay">
+                <button type="button" class="cover-change-btn" (click)="createCoverInput.click()">🔄 Changer</button>
+                <button type="button" class="cover-remove-btn" (click)="clearCreateCover()">× Retirer</button>
+              </div>
+            } @else {
+              <div class="cover-empty">
+                <span class="cover-icon">🖼</span>
+                <span>Glisser une image ici ou</span>
+                <button type="button" class="cover-browse-btn" (click)="createCoverInput.click()">parcourir</button>
+              </div>
+            }
+            <input #createCoverInput type="file" accept="image/*" class="hidden-input" (change)="onCreateCoverSelected($event)" />
+          </div>
+        </div>
+
         <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-full">
           <mat-label>Titre *</mat-label>
           <input matInput formControlName="titre" placeholder="ex. Lumière naturelle" />
@@ -39,10 +66,12 @@
           </mat-form-field>
           <app-date-picker label="Fin du vote *" formControlName="dateFinVote" class="field-date"></app-date-picker>
         </div>
-        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-full">
-          <mat-label>Description</mat-label>
-          <textarea matInput formControlName="description" rows="2"
-            placeholder="Consignes, inspiration, règles…"></textarea>
+        <mat-form-field appearance="outline" class="field-full">
+          <mat-label>Lettre de couverture</mat-label>
+          <textarea matInput formControlName="description" rows="4" maxlength="400"
+            placeholder="Courte introduction au thème — inspiration, ambiance, consignes…"></textarea>
+          <mat-hint>Visible dans les 2 cartes sur la page publique Thèmes du mois · 2 à 4 phrases max.</mat-hint>
+          <mat-hint align="end">{{ createForm.get('description')?.value?.length ?? 0 }} / 400</mat-hint>
         </mat-form-field>
         <div class="form-row">
           <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-num">
@@ -101,6 +130,41 @@
                   @if (editingId() === t.id) {
                     <div [class.form-flash]="flashEdit()">
                     <form [formGroup]="editForm" (ngSubmit)="sauvegarder(t.id)" class="t-form">
+
+                      <!-- Photo de couverture -->
+                      <div class="cover-field">
+                        <label class="cover-label">Photo de couverture <span class="cover-optional">optionnel</span></label>
+                        <p class="cover-hint">Arrière-plan de la carte — format paysage recommandé, redimensionné à 1280 px de large max.</p>
+                        <div class="cover-drop"
+                             [class.drag-over]="editCoverDrag()"
+                             (dragover)="$event.preventDefault(); editCoverDrag.set(true)"
+                             (dragleave)="editCoverDrag.set(false)"
+                             (drop)="onEditCoverDrop($event, t.id)">
+                          @if (t.photoCouvertureUrl) {
+                            <img [src]="t.photoCouvertureUrl" class="cover-preview" alt="Image actuelle" />
+                            <div class="cover-overlay">
+                              <button type="button" class="cover-change-btn" (click)="editCoverInput.click()" [disabled]="editCoverUploading()">
+                                {{ editCoverUploading() ? 'Upload…' : '🔄 Changer' }}
+                              </button>
+                              <button type="button" class="cover-remove-btn" (click)="removeEditCover(t.id, t.photoCouverturePath!)" [disabled]="editCoverUploading()">
+                                × Retirer
+                              </button>
+                            </div>
+                          } @else {
+                            <div class="cover-empty">
+                              <span class="cover-icon">🖼</span>
+                              @if (editCoverUploading()) {
+                                <span>Upload en cours…</span>
+                              } @else {
+                                <span>Glisser une image ici ou</span>
+                                <button type="button" class="cover-browse-btn" (click)="editCoverInput.click()">parcourir</button>
+                              }
+                            </div>
+                          }
+                          <input #editCoverInput type="file" accept="image/*" class="hidden-input" (change)="onEditCoverSelected($event, t.id)" />
+                        </div>
+                      </div>
+
                       <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-full">
                         <mat-label>Titre *</mat-label>
                         <input matInput formControlName="titre" />
@@ -135,9 +199,12 @@
                       @if (editStatut() === 'vote') {
                         <p class="lock-note">🗓 Vote en cours — la date de fin peut uniquement être étendue.</p>
                       }
-                      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-full">
-                        <mat-label>Description</mat-label>
-                        <textarea matInput formControlName="description" rows="2"></textarea>
+                      <mat-form-field appearance="outline" class="field-full">
+                        <mat-label>Lettre de couverture</mat-label>
+                        <textarea matInput formControlName="description" rows="4" maxlength="400"
+                          placeholder="Courte introduction au thème — inspiration, ambiance, consignes…"></textarea>
+                        <mat-hint>Visible dans les 2 cartes sur la page publique Thèmes du mois · 2 à 4 phrases max.</mat-hint>
+                        <mat-hint align="end">{{ editForm.get('description')?.value?.length ?? 0 }} / 400</mat-hint>
                       </mat-form-field>
                       <div class="form-row">
                         <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-num">

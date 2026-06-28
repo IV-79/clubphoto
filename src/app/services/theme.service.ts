@@ -1,7 +1,7 @@
 import { Injectable, inject, Injector, runInInjectionContext } from '@angular/core';
 import {
   Firestore, collection, collectionData, doc, docData,
-  addDoc, deleteDoc, setDoc, updateDoc, query, where, orderBy, arrayUnion, arrayRemove, increment, getDocs,
+  addDoc, deleteDoc, setDoc, updateDoc, query, where, orderBy, arrayUnion, arrayRemove, increment, getDocs, deleteField,
 } from '@angular/fire/firestore';
 import { Storage, ref, uploadBytesResumable, uploadBytes, getDownloadURL, deleteObject } from '@angular/fire/storage';
 import { Observable, from } from 'rxjs';
@@ -87,11 +87,32 @@ export class ThemeService {
     maxPhotos: number;
     maxVotes: number;
     createdBy: string;
-  }): Promise<void> {
-    await addDoc(collection(this.firestore, 'themes'), {
+  }): Promise<string> {
+    const docRef = await addDoc(collection(this.firestore, 'themes'), {
       ...data,
       dateCreation: new Date().toISOString(),
     });
+    return docRef.id;
+  }
+
+  async setCouverture(id: string, file: File): Promise<void> {
+    const path = `themes/${id}/couverture`;
+    const storageRef = ref(this.storage, path);
+    await uploadBytes(storageRef, file);
+    const url = await getDownloadURL(storageRef);
+    await runInInjectionContext(this.injector, () =>
+      updateDoc(doc(this.firestore, 'themes', id), { photoCouvertureUrl: url, photoCouverturePath: path })
+    );
+  }
+
+  async removeCouverture(id: string, path: string): Promise<void> {
+    await deleteObject(ref(this.storage, path)).catch(() => {});
+    await runInInjectionContext(this.injector, () =>
+      updateDoc(doc(this.firestore, 'themes', id), {
+        photoCouvertureUrl:  deleteField(),
+        photoCouverturePath: deleteField(),
+      })
+    );
   }
 
   async modifierTheme(id: string, data: {

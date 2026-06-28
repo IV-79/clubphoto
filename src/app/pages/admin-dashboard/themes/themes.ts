@@ -10,6 +10,7 @@ import { DatePickerComponent } from '../../../components/date-picker/date-picker
 import { ThemeService } from '../../../services/theme.service';
 import { AuthService } from '../../../services/auth.service';
 import { ConfirmService } from '../../../services/confirm.service';
+import { compressImage, COMPRESS_ACTUALITE } from '../../../utils/image-compress';
 import {
   ThemeMensuel, computeThemeStatut, getThemeDates, ThemeStatut, THEME_STATUT_LABELS,
 } from '../../../models/theme.model';
@@ -52,6 +53,14 @@ export class AdminThemes {
   editMinFinVote  = signal('');
   flashEdit       = signal(false);
   private flashTimer: ReturnType<typeof setTimeout> | null = null;
+
+  // Cover upload — create form (pending file, uploaded after theme creation)
+  createPendingFile = signal<File | null>(null);
+  createPendingUrl  = signal<string | null>(null);
+  createCoverDrag   = signal(false);
+  // Cover upload — edit form (immediate upload on file select)
+  editCoverUploading = signal(false);
+  editCoverDrag      = signal(false);
 
   private limitActifs = signal(INIT);
   private limitPasses = signal(INIT);
@@ -117,6 +126,7 @@ export class AdminThemes {
   cancelCreate() {
     this.showCreateForm.set(false);
     this.createError.set('');
+    this.clearCreateCover();
   }
 
   async creer() {
@@ -129,7 +139,7 @@ export class AdminThemes {
     }
     this.saving.set(true);
     try {
-      await this.themeService.creerTheme({
+      const id = await this.themeService.creerTheme({
         titre:       v.titre.trim(),
         description: v.description.trim(),
         mois,
@@ -138,11 +148,80 @@ export class AdminThemes {
         maxVotes:    Number(v.maxVotes),
         createdBy:   this.profile()?.uid ?? '',
       });
+      const pendingFile = this.createPendingFile();
+      if (pendingFile) {
+        const compressed = await compressImage(pendingFile, COMPRESS_ACTUALITE);
+        await this.themeService.setCouverture(id, compressed);
+      }
       this.showCreateForm.set(false);
       this.createForm.reset({ maxPhotos: 1, maxVotes: 3 });
       this.createError.set('');
+      this.clearCreateCover();
     } finally {
       this.saving.set(false);
+    }
+  }
+
+  // ── Cover handlers — create form ──────────────────────────────────────────
+
+  onCreateCoverDrop(event: DragEvent) {
+    event.preventDefault();
+    this.createCoverDrag.set(false);
+    const file = event.dataTransfer?.files?.[0];
+    if (file?.type.startsWith('image/')) this.setCreateCoverFile(file);
+  }
+
+  onCreateCoverSelected(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    (event.target as HTMLInputElement).value = '';
+    if (file) this.setCreateCoverFile(file);
+  }
+
+  private setCreateCoverFile(file: File) {
+    const prev = this.createPendingUrl();
+    if (prev) URL.revokeObjectURL(prev);
+    this.createPendingFile.set(file);
+    this.createPendingUrl.set(URL.createObjectURL(file));
+  }
+
+  clearCreateCover() {
+    const url = this.createPendingUrl();
+    if (url) URL.revokeObjectURL(url);
+    this.createPendingFile.set(null);
+    this.createPendingUrl.set(null);
+  }
+
+  // ── Cover handlers — edit form (immediate upload) ─────────────────────────
+
+  onEditCoverDrop(event: DragEvent, themeId: string) {
+    event.preventDefault();
+    this.editCoverDrag.set(false);
+    const file = event.dataTransfer?.files?.[0];
+    if (file?.type.startsWith('image/')) this.uploadEditCoverFile(themeId, file);
+  }
+
+  onEditCoverSelected(event: Event, themeId: string) {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    (event.target as HTMLInputElement).value = '';
+    if (file) this.uploadEditCoverFile(themeId, file);
+  }
+
+  async removeEditCover(themeId: string, storagePath: string) {
+    this.editCoverUploading.set(true);
+    try {
+      await this.themeService.removeCouverture(themeId, storagePath);
+    } finally {
+      this.editCoverUploading.set(false);
+    }
+  }
+
+  private async uploadEditCoverFile(themeId: string, file: File) {
+    this.editCoverUploading.set(true);
+    try {
+      const compressed = await compressImage(file, COMPRESS_ACTUALITE);
+      await this.themeService.setCouverture(themeId, compressed);
+    } finally {
+      this.editCoverUploading.set(false);
     }
   }
 
