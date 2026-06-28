@@ -50,6 +50,8 @@ export interface ThemeSoumission {
   uploadedAt: string;
   likes?: string[];
   exif?: PhotoExif;
+  thumbnailUrl?:  string;
+  thumbnailPath?: string;
 }
 
 export interface ThemeVote {

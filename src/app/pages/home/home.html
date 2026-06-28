@@ -105,7 +105,7 @@
       <div class="gallery-mosaic">
         @for (photo of recentPhotos(); track photo.id) {
           <div class="mosaic-cell">
-            <img [src]="photo.url" [alt]="photo.titre" class="mosaic-img" loading="lazy">
+            <img [src]="photo.thumbnailUrl ?? photo.url" [alt]="photo.titre" class="mosaic-img" loading="lazy">
           </div>
         }
       </div>

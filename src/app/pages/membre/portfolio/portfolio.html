@@ -42,7 +42,7 @@
         <div class="photo-card"
              [class.is-selected]="selectMode() && selectedIds().has(photo.id)"
              (click)="selectMode() ? toggleSelect(photo.id) : openLightbox(i)">
-          <img [src]="photo.url" [alt]="photo.titre" loading="lazy">
+          <img [src]="photo.thumbnailUrl ?? photo.url" [alt]="photo.titre" loading="lazy">
           @if (photo.categorie && !selectMode()) {
             <span class="card-cat">{{ getCategorieLabel(photo.categorie) }}</span>
           }

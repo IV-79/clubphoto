@@ -82,7 +82,7 @@
               @for (soum of soumissions(); track soum.id) {
                 @let isOwn = soum.membreUid === profile()?.uid;
                 <div class="vote-card" [class.own-card]="isOwn" (click)="openLightbox(soum)">
-                  <img [src]="soum.url" class="vote-thumb" loading="lazy" alt="">
+                  <img [src]="soum.thumbnailUrl ?? soum.url" class="vote-thumb" loading="lazy" alt="">
                   @if (isOwn) {
                     <div class="vote-footer">
                       <span class="footer-own">Ma photo</span>
@@ -134,7 +134,7 @@
                   [class.own-card]="isOwn"
                   (click)="openLightbox(soum)">
 
-                  <img [src]="soum.url" class="vote-thumb" loading="lazy" alt="">
+                  <img [src]="soum.thumbnailUrl ?? soum.url" class="vote-thumb" loading="lazy" alt="">
 
                   <div class="vote-footer">
                     @if (isOwn) {

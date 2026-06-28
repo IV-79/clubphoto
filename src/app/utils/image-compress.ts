@@ -14,6 +14,7 @@ export const COMPRESS_ACTUALITE  : CompressOptions = { maxWidth: 1200 };        
 export const COMPRESS_AVATAR     : CompressOptions = { maxWidth: 512,  maxHeight: 512 };   // 512px — photo de profil
 export const COMPRESS_BANDEAU    : CompressOptions = { maxWidth: 1920, maxHeight: 480 };   // 1920×480 — bandeau membre
 export const COMPRESS_HERO       : CompressOptions = { maxLong: 1920 };                    // 1920px — image hero config site
+export const COMPRESS_THUMB      : CompressOptions = { maxLong: 600 };                     //  600px — miniature grilles de cartes
 
 // ── Core ─────────────────────────────────────────────────────────────────────
 export function compressImage(file: File, opts: CompressOptions = COMPRESS_PORTFOLIO): Promise<File> {

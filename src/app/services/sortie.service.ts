@@ -13,6 +13,7 @@ import {
   Sortie, SortieInscription, SortieImage, SortieCommentaire, SortieReply
 } from '../models/sortie.model';
 import { PhotoExif } from '../models/photo.model';
+import { compressImage, COMPRESS_THUMB } from '../utils/image-compress';
 import { hasExif } from '../utils/exif-reader';
 import { generateId } from '../utils/id';
 
@@ -238,8 +239,10 @@ export class SortieService {
     meta: { uploaderUid: string; nomUploader: string; exif?: PhotoExif }
   ): Observable<SortieUploadState> {
     return new Observable(observer => {
-      const ext = file.name.split('.').pop() ?? 'jpg';
-      const storagePath = `sorties/${sortieId}/${generateId()}.${ext}`;
+      const id = generateId();
+      const ext = file.name.split('.').pop() ?? 'webp';
+      const storagePath = `sorties/${sortieId}/${id}.${ext}`;
+      const thumbPath   = `sorties/${sortieId}/${id}_thumb.${ext}`;
       const storageRef = ref(this.storage, storagePath);
       const task = uploadBytesResumable(storageRef, file);
 
@@ -247,10 +250,16 @@ export class SortieService {
         snap => observer.next({ progress: Math.round(snap.bytesTransferred / snap.totalBytes * 100), done: false }),
         err => observer.error(err),
         async () => {
-          const url = await getDownloadURL(task.snapshot.ref);
+          const [url, thumb] = await Promise.all([
+            getDownloadURL(task.snapshot.ref),
+            compressImage(file, COMPRESS_THUMB),
+          ]);
+          const thumbSnap = await uploadBytes(ref(this.storage, thumbPath), thumb);
+          const thumbnailUrl = await getDownloadURL(thumbSnap.ref);
           const imageData: Omit<SortieImage, 'id'> = {
             url, storagePath, likes: [], uploadedAt: new Date().toISOString(),
             uploaderUid: meta.uploaderUid, nomUploader: meta.nomUploader,
+            thumbnailUrl, thumbnailPath: thumbPath,
             ...(hasExif(meta.exif) ? { exif: meta.exif } : {}),
           };
           const docRef = await runInInjectionContext(this.injector, () =>
@@ -273,12 +282,12 @@ export class SortieService {
   }
 
   async deletePhoto(sortieId: string, image: SortieImage, currentCoverUrl?: string): Promise<void> {
-    await runInInjectionContext(this.injector, () =>
-      Promise.all([
-        deleteObject(ref(this.storage, image.storagePath)).catch(() => {}),
-        deleteDoc(doc(this.firestore, `sorties/${sortieId}/photos`, image.id)),
-      ])
-    );
+    const deletes: Promise<unknown>[] = [
+      deleteObject(ref(this.storage, image.storagePath)).catch(() => {}),
+      deleteDoc(doc(this.firestore, `sorties/${sortieId}/photos`, image.id)),
+    ];
+    if (image.thumbnailPath) deletes.push(deleteObject(ref(this.storage, image.thumbnailPath)).catch(() => {}));
+    await runInInjectionContext(this.injector, () => Promise.all(deletes));
     if (currentCoverUrl === image.url) {
       const photosSnap = await runInInjectionContext(this.injector, () =>
         getDocs(query(collection(this.firestore, `sorties/${sortieId}/photos`), orderBy('uploadedAt', 'asc')))

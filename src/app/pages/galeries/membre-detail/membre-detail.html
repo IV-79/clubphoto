@@ -199,7 +199,7 @@
         <div class="photos-grid">
           @for (photo of filteredPhotos(); track photo.id; let i = $index) {
             <div class="photo-card" (click)="openLightbox(i)">
-              <img [src]="photo.url" [alt]="photo.titre" loading="lazy" class="photo-img">
+              <img [src]="photo.thumbnailUrl ?? photo.url" [alt]="photo.titre" loading="lazy" class="photo-img">
               @if (photo.categorie) {
                 <span class="card-cat">{{ getCategorieLabel(photo.categorie) }}</span>
               }

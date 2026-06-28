@@ -53,6 +53,8 @@ export interface DefiPhoto {
   fileSize: number;
   exif?: PhotoExif;
   uploadedAt: string;
+  thumbnailUrl?:  string;
+  thumbnailPath?: string;
 }
 
 export interface DefiVote {

@@ -51,6 +51,8 @@ export interface Photo {
   categorie?: PhotoCategorie;
   exif?: PhotoExif;
   likes?: string[];
+  thumbnailUrl?:  string;
+  thumbnailPath?: string;
 }
 
 export interface UploadState {

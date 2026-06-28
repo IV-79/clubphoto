@@ -3,13 +3,13 @@ import {
   Firestore, collection, collectionGroup, doc, addDoc, updateDoc, deleteDoc, setDoc,
   collectionData, docData, query, orderBy, where, getDocs, getDoc, increment
 } from '@angular/fire/firestore';
-import { Storage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from '@angular/fire/storage';
+import { Storage, ref, uploadBytesResumable, uploadBytes, getDownloadURL, deleteObject } from '@angular/fire/storage';
 import { Observable, from, map } from 'rxjs';
 import { Defi, DefiInscription, DefiPhoto, DefiVote } from '../models/defi.model';
 import { UserProfile } from '../models/user.model';
 import { generateId } from '../utils/id';
 import { readExif } from '../utils/exif-reader';
-import { compressImage, COMPRESS_COUVERTURE, COMPRESS_EVENT } from '../utils/image-compress';
+import { compressImage, COMPRESS_COUVERTURE, COMPRESS_EVENT, COMPRESS_THUMB } from '../utils/image-compress';
 import { NotificationService } from './notification.service';
 
 export type DefiUploadState = { progress: number; done: false } | { progress: 100; done: true; photo: DefiPhoto };
@@ -230,8 +230,13 @@ export class DefiService {
         try {
           const exif = await readExif(file);
           const fileSize = file.size;
-          const compressed = await compressImage(file, COMPRESS_EVENT);
-          const storagePath = `defis/${defiId}/${user.uid}-${generateId()}.webp`;
+          const id = generateId();
+          const storagePath = `defis/${defiId}/${user.uid}-${id}.webp`;
+          const thumbPath   = `defis/${defiId}/${user.uid}-${id}_thumb.webp`;
+          const [compressed, thumb] = await Promise.all([
+            compressImage(file, COMPRESS_EVENT),
+            compressImage(file, COMPRESS_THUMB),
+          ]);
           const storageRef = ref(this.storage, storagePath);
           const task = uploadBytesResumable(storageRef, compressed);
 
@@ -239,12 +244,17 @@ export class DefiService {
             snap => observer.next({ progress: Math.round(snap.bytesTransferred / snap.totalBytes * 100), done: false }),
             err => observer.error(err),
             async () => {
-              const url = await getDownloadURL(task.snapshot.ref);
+              const [url, thumbSnap] = await Promise.all([
+                getDownloadURL(task.snapshot.ref),
+                uploadBytes(ref(this.storage, thumbPath), thumb),
+              ]);
+              const thumbnailUrl = await getDownloadURL(thumbSnap.ref);
               const membreNom = `${user.prenom ?? ''} ${user.nom}`.trim();
               const photoData: Omit<DefiPhoto, 'id'> = {
                 membreUid: user.uid, membreNom,
                 ...(user.prenom ? { membrePrenom: user.prenom } : {}),
                 url, storagePath, fileSize,
+                thumbnailUrl, thumbnailPath: thumbPath,
                 uploadedAt: new Date().toISOString(),
                 ...(Object.keys(exif).length > 0 ? { exif } : {}),
               };
@@ -263,10 +273,14 @@ export class DefiService {
   }
 
   async deletePhoto(defiId: string, photo: DefiPhoto): Promise<void> {
-    await deleteObject(ref(this.storage, photo.storagePath)).catch(() => {});
-    await runInInjectionContext(this.injector, () =>
-      deleteDoc(doc(this.firestore, `defis/${defiId}/photos`, photo.id))
-    );
+    const deletes: Promise<unknown>[] = [
+      deleteObject(ref(this.storage, photo.storagePath)).catch(() => {}),
+      runInInjectionContext(this.injector, () =>
+        deleteDoc(doc(this.firestore, `defis/${defiId}/photos`, photo.id))
+      ),
+    ];
+    if (photo.thumbnailPath) deletes.push(deleteObject(ref(this.storage, photo.thumbnailPath)).catch(() => {}));
+    await Promise.all(deletes);
   }
 
   // ── Votes ─────────────────────────────────────────────────────────────

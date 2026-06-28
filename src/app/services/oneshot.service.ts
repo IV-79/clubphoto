@@ -13,6 +13,7 @@ import {
 import { NotificationService } from './notification.service';
 import { PhotoExif } from '../models/photo.model';
 import { Commentaire, Reponse } from '../models/commentaire.model';
+import { compressImage, COMPRESS_THUMB } from '../utils/image-compress';
 import { hasExif } from '../utils/exif-reader';
 import { generateId } from '../utils/id';
 
@@ -328,8 +329,10 @@ export class OneShotService {
     meta: { membreUid: string; nomMembre: string; themeId: string; titre?: string; exif?: PhotoExif }
   ): Observable<OneShotUploadState> {
     return new Observable(observer => {
-      const ext = file.name.split('.').pop() ?? 'jpg';
-      const storagePath = `oneshots/${oneShotId}/${generateId()}.${ext}`;
+      const id = generateId();
+      const ext = file.name.split('.').pop() ?? 'webp';
+      const storagePath = `oneshots/${oneShotId}/${id}.${ext}`;
+      const thumbPath   = `oneshots/${oneShotId}/${id}_thumb.${ext}`;
       const storageRef = ref(this.storage, storagePath);
       const task = uploadBytesResumable(storageRef, file);
 
@@ -337,10 +340,15 @@ export class OneShotService {
         snap => observer.next({ progress: Math.round(snap.bytesTransferred / snap.totalBytes * 100), done: false }),
         err => observer.error(err),
         async () => {
-          const url = await getDownloadURL(task.snapshot.ref);
+          const [url, thumb] = await Promise.all([
+            getDownloadURL(task.snapshot.ref),
+            compressImage(file, COMPRESS_THUMB),
+          ]);
+          const thumbSnap = await uploadBytes(ref(this.storage, thumbPath), thumb);
+          const thumbnailUrl = await getDownloadURL(thumbSnap.ref);
           const data: Omit<OneShotPhoto, 'id'> = {
             url, storagePath, uploadedAt: new Date().toISOString(),
-            fileSize: file.size,
+            fileSize: file.size, thumbnailUrl, thumbnailPath: thumbPath,
             membreUid: meta.membreUid, nomMembre: meta.nomMembre, themeId: meta.themeId,
             ...(meta.titre ? { titre: meta.titre } : {}),
             ...(hasExif(meta.exif) ? { exif: meta.exif } : {}),
@@ -378,12 +386,12 @@ export class OneShotService {
   }
 
   async deletePhoto(oneShotId: string, photo: OneShotPhoto): Promise<void> {
-    await runInInjectionContext(this.injector, () =>
-      Promise.all([
-        deleteObject(ref(this.storage, photo.storagePath)),
-        deleteDoc(doc(this.firestore, `oneshots/${oneShotId}/photos`, photo.id)),
-      ])
-    );
+    const deletes: Promise<unknown>[] = [
+      deleteObject(ref(this.storage, photo.storagePath)),
+      deleteDoc(doc(this.firestore, `oneshots/${oneShotId}/photos`, photo.id)),
+    ];
+    if (photo.thumbnailPath) deletes.push(deleteObject(ref(this.storage, photo.thumbnailPath)).catch(() => {}));
+    await runInInjectionContext(this.injector, () => Promise.all(deletes));
     if (photo.fileSize && photo.membreUid) {
       await runInInjectionContext(this.injector, () =>
         updateDoc(doc(this.firestore, 'users', photo.membreUid), {

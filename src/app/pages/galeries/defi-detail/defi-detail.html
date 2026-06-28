@@ -278,7 +278,7 @@
               <div class="photos-grid">
                 @for (photo of photosVisibles(); track photo.id) {
                   <div class="photo-card">
-                    <img [src]="photo.url" [alt]="photo.membreNom" class="photo-img" />
+                    <img [src]="photo.thumbnailUrl ?? photo.url" [alt]="photo.membreNom" class="photo-img" />
                     @if (canManage()) {
                       <p class="photo-author">{{ photo.membreNom }}</p>
                     }
@@ -314,7 +314,7 @@
                   @let voted = mesVotesIds().includes(photo.id);
                   <div class="photo-card photo-vote-card" [class.voted]="voted"
                        style="cursor:pointer" (click)="openLightbox(photo)">
-                    <img [src]="photo.url" alt="photo" class="photo-img" />
+                    <img [src]="photo.thumbnailUrl ?? photo.url" alt="photo" class="photo-img" />
                     <button class="btn-vote" [class.voted]="voted"
                             (click)="$event.stopPropagation(); toggleVote(photo.id)"
                             [disabled]="!voted && votesRestants() <= 0">

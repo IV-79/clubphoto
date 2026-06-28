@@ -46,4 +46,6 @@ export interface SortieImage {
   likes: string[];
   uploadedAt: string;
   exif?: PhotoExif;
+  thumbnailUrl?:  string;
+  thumbnailPath?: string;
 }

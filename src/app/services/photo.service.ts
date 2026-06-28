@@ -1,5 +1,5 @@
 import { Injectable, inject, Injector, runInInjectionContext } from '@angular/core';
-import { Storage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from '@angular/fire/storage';
+import { Storage, ref, uploadBytesResumable, uploadBytes, getDownloadURL, deleteObject } from '@angular/fire/storage';
 import {
   Firestore, collection, collectionData, doc, addDoc, deleteDoc, updateDoc, query, where, orderBy, limit, deleteField, arrayUnion, arrayRemove, increment, getDocs
 } from '@angular/fire/firestore';
@@ -8,6 +8,7 @@ import { Photo, PhotoExif, PhotoVisibilite, UploadState } from '../models/photo.
 import { Commentaire, Reponse } from '../models/commentaire.model';
 import { hasExif } from '../utils/exif-reader';
 import { generateId } from '../utils/id';
+import { compressImage, COMPRESS_THUMB } from '../utils/image-compress';
 import { NotificationService } from './notification.service';
 import { UserSubscriptions } from '../models/notification.model';
 
@@ -25,8 +26,10 @@ export class PhotoService {
     meta: { titre: string; description?: string; visibilite: PhotoVisibilite; categorie?: string; exif?: PhotoExif }
   ): Observable<UploadState> {
     return new Observable(observer => {
-      const ext = file.name.split('.').pop() ?? 'jpg';
-      const storagePath = `photos/${uid}/${generateId()}.${ext}`;
+      const id = generateId();
+      const ext = file.name.split('.').pop() ?? 'webp';
+      const storagePath = `photos/${uid}/${id}.${ext}`;
+      const thumbPath   = `photos/${uid}/${id}_thumb.${ext}`;
       const storageRef = ref(this.storage, storagePath);
       const task = uploadBytesResumable(storageRef, file);
 
@@ -39,7 +42,12 @@ export class PhotoService {
         error => observer.error(error),
         async () => {
           try {
-            const url = await getDownloadURL(task.snapshot.ref);
+            const [url, thumb] = await Promise.all([
+              getDownloadURL(task.snapshot.ref),
+              compressImage(file, COMPRESS_THUMB),
+            ]);
+            const thumbSnap = await uploadBytes(ref(this.storage, thumbPath), thumb);
+            const thumbnailUrl = await getDownloadURL(thumbSnap.ref);
             const data: Omit<Photo, 'id'> = {
               uid,
               nomMembre,
@@ -50,6 +58,7 @@ export class PhotoService {
               dateUpload: new Date().toISOString(),
               storagePath,
               fileSize: file.size,
+              thumbnailUrl, thumbnailPath: thumbPath,
               ...(meta.categorie ? { categorie: meta.categorie as Photo['categorie'] } : {}),
               ...(hasExif(meta.exif) ? { exif: meta.exif } : {}),
             };
@@ -132,12 +141,12 @@ export class PhotoService {
   }
 
   async deletePhoto(photo: Photo): Promise<void> {
-    await runInInjectionContext(this.injector, () =>
-      Promise.all([
-        deleteObject(ref(this.storage, photo.storagePath)),
-        deleteDoc(doc(this.firestore, 'photos', photo.id)),
-      ])
-    );
+    const deletes: Promise<unknown>[] = [
+      deleteObject(ref(this.storage, photo.storagePath)),
+      deleteDoc(doc(this.firestore, 'photos', photo.id)),
+    ];
+    if (photo.thumbnailPath) deletes.push(deleteObject(ref(this.storage, photo.thumbnailPath)).catch(() => {}));
+    await runInInjectionContext(this.injector, () => Promise.all(deletes));
     const update: Record<string, unknown> = { 'photoCount': increment(-1) };
     if (photo.fileSize) update['storageUsed.portfolio'] = increment(-photo.fileSize);
     await runInInjectionContext(this.injector, () =>

@@ -282,7 +282,7 @@
                   [class.own-photo]="isOwnPhoto"
                   (click)="openLightbox(photo)">
 
-                  <img [src]="photo.url" class="vote-thumb" loading="lazy">
+                  <img [src]="photo.thumbnailUrl ?? photo.url" class="vote-thumb" loading="lazy">
 
                   <div class="vote-footer"
                        [class.footer-votable]="!viewAsAdmin() && !isOwnPhoto && !isVoting"

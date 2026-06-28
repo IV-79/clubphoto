@@ -3,7 +3,7 @@ import {
   Firestore, collection, collectionData, doc, docData,
   addDoc, deleteDoc, setDoc, updateDoc, query, where, orderBy, arrayUnion, arrayRemove, increment, getDocs,
 } from '@angular/fire/firestore';
-import { Storage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from '@angular/fire/storage';
+import { Storage, ref, uploadBytesResumable, uploadBytes, getDownloadURL, deleteObject } from '@angular/fire/storage';
 import { Observable, from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ThemeMensuel, ThemeSoumission, ThemeVote } from '../models/theme.model';
@@ -11,6 +11,7 @@ import { PhotoExif } from '../models/photo.model';
 import { Commentaire, Reponse } from '../models/commentaire.model';
 import { hasExif } from '../utils/exif-reader';
 import { generateId } from '../utils/id';
+import { compressImage, COMPRESS_THUMB } from '../utils/image-compress';
 
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
@@ -118,7 +119,9 @@ export class ThemeService {
     exif?: PhotoExif,
     onProgress?: (pct: number) => void
   ): Promise<void> {
-    const storagePath = `themes/${themeId}/${uid}_${Date.now()}.webp`;
+    const ts = Date.now();
+    const storagePath = `themes/${themeId}/${uid}_${ts}.webp`;
+    const thumbPath   = `themes/${themeId}/${uid}_${ts}_thumb.webp`;
     const storageRef = ref(this.storage, storagePath);
     const task = uploadBytesResumable(storageRef, file);
 
@@ -129,12 +132,17 @@ export class ThemeService {
         reject,
         async () => {
           try {
-            const url = await getDownloadURL(storageRef);
+            const [url, thumb] = await Promise.all([
+              getDownloadURL(storageRef),
+              compressImage(file, COMPRESS_THUMB),
+            ]);
+            const thumbSnap = await uploadBytes(ref(this.storage, thumbPath), thumb);
+            const thumbnailUrl = await getDownloadURL(thumbSnap.ref);
             await addDoc(
               collection(this.firestore, 'themes', themeId, 'soumissions'),
               {
                 membreUid: uid, nomMembre, url, storagePath,
-                fileSize: file.size,
+                fileSize: file.size, thumbnailUrl, thumbnailPath: thumbPath,
                 uploadedAt: new Date().toISOString(),
                 ...(hasExif(exif) ? { exif } : {}),
               }
@@ -153,11 +161,13 @@ export class ThemeService {
     });
   }
 
-  async deleteSoumission(themeId: string, soumissionId: string, storagePath: string, membreUid?: string, fileSize?: number): Promise<void> {
-    await Promise.all([
+  async deleteSoumission(themeId: string, soumissionId: string, storagePath: string, membreUid?: string, fileSize?: number, thumbnailPath?: string): Promise<void> {
+    const deletes: Promise<unknown>[] = [
       deleteObject(ref(this.storage, storagePath)).catch(() => {}),
       deleteDoc(doc(this.firestore, 'themes', themeId, 'soumissions', soumissionId)),
-    ]);
+    ];
+    if (thumbnailPath) deletes.push(deleteObject(ref(this.storage, thumbnailPath)).catch(() => {}));
+    await Promise.all(deletes);
     if (membreUid && fileSize) {
       await runInInjectionContext(this.injector, () =>
         updateDoc(doc(this.firestore, 'users', membreUid), {

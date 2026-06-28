@@ -233,7 +233,7 @@
           @let isOwn = photo.uploaderUid === profile()?.uid;
           <div class="photo-card" [class.own-card]="isOwn" (click)="openLightbox(i)">
             <div class="photo-img-wrap">
-              <img [src]="photo.url" [alt]="photo.nomUploader" loading="lazy" class="photo-img" />
+              <img [src]="photo.thumbnailUrl ?? photo.url" [alt]="photo.nomUploader" loading="lazy" class="photo-img" />
               @if (profile()) {
                 <button class="card-heart" [class.liked]="isLikedPhoto(photo)"
                   (click)="toggleLikeOnCard(photo, $event)"

@@ -148,7 +148,7 @@
 
                 <!-- Zone draggable = image -->
                 <div class="photo-img-wrap" cdkDragHandle>
-                  <img [src]="photo.url" loading="lazy" class="photo-thumb" draggable="false">
+                  <img [src]="photo.thumbnailUrl ?? photo.url" loading="lazy" class="photo-thumb" draggable="false">
                   <span class="drag-grip" aria-hidden="true">⠿</span>
                   @if (isSaving(photo.id)) {
                     <div class="saving-overlay"></div>

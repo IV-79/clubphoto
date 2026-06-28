@@ -51,6 +51,8 @@ export interface OneShotPhoto {
   uploadedAt: string;
   likes?: string[];
   exif?: PhotoExif;
+  thumbnailUrl?:  string;
+  thumbnailPath?: string;
 }
 
 export interface OneShotVote {

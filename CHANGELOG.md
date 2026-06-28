@@ -4,6 +4,14 @@
 
 ## En cours (alpha)
 
+### Miniatures 600 px pour grilles de cartes (2026-06-28)
+
+- À l'upload (portfolio, sorties, oneshots, défis, thèmes), génération automatique côté client d'une miniature WebP 600 px en plus de la photo pleine résolution.
+- La miniature est stockée dans Firebase Storage (`*_thumb.webp`) et son URL sauvegardée dans le document Firestore (`thumbnailUrl`, `thumbnailPath`).
+- Toutes les grilles de cartes utilisent désormais `thumbnailUrl ?? url` : chargement 5×–10× plus rapide, bande passante réduite.
+- Les suppressions nettoient aussi la miniature en Storage (`.catch(() => {})` pour la rétrocompatibilité avec les anciennes photos sans miniature).
+- Nouveau preset `COMPRESS_THUMB` (600 px max).
+
 ### Consentement GPS par lot — OneShot (2026-06-28)
 
 - Upload multiple photos dans OneShot : tous les EXIF sont lus en parallèle avant la boucle d'upload, le popup GPS n'apparaît plus qu'une seule fois si au moins une photo du lot contient des coordonnées, la réponse s'applique à l'ensemble du lot.
