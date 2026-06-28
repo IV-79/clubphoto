@@ -32,6 +32,7 @@ export class PhotoLightbox implements OnInit, OnDestroy {
 
   currentIdx   = signal(0);
   fullscreen   = signal(false);
+  imgLoading   = signal(false);
 
   ngOnInit() {
     this.currentIdx.set(this.startIndex());
@@ -78,12 +79,14 @@ export class PhotoLightbox implements OnInit, OnDestroy {
 
   prev() {
     const len = this.photos().length;
+    this.imgLoading.set(true);
     this.currentIdx.set((this.currentIdx() - 1 + len) % len);
     this.replyingTo.set(null);
   }
 
   next() {
     const len = this.photos().length;
+    this.imgLoading.set(true);
     this.currentIdx.set((this.currentIdx() + 1) % len);
     this.replyingTo.set(null);
   }

@@ -11,7 +11,12 @@
         @if (photos().length > 1) {
           <button class="lb-nav lb-nav-prev" (click)="prev()" aria-label="Précédent">‹</button>
         }
-        <img [src]="photo.url" [alt]="photo.titre || photo.nomAuteur" class="lb-image" (click)="openFullscreen()" title="Cliquez pour agrandir" />
+        @if (imgLoading()) {
+          <div class="lb-loading-overlay"><div class="lb-spinner"></div></div>
+        }
+        <img [src]="photo.url" [alt]="photo.titre || photo.nomAuteur" class="lb-image"
+             (load)="imgLoading.set(false)" (error)="imgLoading.set(false)"
+             (click)="openFullscreen()" title="Cliquez pour agrandir" />
         @if (photos().length > 1) {
           <button class="lb-nav lb-nav-next" (click)="next()" aria-label="Suivant">›</button>
         }
@@ -217,7 +222,12 @@
       @if (photos().length > 1) {
         <button class="lb-fs-nav lb-fs-prev" (click)="$event.stopPropagation(); prev()" aria-label="Précédent">‹</button>
       }
-      <img [src]="currentPhoto()!.url" [alt]="currentPhoto()!.titre || ''" class="lb-fs-img" (click)="closeFullscreen()" />
+      @if (imgLoading()) {
+        <div class="lb-loading-overlay"><div class="lb-spinner"></div></div>
+      }
+      <img [src]="currentPhoto()!.url" [alt]="currentPhoto()!.titre || ''" class="lb-fs-img"
+           (load)="imgLoading.set(false)" (error)="imgLoading.set(false)"
+           (click)="closeFullscreen()" />
       @if (photos().length > 1) {
         <button class="lb-fs-nav lb-fs-next" (click)="$event.stopPropagation(); next()" aria-label="Suivant">›</button>
       }
