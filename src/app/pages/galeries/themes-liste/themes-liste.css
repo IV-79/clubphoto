@@ -46,6 +46,11 @@
   border-color: rgba(33, 150, 243, 0.28);
 }
 
+.featured-resultats {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.07) 0%, #fff 60%);
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
 .card-meta {
   display: flex;
   align-items: center;
@@ -65,6 +70,7 @@
 
 .pill-ouvert     { background: rgba(76, 175, 80, 0.14);  color: #2e7d32; }
 .pill-vote       { background: rgba(33, 150, 243, 0.14); color: #1565c0; }
+.pill-resultats  { background: rgba(245, 158, 11, 0.16); color: #b45309; }
 
 .card-mois {
   font-size: 0.78rem;
@@ -121,8 +127,11 @@
 }
 .btn-voir-photos:hover { background: #aa0000; color: white; }
 
-.btn-voir-photos.btn-vote-theme { background: #1565c0; }
+.btn-voir-photos.btn-vote-theme    { background: #1565c0; }
 .btn-voir-photos.btn-vote-theme:hover { background: #0d47a1; }
+
+.btn-voir-photos.btn-resultats-theme { background: #b45309; }
+.btn-voir-photos.btn-resultats-theme:hover { background: #92400e; }
 
 
 .btn-soumettre {
