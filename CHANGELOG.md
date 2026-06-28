@@ -4,6 +4,25 @@
 
 ## En cours (alpha)
 
+### Rôle Contributeur + restriction création d'événements (2026-06-28)
+
+- Rôle `redacteur` renommé `contributeur` partout : modèle `UserProfile`, garde `editorGuard`, `AuthService.getUserRole()`, sélecteur de rôle admin, page Actualités, règles Firestore.
+- Création d'événement (Sortie, Défi, OneShot) désormais réservée aux contributeurs et administrateurs : `canActivate: [editorGuard]` ajouté aux routes `membre/sorties/creer` et `membre/defis/creer`.
+- Guide du site (`/membres/guide`) mis à jour : toutes les occurrences "membre" dans les contextes de création d'événement corrigées en "contributeur ou administrateur".
+- Firebase Analytics activé : `provideAnalytics` + `ScreenTrackingService` ajoutés dans `app.config.ts` (le `measurementId` était déjà présent dans `environment.ts`).
+
+### Zone d'upload universelle drag & drop — Sortie (2026-06-28)
+
+- Page `sortie-detail` : le bouton "+ Ajouter des photos" remplacé par une zone drag & drop cohérente avec le Défi et le Thème du mois.
+- Logique d'upload extraite dans `processPhotoFiles(files)` (partagée entre drop et sélecteur fichier).
+- Suppression de `@ViewChild('photoInput')` — la zone utilise un `<label>` avec `<input hidden>`.
+
+### Notifications de vote — diffusion à tous les membres (2026-06-28)
+
+- **Défi** : à la clôture des inscriptions pour le vote, notification envoyée à **tous les membres** (via `broadcast()`) au lieu des seuls inscrits (`sendToUser()` en boucle).
+- **OneShot** : `updateStatut()` utilisait déjà `broadcast()` — comportement confirmé correct.
+- **Thème du mois** : pas de notification possible (statut calculé automatiquement côté client, pas de trigger serveur).
+
 ### Visibilité Public/Membres pour Sorties et OneShots (2026-06-28)
 
 - La visibilité (Public / Membres seulement) s'applique désormais à tous les types d'événements : Sortie Photo, Sortie Club, Atelier et OneShot (le Défi Photo l'avait déjà).
