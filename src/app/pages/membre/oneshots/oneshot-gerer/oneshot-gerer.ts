@@ -6,7 +6,7 @@ import { OneShotService } from '../../../../services/oneshot.service';
 import { AuthService } from '../../../../services/auth.service';
 import { ConfirmService } from '../../../../services/confirm.service';
 import { OneShotTheme, ONESHOT_STATUT_LABELS } from '../../../../models/oneshot.model';
-import { compressToJpeg } from '../../../../utils/image-compress';
+import { compressImage, COMPRESS_COUVERTURE } from '../../../../utils/image-compress';
 import { DatePickerComponent } from '../../../../components/date-picker/date-picker';
 import { ImgRetryDirective } from '../../../../directives/img-retry.directive';
 
@@ -151,7 +151,7 @@ export class OneShotGerer implements OnInit {
   private async uploadCoverFile(file: File) {
     this.coverUploading.set(true);
     try {
-      const compressed = await compressToJpeg(file);
+      const compressed = await compressImage(file, COMPRESS_COUVERTURE);
       await this.oneShotService.setCouverture(this.id, compressed);
     } finally {
       this.coverUploading.set(false);

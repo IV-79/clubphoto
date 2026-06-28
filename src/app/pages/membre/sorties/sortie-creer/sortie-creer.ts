@@ -15,7 +15,7 @@ import { OneShotService } from '../../../../services/oneshot.service';
 import { DefiService } from '../../../../services/defi.service';
 import { AuthService } from '../../../../services/auth.service';
 import { SortieType } from '../../../../models/sortie.model';
-import { compressToJpeg } from '../../../../utils/image-compress';
+import { compressImage, COMPRESS_COUVERTURE } from '../../../../utils/image-compress';
 
 type CreationType = SortieType | 'oneshot' | 'defi';
 
@@ -191,7 +191,7 @@ export class SortieCreer {
         await Promise.all(this.pendingThemes().map((t, i) => this.oneShotService.addTheme(id, t, i)));
         await this.oneShotService.inscrire(id, profile.uid, nom);
         if (this.pendingCoverFile()) {
-          const compressed = await compressToJpeg(this.pendingCoverFile()!);
+          const compressed = await compressImage(this.pendingCoverFile()!, COMPRESS_COUVERTURE);
           await this.oneShotService.setCouverture(id, compressed);
         }
         this.router.navigate(['/galeries/oneshots', id]);
@@ -213,7 +213,7 @@ export class SortieCreer {
           await this.sortieService.inscrire(id, profile.uid, nom);
         }
         if (this.pendingCoverFile()) {
-          const compressed = await compressToJpeg(this.pendingCoverFile()!);
+          const compressed = await compressImage(this.pendingCoverFile()!, COMPRESS_COUVERTURE);
           await this.sortieService.setImageEvenement(id, compressed);
         }
         this.router.navigate(['/galeries/sorties', id]);

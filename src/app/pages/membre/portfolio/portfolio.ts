@@ -8,7 +8,7 @@ import { ConfirmService } from '../../../services/confirm.service';
 import { Photo, PhotoExif, PhotoVisibilite } from '../../../models/photo.model';
 import { LightboxPhoto, PhotoLightboxCallbacks } from '../../../models/commentaire.model';
 import { PhotoLightbox } from '../../../components/photo-lightbox/photo-lightbox';
-import { compressToJpeg } from '../../../utils/image-compress';
+import { compressImage, COMPRESS_PORTFOLIO } from '../../../utils/image-compress';
 import { readExifWithConsent } from '../../../utils/exif-reader';
 import { GpsConsentService } from '../../../services/gps-consent.service';
 import { switchMap, of } from 'rxjs';
@@ -190,7 +190,7 @@ export class MembrePortfolio implements OnInit {
 
   private async setFile(file: File) {
     this.pendingExif = await readExifWithConsent(file, this.gpsConsentService);
-    const compressed = await compressToJpeg(file);
+    const compressed = await compressImage(file, COMPRESS_PORTFOLIO);
     this.selectedFile.set(compressed);
     this.uploadTitre = '';
     const reader = new FileReader();

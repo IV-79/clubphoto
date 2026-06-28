@@ -92,7 +92,7 @@
             <!-- Couverture -->
             <div class="edit-cover-section">
               <p class="edit-cover-label">Photo de couverture</p>
-              <p class="edit-cover-hint">Format recommandé : 16/9, résolution recommandée 1280×720 px (JPG ou PNG)</p>
+              <p class="edit-cover-hint">Format recommandé : 16/9 — redimensionné à 1280×720 px</p>
               @if (d.photoCouvertureUrl && !coverPreview()) {
                 <img [src]="d.photoCouvertureUrl" class="cover-preview-sm" alt="couverture actuelle" />
                 <button class="btn-sm btn-danger-sm" (click)="removeCouverture()">Supprimer la couverture</button>

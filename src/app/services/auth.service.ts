@@ -323,7 +323,7 @@ export class AuthService {
 
   uploadUserPhoto(uid: string, file: File, type: 'profil' | 'bandeau'): Observable<{ state: 'uploading' | 'done'; progress: number; url?: string }> {
     return new Observable(observer => {
-      const storagePath = `user-photos/${uid}/${type}.jpg`;
+      const storagePath = `user-photos/${uid}/${type}.webp`;
       const storageRef = ref(this.storage, storagePath);
       const task = uploadBytesResumable(storageRef, file);
       task.on(

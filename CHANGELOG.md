@@ -4,6 +4,24 @@
 
 ## En cours (alpha)
 
+### Consentement GPS par lot — OneShot (2026-06-28)
+
+- Upload multiple photos dans OneShot : tous les EXIF sont lus en parallèle avant la boucle d'upload, le popup GPS n'apparaît plus qu'une seule fois si au moins une photo du lot contient des coordonnées, la réponse s'applique à l'ensemble du lot.
+
+### Optimisation photos — resize par catégorie + WebP (2026-06-28)
+
+- Refactorisation de `image-compress.ts` : fonction `compressImage(file, opts)` avec 8 presets nommés (`COMPRESS_PORTFOLIO`, `COMPRESS_EVENT`, `COMPRESS_THEME`, `COMPRESS_COUVERTURE`, `COMPRESS_ACTUALITE`, `COMPRESS_AVATAR`, `COMPRESS_BANDEAU`, `COMPRESS_HERO`).
+- Sortie **WebP** pour tous les nouveaux uploads (−30 à 40 % de poids vs JPEG).
+- Dimensions cibles : portfolio 3840 px, événements 2048 px, couvertures 1280×720, avatar 512×512, bandeau 1920×480, actualité 1200 px, hero 1920 px.
+- 12 call sites mis à jour dans les pages et services.
+- Chemins Storage mis à jour en `.webp` pour les nouveaux fichiers.
+- Hints UI mis à jour sur toutes les zones d'upload : "Envoyez votre photo en pleine résolution · compressé automatiquement pour le site" pour les photos, dimensions recommandées pour les couvertures/avatars.
+
+### Vote ouvert à tous les membres (2026-06-28)
+
+- **Défi** : vote accessible à tous les membres connectés (plus uniquement aux inscrits) ; message "Seuls les participants inscrits peuvent voter" supprimé.
+- **OneShot** : barre de progression admin corrigée — dénominateur = membres non suspendus (au lieu des inscrits seulement).
+
 ### Hero événement partagé — composant `event-hero` (2026-06-28)
 
 - Nouveau composant standalone `app-event-hero` branché sur les 3 pages détail : `sortie-detail`, `defi-detail`, `oneshot-detail`.

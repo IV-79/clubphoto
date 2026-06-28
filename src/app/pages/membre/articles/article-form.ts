@@ -57,6 +57,7 @@ import { Article, ArticleType, ArticleStatut, ArticlePortee, ARTICLE_TYPES } fro
             (drop)="onDrop($event)">
             <mat-icon>add_photo_alternate</mat-icon>
             <span>Glisser une image ici ou cliquer pour choisir</span>
+            <span style="font-size:0.75rem;color:#aaa">Compressé automatiquement pour le site</span>
           </label>
         }
         <input id="cover-input" type="file" accept="image/*" style="display:none" (change)="onFileSelected($event)" />

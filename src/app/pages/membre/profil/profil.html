@@ -123,7 +123,7 @@
 
       <div class="sidebar-section">
         <h2 class="sidebar-title">Photo de profil</h2>
-        <p class="sidebar-hint">Visible sur votre carte membre</p>
+        <p class="sidebar-hint">Visible sur votre carte membre — max 512×512 px</p>
         <div class="avatar-wrap">
           @if (profilPreviewUrl()) {
             <img [src]="profilPreviewUrl()" class="avatar-thumb" alt="Aperçu">
@@ -151,7 +151,7 @@
 
       <div class="sidebar-section">
         <h2 class="sidebar-title">Photo bandeau</h2>
-        <p class="sidebar-hint">En-tête de votre page publique — format 4:1 paysage (ex. 2400×600 px)</p>
+        <p class="sidebar-hint">En-tête de votre page publique — format 4:1 paysage (max 1920×480 px)</p>
         <div class="bandeau-current">
           @if (bandeauPreviewUrl()) {
             <img [src]="bandeauPreviewUrl()" class="bandeau-thumb" alt="Aperçu bandeau">

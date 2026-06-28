@@ -92,6 +92,7 @@
           (click)="fileInput.click()">
           <p>Glissez une image ici</p>
           <p class="drop-sub">ou cliquez pour parcourir</p>
+          <p class="drop-sub">Envoyez votre photo en pleine résolution · compressé automatiquement pour le site</p>
         </div>
         <input #fileInput type="file" accept="image/*" hidden (change)="onFileSelected($event)">
       } @else {

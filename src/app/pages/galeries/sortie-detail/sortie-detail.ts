@@ -17,7 +17,7 @@ import { Sortie, SortieImage, SortieType, SORTIE_TYPE_META } from '../../../mode
 import { UserProfile } from '../../../models/user.model';
 import { LightboxPhoto, PhotoLightboxCallbacks } from '../../../models/commentaire.model';
 import { PhotoLightbox } from '../../../components/photo-lightbox/photo-lightbox';
-import { compressToJpeg } from '../../../utils/image-compress';
+import { compressImage, COMPRESS_EVENT, COMPRESS_COUVERTURE } from '../../../utils/image-compress';
 import { readExifWithConsent } from '../../../utils/exif-reader';
 import { GpsConsentService } from '../../../services/gps-consent.service';
 import { ImgRetryDirective } from '../../../directives/img-retry.directive';
@@ -336,7 +336,7 @@ export class SortieDetail {
       try {
         const [exif, compressed] = await Promise.all([
           readExifWithConsent(file, this.gpsConsentService),
-          compressToJpeg(file),
+          compressImage(file, COMPRESS_EVENT),
         ]);
         this.sortieService.uploadPhoto(compressed, this.sortieId, {
           uploaderUid: p.uid,
@@ -420,7 +420,7 @@ export class SortieDetail {
   private async uploadCoverFile(file: File) {
     this.coverUploading.set(true);
     try {
-      const compressed = await compressToJpeg(file);
+      const compressed = await compressImage(file, COMPRESS_COUVERTURE);
       await this.sortieService.setImageEvenement(this.sortieId, compressed);
       this.refresh();
     } finally {

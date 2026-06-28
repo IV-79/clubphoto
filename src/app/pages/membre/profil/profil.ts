@@ -3,7 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../services/auth.service';
 import { STYLES_PHOTO, UserProfile } from '../../../models/user.model';
-import { compressToJpeg } from '../../../utils/image-compress';
+import { compressImage, COMPRESS_AVATAR, COMPRESS_BANDEAU } from '../../../utils/image-compress';
 
 @Component({
   selector: 'app-membre-profil',
@@ -115,7 +115,7 @@ export class MembreProfil implements OnInit {
   async onProfilSelected(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
-    const compressed = await compressToJpeg(file);
+    const compressed = await compressImage(file, COMPRESS_AVATAR);
     this.profilFile.set(compressed);
     const reader = new FileReader();
     reader.onload = e => this.profilPreviewUrl.set(e.target?.result as string);
@@ -149,7 +149,7 @@ export class MembreProfil implements OnInit {
   async onBandeauSelected(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
-    const compressed = await compressToJpeg(file);
+    const compressed = await compressImage(file, COMPRESS_BANDEAU);
     this.bandeauFile.set(compressed);
     const reader = new FileReader();
     reader.onload = e => this.bandeauPreviewUrl.set(e.target?.result as string);

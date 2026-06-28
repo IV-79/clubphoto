@@ -7,7 +7,7 @@ import { Storage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from
 import { Observable, from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Article } from '../models/article.model';
-import { compressToJpeg } from '../utils/image-compress';
+import { compressImage, COMPRESS_ACTUALITE } from '../utils/image-compress';
 import { NotificationService } from './notification.service';
 
 @Injectable({ providedIn: 'root' })
@@ -112,11 +112,11 @@ export class ArticleService {
     file: File,
     onProgress?: (pct: number) => void
   ): Promise<{ url: string; storagePath: string }> {
-    return compressToJpeg(file).then(compressed => {
-      const path = `articles/${articleId}/couverture.jpg`;
+    return compressImage(file, COMPRESS_ACTUALITE).then(compressed => {
+      const path = `articles/${articleId}/couverture.webp`;
       const storageRef = ref(this.storage, path);
       return new Promise((resolve, reject) => {
-        const task = uploadBytesResumable(storageRef, compressed, { contentType: 'image/jpeg' });
+        const task = uploadBytesResumable(storageRef, compressed, { contentType: 'image/webp' });
         task.on('state_changed',
           snap => onProgress?.(Math.round(snap.bytesTransferred / snap.totalBytes * 100)),
           reject,

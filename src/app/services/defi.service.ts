@@ -9,7 +9,7 @@ import { Defi, DefiInscription, DefiPhoto, DefiVote } from '../models/defi.model
 import { UserProfile } from '../models/user.model';
 import { generateId } from '../utils/id';
 import { readExif } from '../utils/exif-reader';
-import { compressToJpeg } from '../utils/image-compress';
+import { compressImage, COMPRESS_COUVERTURE, COMPRESS_EVENT } from '../utils/image-compress';
 import { NotificationService } from './notification.service';
 
 export type DefiUploadState = { progress: number; done: false } | { progress: 100; done: true; photo: DefiPhoto };
@@ -151,9 +151,9 @@ export class DefiService {
   // ── Couverture ───────────────────────────────────────────────────────
 
   async setCouverture(id: string, file: File): Promise<void> {
-    const storagePath = `defis/${id}/couverture.jpg`;
+    const storagePath = `defis/${id}/couverture.webp`;
     const storageRef = ref(this.storage, storagePath);
-    const compressed = await compressToJpeg(file);
+    const compressed = await compressImage(file, COMPRESS_COUVERTURE);
     await uploadBytesResumable(storageRef, compressed);
     const url = await getDownloadURL(storageRef);
     await runInInjectionContext(this.injector, () =>
@@ -230,8 +230,8 @@ export class DefiService {
         try {
           const exif = await readExif(file);
           const fileSize = file.size;
-          const compressed = await compressToJpeg(file);
-          const storagePath = `defis/${defiId}/${user.uid}-${generateId()}.jpg`;
+          const compressed = await compressImage(file, COMPRESS_EVENT);
+          const storagePath = `defis/${defiId}/${user.uid}-${generateId()}.webp`;
           const storageRef = ref(this.storage, storagePath);
           const task = uploadBytesResumable(storageRef, compressed);
 

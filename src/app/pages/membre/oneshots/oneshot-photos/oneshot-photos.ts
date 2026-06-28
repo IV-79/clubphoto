@@ -6,8 +6,8 @@ import { CdkDragDrop, CdkDrag, CdkDropList, CdkDropListGroup, CdkDragPreview } f
 import { OneShotService } from '../../../../services/oneshot.service';
 import { ConfirmService } from '../../../../services/confirm.service';
 import { OneShotPhoto, OneShotTheme, OneShotInscription } from '../../../../models/oneshot.model';
-import { compressToJpeg } from '../../../../utils/image-compress';
-import { readExifWithConsent } from '../../../../utils/exif-reader';
+import { compressImage, COMPRESS_EVENT } from '../../../../utils/image-compress';
+import { readExif } from '../../../../utils/exif-reader';
 import { GpsConsentService } from '../../../../services/gps-consent.service';
 import { ImgRetryDirective } from '../../../../directives/img-retry.directive';
 
@@ -169,14 +169,18 @@ export class OneShotPhotos {
     this.uploadDone.set(0);
     this.uploadTotal.set(entries.length);
 
-    for (const entry of entries) {
-      const [exif, compressed] = await Promise.all([
-        readExifWithConsent(entry.file, this.gpsConsentService),
-        compressToJpeg(entry.file),
-      ]);
+    // Lire tous les EXIF en parallèle, puis demander le consentement GPS une seule fois pour le lot
+    const exifResults = await Promise.all(entries.map(e => readExif(e.file)));
+    if (exifResults.some(e => !!e.gps)) {
+      const keepGps = await this.gpsConsentService.requestConsent();
+      if (!keepGps) exifResults.forEach(e => delete e.gps);
+    }
+
+    for (let i = 0; i < entries.length; i++) {
+      const compressed = await compressImage(entries[i].file, COMPRESS_EVENT);
       await new Promise<void>((resolve, reject) => {
         this.oneShotService.uploadPhoto(compressed, this.id, {
-          ...meta, titre: entry.name, exif,
+          ...meta, titre: entries[i].name, exif: exifResults[i],
         }).subscribe({
           complete: () => { this.uploadDone.update(n => n + 1); resolve(); },
           error: reject,

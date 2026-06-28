@@ -118,7 +118,7 @@ export class ThemeService {
     exif?: PhotoExif,
     onProgress?: (pct: number) => void
   ): Promise<void> {
-    const storagePath = `themes/${themeId}/${uid}_${Date.now()}.jpg`;
+    const storagePath = `themes/${themeId}/${uid}_${Date.now()}.webp`;
     const storageRef = ref(this.storage, storagePath);
     const task = uploadBytesResumable(storageRef, file);
 

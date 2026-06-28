@@ -3,7 +3,7 @@ import { Firestore, doc, docData, setDoc, getDoc } from '@angular/fire/firestore
 import { Storage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from '@angular/fire/storage';
 import { Observable, from, map, catchError, of } from 'rxjs';
 import { PHOTO_CATEGORIES } from '../models/photo.model';
-import { compressToJpeg } from '../utils/image-compress';
+import { compressImage, COMPRESS_HERO } from '../utils/image-compress';
 
 export interface CategorieConfig {
   value: string;
@@ -65,8 +65,8 @@ export class ConfigService {
   }
 
   async uploadHeroImage(file: File): Promise<{ url: string; storagePath: string }> {
-    const compressed = await compressToJpeg(file);
-    const storagePath = 'config/hero.jpg';
+    const compressed = await compressImage(file, COMPRESS_HERO);
+    const storagePath = 'config/hero.webp';
     const storageRef = ref(this.storage, storagePath);
     const task = uploadBytesResumable(storageRef, compressed);
     await new Promise<void>((resolve, reject) => task.on('state_changed', null, reject, resolve));
