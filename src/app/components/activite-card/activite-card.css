@@ -1,11 +1,18 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
 /* Carte de base */
 .event-card {
+  height: 100%;
   background: white;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   overflow: hidden;
   text-decoration: none;
-  display: block;
+  display: flex;
+  flex-direction: column;
   transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
   box-shadow: 0 1px 4px rgba(0,0,0,0.07);
 }
@@ -88,7 +95,12 @@
 .status-defi-vote           { background: rgba(139,92,246,0.12); color: #6d28d9; }
 
 /* Infos */
-.card-info { padding: 1rem; }
+.card-info {
+  padding: 1rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
 
 .card-titre-row {
   display: flex;
@@ -133,7 +145,8 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 0.5rem;
-  margin-top: 0.4rem;
+  margin-top: auto;
+  padding-top: 0.4rem;
 }
 
 .card-meta {
@@ -166,12 +179,10 @@
 
 .card-badges {
   display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-end;
   align-self: flex-end;
-  gap: 0.3rem;
+  gap: 0.25rem;
   flex-shrink: 0;
 }
 
