@@ -16,30 +16,22 @@ import { Article, getArticleTypeMeta } from '../../models/article.model';
           <mat-icon>edit</mat-icon>
         </a>
       }
-      @if (article().couvertureUrl) {
-        <div class="cover">
+      <div class="cover">
+        @if (article().couvertureUrl) {
           <img [src]="article().couvertureUrl" [alt]="article().titre" loading="lazy" />
-          <span class="type-badge" [style.background]="meta().color">
-            <mat-icon>{{ meta().icon }}</mat-icon>{{ meta().label }}
-          </span>
-          @if (article().portee === 'membre') {
-            <span class="membre-badge" title="Membres uniquement"><mat-icon>lock</mat-icon></span>
-          }
-        </div>
-      }
-      <div class="body">
-        @if (!article().couvertureUrl) {
-          <div class="no-cover-header">
-            <span class="type-badge-inline" [style.background]="meta().color">
-              <mat-icon>{{ meta().icon }}</mat-icon>{{ meta().label }}
-            </span>
-            <div class="no-cover-icons">
-              @if (article().portee === 'membre') {
-                <span title="Membres uniquement"><mat-icon class="lock-icon">lock</mat-icon></span>
-              }
-            </div>
+        } @else {
+          <div class="cover-placeholder placeholder-{{ article().type }}">
+            <mat-icon class="placeholder-icon">{{ meta().icon }}</mat-icon>
           </div>
         }
+        <span class="type-badge" [style.background]="meta().color">
+          <mat-icon>{{ meta().icon }}</mat-icon>{{ meta().label }}
+        </span>
+        @if (article().portee === 'membre') {
+          <span class="membre-badge" title="Membres uniquement"><mat-icon>lock</mat-icon></span>
+        }
+      </div>
+      <div class="body">
         @if (isEditor() && article().statut !== 'publie') {
           <span class="statut-badge" [class.brouillon]="article().statut === 'brouillon'" [class.expire]="article().statut === 'expire'">
             {{ article().statut === 'brouillon' ? 'Brouillon' : 'Expiré' }}
@@ -73,6 +65,16 @@ import { Article, getArticleTypeMeta } from '../../models/article.model';
       background: #f0f0f0; flex-shrink: 0;
     }
     .cover img { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .cover-placeholder {
+      width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .placeholder-icon { font-size: 2.5rem; width: 2.5rem; height: 2.5rem; opacity: 0.35; }
+    .placeholder-info      { background: linear-gradient(135deg, rgba(25,118,210,0.08), rgba(25,118,210,0.22)); color: #1976d2; }
+    .placeholder-encart    { background: linear-gradient(135deg, rgba(123,31,162,0.08), rgba(123,31,162,0.22)); color: #7b1fa2; }
+    .placeholder-expo      { background: linear-gradient(135deg, rgba(230,81,0,0.08),   rgba(230,81,0,0.22));   color: #e65100; }
+    .placeholder-evenement { background: linear-gradient(135deg, rgba(46,125,50,0.08),  rgba(46,125,50,0.22));  color: #2e7d32; }
+    .placeholder-annonce   { background: linear-gradient(135deg, rgba(245,124,0,0.08),  rgba(245,124,0,0.22));  color: #f57c00; }
     .type-badge {
       position: absolute; bottom: 8px; left: 8px;
       display: inline-flex; align-items: center; gap: 4px;
@@ -88,15 +90,6 @@ import { Article, getArticleTypeMeta } from '../../models/article.model';
     }
     .membre-badge mat-icon { font-size: 16px; width: 16px; height: 16px; }
     .body { padding: 14px 16px 18px; flex: 1; }
-    .no-cover-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-    .type-badge-inline {
-      display: inline-flex; align-items: center; gap: 4px;
-      color: #fff; padding: 4px 10px; border-radius: 20px;
-      font-size: .72rem; font-weight: 600;
-    }
-    .type-badge-inline mat-icon { font-size: 13px; width: 13px; height: 13px; }
-    .no-cover-icons { display: flex; gap: 4px; align-items: center; }
-    .lock-icon { color: #888; font-size: 18px; width: 18px; height: 18px; }
     .titre { margin: 0 0 8px; font-size: .97rem; font-weight: 600; line-height: 1.35; color: #1a1a1a; }
     .meta {
       display: flex; align-items: flex-start; gap: 5px;

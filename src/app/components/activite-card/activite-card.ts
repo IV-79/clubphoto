@@ -37,6 +37,18 @@ export class ActiviteCard {
     return (data as OneShot | Defi).photoCouvertureUrl;
   });
 
+  protected placeholderIcon = computed((): string => {
+    const { kind, data } = this.item();
+    if (kind === 'sortie') return SORTIE_TYPE_META[(data as Sortie).type]?.emoji ?? '📷';
+    if (kind === 'oneshot') return '📸';
+    return '🏅';
+  });
+
+  protected placeholderCss = computed((): string => {
+    const kind = this.item().kind;
+    return `cover-placeholder placeholder-${kind}`;
+  });
+
   protected cardClass = computed((): string => {
     const kind = this.item().kind;
     if (kind === 'oneshot') return 'event-card event-card-oneshot';

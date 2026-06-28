@@ -1,18 +1,19 @@
 <a [routerLink]="routerLink()" [class]="cardClass()">
 
-  @if (coverUrl()) {
-    <div class="card-cover">
+  <div class="card-cover">
+    @if (coverUrl()) {
       <img [src]="coverUrl()" [alt]="item().data.titre" class="cover-img" />
-      <span [class]="statusBadge().css">{{ statusBadge().text }}</span>
-    </div>
-  }
+    } @else {
+      <div [class]="placeholderCss()">
+        <span class="placeholder-icon">{{ placeholderIcon() }}</span>
+      </div>
+    }
+    <span [class]="statusBadge().css">{{ statusBadge().text }}</span>
+  </div>
 
   <div class="card-info">
     <div class="card-titre-row">
       <span [class]="typeBadge().css">{{ typeBadge().text }}</span>
-      @if (!coverUrl()) {
-        <span [class]="statusBadge().css">{{ statusBadge().text }}</span>
-      }
     </div>
 
     <div class="card-titre-org">

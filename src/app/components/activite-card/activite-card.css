@@ -35,6 +35,23 @@
   object-fit: cover;
 }
 
+.cover-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.placeholder-icon {
+  font-size: 2.5rem;
+  opacity: 0.45;
+}
+
+.placeholder-sortie  { background: linear-gradient(135deg, #e8edf5 0%, #c4d0e6 100%); }
+.placeholder-oneshot { background: linear-gradient(135deg, #e8f5ee 0%, #b8ddc8 100%); }
+.placeholder-defi    { background: linear-gradient(135deg, #fef3e2 0%, #fddfa0 100%); }
+
 .card-cover .card-status {
   position: absolute;
   top: 0.6rem;
