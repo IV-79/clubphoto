@@ -146,6 +146,19 @@ export class OneShotService {
     );
   }
 
+  async updateTitre(id: string, titre: string): Promise<void> {
+    await runInInjectionContext(this.injector, () =>
+      updateDoc(doc(this.firestore, 'oneshots', id), { titre: titre.trim() })
+    );
+  }
+
+  async updateDescription(id: string, description: string): Promise<void> {
+    const value = description.trim();
+    await runInInjectionContext(this.injector, () =>
+      updateDoc(doc(this.firestore, 'oneshots', id), { description: value || deleteField() })
+    );
+  }
+
   async setCouverture(id: string, file: File): Promise<void> {
     const path = `oneshots/${id}/couverture`;
     const storageRef = ref(this.storage, path);

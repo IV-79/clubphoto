@@ -1,0 +1,64 @@
+<a [routerLink]="routerLink()" [class]="cardClass()">
+
+  @if (coverUrl()) {
+    <div class="card-cover">
+      <img [src]="coverUrl()" [alt]="item().data.titre" class="cover-img" />
+      <span [class]="statusBadge().css">{{ statusBadge().text }}</span>
+    </div>
+  }
+
+  <div class="card-info">
+    <div class="card-titre-row">
+      <span [class]="typeBadge().css">{{ typeBadge().text }}</span>
+      @if (!coverUrl()) {
+        <span [class]="statusBadge().css">{{ statusBadge().text }}</span>
+      }
+    </div>
+
+    <div class="card-titre-org">
+      <h3 class="card-titre">{{ item().data.titre }}</h3>
+      @if (loggedIn() && organisateur()) {
+        <span class="card-organisateur">par {{ organisateur() }}</span>
+      }
+    </div>
+
+    <div class="card-meta-row">
+      <div class="card-meta">
+        @if (dateStr()) {
+          <span class="meta-date">📅 {{ dateStr() }}</span>
+        }
+        @if (loggedIn() && lieu()) {
+          <a class="meta-lieu" [href]="mapsUrl(lieu()!)" target="_blank" (click)="$event.stopPropagation()">
+            📍 {{ lieu() }}
+          </a>
+        }
+      </div>
+
+      <div class="card-badges">
+        @switch (item().kind) {
+          @case ('sortie') {
+            @let s = sortie()!;
+            @if (!isPast() && s.inscriptionObligatoire) {
+              <span class="badge badge-inscription">
+                {{ s.nbInscrits ?? 0 }}{{ s.maxParticipants ? ' / ' + s.maxParticipants : '' }} inscrit(s)
+              </span>
+            }
+          }
+          @case ('oneshot') {
+            @let os = oneshot()!;
+            <span class="badge badge-oneshot">{{ os.nbThemes ?? 0 }} thème(s)</span>
+            <span class="badge badge-oneshot">{{ os.nbInscrits ?? 0 }} inscrit(s)</span>
+          }
+          @case ('defi') {
+            @let d = defi()!;
+            @if (d.theme) {
+              <span class="badge badge-defi">{{ d.theme }}</span>
+            }
+            <span class="badge badge-defi">{{ d.nbInscrits }} inscrit(s)</span>
+          }
+        }
+      </div>
+    </div>
+  </div>
+
+</a>

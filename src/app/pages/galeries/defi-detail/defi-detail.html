@@ -8,22 +8,20 @@
 
   <div class="defi-page">
 
-    <!-- Cover + entête -->
-    <div class="defi-hero" [class.has-cover]="d.photoCouvertureUrl">
-      @if (d.photoCouvertureUrl) {
-        <img [src]="d.photoCouvertureUrl" [alt]="d.titre" class="hero-img" />
-        <div class="hero-overlay"></div>
-      }
-      <div class="hero-content" [class.dark]="!!d.photoCouvertureUrl">
-        <a routerLink="/galeries/sorties" class="back-link">← Événements</a>
-        <div class="hero-badges">
-          <span class="hero-badge badge-type">🏅 Défi Photo</span>
-          <span [class]="'hero-badge ' + statutClass(s)">{{ statutLabel(s) }}</span>
-        </div>
-        <h1 class="defi-titre">{{ d.titre }}</h1>
-        <p class="defi-theme">{{ d.theme }}</p>
-      </div>
-    </div>
+    <app-event-hero
+      [coverUrl]="d.photoCouvertureUrl"
+      [backLink]="['/galeries/sorties']"
+      backLabel="Activités"
+      [typeBadge]="typeBadgeHero()"
+      [status]="statusHero()"
+      [titre]="d.titre"
+      [organisateur]="d.organisateurNom"
+      [loggedIn]="!!profile()"
+      [canEdit]="canManage() && !editMode()"
+      [canDelete]="canManage() && !editMode()"
+      (editClick)="enterEdit()"
+      (deleteClick)="deleteDefi()"
+    />
 
     <div class="defi-body">
 
@@ -47,23 +45,10 @@
           </div>
         </div>
 
-        <!-- Action principale : inscription -->
-        @if (profile()) {
-          @if (!isInscrit()) {
-            @if (s === 'soumission') {
-              <button class="btn-inscrire" (click)="inscrire()" [disabled]="inscribing()">
-                {{ inscribing() ? 'Inscription…' : 'S\'inscrire au défi' }}
-              </button>
-            }
-          }
-          @if (isInscrit() && s === 'soumission') {
-            <button class="btn-desinscrire" (click)="desinscrire()">Se désinscrire</button>
-          }
-          @if (isInscrit() && s === 'vote') {
-            <div class="votes-restants">
-              {{ votesRestants() }} vote(s) restant(s) / {{ d.maxVotes }}
-            </div>
-          }
+        @if (profile() && isInscrit() && s === 'vote') {
+          <div class="votes-restants">
+            {{ votesRestants() }} vote(s) restant(s) / {{ d.maxVotes }}
+          </div>
         }
 
         <!-- Stats -->
@@ -94,15 +79,6 @@
           </div>
         </div>
 
-        <!-- Contrôles organisateur -->
-        @if (canManage()) {
-          <div class="manage-section">
-            @if (!editMode()) {
-              <button class="btn-edit" (click)="enterEdit()">Modifier le défi</button>
-              <button class="btn-delete" (click)="deleteDefi()">Supprimer</button>
-            }
-          </div>
-        }
       </aside>
 
       <!-- Contenu principal -->
@@ -181,11 +157,53 @@
           </div>
         }
 
-        <!-- Description -->
+        @if (d.theme && !editMode()) {
+          <p class="defi-theme-line">
+            <span class="defi-theme-label">Thème</span>
+            {{ d.theme }}
+          </p>
+        }
+
         @if (d.description && !editMode()) {
           <div class="defi-description">
-            <p>{{ d.description }}</p>
+            <span class="defi-description-label">Description</span>
+            <p class="defi-description-text">{{ d.description }}</p>
           </div>
+        }
+
+        <!-- Participants -->
+        @if (!editMode()) {
+          <section class="inscription-section">
+            <div class="inscription-header">
+              <h2>
+                Participants
+                @if (profile()) { <span class="count">{{ inscriptions().length }}</span> }
+              </h2>
+              @if (profile()) {
+                @if (!isInscrit() && s === 'soumission') {
+                  <button class="btn-inscrire" (click)="inscrire()" [disabled]="inscribing()">
+                    {{ inscribing() ? 'Inscription…' : 'S\'inscrire au défi' }}
+                  </button>
+                } @else if (isInscrit() && s === 'soumission') {
+                  <button class="btn-desinscrire" (click)="desinscrire()">✓ Inscrit — Se désinscrire</button>
+                } @else if (isInscrit()) {
+                  <span class="inscrit-badge">✓ Inscrit</span>
+                }
+              }
+            </div>
+            @if (profile() && inscriptions().length > 0) {
+              <div class="participants-row">
+                @for (p of inscriptions(); track p.uid) {
+                  <span class="participant-chip" [class.me]="p.uid === profile()?.uid">
+                    {{ p.prenom ? p.prenom + ' ' + p.nom : p.nom }}
+                  </span>
+                }
+              </div>
+            }
+            @if (!profile()) {
+              <p class="login-hint">Connectez-vous pour voir les participants.</p>
+            }
+          </section>
         }
 
         <!-- Phase : À venir -->

@@ -1,40 +1,21 @@
 <!-- Hero (pleine largeur) -->
 @if (event()) {
-  <div class="event-hero" [class.has-cover]="event()!.photoCouvertureUrl">
-    @if (event()!.photoCouvertureUrl) {
-      <img [src]="event()!.photoCouvertureUrl" [alt]="event()!.titre" class="hero-img" imgRetry />
-      <div class="hero-overlay"></div>
-    }
-    <div class="hero-content" [class.dark]="!!event()!.photoCouvertureUrl">
-      <div class="hero-nav">
-        <a routerLink="/galeries/sorties" class="back-link">← Activités</a>
-        @if (canManage()) {
-          <div class="header-actions">
-            <a [routerLink]="['/membre/oneshots', id, 'gerer']" class="btn-action">✏ Modifier</a>
-            <button class="btn-action btn-action-danger" (click)="deleteOneShot()">🗑 Supprimer</button>
-          </div>
-        }
-      </div>
-      <div class="hero-badges">
-        <span class="statut-badge statut-{{ event()!.statut }}">{{ statutLabel() }}</span>
-      </div>
-      <h1>{{ event()!.titre }}</h1>
-      <div class="event-meta">
-        @if (event()!.date) {
-          <span class="meta-item">📅 {{ formatDate(event()!.date!) }}</span>
-        }
-        @if (isLoggedIn() && event()!.lieu) {
-          <span class="meta-item">📍 {{ event()!.lieu }}</span>
-        }
-        @if (isLoggedIn()) {
-          <span class="meta-item meta-org">Organisé par {{ event()!.nomCreateur }}</span>
-        }
-      </div>
-      @if (isLoggedIn() && event()!.description) {
-        <p class="event-desc">{{ event()!.description }}</p>
-      }
-    </div>
-  </div>
+  <app-event-hero
+    [coverUrl]="event()!.photoCouvertureUrl"
+    [backLink]="['/galeries/sorties']"
+    backLabel="Activités"
+    [typeBadge]="typeBadgeHero()"
+    [status]="statusHero()"
+    [titre]="event()!.titre"
+    [organisateur]="event()!.nomCreateur"
+    [date]="event()!.date"
+    [lieu]="event()!.lieu"
+    [loggedIn]="isLoggedIn()"
+    [canEdit]="canManage()"
+    [canDelete]="canManage()"
+    (editClick)="goToGestion()"
+    (deleteClick)="deleteOneShot()"
+  />
 }
 
 <div class="detail-page">
@@ -45,6 +26,13 @@
     </div>
     <p class="loading">Chargement…</p>
   } @else {
+
+    @if (event()!.description) {
+      <div class="event-description">
+        <span class="event-description-label">Description</span>
+        <p class="event-description-text">{{ event()!.description }}</p>
+      </div>
+    }
 
     <!-- ── GESTION (créateur / admin) ──────────────── -->
     @if (canManage() && event()!.statut !== 'resultats') {
@@ -196,7 +184,7 @@
     <!-- Inscription + Participants -->
     <section class="inscription-section">
       <div class="inscription-header">
-        <h2 class="panel-title">
+        <h2>
           Participants
           @if (isLoggedIn()) { <span class="count">{{ inscriptions().length }}</span> }
         </h2>
@@ -220,7 +208,7 @@
       @if (isLoggedIn() && inscriptions().length > 0) {
         <div class="participants-row">
           @for (ins of inscriptions(); track ins.uid) {
-            <span class="participant-name-chip" [class.me]="ins.uid === profile()?.uid">
+            <span class="participant-chip" [class.me]="ins.uid === profile()?.uid">
               {{ ins.nomMembre }}
               @if (canManage() && canManageInscriptions()) {
                 <button class="chip-remove" (click)="retirerInscrit(ins.uid, ins.nomMembre)" title="Désinscrire">×</button>

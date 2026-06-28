@@ -7,19 +7,16 @@ import { AuthService } from '../../../services/auth.service';
 import { OneShotService } from '../../../services/oneshot.service';
 import { DefiService } from '../../../services/defi.service';
 import { Sortie, SORTIE_TYPE_META, SortieType } from '../../../models/sortie.model';
-import { OneShot, ONESHOT_STATUT_LABELS, OneShotStatut } from '../../../models/oneshot.model';
-import { Defi, DEFI_STATUT_LABELS, DefiStatut, getDefiStatut } from '../../../models/defi.model';
+import { OneShot } from '../../../models/oneshot.model';
+import { Defi, getDefiStatut } from '../../../models/defi.model';
 import { DatePickerComponent } from '../../../components/date-picker/date-picker';
-import { ImgRetryDirective } from '../../../directives/img-retry.directive';
+import { ActiviteCard, ActiviteItem } from '../../../components/activite-card/activite-card';
 
-export type ActiviteItem =
-  | { kind: 'sortie'; data: Sortie }
-  | { kind: 'oneshot'; data: OneShot }
-  | { kind: 'defi'; data: Defi };
+export type { ActiviteItem };
 
 @Component({
   selector: 'app-sorties-liste',
-  imports: [RouterLink, DatePickerComponent, ImgRetryDirective],
+  imports: [RouterLink, DatePickerComponent, ActiviteCard],
   templateUrl: './sorties-liste.html',
   styleUrl: './sorties-liste.css',
 })
@@ -190,54 +187,4 @@ export class SortiesListe {
   isAVenir(date: string): boolean {
     return new Date(date + 'T00:00:00') > new Date();
   }
-
-  formatDate(date: string): string {
-    return new Date(date + 'T12:00:00').toLocaleDateString('fr-FR', {
-      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
-    });
-  }
-
-  mapsUrl(lieu: string): string {
-    return `https://maps.google.com/?q=${encodeURIComponent(lieu)}`;
-  }
-
-  typeLabel(type: SortieType | undefined): string {
-    return type ? SORTIE_TYPE_META[type].label : 'Sortie Photo';
-  }
-
-  typeEmoji(type: SortieType | undefined): string {
-    return type ? SORTIE_TYPE_META[type].emoji : '📸';
-  }
-
-  oneShotStatutLabel(statut: OneShotStatut): string {
-    return ONESHOT_STATUT_LABELS[statut];
-  }
-
-  oneShotStatutClass(statut: OneShotStatut): string {
-    switch (statut) {
-      case 'inscription':            return 'sortie-status status-oneshot-inscription';
-      case 'fermeture_inscriptions': return 'sortie-status status-oneshot-fermee';
-      case 'vote':                   return 'sortie-status status-oneshot-vote';
-      case 'resultats':              return 'sortie-status status-passee';
-      default:                       return 'sortie-status';
-    }
-  }
-
-  defiStatutLabel(defi: Defi): string {
-    return DEFI_STATUT_LABELS[getDefiStatut(defi)];
-  }
-
-  defiStatutClass(defi: Defi): string {
-    const s = getDefiStatut(defi);
-    switch (s) {
-      case 'a_venir':    return 'sortie-status status-defi-avenir';
-      case 'soumission': return 'sortie-status status-defi-soumission';
-      case 'vote':       return 'sortie-status status-defi-vote';
-      case 'resultats':  return 'sortie-status status-passee';
-    }
-  }
-
-  asSortie(item: ActiviteItem): Sortie   { return item.data as Sortie; }
-  asOneShot(item: ActiviteItem): OneShot { return item.data as OneShot; }
-  asDefi(item: ActiviteItem): Defi       { return item.data as Defi; }
 }

@@ -1,45 +1,26 @@
 @if (sortie(); as s) {
+  @if (!editMode()) {
+    <app-event-hero
+      [coverUrl]="s.imageEvenementUrl"
+      [backLink]="['/galeries/sorties']"
+      backLabel="Activités"
+      [typeBadge]="typeBadgeHero()"
+      [status]="statusHero()"
+      [titre]="s.titre"
+      [organisateur]="s.nomOrganisateur"
+      [date]="s.date"
+      [lieu]="s.lieu"
+      [loggedIn]="!!profile()"
+      [canEdit]="canManage()"
+      [canDelete]="canManage()"
+      (editClick)="startEdit()"
+      (deleteClick)="deleteSortie()"
+    />
+  }
+
 <div class="sortie-detail">
 
-  @if (!editMode()) {
-    <!-- Hero (mode vue) -->
-    <div class="sortie-hero" [class.has-cover]="s.imageEvenementUrl">
-      @if (s.imageEvenementUrl) {
-        <img [src]="s.imageEvenementUrl" [alt]="s.titre" class="hero-img" imgRetry />
-        <div class="hero-overlay"></div>
-      }
-      <div class="hero-content" [class.dark]="!!s.imageEvenementUrl">
-        <a routerLink="/galeries/sorties" class="back-link">← Activités</a>
-        <div class="hero-badges">
-          <span class="status-badge" [class.status-avenir]="isAVenir()" [class.status-ouverte]="!isAVenir()">
-            {{ isAVenir() ? 'À venir' : 'Ouverte aux photos' }}
-          </span>
-        </div>
-        <h1>{{ s.titre }}</h1>
-        <div class="header-meta">
-          <span class="meta-item">📅 {{ formatDate(s.date) }}</span>
-          @if (profile() && s.lieu) {
-            <a [href]="mapsUrl(s.lieu)" target="_blank" class="meta-item meta-lieu">
-              📍 {{ s.lieu }}
-            </a>
-          }
-          @if (profile()) {
-            <span class="meta-item meta-org">par {{ s.nomOrganisateur }}</span>
-          }
-        </div>
-        @if (profile() && s.description) {
-          <p class="detail-desc">{{ s.description }}</p>
-        }
-        @if (isOrganisateur() || isAdmin()) {
-          <div class="header-actions">
-            <button class="btn-action" (click)="startEdit()">✏ Modifier</button>
-            <button class="btn-action btn-action-danger" (click)="deleteSortie()">🗑 Supprimer</button>
-          </div>
-        }
-      </div>
-    </div>
-
-  } @else {
+  @if (editMode()) {
     <div class="detail-header">
       <button class="back-link back-link-btn" (click)="cancelEdit()">← Retour à l'événement</button>
       <p class="edit-title">Modifier l'événement</p>
@@ -124,6 +105,13 @@
         </div>
 
       </form>
+    </div>
+  }
+
+  @if (s.description && !editMode()) {
+    <div class="event-description">
+      <span class="event-description-label">Description</span>
+      <p class="event-description-text">{{ s.description }}</p>
     </div>
   }
 

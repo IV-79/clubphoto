@@ -16,10 +16,11 @@ import { LightboxPhoto, PhotoLightboxCallbacks } from '../../../../models/commen
 import { PhotoLightbox } from '../../../../components/photo-lightbox/photo-lightbox';
 import { VoteRankingComponent, RankingItem } from '../../../../components/vote-ranking/vote-ranking';
 import { ImgRetryDirective } from '../../../../directives/img-retry.directive';
+import { EventHero, HeroBadge } from '../../../../components/event-hero/event-hero';
 
 @Component({
   selector: 'app-oneshot-detail',
-  imports: [RouterLink, PhotoLightbox, ImgRetryDirective, VoteRankingComponent],
+  imports: [RouterLink, PhotoLightbox, ImgRetryDirective, VoteRankingComponent, EventHero],
   templateUrl: './oneshot-detail.html',
   styleUrl: './oneshot-detail.css',
 })
@@ -68,6 +69,20 @@ export class OneShotDetail {
 
   isLoggedIn = computed(() => !!this.profile());
   authReady  = computed(() => this.profile() !== undefined);
+
+  typeBadgeHero = computed((): HeroBadge => ({ text: '🏆 OneShot', css: 'event-type-badge badge-oneshot-type' }));
+  statusHero = computed((): HeroBadge => {
+    const e = this.event();
+    if (!e) return { text: '', css: 'hero-status' };
+    const cssMap: Record<string, string> = {
+      preparation:            'hero-status',
+      inscription:            'hero-status status-avenir',
+      fermeture_inscriptions: 'hero-status status-oneshot-fermee',
+      vote:                   'hero-status status-oneshot-vote',
+      resultats:              'hero-status status-passee',
+    };
+    return { text: ONESHOT_STATUT_LABELS[e.statut], css: cssMap[e.statut] ?? 'hero-status' };
+  });
 
   isCreator          = computed(() => this.event()?.creatorUid === this.profile()?.uid);
   isAdmin            = computed(() => this.profile()?.role === 'admin');
@@ -376,6 +391,8 @@ export class OneShotDetail {
       weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
     });
   }
+
+  goToGestion() { this.router.navigate(['/membre/oneshots', this.id, 'gerer']); }
 
   async deleteOneShot() {
     const e = this.event();

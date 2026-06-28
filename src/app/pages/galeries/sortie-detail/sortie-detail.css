@@ -4,6 +4,30 @@
   padding: 0 1rem 2rem;
 }
 
+.event-description {
+  margin: 1.5rem 0;
+  padding: 1rem 1.25rem;
+  background: #f9f9f9;
+  border-left: 3px solid #e0e0e0;
+  border-radius: 0 4px 4px 0;
+}
+.event-description-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: rgba(0,0,0,0.35);
+  margin-bottom: 0.4rem;
+}
+.event-description-text {
+  margin: 0;
+  font-size: 0.9rem;
+  color: rgba(0,0,0,0.65);
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
 /* ── Hero (mode vue) ─────────────────────────────────────────── */
 
 .sortie-hero {
@@ -310,6 +334,7 @@
 .inscription-header h2 {
   margin: 0;
   font-size: 1rem;
+  font-weight: 600;
   color: #1a1a1a;
   display: flex;
   align-items: center;

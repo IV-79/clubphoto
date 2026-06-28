@@ -42,6 +42,21 @@
         </div>
       </div>
 
+      <!-- Titre -->
+      <div class="field-full">
+        <label class="field-label">Titre *</label>
+        <input type="text" class="field-input" [(ngModel)]="titreValue"
+               placeholder="Nom du OneShot" [disabled]="saving()" required>
+      </div>
+
+      <!-- Description -->
+      <div class="field-full">
+        <label class="field-label">Description <span class="field-optional">optionnel</span></label>
+        <textarea class="field-input field-textarea" [(ngModel)]="descriptionValue" rows="3"
+                  placeholder="Détails sur l'événement, consignes, thème général…"
+                  [disabled]="saving()"></textarea>
+      </div>
+
       <!-- Date + Lieu -->
       @if (peutEditer()) {
         <div class="form-row">

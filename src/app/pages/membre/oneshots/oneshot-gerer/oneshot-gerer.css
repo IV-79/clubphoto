@@ -76,6 +76,7 @@
 }
 .field-input:focus { border-color: #cc0000; border-width: 2px; }
 .field-input:disabled { opacity: 0.5; background: #f5f5f5; }
+.field-textarea { resize: vertical; min-height: 80px; }
 
 .field-note {
   font-size: 0.76rem;

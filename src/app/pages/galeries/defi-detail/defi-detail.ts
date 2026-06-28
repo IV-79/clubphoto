@@ -13,10 +13,11 @@ import { VoteRankingComponent, RankingItem } from '../../../components/vote-rank
 import { Defi, DefiPhoto, DefiPhotoResult, DefiStatut, DEFI_STATUT_LABELS, getDefiStatut } from '../../../models/defi.model';
 import { LightboxPhoto, PhotoLightboxCallbacks } from '../../../models/commentaire.model';
 import { ImgRetryDirective } from '../../../directives/img-retry.directive';
+import { EventHero, HeroBadge } from '../../../components/event-hero/event-hero';
 
 @Component({
   selector: 'app-defi-detail',
-  imports: [RouterLink, FormsModule, DatePickerComponent, PhotoLightbox, ImgRetryDirective, VoteRankingComponent],
+  imports: [FormsModule, DatePickerComponent, PhotoLightbox, ImgRetryDirective, VoteRankingComponent, EventHero],
   templateUrl: './defi-detail.html',
   styleUrl: './defi-detail.css',
 })
@@ -72,6 +73,18 @@ export class DefiDetail {
 
   statut            = computed((): DefiStatut => this.defi() ? getDefiStatut(this.defi()!) : 'a_venir');
   totalVotesDeposes = computed(() => this.votes().reduce((acc, v) => acc + v.photoIds.length, 0));
+
+  typeBadgeHero = computed((): HeroBadge => ({ text: '🏅 Défi Photo', css: 'event-type-badge badge-defi-type' }));
+  statusHero = computed((): HeroBadge => {
+    const s = this.statut();
+    const css: Record<string, string> = {
+      a_venir:    'hero-status status-defi-avenir',
+      soumission: 'hero-status status-defi-soumission',
+      vote:       'hero-status status-defi-vote',
+      resultats:  'hero-status status-passee',
+    };
+    return { text: DEFI_STATUT_LABELS[s], css: css[s] ?? 'hero-status' };
+  });
   isAdmin    = computed(() => this.profile()?.role === 'admin');
   isOrg      = computed(() => !!this.profile() && this.defi()?.organisateurUid === this.profile()!.uid);
   canManage  = computed(() => this.isOrg() || this.isAdmin());

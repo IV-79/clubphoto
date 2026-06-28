@@ -1,0 +1,185 @@
+/* Carte de base */
+.event-card {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  text-decoration: none;
+  display: block;
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+}
+.event-card:hover {
+  transform: translateY(-2px);
+  border-color: #ccc;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.event-card-oneshot { border-color: rgba(46,125,90,0.25); }
+.event-card-oneshot:hover { border-color: rgba(46,125,90,0.5); }
+
+.event-card-defi { border-color: rgba(217,119,6,0.25); }
+.event-card-defi:hover { border-color: rgba(217,119,6,0.5); }
+
+/* Cover 16:9 */
+.card-cover {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: #f0f0f0;
+  overflow: hidden;
+}
+
+.cover-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.card-cover .card-status {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  background: rgba(255,255,255,0.88);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+}
+
+/* Badge statut */
+.card-status {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.status-avenir              { background: rgba(76,175,80,0.12);  color: #2e7d32; }
+.status-passee              { background: rgba(0,0,0,0.06);       color: rgba(0,0,0,0.45); }
+.status-oneshot-inscription { background: rgba(76,175,80,0.12);  color: #2e7d32; }
+.status-oneshot-fermee      { background: rgba(255,152,0,0.14);  color: #e65100; }
+.status-oneshot-vote        { background: rgba(103,58,183,0.12); color: #4527a0; }
+.status-defi-avenir         { background: rgba(245,158,11,0.12); color: #d97706; }
+.status-defi-soumission     { background: rgba(76,175,80,0.12);  color: #2e7d32; }
+.status-defi-vote           { background: rgba(139,92,246,0.12); color: #6d28d9; }
+
+/* Infos */
+.card-info { padding: 1rem; }
+
+.card-titre-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Badge type */
+.card-type-badge {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.badge-sortie       { background: rgba(61,90,128,0.1);   border: 1px solid rgba(61,90,128,0.25);  color: #3d5a80; border-radius: 4px; padding: 0.2rem 0.5rem; }
+.badge-oneshot-type { background: rgba(46,125,90,0.1);   border: 1px solid rgba(46,125,90,0.25); color: #2e7d5a; border-radius: 4px; padding: 0.2rem 0.5rem; }
+.badge-defi-type    { background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.3); color: #d97706; border-radius: 4px; padding: 0.2rem 0.5rem; }
+
+/* Titre + organisateur sur la même ligne */
+.card-titre-org {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.1rem;
+}
+
+.card-titre {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  line-height: 1.3;
+}
+
+/* Méta (date, lieu) + badges sur la même ligne */
+.card-meta-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+}
+
+.card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.meta-date {
+  font-size: 0.8rem;
+  color: rgba(0,0,0,0.45);
+}
+
+.meta-lieu {
+  font-size: 0.8rem;
+  color: #1565c0;
+  text-decoration: none;
+}
+.meta-lieu:hover { text-decoration: underline; }
+
+.card-organisateur {
+  font-size: 0.75rem;
+  color: rgba(0,0,0,0.4);
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding-top: 0.15rem;
+}
+
+.card-badges {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  align-self: flex-end;
+  gap: 0.3rem;
+  flex-shrink: 0;
+}
+
+/* Badges spécifiques */
+.badge {
+  font-size: 0.7rem;
+  border-radius: 4px;
+  padding: 0.15rem 0.6rem;
+  white-space: nowrap;
+}
+
+.badge-inscription {
+  background: rgba(103,58,183,0.08);
+  border: 1px solid rgba(103,58,183,0.25);
+  color: #5e35b1;
+}
+
+.badge-oneshot {
+  background: rgba(46,125,90,0.08);
+  border: 1px solid rgba(46,125,90,0.25);
+  color: #2e7d5a;
+}
+
+.badge-defi {
+  background: rgba(217,119,6,0.08);
+  border: 1px solid rgba(217,119,6,0.25);
+  color: #d97706;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

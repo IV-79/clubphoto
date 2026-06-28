@@ -1,0 +1,188 @@
+.event-hero {
+  position: relative;
+  min-height: 200px;
+  background: #f5f5f5;
+  display: flex;
+  align-items: stretch;
+}
+.event-hero.has-cover { min-height: 340px; }
+
+.hero-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #111;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem 1.5rem;
+  color: #1a1a1a;
+  display: flex;
+  flex-direction: column;
+}
+.hero-content.dark { color: white; }
+
+/* Navigation haut : back-link | boutons */
+.hero-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.back-link {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: rgba(0,0,0,0.45);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.back-link:hover { color: #1a1a1a; }
+.hero-content.dark .back-link { color: rgba(255,255,255,0.65); }
+.hero-content.dark .back-link:hover { color: white; }
+
+.hero-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-action {
+  background: rgba(0,0,0,0.06);
+  border: 1px solid rgba(0,0,0,0.18);
+  color: rgba(0,0,0,0.7);
+  border-radius: 4px;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.82rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.btn-action:hover { background: rgba(0,0,0,0.1); border-color: rgba(0,0,0,0.3); }
+
+.btn-action-danger { border-color: rgba(204,0,0,0.3); color: #cc0000; }
+.btn-action-danger:hover { background: rgba(204,0,0,0.08); border-color: #cc0000; }
+
+.hero-content.dark .btn-action {
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(255,255,255,0.35);
+  color: rgba(255,255,255,0.9);
+}
+.hero-content.dark .btn-action:hover {
+  background: rgba(255,255,255,0.22);
+  border-color: rgba(255,255,255,0.6);
+}
+.hero-content.dark .btn-action-danger {
+  border-color: rgba(255,100,100,0.5);
+  color: #ff8080;
+}
+.hero-content.dark .btn-action-danger:hover {
+  background: rgba(255,80,80,0.18);
+}
+
+/* Badges : type (gauche) + statut (droite) — poussés en bas par margin-top:auto */
+.hero-badges {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: auto;
+  margin-bottom: 0.6rem;
+}
+
+/* Base badge type */
+.event-type-badge {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  border-radius: 4px;
+  padding: 0.2rem 0.5rem;
+}
+.badge-sortie       { background: rgba(61,90,128,0.1);   border: 1px solid rgba(61,90,128,0.25);  color: #3d5a80; }
+.badge-oneshot-type { background: rgba(46,125,90,0.1);   border: 1px solid rgba(46,125,90,0.25);  color: #2e7d5a; }
+.badge-defi-type    { background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.3);  color: #d97706; }
+
+/* Base badge statut */
+.hero-status {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+.status-avenir              { background: rgba(76,175,80,0.12);  color: #2e7d32; }
+.status-passee              { background: rgba(0,0,0,0.06);       color: rgba(0,0,0,0.45); }
+.status-photos              { background: rgba(21,101,192,0.1);   color: #1565c0; }
+.status-oneshot-inscription { background: rgba(76,175,80,0.12);  color: #2e7d32; }
+.status-oneshot-fermee      { background: rgba(255,152,0,0.14);  color: #e65100; }
+.status-oneshot-vote        { background: rgba(103,58,183,0.12); color: #4527a0; }
+.status-defi-avenir         { background: rgba(245,158,11,0.12); color: #d97706; }
+.status-defi-soumission     { background: rgba(76,175,80,0.12);  color: #2e7d32; }
+.status-defi-vote           { background: rgba(139,92,246,0.12); color: #6d28d9; }
+
+/* Sur photo sombre → frosted glass pour les deux badges */
+.event-hero.has-cover .event-type-badge,
+.event-hero.has-cover .hero-status {
+  background: rgba(255,255,255,0.88);
+  border-color: transparent;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+}
+
+/* Titre + organisateur sur la même ligne */
+.hero-titre-row {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 0.3rem;
+}
+
+.hero-titre {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 300;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+}
+
+/* Méta : date · lieu */
+.hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.meta-item {
+  font-size: 0.875rem;
+  color: rgba(0,0,0,0.55);
+}
+
+.meta-lieu {
+  color: #1565c0;
+  text-decoration: none;
+}
+.meta-lieu:hover { text-decoration: underline; }
+
+.meta-org { font-size: 0.85rem; color: rgba(0,0,0,0.4); white-space: nowrap; }
+
+.hero-content.dark .meta-item  { color: rgba(255,255,255,0.75); }
+.hero-content.dark .meta-lieu  { color: rgba(255,255,255,0.9); }
+.hero-content.dark .meta-org   { color: rgba(255,255,255,0.6); }

@@ -4,6 +4,25 @@
 
 ## En cours (alpha)
 
+### Hero événement partagé — composant `event-hero` (2026-06-28)
+
+- Nouveau composant standalone `app-event-hero` branché sur les 3 pages détail : `sortie-detail`, `defi-detail`, `oneshot-detail`.
+- **Structure du hero** : haut-gauche lien retour, haut-droite boutons Modifier/Supprimer, bas : badge type + badge statut, titre, organisateur, date + lieu (lien Maps pour membres).
+- **Badges frosted glass** : sur une photo de couverture sombre, les badges s'affichent en fond blanc semi-transparent + `backdrop-filter: blur`.
+- **Description hors hero** : chaque page gère sa description dans son corps (encart `event-description` avec bordure gauche).
+- **Défi** : thème (`d.theme`) affiché en italique dans `.defi-main` ; boutons modifier/supprimer retirés du panneau `.defi-aside`.
+- **OneShot** : le bouton Modifier navigue vers `/membre/oneshots/{id}/gerer` via `goToGestion()`.
+- Typo `claud` (artefact de code) supprimée dans `defi-detail.html`.
+
+### Carte événement universelle — composant `activite-card` (2026-06-28)
+
+- Nouveau composant standalone `app-activite-card` qui remplace les 6 blocs de carte répétés dans `sorties-liste` (3 types × 2 sections).
+- Prend un `ActiviteItem` (`sortie | oneshot | defi`) + `loggedIn` + `isPast` en inputs.
+- **Corrections OneShot** : lieu affiché avec lien Google Maps (comme Sortie), `nomCreateur` affiché (masqué invités).
+- **Cover** : passage de `object-fit: contain` à `object-fit: cover` (fini les bandes noires).
+- **Badges type** : vrais badges encadrés pour les 3 types — bleu ardoise (Sortie), vert (OneShot), orange (Défi).
+- **Layout carte** : titre + organisateur sur la même ligne (space-between), date/lieu à gauche + badges inscrits/thèmes à droite alignés en bas, auto-wrap si manque de place.
+
 ### Alignement visuel des événements — héros, couvertures, formulaires (2026-06-27)
 
 #### Héros photo de couverture — Sortie, OneShot, Défi

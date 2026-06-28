@@ -4,6 +4,42 @@
   color: rgba(0,0,0,0.4);
 }
 
+.defi-theme-line {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: rgba(0,0,0,0.8);
+  margin: 0 0 1rem;
+}
+.defi-theme-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #d97706;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.defi-description-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: rgba(0,0,0,0.35);
+  margin-bottom: 0.4rem;
+}
+.defi-description-text {
+  margin: 0;
+  font-size: 0.9rem;
+  color: rgba(0,0,0,0.65);
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
 .defi-page {
   max-width: 1200px;
   margin: 0 auto;
@@ -173,6 +209,74 @@
   transition: all 0.15s;
 }
 .btn-desinscrire:hover { border-color: #cc0000; color: #cc0000; }
+
+/* ── Box participants ─────────────────────────────────────────── */
+
+.inscription-section {
+  background: #f8f8f8;
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 8px;
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.inscription-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.inscription-header h2 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.inscription-header .count {
+  background: rgba(0,0,0,0.06);
+  color: rgba(0,0,0,0.4);
+  border-radius: 12px;
+  padding: 0.1rem 0.5rem;
+  font-size: 0.8rem;
+  font-weight: normal;
+}
+
+.participants-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.participant-chip {
+  background: rgba(0,0,0,0.04);
+  border: 1px solid #e0e0e0;
+  border-radius: 20px;
+  padding: 3px 12px;
+  font-size: 0.82rem;
+  color: #1a1a1a;
+  white-space: nowrap;
+}
+
+.participant-chip.me {
+  color: #1565c0;
+  border-color: rgba(21,101,192,0.3);
+  background: rgba(21,101,192,0.07);
+}
+
+.inscrit-badge {
+  font-size: 0.82rem;
+  color: #2e7d32;
+  font-weight: 500;
+}
+
+.login-hint { font-size: 0.85rem; color: rgba(0,0,0,0.4); }
 
 .votes-restants {
   background: rgba(139,92,246,0.08);

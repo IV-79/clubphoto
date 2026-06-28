@@ -13,7 +13,7 @@ import { SortieService } from '../../../services/sortie.service';
 import { AuthService } from '../../../services/auth.service';
 import { ConfirmService } from '../../../services/confirm.service';
 import { NotificationService } from '../../../services/notification.service';
-import { Sortie, SortieImage, SortieType } from '../../../models/sortie.model';
+import { Sortie, SortieImage, SortieType, SORTIE_TYPE_META } from '../../../models/sortie.model';
 import { UserProfile } from '../../../models/user.model';
 import { LightboxPhoto, PhotoLightboxCallbacks } from '../../../models/commentaire.model';
 import { PhotoLightbox } from '../../../components/photo-lightbox/photo-lightbox';
@@ -21,6 +21,7 @@ import { compressToJpeg } from '../../../utils/image-compress';
 import { readExifWithConsent } from '../../../utils/exif-reader';
 import { GpsConsentService } from '../../../services/gps-consent.service';
 import { ImgRetryDirective } from '../../../directives/img-retry.directive';
+import { EventHero, HeroBadge } from '../../../components/event-hero/event-hero';
 
 interface UploadTask {
   id: string;
@@ -33,7 +34,7 @@ interface UploadTask {
 @Component({
   selector: 'app-sortie-detail',
   imports: [
-    RouterLink, PhotoLightbox, ImgRetryDirective,
+    PhotoLightbox, ImgRetryDirective, EventHero,
     ReactiveFormsModule,
     MatFormFieldModule, MatInputModule, MatCheckboxModule,
     MatSelectModule, MatIconModule,
@@ -98,6 +99,16 @@ export class SortieDetail {
 
   isAdmin = computed(() => this.profile()?.role === 'admin');
   canManage = computed(() => this.isOrganisateur() || this.isAdmin());
+
+  typeBadgeHero = computed((): HeroBadge => {
+    const s = this.sortie();
+    const meta = SORTIE_TYPE_META[s?.type ?? 'sortie_photo'];
+    return { text: `${meta.emoji} ${meta.label}`, css: 'event-type-badge badge-sortie' };
+  });
+  statusHero = computed((): HeroBadge => this.isAVenir()
+    ? { text: 'À venir',           css: 'hero-status status-avenir' }
+    : { text: 'Ouverte aux photos', css: 'hero-status status-photos' }
+  );
 
   private allMembres$ = toObservable(this.canManage).pipe(
     switchMap(can => can ? this.authService.getAllMembersOnce() : of([] as UserProfile[]))

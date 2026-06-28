@@ -1,0 +1,46 @@
+<div class="event-hero" [class.has-cover]="coverUrl()">
+  @if (coverUrl()) {
+    <img [src]="coverUrl()" [alt]="titre()" class="hero-img" imgRetry />
+    <div class="hero-overlay"></div>
+  }
+  <div class="hero-content" [class.dark]="!!coverUrl()">
+
+    <div class="hero-nav">
+      <a [routerLink]="backLink()" class="back-link">← {{ backLabel() }}</a>
+      @if (canEdit() || canDelete()) {
+        <div class="hero-actions">
+          @if (canEdit()) {
+            <button class="btn-action" (click)="editClick.emit()">✏ Modifier</button>
+          }
+          @if (canDelete()) {
+            <button class="btn-action btn-action-danger" (click)="deleteClick.emit()">🗑 Supprimer</button>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="hero-badges">
+      <span [class]="typeBadge().css">{{ typeBadge().text }}</span>
+      <span [class]="status().css">{{ status().text }}</span>
+    </div>
+
+    <div class="hero-titre-row">
+      <h1 class="hero-titre">{{ titre() }}</h1>
+      @if (loggedIn() && organisateur()) {
+        <span class="meta-org">par {{ organisateur() }}</span>
+      }
+    </div>
+
+    <div class="hero-meta">
+      @if (date()) {
+        <span class="meta-item">📅 {{ formatDate(date()!) }}</span>
+      }
+      @if (loggedIn() && lieu()) {
+        <a [href]="mapsUrl(lieu()!)" target="_blank" class="meta-item meta-lieu">
+          📍 {{ lieu() }}
+        </a>
+      }
+    </div>
+
+  </div>
+</div>

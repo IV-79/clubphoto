@@ -4,6 +4,30 @@
   min-height: calc(100vh - 120px);
 }
 
+.event-description {
+  margin: 1.5rem 0;
+  padding: 1rem 1.25rem;
+  background: #f9f9f9;
+  border-left: 3px solid #e0e0e0;
+  border-radius: 0 4px 4px 0;
+}
+.event-description-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: rgba(0,0,0,0.35);
+  margin-bottom: 0.4rem;
+}
+.event-description-text {
+  margin: 0;
+  font-size: 0.9rem;
+  color: rgba(0,0,0,0.65);
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
 .detail-page {
   max-width: 860px;
   margin: 0 auto;
@@ -206,13 +230,14 @@
 
 .inscription-header:has(+ .participants-row) { margin-bottom: 12px; }
 
-.inscription-section .inscription-header .panel-title {
-  color: #1a1a1a;
-  font-size: 1rem;
-  font-weight: 400;
-  letter-spacing: 0;
-  text-transform: none;
+.inscription-section .inscription-header h2 {
   margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
 .inscription-section .count {
@@ -227,16 +252,17 @@
   margin-top: 12px;
 }
 
-.participant-name-chip {
+.participant-chip {
   background: rgba(0,0,0,0.04);
   border: 1px solid #e0e0e0;
   border-radius: 20px;
   padding: 3px 12px;
   font-size: 0.82rem;
   color: #1a1a1a;
+  white-space: nowrap;
 }
 
-.participant-name-chip.me {
+.participant-chip.me {
   color: #1565c0;
   border-color: rgba(21,101,192,0.3);
   background: rgba(21,101,192,0.07);
