@@ -5,9 +5,10 @@
     <p class="subtitle">Défis photographiques mensuels</p>
   </div>
 
-  <!-- THÈME OUVERT -->
-  @if (themeOuvert(); as t) {
-    <section class="section-featured">
+  <div class="featured-grid">
+
+    <!-- THÈME OUVERT -->
+    @if (themeOuvert(); as t) {
       <div class="featured-card featured-ouvert"
            [class.has-cover]="!!t.photoCouvertureUrl"
            [style.backgroundImage]="coverBgStyle(t.photoCouvertureUrl)">
@@ -26,12 +27,10 @@
           </div>
         </div>
       </div>
-    </section>
-  }
+    }
 
-  <!-- THÈME COMPAGNON : vote en cours ou dernier résultat -->
-  @if (themeCompagnon(); as c) {
-    <section class="section-featured">
+    <!-- THÈME COMPAGNON : vote en cours ou dernier résultat -->
+    @if (themeCompagnon(); as c) {
       <div class="featured-card"
            [class.featured-vote]="c.statut === 'vote'"
            [class.featured-resultats]="c.statut === 'resultats'"
@@ -64,8 +63,9 @@
           </div>
         </div>
       </div>
-    </section>
-  }
+    }
+
+  </div>
 
   <!-- À VENIR -->
   @if (themesAVenir().length > 0) {

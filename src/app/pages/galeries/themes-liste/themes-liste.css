@@ -1,5 +1,5 @@
 .page {
-  max-width: 800px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 48px 32px 80px;
 }
@@ -26,7 +26,10 @@
 
 /* ── Featured cards (ouvert / vote) ── */
 
-.section-featured {
+.featured-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
   margin-bottom: 18px;
 }
 
@@ -37,6 +40,10 @@
   position: relative;
   background-size: cover;
   background-position: center;
+  min-height: clamp(260px, 28vw, 400px);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
 }
 
 .featured-card-content {
@@ -340,6 +347,7 @@
 
 @media (max-width: 600px) {
   .page { padding: 32px 20px 60px; }
+  .featured-card { min-height: 240px; }
   .featured-card-content { padding: 22px 20px; }
   .card-titre { font-size: 1.3rem; }
   .avenir-entry { flex-wrap: wrap; gap: 4px; }
