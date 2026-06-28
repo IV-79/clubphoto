@@ -7,22 +7,24 @@
     </div>
   } @else {
   @if (!editMode()) {
-    <app-event-hero
-      [coverUrl]="s.imageEvenementUrl"
-      [backLink]="['/galeries/sorties']"
-      backLabel="Activités"
-      [typeBadge]="typeBadgeHero()"
-      [status]="statusHero()"
-      [titre]="s.titre"
-      [organisateur]="s.nomOrganisateur"
-      [date]="s.date"
-      [lieu]="s.lieu"
-      [loggedIn]="!!profile()"
-      [canEdit]="canManage()"
-      [canDelete]="canManage()"
-      (editClick)="startEdit()"
-      (deleteClick)="deleteSortie()"
-    />
+    <div class="hero-wrap">
+      <app-event-hero
+        [coverUrl]="s.imageEvenementUrl"
+        [backLink]="['/galeries/sorties']"
+        backLabel="Activités"
+        [typeBadge]="typeBadgeHero()"
+        [status]="statusHero()"
+        [titre]="s.titre"
+        [organisateur]="s.nomOrganisateur"
+        [date]="s.date"
+        [lieu]="s.lieu"
+        [loggedIn]="!!profile()"
+        [canEdit]="canManage()"
+        [canDelete]="canManage()"
+        (editClick)="startEdit()"
+        (deleteClick)="deleteSortie()"
+      />
+    </div>
   }
 
 <div class="sortie-detail">

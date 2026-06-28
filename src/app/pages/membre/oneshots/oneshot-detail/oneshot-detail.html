@@ -1,21 +1,22 @@
-<!-- Hero (pleine largeur) -->
 @if (event()) {
-  <app-event-hero
-    [coverUrl]="event()!.photoCouvertureUrl"
-    [backLink]="['/galeries/sorties']"
-    backLabel="Activités"
-    [typeBadge]="typeBadgeHero()"
-    [status]="statusHero()"
-    [titre]="event()!.titre"
-    [organisateur]="event()!.nomCreateur"
-    [date]="event()!.date"
-    [lieu]="event()!.lieu"
-    [loggedIn]="isLoggedIn()"
-    [canEdit]="canManage()"
-    [canDelete]="canManage()"
-    (editClick)="goToGestion()"
-    (deleteClick)="deleteOneShot()"
-  />
+  <div class="hero-wrap">
+    <app-event-hero
+      [coverUrl]="event()!.photoCouvertureUrl"
+      [backLink]="['/galeries/sorties']"
+      backLabel="Activités"
+      [typeBadge]="typeBadgeHero()"
+      [status]="statusHero()"
+      [titre]="event()!.titre"
+      [organisateur]="event()!.nomCreateur"
+      [date]="event()!.date"
+      [lieu]="event()!.lieu"
+      [loggedIn]="isLoggedIn()"
+      [canEdit]="canManage()"
+      [canDelete]="canManage()"
+      (editClick)="goToGestion()"
+      (deleteClick)="deleteOneShot()"
+    />
+  </div>
 }
 
 <div class="detail-page">
