@@ -47,7 +47,7 @@
 
 .field-label {
   font-size: 0.78rem;
-  color: rgba(0,0,0,0.5);
+  color: rgba(0,0,0,0.72);
   font-weight: 600;
   letter-spacing: 0.03em;
   display: flex;
@@ -80,7 +80,7 @@
 
 .field-note {
   font-size: 0.76rem;
-  color: rgba(0,0,0,0.32);
+  color: rgba(0,0,0,0.55);
   margin: 0;
 }
 
@@ -94,7 +94,7 @@
 
 .themes-count {
   background: rgba(0,0,0,0.07);
-  color: rgba(0,0,0,0.4);
+  color: rgba(0,0,0,0.55);
   font-size: 0.68rem;
   font-weight: normal;
   padding: 1px 7px;
@@ -220,7 +220,7 @@
 
 /* ── Cover drop zone ── */
 .field-cover { display: flex; flex-direction: column; gap: 6px; }
-.field-cover-hint { font-size: 0.75rem; color: rgba(0,0,0,0.38); margin: 0; }
+.field-cover-hint { font-size: 0.75rem; color: rgba(0,0,0,0.55); margin: 0; }
 
 .cover-drop {
   position: relative;

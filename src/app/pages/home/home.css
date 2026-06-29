@@ -215,7 +215,7 @@
 
 .actu-desc {
   font-size: 0.82rem;
-  color: rgba(0,0,0,0.5);
+  color: rgba(0,0,0,0.58);
   line-height: 1.6;
   margin: 0;
   display: -webkit-box;
@@ -226,7 +226,7 @@
 
 .actu-date {
   font-size: 0.72rem;
-  color: rgba(0,0,0,0.28);
+  color: rgba(0,0,0,0.55);
   margin-top: auto;
   padding-top: 8px;
 }
@@ -447,7 +447,7 @@
 
 .membre-bio {
   font-size: 0.82rem;
-  color: rgba(0,0,0,0.5);
+  color: rgba(0,0,0,0.58);
   line-height: 1.6;
   margin: 0;
   display: -webkit-box;

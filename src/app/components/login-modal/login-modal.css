@@ -58,7 +58,7 @@
   flex-direction: column;
   gap: 0.4rem;
   font-size: 0.875rem;
-  color: rgba(0,0,0,0.55);
+  color: rgba(0,0,0,0.72);
 }
 
 .field-label input {
@@ -144,7 +144,7 @@
   text-align: center;
   margin: 1.25rem 0 0;
   font-size: 0.875rem;
-  color: rgba(0,0,0,0.5);
+  color: rgba(0,0,0,0.55);
 }
 
 .register-hint a {

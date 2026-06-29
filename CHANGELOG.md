@@ -4,6 +4,12 @@
 
 ## En cours (alpha)
 
+### Audit contraste CSS — correction des couleurs trop claires (2026-06-29)
+
+- Audit complet de tous les fichiers CSS du projet (hors fichiers déjà corrigés).
+- 57 corrections appliquées sur 15 fichiers : labels de champs rehaussés à `rgba(0,0,0,0.72)`, titres de sections à `rgba(0,0,0,0.65)`, textes informatifs (dates, métas, sous-titres) et textes d'aide/hint à `rgba(0,0,0,0.55)`, textes descriptifs à `rgba(0,0,0,0.58)`.
+- Fichiers corrigés : `home.css`, `membres-galerie.css`, `membre-detail.css`, `theme-detail.css`, `defi-detail.css`, `notifications.css`, `sortie-creer.css`, `defi-creer.css`, `oneshot-gerer.css`, `admin/config.css`, `admin/admin-pages.css`, `vote-ranking.css`, `activite-card.css`, `event-hero.css`, `login-modal.css`.
+
 ### Défi photo — inscription optionnelle + nettoyage Storage (2026-06-28)
 
 - Nouveau champ `inscriptionObligatoire` (coché par défaut) sur les défis : accessible à la création (formulaire dédié et formulaire unifié) et en édition.

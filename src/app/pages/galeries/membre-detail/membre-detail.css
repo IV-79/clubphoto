@@ -153,7 +153,7 @@
 
 .count {
   font-size: 0.85rem;
-  color: rgba(0, 0, 0, 0.35);
+  color: rgba(0, 0, 0, 0.55);
   font-weight: 400;
 }
 
@@ -250,7 +250,7 @@
 /* Meta labels */
 .meta-lbl {
   font-size: 0.72rem;
-  color: rgba(0,0,0,0.35);
+  color: rgba(0,0,0,0.55);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -264,7 +264,7 @@
 
 .meta-lbl-block {
   font-size: 0.72rem;
-  color: rgba(0,0,0,0.35);
+  color: rgba(0,0,0,0.55);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }

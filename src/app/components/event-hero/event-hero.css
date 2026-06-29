@@ -190,7 +190,7 @@
 }
 .meta-lieu:hover { text-decoration: underline; }
 
-.meta-org { font-size: 0.85rem; color: rgba(0,0,0,0.4); white-space: nowrap; }
+.meta-org { font-size: 0.85rem; color: rgba(0,0,0,0.55); white-space: nowrap; }
 
 .hero-content.dark .meta-item  { color: rgba(255,255,255,0.75); }
 .hero-content.dark .meta-lieu  { color: rgba(255,255,255,0.9); }

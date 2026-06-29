@@ -37,12 +37,12 @@
       @if (hasOrganisees()) {
         <button class="filter-chip" [class.filter-chip-active]="filterOrganisees()"
                 (click)="filterOrganisees.set(!filterOrganisees())">
-          Organisées
+          Mes événements
         </button>
       }
       <button class="filter-chip" [class.filter-chip-active]="filterParticipe()"
               (click)="filterParticipe.set(!filterParticipe())">
-        Participe
+        Mes participations
       </button>
     }
 

@@ -90,7 +90,7 @@
 
 .date-label, .stat-row > span {
   font-size: 0.72rem;
-  color: rgba(0,0,0,0.4);
+  color: rgba(0,0,0,0.55);
 }
 .date-val { font-size: 0.85rem; color: #1a1a1a; }
 .stat-row > strong { font-size: 0.9rem; color: #1a1a1a; }
@@ -152,7 +152,7 @@
 
 .inscription-header .count {
   background: rgba(0,0,0,0.06);
-  color: rgba(0,0,0,0.4);
+  color: rgba(0,0,0,0.55);
   border-radius: 12px;
   padding: 0.1rem 0.5rem;
   font-size: 0.8rem;
@@ -187,7 +187,7 @@
   font-weight: 500;
 }
 
-.login-hint { font-size: 0.85rem; color: rgba(0,0,0,0.4); }
+.login-hint { font-size: 0.85rem; color: rgba(0,0,0,0.55); }
 
 .votes-restants {
   background: rgba(139,92,246,0.08);
@@ -224,7 +224,7 @@
   border-radius: 6px;
   padding: 0.75rem;
 }
-.extend-label { font-size: 0.8rem; color: rgba(0,0,0,0.5); margin-bottom: 0.35rem; display: block; }
+.extend-label { font-size: 0.8rem; color: rgba(0,0,0,0.72); margin-bottom: 0.35rem; display: block; }
 .extend-input {
   width: 100%;
   border: 1px solid #ddd;
@@ -257,7 +257,7 @@
 .cover-drop-sm.drag-over { border-color: #d97706; }
 .edit-cover-section { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; }
 .edit-cover-label   { font-size: 0.78rem; font-weight: 600; color: rgba(0,0,0,0.55); margin: 0; }
-.edit-cover-hint    { font-size: 0.72rem; color: rgba(0,0,0,0.38); margin: 0; font-style: italic; }
+.edit-cover-hint    { font-size: 0.72rem; color: rgba(0,0,0,0.55); margin: 0; font-style: italic; }
 .cover-preview-sm   { width: 100%; max-height: 180px; object-fit: contain; background: #111; border-radius: 4px; }
 
 .btn-sm {
@@ -302,7 +302,7 @@
 
 .phase-header { margin-bottom: 1.5rem; }
 .phase-header h2 { margin: 0 0 0.25rem; font-size: 1.25rem; font-weight: 400; color: #1a1a1a; }
-.phase-subtitle { margin: 0; font-size: 0.85rem; color: rgba(0,0,0,0.4); }
+.phase-subtitle { margin: 0; font-size: 0.85rem; color: rgba(0,0,0,0.55); }
 
 /* ── Edit Panel ─────────────────────────────────────────────── */
 
@@ -320,7 +320,7 @@
   flex-direction: column;
   gap: 0.25rem;
   font-size: 0.8rem;
-  color: rgba(0,0,0,0.5);
+  color: rgba(0,0,0,0.72);
   margin-bottom: 0.75rem;
 }
 
@@ -385,7 +385,7 @@
 
 .lock-note-sm {
   font-size: 0.78rem;
-  color: rgba(0,0,0,0.38);
+  color: rgba(0,0,0,0.55);
   background: rgba(0,0,0,0.04);
   border-radius: 4px;
   padding: 4px 10px;
@@ -435,9 +435,9 @@
   margin-bottom: 1.5rem;
 }
 .upload-zone.drag-over { border-color: #d97706; background: rgba(217,119,6,0.04); }
-.upload-zone p { margin: 0.25rem 0; color: rgba(0,0,0,0.5); font-size: 0.9rem; }
+.upload-zone p { margin: 0.25rem 0; color: rgba(0,0,0,0.55); font-size: 0.9rem; }
 .upload-icon { font-size: 2rem; display: block; margin-bottom: 0.5rem; }
-.upload-hint { font-size: 0.8rem !important; color: rgba(0,0,0,0.35) !important; }
+.upload-hint { font-size: 0.8rem !important; color: rgba(0,0,0,0.55) !important; }
 
 .upload-progress { height: 6px; background: #f0f0f0; border-radius: 3px; margin-bottom: 0.5rem; overflow: hidden; }
 .upload-bar { height: 100%; background: #d97706; transition: width 0.3s; border-radius: 3px; }
@@ -461,7 +461,7 @@
   border-radius: 6px;
   padding: 0.75rem 1rem;
   font-size: 0.85rem;
-  color: rgba(0,0,0,0.5);
+  color: rgba(0,0,0,0.55);
   margin-bottom: 1.5rem;
 }
 
@@ -503,7 +503,7 @@
   margin: 0;
   padding: 0.4rem 0.5rem;
   font-size: 0.75rem;
-  color: rgba(0,0,0,0.5);
+  color: rgba(0,0,0,0.55);
 }
 
 .btn-delete-photo {
@@ -571,7 +571,7 @@
 }
 
 .footer-votable { cursor: pointer; }
-.footer-own     { color: rgba(0,0,0,0.35); font-style: italic; }
+.footer-own     { color: rgba(0,0,0,0.55); font-style: italic; }
 .footer-action  { color: rgba(0,0,0,0.4); }
 .footer-action.footer-voted { color: #6d28d9; font-weight: 600; }
 .footer-action.footer-disabled { color: rgba(0,0,0,0.2); }
@@ -607,7 +607,7 @@
 .podium-img { width: 100%; aspect-ratio: 1; object-fit: contain; display: block; background: #111; }
 .podium-info { padding: 0.5rem; }
 .podium-author { margin: 0; font-size: 0.85rem; font-weight: 600; }
-.podium-votes { margin: 0; font-size: 0.75rem; color: rgba(0,0,0,0.4); }
+.podium-votes { margin: 0; font-size: 0.75rem; color: rgba(0,0,0,0.55); }
 
 .classement-title {
   font-size: 0.75rem;
@@ -631,9 +631,9 @@
   padding: 0.1rem 0.35rem;
 }
 .result-info { padding: 0.4rem 0.5rem; }
-.result-votes { margin: 0; font-size: 0.72rem; color: rgba(0,0,0,0.4); }
+.result-votes { margin: 0; font-size: 0.72rem; color: rgba(0,0,0,0.55); }
 
-.hint { font-size: 0.85rem; color: rgba(0,0,0,0.4); }
+.hint { font-size: 0.85rem; color: rgba(0,0,0,0.55); }
 
 .btn-suite {
   display: block;

@@ -39,13 +39,13 @@
 
 .section-sub {
   font-size: 0.82rem;
-  color: rgba(0, 0, 0, 0.45);
+  color: rgba(0, 0, 0, 0.55);
   margin: 0;
 }
 
 .badge {
   background: #f0f0f0;
-  color: rgba(0, 0, 0, 0.5);
+  color: rgba(0, 0, 0, 0.58);
   font-size: 0.78rem;
   font-weight: 600;
   padding: 3px 10px;
@@ -82,7 +82,7 @@
 .cat-value {
   font-size: 0.75rem;
   font-family: monospace;
-  color: rgba(0, 0, 0, 0.35);
+  color: rgba(0, 0, 0, 0.55);
   background: #f5f5f5;
   padding: 2px 8px;
   border-radius: 3px;
@@ -206,7 +206,7 @@
 .saving-msg {
   margin-top: 12px;
   font-size: 0.82rem;
-  color: rgba(0, 0, 0, 0.4);
+  color: rgba(0, 0, 0, 0.55);
 }
 
 /* Source segmented control */
@@ -219,7 +219,7 @@
 
 .source-label {
   font-size: 0.85rem;
-  color: rgba(0,0,0,0.5);
+  color: rgba(0,0,0,0.72);
   white-space: nowrap;
 }
 

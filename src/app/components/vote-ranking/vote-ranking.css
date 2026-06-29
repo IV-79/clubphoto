@@ -40,7 +40,7 @@
   height: 32px;
   border-radius: 50%;
   background: rgba(0,0,0,0.07);
-  color: rgba(0,0,0,0.5);
+  color: rgba(0,0,0,0.55);
   font-size: 0.8rem;
   font-weight: 700;
   display: flex;
@@ -76,7 +76,7 @@
 .rank-votes {
   margin: 0;
   font-size: 0.75rem;
-  color: rgba(0,0,0,0.4);
+  color: rgba(0,0,0,0.55);
 }
 
 /* ── Bouton suite ────────────────────────────────────────── */
