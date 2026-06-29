@@ -199,7 +199,7 @@
   font-weight: 700;
   letter-spacing: 1.2px;
   text-transform: uppercase;
-  color: rgba(0, 0, 0, 0.3);
+  color: rgba(0,0,0,0.65);
   margin: 0 0 14px;
 }
 
@@ -228,7 +228,7 @@
 .avenir-mois {
   font-size: 0.72rem;
   font-weight: 600;
-  color: rgba(0, 0, 0, 0.3);
+  color: rgba(0,0,0,0.58);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   min-width: 120px;
@@ -243,7 +243,7 @@
 
 .avenir-date {
   font-size: 0.78rem;
-  color: rgba(0, 0, 0, 0.3);
+  color: rgba(0,0,0,0.55);
   white-space: nowrap;
 }
 
@@ -278,7 +278,7 @@
 .termine-mois {
   font-size: 0.7rem;
   font-weight: 600;
-  color: rgba(0, 0, 0, 0.3);
+  color: rgba(0,0,0,0.55);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   min-width: 110px;

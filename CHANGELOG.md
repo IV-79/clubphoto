@@ -14,6 +14,7 @@
 - Style de la box Participants du défi aligné sur celui de la sortie-detail (rouge, vert, chips).
 - **Cascade delete corrigée** : suppression d'un événement (sortie, oneshot, défi) efface maintenant tous les fichiers Storage associés (photos, miniatures, couverture) et toutes les sous-collections Firestore (inscriptions, thèmes, votes). La suppression d'une photo portfolio supprimait déjà correctement les deux fichiers.
 - **Hero événements** : double dégradé (haut+bas), `object-fit: cover`, hauteur responsive `clamp(280px, 42vw, 560px)`. Hero contraint à 1200px (même largeur que le contenu) sur les pages sortie-detail, defi-detail et oneshot-detail.
+- **Cohérence layout** : toutes les pages galeries publiques et gestion membre alignées à `max-width: 1200px` (themes-liste, theme-detail, oneshot-photos, oneshot-detail). Cartes "Ouvert" et "Résultats" de la page Thèmes du mois empilées pleine largeur avec hauteur `clamp(260px, 28vw, 400px)`.
 
 ### Page Événements — 3 sections (En cours / À venir / Terminés) (2026-06-28)
 
