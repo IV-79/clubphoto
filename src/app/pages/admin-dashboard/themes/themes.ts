@@ -263,6 +263,13 @@ export class AdminThemes {
       this.editForm.controls.moisMonth.disable();
       this.editForm.controls.moisYear.disable();
     }
+    if (s === 'vote') {
+      this.editForm.controls.maxPhotos.disable();
+      this.editForm.controls.maxVotes.disable();
+    } else {
+      this.editForm.controls.maxPhotos.enable();
+      this.editForm.controls.maxVotes.enable();
+    }
     this.editMinFinVote.set(s === 'vote' ? theme.dateFinVote : '');
     this.editStatut.set(s);
     this.editError.set('');

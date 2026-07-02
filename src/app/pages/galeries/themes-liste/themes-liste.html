@@ -23,7 +23,9 @@
           }
           <p class="card-date">Clôture le <strong>{{ formatDate(dates(t).dateCloture) }}</strong></p>
           <div class="card-actions">
-            <a [routerLink]="['/galeries/themesdumois', t.id]" class="btn-voir-photos">Voir et soumettre</a>
+            @if (isLoggedIn()) {
+              <a [routerLink]="['/galeries/themesdumois', t.id]" class="btn-voir-photos">Voir et soumettre</a>
+            }
           </div>
         </div>
       </div>
