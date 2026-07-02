@@ -1,5 +1,6 @@
 import { Component, inject, signal, computed } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { combineLatest, of, switchMap } from 'rxjs';
 import { OneShotService } from '../../../../services/oneshot.service';
@@ -17,10 +18,12 @@ import { PhotoLightbox } from '../../../../components/photo-lightbox/photo-light
 import { VoteRankingComponent, RankingItem } from '../../../../components/vote-ranking/vote-ranking';
 import { ImgRetryDirective } from '../../../../directives/img-retry.directive';
 import { EventHero, HeroBadge } from '../../../../components/event-hero/event-hero';
+import { DatePickerComponent } from '../../../../components/date-picker/date-picker';
+import { compressImage, COMPRESS_COUVERTURE } from '../../../../utils/image-compress';
 
 @Component({
   selector: 'app-oneshot-detail',
-  imports: [RouterLink, PhotoLightbox, ImgRetryDirective, VoteRankingComponent, EventHero],
+  imports: [RouterLink, FormsModule, PhotoLightbox, ImgRetryDirective, VoteRankingComponent, EventHero, DatePickerComponent],
   templateUrl: './oneshot-detail.html',
   styleUrl: './oneshot-detail.css',
 })
@@ -126,7 +129,8 @@ export class OneShotDetail {
   );
   allVotes = toSignal(this.allVotes$, { initialValue: [] as OneShotVote[] });
 
-  // Avancement (gestion)
+  // ── Avancement ──────────────────────────────────────────────────────
+
   nextStatut = computed<OneShotStatut | null>(() => {
     switch (this.event()?.statut) {
       case 'preparation':            return 'inscription';
@@ -149,7 +153,7 @@ export class OneShotDetail {
 
   peutFermerInscriptions = computed(() => this.event()?.statut === 'inscription');
 
-  transitioning   = signal(false);
+  transitioning     = signal(false);
   confirmTransition = signal(false);
 
   async avancer() {
@@ -179,8 +183,8 @@ export class OneShotDetail {
     }
   }
 
-  statutLabel        = computed(() => ONESHOT_STATUT_LABELS[this.event()?.statut ?? 'preparation']);
-  inscriptionOuverte = computed(() => this.event()?.statut === 'inscription');
+  statutLabel           = computed(() => ONESHOT_STATUT_LABELS[this.event()?.statut ?? 'preparation']);
+  inscriptionOuverte    = computed(() => this.event()?.statut === 'inscription');
   canManageInscriptions = computed(() =>
     ['inscription', 'fermeture_inscriptions'].includes(this.event()?.statut ?? '')
   );
@@ -220,9 +224,9 @@ export class OneShotDetail {
   });
 
   voteProgress = computed(() => {
-    const themes   = this.themes();
-    const membres  = this.allMembres().filter(m => !m.isSuspended);
-    const votes    = this.allVotes();
+    const themes  = this.themes();
+    const membres = this.allMembres().filter(m => !m.isSuspended);
+    const votes   = this.allVotes();
     if (!themes.length || !membres.length) return null;
 
     const total = themes.length * membres.length;
@@ -386,8 +390,6 @@ export class OneShotDetail {
 
   closeLightbox() { this.lightboxIndex.set(null); }
 
-  goToGestion() { this.router.navigate(['/membre/oneshots', this.id, 'gerer']); }
-
   async deleteOneShot() {
     const e = this.event();
     const ok = await this.confirmService.confirm(
@@ -489,5 +491,149 @@ export class OneShotDetail {
     } finally {
       this.saving.set(false);
     }
+  }
+
+  // ── Édition inline ──────────────────────────────────────────────────
+
+  editMode       = signal(false);
+  coverUploading = signal(false);
+  coverDragOver  = signal(false);
+
+  titreValue       = '';
+  descriptionValue = '';
+  dateValue        = '';
+  lieuValue        = '';
+  visibiliteValue: 'public' | 'membre' = 'public';
+
+  peutEditerDetails = computed(() =>
+    ['preparation', 'inscription', 'fermeture_inscriptions'].includes(this.event()?.statut ?? '')
+  );
+
+  startEdit() {
+    const e = this.event();
+    if (!e) return;
+    this.titreValue       = e.titre;
+    this.descriptionValue = e.description ?? '';
+    this.dateValue        = e.date ?? '';
+    this.lieuValue        = e.lieu ?? '';
+    this.visibiliteValue  = e.visibilite ?? 'public';
+    this.editMode.set(true);
+  }
+
+  cancelEdit() { this.editMode.set(false); }
+
+  async saveEvent() {
+    if (this.saving()) return;
+    this.saving.set(true);
+    const e = this.event()!;
+    try {
+      await Promise.all([
+        this.oneShotService.updateTitre(this.id, this.titreValue.trim()),
+        this.oneShotService.updateDescription(this.id, this.descriptionValue),
+        this.oneShotService.updateLieu(this.id, this.lieuValue.trim()),
+        this.oneShotService.updateVisibilite(this.id, this.visibiliteValue),
+        this.oneShotService.updateDate(this.id, this.dateValue, {
+          oldDate: e.date ?? '',
+          titre: e.titre,
+          nomCreateur: e.nomCreateur,
+          creatorUid: e.creatorUid,
+        }),
+      ]);
+      this.editMode.set(false);
+      this.refresh();
+    } finally {
+      this.saving.set(false);
+    }
+  }
+
+  // Cover
+
+  onCoverDrop(event: DragEvent) {
+    event.preventDefault();
+    this.coverDragOver.set(false);
+    const file = event.dataTransfer?.files?.[0];
+    if (file && file.type.startsWith('image/')) this.uploadCoverFile(file);
+  }
+
+  async onCoverSelected(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    (event.target as HTMLInputElement).value = '';
+    if (file) this.uploadCoverFile(file);
+  }
+
+  async removeCover() {
+    const path = this.event()?.photoCouverturePath;
+    if (!path) return;
+    this.coverUploading.set(true);
+    try {
+      await this.oneShotService.removeCouverture(this.id, path);
+      this.refresh();
+    } finally {
+      this.coverUploading.set(false);
+    }
+  }
+
+  private async uploadCoverFile(file: File) {
+    this.coverUploading.set(true);
+    try {
+      const compressed = await compressImage(file, COMPRESS_COUVERTURE);
+      await this.oneShotService.setCouverture(this.id, compressed);
+      this.refresh();
+    } finally {
+      this.coverUploading.set(false);
+    }
+  }
+
+  // Thèmes (CRUD)
+
+  newThemeNom     = '';
+  editingThemeId  = signal<string | null>(null);
+  editingThemeNom = '';
+  savingTheme     = signal(false);
+
+  async addTheme() {
+    const nom = this.newThemeNom.trim();
+    if (!nom || this.savingTheme()) return;
+    this.savingTheme.set(true);
+    try {
+      await this.oneShotService.addTheme(this.id, nom, this.themes().length);
+      this.newThemeNom = '';
+      this.refresh();
+    } finally {
+      this.savingTheme.set(false);
+    }
+  }
+
+  startThemeEdit(theme: OneShotTheme) {
+    this.editingThemeId.set(theme.id);
+    this.editingThemeNom = theme.nom;
+  }
+
+  cancelThemeEdit() { this.editingThemeId.set(null); }
+
+  async saveThemeEdit(themeId: string) {
+    const nom = this.editingThemeNom.trim();
+    if (!nom || this.savingTheme()) return;
+    this.savingTheme.set(true);
+    try {
+      await this.oneShotService.updateTheme(this.id, themeId, nom);
+      this.editingThemeId.set(null);
+      this.refresh();
+    } finally {
+      this.savingTheme.set(false);
+    }
+  }
+
+  async deleteTheme(theme: OneShotTheme) {
+    const ok = await this.confirmService.confirm(`Supprimer le thème « ${theme.nom} » définitivement ?`);
+    if (!ok) return;
+    await this.oneShotService.deleteTheme(this.id, theme.id);
+    this.refresh();
+  }
+
+  formatDate(date: string): string {
+    return new Date(date + 'T12:00:00').toLocaleDateString('fr-FR', {
+      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+    });
   }
 }

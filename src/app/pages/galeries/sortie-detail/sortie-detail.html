@@ -1,12 +1,10 @@
 @if (sortie(); as s) {
   @if (accessDenied()) {
-    <div class="sortie-detail">
-      <div class="access-denied">
-        <p>Cet événement est réservé aux membres connectés.</p>
-      </div>
+    <div class="access-denied-page">
+      <p>Cet événement est réservé aux membres connectés.</p>
     </div>
   } @else {
-  @if (!editMode()) {
+
     <div class="hero-wrap">
       <app-event-hero
         [coverUrl]="s.imageEvenementUrl"
@@ -19,275 +17,323 @@
         [date]="s.date"
         [lieu]="s.lieu"
         [loggedIn]="!!profile()"
-        [canEdit]="canManage()"
-        [canDelete]="canManage()"
+        [canEdit]="canManage() && !editMode()"
+        [canDelete]="canManage() && !editMode()"
         (editClick)="startEdit()"
         (deleteClick)="deleteSortie()"
       />
     </div>
-  }
 
-<div class="sortie-detail">
+    <div class="sortie-page">
 
-  @if (editMode()) {
-    <div class="detail-header">
-      <button class="back-link back-link-btn" (click)="cancelEdit()">← Retour à l'événement</button>
-      <p class="edit-title">Modifier l'événement</p>
-      <form [formGroup]="form" (ngSubmit)="saveEdit()" class="edit-form">
+      <!-- ── Sidebar ──────────────────────────────────────── -->
+      <aside class="sortie-aside">
 
-        <!-- Photo de couverture -->
-        <div class="field-cover">
-          <label class="edit-cover-label">Photo de couverture <span class="field-opt">optionnel</span></label>
-          <p class="edit-cover-hint">Format recommandé : 16/9 — redimensionné à 1280×720 px</p>
-          <div class="cover-drop"
-               [class.drag-over]="coverDragOver()"
-               (dragover)="$event.preventDefault(); coverDragOver.set(true)"
-               (dragleave)="coverDragOver.set(false)"
-               (drop)="onCoverDrop($event)">
-            @if (s.imageEvenementUrl) {
-              <img [src]="s.imageEvenementUrl" class="cover-preview" alt="Image actuelle" />
-              <div class="cover-overlay-actions">
-                <button type="button" class="cover-browse-btn" (click)="coverInput.click()" [disabled]="coverUploading()">
-                  {{ coverUploading() ? 'Upload…' : '🔄 Changer' }}
-                </button>
-                <button type="button" class="cover-remove-btn" (click)="removeCover(s.imageEvenementPath!)" [disabled]="coverUploading()">
-                  × Retirer
-                </button>
-              </div>
-            } @else {
-              <div class="cover-placeholder">
-                <span class="cover-icon">🖼</span>
-                <span>Glisser une image ici ou</span>
-                <button type="button" class="cover-browse-btn" (click)="coverInput.click()" [disabled]="coverUploading()">
-                  {{ coverUploading() ? 'Upload…' : 'parcourir' }}
-                </button>
-              </div>
-            }
-            <input #coverInput type="file" accept="image/*" class="hidden-input" (change)="onCoverSelected($event)" />
+        <div class="info-card">
+          <h3 class="info-card-title">Événement</h3>
+          <div class="stat-row">
+            <span>Date</span>
+            <strong>{{ formatDate(s.date) }}</strong>
+          </div>
+          @if (s.lieu) {
+            <div class="stat-row">
+              <span>Lieu</span>
+              <strong>{{ s.lieu }}</strong>
+            </div>
+          }
+          <div class="stat-row">
+            <span>Type</span>
+            <strong>{{ typeMeta().emoji }} {{ typeMeta().label }}</strong>
+          </div>
+          <div class="stat-row">
+            <span>Participation</span>
+            <strong>{{ s.inscriptionObligatoire ? 'Inscription requise' : 'Libre' }}</strong>
+          </div>
+          @if (s.inscriptionObligatoire && profile()) {
+            <div class="stat-row">
+              <span>Inscrits</span>
+              <strong>
+                {{ inscriptions().length }}
+                @if (s.maxParticipants) { / {{ s.maxParticipants }} }
+              </strong>
+            </div>
+          }
+          <div class="stat-row">
+            <span>Photos</span>
+            <strong>{{ photos().length }}</strong>
+          </div>
+          <div class="stat-row">
+            <span>Visibilité</span>
+            <strong>{{ s.visibilite === 'membre' ? 'Membres' : 'Publique' }}</strong>
           </div>
         </div>
 
-        <mat-form-field appearance="outline" class="field-half">
-          <mat-label>Type</mat-label>
-          <mat-select formControlName="type">
-            <mat-option value="sortie_photo">📸 Sortie Photo</mat-option>
-            <mat-option value="sortie_club">🚶 Sortie Club</mat-option>
-            <mat-option value="atelier">🎨 Atelier</mat-option>
-          </mat-select>
-        </mat-form-field>
+      </aside>
 
-        <mat-form-field appearance="outline" class="field-full">
-          <mat-label>Titre *</mat-label>
-          <input matInput formControlName="titre" />
-        </mat-form-field>
+      <!-- ── Main ─────────────────────────────────────────── -->
+      <main class="sortie-main">
 
-        <mat-form-field appearance="outline" class="field-full">
-          <mat-label>Description</mat-label>
-          <textarea matInput formControlName="description" rows="3"></textarea>
-        </mat-form-field>
+        <!-- Formulaire d'édition -->
+        @if (editMode()) {
+          <div class="edit-panel">
+            <h2>Modifier l'événement</h2>
+            <form [formGroup]="form" (ngSubmit)="saveEdit()" class="edit-form">
 
-        <div class="form-row">
-          <app-date-picker label="Date" [required]="true" formControlName="date" class="field-half"></app-date-picker>
-          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-half">
-            <mat-label>Lieu</mat-label>
-            <input matInput formControlName="lieu" />
-            <mat-icon matSuffix>place</mat-icon>
-          </mat-form-field>
-        </div>
-
-        <mat-form-field appearance="outline" class="field-half">
-          <mat-label>Max participants</mat-label>
-          <input matInput type="number" formControlName="maxParticipants" min="1" placeholder="Optionnel" />
-        </mat-form-field>
-
-        <div class="edit-checkboxes">
-          <mat-checkbox formControlName="inscriptionObligatoire" color="primary">
-            Inscription obligatoire
-          </mat-checkbox>
-        </div>
-
-        <mat-form-field appearance="outline" class="field-half">
-          <mat-label>Visibilité</mat-label>
-          <mat-select formControlName="visibilite">
-            <mat-option value="public">Public (tout le monde)</mat-option>
-            <mat-option value="membre">Membres seulement</mat-option>
-          </mat-select>
-        </mat-form-field>
-
-        <div class="edit-actions">
-          <button type="button" class="btn-cancel-edit" (click)="cancelEdit()">Annuler</button>
-          <button type="submit" class="btn-save-edit" [disabled]="form.invalid || saving()">
-            {{ saving() ? 'Sauvegarde…' : 'Sauvegarder' }}
-          </button>
-        </div>
-
-      </form>
-    </div>
-  }
-
-  @if (s.description && !editMode()) {
-    <div class="event-description">
-      <span class="event-description-label">Description</span>
-      <p class="event-description-text">{{ s.description }}</p>
-    </div>
-  }
-
-  <!-- Inscription -->
-  @if (s.inscriptionObligatoire && !editMode()) {
-    <section class="inscription-section">
-      <div class="inscription-header">
-        <h2>
-          Participants
-          @if (profile()) {
-            <span class="count">{{ inscriptions().length }}</span>
-            @if (s.maxParticipants) {
-              <span class="max-count">/ {{ s.maxParticipants }}</span>
-            }
-          }
-        </h2>
-
-        @if (profile()) {
-          @if (isInscrit()) {
-            <button class="btn-desinscrit" (click)="toggleInscription()" [disabled]="inscribing()">
-              ✓ Inscrit — Se désinscrire
-            </button>
-          } @else if (canInscrire()) {
-            <button class="btn-inscrire" (click)="toggleInscription()" [disabled]="inscribing()">
-              {{ inscribing() ? '…' : 'Je participe' }}
-            </button>
-          } @else if (s.maxParticipants && inscriptions().length >= s.maxParticipants) {
-            <span class="full-badge">Complet</span>
-          }
-        }
-      </div>
-
-      @if (profile() && inscriptions().length > 0) {
-        <div class="participants-row">
-          @for (p of inscriptions(); track p.uid) {
-            <span class="participant-chip" [class.me]="p.uid === profile()?.uid">
-              {{ p.nomMembre }}
-              @if (isOrganisateur() || isAdmin()) {
-                <button class="chip-remove" (click)="retirerInscrit(p.uid, p.nomMembre)" title="Désinscrire">×</button>
-              }
-            </span>
-          }
-        </div>
-      }
-
-      @if (isOrganisateur() || isAdmin()) {
-        <div class="add-participant-zone">
-          @if (!addingMembre()) {
-            <button class="btn-add-participant" (click)="addingMembre.set(true)">+ Inscrire un membre</button>
-          } @else {
-            <div class="add-participant-row">
-              <select class="add-participant-select" (change)="selectedMembreUid.set($any($event.target).value)">
-                <option value="">— Choisir un membre —</option>
-                @for (m of membresDisponibles(); track m.uid) {
-                  <option [value]="m.uid">{{ m.prenom }} {{ m.nom }}</option>
-                }
-              </select>
-              <button class="btn-add-confirm" (click)="inscrireSelected()" [disabled]="!selectedMembreUid()">Inscrire</button>
-              <button class="btn-add-cancel" (click)="addingMembre.set(false); selectedMembreUid.set('')">Annuler</button>
-            </div>
-          }
-        </div>
-      }
-    </section>
-  }
-
-  <!-- Upload -->
-  @if (canUpload()) {
-    <section class="upload-section">
-      <h2 class="upload-title">Partager vos photos</h2>
-
-      <div class="upload-zone"
-           [class.drag-over]="photoDragOver()"
-           (dragover)="$event.preventDefault(); photoDragOver.set(true)"
-           (dragleave)="photoDragOver.set(false)"
-           (drop)="onPhotosDrop($event)">
-        <span class="upload-icon">📷</span>
-        <p>Glissez vos photos ici ou</p>
-        <label class="btn-upload-photo">
-          Choisir des photos
-          <input type="file" accept="image/*" multiple hidden (change)="onPhotosSelected($event)" />
-        </label>
-        <p class="upload-hint">Plusieurs fichiers acceptés</p>
-      </div>
-
-      @if (uploads().length > 0) {
-        <div class="uploads-list">
-          @for (u of uploads(); track u.id) {
-            <div class="upload-item" [class.upload-done]="u.done" [class.upload-error]="u.error">
-              <span class="upload-name">{{ u.name }}</span>
-              @if (!u.done && !u.error) {
-                <div class="upload-bar-wrap">
-                  <div class="upload-bar" [style.width.%]="u.progress"></div>
+              <!-- Photo de couverture -->
+              <div class="field-cover">
+                <label class="edit-cover-label">Photo de couverture <span class="field-opt">optionnel</span></label>
+                <p class="edit-cover-hint">Format recommandé : 16/9 — redimensionné à 1280×720 px</p>
+                <div class="cover-drop"
+                     [class.drag-over]="coverDragOver()"
+                     (dragover)="$event.preventDefault(); coverDragOver.set(true)"
+                     (dragleave)="coverDragOver.set(false)"
+                     (drop)="onCoverDrop($event)">
+                  @if (s.imageEvenementUrl) {
+                    <img [src]="s.imageEvenementUrl" class="cover-preview" alt="Image actuelle" />
+                    <div class="cover-overlay-actions">
+                      <button type="button" class="cover-browse-btn" (click)="coverInput.click()" [disabled]="coverUploading()">
+                        {{ coverUploading() ? 'Upload…' : '🔄 Changer' }}
+                      </button>
+                      <button type="button" class="cover-remove-btn" (click)="removeCover(s.imageEvenementPath!)" [disabled]="coverUploading()">
+                        × Retirer
+                      </button>
+                    </div>
+                  } @else {
+                    <div class="cover-placeholder">
+                      <span class="cover-icon">🖼</span>
+                      <span>Glisser une image ici ou</span>
+                      <button type="button" class="cover-browse-btn" (click)="coverInput.click()" [disabled]="coverUploading()">
+                        {{ coverUploading() ? 'Upload…' : 'parcourir' }}
+                      </button>
+                    </div>
+                  }
+                  <input #coverInput type="file" accept="image/*" class="hidden-input" (change)="onCoverSelected($event)" />
                 </div>
-              } @else if (u.done) {
-                <span class="upload-check">✓</span>
-              } @else {
-                <span class="upload-err">{{ u.error }}</span>
-              }
-            </div>
-          }
-          @if (uploads().every(u => u.done || u.error)) {
-            <button class="btn-clear" (click)="clearDoneUploads()">Effacer</button>
-          }
-        </div>
-      }
-    </section>
-  } @else if (!isAVenir() && profile() && !canUpload()) {
-    <p class="upload-locked">🔒 Upload réservé aux participants inscrits.</p>
-  }
+              </div>
 
-  <!-- Galerie de photos -->
-  <section class="photos-section">
-    <h2>
-      Photos
-      <span class="count">{{ photos().length }}</span>
-    </h2>
+              <mat-form-field appearance="outline" class="field-half">
+                <mat-label>Type</mat-label>
+                <mat-select formControlName="type">
+                  <mat-option value="sortie_photo">📸 Sortie Photo</mat-option>
+                  <mat-option value="sortie_club">🚶 Sortie Club</mat-option>
+                  <mat-option value="atelier">🎨 Atelier</mat-option>
+                </mat-select>
+              </mat-form-field>
 
-    @if (photos().length === 0) {
-      @if (isAVenir()) {
-        <p class="empty-msg">Les photos seront disponibles à partir du {{ formatDate(s.date) }}.</p>
-      } @else {
-        <p class="empty-msg">Aucune photo pour l'instant.@if (canUpload()) { Soyez le premier à partager ! }</p>
-      }
-    } @else {
-      <div class="photos-grid">
-        @for (photo of photos(); track photo.id; let i = $index) {
-          @let isOwn = photo.uploaderUid === profile()?.uid;
-          <div class="photo-card" [class.own-card]="isOwn" (click)="openLightbox(i)">
-            <div class="photo-img-wrap">
-              <img [src]="photo.thumbnailUrl ?? photo.url" [alt]="photo.nomUploader" loading="lazy" class="photo-img" />
-              @if (profile()) {
-                <button class="card-heart" [class.liked]="isLikedPhoto(photo)"
-                  (click)="toggleLikeOnCard(photo, $event)"
-                  [title]="isLikedPhoto(photo) ? 'Retirer le like' : 'J\'aime'">
-                  <span class="hi">♥</span>
-                  @if (photo.likes.length > 0) { {{ photo.likes.length }} }
+              <mat-form-field appearance="outline" class="field-full">
+                <mat-label>Titre *</mat-label>
+                <input matInput formControlName="titre" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="field-full">
+                <mat-label>Description</mat-label>
+                <textarea matInput formControlName="description" rows="3"></textarea>
+              </mat-form-field>
+
+              <div class="form-row">
+                <app-date-picker label="Date" [required]="true" formControlName="date" class="field-half"></app-date-picker>
+                <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-half">
+                  <mat-label>Lieu</mat-label>
+                  <input matInput formControlName="lieu" />
+                  <mat-icon matSuffix>place</mat-icon>
+                </mat-form-field>
+              </div>
+
+              <mat-form-field appearance="outline" class="field-half">
+                <mat-label>Max participants</mat-label>
+                <input matInput type="number" formControlName="maxParticipants" min="1" placeholder="Optionnel" />
+              </mat-form-field>
+
+              <div class="edit-checkboxes">
+                <mat-checkbox formControlName="inscriptionObligatoire" color="primary">
+                  Inscription obligatoire
+                </mat-checkbox>
+              </div>
+
+              <mat-form-field appearance="outline" class="field-half">
+                <mat-label>Visibilité</mat-label>
+                <mat-select formControlName="visibilite">
+                  <mat-option value="public">Public (tout le monde)</mat-option>
+                  <mat-option value="membre">Membres seulement</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <div class="edit-actions">
+                <button type="submit" class="btn-save-edit" [disabled]="form.invalid || saving()">
+                  {{ saving() ? 'Sauvegarde…' : 'Sauvegarder' }}
                 </button>
-              }
-            </div>
-            <div class="photo-footer">
-              @if (isOwn) {
-                <span class="footer-own">Ma photo</span>
-                <button class="btn-del-sm" title="Supprimer" (click)="$event.stopPropagation(); supprimerPhoto(photo)">🗑</button>
-              } @else {
-                <span class="photo-name">{{ photo.nomUploader }}</span>
-                @if (isAdmin() || isOrganisateur()) {
-                  <button class="btn-del-sm btn-del-admin" title="Supprimer" (click)="$event.stopPropagation(); supprimerPhoto(photo)">🗑</button>
+                <button type="button" class="btn-cancel-edit" (click)="cancelEdit()">Annuler</button>
+              </div>
+
+            </form>
+          </div>
+        }
+
+        <!-- Description -->
+        @if (s.description && !editMode()) {
+          <div class="event-description">
+            <span class="event-description-label">Description</span>
+            <p class="event-description-text">{{ s.description }}</p>
+          </div>
+        }
+
+        <!-- Inscription -->
+        @if (s.inscriptionObligatoire && !editMode()) {
+          <section class="inscription-section">
+            <div class="inscription-header">
+              <h2>
+                Participants
+                @if (profile()) {
+                  <span class="count">{{ inscriptions().length }}</span>
+                  @if (s.maxParticipants) {
+                    <span class="max-count">/ {{ s.maxParticipants }}</span>
+                  }
+                }
+              </h2>
+
+              @if (profile()) {
+                @if (isInscrit()) {
+                  <button class="btn-desinscrit" (click)="toggleInscription()" [disabled]="inscribing()">
+                    ✓ Inscrit — Se désinscrire
+                  </button>
+                } @else if (canInscrire()) {
+                  <button class="btn-inscrire" (click)="toggleInscription()" [disabled]="inscribing()">
+                    {{ inscribing() ? '…' : 'Je participe' }}
+                  </button>
+                } @else if (s.maxParticipants && inscriptions().length >= s.maxParticipants) {
+                  <span class="full-badge">Complet</span>
                 }
               }
             </div>
-          </div>
-        }
-      </div>
-    }
-  </section>
 
-</div>
-  } <!-- @else (access control) -->
+            @if (profile() && inscriptions().length > 0) {
+              <div class="participants-row">
+                @for (p of inscriptions(); track p.uid) {
+                  <span class="participant-chip" [class.me]="p.uid === profile()?.uid">
+                    {{ p.nomMembre }}
+                    @if (isOrganisateur() || isAdmin()) {
+                      <button class="chip-remove" (click)="retirerInscrit(p.uid, p.nomMembre)" title="Désinscrire">×</button>
+                    }
+                  </span>
+                }
+              </div>
+            }
+
+            @if (isOrganisateur() || isAdmin()) {
+              <div class="add-participant-zone">
+                @if (!addingMembre()) {
+                  <button class="btn-add-participant" (click)="addingMembre.set(true)">+ Inscrire un membre</button>
+                } @else {
+                  <div class="add-participant-row">
+                    <select class="add-participant-select" (change)="selectedMembreUid.set($any($event.target).value)">
+                      <option value="">— Choisir un membre —</option>
+                      @for (m of membresDisponibles(); track m.uid) {
+                        <option [value]="m.uid">{{ m.prenom }} {{ m.nom }}</option>
+                      }
+                    </select>
+                    <button class="btn-add-confirm" (click)="inscrireSelected()" [disabled]="!selectedMembreUid()">Inscrire</button>
+                    <button class="btn-add-cancel" (click)="addingMembre.set(false); selectedMembreUid.set('')">Annuler</button>
+                  </div>
+                }
+              </div>
+            }
+          </section>
+        }
+
+        <!-- Upload -->
+        @if (canUpload()) {
+          <section class="upload-section">
+            <h2 class="upload-title">Partager vos photos</h2>
+
+            <div class="upload-zone"
+                 [class.drag-over]="photoDragOver()"
+                 (dragover)="$event.preventDefault(); photoDragOver.set(true)"
+                 (dragleave)="photoDragOver.set(false)"
+                 (drop)="onPhotosDrop($event)">
+              <span class="upload-icon">📷</span>
+              <p>Glissez vos photos ici ou</p>
+              <label class="btn-upload-photo">
+                Choisir des photos
+                <input type="file" accept="image/*" multiple hidden (change)="onPhotosSelected($event)" />
+              </label>
+              <p class="upload-hint">Plusieurs fichiers acceptés</p>
+            </div>
+
+            @if (uploads().length > 0) {
+              <div class="uploads-list">
+                @for (u of uploads(); track u.id) {
+                  <div class="upload-item" [class.upload-done]="u.done" [class.upload-error]="u.error">
+                    <span class="upload-name">{{ u.name }}</span>
+                    @if (!u.done && !u.error) {
+                      <div class="upload-bar-wrap">
+                        <div class="upload-bar" [style.width.%]="u.progress"></div>
+                      </div>
+                    } @else if (u.done) {
+                      <span class="upload-check">✓</span>
+                    } @else {
+                      <span class="upload-err">{{ u.error }}</span>
+                    }
+                  </div>
+                }
+                @if (uploads().every(u => u.done || u.error)) {
+                  <button class="btn-clear" (click)="clearDoneUploads()">Effacer</button>
+                }
+              </div>
+            }
+          </section>
+        } @else if (!isAVenir() && profile() && !canUpload()) {
+          <p class="upload-locked">🔒 Upload réservé aux participants inscrits.</p>
+        }
+
+        <!-- Galerie de photos -->
+        <section class="photos-section">
+          <h2>
+            Photos
+            <span class="count">{{ photos().length }}</span>
+          </h2>
+
+          @if (photos().length === 0) {
+            @if (isAVenir()) {
+              <p class="empty-msg">Les photos seront disponibles à partir du {{ formatDate(s.date) }}.</p>
+            } @else {
+              <p class="empty-msg">Aucune photo pour l'instant.@if (canUpload()) { Soyez le premier à partager !}</p>
+            }
+          } @else {
+            <div class="photos-grid">
+              @for (photo of photos(); track photo.id; let i = $index) {
+                @let isOwn = photo.uploaderUid === profile()?.uid;
+                <div class="photo-card" [class.own-card]="isOwn" (click)="openLightbox(i)">
+                  <div class="photo-img-wrap">
+                    <img [src]="photo.thumbnailUrl ?? photo.url" [alt]="photo.nomUploader" loading="lazy" class="photo-img" />
+                    @if (profile()) {
+                      <button class="card-heart" [class.liked]="isLikedPhoto(photo)"
+                        (click)="toggleLikeOnCard(photo, $event)"
+                        [title]="isLikedPhoto(photo) ? 'Retirer le like' : 'J\'aime'">
+                        <span class="hi">♥</span>
+                        @if (photo.likes.length > 0) { {{ photo.likes.length }} }
+                      </button>
+                    }
+                  </div>
+                  <div class="photo-footer">
+                    @if (isOwn) {
+                      <span class="footer-own">Ma photo</span>
+                      <button class="btn-del-sm" title="Supprimer" (click)="$event.stopPropagation(); supprimerPhoto(photo)">🗑</button>
+                    } @else {
+                      <span class="photo-name">{{ photo.nomUploader }}</span>
+                      @if (isAdmin() || isOrganisateur()) {
+                        <button class="btn-del-sm btn-del-admin" title="Supprimer" (click)="$event.stopPropagation(); supprimerPhoto(photo)">🗑</button>
+                      }
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </section>
+
+      </main>
+    </div>
+  }
 } @else {
   <div class="loading-page">Chargement…</div>
 }

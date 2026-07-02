@@ -97,6 +97,8 @@ export class SortieDetail {
     return !!s && !!p && s.organisateurUid === p.uid;
   });
 
+  typeMeta = computed(() => SORTIE_TYPE_META[this.sortie()?.type ?? 'sortie_photo']);
+
   isAdmin = computed(() => this.profile()?.role === 'admin');
   canManage = computed(() => this.isOrganisateur() || this.isAdmin());
 

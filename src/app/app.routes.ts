@@ -20,7 +20,6 @@ import { Contact } from './pages/contact/contact';
 import { MembrePortfolio } from './pages/membre/portfolio/portfolio';
 import { MembreProfil } from './pages/membre/profil/profil';
 import { ArticleForm } from './pages/membre/articles/article-form';
-import { OneShotGerer } from './pages/membre/oneshots/oneshot-gerer/oneshot-gerer';
 import { OneShotDetail } from './pages/membre/oneshots/oneshot-detail/oneshot-detail';
 import { OneShotPhotos } from './pages/membre/oneshots/oneshot-photos/oneshot-photos';
 import { MembresGalerie } from './pages/galeries/membres-galerie/membres-galerie';
@@ -98,7 +97,6 @@ export const routes: Routes = [
       { path: 'profil', component: MembreProfil },
       { path: 'articles/creer', component: ArticleForm, canActivate: [editorGuard] },
       { path: 'articles/:id/editer', component: ArticleForm, canActivate: [editorGuard] },
-      { path: 'oneshots/:id/gerer', component: OneShotGerer },
       { path: 'oneshots/:id/photos', component: OneShotPhotos },
       { path: 'documents', component: Documents },
       { path: 'notifications', component: Notifications },
