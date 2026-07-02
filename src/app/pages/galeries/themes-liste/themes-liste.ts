@@ -4,7 +4,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { DomSanitizer, SafeStyle } from '@angular/platform-browser';
 import { ThemeService } from '../../../services/theme.service';
 import { AuthService } from '../../../services/auth.service';
-import { ThemeMensuel, computeThemeStatut, getThemeDates, ThemeStatut } from '../../../models/theme.model';
+import { ThemeMensuel, computeThemeStatut, getThemeDates } from '../../../models/theme.model';
 
 @Component({
   selector: 'app-themes-liste',
@@ -29,13 +29,9 @@ export class ThemesListe {
     this.allThemes().find(t => computeThemeStatut(t) === 'vote') ?? null
   );
 
-  themeCompagnon = computed((): { theme: ThemeMensuel; statut: ThemeStatut } | null => {
-    const vote = this.themeVote();
-    if (vote) return { theme: vote, statut: 'vote' };
-    const dernier = this.themesTermines()[0];
-    if (dernier) return { theme: dernier, statut: 'resultats' };
-    return null;
-  });
+  themeCompagnon = computed((): ThemeMensuel | null =>
+    this.themeVote() ?? null
+  );
 
   themesAVenir = computed(() =>
     this.allThemes().filter(t => computeThemeStatut(t) === 'en_attente')

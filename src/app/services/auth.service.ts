@@ -1,7 +1,8 @@
 import { Injectable, inject, Injector, runInInjectionContext } from '@angular/core';
 import {
   Auth, signInWithEmailAndPassword, signOut, authState,
-  createUserWithEmailAndPassword, sendSignInLinkToEmail, sendPasswordResetEmail
+  createUserWithEmailAndPassword, sendSignInLinkToEmail, sendPasswordResetEmail,
+  reauthenticateWithCredential, updatePassword, EmailAuthProvider
 } from '@angular/fire/auth';
 import {
   Firestore, doc, setDoc, getDoc, updateDoc, deleteDoc,
@@ -172,6 +173,14 @@ export class AuthService {
         handleCodeInApp: false,
       })
     );
+  }
+
+  async changePassword(currentPassword: string, newPassword: string): Promise<void> {
+    const user = this.auth.currentUser;
+    if (!user || !user.email) throw new Error('Non connecté');
+    const credential = EmailAuthProvider.credential(user.email, currentPassword);
+    await reauthenticateWithCredential(user, credential);
+    await updatePassword(user, newPassword);
   }
 
   async inviteMember(email: string): Promise<void> {

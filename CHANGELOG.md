@@ -4,6 +4,18 @@
 
 ## En cours (alpha)
 
+### Améliorations profil membre & galerie thèmes (2026-07-02)
+
+- **Changement de mot de passe** : bouton "Changer le mot de passe" dans la sidebar de la page profil membre, ouvre une modale avec les champs mot de passe actuel / nouveau / confirmation. Ré-authentification Firebase avant la mise à jour (sécurité obligatoire). Fermeture automatique après succès.
+- **Galerie thèmes du mois** : le thème "Vote en cours" s'affiche en première position dans le featured grid ; une fois le vote terminé, il descend dans la section "Thèmes terminés" (plus de doublon en haut).
+- **Protection images** : clic droit désactivé sur toutes les images du site, drag-and-drop bloqué, sélection CSS désactivée — dissuasion téléchargement pour les visiteurs.
+
+### Alignement layout pages détail événement (2026-07-02)
+
+- **Sortie-detail** : refonte en hero + sidebar 280px + main. Édition du formulaire inline (signal `editMode`) au lieu d'une page séparée. Sidebar : Date, Lieu, Type, Participation, Inscrits N/max, Photos, Visibilité.
+- **Oneshot-detail** : même pattern. `oneshot-gerer` absorbé dans `oneshot-detail` et supprimé (route `/membre/oneshots/:id/gerer` supprimée). Section Avancement (transitions de statut + barres de progression soumissions/votes) dans le main au-dessus des Participants. Thèmes CRUD inline dans le formulaire d'édition. `/membre/oneshots/:id/photos` reste une page séparée.
+- **Admin thèmes** : champs `maxPhotos` et `maxVotes` verrouillés (disabled) quand le statut est `vote` — seule la date de fin de vote peut être étendue.
+
 ### Audit contraste CSS — correction des couleurs trop claires (2026-06-29)
 
 - Audit complet de tous les fichiers CSS du projet (hors fichiers déjà corrigés).

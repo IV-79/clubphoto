@@ -39,6 +39,12 @@ export class MembreProfil implements OnInit {
   saved = signal(false);
   error = signal('');
 
+  pwModalOpen = signal(false);
+  pwForm = { current: '', newPw: '', confirm: '' };
+  pwSaving = signal(false);
+  pwSaved  = signal(false);
+  pwError  = signal('');
+
   profilFile = signal<File | null>(null);
   profilPreviewUrl = signal('');
   uploadingProfil = signal(false);
@@ -108,6 +114,47 @@ export class MembreProfil implements OnInit {
       this.error.set('Une erreur est survenue. Veuillez réessayer.');
     } finally {
       this.saving.set(false);
+    }
+  }
+
+  openPwModal() {
+    this.pwForm = { current: '', newPw: '', confirm: '' };
+    this.pwError.set('');
+    this.pwSaved.set(false);
+    this.pwModalOpen.set(true);
+  }
+
+  closePwModal() {
+    if (this.pwSaving()) return;
+    this.pwModalOpen.set(false);
+  }
+
+  async changePassword() {
+    if (this.pwForm.newPw !== this.pwForm.confirm) {
+      this.pwError.set('Les nouveaux mots de passe ne correspondent pas.');
+      return;
+    }
+    if (this.pwForm.newPw.length < 6) {
+      this.pwError.set('Le mot de passe doit contenir au moins 6 caractères.');
+      return;
+    }
+    this.pwSaving.set(true);
+    this.pwSaved.set(false);
+    this.pwError.set('');
+    try {
+      await this.authService.changePassword(this.pwForm.current, this.pwForm.newPw);
+      this.pwSaved.set(true);
+      this.pwForm = { current: '', newPw: '', confirm: '' };
+      setTimeout(() => { this.pwSaved.set(false); this.pwModalOpen.set(false); }, 1500);
+    } catch (e: unknown) {
+      const code = (e as { code?: string })?.code;
+      if (code === 'auth/wrong-password' || code === 'auth/invalid-credential') {
+        this.pwError.set('Mot de passe actuel incorrect.');
+      } else {
+        this.pwError.set('Erreur lors du changement. Réessayez.');
+      }
+    } finally {
+      this.pwSaving.set(false);
     }
   }
 

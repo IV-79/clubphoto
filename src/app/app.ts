@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, HostListener, inject, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { LoginModalComponent } from './components/login-modal/login-modal';
@@ -18,4 +18,14 @@ export class App {
 
   private charteService = inject(CharteService);
   mustAcceptCharte = toSignal(this.charteService.mustAccept$, { initialValue: false });
+
+  @HostListener('document:contextmenu', ['$event'])
+  onContextMenu(e: MouseEvent) {
+    if (e.target instanceof HTMLImageElement) e.preventDefault();
+  }
+
+  @HostListener('document:dragstart', ['$event'])
+  onDragStart(e: DragEvent) {
+    if (e.target instanceof HTMLImageElement) e.preventDefault();
+  }
 }

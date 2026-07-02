@@ -182,8 +182,53 @@
         }
       </div>
 
+      <!-- Mot de passe -->
+      <div class="sidebar-section">
+        <h2 class="sidebar-title">Sécurité</h2>
+        <p class="sidebar-hint">Modifiez votre mot de passe de connexion</p>
+        <button type="button" class="btn-photo-change" (click)="openPwModal()">
+          Changer le mot de passe
+        </button>
+      </div>
+
     </aside>
 
   </div>
 
 </div>
+
+<!-- Modale changement de mot de passe -->
+@if (pwModalOpen()) {
+  <div class="pw-modal-backdrop" (click)="closePwModal()">
+    <div class="pw-modal" (click)="$event.stopPropagation()">
+      <div class="pw-modal-header">
+        <h3>Changer le mot de passe</h3>
+        <button type="button" class="pw-modal-close" (click)="closePwModal()">✕</button>
+      </div>
+      <div class="pw-modal-body">
+        <label>
+          <span>Mot de passe actuel</span>
+          <input type="password" [(ngModel)]="pwForm.current" name="pwCurrent" autocomplete="current-password">
+        </label>
+        <label class="field-mt">
+          <span>Nouveau mot de passe</span>
+          <input type="password" [(ngModel)]="pwForm.newPw" name="pwNew" autocomplete="new-password">
+        </label>
+        <label class="field-mt">
+          <span>Confirmer le nouveau</span>
+          <input type="password" [(ngModel)]="pwForm.confirm" name="pwConfirm" autocomplete="new-password">
+        </label>
+        @if (pwError()) { <p class="pw-feedback-err">{{ pwError() }}</p> }
+        @if (pwSaved()) { <p class="pw-feedback-ok">Mot de passe modifié avec succès.</p> }
+      </div>
+      <div class="pw-modal-footer">
+        <button type="button" class="btn-pw-cancel" (click)="closePwModal()">Annuler</button>
+        <button type="button" class="btn-save"
+          (click)="changePassword()"
+          [disabled]="pwSaving() || !pwForm.current || !pwForm.newPw || !pwForm.confirm">
+          {{ pwSaving() ? 'Modification…' : 'Enregistrer' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

@@ -128,6 +128,7 @@ label.full { width: 100%; }
 
 input[type="text"],
 input[type="url"],
+input[type="password"],
 textarea {
   background: white;
   border: 1px solid #d4d4d4;
@@ -211,6 +212,83 @@ textarea:focus { border-color: #cc0000; }
   border-color: #cc0000;
   color: #cc0000;
 }
+
+/* Modale mot de passe */
+.pw-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.pw-modal {
+  background: white;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+}
+
+.pw-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.pw-modal-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.pw-modal-close {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  color: rgba(0,0,0,0.4);
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+}
+.pw-modal-close:hover { color: #1a1a1a; }
+
+.pw-modal-body {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+.pw-feedback-err { color: #cc0000; font-size: 0.82rem; margin: 12px 0 0; }
+.pw-feedback-ok  { color: #2e7d32; font-size: 0.82rem; margin: 12px 0 0; }
+
+.pw-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px 20px;
+  border-top: 1px solid #e8e8e8;
+}
+
+.btn-pw-cancel {
+  background: none;
+  border: 1px solid #ddd;
+  color: rgba(0,0,0,0.55);
+  padding: 9px 18px;
+  border-radius: 4px;
+  font-size: 0.88rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+.btn-pw-cancel:hover { border-color: #aaa; color: #1a1a1a; }
 
 /* Actions */
 .form-actions {
