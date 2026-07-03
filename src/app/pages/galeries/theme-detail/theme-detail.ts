@@ -1,7 +1,7 @@
 import { Component, inject, signal, computed } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
-import { switchMap, of } from 'rxjs';
+import { switchMap, of, combineLatest } from 'rxjs';
 import { ThemeService } from '../../../services/theme.service';
 import { AuthService } from '../../../services/auth.service';
 import { LoginModalService } from '../../../services/login-modal.service';
@@ -26,19 +26,22 @@ import { ImgRetryDirective } from '../../../directives/img-retry.directive';
   styleUrl: './theme-detail.css',
 })
 export class ThemeDetail {
-  private route          = inject(ActivatedRoute);
-  private themeService   = inject(ThemeService);
-  private authService    = inject(AuthService);
-  private confirmService = inject(ConfirmService);
-  private notifService   = inject(NotificationService);
+  private route             = inject(ActivatedRoute);
+  private themeService      = inject(ThemeService);
+  private authService       = inject(AuthService);
+  private confirmService    = inject(ConfirmService);
+  private notifService      = inject(NotificationService);
   private gpsConsentService = inject(GpsConsentService);
-  readonly loginModal = inject(LoginModalService);
+  readonly loginModal       = inject(LoginModalService);
 
   readonly id = this.route.snapshot.paramMap.get('id')!;
 
-  theme       = toSignal(this.themeService.getTheme(this.id));
-  soumissions = toSignal(this.themeService.getSoumissions(this.id), { initialValue: [] as ThemeSoumission[] });
-  profile     = toSignal(this.authService.currentUserProfile$);
+  private refreshTick = signal(0);
+  private refresh() { this.refreshTick.update(n => n + 1); }
+
+  // One-shot — theme metadata changes rarely during a session
+  theme   = toSignal(this.themeService.getThemeOnce(this.id));
+  profile = toSignal(this.authService.currentUserProfile$);
   private readonly uid = computed(() => this.profile()?.uid ?? null);
 
   statut = computed(() => {
@@ -50,6 +53,14 @@ export class ThemeDetail {
   isLoggedIn = computed(() => !!this.profile());
   isAdmin    = computed(() => this.profile()?.role === 'admin');
 
+  // One-shot, refreshed after every mutation
+  soumissions = toSignal(
+    toObservable(this.refreshTick).pipe(
+      switchMap(() => this.themeService.getSoumissionsOnce(this.id))
+    ),
+    { initialValue: [] as ThemeSoumission[] }
+  );
+
   mesSoumissions = computed(() =>
     this.soumissions().filter(s => s.membreUid === this.profile()?.uid)
   );
@@ -60,26 +71,30 @@ export class ThemeDetail {
     this.mesSoumissions().length < (this.theme()?.maxPhotos ?? 1)
   );
 
-  // Mes votes
-  private mesVotes$ = toObservable(this.uid).pipe(
-    switchMap(uid => uid
-      ? this.themeService.getMesVotes(this.id, uid)
-      : of([] as ThemeVote[])
-    )
+  // One-shot, refreshed after vote/unvote or any mutation that touches soumissions
+  mesVotes = toSignal(
+    combineLatest([toObservable(this.uid), toObservable(this.refreshTick)]).pipe(
+      switchMap(([uid]) => uid
+        ? this.themeService.getMesVotesOnce(this.id, uid)
+        : of([] as ThemeVote[])
+      )
+    ),
+    { initialValue: [] as ThemeVote[] }
   );
-  mesVotes = toSignal(this.mesVotes$, { initialValue: [] as ThemeVote[] });
 
   mesVotesIds     = computed(() => new Set(this.mesVotes().map(v => v.soumissionId)));
   nbVotesRestants = computed(() => (this.theme()?.maxVotes ?? 3) - this.mesVotes().length);
 
-  // Tous les votes (résultats uniquement)
-  private tousVotes$ = toObservable(this.statut).pipe(
-    switchMap(s => s === 'resultats'
-      ? this.themeService.getTousVotes(this.id)
-      : of([] as ThemeVote[])
-    )
+  // One-shot, loaded once when statut reaches 'resultats' (results never change after close)
+  tousVotes = toSignal(
+    toObservable(this.statut).pipe(
+      switchMap(s => s === 'resultats'
+        ? this.themeService.getTousVotesOnce(this.id)
+        : of([] as ThemeVote[])
+      )
+    ),
+    { initialValue: [] as ThemeVote[] }
   );
-  tousVotes = toSignal(this.tousVotes$, { initialValue: [] as ThemeVote[] });
 
   votesParSoumission = computed((): Record<string, number | undefined> => {
     const counts: Record<string, number | undefined> = {};
@@ -138,8 +153,10 @@ export class ThemeDetail {
     const themeId = this.id;
     const uid = this.profile()?.uid ?? '';
     return {
-      toggleLike: (soumId, liked) =>
-        this.themeService.toggleLikePhoto(themeId, soumId, uid, liked),
+      toggleLike: async (soumId, liked) => {
+        await this.themeService.toggleLikePhoto(themeId, soumId, uid, liked);
+        this.refresh();
+      },
       getComments: (soumId) =>
         this.themeService.getCommentaires(themeId, soumId),
       addComment: (soumId, texte, auteurUid, nomAuteur) =>
@@ -158,6 +175,7 @@ export class ThemeDetail {
         const soum = this.soumissions().find(s => s.id === lbPhoto.id);
         if (!soum) return;
         await this.themeService.deleteSoumission(themeId, soum.id, soum.storagePath, soum.membreUid, soum.fileSize, soum.thumbnailPath);
+        this.refresh();
         const actor = this.profile();
         if (actor && soum.membreUid !== actor.uid) {
           const titre = lbPhoto.titre ? ` « ${lbPhoto.titre} »` : '';
@@ -187,6 +205,7 @@ export class ThemeDetail {
     const uid = this.profile()?.uid;
     if (!uid) return;
     await this.themeService.toggleLikePhoto(this.id, soum.id, uid, this.isLiked(soum));
+    this.refresh();
   }
 
   openLightbox(soum: ThemeSoumission, $event?: MouseEvent) {
@@ -238,6 +257,7 @@ export class ThemeDetail {
         pct => this.uploadProgress.set(pct)
       );
       this.uploadProgress.set(0);
+      this.refresh();
     } catch {
       this.uploadError.set('Erreur lors de l\'envoi. Réessayez.');
     } finally {
@@ -249,6 +269,7 @@ export class ThemeDetail {
     const ok = await this.confirmService.confirm('Supprimer cette photo du thème définitivement ?');
     if (!ok) return;
     await this.themeService.deleteSoumission(this.id, soum.id, soum.storagePath, soum.membreUid, soum.fileSize, soum.thumbnailPath);
+    this.refresh();
   }
 
   // Vote
@@ -265,6 +286,7 @@ export class ThemeDetail {
         if (this.nbVotesRestants() <= 0) return;
         await this.themeService.voter(this.id, profile.uid, soumissionId);
       }
+      this.refresh();
     } finally {
       this.voting.set(false);
     }

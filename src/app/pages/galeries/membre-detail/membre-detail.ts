@@ -1,7 +1,7 @@
 import { Component, inject, signal, computed, effect, HostListener } from '@angular/core';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { combineLatest, switchMap } from 'rxjs';
+import { combineLatest, switchMap, tap } from 'rxjs';
 import { AuthService } from '../../../services/auth.service';
 import { PhotoService } from '../../../services/photo.service';
 import { ConfirmService } from '../../../services/confirm.service';
@@ -35,14 +35,17 @@ export class MembreDetail {
     )
   );
 
+  private visiblePhotosCount = signal(8);
+
   photos = toSignal(
     combineLatest([
       this.route.paramMap,
       toObservable(this.loggedIn),
     ]).pipe(
+      tap(() => this.visiblePhotosCount.set(8)),
       switchMap(([params, loggedIn]) => loggedIn
-        ? this.photoService.getPhotosMembre(params.get('uid')!)
-        : this.photoService.getPhotosVisiteur(params.get('uid')!)
+        ? this.photoService.getPhotosMembreOnce(params.get('uid')!)
+        : this.photoService.getPhotosVisiteurOnce(params.get('uid')!)
       )
     ),
     { initialValue: [] as Photo[] }
@@ -85,6 +88,10 @@ export class MembreDetail {
     if (objs.length) photos = photos.filter(p => objs.includes(p.exif?.objectif ?? ''));
     return photos;
   });
+
+  photosVisible = computed(() => this.filteredPhotos().slice(0, this.visiblePhotosCount()));
+  hasMorePhotos = computed(() => this.filteredPhotos().length > this.visiblePhotosCount());
+  loadMorePhotos() { this.visiblePhotosCount.update(n => n + 4); }
 
   toggleAppareil(val: string) {
     this.filterAppareils.update(arr => arr.includes(val) ? arr.filter(a => a !== val) : [...arr, val]);

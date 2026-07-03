@@ -26,6 +26,7 @@ export interface OneShot {
   photoCouvertureUrl?: string;
   photoCouverturePath?: string;
   visibilite?: 'public' | 'membre';
+  datePassageResultats?: string; // YYYY-MM-DD, positionné lors du passage au statut resultats
 }
 
 export interface OneShotTheme {

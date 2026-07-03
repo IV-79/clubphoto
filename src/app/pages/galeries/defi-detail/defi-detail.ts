@@ -10,7 +10,7 @@ import { NotificationService } from '../../../services/notification.service';
 import { DatePickerComponent } from '../../../components/date-picker/date-picker';
 import { PhotoLightbox } from '../../../components/photo-lightbox/photo-lightbox';
 import { VoteRankingComponent, RankingItem } from '../../../components/vote-ranking/vote-ranking';
-import { Defi, DefiPhoto, DefiPhotoResult, DefiStatut, DEFI_STATUT_LABELS, getDefiStatut } from '../../../models/defi.model';
+import { Defi, DefiPhoto, DefiPhotoResult, DefiStatut, DefiVote, DEFI_STATUT_LABELS, getDefiStatut } from '../../../models/defi.model';
 import { LightboxPhoto, PhotoLightboxCallbacks } from '../../../models/commentaire.model';
 import { ImgRetryDirective } from '../../../directives/img-retry.directive';
 import { EventHero, HeroBadge } from '../../../components/event-hero/event-hero';
@@ -52,14 +52,45 @@ export class DefiDetail {
     { initialValue: [] }
   );
 
+  // Triggers réactifs : defi en dépendance directe pour réagir au chargement initial
+  private photosTrigger = computed(() => ({
+    defi:    this.defi(),
+    profile: this.profile(),
+    tick:    this.refreshTick(),
+  }));
+
+  private votesTrigger = computed(() => ({
+    defi: this.defi(),
+    tick: this.refreshTick(),
+  }));
+
+  // a_venir → rien ; soumission → seulement les miennes (sauf admin/org) ; vote/resultats → tout
   photos = toSignal(
-    toObservable(this.refreshTick).pipe(switchMap(() => this.defiService.getPhotosOnce(this.id))),
-    { initialValue: [] }
+    toObservable(this.photosTrigger).pipe(
+      switchMap(({ defi, profile }) => {
+        const s   = defi ? getDefiStatut(defi) : 'a_venir';
+        const uid = profile?.uid ?? null;
+        const can = profile?.role === 'admin' || (uid !== null && defi?.organisateurUid === uid);
+        if (s === 'a_venir') return of([] as DefiPhoto[]);
+        if (s === 'soumission' && !can) {
+          return uid ? this.defiService.getMyPhotosOnce(this.id, uid) : of([] as DefiPhoto[]);
+        }
+        return this.defiService.getPhotosOnce(this.id);
+      })
+    ),
+    { initialValue: [] as DefiPhoto[] }
   );
 
+  // a_venir + soumission → aucun vote ; vote/resultats → tous
   votes = toSignal(
-    toObservable(this.refreshTick).pipe(switchMap(() => this.defiService.getVotesOnce(this.id))),
-    { initialValue: [] }
+    toObservable(this.votesTrigger).pipe(
+      switchMap(({ defi }) => {
+        const s = defi ? getDefiStatut(defi) : 'a_venir';
+        if (s === 'a_venir' || s === 'soumission') return of([] as DefiVote[]);
+        return this.defiService.getVotesOnce(this.id);
+      })
+    ),
+    { initialValue: [] as DefiVote[] }
   );
 
   monVote = toSignal(

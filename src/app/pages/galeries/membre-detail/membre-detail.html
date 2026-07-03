@@ -197,7 +197,7 @@
         <div class="empty-state"><p>Aucune photo ne correspond aux filtres sélectionnés.</p></div>
       } @else {
         <div class="photos-grid">
-          @for (photo of filteredPhotos(); track photo.id; let i = $index) {
+          @for (photo of photosVisible(); track photo.id; let i = $index) {
             <div class="photo-card" (click)="openLightbox(i)">
               <img [src]="photo.thumbnailUrl ?? photo.url" [alt]="photo.titre" loading="lazy" class="photo-img">
               @if (photo.categorie) {
@@ -216,6 +216,11 @@
             </div>
           }
         </div>
+        @if (hasMorePhotos()) {
+          <div class="load-more-wrap">
+            <button class="btn-load-more" (click)="loadMorePhotos()">Charger plus</button>
+          </div>
+        }
       }
     </div>
 

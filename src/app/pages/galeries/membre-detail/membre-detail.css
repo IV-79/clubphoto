@@ -163,6 +163,29 @@
   gap: 16px;
 }
 
+.load-more-wrap {
+  text-align: center;
+  margin-top: 24px;
+}
+
+.btn-load-more {
+  background: transparent;
+  border: 1.5px solid rgba(0,0,0,0.13);
+  color: rgba(0,0,0,0.42);
+  padding: 8px 28px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+  letter-spacing: 0.2px;
+}
+
+.btn-load-more:hover {
+  border-color: rgba(0,0,0,0.26);
+  color: rgba(0,0,0,0.68);
+}
+
 .photo-card {
   position: relative;
   aspect-ratio: 4/3;

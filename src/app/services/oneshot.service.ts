@@ -239,8 +239,12 @@ export class OneShotService {
     statut: OneShotStatut,
     notifCtx?: { titre: string; nomCreateur: string; creatorUid: string }
   ): Promise<void> {
+    const update: Record<string, unknown> = { statut };
+    if (statut === 'resultats') {
+      update['datePassageResultats'] = new Date().toISOString().slice(0, 10);
+    }
     await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, 'oneshots', id), { statut })
+      updateDoc(doc(this.firestore, 'oneshots', id), update)
     );
     if (notifCtx) {
       const msgs: Partial<Record<OneShotStatut, string>> = {

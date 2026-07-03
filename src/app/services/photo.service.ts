@@ -92,6 +92,28 @@ export class PhotoService {
     ) as Observable<Photo[]>;
   }
 
+  /** Photos visibles par un visiteur anonyme — one-shot. */
+  getPhotosVisiteurOnce(uid: string): Observable<Photo[]> {
+    const q = query(collection(this.firestore, 'photos'),
+      where('uid', '==', uid), where('visibilite', '==', 'public'));
+    return from(runInInjectionContext(this.injector, () => getDocs(q)))
+      .pipe(map(snap => snap.docs
+        .map(d => ({ id: d.id, ...d.data() } as Photo))
+        .sort((a, b) => b.dateUpload.localeCompare(a.dateUpload))
+      ));
+  }
+
+  /** Photos visibles par un membre connecté — one-shot. */
+  getPhotosMembreOnce(uid: string): Observable<Photo[]> {
+    const q = query(collection(this.firestore, 'photos'),
+      where('uid', '==', uid), where('visibilite', 'in', ['public', 'membre']));
+    return from(runInInjectionContext(this.injector, () => getDocs(q)))
+      .pipe(map(snap => snap.docs
+        .map(d => ({ id: d.id, ...d.data() } as Photo))
+        .sort((a, b) => b.dateUpload.localeCompare(a.dateUpload))
+      ));
+  }
+
   /** Photos visibles par un visiteur anonyme (public seulement). */
   getPhotosVisiteur(uid: string): Observable<Photo[]> {
     const q = query(

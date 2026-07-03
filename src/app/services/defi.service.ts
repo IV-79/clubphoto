@@ -80,6 +80,13 @@ export class DefiService {
     )).pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as DefiPhoto))));
   }
 
+  getMyPhotosOnce(defiId: string, uid: string): Observable<DefiPhoto[]> {
+    return from(runInInjectionContext(this.injector, () =>
+      getDocs(query(collection(this.firestore, `defis/${defiId}/photos`),
+        where('membreUid', '==', uid), orderBy('uploadedAt', 'asc')))
+    )).pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as DefiPhoto))));
+  }
+
   getVotesOnce(defiId: string): Observable<DefiVote[]> {
     return from(runInInjectionContext(this.injector, () =>
       getDocs(collection(this.firestore, `defis/${defiId}/votes`))

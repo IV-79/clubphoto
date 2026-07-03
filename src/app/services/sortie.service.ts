@@ -3,8 +3,8 @@ import { NotificationService } from './notification.service';
 import {
   Firestore, collection, collectionData, collectionGroup, doc, docData,
   addDoc, updateDoc, deleteDoc, setDoc, getDocs, getDoc,
-  query, where, orderBy, arrayUnion, arrayRemove, increment, deleteField
-
+  query, where, orderBy, arrayUnion, arrayRemove, increment, deleteField,
+  limit, startAfter, QueryDocumentSnapshot, DocumentData
 } from '@angular/fire/firestore';
 import { Storage, ref, uploadBytes, uploadBytesResumable, getDownloadURL, deleteObject } from '@angular/fire/storage';
 import { Observable, from } from 'rxjs';
@@ -41,6 +41,34 @@ export class SortieService {
     return from(runInInjectionContext(this.injector, () =>
       getDocs(query(collection(this.firestore, 'sorties'), orderBy('date', 'desc')))
     )).pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as Sortie))));
+  }
+
+  getSortiesActivesOnce(): Observable<Sortie[]> {
+    const d = new Date(); d.setDate(d.getDate() - 7);
+    const windowStart = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    return from(runInInjectionContext(this.injector, () =>
+      getDocs(query(collection(this.firestore, 'sorties'),
+        where('date', '>=', windowStart), orderBy('date', 'asc')))
+    )).pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as Sortie))));
+  }
+
+  getSortiesTermineesPage(
+    cursor: QueryDocumentSnapshot<DocumentData> | null,
+    pageSize: number
+  ): Observable<{ items: Sortie[]; cursor: QueryDocumentSnapshot<DocumentData> | null; hasMore: boolean }> {
+    const d = new Date(); d.setDate(d.getDate() - 7);
+    const windowStart = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const q = cursor
+      ? query(collection(this.firestore, 'sorties'),
+          where('date', '<', windowStart), orderBy('date', 'desc'), startAfter(cursor), limit(pageSize))
+      : query(collection(this.firestore, 'sorties'),
+          where('date', '<', windowStart), orderBy('date', 'desc'), limit(pageSize));
+    return from(runInInjectionContext(this.injector, () => getDocs(q)))
+      .pipe(map(snap => ({
+        items:   snap.docs.map(d => ({ id: d.id, ...d.data() } as Sortie)),
+        cursor:  snap.docs.length > 0 ? snap.docs[snap.docs.length - 1] : null,
+        hasMore: snap.docs.length === pageSize,
+      })));
   }
 
   getMesSortiesOnce(uid: string): Observable<Sortie[]> {

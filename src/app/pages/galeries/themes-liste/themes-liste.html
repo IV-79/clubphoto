@@ -23,7 +23,9 @@
           }
           <p class="card-date">Votes jusqu'au <strong>{{ formatDate(dates(t).dateFinVote) }}</strong></p>
           <div class="card-actions">
-            <a [routerLink]="['/galeries/themesdumois', t.id]" class="btn-voir-photos btn-vote-theme">Voir & voter</a>
+            @if (isLoggedIn()) {
+              <a [routerLink]="['/galeries/themesdumois', t.id]" class="btn-voir-photos btn-vote-theme">Voir & voter</a>
+            }
           </div>
         </div>
       </div>

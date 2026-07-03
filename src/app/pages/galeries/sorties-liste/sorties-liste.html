@@ -117,9 +117,14 @@
         <p class="empty-msg">Aucun résultat pour ces filtres.</p>
       } @else {
         <div class="sorties-grid">
-          @for (item of passeesFiltrees(); track item.kind + ':' + item.data.id) {
+          @for (item of passeesFiltreesVisible(); track item.kind + ':' + item.data.id) {
             <app-activite-card [item]="item" [loggedIn]="!!profile()" [isPast]="true" />
           }
+        </div>
+      }
+      @if (hasMoreTerminees()) {
+        <div class="load-more-wrap">
+          <button class="btn-load-more" (click)="loadMoreTerminees()">Charger plus</button>
         </div>
       }
     </section>

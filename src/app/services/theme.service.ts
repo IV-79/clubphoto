@@ -1,7 +1,8 @@
 import { Injectable, inject, Injector, runInInjectionContext } from '@angular/core';
 import {
-  Firestore, collection, collectionData, doc, docData,
+  Firestore, collection, collectionData, doc, docData, getDoc,
   addDoc, deleteDoc, setDoc, updateDoc, query, where, orderBy, arrayUnion, arrayRemove, increment, getDocs, deleteField,
+  limit, startAfter, QueryDocumentSnapshot, DocumentData,
 } from '@angular/fire/firestore';
 import { Storage, ref, uploadBytesResumable, uploadBytes, getDownloadURL, deleteObject } from '@angular/fire/storage';
 import { Observable, from } from 'rxjs';
@@ -26,10 +27,49 @@ export class ThemeService {
     ) as Observable<ThemeMensuel[]>;
   }
 
+  getThemeOnce(id: string): Observable<ThemeMensuel | undefined> {
+    return from(runInInjectionContext(this.injector, () =>
+      getDoc(doc(this.firestore, 'themes', id))
+    )).pipe(map(snap => snap.exists() ? ({ id: snap.id, ...snap.data() } as ThemeMensuel) : undefined));
+  }
+
   getThemesOnce(): Observable<ThemeMensuel[]> {
     return from(runInInjectionContext(this.injector, () =>
       getDocs(query(collection(this.firestore, 'themes'), orderBy('mois', 'desc')))
     )).pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as ThemeMensuel))));
+  }
+
+  private moisCutoff(): string {
+    const d = new Date();
+    d.setMonth(d.getMonth() - 2);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  }
+
+  /** Thèmes du mois courant et des 2 mois précédents (actifs, vote, résultats récents). */
+  getThemesActifsOnce(): Observable<ThemeMensuel[]> {
+    const cutoff = this.moisCutoff();
+    return from(runInInjectionContext(this.injector, () =>
+      getDocs(query(collection(this.firestore, 'themes'),
+        where('mois', '>=', cutoff), orderBy('mois', 'desc')))
+    )).pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as ThemeMensuel))));
+  }
+
+  /** Thèmes terminés antérieurs au cutoff, paginés par lot de pageSize. */
+  getThemesTerminesPage(
+    cursor: QueryDocumentSnapshot<DocumentData> | null,
+    pageSize: number
+  ): Observable<{ items: ThemeMensuel[]; cursor: QueryDocumentSnapshot<DocumentData> | null; hasMore: boolean }> {
+    const cutoff = this.moisCutoff();
+    const base = [where('mois', '<', cutoff), orderBy('mois', 'desc')];
+    const q = cursor
+      ? query(collection(this.firestore, 'themes'), ...base, startAfter(cursor), limit(pageSize))
+      : query(collection(this.firestore, 'themes'), ...base, limit(pageSize));
+    return from(runInInjectionContext(this.injector, () => getDocs(q)))
+      .pipe(map(snap => ({
+        items: snap.docs.map(d => ({ id: d.id, ...d.data() } as ThemeMensuel)),
+        cursor: snap.docs.length > 0 ? snap.docs[snap.docs.length - 1] : null,
+        hasMore: snap.docs.length === pageSize,
+      })));
   }
 
   getSoumissionsOnce(themeId: string): Observable<ThemeSoumission[]> {
@@ -58,6 +98,15 @@ export class ThemeService {
     return runInInjectionContext(this.injector, () =>
       collectionData(q, { idField: 'id' })
     ) as Observable<ThemeSoumission[]>;
+  }
+
+  getMesVotesOnce(themeId: string, uid: string): Observable<ThemeVote[]> {
+    const q = query(
+      collection(this.firestore, 'themes', themeId, 'votes'),
+      where('voterUid', '==', uid)
+    );
+    return from(runInInjectionContext(this.injector, () => getDocs(q)))
+      .pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as ThemeVote))));
   }
 
   getMesVotes(themeId: string, uid: string): Observable<ThemeVote[]> {

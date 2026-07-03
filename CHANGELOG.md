@@ -4,6 +4,30 @@
 
 ## En cours (alpha)
 
+### Optimisation lectures Firestore — galeries & pages événements (2026-07-03)
+
+Réduction systématique des lectures Firestore sur toutes les pages galeries publiques : suppression des listeners temps-réel résiduels, pagination curseur côté Firestore, et chargement conditionnel par phase.
+
+#### Galerie thèmes du mois (`/galeries/themesdumois`)
+- **Visiteurs** : bouton "Voir & voter" masqué pour les visiteurs non connectés (accès résultats uniquement).
+- **Liste — thèmes terminés** : passage d'un chargement unique (tous les thèmes en mémoire) à une vraie **pagination Firestore** avec curseur (`startAfter + limit(3)`). Cutoff = mois courant – 2 mois : les thèmes actifs/récents sont chargés en one-shot (≤ 5 docs), les terminés paginés 3 par 3 à la demande.
+- **Page détail** (`theme-detail`) : **3 listeners temps-réel supprimés** (`collectionData/docData` → `getDocs/getDoc`). `soumissions`, `mesVotes` et `theme` passent en lecture ponctuelle avec signal `refreshTick` (appelé après upload, vote, like, suppression). `tousVotes` chargé une seule fois au passage en phase résultats (données figées). Nouvelles méthodes de service : `getThemeOnce`, `getMesVotesOnce`.
+
+#### Galerie sorties / événements (`/galeries/sorties`)
+- **Section "En cours"** : logique unifiée ±7 jours pour tous les types d'événements (Sorties, Défis, OneShots). Les OneShots passés en `resultats` restent visibles 7 jours via un nouveau champ `datePassageResultats` écrit automatiquement lors de la transition de statut.
+- **Section "Terminés"** : **pagination Firestore** avec curseur (`startAfter + limit(4)`), 4 sorties affichées initialement, +4 par clic sur "Charger plus". Les autres types (Défis, OneShots) restent chargés intégralement (volume faible).
+
+#### Portfolios membres (`/galeries/membres/:id`)
+- Passage de listeners temps-réel à des lectures ponctuelles (`getPhotosMembreOnce` / `getPhotosVisiteurOnce`).
+- Pagination client : 8 photos affichées initialement, bouton "Charger plus" par tranches de 4.
+
+#### Défis photo (`/galeries/defis/:id`)
+- **Chargement conditionnel par phase** pour `photos` et `votes` :
+  - `a_venir` → aucune lecture (pas de photos ni de votes à ce stade).
+  - `soumission` → uniquement les photos du membre connecté (`getMyPhotosOnce`, filtre Firestore), sauf admin/organisateur qui voient tout ; votes non chargés.
+  - `vote` + `résultats` → toutes les photos et tous les votes (comparatif et classement universel).
+- Nouvelle méthode de service : `getMyPhotosOnce(defiId, uid)`.
+
 ### Améliorations profil membre & galerie thèmes (2026-07-02)
 
 - **Changement de mot de passe** : bouton "Changer le mot de passe" dans la sidebar de la page profil membre, ouvre une modale avec les champs mot de passe actuel / nouveau / confirmation. Ré-authentification Firebase avant la mise à jour (sécurité obligatoire). Fermeture automatique après succès.

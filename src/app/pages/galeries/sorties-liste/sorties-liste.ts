@@ -1,14 +1,15 @@
-import { Component, inject, computed, signal } from '@angular/core';
+import { Component, inject, computed, signal, effect, untracked } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { switchMap, of, map } from 'rxjs';
+import { QueryDocumentSnapshot, DocumentData } from '@angular/fire/firestore';
 import { SortieService } from '../../../services/sortie.service';
 import { AuthService } from '../../../services/auth.service';
 import { OneShotService } from '../../../services/oneshot.service';
 import { DefiService } from '../../../services/defi.service';
 import { Sortie, SORTIE_TYPE_META, SortieType } from '../../../models/sortie.model';
 import { OneShot } from '../../../models/oneshot.model';
-import { Defi, getDefiStatut } from '../../../models/defi.model';
+import { Defi } from '../../../models/defi.model';
 import { DatePickerComponent } from '../../../components/date-picker/date-picker';
 import { ActiviteCard, ActiviteItem } from '../../../components/activite-card/activite-card';
 
@@ -34,11 +35,18 @@ export class SortiesListe {
   private readonly uid      = computed(() => this.profile()?.uid ?? null);
 
   private sorties$ = toObservable(this.loggedIn).pipe(
-    switchMap(loggedIn => this.sortieService.getSortiesOnce().pipe(
+    switchMap(loggedIn => this.sortieService.getSortiesActivesOnce().pipe(
       map(list => loggedIn ? list : list.filter(s => (s.visibilite ?? 'public') === 'public'))
     ))
   );
   sorties = toSignal(this.sorties$, { initialValue: [] as Sortie[] });
+
+  private readonly TERM_PAGE_SIZE = 4;
+  private readonly TERM_STEP      = 4;
+  sortiesTerminees         = signal<Sortie[]>([]);
+  private termCursor       = signal<QueryDocumentSnapshot<DocumentData> | null>(null);
+  private hasMoreFirestore  = signal(false);
+  private visibleTermCount  = signal(4);
 
   private oneshots$ = toObservable(this.loggedIn).pipe(
     switchMap(loggedIn => this.oneShotService.getPublicOneShotsOnce().pipe(
@@ -86,6 +94,37 @@ export class SortiesListe {
     this.mesSorties().length > 0 || this.mesOneShots().length > 0 || this.mesDefis().length > 0
   );
 
+  constructor() {
+    effect(() => {
+      const loggedIn = this.loggedIn();
+      this.sortiesTerminees.set([]);
+      this.termCursor.set(null);
+      this.hasMoreFirestore.set(false);
+      this.visibleTermCount.set(this.TERM_STEP);
+      this.fetchTerminees(loggedIn);
+    });
+  }
+
+  private fetchTerminees(loggedIn = this.loggedIn()): void {
+    const cursor = untracked(() => this.termCursor());
+    this.sortieService.getSortiesTermineesPage(cursor, this.TERM_PAGE_SIZE)
+      .subscribe(({ items, cursor, hasMore }) => {
+        const visible = loggedIn ? items : items.filter(s => (s.visibilite ?? 'public') === 'public');
+        this.sortiesTerminees.update(prev => [...prev, ...visible]);
+        this.termCursor.set(cursor);
+        this.hasMoreFirestore.set(hasMore);
+      });
+  }
+
+  loadMoreTerminees(): void {
+    const next = this.visibleTermCount() + this.TERM_STEP;
+    this.visibleTermCount.set(next);
+    // Fetch Firestore si on arrive en fin de sorties chargées
+    if (next >= this.sortiesTerminees().length && this.hasMoreFirestore()) {
+      this.fetchTerminees();
+    }
+  }
+
   readonly sortieTypes = Object.entries(SORTIE_TYPE_META) as [SortieType, { label: string; emoji: string }][];
 
   filterTexte      = signal('');
@@ -115,23 +154,24 @@ export class SortiesListe {
   }
 
   enCours = computed((): ActiviteItem[] => {
+    // Sorties : today-7 ≤ date ≤ today+7 (query démarre à today-7, on coupe à today+7)
     const sorties: ActiviteItem[] = this.sorties()
-      .filter(s => !this.isPastDate(s.date) && this.isWithin7Days(s.date))
+      .filter(s => !this.isAfterWindow(s.date))
       .map(data => ({ kind: 'sortie' as const, data }));
 
-    const activeStatuts = ['inscription', 'fermeture_inscriptions', 'vote'];
-    const publicActive = this.oneshots().filter(o => activeStatuts.includes(o.statut));
+    // OneShots : actifs (inscription/fermeture/vote) OU en résultats depuis ≤ 7 jours
+    const isOneShotEnCours = (o: OneShot) =>
+      ['inscription', 'fermeture_inscriptions', 'vote'].includes(o.statut) ||
+      (o.statut === 'resultats' && !!o.datePassageResultats && !this.isBeforeWindow(o.datePassageResultats));
+    const publicActive    = this.oneshots().filter(isOneShotEnCours);
     const publicActiveIds = new Set(publicActive.map(o => o.id));
-    const mesActifs = this.mesOneShots().filter(o => activeStatuts.includes(o.statut) && !publicActiveIds.has(o.id));
+    const mesActifs       = this.mesOneShots().filter(o => isOneShotEnCours(o) && !publicActiveIds.has(o.id));
     const oneshots: ActiviteItem[] = [...publicActive, ...mesActifs]
       .map(data => ({ kind: 'oneshot' as const, data }));
 
+    // Défis : overlap [dateDebutSoumission, dateCloturVotes] ∩ [today-7, today+7]
     const defis: ActiviteItem[] = this.defis()
-      .filter(d => {
-        const s = getDefiStatut(d);
-        return s === 'soumission' || s === 'vote' ||
-               (s === 'a_venir' && this.isWithin7Days(d.dateDebutSoumission));
-      })
+      .filter(d => !this.isAfterWindow(d.dateDebutSoumission) && !this.isBeforeWindow(d.dateCloturVotes))
       .map(data => ({ kind: 'defi' as const, data }));
 
     return [...sorties, ...oneshots, ...defis]
@@ -147,11 +187,11 @@ export class SortiesListe {
 
   aVenir = computed((): ActiviteItem[] => {
     const sorties: ActiviteItem[] = this.sorties()
-      .filter(s => !this.isPastDate(s.date) && !this.isWithin7Days(s.date))
+      .filter(s => this.isAfterWindow(s.date))
       .map(data => ({ kind: 'sortie' as const, data }));
 
     const defis: ActiviteItem[] = this.defis()
-      .filter(d => getDefiStatut(d) === 'a_venir' && !this.isWithin7Days(d.dateDebutSoumission))
+      .filter(d => this.isAfterWindow(d.dateDebutSoumission))
       .map(data => ({ kind: 'defi' as const, data }));
 
     return [...sorties, ...defis]
@@ -159,16 +199,19 @@ export class SortiesListe {
   });
 
   passees = computed((): ActiviteItem[] => {
-    const sorties: ActiviteItem[] = this.sorties()
-      .filter(s => this.isPastDate(s.date))
+    // Sorties : tout ce qui est en Firestore (date < today-7 garanti par la query)
+    const sorties: ActiviteItem[] = this.sortiesTerminees()
       .map(data => ({ kind: 'sortie' as const, data }));
 
+    // OneShots : resultats ET grace period expirée (pas de datePassageResultats = ancien doc, traité comme passé)
     const oneshots: ActiviteItem[] = this.oneshots()
-      .filter(o => o.statut === 'resultats')
+      .filter(o => o.statut === 'resultats' &&
+        (!o.datePassageResultats || this.isBeforeWindow(o.datePassageResultats)))
       .map(data => ({ kind: 'oneshot' as const, data }));
 
+    // Défis : dateCloturVotes < today-7
     const defis: ActiviteItem[] = this.defis()
-      .filter(d => getDefiStatut(d) === 'resultats')
+      .filter(d => this.isBeforeWindow(d.dateCloturVotes))
       .map(data => ({ kind: 'defi' as const, data }));
 
     return [...sorties, ...oneshots, ...defis]
@@ -222,28 +265,29 @@ export class SortiesListe {
   aVenirFiltrees  = computed(() => this.applyFilters(this.aVenir()));
   passeesFiltrees = computed(() => this.applyFilters(this.passees()));
 
+  passeesFiltreesVisible = computed(() =>
+    this.passeesFiltrees().slice(0, this.visibleTermCount())
+  );
+
+  hasMoreTerminees = computed(() =>
+    this.passeesFiltrees().length > this.visibleTermCount() || this.hasMoreFirestore()
+  );
+
   private effectiveDate(item: ActiviteItem): string {
     if (item.kind === 'sortie')  return (item.data as Sortie).date;
     if (item.kind === 'oneshot') return (item.data as OneShot).date ?? (item.data as OneShot).dateCreation.slice(0, 10);
     return (item.data as Defi).dateDebutSoumission;
   }
 
-  private get todayStr(): string {
-    const n = new Date();
-    return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}`;
+  private dateOffset(days: number): string {
+    const d = new Date();
+    d.setDate(d.getDate() + days);
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   }
 
-  private isPastDate(date: string): boolean {
-    return date < this.todayStr;
-  }
+  private get windowStart(): string { return this.dateOffset(-7); }
+  private get windowEnd():   string { return this.dateOffset(7);  }
 
-  private isWithin7Days(date: string): boolean {
-    if (date < this.todayStr) return false;
-    const limit = new Date();
-    limit.setDate(limit.getDate() + 7);
-    const y = limit.getFullYear();
-    const m = String(limit.getMonth() + 1).padStart(2, '0');
-    const d = String(limit.getDate()).padStart(2, '0');
-    return date <= `${y}-${m}-${d}`;
-  }
+  private isBeforeWindow(date: string): boolean { return date < this.windowStart; }
+  private isAfterWindow(date: string):  boolean { return date > this.windowEnd;   }
 }
