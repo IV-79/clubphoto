@@ -7,8 +7,8 @@
 
   <div class="featured-grid">
 
-    <!-- THÈME EN VOTE -->
-    @if (themeCompagnon(); as t) {
+    <!-- BOX 1 : Vote (priorité) > Ouvert (si pas de vote) > Résultats (dernier recours) -->
+    @if (themeVote(); as t) {
       <div class="featured-card featured-vote"
            [class.has-cover]="!!t.photoCouvertureUrl"
            [style.backgroundImage]="coverBgStyle(t.photoCouvertureUrl)">
@@ -29,10 +29,7 @@
           </div>
         </div>
       </div>
-    }
-
-    <!-- THÈME OUVERT -->
-    @if (themeOuvert(); as t) {
+    } @else if (themeOuvert(); as t) {
       <div class="featured-card featured-ouvert"
            [class.has-cover]="!!t.photoCouvertureUrl"
            [style.backgroundImage]="coverBgStyle(t.photoCouvertureUrl)">
@@ -50,6 +47,68 @@
             @if (isLoggedIn()) {
               <a [routerLink]="['/galeries/themesdumois', t.id]" class="btn-voir-photos">Voir et soumettre</a>
             }
+          </div>
+        </div>
+      </div>
+    } @else if (themeResultats(); as t) {
+      <div class="featured-card featured-resultats"
+           [class.has-cover]="!!t.photoCouvertureUrl"
+           [style.backgroundImage]="coverBgStyle(t.photoCouvertureUrl)">
+        <div class="featured-card-content">
+          <div class="card-meta">
+            <span class="statut-pill pill-resultats">Résultats</span>
+            <span class="card-mois">{{ formatMois(t.mois) }}</span>
+          </div>
+          <h2 class="card-titre">{{ t.titre }}</h2>
+          @if (t.description) {
+            <p class="card-desc">{{ t.description }}</p>
+          }
+          <p class="card-date">Votes terminés le <strong>{{ formatDate(dates(t).dateFinVote) }}</strong></p>
+          <div class="card-actions">
+            <a [routerLink]="['/galeries/themesdumois', t.id]" class="btn-voir-photos btn-resultats-theme">Voir les résultats</a>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- BOX 2 : Ouvert (si vote en box 1) > Résultats (si box 1 occupée par autre chose) -->
+    @if (themeVote() && themeOuvert(); as t) {
+      <div class="featured-card featured-ouvert"
+           [class.has-cover]="!!t.photoCouvertureUrl"
+           [style.backgroundImage]="coverBgStyle(t.photoCouvertureUrl)">
+        <div class="featured-card-content">
+          <div class="card-meta">
+            <span class="statut-pill pill-ouvert">Ouvert</span>
+            <span class="card-mois">{{ formatMois(t.mois) }}</span>
+          </div>
+          <h2 class="card-titre">{{ t.titre }}</h2>
+          @if (t.description) {
+            <p class="card-desc">{{ t.description }}</p>
+          }
+          <p class="card-date">Clôture le <strong>{{ formatDate(dates(t).dateCloture) }}</strong></p>
+          <div class="card-actions">
+            @if (isLoggedIn()) {
+              <a [routerLink]="['/galeries/themesdumois', t.id]" class="btn-voir-photos">Voir et soumettre</a>
+            }
+          </div>
+        </div>
+      </div>
+    } @else if ((themeVote() || themeOuvert()) && themeResultats(); as t) {
+      <div class="featured-card featured-resultats"
+           [class.has-cover]="!!t.photoCouvertureUrl"
+           [style.backgroundImage]="coverBgStyle(t.photoCouvertureUrl)">
+        <div class="featured-card-content">
+          <div class="card-meta">
+            <span class="statut-pill pill-resultats">Résultats</span>
+            <span class="card-mois">{{ formatMois(t.mois) }}</span>
+          </div>
+          <h2 class="card-titre">{{ t.titre }}</h2>
+          @if (t.description) {
+            <p class="card-desc">{{ t.description }}</p>
+          }
+          <p class="card-date">Votes terminés le <strong>{{ formatDate(dates(t).dateFinVote) }}</strong></p>
+          <div class="card-actions">
+            <a [routerLink]="['/galeries/themesdumois', t.id]" class="btn-voir-photos btn-resultats-theme">Voir les résultats</a>
           </div>
         </div>
       </div>

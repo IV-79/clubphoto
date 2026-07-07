@@ -60,6 +60,8 @@ export class ThemesListe {
 
   themeCompagnon = computed((): ThemeMensuel | null => this.themeVote() ?? null);
 
+  themeResultats = computed(() => this.themesTermines()[0] ?? null);
+
   themesAVenir = computed(() =>
     this.themesActifs().filter(t => computeThemeStatut(t) === 'en_attente')
   );
