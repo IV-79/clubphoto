@@ -243,24 +243,24 @@ import { ClubDocument, getExtensionMeta, extractExtension } from '../../../model
 
     /* Upload panel */
     .upload-panel {
-      background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 12px;
+      background: var(--bg-surface-alt); border: 1px solid var(--border-medium); border-radius: 12px;
       padding: 20px; margin-bottom: 24px;
     }
     .upload-fields { display: grid; grid-template-columns: 1fr 220px; gap: 12px; margin-bottom: 12px; }
     .field-nom, .field-dossier { width: 100%; }
     .file-drop {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 8px; border: 2px dashed #bbb; border-radius: 10px; padding: 28px;
-      cursor: pointer; color: #888; transition: border-color .2s, color .2s, background .2s;
+      gap: 8px; border: 2px dashed var(--border-strong); border-radius: 10px; padding: 28px;
+      cursor: pointer; color: var(--text-muted); transition: border-color .2s, color .2s, background .2s;
       margin-bottom: 8px;
     }
-    .file-drop:hover, .file-drop.dragging { border-color: #1976d2; color: #1976d2; background: #e3f0ff; }
+    .file-drop:hover, .file-drop.dragging { border-color: #1976d2; color: #1976d2; background: rgba(25,118,210,0.08); }
     .file-drop mat-icon { font-size: 32px; width: 32px; height: 32px; }
     .file-icon-large { font-size: 40px; width: 40px; height: 40px; }
     .file-name { font-weight: 500; font-size: .95rem; word-break: break-all; text-align: center; }
-    .file-size { font-size: .8rem; color: #666; }
+    .file-size { font-size: .8rem; color: var(--text-secondary); }
     .upload-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px; }
-    .ext-suffix { color: #888; font-size: .9rem; padding-right: 4px; }
+    .ext-suffix { color: var(--text-muted); font-size: .9rem; padding-right: 4px; }
 
     /* Folder chips */
     .folder-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
@@ -268,28 +268,28 @@ import { ClubDocument, getExtensionMeta, extractExtension } from '../../../model
     .search-wrap {
       flex: 1; min-width: 160px; max-width: 320px;
       display: flex; align-items: center; gap: 6px;
-      border: 1px solid #ddd; border-radius: 20px;
-      padding: 5px 10px 5px 12px; background: #fff;
+      border: 1px solid var(--border-medium); border-radius: 20px;
+      padding: 5px 10px 5px 12px; background: var(--bg-surface);
       transition: border-color .15s;
     }
     .search-wrap:focus-within { border-color: #1976d2; }
-    .search-icon { font-size: 18px; width: 18px; height: 18px; color: #aaa; flex-shrink: 0; }
+    .search-icon { font-size: 18px; width: 18px; height: 18px; color: var(--text-muted); flex-shrink: 0; }
     .search-input {
       flex: 1; border: none; outline: none; font-size: .85rem;
-      color: #333; background: transparent; min-width: 0;
+      color: var(--text-primary); background: transparent; min-width: 0;
     }
     .search-clear {
       display: flex; align-items: center; justify-content: center;
       background: none; border: none; cursor: pointer; padding: 0;
-      color: #aaa; line-height: 1;
+      color: var(--text-muted); line-height: 1;
     }
     .search-clear mat-icon { font-size: 16px; width: 16px; height: 16px; }
-    .search-clear:hover { color: #555; }
+    .search-clear:hover { color: var(--text-secondary); }
     .filter-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
     .chip {
       display: flex; align-items: center; gap: 4px;
-      padding: 6px 14px; border-radius: 20px; border: 1px solid #ddd;
-      background: #fff; cursor: pointer; font-size: .85rem; color: #555;
+      padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border-medium);
+      background: var(--bg-surface); cursor: pointer; font-size: .85rem; color: var(--text-secondary);
       transition: background .15s, color .15s, border-color .15s;
     }
     .chip:hover { border-color: #1976d2; color: #1976d2; }
@@ -297,23 +297,23 @@ import { ClubDocument, getExtensionMeta, extractExtension } from '../../../model
     .chip-icon { font-size: 16px; width: 16px; height: 16px; }
     .sort-btn {
       display: flex; align-items: center; gap: 4px;
-      padding: 6px 12px; border-radius: 8px; border: 1px solid #ddd;
-      background: #fff; cursor: pointer; font-size: .85rem; color: #555;
+      padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border-medium);
+      background: var(--bg-surface); cursor: pointer; font-size: .85rem; color: var(--text-secondary);
       transition: background .15s, color .15s;
     }
-    .sort-btn:hover { background: #f5f5f5; color: #1976d2; }
+    .sort-btn:hover { background: var(--bg-surface-raised); color: #1976d2; }
     .sort-btn mat-icon { font-size: 16px; width: 16px; height: 16px; }
 
     /* Empty state */
-    .empty { text-align: center; padding: 48px 0; color: #aaa; }
+    .empty { text-align: center; padding: 48px 0; color: var(--text-muted); }
     .empty mat-icon { font-size: 48px; width: 48px; height: 48px; margin-bottom: 8px; }
     .empty p { margin: 0; font-size: .95rem; }
 
     /* Document list */
     .doc-list { display: flex; flex-direction: column; gap: 8px; }
     .doc-card {
-      border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden;
-      background: #fff;
+      border: 1px solid var(--border-medium); border-radius: 10px; overflow: hidden;
+      background: var(--bg-surface);
     }
     .doc-row {
       display: flex; align-items: center; gap: 14px; padding: 14px 16px;
@@ -328,18 +328,18 @@ import { ClubDocument, getExtensionMeta, extractExtension } from '../../../model
     .doc-nom { font-weight: 500; font-size: .95rem; display: block; word-break: break-all; }
     .doc-meta {
       display: flex; flex-wrap: wrap; gap: 6px 12px; margin-top: 4px;
-      font-size: .78rem; color: #888; align-items: center;
+      font-size: .78rem; color: var(--text-secondary); align-items: center;
     }
     .meta-tag {
-      background: #f0f0f0; padding: 2px 8px; border-radius: 10px;
-      color: #555; font-weight: 500;
+      background: var(--bg-surface-raised); padding: 2px 8px; border-radius: 10px;
+      color: var(--text-secondary); font-weight: 500;
     }
     .meta-updated { color: #f57c00; font-size: .8rem; }
     .doc-actions { display: flex; align-items: center; flex-shrink: 0; }
 
     /* Replace panel */
     .replace-panel {
-      border-top: 1px solid #e0e0e0; background: #fafafa;
+      border-top: 1px solid var(--border-medium); background: var(--bg-surface-alt);
       padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;
     }
     .replace-fields { display: grid; grid-template-columns: 1fr 200px; gap: 12px; }

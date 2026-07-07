@@ -6,17 +6,17 @@
 
 .back-link {
   display: inline-block;
-  color: rgba(0, 0, 0, 0.35);
+  color: var(--text-hint);
   text-decoration: none;
   font-size: 0.85rem;
   margin-bottom: 32px;
   transition: color 0.2s;
 }
 
-.back-link:hover { color: #1a1a1a; }
+.back-link:hover { color: var(--text-primary); }
 
 .loading, .empty-state {
-  color: rgba(0, 0, 0, 0.35);
+  color: var(--text-hint);
   padding: 60px 0;
   text-align: center;
 }
@@ -38,7 +38,7 @@
   margin-bottom: 10px;
 }
 
-.statut-en_attente { background: rgba(0,0,0,0.06);       color: rgba(0,0,0,0.45); }
+.statut-en_attente { background: rgba(0,0,0,0.10);       color: var(--text-muted); }
 .statut-ouvert     { background: rgba(76,175,80,0.12);   color: #2e7d32; }
 .statut-vote       { background: rgba(33,150,243,0.12);  color: #1565c0; }
 .statut-resultats  { background: rgba(255,152,0,0.14);   color: #e65100; }
@@ -47,13 +47,13 @@
   font-size: 2rem;
   font-weight: 300;
   letter-spacing: 0.5px;
-  color: #1a1a1a;
+  color: var(--text-primary);
   margin: 0 0 4px;
 }
 
 .theme-mois {
   font-size: 0.85rem;
-  color: rgba(0,0,0,0.55);
+  color: var(--text-secondary);
   margin: 0 0 10px;
   text-transform: uppercase;
   letter-spacing: 0.6px;
@@ -61,7 +61,7 @@
 }
 
 .theme-desc {
-  color: rgba(0,0,0,0.55);
+  color: var(--text-secondary);
   font-size: 0.95rem;
   line-height: 1.7;
   max-width: 640px;
@@ -73,7 +73,7 @@
   flex-wrap: wrap;
   gap: 6px;
   font-size: 0.8rem;
-  color: rgba(0,0,0,0.55);
+  color: var(--text-secondary);
 }
 
 .date-sep { opacity: 0.5; }
@@ -81,14 +81,14 @@
 /* ── Info panel (en_attente) ─────────────────── */
 
 .info-panel {
-  background: #f7f7f7;
+  background: var(--bg-surface-raised);
   border-radius: 8px;
   padding: 24px 28px;
   margin-bottom: 24px;
 }
 
 .info-msg {
-  color: rgba(0,0,0,0.6);
+  color: var(--text-secondary);
   font-size: 0.95rem;
   margin: 0 0 12px;
 }
@@ -102,8 +102,8 @@
 }
 
 .chip {
-  background: rgba(0,0,0,0.06);
-  color: rgba(0,0,0,0.58);
+  background: var(--chip-bg);
+  color: var(--text-secondary);
   font-size: 0.78rem;
   font-weight: 600;
   padding: 4px 12px;
@@ -129,7 +129,7 @@
   font-weight: 700;
   letter-spacing: 1.5px;
   text-transform: uppercase;
-  color: rgba(0,0,0,0.65);
+  color: var(--text-secondary);
   margin: 0;
 }
 
@@ -137,13 +137,13 @@
 
 .phase-meta {
   font-size: 0.8rem;
-  color: rgba(0,0,0,0.55);
+  color: var(--text-secondary);
 }
 
 /* ── Upload zone ─────────────────────────────── */
 
 .upload-zone {
-  border: 2px dashed rgba(0,0,0,0.14);
+  border: 2px dashed var(--border-medium);
   border-radius: 8px;
   padding: 40px 24px;
   text-align: center;
@@ -164,24 +164,24 @@
 
 .upload-plus {
   font-size: 2rem;
-  color: rgba(0,0,0,0.2);
+  color: var(--text-hint);
   line-height: 1;
 }
 
 .upload-label {
   font-size: 0.9rem;
-  color: rgba(0,0,0,0.55);
+  color: var(--text-secondary);
 }
 
 .upload-hint {
   font-size: 0.78rem;
-  color: rgba(0,0,0,0.55);
+  color: var(--text-secondary);
 }
 
 .progress-bar-wrap {
   width: 80%;
   height: 4px;
-  background: rgba(0,0,0,0.08);
+  background: var(--border);
   border-radius: 2px;
   overflow: hidden;
   margin-bottom: 8px;
@@ -204,13 +204,13 @@
 
 .quota-msg {
   font-size: 0.85rem;
-  color: rgba(0,0,0,0.55);
+  color: var(--text-secondary);
   margin: 0 0 16px;
 }
 
 .empty-state-sm {
   font-size: 0.85rem;
-  color: rgba(0,0,0,0.3);
+  color: var(--text-hint);
   margin: 16px 0 0;
   font-style: italic;
 }
@@ -242,7 +242,7 @@
 .vote-track {
   flex: 1;
   height: 4px;
-  background: rgba(0,0,0,0.08);
+  background: var(--border);
   border-radius: 2px;
   overflow: hidden;
   max-width: 200px;
@@ -257,7 +257,7 @@
 
 .vote-progress-label {
   font-size: 0.78rem;
-  color: rgba(0,0,0,0.55);
+  color: var(--text-secondary);
   white-space: nowrap;
 }
 
@@ -270,22 +270,22 @@
 .vote-card {
   border-radius: 6px;
   overflow: hidden;
-  background: #f5f5f5;
+  background: var(--bg-surface-raised);
   border: 2px solid transparent;
   transition: border-color 0.15s, box-shadow 0.15s;
   position: relative;
 }
 
 .vote-card { cursor: pointer; }
-.vote-card:hover { border-color: rgba(0,0,0,0.15); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.vote-card:hover { border-color: var(--border-medium); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
 .vote-card.voted { border-color: #1565c0; }
-.vote-card.own-card { border-color: rgba(0,0,0,0.1); }
+.vote-card.own-card { border-color: var(--border-medium); }
 
 .vote-thumb {
   width: 100%;
   aspect-ratio: 4/3;
   object-fit: contain;
-  background: #e0e0e0;
+  background: var(--placeholder-bg);
   display: block;
 }
 
@@ -294,22 +294,22 @@
   justify-content: space-between;
   align-items: center;
   padding: 7px 10px;
-  background: white;
+  background: var(--bg-surface);
   font-size: 0.75rem;
   min-height: 32px;
 }
 
-.footer-own    { color: rgba(0,0,0,0.55); font-style: italic; }
+.footer-own    { color: var(--text-secondary); font-style: italic; }
 .footer-voted  { color: #1565c0; font-weight: 600; }
 .footer-action {
   background: none; border: none; padding: 0;
   font-size: inherit; font-family: inherit;
-  cursor: pointer; color: rgba(0,0,0,0.4);
+  cursor: pointer; color: var(--text-muted);
 }
-.footer-action:hover:not(:disabled) { color: rgba(0,0,0,0.7); }
-.footer-action:disabled { color: rgba(0,0,0,0.2); cursor: default; }
+.footer-action:hover:not(:disabled) { color: var(--text-secondary); }
+.footer-action:disabled { color: var(--text-hint); cursor: default; }
 .footer-action.footer-voted { color: #1565c0; font-weight: 600; }
-.vote-card:hover .footer-action { color: rgba(0,0,0,0.65); }
+.vote-card:hover .footer-action { color: var(--text-secondary); }
 
 /* ── Expand button ───────────────────────────── */
 

@@ -57,7 +57,7 @@ import { Article, ArticleType, ArticleStatut, ArticlePortee, ARTICLE_TYPES } fro
             (drop)="onDrop($event)">
             <mat-icon>add_photo_alternate</mat-icon>
             <span>Glisser une image ici ou cliquer pour choisir</span>
-            <span style="font-size:0.75rem;color:#aaa">Compressé automatiquement pour le site</span>
+            <span class="cover-hint">Compressé automatiquement pour le site</span>
           </label>
         }
         <input id="cover-input" type="file" accept="image/*" style="display:none" (change)="onFileSelected($event)" />
@@ -163,20 +163,21 @@ import { Article, ArticleType, ArticleStatut, ArticlePortee, ARTICLE_TYPES } fro
     .cover-section { margin-bottom: 24px; }
     .cover-preview {
       position: relative; aspect-ratio: 16/9; border-radius: 10px;
-      overflow: hidden; max-width: 500px; background: #f0f0f0;
+      overflow: hidden; max-width: 500px; background: var(--bg-surface-raised);
     }
     .cover-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .remove-cover { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,.5); }
     .cover-drop {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 8px; border: 2px dashed #bbb; border-radius: 10px; padding: 40px;
-      cursor: pointer; color: #999; max-width: 500px;
+      gap: 8px; border: 2px dashed var(--border-strong); border-radius: 10px; padding: 40px;
+      cursor: pointer; color: var(--text-muted); max-width: 500px;
       transition: border-color .2s, color .2s, background .2s;
     }
     .cover-drop:hover, .cover-drop.dragging {
-      border-color: #1976d2; color: #1976d2; background: #e3f0ff;
+      border-color: #1976d2; color: #1976d2; background: rgba(25,118,210,0.08);
     }
     .cover-drop mat-icon { font-size: 40px; width: 40px; height: 40px; }
+    .cover-hint { font-size: 0.75rem; color: var(--text-muted); }
     mat-progress-bar { margin-top: 8px; max-width: 500px; }
     .fields { display: flex; flex-direction: column; gap: 4px; }
     .full { width: 100%; }

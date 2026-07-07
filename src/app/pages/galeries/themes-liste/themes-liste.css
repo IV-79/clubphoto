@@ -14,12 +14,15 @@
   font-size: 2rem;
   font-weight: 300;
   letter-spacing: 1px;
-  color: #1a1a1a;
+  color: var(--text-accent);
+  border-bottom: 3px solid #ffb300;
+  padding-bottom: 8px;
+  display: inline-block;
   margin: 0 0 6px;
 }
 
 .subtitle {
-  color: rgba(0, 0, 0, 0.4);
+  color: var(--text-muted);
   font-size: 0.875rem;
   margin: 0;
 }
@@ -82,17 +85,17 @@
 }
 
 .featured-ouvert:not(.has-cover) {
-  background: linear-gradient(135deg, rgba(76, 175, 80, 0.06) 0%, #fff 60%);
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.06) 0%, var(--bg-surface) 60%);
 }
 .featured-ouvert { border-color: rgba(76, 175, 80, 0.28); }
 
 .featured-vote:not(.has-cover) {
-  background: linear-gradient(135deg, rgba(33, 150, 243, 0.06) 0%, #fff 60%);
+  background: linear-gradient(135deg, rgba(33, 150, 243, 0.06) 0%, var(--bg-surface) 60%);
 }
 .featured-vote { border-color: rgba(33, 150, 243, 0.28); }
 
 .featured-resultats:not(.has-cover) {
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.07) 0%, #fff 60%);
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.07) 0%, var(--bg-surface) 60%);
 }
 .featured-resultats { border-color: rgba(245, 158, 11, 0.3); }
 
@@ -119,7 +122,7 @@
 
 .card-mois {
   font-size: 0.78rem;
-  color: rgba(0, 0, 0, 0.35);
+  color: var(--text-hint);
   font-weight: 500;
   letter-spacing: 0.3px;
   text-transform: uppercase;
@@ -128,13 +131,13 @@
 .card-titre {
   font-size: 1.6rem;
   font-weight: 300;
-  color: #1a1a1a;
+  color: var(--text-primary);
   margin: 0 0 12px;
   letter-spacing: 0.4px;
 }
 
 .card-desc {
-  color: rgba(0, 0, 0, 0.52);
+  color: var(--text-secondary);
   font-size: 0.9rem;
   line-height: 1.65;
   margin: 0 0 12px;
@@ -143,11 +146,11 @@
 
 .card-date {
   font-size: 0.85rem;
-  color: rgba(0, 0, 0, 0.4);
+  color: var(--text-muted);
   margin: 0 0 22px;
 }
 
-.card-date strong { color: rgba(0, 0, 0, 0.65); }
+.card-date strong { color: var(--text-secondary); }
 
 .card-actions {
   display: flex;
@@ -181,9 +184,9 @@
 
 .btn-soumettre {
   font-size: 0.82rem;
-  color: rgba(0, 0, 0, 0.42);
+  color: var(--text-muted);
   text-decoration: none;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.16);
+  border-bottom: 1px solid var(--border-medium);
   padding-bottom: 1px;
   transition: color 0.15s, border-color 0.15s;
 }
@@ -199,8 +202,20 @@
   font-weight: 700;
   letter-spacing: 1.2px;
   text-transform: uppercase;
-  color: rgba(0,0,0,0.65);
+  color: var(--text-secondary);
   margin: 0 0 14px;
+  border-bottom: 1px solid var(--border-medium);
+  padding-bottom: 8px;
+}
+
+.count {
+  background: var(--border);
+  color: var(--text-muted);
+  padding: 1px 6px;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  margin-left: 6px;
 }
 
 /* ── À venir ── */
@@ -220,7 +235,7 @@
   align-items: center;
   gap: 16px;
   padding: 13px 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid var(--border);
 }
 
 .avenir-entry:last-child { border-bottom: none; }
@@ -228,7 +243,7 @@
 .avenir-mois {
   font-size: 0.72rem;
   font-weight: 600;
-  color: rgba(0,0,0,0.58);
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   min-width: 120px;
@@ -238,12 +253,12 @@
 .avenir-titre {
   flex: 1;
   font-size: 0.95rem;
-  color: #1a1a1a;
+  color: var(--text-primary);
 }
 
 .avenir-date {
   font-size: 0.78rem;
-  color: rgba(0,0,0,0.55);
+  color: var(--text-secondary);
   white-space: nowrap;
 }
 
@@ -257,7 +272,7 @@
 .termines-list {
   display: flex;
   flex-direction: column;
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--border-medium);
   border-radius: 8px;
   overflow: hidden;
   margin-bottom: 18px;
@@ -268,17 +283,17 @@
   align-items: center;
   gap: 16px;
   padding: 11px 16px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.07);
-  background: white;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-surface);
 }
 
 .termine-entry:last-child { border-bottom: none; }
-.termine-entry:nth-child(even) { background: #fafafa; }
+.termine-entry:nth-child(even) { background: var(--bg-surface-alt); }
 
 .termine-mois {
   font-size: 0.7rem;
   font-weight: 600;
-  color: rgba(0,0,0,0.55);
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   min-width: 110px;
@@ -288,7 +303,7 @@
 .termine-titre {
   flex: 1;
   font-size: 0.9rem;
-  color: rgba(0, 0, 0, 0.58);
+  color: var(--text-secondary);
 }
 
 .btn-voir-archive {
@@ -298,15 +313,15 @@
   text-decoration: none;
   font-size: 0.78rem;
   font-weight: 500;
-  border: 1.5px solid rgba(0,0,0,0.13);
-  color: rgba(0,0,0,0.45);
+  border: 1.5px solid var(--border-medium);
+  color: var(--text-muted);
   white-space: nowrap;
   flex-shrink: 0;
   transition: border-color 0.15s, color 0.15s;
 }
 .btn-voir-archive:hover {
-  border-color: rgba(0,0,0,0.26);
-  color: rgba(0,0,0,0.72);
+  border-color: var(--border-strong);
+  color: var(--text-primary);
 }
 
 /* ── Charger plus ── */
@@ -318,8 +333,8 @@
 
 .btn-load-more {
   background: transparent;
-  border: 1.5px solid rgba(0, 0, 0, 0.13);
-  color: rgba(0, 0, 0, 0.42);
+  border: 1.5px solid var(--border-medium);
+  color: var(--text-muted);
   padding: 8px 28px;
   border-radius: 20px;
   font-size: 0.85rem;
@@ -330,8 +345,8 @@
 }
 
 .btn-load-more:hover {
-  border-color: rgba(0, 0, 0, 0.26);
-  color: rgba(0, 0, 0, 0.68);
+  border-color: var(--border-strong);
+  color: var(--text-primary);
 }
 
 /* ── Empty ── */
@@ -339,7 +354,7 @@
 .empty-state {
   text-align: center;
   padding: 80px 24px;
-  color: rgba(0, 0, 0, 0.28);
+  color: var(--text-hint);
   font-size: 0.9rem;
 }
 

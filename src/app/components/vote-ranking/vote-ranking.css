@@ -12,12 +12,12 @@
 /* ── Carte ───────────────────────────────────────────────── */
 
 .rank-card {
-  border: 2px solid #e8e8e8;
+  border: 2px solid var(--border-medium);
   border-radius: 8px;
   overflow: hidden;
   text-align: center;
   cursor: pointer;
-  background: white;
+  background: var(--bg-surface);
   transition: box-shadow 0.15s;
 }
 
@@ -40,7 +40,7 @@
   height: 32px;
   border-radius: 50%;
   background: rgba(0,0,0,0.07);
-  color: rgba(0,0,0,0.55);
+  color: var(--text-secondary);
   font-size: 0.8rem;
   font-weight: 700;
   display: flex;
@@ -67,7 +67,7 @@
   margin: 0;
   font-size: 0.85rem;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -76,7 +76,7 @@
 .rank-votes {
   margin: 0;
   font-size: 0.75rem;
-  color: rgba(0,0,0,0.55);
+  color: var(--text-secondary);
 }
 
 /* ── Bouton suite ────────────────────────────────────────── */
@@ -87,12 +87,12 @@
   margin-top: 1.25rem;
   padding: 0.65rem 1rem;
   background: none;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-medium);
   border-radius: 6px;
   font-size: 0.85rem;
-  color: rgba(0,0,0,0.5);
+  color: var(--text-secondary);
   cursor: pointer;
   text-align: center;
   transition: border-color 0.2s, color 0.2s;
 }
-.btn-suite:hover { border-color: #999; color: #1a1a1a; }
+.btn-suite:hover { border-color: #999; color: var(--text-primary); }

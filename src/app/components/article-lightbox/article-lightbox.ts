@@ -82,7 +82,7 @@ import { AuthService } from '../../services/auth.service';
     }
     @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
     .lb-panel {
-      background: #fff; border-radius: 16px; overflow: hidden;
+      background: var(--bg-surface); border-radius: 16px; overflow: hidden;
       max-width: 680px; width: 100%; max-height: 90vh;
       overflow-y: auto; position: relative;
       animation: slideUp .2s ease;
@@ -100,9 +100,9 @@ import { AuthService } from '../../services/auth.service';
       transition: background .15s;
     }
     .lb-close:hover { background: rgba(0,0,0,.7); }
-    .lb-cover { overflow: hidden; background: #f0f0f0; }
+    .lb-cover { overflow: hidden; background: var(--bg-surface-raised); }
     .lb-cover img { width: 100%; height: auto; display: block; }
-.lb-content { padding: 20px 24px 28px; }
+    .lb-content { padding: 20px 24px 28px; }
     .lb-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
     .chip-type {
       display: inline-flex; align-items: center; gap: 5px;
@@ -112,22 +112,22 @@ import { AuthService } from '../../services/auth.service';
     .chip-type mat-icon { font-size: 14px; width: 14px; height: 14px; }
     .chip-info {
       display: inline-flex; align-items: center; gap: 4px;
-      font-size: .78rem; color: #555; padding: 4px 10px;
-      background: #f3f3f3; border-radius: 20px;
+      font-size: .78rem; color: var(--text-secondary); padding: 4px 10px;
+      background: var(--bg-surface-raised); border-radius: 20px;
     }
     .chip-info mat-icon { font-size: 13px; width: 13px; height: 13px; }
-    .lb-titre { margin: 0 0 14px; font-size: 1.45rem; font-weight: 700; line-height: 1.3; color: #111; }
+    .lb-titre { margin: 0 0 14px; font-size: 1.45rem; font-weight: 700; line-height: 1.3; color: var(--text-primary); }
     .lb-meta-row { display: flex; gap: 18px; flex-wrap: wrap; margin-bottom: 18px; }
     .lb-meta {
       display: inline-flex; align-items: center; gap: 5px;
-      font-size: .83rem; color: #555;
+      font-size: .83rem; color: var(--text-secondary);
     }
     .lb-meta mat-icon { font-size: 14px; width: 14px; height: 14px; }
-    .lb-auteur { color: #888; }
+    .lb-auteur { color: var(--text-muted); }
     .lieu-link { color: inherit; text-decoration: none; }
-    .lieu-link:hover { color: #1976d2; text-decoration: underline; }
+    .lieu-link:hover { color: var(--text-accent); text-decoration: underline; }
     .lb-description {
-      font-size: .95rem; line-height: 1.75; color: #333;
+      font-size: .95rem; line-height: 1.75; color: var(--text-primary);
       white-space: pre-wrap; margin-bottom: 22px;
     }
     .lb-link-btn { display: inline-flex; align-items: center; gap: 6px; }

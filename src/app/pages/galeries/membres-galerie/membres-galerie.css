@@ -12,12 +12,15 @@
   font-size: 2rem;
   font-weight: 300;
   letter-spacing: 1px;
-  color: #1a1a1a;
+  color: var(--text-accent);
+  border-bottom: 3px solid #ffb300;
+  padding-bottom: 8px;
+  display: inline-block;
   margin: 0 0 8px;
 }
 
 .subtitle {
-  color: rgba(0, 0, 0, 0.55);
+  color: var(--text-secondary);
   font-size: 0.875rem;
   margin: 0;
 }
@@ -33,8 +36,8 @@
   text-decoration: none;
   border-radius: 6px;
   overflow: hidden;
-  background: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: var(--bg-surface);
+  box-shadow: 0 2px 8px var(--card-shadow);
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
@@ -46,7 +49,7 @@
 .cover-wrap {
   aspect-ratio: 1;
   overflow: hidden;
-  background: #f0f0f0;
+  background: var(--bg-surface-raised);
 }
 
 .cover-img {
@@ -84,18 +87,144 @@
 }
 
 .membre-nom {
-  color: #1a1a1a;
+  color: var(--text-primary);
   font-size: 0.95rem;
   font-weight: 500;
 }
 
 .membre-styles {
-  color: rgba(0, 0, 0, 0.55);
+  color: var(--text-secondary);
   font-size: 0.75rem;
 }
 
 .empty-state {
   text-align: center;
   padding: 80px 24px;
-  color: rgba(0, 0, 0, 0.35);
+  color: var(--text-hint);
 }
+
+/* Filter bar */
+.filter-bar {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.f-chip {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-medium);
+  border-radius: 14px;
+  padding: 4px 12px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.f-chip:hover { border-color: var(--border-strong); color: var(--text-primary); }
+.f-chip.active { background: var(--text-primary); border-color: var(--text-primary); color: var(--bg-page); }
+
+.f-dd-wrap { position: relative; }
+
+.f-dd-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-medium);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.f-dd-btn:hover { border-color: #999; color: var(--text-primary); }
+.f-dd-btn.has-selection { border-color: var(--border-strong); color: var(--text-primary); font-weight: 500; }
+
+.f-badge {
+  background: var(--text-primary);
+  color: var(--bg-page);
+  border-radius: 10px;
+  padding: 0 6px;
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+.f-caret { font-size: 0.6rem; opacity: 0.5; }
+
+.f-panel {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-medium);
+  border-radius: 6px;
+  box-shadow: 0 4px 16px var(--card-shadow);
+  min-width: 220px;
+  max-width: 340px;
+  max-height: 280px;
+  overflow-y: auto;
+  z-index: 100;
+  padding: 6px 0;
+}
+
+.f-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.f-option:hover { background: var(--bg-surface-raised); }
+.f-option input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  accent-color: var(--text-accent);
+  flex-shrink: 0;
+}
+
+.active-filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.active-chip {
+  background: var(--bg-surface-raised);
+  border: 1px solid var(--border-strong);
+  border-radius: 14px;
+  padding: 3px 10px;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+  max-width: 220px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.active-chip:hover { background: var(--placeholder-bg); border-color: #bbb; }
+
+.f-clear {
+  background: none;
+  border: none;
+  color: var(--text-hint);
+  font-size: 0.78rem;
+  cursor: pointer;
+  padding: 2px 0;
+  text-decoration: underline;
+  align-self: flex-start;
+  transition: color 0.15s;
+}
+.f-clear:hover { color: var(--text-secondary); }

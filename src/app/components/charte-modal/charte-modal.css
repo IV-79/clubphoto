@@ -10,7 +10,7 @@
 }
 
 .charte-dialog {
-  background: #fff;
+  background: var(--bg-surface);
   border-radius: 10px;
   width: 100%;
   max-width: 680px;
@@ -22,20 +22,20 @@
 
 .charte-header {
   padding: 24px 28px 16px;
-  border-bottom: 1px solid #e8e8e8;
+  border-bottom: 1px solid var(--border-medium);
   flex-shrink: 0;
 }
 
 .charte-title {
   font-size: 1.3rem;
   font-weight: 700;
-  color: #1a237e;
+  color: var(--text-accent);
   margin: 0 0 4px;
 }
 
 .charte-subtitle {
   font-size: 0.85rem;
-  color: rgba(0, 0, 0, 0.5);
+  color: var(--text-secondary);
   margin: 0;
 }
 
@@ -54,13 +54,13 @@
 .section-title {
   font-size: 1rem;
   font-weight: 700;
-  color: #1a237e;
+  color: var(--text-accent);
   margin: 0;
 }
 
 .section-text {
   font-size: 0.9rem;
-  color: rgba(0, 0, 0, 0.65);
+  color: var(--text-secondary);
   margin: 0;
 }
 
@@ -83,10 +83,10 @@
 .charte-scroll {
   max-height: 260px;
   overflow-y: auto;
-  border: 1px solid #e8e8e8;
+  border: 1px solid var(--border-medium);
   border-radius: 6px;
   padding: 14px 16px;
-  background: #fafafa;
+  background: var(--bg-surface-alt);
 }
 
 .accept-checkbox {
@@ -94,7 +94,7 @@
   align-items: flex-start;
   gap: 10px;
   font-size: 0.88rem;
-  color: #1a1a1a;
+  color: var(--text-primary);
   cursor: pointer;
 }
 
@@ -109,21 +109,21 @@
 
 .section-divider {
   border: none;
-  border-top: 1px solid #e8e8e8;
+  border-top: 1px solid var(--border-medium);
   margin: 8px 0;
 }
 
 /* Markdown inline dans la modale */
 .charte-scroll .club-md-content {
   line-height: 1.7;
-  color: #1a1a1a;
+  color: var(--text-primary);
   font-size: 0.9rem;
 }
 
 .charte-scroll .club-md-content h2 {
   font-size: 0.95rem;
   font-weight: 700;
-  color: #1a237e;
+  color: var(--text-accent);
   margin: 1.2em 0 0.3em;
 }
 
@@ -138,7 +138,7 @@
 
 .charte-footer {
   padding: 16px 28px;
-  border-top: 1px solid #e8e8e8;
+  border-top: 1px solid var(--border-medium);
   display: flex;
   gap: 12px;
   justify-content: flex-end;
@@ -147,8 +147,8 @@
 
 .btn-refuse {
   background: none;
-  border: 1px solid #ddd;
-  color: rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--border-medium);
+  color: var(--text-secondary);
   padding: 9px 18px;
   border-radius: 5px;
   font-size: 0.88rem;
@@ -162,7 +162,7 @@
 }
 
 .btn-accept {
-  background: #1a237e;
+  background: var(--text-accent);
   color: #fff;
   border: none;
   padding: 9px 22px;
@@ -173,7 +173,7 @@
   transition: background 0.15s;
 }
 
-.btn-accept:hover:not(:disabled) { background: #283593; }
+.btn-accept:hover:not(:disabled) { filter: brightness(1.1); }
 .btn-accept:disabled { opacity: 0.5; cursor: not-allowed; }
 
 @media (max-width: 480px) {

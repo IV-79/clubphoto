@@ -14,7 +14,7 @@ import { Header } from '../../components/header/header';
   styles: [`
     .member-content {
       min-height: calc(100vh - 122px);
-      background: #fff;
+      background: var(--bg-page);
       padding-top: 122px;
     }
   `]

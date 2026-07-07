@@ -22,7 +22,7 @@ import { Header } from '../../components/header/header';
     </footer>
   `,
   styles: [`
-    .page-content { min-height: calc(100vh - 122px); padding-top: 122px; }
+    .page-content { min-height: calc(100vh - 122px); padding-top: 122px; background: var(--bg-page); }
     .site-footer {
       background: #1a1a1a;
       color: rgba(255,255,255,0.65);

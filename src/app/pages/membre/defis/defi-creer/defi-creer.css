@@ -12,7 +12,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  color: rgba(0,0,0,0.5);
+  color: var(--text-muted);
   text-decoration: none;
   font-size: 0.85rem;
   margin-bottom: 0.75rem;
@@ -24,7 +24,10 @@
   font-size: 1.75rem;
   font-weight: 300;
   letter-spacing: 0.5px;
-  color: #1a1a1a;
+  color: var(--text-accent);
+  border-bottom: 3px solid #ffb300;
+  padding-bottom: 8px;
+  display: inline-block;
 }
 
 .creer-form {
@@ -37,34 +40,35 @@
 .cover-section { margin-bottom: 0.5rem; }
 
 .cover-drop {
-  border: 2px dashed #ddd;
+  border: 2px dashed var(--border-medium);
   border-radius: 8px;
   padding: 2rem 1.5rem;
   text-align: center;
   cursor: pointer;
   transition: border-color 0.2s, background 0.2s;
-  background: #fafafa;
+  background: var(--bg-surface-alt);
 }
 .cover-drop.drag-over {
   border-color: #cc0000;
   background: rgba(204,0,0,0.04);
 }
-.cover-drop-icon { font-size: 2rem; color: rgba(0,0,0,0.25); margin-bottom: 0.5rem; }
-.cover-drop p { margin: 0.25rem 0; color: rgba(0,0,0,0.5); font-size: 0.9rem; }
+.cover-drop-icon { font-size: 2rem; color: var(--text-hint); margin-bottom: 0.5rem; }
+.cover-drop p { margin: 0.25rem 0; color: var(--text-muted); font-size: 0.9rem; }
 .cover-drop-hint { font-size: 0.8rem !important; }
 
 .btn-upload-cover {
   display: inline-block;
   margin-top: 0.5rem;
   padding: 0.4rem 1rem;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-medium);
   border-radius: 4px;
-  background: white;
+  background: var(--bg-surface);
+  color: var(--text-secondary);
   font-size: 0.85rem;
   cursor: pointer;
   transition: border-color 0.2s;
 }
-.btn-upload-cover:hover { border-color: #999; }
+.btn-upload-cover:hover { border-color: var(--border-strong); }
 
 .cover-preview-wrap {
   position: relative;
@@ -104,7 +108,7 @@
   font-weight: 700;
   letter-spacing: 1.5px;
   text-transform: uppercase;
-  color: rgba(0,0,0,0.65);
+  color: var(--text-secondary);
   margin: 0 0 0.75rem;
 }
 .dates-grid {
@@ -145,12 +149,12 @@
   align-items: center;
   gap: 8px;
   font-size: 0.9rem;
-  color: #1a1a1a;
+  color: var(--text-primary);
   font-weight: 500;
 }
 .toggle-hint {
   font-size: 0.78rem;
-  color: rgba(0,0,0,0.55);
+  color: var(--text-secondary);
   padding-left: 24px;
 }
 

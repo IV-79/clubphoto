@@ -4,6 +4,14 @@
 
 ## En cours (alpha)
 
+### Mode sombre — alignement des grands titres (2026-07-07)
+
+Uniformisation du style des grands titres de pages publiques et membres : `color: var(--text-accent)` (bleu marine `#1a237e` en clair, indigo `#818cf8` en sombre) + soulignement orange `#ffb300`. Pages mises à jour : Portfolios des membres, Sorties & Défis, Thèmes du mois, Calendrier, Notifications, Préférences, Créer un défi, Portfolio personnel. Correction également des couleurs codées en dur dans `defi-creer.css` et des textes blancs sur fond blanc dans `portfolio.css`.
+
+### Mode sombre — migration CSS complète (2026-07-07)
+
+Remplacement de toutes les couleurs CSS codées en dur par des variables CSS (`--bg-page`, `--bg-surface`, `--text-primary`, `--border`, etc.) dans l'ensemble de l'application. Le thème clair/sombre est contrôlé via `html[data-theme]` dans `styles.css`. Ajout du token `--text-accent` (`#1a237e` / `#818cf8`) pour les titres. Correction du fond de page (layouts). Fichiers migrés : le-club, contact, actualites, register, completer-profil, admin-dashboard, overview, theme-detail, sortie-detail, defi-detail, profil, calendrier, reunions, config, galeries, admin-pages, membres, themes, membre-detail, oneshot-photos, guide, oneshot-detail (plus de 20 fichiers CSS).
+
 ### Optimisation lectures Firestore — galeries & pages événements (2026-07-03)
 
 Réduction systématique des lectures Firestore sur toutes les pages galeries publiques : suppression des listeners temps-réel résiduels, pagination curseur côté Firestore, et chargement conditionnel par phase.

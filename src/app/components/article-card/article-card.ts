@@ -54,7 +54,7 @@ import { Article, getArticleTypeMeta } from '../../models/article.model';
   styles: [`
     .card {
       cursor: pointer; border-radius: 12px; overflow: hidden;
-      background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.12);
+      background: var(--bg-surface); box-shadow: 0 2px 8px var(--card-shadow);
       transition: transform .2s, box-shadow .2s;
       display: flex; flex-direction: column;
       position: relative;
@@ -62,7 +62,7 @@ import { Article, getArticleTypeMeta } from '../../models/article.model';
     .card:hover { transform: translateY(-4px); box-shadow: 0 6px 20px rgba(0,0,0,.2); }
     .cover {
       position: relative; aspect-ratio: 16/9; overflow: hidden;
-      background: #f0f0f0; flex-shrink: 0;
+      background: var(--bg-surface-raised); flex-shrink: 0;
     }
     .cover img { width: 100%; height: 100%; object-fit: contain; display: block; }
     .cover-placeholder {
@@ -90,10 +90,10 @@ import { Article, getArticleTypeMeta } from '../../models/article.model';
     }
     .membre-badge mat-icon { font-size: 16px; width: 16px; height: 16px; }
     .body { padding: 14px 16px 18px; flex: 1; }
-    .titre { margin: 0 0 8px; font-size: .97rem; font-weight: 600; line-height: 1.35; color: #1a1a1a; }
+    .titre { margin: 0 0 8px; font-size: .97rem; font-weight: 600; line-height: 1.35; color: var(--text-primary); }
     .meta {
       display: flex; align-items: flex-start; gap: 5px;
-      margin: 4px 0 0; font-size: .78rem; color: #666;
+      margin: 4px 0 0; font-size: .78rem; color: var(--text-secondary);
     }
     .meta mat-icon { font-size: 13px; width: 13px; height: 13px; flex-shrink: 0; margin-top: 1px; }
     .lieu-link { color: inherit; text-decoration: none; }
@@ -115,7 +115,7 @@ import { Article, getArticleTypeMeta } from '../../models/article.model';
       font-size: .68rem; font-weight: 700; letter-spacing: .4px;
       text-transform: uppercase; margin-bottom: 6px;
     }
-    .statut-badge.brouillon { background: #eeeeee; color: #616161; }
+    .statut-badge.brouillon { background: var(--bg-surface-raised); color: var(--text-muted); }
     .statut-badge.expire    { background: #ffebee; color: #c62828; }
   `]
 })

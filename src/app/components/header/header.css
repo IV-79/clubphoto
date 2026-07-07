@@ -95,7 +95,7 @@
   position: absolute;
   top: 100%;
   left: 0;
-  background: #fff;
+  background: var(--nav-panel-bg);
   border-radius: 4px;
   box-shadow: 0 4px 20px rgba(0,0,0,.25);
   min-width: 210px;
@@ -110,7 +110,7 @@
   align-items: center;
   gap: 10px;
   padding: 12px 16px;
-  color: #1a1a1a;
+  color: var(--nav-panel-text);
   text-decoration: none;
   font-size: 14px;
   font-weight: 400;
@@ -121,10 +121,10 @@
   width: 100%;
   box-sizing: border-box;
 }
-.nav-panel .nav-panel-item:hover { background: #f0f0f0; }
-.nav-panel-item mat-icon { font-size: 18px; width: 18px; height: 18px; color: #444; flex-shrink: 0; }
+.nav-panel .nav-panel-item:hover { background: var(--nav-panel-hover); }
+.nav-panel-item mat-icon { font-size: 18px; width: 18px; height: 18px; color: var(--nav-panel-icon); flex-shrink: 0; }
 
-.nav-panel-divider { border: none; border-top: 1px solid #e8e8e8; margin: 4px 0; }
+.nav-panel-divider { border: none; border-top: 1px solid var(--nav-panel-divider); margin: 4px 0; }
 
 .nav-panel-btn {
   background: none;
@@ -181,10 +181,10 @@
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px 8px;
-  border-bottom: 1px solid #ececec;
+  border-bottom: 1px solid var(--nav-panel-divider);
   position: sticky;
   top: 0;
-  background: white;
+  background: var(--nav-panel-bg);
 }
 
 .notif-panel-title {
@@ -192,7 +192,7 @@
   font-weight: 600;
   letter-spacing: 0.5px;
   text-transform: uppercase;
-  color: #444;
+  color: var(--nav-panel-icon);
 }
 
 .notif-mark-all {
@@ -220,17 +220,17 @@
   gap: 10px;
   padding: 10px 16px;
   width: 100%;
-  background: white;
+  background: var(--nav-panel-bg);
   border: none;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--border);
   cursor: pointer;
   text-align: left;
   font-family: inherit;
   transition: background 0.12s;
 }
-.notif-panel-item:hover { background: #f7f7f7; }
-.notif-panel-item.unread { background: #eef4ff; }
-.notif-panel-item.unread:hover { background: #e4eeff; }
+.notif-panel-item:hover { background: var(--nav-panel-hover); }
+.notif-panel-item.unread { background: var(--notif-unread-bg); }
+.notif-panel-item.unread:hover { background: var(--notif-unread-bg); filter: brightness(0.95); }
 
 .notif-item-icon { font-size: 1rem; flex-shrink: 0; margin-top: 2px; }
 
@@ -239,7 +239,7 @@
 .notif-item-msg {
   margin: 0 0 3px;
   font-size: 0.8rem;
-  color: #222;
+  color: var(--text-primary);
   line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -249,7 +249,7 @@
 
 .notif-item-date {
   font-size: 0.7rem;
-  color: rgba(0,0,0,0.38);
+  color: var(--text-muted);
 }
 
 .notif-unread-dot {
@@ -263,11 +263,11 @@
 
 .notif-panel-footer {
   padding: 10px 16px;
-  border-top: 1px solid #ececec;
+  border-top: 1px solid var(--nav-panel-divider);
   text-align: center;
   position: sticky;
   bottom: 0;
-  background: white;
+  background: var(--nav-panel-bg);
 }
 
 .notif-voir-tout {
@@ -308,6 +308,28 @@
   padding: 0 4px;
   margin-left: 8px;
 }
+
+/* ── Toggle dark/light ── */
+
+.theme-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.65);
+  cursor: pointer;
+  transition: color 0.2s, background 0.2s;
+  padding: 0;
+}
+.theme-toggle-btn:hover {
+  color: white;
+  background: rgba(255,255,255,0.10);
+}
+.theme-toggle-btn mat-icon { font-size: 20px; width: 20px; height: 20px; }
 
 /* Actions droite */
 .nav-actions {

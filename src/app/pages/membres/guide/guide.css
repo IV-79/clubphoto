@@ -17,7 +17,7 @@
 }
 
 .guide-intro {
-  color: #555;
+  color: var(--text-secondary);
   font-size: 1.05rem;
 }
 
@@ -35,18 +35,18 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.6rem 1.4rem;
-  border: 2px solid #d1d5db;
+  border: 2px solid var(--border-medium);
   border-radius: 2rem;
   text-decoration: none;
-  color: #374151;
+  color: var(--text-primary);
   font-weight: 500;
   transition: border-color 0.15s, background 0.15s;
 }
 
 .guide-nav-link:hover {
-  border-color: #4f46e5;
-  background: #f5f3ff;
-  color: #4f46e5;
+  border-color: var(--text-accent);
+  background: var(--bg-surface-alt);
+  color: var(--text-accent);
 }
 
 .guide-nav-icon {
@@ -59,7 +59,7 @@
 }
 
 .guide-section + .guide-section {
-  border-top: 2px solid #e5e7eb;
+  border-top: 2px solid var(--border-medium);
   padding-top: 3rem;
 }
 
@@ -74,14 +74,14 @@
 }
 
 .section-subtitle {
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 0.95rem;
 }
 
 /* Cards */
 .guide-card {
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
+  background: var(--bg-surface-alt);
+  border: 1px solid var(--border-medium);
   border-radius: 12px;
   padding: 1.25rem 1.5rem;
   margin-bottom: 1rem;
@@ -94,7 +94,7 @@
 }
 
 .guide-card p {
-  color: #374151;
+  color: var(--text-primary);
   line-height: 1.6;
   margin-bottom: 0.5rem;
 }
@@ -107,7 +107,7 @@
 .guide-steps {
   padding-left: 1.25rem;
   margin: 0;
-  color: #374151;
+  color: var(--text-primary);
   line-height: 1.7;
 }
 
@@ -133,12 +133,12 @@
 }
 
 .step-body {
-  color: #374151;
+  color: var(--text-primary);
   line-height: 1.55;
   font-size: 0.9rem;
 }
 
-/* Badges statut */
+/* Badges statut — semantic colors preserved */
 .step-badge {
   display: inline-block;
   flex-shrink: 0;
@@ -199,7 +199,7 @@
 }
 
 .admin-icon {
-  color: #4f46e5;
+  color: var(--text-accent);
   font-size: 1.2rem;
   width: 1.2rem;
   height: 1.2rem;
@@ -222,11 +222,11 @@
 
 .field-label {
   font-weight: 600;
-  color: #4338ca;
+  color: var(--text-accent);
 }
 
 .field-desc {
-  color: #374151;
+  color: var(--text-secondary);
   line-height: 1.5;
 }
 
@@ -252,7 +252,7 @@
 .tl-label { font-weight: 600; }
 .tl-hint  { font-size: 0.68rem; opacity: 0.8; }
 
-.tl-arrow { color: #6b7280; font-weight: 600; }
+.tl-arrow { color: var(--text-secondary); font-weight: 600; }
 
 .tl-attente   { background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; }
 .tl-ouvert    { background: #dcfce7; color: #166534; }
@@ -279,8 +279,8 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  background: #fff;
-  border: 1.5px solid #d1d5db;
+  background: var(--bg-surface);
+  border: 1.5px solid var(--border-medium);
   border-radius: 10px;
   padding: 0.5rem 0.8rem;
   min-width: 82px;
@@ -289,23 +289,23 @@
 }
 
 .flow-node-hl {
-  border-color: #4f46e5;
-  background: #f5f3ff;
+  border-color: var(--text-accent);
+  background: var(--bg-surface-alt);
 }
 
 .flow-emoji { font-size: 1.35rem; line-height: 1; margin-bottom: 0.15rem; }
 
-.flow-sub { font-size: 0.62rem; color: #6b7280; }
+.flow-sub { font-size: 0.62rem; color: var(--text-secondary); }
 
 .flow-conn {
   display: flex;
   flex-direction: column;
   align-items: center;
-  color: #9ca3af;
+  color: var(--text-muted);
   gap: 0.05rem;
 }
 
-.flow-act { font-size: 0.62rem; color: #4f46e5; font-weight: 600; white-space: nowrap; }
+.flow-act { font-size: 0.62rem; color: var(--text-accent); font-weight: 600; white-space: nowrap; }
 
 @media (max-width: 600px) {
   .nav-flow { flex-direction: column; gap: 0.15rem; }
@@ -326,7 +326,7 @@
 
 /* Inline link */
 .inline-link {
-  color: #4f46e5;
+  color: var(--text-accent);
   text-decoration: underline;
 }
 
@@ -334,12 +334,12 @@
 kbd {
   display: inline-block;
   padding: 0.1rem 0.4rem;
-  background: #f3f4f6;
-  border: 1px solid #d1d5db;
+  background: var(--bg-surface-raised);
+  border: 1px solid var(--border-medium);
   border-radius: 4px;
   font-family: monospace;
   font-size: 0.85rem;
-  color: #374151;
+  color: var(--text-primary);
 }
 
 @media (max-width: 600px) {
@@ -357,8 +357,8 @@ kbd {
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  background: #1a1a1a;
-  color: #fff;
+  background: var(--text-primary);
+  color: var(--bg-page);
   border: none;
   font-size: 1.1rem;
   line-height: 1;
@@ -381,5 +381,8 @@ kbd {
 }
 
 .scroll-top-btn:hover {
-  background: #333;
+  background: var(--text-secondary);
 }
+
+/* Les dark overrides sont dans styles.css (global) car ViewEncapsulation.Emulated
+   scoperait incorrectement html[data-theme] avec [_ngcontent]. */

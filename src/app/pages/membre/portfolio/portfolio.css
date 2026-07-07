@@ -13,15 +13,18 @@
 }
 
 .portfolio-header h1 {
-  color: white;
+  color: var(--text-accent);
   font-size: 1.8rem;
   font-weight: 300;
   letter-spacing: 1px;
+  border-bottom: 3px solid #ffb300;
+  padding-bottom: 8px;
+  display: inline-block;
   margin: 0 0 6px;
 }
 
 .stats {
-  color: rgba(255,255,255,0.4);
+  color: var(--text-secondary);
   font-size: 0.85rem;
 }
 
@@ -84,7 +87,7 @@
 .empty-state {
   text-align: center;
   padding: 80px 24px;
-  color: rgba(255,255,255,0.35);
+  color: var(--text-muted);
 }
 
 .empty-icon {

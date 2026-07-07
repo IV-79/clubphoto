@@ -7,12 +7,15 @@
 .page-title {
   font-size: 1.5rem;
   font-weight: 300;
-  color: #1a1a1a;
+  color: var(--text-accent);
+  border-bottom: 3px solid #ffb300;
+  padding-bottom: 8px;
+  display: inline-block;
   margin: 0 0 6px;
 }
 
 .page-subtitle {
-  color: rgba(0,0,0,0.45);
+  color: var(--text-muted);
   font-size: 0.9rem;
   margin: 0 0 36px;
 }
@@ -26,13 +29,13 @@
   font-weight: 700;
   letter-spacing: 1.8px;
   text-transform: uppercase;
-  color: rgba(0,0,0,0.65);
+  color: var(--text-secondary);
   margin: 0 0 4px;
 }
 
 .section-desc {
   font-size: 0.8rem;
-  color: rgba(0,0,0,0.4);
+  color: var(--text-muted);
   margin: 0 0 16px;
 }
 
@@ -47,7 +50,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 14px 16px;
-  background: #f9f9f9;
+  background: var(--bg-surface-alt);
   border-radius: 6px;
   gap: 16px;
 }
@@ -69,13 +72,13 @@
   margin: 0 0 2px;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #222;
+  color: var(--text-primary);
 }
 
 .pref-hint {
   margin: 0;
   font-size: 0.78rem;
-  color: rgba(0,0,0,0.4);
+  color: var(--text-muted);
 }
 
 /* ── Toggle switch ──────────────────────────────── */
@@ -112,7 +115,7 @@
 
 .saving-hint {
   font-size: 0.8rem;
-  color: rgba(0,0,0,0.4);
+  color: var(--text-muted);
   text-align: center;
   margin-top: 20px;
 }

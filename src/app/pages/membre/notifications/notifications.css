@@ -16,7 +16,10 @@
 .page-title {
   font-size: 1.5rem;
   font-weight: 300;
-  color: #1a1a1a;
+  color: var(--text-accent);
+  border-bottom: 3px solid #ffb300;
+  padding-bottom: 8px;
+  display: inline-block;
   margin: 0;
 }
 
@@ -24,15 +27,15 @@
 
 .btn-action {
   padding: 6px 14px;
-  border: 1px solid rgba(0,0,0,0.2);
+  border: 1px solid var(--border-strong);
   border-radius: 4px;
-  background: white;
+  background: var(--bg-surface);
   font-size: 0.8rem;
   cursor: pointer;
-  color: #444;
+  color: var(--text-secondary);
   transition: background 0.15s;
 }
-.btn-action:hover { background: #f0f0f0; }
+.btn-action:hover { background: var(--bg-surface-raised); }
 .btn-action.btn-danger { border-color: #e53935; color: #e53935; }
 .btn-action.btn-danger:hover { background: #ffebee; }
 
@@ -46,14 +49,14 @@
   gap: 12px;
   padding: 14px 16px;
   border-radius: 6px;
-  background: #f9f9f9;
-  border: 1px solid #ececec;
+  background: var(--bg-surface-alt);
+  border: 1px solid var(--border-medium);
   cursor: pointer;
   transition: background 0.15s;
   position: relative;
 }
-.notif-item:hover { background: #f0f0f0; }
-.notif-item.unread { background: #eef4ff; border-color: #c5d8f5; }
+.notif-item:hover { background: var(--bg-surface-raised); }
+.notif-item.unread { background: var(--notif-unread-bg); border-color: #c5d8f5; }
 .notif-item.unread:hover { background: #e4eeff; }
 
 .notif-type-icon {
@@ -67,13 +70,13 @@
 .notif-message {
   margin: 0 0 4px;
   font-size: 0.875rem;
-  color: #222;
+  color: var(--text-primary);
   line-height: 1.45;
 }
 
 .notif-date {
   font-size: 0.75rem;
-  color: rgba(0,0,0,0.55);
+  color: var(--text-secondary);
 }
 
 .unread-dot {
@@ -92,7 +95,7 @@
   font-size: 0.85rem;
   padding: 2px 4px;
   border-radius: 3px;
-  color: rgba(0,0,0,0.3);
+  color: var(--text-hint);
   flex-shrink: 0;
   transition: color 0.15s;
 }
@@ -103,7 +106,7 @@
 .empty-state {
   text-align: center;
   padding: 60px 0;
-  color: rgba(0,0,0,0.35);
+  color: var(--text-hint);
 }
 .empty-icon { font-size: 2.5rem; display: block; margin-bottom: 12px; }
 .empty-msg { margin: 0; font-size: 0.95rem; }

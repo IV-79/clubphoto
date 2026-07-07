@@ -14,7 +14,7 @@
 .admin-title {
   font-size: 1.8rem;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--text-primary);
   margin: 0;
   padding-bottom: 12px;
   border-bottom: 3px solid #cc0000;
@@ -98,7 +98,7 @@
 }
 
 .count {
-  color: #666;
+  color: var(--text-secondary);
   font-size: 0.875rem;
   white-space: nowrap;
 }
@@ -116,7 +116,7 @@
 
 .cell-date {
   white-space: nowrap;
-  color: #555;
+  color: var(--text-secondary);
 }
 
 .cell-email {
@@ -148,20 +148,20 @@
 .storage-cell {
   cursor: default;
   font-variant-numeric: tabular-nums;
-  color: #444;
+  color: var(--text-secondary);
 }
 
 .prenom {
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .suspended-name {
   text-decoration: line-through;
-  color: #999;
+  color: var(--text-muted);
 }
 
 .row-suspended {
-  background: #fafafa;
+  background: var(--bg-surface-alt);
   opacity: 0.75;
 }
 
@@ -204,11 +204,11 @@ mat-chip.membre {
 
 .role-select-admin        { background: rgba(204,0,0,0.08);   color: #cc0000; }
 .role-select-contributeur { background: rgba(21,128,61,0.08); color: #15803d; }
-.role-select-membre       { background: rgba(0,0,0,0.05);     color: rgba(0,0,0,0.5); }
+.role-select-membre       { background: rgba(0,0,0,0.10);     color: var(--text-secondary); }
 
 .self-label {
   font-size: 0.8rem;
-  color: #999;
+  color: var(--text-muted);
   font-style: italic;
 }
 
@@ -225,7 +225,7 @@ mat-chip.membre {
   flex-direction: column;
   align-items: center;
   padding: 48px;
-  color: #999;
+  color: var(--text-muted);
 }
 
 .empty-state mat-icon {

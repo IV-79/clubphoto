@@ -93,6 +93,11 @@
 
       <!-- Actions droite -->
       <div class="nav-actions">
+        <!-- Toggle dark/light — toujours visible -->
+        <button class="theme-toggle-btn" (click)="darkMode.toggle()" [title]="darkMode.isDark() ? 'Mode clair' : 'Mode sombre'">
+          <mat-icon>{{ darkMode.isDark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+        </button>
+
         @if (isLoggedIn$ | async) {
 
           <!-- Cloche notifications -->
@@ -206,6 +211,7 @@
             }
           </div>
         }
+
         @if (!(isLoggedIn$ | async)) {
           <button (click)="openLogin()" class="login-btn">Connexion</button>
         }
@@ -213,6 +219,9 @@
 
       <!-- Groupe cloche + burger (mobile) -->
       <div class="mobile-right">
+        <button class="theme-toggle-btn" (click)="darkMode.toggle()" [title]="darkMode.isDark() ? 'Mode clair' : 'Mode sombre'">
+          <mat-icon>{{ darkMode.isDark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+        </button>
         @if (isLoggedIn$ | async) {
           <div class="has-dropdown">
             <button class="mobile-notif-btn" (click)="toggleMenu('notifs', $event)" [class.has-unread]="unreadCount() > 0" title="Notifications">

@@ -7,6 +7,7 @@ import { switchMap, map, of } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { LoginModalService } from '../../services/login-modal.service';
 import { NotificationService } from '../../services/notification.service';
+import { DarkModeService } from '../../services/dark-mode.service';
 import { AppNotification, NOTIF_ICONS } from '../../models/notification.model';
 
 @Component({
@@ -20,6 +21,7 @@ export class Header {
   private notifService = inject(NotificationService);
   private router       = inject(Router);
   private loginModal   = inject(LoginModalService);
+  readonly darkMode    = inject(DarkModeService);
 
   // Desktop dropdowns
   openMenu = signal<string | null>(null);

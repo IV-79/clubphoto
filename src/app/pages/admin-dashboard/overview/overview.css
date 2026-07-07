@@ -7,7 +7,7 @@
 .admin-title {
   font-size: 1.8rem;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--text-primary);
   margin: 0 0 32px;
   padding-bottom: 12px;
   border-bottom: 3px solid #cc0000;
@@ -36,10 +36,10 @@
   padding: 10px;
 }
 
-.stat-icon.members  { color: #1565c0; background: #e3f2fd; }
-.stat-icon.galleries { color: #6a1b9a; background: #f3e5f5; }
-.stat-icon.events   { color: #2e7d32; background: #e8f5e9; }
-.stat-icon.articles { color: #e65100; background: #fff3e0; }
+.stat-icon.members   { color: #1565c0; background: rgba(21,101,192,0.12); }
+.stat-icon.galleries { color: #6a1b9a; background: rgba(106,27,154,0.12); }
+.stat-icon.events    { color: #2e7d32; background: rgba(46,125,50,0.12); }
+.stat-icon.articles  { color: #e65100; background: rgba(230,81,0,0.12); }
 
 .stat-value {
   font-size: 2rem;
@@ -49,6 +49,6 @@
 
 .stat-label {
   font-size: 0.875rem;
-  color: #666;
+  color: var(--text-secondary);
   margin-top: 4px;
 }

@@ -5,7 +5,7 @@
   display: block;
   font-size: 0.74rem;
   font-weight: 500;
-  color: rgba(0,0,0,0.72);
+  color: var(--text-secondary);
   margin-bottom: 5px;
   letter-spacing: 0.015em;
   user-select: none;
@@ -17,36 +17,36 @@
   display: flex;
   align-items: center;
   height: var(--dp-field-height, 56px);
-  border: 1.5px solid rgba(0,0,0,0.28);
+  border: 1.5px solid var(--border-strong);
   border-radius: 6px;
   padding: 0 var(--dp-field-px, 14px);
   cursor: pointer;
-  background: #fff;
+  background: var(--bg-input);
   gap: 10px;
   transition: border-color 0.15s, box-shadow 0.15s;
   user-select: none;
   box-sizing: border-box;
 }
-.dp-field:hover { border-color: rgba(0,0,0,0.68); }
+.dp-field:hover { border-color: var(--text-primary); }
 .dp-field.dp-field-open {
   border-color: #cc0000;
   border-width: 2px;
   box-shadow: 0 0 0 3px rgba(204,0,0,0.09);
 }
 
-.dp-text { flex: 1; font-size: var(--dp-field-font, 1rem); color: #1a1a1a; }
-.dp-empty { color: rgba(0,0,0,0.38); }
+.dp-text { flex: 1; font-size: var(--dp-field-font, 1rem); color: var(--text-primary); }
+.dp-empty { color: var(--text-hint); }
 
 .dp-icon {
   width: 18px; height: 18px;
-  color: rgba(0,0,0,0.42);
+  color: var(--text-muted);
   flex-shrink: 0;
 }
 
 /* Disabled */
 .dp-disabled .dp-field {
-  background: #f5f5f5;
-  border-color: rgba(0,0,0,0.15);
+  background: var(--bg-surface-raised);
+  border-color: var(--border-medium);
   cursor: default;
   opacity: 0.65;
 }
@@ -57,10 +57,10 @@
   top: calc(100% + 5px);
   left: 0;
   z-index: 1200;
-  background: #fff;
+  background: var(--bg-surface);
   border-radius: 12px;
   box-shadow: 0 12px 40px rgba(0,0,0,0.14), 0 3px 10px rgba(0,0,0,0.08);
-  border: 1px solid rgba(0,0,0,0.07);
+  border: 1px solid var(--border);
   padding: 14px 12px 12px;
   width: 285px;
   animation: dp-in 0.14s ease;
@@ -88,25 +88,25 @@
 .dp-nav {
   background: none; border: none; cursor: pointer;
   width: 30px; height: 30px; border-radius: 50%;
-  font-size: 1.5rem; color: #555; line-height: 1;
+  font-size: 1.5rem; color: var(--text-secondary); line-height: 1;
   display: flex; align-items: center; justify-content: center;
   transition: background 0.12s;
   flex-shrink: 0;
   padding: 0;
 }
-.dp-nav:hover { background: #f0f0f0; }
+.dp-nav:hover { background: var(--bg-surface-raised); }
 
 .dp-nav-label {
   background: none; border: none; cursor: pointer;
-  font-size: 0.88rem; font-weight: 700; color: #1a1a1a;
+  font-size: 0.88rem; font-weight: 700; color: var(--text-primary);
   padding: 5px 7px; border-radius: 6px;
   transition: background 0.12s;
   line-height: 1.2;
 }
-.dp-nav-label:hover { background: #f5f5f5; }
+.dp-nav-label:hover { background: var(--bg-surface-raised); }
 
 .dp-range-label {
-  font-size: 0.88rem; font-weight: 700; color: #1a1a1a;
+  font-size: 0.88rem; font-weight: 700; color: var(--text-primary);
   padding: 5px 0;
 }
 
@@ -120,7 +120,7 @@
   text-align: center;
   font-size: 0.64rem;
   font-weight: 700;
-  color: rgba(0,0,0,0.38);
+  color: var(--text-hint);
   padding: 2px 0 4px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -140,17 +140,17 @@
   border: none; background: none; cursor: pointer;
   border-radius: 50%;
   font-size: 0.8rem;
-  color: #1a1a1a;
+  color: var(--text-primary);
   display: flex; align-items: center; justify-content: center;
   transition: background 0.1s, color 0.1s;
   position: relative;
   padding: 0;
 }
-.dp-day:hover:not(:disabled):not(.dp-sel) { background: #f0f0f0; }
+.dp-day:hover:not(:disabled):not(.dp-sel) { background: var(--bg-surface-raised); }
 .dp-day:disabled { opacity: 0.28; cursor: default; }
 
 /* Other-month days */
-.dp-other { color: rgba(0,0,0,0.27); }
+.dp-other { color: var(--text-hint); }
 
 /* Weekend days (Sat & Sun) */
 .dp-wknd:not(.dp-sel):not(.dp-other) { color: #b83232; }
@@ -182,10 +182,10 @@
 .dp-month-cell {
   background: none; border: none; cursor: pointer;
   padding: 11px 6px; border-radius: 8px;
-  font-size: 0.84rem; color: #1a1a1a;
+  font-size: 0.84rem; color: var(--text-primary);
   text-align: center; transition: background 0.12s;
 }
-.dp-month-cell:hover { background: #f0f0f0; }
+.dp-month-cell:hover { background: var(--bg-surface-raised); }
 
 /* ── Year grid ──────────────────────────────────── */
 .dp-years-grid {
@@ -198,10 +198,10 @@
 .dp-year-cell {
   background: none; border: none; cursor: pointer;
   padding: 11px 4px; border-radius: 8px;
-  font-size: 0.84rem; color: #1a1a1a;
+  font-size: 0.84rem; color: var(--text-primary);
   text-align: center; transition: background 0.12s;
 }
-.dp-year-cell:hover { background: #f0f0f0; }
+.dp-year-cell:hover { background: var(--bg-surface-raised); }
 
 /* Shared selected state for month/year cells */
 .dp-cell-sel {
