@@ -83,7 +83,7 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #1565c0;
+  background: var(--c-blue);
   flex-shrink: 0;
   margin-top: 6px;
 }

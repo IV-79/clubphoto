@@ -1,7 +1,14 @@
 .calendrier-page {
-  max-width: 860px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 48px 32px 64px;
+}
+
+/* Contenu listé — contraindre à 780px pour rester lisible dans la zone gauche */
+.filtres,
+.membres-note,
+.section {
+  max-width: 780px;
 }
 
 .page-header { margin-bottom: 32px; }
@@ -68,7 +75,7 @@
   border: none;
   padding: 0;
   font-size: inherit;
-  color: #1976d2;
+  color: var(--c-blue);
   cursor: pointer;
   text-decoration: underline;
 }
@@ -184,14 +191,14 @@
   border-radius: 10px;
 }
 
-.badge-reunion  { background: rgba(25,118,210,0.1);  color: #1565c0; }
-.badge-sortie   { background: rgba(245,124,0,0.12); color: #e65100; }
-.badge-passe    { background: rgba(0,0,0,0.10);     color: var(--text-muted); }
-.badge-oneshot  { background: rgba(126,87,194,0.1); color: #6a3fb5; }
+.badge-reunion  { background: var(--c-blue-bg);   color: var(--c-blue); }
+.badge-sortie   { background: var(--c-orange-bg); color: var(--c-orange); }
+.badge-passe    { background: var(--border-medium); color: var(--text-muted); }
+.badge-oneshot  { background: var(--c-violet-bg); color: var(--c-violet); }
 
 .card-titre { margin: 0; font-size: 1rem; font-weight: 500; color: var(--text-primary); }
 .card-lieu  { font-size: 0.82rem; color: var(--text-muted); text-decoration: none; }
-a.card-lieu:hover { color: #1565c0; text-decoration: underline; }
+a.card-lieu:hover { color: var(--c-blue); text-decoration: underline; }
 
 .card-desc {
   margin: 4px 0 0;
@@ -226,10 +233,10 @@ a.card-lieu:hover { color: #1565c0; text-decoration: underline; }
   border-radius: 10px;
 }
 
-.os-statut-inscription            { background: rgba(0,150,0,0.1);    color: #007700; }
-.os-statut-fermeture_inscriptions { background: rgba(200,100,0,0.1);  color: #b05000; }
-.os-statut-vote                   { background: rgba(80,120,220,0.1); color: #3060cc; }
-.os-statut-resultats              { background: rgba(180,140,0,0.1);  color: #907000; }
+.os-statut-inscription            { background: var(--c-green-bg);  color: var(--c-green); }
+.os-statut-fermeture_inscriptions { background: var(--c-orange-bg); color: var(--c-orange); }
+.os-statut-vote                   { background: var(--c-blue-bg);   color: var(--c-blue); }
+.os-statut-resultats              { background: var(--c-amber-bg);  color: var(--c-amber); }
 
 .os-createur { font-size: 0.78rem; color: var(--text-muted); }
 
@@ -241,7 +248,7 @@ a.card-lieu:hover { color: #1565c0; text-decoration: underline; }
   flex-shrink: 0;
 }
 
-.os-inscrit-label { font-size: 0.8rem; color: #007700; font-weight: 500; }
+.os-inscrit-label { font-size: 0.8rem; color: var(--c-green); font-weight: 500; }
 
 .btn-os-inscrire {
   background: #1a1a1a;

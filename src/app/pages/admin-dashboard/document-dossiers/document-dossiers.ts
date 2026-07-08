@@ -74,25 +74,25 @@ import { DocumentDossier } from '../../../models/document.model';
     </div>
   `,
   styles: [`
-    .page-wrap { max-width: 600px; margin: 0 auto; padding: 24px 16px; }
-    .page-title { margin: 0 0 4px; font-size: 1.4rem; font-weight: 600; }
-    .page-sub { margin: 0 0 24px; color: #666; font-size: .9rem; }
+    .page-wrap { max-width: 600px; padding: 24px 16px; }
+    .page-title { font-size: 2rem; font-weight: 300; letter-spacing: 1px; color: var(--text-accent); padding-bottom: 8px; border-bottom: 3px solid #ffb300; display: inline-block; margin: 0 0 4px; }
+    .page-sub { margin: 0 0 24px; color: var(--text-secondary); font-size: .9rem; }
     .add-form { display: flex; gap: 12px; align-items: center; margin-bottom: 24px; }
     .add-form mat-form-field { flex: 1; }
     .dossier-list { display: flex; flex-direction: column; gap: 4px; }
     .dossier-row {
       display: flex; align-items: center; gap: 10px;
-      background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 8px 12px;
+      background: var(--bg-surface); border: 1px solid var(--border-medium); border-radius: 8px; padding: 8px 12px;
     }
     .dossier-ordre {
-      width: 24px; height: 24px; border-radius: 50%; background: #e3f0ff; color: #1976d2;
+      width: 24px; height: 24px; border-radius: 50%; background: var(--c-blue-bg); color: var(--c-blue);
       font-size: .75rem; font-weight: 700; display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
     }
-    .dossier-nom { flex: 1; font-weight: 500; }
+    .dossier-nom { flex: 1; font-weight: 500; color: var(--text-primary); }
     .dossier-actions { display: flex; gap: 0; }
     .edit-field { flex: 1; }
-    .empty { color: #aaa; text-align: center; padding: 24px 0; }
+    .empty { color: var(--text-muted); text-align: center; padding: 24px 0; }
   `]
 })
 export class DocumentDossiers {

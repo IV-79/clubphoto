@@ -18,15 +18,15 @@
 }
 .event-card:hover {
   transform: translateY(-2px);
-  border-color: #ccc;
+  border-color: var(--border-strong);
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
-.event-card-oneshot { border-color: rgba(46,125,90,0.25); }
-.event-card-oneshot:hover { border-color: rgba(46,125,90,0.5); }
+.event-card-oneshot { border-color: var(--c-teal-bd); }
+.event-card-oneshot:hover { border-color: var(--c-teal); }
 
-.event-card-defi { border-color: rgba(217,119,6,0.25); }
-.event-card-defi:hover { border-color: rgba(217,119,6,0.5); }
+.event-card-defi { border-color: var(--c-amber-bd); }
+.event-card-defi:hover { border-color: var(--c-amber); }
 
 /* Cover 16:9 */
 .card-cover {
@@ -63,7 +63,7 @@
   position: absolute;
   top: 0.6rem;
   right: 0.6rem;
-  background: rgba(255,255,255,0.88);
+  background: var(--card-status-bg);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   box-shadow: 0 1px 4px rgba(0,0,0,0.12);
@@ -82,17 +82,17 @@
   flex-shrink: 0;
 }
 
-.status-avenir              { background: rgba(76,175,80,0.12);  color: #2e7d32; }
-.status-bientot             { background: rgba(245,158,11,0.12); color: #d97706; }
-.status-encours             { background: rgba(22,163,74,0.15);  color: #15803d; }
-.status-passee              { background: rgba(0,0,0,0.10);       color: var(--text-muted); }
-.status-oneshot-inscription { background: rgba(76,175,80,0.12);  color: #2e7d32; }
-.status-oneshot-fermee      { background: rgba(255,152,0,0.14);  color: #e65100; }
-.status-oneshot-vote        { background: rgba(103,58,183,0.12); color: #4527a0; }
-.status-preparation         { background: rgba(103,58,183,0.10); color: #5e35b1; }
-.status-defi-avenir         { background: rgba(245,158,11,0.12); color: #d97706; }
-.status-defi-soumission     { background: rgba(76,175,80,0.12);  color: #2e7d32; }
-.status-defi-vote           { background: rgba(139,92,246,0.12); color: #6d28d9; }
+.status-avenir              { background: var(--c-green-bg);  color: var(--c-green); }
+.status-bientot             { background: var(--c-amber-bg);  color: var(--c-amber); }
+.status-encours             { background: var(--c-green-bg);  color: var(--c-green); }
+.status-passee              { background: var(--border-medium); color: var(--text-secondary); }
+.status-oneshot-inscription { background: var(--c-green-bg);  color: var(--c-green); }
+.status-oneshot-fermee      { background: var(--c-orange-bg); color: var(--c-orange); }
+.status-oneshot-vote        { background: var(--c-violet-bg); color: var(--c-violet); }
+.status-preparation         { background: var(--c-violet-bg); color: var(--c-violet); }
+.status-defi-avenir         { background: var(--c-amber-bg);  color: var(--c-amber); }
+.status-defi-soumission     { background: var(--c-green-bg);  color: var(--c-green); }
+.status-defi-vote           { background: var(--c-violet-bg); color: var(--c-violet); }
 
 /* Infos */
 .card-info {
@@ -118,9 +118,9 @@
   white-space: nowrap;
 }
 
-.badge-sortie       { background: rgba(61,90,128,0.1);   border: 1px solid rgba(61,90,128,0.25);  color: #3d5a80; border-radius: 4px; padding: 0.2rem 0.5rem; }
-.badge-oneshot-type { background: rgba(46,125,90,0.1);   border: 1px solid rgba(46,125,90,0.25); color: #2e7d5a; border-radius: 4px; padding: 0.2rem 0.5rem; }
-.badge-defi-type    { background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.3); color: #d97706; border-radius: 4px; padding: 0.2rem 0.5rem; }
+.badge-sortie       { background: var(--c-blue-bg);  border: 1px solid var(--c-blue-bd);  color: var(--c-blue);  border-radius: 4px; padding: 0.2rem 0.5rem; }
+.badge-oneshot-type { background: var(--c-teal-bg);  border: 1px solid var(--c-teal-bd);  color: var(--c-teal);  border-radius: 4px; padding: 0.2rem 0.5rem; }
+.badge-defi-type    { background: var(--c-amber-bg); border: 1px solid var(--c-amber-bd); color: var(--c-amber); border-radius: 4px; padding: 0.2rem 0.5rem; }
 
 /* Titre + organisateur sur la même ligne */
 .card-titre-org {
@@ -164,7 +164,7 @@
 
 .meta-lieu {
   font-size: 0.8rem;
-  color: #1565c0;
+  color: var(--c-blue);
   text-decoration: none;
 }
 .meta-lieu:hover { text-decoration: underline; }
@@ -195,21 +195,21 @@
 }
 
 .badge-inscription {
-  background: rgba(103,58,183,0.08);
-  border: 1px solid rgba(103,58,183,0.25);
-  color: #5e35b1;
+  background: var(--c-violet-bg);
+  border: 1px solid var(--c-violet-bd);
+  color: var(--c-violet);
 }
 
-.badge-oneshot {
-  background: rgba(46,125,90,0.08);
-  border: 1px solid rgba(46,125,90,0.25);
-  color: #2e7d5a;
+.badge-oneshot-count {
+  background: var(--c-teal-bg);
+  border: 1px solid var(--c-teal-bd);
+  color: var(--c-teal);
 }
 
 .badge-defi {
-  background: rgba(217,119,6,0.08);
-  border: 1px solid rgba(217,119,6,0.25);
-  color: #d97706;
+  background: var(--c-amber-bg);
+  border: 1px solid var(--c-amber-bd);
+  color: var(--c-amber);
   max-width: 180px;
   overflow: hidden;
   text-overflow: ellipsis;

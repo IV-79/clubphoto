@@ -51,12 +51,13 @@ import { Article, ArticleType, ARTICLE_TYPES } from '../../models/article.model'
     }
   `,
   styles: [`
-    .page-wrap { max-width: 1100px; margin: 40px auto; padding: 0 24px; }
+    .page-wrap { max-width: 1200px; margin: 40px auto; padding: 0 32px; }
     .page-header {
       display: flex; align-items: center; justify-content: space-between;
       margin-bottom: 28px; gap: 16px;
     }
     .page-title {
+      font-size: 2rem; font-weight: 300; letter-spacing: 1px;
       color: var(--text-accent); border-bottom: 3px solid #ffb300;
       padding-bottom: 8px; display: inline-block; margin: 0;
     }

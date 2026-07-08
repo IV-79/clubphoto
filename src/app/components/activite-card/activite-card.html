@@ -47,8 +47,8 @@
           }
           @case ('oneshot') {
             @let os = oneshot()!;
-            <span class="badge badge-oneshot">{{ os.nbThemes ?? 0 }} thème(s)</span>
-            <span class="badge badge-oneshot">{{ os.nbInscrits ?? 0 }} inscrit(s)</span>
+            <span class="badge badge-oneshot-count">{{ os.nbThemes ?? 0 }} thème(s)</span>
+            <span class="badge badge-oneshot-count">{{ os.nbInscrits ?? 0 }} inscrit(s)</span>
           }
           @case ('defi') {
             @let d = defi()!;

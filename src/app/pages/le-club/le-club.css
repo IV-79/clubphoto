@@ -1,15 +1,16 @@
 .club-page-wrap {
-  max-width: 860px;
+  max-width: 1200px;
   margin: 40px auto;
-  padding: 0 24px 60px;
+  padding: 0 32px 60px;
 }
 
 .club-page-title {
   font-size: 1.8rem;
-  font-weight: 700;
+  font-weight: 300;
+  letter-spacing: 1px;
   color: var(--text-accent);
   border-bottom: 3px solid #ffb300;
-  padding-bottom: 10px;
+  padding-bottom: 8px;
   display: inline-block;
   margin-bottom: 32px;
 }
@@ -21,6 +22,7 @@
 
 /* Rendu Markdown */
 .club-md-content {
+  max-width: 780px;
   line-height: 1.75;
   color: var(--text-primary);
   font-size: 1rem;

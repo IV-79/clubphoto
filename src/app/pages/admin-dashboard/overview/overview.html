@@ -1,53 +1,217 @@
 <div class="admin-page">
-  <h2 class="admin-title">Tableau de bord</h2>
 
-  <div class="stats-grid">
-    <mat-card class="stat-card">
-      <mat-card-content>
-        <div class="stat-row">
-          <mat-icon class="stat-icon members">group</mat-icon>
-          <div>
-            <div class="stat-value">0</div>
-            <div class="stat-label">Membres</div>
-          </div>
-        </div>
-      </mat-card-content>
-    </mat-card>
-
-    <mat-card class="stat-card">
-      <mat-card-content>
-        <div class="stat-row">
-          <mat-icon class="stat-icon galleries">photo_library</mat-icon>
-          <div>
-            <div class="stat-value">0</div>
-            <div class="stat-label">Galeries</div>
-          </div>
-        </div>
-      </mat-card-content>
-    </mat-card>
-
-    <mat-card class="stat-card">
-      <mat-card-content>
-        <div class="stat-row">
-          <mat-icon class="stat-icon events">event</mat-icon>
-          <div>
-            <div class="stat-value">0</div>
-            <div class="stat-label">Événements</div>
-          </div>
-        </div>
-      </mat-card-content>
-    </mat-card>
-
-    <mat-card class="stat-card">
-      <mat-card-content>
-        <div class="stat-row">
-          <mat-icon class="stat-icon articles">article</mat-icon>
-          <div>
-            <div class="stat-value">0</div>
-            <div class="stat-label">Articles</div>
-          </div>
-        </div>
-      </mat-card-content>
-    </mat-card>
+  <!-- En-tête -->
+  <div class="db-header">
+    <h2 class="admin-title">Tableau de bord</h2>
+    <button mat-stroked-button (click)="load()" [disabled]="loading()">
+      <mat-icon>refresh</mat-icon> Actualiser
+    </button>
   </div>
+
+  <!-- Chargement -->
+  @if (loading()) {
+    <div class="db-loading">
+      <mat-icon class="spin-icon">autorenew</mat-icon>
+      Chargement des données...
+    </div>
+  }
+
+  <!-- Erreur -->
+  @if (!loading() && hasError()) {
+    <div class="db-error">
+      <mat-icon>error_outline</mat-icon>
+      <span>Erreur de chargement.</span>
+      <button mat-button color="primary" (click)="load()">Réessayer</button>
+    </div>
+  }
+
+  @if (!loading() && !hasError()) {
+
+    <!-- ── KPI ─────────────────────────────────────────── -->
+    <div class="kpi-grid">
+
+      <!-- Membres -->
+      <mat-card class="db-card kpi-card">
+        <mat-card-content class="kpi-body">
+          <div class="kpi-icon-wrap members"><mat-icon>group</mat-icon></div>
+          <div class="kpi-num">{{ totalMembres() }}</div>
+          <div class="kpi-lbl">Membres</div>
+          <div class="kpi-chips">
+            @if (roleBreakdown().admin > 0) {
+              <span class="chip chip-admin">{{ roleBreakdown().admin }} admin</span>
+            }
+            @if (roleBreakdown().contributeur > 0) {
+              <span class="chip chip-contrib">{{ roleBreakdown().contributeur }} contrib.</span>
+            }
+            @if (suspendus() > 0) {
+              <span class="chip chip-sus">{{ suspendus() }} suspendu{{ suspendus() > 1 ? 's' : '' }}</span>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Actifs -->
+      <mat-card class="db-card kpi-card">
+        <mat-card-content class="kpi-body">
+          <div class="kpi-icon-wrap active"><mat-icon>person_check</mat-icon></div>
+          <div class="kpi-num">{{ membresActifs() }}</div>
+          <div class="kpi-lbl">Actifs ce mois</div>
+          <div class="kpi-progress">
+            <div class="kpi-bar">
+              <div class="kpi-bar-fill" [style.width.%]="activePct()"></div>
+            </div>
+            <span class="kpi-pct">{{ activePct() }}%</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Événements -->
+      <mat-card class="db-card kpi-card">
+        <mat-card-content class="kpi-body">
+          <div class="kpi-icon-wrap events"><mat-icon>photo_camera</mat-icon></div>
+          <div class="kpi-num">{{ totalSorties() }}</div>
+          <div class="kpi-lbl">Sorties & événements</div>
+          <div class="kpi-sub">
+            @if (agendaItems().length > 0) {
+              <span class="kpi-upcoming">{{ agendaItems().length }} à venir (30 j.)</span>
+            } @else {
+              <span class="kpi-hint">aucun dans les 30 j.</span>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Articles -->
+      <mat-card class="db-card kpi-card">
+        <mat-card-content class="kpi-body">
+          <div class="kpi-icon-wrap articles"><mat-icon>article</mat-icon></div>
+          <div class="kpi-num">{{ totalArticles() }}</div>
+          <div class="kpi-lbl">Articles publiés</div>
+          <div class="kpi-sub">
+            <span class="kpi-hint">actualités en ligne</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+    </div>
+
+    <!-- ── Stockage ────────────────────────────────────── -->
+    <div class="storage-section">
+
+      <!-- Barres par catégorie -->
+      <mat-card class="db-card">
+        <mat-card-content>
+          <div class="section-lbl">Stockage utilisé</div>
+          <div class="storage-total-val">{{ formatBytes(storageTotal()) }}</div>
+          <div class="storage-list">
+            @for (item of storageItems(); track item.label) {
+              <div class="s-row">
+                <div class="s-label">
+                  <span class="s-dot" [style.background]="item.color"></span>
+                  {{ item.label }}
+                </div>
+                <div class="s-track">
+                  <div class="s-fill" [style.width.%]="item.pct" [style.background]="item.color"></div>
+                </div>
+                <span class="s-bytes">{{ formatBytes(item.bytes) }}</span>
+                <span class="s-pct">{{ item.pct }}%</span>
+              </div>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Donut -->
+      <mat-card class="db-card donut-card">
+        <mat-card-content>
+          <div class="section-lbl">Répartition</div>
+          <div class="donut-layout">
+            <div class="donut" [style.background]="donutGradient()">
+              <div class="donut-hole">
+                <span class="donut-hole-val">{{ formatBytes(storageTotal()) }}</span>
+                <span class="donut-hole-sub">total</span>
+              </div>
+            </div>
+            <div class="donut-legend">
+              @for (item of storageItems(); track item.label) {
+                <div class="legend-row">
+                  <span class="s-dot" [style.background]="item.color"></span>
+                  <span class="legend-lbl">{{ item.label }}</span>
+                  <span class="legend-pct">{{ item.pct }}%</span>
+                </div>
+              }
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+    </div>
+
+    <!-- ── Top membres ─────────────────────────────────── -->
+    @if (topMembers().length > 0) {
+      <mat-card class="db-card">
+        <mat-card-content>
+          <div class="section-lbl">Top membres — stockage utilisé</div>
+          <div class="bar-list">
+            @for (m of topMembers(); track m.nom) {
+              <div class="bar-row">
+                <span class="bar-name">{{ m.nom }}</span>
+                <div class="bar-track">
+                  <div class="bar-fill" [style.width.%]="barWidth(m.total)"></div>
+                </div>
+                <span class="bar-val">{{ formatBytes(m.total) }}</span>
+              </div>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <!-- ── Agenda à venir ──────────────────────────────── -->
+    <mat-card class="db-card">
+      <mat-card-content>
+        <div class="section-lbl">
+          Événements à venir
+          @if (agendaItems().length > 0) {
+            <span class="section-count">{{ agendaItems().length }}</span>
+          }
+        </div>
+
+        @if (agendaItems().length === 0) {
+          <p class="empty-msg">Aucun événement dans les 30 prochains jours.</p>
+        } @else {
+          <div class="agenda-list">
+            @for (ev of agendaItems(); track ev.date + ev.titre) {
+              <div class="agenda-item">
+
+                <div class="agenda-date">
+                  <span class="agenda-day">{{ dayNum(ev.date) }}</span>
+                  <span class="agenda-month">{{ monthStr(ev.date) }}</span>
+                </div>
+
+                <div class="agenda-icon" [style.background]="eventBg(ev.type)">
+                  <mat-icon [style.color]="eventColor(ev.type)">{{ eventIcon(ev.type) }}</mat-icon>
+                </div>
+
+                <div class="agenda-body">
+                  <div class="agenda-titre">{{ ev.titre }}</div>
+                  <div class="agenda-meta">
+                    <span class="agenda-type" [style.color]="eventColor(ev.type)">{{ eventLabel(ev.type) }}</span>
+                    @if (ev.lieu) {
+                      <span class="agenda-lieu"> · {{ ev.lieu }}</span>
+                    }
+                  </div>
+                </div>
+
+                <span class="agenda-wday">{{ weekStr(ev.date) }}.</span>
+
+              </div>
+            }
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+
+  }
+
 </div>

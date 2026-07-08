@@ -38,10 +38,10 @@
   margin-bottom: 10px;
 }
 
-.statut-en_attente { background: rgba(0,0,0,0.10);       color: var(--text-muted); }
-.statut-ouvert     { background: rgba(76,175,80,0.12);   color: #2e7d32; }
-.statut-vote       { background: rgba(33,150,243,0.12);  color: #1565c0; }
-.statut-resultats  { background: rgba(255,152,0,0.14);   color: #e65100; }
+.statut-en_attente { background: var(--border-medium);  color: var(--text-muted); }
+.statut-ouvert     { background: var(--c-green-bg);     color: var(--c-green); }
+.statut-vote       { background: var(--c-blue-bg);      color: var(--c-blue); }
+.statut-resultats  { background: var(--c-orange-bg);    color: var(--c-orange); }
 
 .theme-titre {
   font-size: 2rem;

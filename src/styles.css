@@ -5,6 +5,31 @@
 
 /* ── Tokens light (défaut) ── */
 :root {
+  /* Palette sémantique — auto-switch light ↔ dark via html[data-theme="dark"] */
+  --card-status-bg: rgba(255,255,255,0.88); /* pilule statut sur cover image */
+
+  --c-green:     #2e7d32;
+  --c-green-bg:  rgba(46,125,50,0.10);
+  --c-green-bd:  rgba(46,125,50,0.25);
+  --c-blue:      #1565c0;
+  --c-blue-bg:   rgba(21,101,192,0.10);
+  --c-blue-bd:   rgba(21,101,192,0.25);
+  --c-amber:     #d97706;
+  --c-amber-bg:  rgba(217,119,6,0.10);
+  --c-amber-bd:  rgba(217,119,6,0.25);
+  --c-orange:    #e65100;
+  --c-orange-bg: rgba(230,81,0,0.10);
+  --c-orange-bd: rgba(230,81,0,0.25);
+  --c-violet:    #5e35b1;
+  --c-violet-bg: rgba(94,53,177,0.10);
+  --c-violet-bd: rgba(94,53,177,0.25);
+  --c-teal:      #2e7d5a;
+  --c-teal-bg:   rgba(46,125,90,0.10);
+  --c-teal-bd:   rgba(46,125,90,0.25);
+  --c-red:       #c62828;
+  --c-red-bg:    rgba(198,40,40,0.10);
+  --c-red-bd:    rgba(198,40,40,0.25);
+
   --bg-page:            #ffffff;
   --bg-surface:         #ffffff;
   --bg-surface-alt:     #fafafa;
@@ -50,11 +75,41 @@ html[data-theme="dark"] {
   --mat-sys-secondary-container: #1e1a2e;
   --mat-sys-on-secondary-container: #c4b5fd;
   --mat-sys-error:               #f87171;
+  /* Angular Material — surface containers (mat-card, mat-table, mat-dialog…) */
+  --mat-sys-surface-container-lowest: #121212;
+  --mat-sys-surface-container-low:    #1e1e1e;
+  --mdc-elevated-card-container-color: #1e1e1e;
+  --mat-card-elevated-container-color: #1e1e1e;
+  --mat-table-background-color:        #1e1e1e;
   /* Angular Material — select/option panels */
   --mat-select-panel-background-color:          #2a2a2a;
   --mat-option-hover-state-layer-color:         rgba(255,255,255,0.08);
   --mat-option-selected-state-layer-color:      rgba(129,140,248,0.12);
   --mat-option-selected-state-label-text-color: #818cf8;
+  --card-status-bg: rgba(15,15,15,0.75);
+
+  --c-green:     #4ade80;
+  --c-green-bg:  rgba(74,222,128,0.12);
+  --c-green-bd:  rgba(74,222,128,0.22);
+  --c-blue:      #60a5fa;
+  --c-blue-bg:   rgba(96,165,250,0.12);
+  --c-blue-bd:   rgba(96,165,250,0.22);
+  --c-amber:     #fbbf24;
+  --c-amber-bg:  rgba(251,191,36,0.12);
+  --c-amber-bd:  rgba(251,191,36,0.22);
+  --c-orange:    #fb923c;
+  --c-orange-bg: rgba(251,146,60,0.12);
+  --c-orange-bd: rgba(251,146,60,0.22);
+  --c-violet:    #a78bfa;
+  --c-violet-bg: rgba(167,139,250,0.12);
+  --c-violet-bd: rgba(167,139,250,0.22);
+  --c-teal:      #34d399;
+  --c-teal-bg:   rgba(52,211,153,0.12);
+  --c-teal-bd:   rgba(52,211,153,0.22);
+  --c-red:       #f87171;
+  --c-red-bg:    rgba(248,113,113,0.12);
+  --c-red-bd:    rgba(248,113,113,0.22);
+
   --bg-page:            #121212;
   --bg-surface:         #1e1e1e;
   --bg-surface-alt:     #252525;
@@ -89,6 +144,7 @@ html[data-theme="light"] {
 body {
   background: var(--bg-page);
   color: var(--text-primary);
+  overflow-x: hidden; /* évite le scroll horizontal des animations GSAP (translateX ±300px) */
 }
 
 /* Protection images */
@@ -168,98 +224,10 @@ html[data-theme="dark"] .event-hero.has-cover .hero-status {
   backdrop-filter: blur(6px);
 }
 
-/* ── Badges statuts activite-card & event-hero — dark mode ──────────────────
-   ViewEncapsulation.Emulated : ces overrides doivent être globaux.
+
+/* ── Badges dark — gérés par CSS tokens dans les composants ─────────────────
+   Les couleurs de badges/statuts/liens passent désormais par --c-green,
+   --c-blue, --c-amber, --c-orange, --c-violet, --c-teal définis ci-dessus.
+   Seul le role-select-membre reste ici (UI admin, pas de token dédié).
    ─────────────────────────────────────────────────────────────────────────── */
-html[data-theme="dark"] .status-avenir,
-html[data-theme="dark"] .status-encours,
-html[data-theme="dark"] .status-oneshot-inscription,
-html[data-theme="dark"] .status-defi-soumission      { background: rgba(74,222,128,0.12);  color: #4ade80; }
-html[data-theme="dark"] .status-bientot,
-html[data-theme="dark"] .status-oneshot-fermee,
-html[data-theme="dark"] .status-defi-avenir          { background: rgba(251,146,60,0.12);  color: #fb923c; }
-html[data-theme="dark"] .status-photos               { background: rgba(96,165,250,0.12);  color: #60a5fa; }
-html[data-theme="dark"] .status-oneshot-vote,
-html[data-theme="dark"] .status-preparation,
-html[data-theme="dark"] .status-defi-vote            { background: rgba(167,139,250,0.12); color: #a78bfa; }
-html[data-theme="dark"] .status-passee               { background: rgba(255,255,255,0.14); color: var(--text-muted); }
-html[data-theme="dark"] .badge-sortie                { background: rgba(96,165,250,0.10);  border-color: rgba(96,165,250,0.22);  color: #60a5fa; }
-html[data-theme="dark"] .badge-oneshot-type          { background: rgba(52,211,153,0.10);  border-color: rgba(52,211,153,0.22);  color: #34d399; }
-html[data-theme="dark"] .badge-defi-type             { background: rgba(251,146,60,0.10);  border-color: rgba(251,146,60,0.22);  color: #fb923c; }
-
-/* ── Badges "passé / en attente" gris — dark mode ──────────────────────────
-   rgba(0,0,0,0.10) + rgba(0,0,0,0.4) → quasi invisible sur fond sombre.
-   ─────────────────────────────────────────────────────────────────────────── */
-html[data-theme="dark"] .badge-passe,
-html[data-theme="dark"] .statut-en_attente,
-html[data-theme="dark"] .badge-en_attente       { background: rgba(255,255,255,0.10); color: var(--text-muted); }
-html[data-theme="dark"] .role-select-membre     { background: rgba(255,255,255,0.08); color: var(--text-secondary); }
-
-/* ── Calendrier — badges type événement — dark mode ────────────────────────
-   Couleurs hardcodées (#1565c0, #e65100, #6a3fb5) trop sombres sur fond dark.
-   ─────────────────────────────────────────────────────────────────────────── */
-html[data-theme="dark"] .badge-reunion  { background: rgba(96,165,250,0.10);  color: #60a5fa; }
-html[data-theme="dark"] .badge-oneshot  { background: rgba(167,139,250,0.10); color: #a78bfa; }
-
-/* ── Calendrier — statuts OneShot — dark mode ───────────────────────────── */
-html[data-theme="dark"] .os-statut-inscription            { background: rgba(74,222,128,0.10); color: #4ade80; }
-html[data-theme="dark"] .os-statut-fermeture_inscriptions { background: rgba(251,146,60,0.10);  color: #fb923c; }
-html[data-theme="dark"] .os-statut-vote                   { background: rgba(96,165,250,0.10);  color: #60a5fa; }
-html[data-theme="dark"] .os-statut-resultats              { background: rgba(251,191,36,0.10);  color: #fbbf24; }
-
-/* ── Theme-detail + admin/themes — statuts — dark mode ─────────────────── */
-html[data-theme="dark"] .statut-ouvert,
-html[data-theme="dark"] .badge-ouvert    { background: rgba(74,222,128,0.10);  color: #4ade80; }
-html[data-theme="dark"] .statut-vote,
-html[data-theme="dark"] .badge-vote      { background: rgba(96,165,250,0.10);  color: #60a5fa; }
-html[data-theme="dark"] .statut-resultats,
-html[data-theme="dark"] .badge-resultats { background: rgba(251,146,60,0.10);  color: #fb923c; }
-
-/* ── Badges spécifiques pages de détail — dark mode ────────────────────────
-   Même raison : ViewEncapsulation.Emulated scoperait html[data-theme].
-   ─────────────────────────────────────────────────────────────────────────── */
-
-/* sortie-detail + defi-detail : chip "moi" bleu */
-html[data-theme="dark"] .participant-chip.me {
-  color: #60a5fa;
-  border-color: rgba(96,165,250,0.3);
-  background: rgba(96,165,250,0.07);
-}
-
-/* sortie-detail : badge "complet" orange */
-html[data-theme="dark"] .full-badge {
-  color: #fb923c;
-  background: rgba(251,146,60,0.1);
-  border-color: rgba(251,146,60,0.3);
-}
-
-/* defi-detail : label thème amber, badge inscrit vert, votes restants violet */
-html[data-theme="dark"] .defi-theme-label  { color: #fbbf24; }
-html[data-theme="dark"] .inscrit-badge     { color: #4ade80; }
-html[data-theme="dark"] .votes-restants {
-  color: #a78bfa;
-  background: rgba(167,139,250,0.08);
-  border-color: rgba(167,139,250,0.2);
-}
-html[data-theme="dark"] .extend-section {
-  background: rgba(167,139,250,0.05);
-  border-color: rgba(167,139,250,0.15);
-}
-html[data-theme="dark"] .btn-delete { border-color: rgba(204,0,0,0.25); }
-
-/* oneshot-detail : vote cards, voted chip, résultats */
-/* oneshot-detail */
-html[data-theme="dark"] .voted-chip {
-  background: rgba(74,222,128,0.12);
-  color: #4ade80;
-}
-html[data-theme="dark"] .vote-card.selected  { border-color: #4ade80; }
-html[data-theme="dark"] .footer-voted        { color: #4ade80; }
-html[data-theme="dark"] .btn-desinscrire     { color: #4ade80; }
-html[data-theme="dark"] .btn-ok              { color: #4ade80; }
-html[data-theme="dark"] .prog-ratio.prog-complete,
-html[data-theme="dark"] .prog-theme-ratio.prog-complete { color: #4ade80; }
-
-/* defi-detail : vote card et footer violet */
-html[data-theme="dark"] .vote-card.voted                   { border-color: #a78bfa; }
-html[data-theme="dark"] .footer-action.footer-voted        { color: #a78bfa; }
+html[data-theme="dark"] .role-select-membre { background: rgba(255,255,255,0.08); color: var(--text-secondary); }

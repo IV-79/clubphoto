@@ -4,6 +4,14 @@
 
 ## En cours (alpha)
 
+### Dashboard admin — indicateurs & visualisations (2026-07-08)
+
+Refonte complète de la page `/admin` (Tableau de bord) : 4 KPI cards en temps-réel (membres, actifs 30 j., événements, articles publiés), section stockage avec barres de progression par catégorie (Portfolio / Thèmes / One-shots / Documents) + donut `conic-gradient` CSS avec total au centre, top-10 membres par stockage (barres horizontales), agenda des événements à venir (30 j.) fusionnant sorties et réunions. Bouton Actualiser. Responsive 4 → 2 → 1 colonne. Coût : **4 reads Firestore** au chargement (one-shot `getDocs`, aucun listener temps-réel).
+
+### Admin — harmonisation titres et alignement gauche (2026-07-08)
+
+Tous les titres des pages admin alignés sur le style des pages publiques : `font-weight: 300`, `letter-spacing: 1px`, `font-size: 2rem`, `color: var(--text-accent)`, soulignement `border-bottom: 3px solid #ffb300` (orange, remplace le rouge). Pages mises à jour : overview, membres, galeries, themes, reunions, config, pages, dossiers. Suppression des `margin: auto` sur les wrappers des pages à centrage incorrect (overview, membres, galeries, themes, reunions).
+
 ### Mode sombre — alignement des grands titres (2026-07-07)
 
 Uniformisation du style des grands titres de pages publiques et membres : `color: var(--text-accent)` (bleu marine `#1a237e` en clair, indigo `#818cf8` en sombre) + soulignement orange `#ffb300`. Pages mises à jour : Portfolios des membres, Sorties & Défis, Thèmes du mois, Calendrier, Notifications, Préférences, Créer un défi, Portfolio personnel. Correction également des couleurs codées en dur dans `defi-creer.css` et des textes blancs sur fond blanc dans `portfolio.css`.
