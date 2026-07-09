@@ -30,7 +30,6 @@
     <!-- ── KPI ─────────────────────────────────────────── -->
     <div class="kpi-grid">
 
-      <!-- Membres -->
       <mat-card class="db-card kpi-card">
         <mat-card-content class="kpi-body">
           <div class="kpi-icon-wrap members"><mat-icon>group</mat-icon></div>
@@ -50,7 +49,6 @@
         </mat-card-content>
       </mat-card>
 
-      <!-- Actifs -->
       <mat-card class="db-card kpi-card">
         <mat-card-content class="kpi-body">
           <div class="kpi-icon-wrap active"><mat-icon>person_check</mat-icon></div>
@@ -65,31 +63,21 @@
         </mat-card-content>
       </mat-card>
 
-      <!-- Événements -->
       <mat-card class="db-card kpi-card">
         <mat-card-content class="kpi-body">
           <div class="kpi-icon-wrap events"><mat-icon>photo_camera</mat-icon></div>
           <div class="kpi-num">{{ totalSorties() }}</div>
           <div class="kpi-lbl">Sorties & événements</div>
-          <div class="kpi-sub">
-            @if (agendaItems().length > 0) {
-              <span class="kpi-upcoming">{{ agendaItems().length }} à venir (30 j.)</span>
-            } @else {
-              <span class="kpi-hint">aucun dans les 30 j.</span>
-            }
-          </div>
+          <div class="kpi-sub"><span class="kpi-hint">activités du club</span></div>
         </mat-card-content>
       </mat-card>
 
-      <!-- Articles -->
       <mat-card class="db-card kpi-card">
         <mat-card-content class="kpi-body">
           <div class="kpi-icon-wrap articles"><mat-icon>article</mat-icon></div>
           <div class="kpi-num">{{ totalArticles() }}</div>
           <div class="kpi-lbl">Articles publiés</div>
-          <div class="kpi-sub">
-            <span class="kpi-hint">actualités en ligne</span>
-          </div>
+          <div class="kpi-sub"><span class="kpi-hint">actualités en ligne</span></div>
         </mat-card-content>
       </mat-card>
 
@@ -98,7 +86,6 @@
     <!-- ── Stockage ────────────────────────────────────── -->
     <div class="storage-section">
 
-      <!-- Barres par catégorie -->
       <mat-card class="db-card">
         <mat-card-content>
           <div class="section-lbl">Stockage utilisé</div>
@@ -121,7 +108,6 @@
         </mat-card-content>
       </mat-card>
 
-      <!-- Donut -->
       <mat-card class="db-card donut-card">
         <mat-card-content>
           <div class="section-lbl">Répartition</div>
@@ -167,48 +153,219 @@
       </mat-card>
     }
 
-    <!-- ── Agenda à venir ──────────────────────────────── -->
+    <!-- ── Maintenance ────────────────────────────────── -->
     <mat-card class="db-card">
       <mat-card-content>
-        <div class="section-lbl">
-          Événements à venir
-          @if (agendaItems().length > 0) {
-            <span class="section-count">{{ agendaItems().length }}</span>
-          }
-        </div>
+        <div class="section-lbl">Maintenance — nettoyage photos</div>
+        <p class="cleanup-intro">
+          Conserve les 3 photos les mieux votées par événement (ex-aequo inclus). Les documents sont toujours conservés.
+        </p>
 
-        @if (agendaItems().length === 0) {
-          <p class="empty-msg">Aucun événement dans les 30 prochains jours.</p>
-        } @else {
-          <div class="agenda-list">
-            @for (ev of agendaItems(); track ev.date + ev.titre) {
-              <div class="agenda-item">
-
-                <div class="agenda-date">
-                  <span class="agenda-day">{{ dayNum(ev.date) }}</span>
-                  <span class="agenda-month">{{ monthStr(ev.date) }}</span>
-                </div>
-
-                <div class="agenda-icon" [style.background]="eventBg(ev.type)">
-                  <mat-icon [style.color]="eventColor(ev.type)">{{ eventIcon(ev.type) }}</mat-icon>
-                </div>
-
-                <div class="agenda-body">
-                  <div class="agenda-titre">{{ ev.titre }}</div>
-                  <div class="agenda-meta">
-                    <span class="agenda-type" [style.color]="eventColor(ev.type)">{{ eventLabel(ev.type) }}</span>
-                    @if (ev.lieu) {
-                      <span class="agenda-lieu"> · {{ ev.lieu }}</span>
-                    }
-                  </div>
-                </div>
-
-                <span class="agenda-wday">{{ weekStr(ev.date) }}.</span>
-
+        <!-- Barre de progression -->
+        @if (cleanupService.progress(); as prog) {
+          <div class="cleanup-prog-wrap">
+            <div class="cleanup-prog-label">{{ prog.label }} — {{ prog.current }}/{{ prog.total }}</div>
+            <div class="cleanup-prog-track">
+              <div class="cleanup-prog-fill"
+                   [style.width.%]="prog.total > 0 ? prog.current / prog.total * 100 : 0">
               </div>
-            }
+            </div>
           </div>
         }
+
+        <div class="cleanup-grid">
+
+          <!-- Thèmes du mois -->
+          <div class="cleanup-block">
+            <div class="cleanup-block-head">
+              <mat-icon class="cu-icon">palette</mat-icon>
+              <span>Thèmes du mois</span>
+            </div>
+            <div class="cleanup-opts">
+              <label class="cu-opt">
+                <input type="checkbox" [checked]="keepTop3Themes()" (change)="onTop3ThemesChange($event)">
+                Conserver le top 3
+              </label>
+            </div>
+            <div class="cleanup-date-row">
+              <span class="cleanup-date-lbl">Avant le</span>
+              <app-date-picker class="cleanup-dp" label="Date" [value]="cleanupThemesDate()" (valueChange)="onThemesDateChange($event)"></app-date-picker>
+            </div>
+            @if (cleanupThemesPreview(); as p) {
+              <div class="cleanup-summary">
+                @if (p.events === 0) {
+                  <span class="cu-empty">Aucun thème à nettoyer.</span>
+                } @else {
+                  <strong>{{ p.events }}</strong> thème(s) ·
+                  <span class="cu-del">{{ p.photosToDelete }}</span> à supprimer
+                  @if (p.photosToKeep > 0) {, {{ p.photosToKeep }} conservée(s)}
+                  @if (p.bytesToFree > 0) { · <em>{{ formatBytes(p.bytesToFree) }}</em>}
+                }
+              </div>
+            }
+            @if (cleanupThemesResult(); as r) {
+              <div class="cleanup-result">✓ {{ r.photosDeleted }} supprimée(s)@if (r.bytesFreed > 0) {, {{ formatBytes(r.bytesFreed) }} libérés}</div>
+            }
+            <div class="cleanup-btns">
+              <button class="btn-cu-preview" (click)="previewThemes()" [disabled]="cleanupRunning() || !cleanupThemesDate()">Analyser</button>
+              @if ((cleanupThemesPreview()?.photosToDelete ?? 0) > 0) {
+                <button class="btn-cu-exec" (click)="executeThemes()" [disabled]="cleanupRunning()">Nettoyer</button>
+              }
+            </div>
+          </div>
+
+          <!-- One-shots -->
+          <div class="cleanup-block">
+            <div class="cleanup-block-head">
+              <mat-icon class="cu-icon">camera_alt</mat-icon>
+              <span>One-shots</span>
+            </div>
+            <div class="cleanup-opts">
+              <label class="cu-opt">
+                <input type="checkbox" [checked]="keepTop3Os()" (change)="onTop3OsChange($event)">
+                Conserver le top 3 par thème
+              </label>
+            </div>
+            <div class="cleanup-date-row">
+              <span class="cleanup-date-lbl">Avant le</span>
+              <app-date-picker class="cleanup-dp" label="Date" [value]="cleanupOsDate()" (valueChange)="onOsDateChange($event)"></app-date-picker>
+            </div>
+            @if (cleanupOsPreview(); as p) {
+              <div class="cleanup-summary">
+                @if (p.events === 0) {
+                  <span class="cu-empty">Aucun one-shot à nettoyer.</span>
+                } @else {
+                  <strong>{{ p.events }}</strong> one-shot(s) ·
+                  <span class="cu-del">{{ p.photosToDelete }}</span> à supprimer
+                  @if (p.photosToKeep > 0) {, {{ p.photosToKeep }} conservée(s)}
+                  @if (p.bytesToFree > 0) { · <em>{{ formatBytes(p.bytesToFree) }}</em>}
+                }
+              </div>
+            }
+            @if (cleanupOsResult(); as r) {
+              <div class="cleanup-result">✓ {{ r.photosDeleted }} supprimée(s)@if (r.bytesFreed > 0) {, {{ formatBytes(r.bytesFreed) }} libérés}</div>
+            }
+            <div class="cleanup-btns">
+              <button class="btn-cu-preview" (click)="previewOs()" [disabled]="cleanupRunning() || !cleanupOsDate()">Analyser</button>
+              @if ((cleanupOsPreview()?.photosToDelete ?? 0) > 0) {
+                <button class="btn-cu-exec" (click)="executeOs()" [disabled]="cleanupRunning()">Nettoyer</button>
+              }
+            </div>
+          </div>
+
+          <!-- Défis -->
+          <div class="cleanup-block">
+            <div class="cleanup-block-head">
+              <mat-icon class="cu-icon">emoji_events</mat-icon>
+              <span>Défis</span>
+            </div>
+            <div class="cleanup-opts">
+              <label class="cu-opt">
+                <input type="checkbox" [checked]="keepTop3Defis()" (change)="onTop3DefiChange($event)">
+                Conserver le top 3 global
+              </label>
+            </div>
+            <div class="cleanup-date-row">
+              <span class="cleanup-date-lbl">Avant le</span>
+              <app-date-picker class="cleanup-dp" label="Date" [value]="cleanupDefiDate()" (valueChange)="onDefiDateChange($event)"></app-date-picker>
+            </div>
+            @if (cleanupDefiPreview(); as p) {
+              <div class="cleanup-summary">
+                @if (p.events === 0) {
+                  <span class="cu-empty">Aucun défi à nettoyer.</span>
+                } @else {
+                  <strong>{{ p.events }}</strong> défi(s) ·
+                  <span class="cu-del">{{ p.photosToDelete }}</span> à supprimer
+                  @if (p.photosToKeep > 0) {, {{ p.photosToKeep }} conservée(s)}
+                  @if (p.bytesToFree > 0) { · <em>{{ formatBytes(p.bytesToFree) }}</em>}
+                }
+              </div>
+            }
+            @if (cleanupDefiResult(); as r) {
+              <div class="cleanup-result">✓ {{ r.photosDeleted }} supprimée(s)@if (r.bytesFreed > 0) {, {{ formatBytes(r.bytesFreed) }} libérés}</div>
+            }
+            <div class="cleanup-btns">
+              <button class="btn-cu-preview" (click)="previewDefis()" [disabled]="cleanupRunning() || !cleanupDefiDate()">Analyser</button>
+              @if ((cleanupDefiPreview()?.photosToDelete ?? 0) > 0) {
+                <button class="btn-cu-exec" (click)="executeDefis()" [disabled]="cleanupRunning()">Nettoyer</button>
+              }
+            </div>
+          </div>
+
+          <!-- Sorties -->
+          <div class="cleanup-block cleanup-block--warn">
+            <div class="cleanup-block-head">
+              <mat-icon class="cu-icon">photo_library</mat-icon>
+              <span>Sorties</span>
+            </div>
+            <p class="cleanup-block-desc">Toutes les photos supprimées (pas de votes)</p>
+            <div class="cleanup-date-row">
+              <span class="cleanup-date-lbl">Avant le</span>
+              <app-date-picker class="cleanup-dp" label="Date" [value]="cleanupSortieDate()" (valueChange)="onSortieDate($event)"></app-date-picker>
+            </div>
+            @if (cleanupSortiePreview(); as p) {
+              <div class="cleanup-summary">
+                @if (p.events === 0) {
+                  <span class="cu-empty">Aucune sortie à nettoyer.</span>
+                } @else {
+                  <strong>{{ p.events }}</strong> sortie(s) ·
+                  <span class="cu-del">{{ p.photosToDelete }}</span> photo(s) à supprimer
+                }
+              </div>
+            }
+            @if (cleanupSortieResult(); as r) {
+              <div class="cleanup-result">✓ {{ r.photosDeleted }} supprimée(s)</div>
+            }
+            <div class="cleanup-btns">
+              <button class="btn-cu-preview" (click)="previewSorties()" [disabled]="cleanupRunning() || !cleanupSortieDate()">Analyser</button>
+              @if ((cleanupSortiePreview()?.photosToDelete ?? 0) > 0) {
+                <button class="btn-cu-exec btn-cu-exec--danger" (click)="executeSorties()" [disabled]="cleanupRunning()">Supprimer tout</button>
+              }
+            </div>
+          </div>
+
+          <!-- Orphelins Storage -->
+          <div class="cleanup-block cleanup-block--full cleanup-block--orphan">
+            <div class="cleanup-block-head">
+              <mat-icon class="cu-icon">cloud_off</mat-icon>
+              <span>Orphelins Storage</span>
+              <span class="cu-warn-badge">lecture approfondie</span>
+            </div>
+            <p class="cleanup-block-desc">
+              Fichiers présents dans Storage sans document Firestore correspondant.
+              Périmètre : thèmes, one-shots, défis, sorties (portfolio et profils exclus).
+            </p>
+            @if (orphanPreview(); as p) {
+              <div class="cleanup-summary">
+                @if (p.orphanCount === 0) {
+                  <span class="cu-empty">Aucun orphelin détecté — {{ p.scanned }} fichier(s) scannés.</span>
+                } @else {
+                  <span class="cu-del">{{ p.orphanCount }}</span> orphelin(s) sur {{ p.scanned }} fichier(s) scannés.
+                  @if (p.orphanPaths.length > 0) {
+                    <details class="cu-orphan-details">
+                      <summary>Chemins ({{ p.orphanPaths.length }}{{ p.orphanPaths.length < p.orphanCount ? ' premiers affichés' : '' }})</summary>
+                      <ul class="cu-orphan-list">
+                        @for (path of p.orphanPaths; track path) {
+                          <li>{{ path }}</li>
+                        }
+                      </ul>
+                    </details>
+                  }
+                }
+              </div>
+            }
+            @if (orphanResult(); as r) {
+              <div class="cleanup-result">✓ {{ r.deleted }} fichier(s) supprimé(s)</div>
+            }
+            <div class="cleanup-btns">
+              <button class="btn-cu-preview" (click)="previewOrphans()" [disabled]="cleanupRunning()">Analyser</button>
+              @if ((orphanPreview()?.orphanCount ?? 0) > 0) {
+                <button class="btn-cu-exec btn-cu-exec--danger" (click)="executeOrphans()" [disabled]="cleanupRunning()">Supprimer les orphelins</button>
+              }
+            </div>
+          </div>
+
+        </div>
       </mat-card-content>
     </mat-card>
 

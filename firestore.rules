@@ -83,7 +83,7 @@ service cloud.firestore {
     match /themes/{themeId}/votes/{voteId} {
       allow read: if true;
       allow create, update: if isLoggedIn() && request.resource.data.voterUid == request.auth.uid;
-      allow delete: if isLoggedIn() && resource.data.voterUid == request.auth.uid;
+      allow delete: if isLoggedIn() && (resource.data.voterUid == request.auth.uid || isAdmin());
     }
 
     // Réunions (lecture membres, écriture admin)
@@ -157,7 +157,7 @@ service cloud.firestore {
     match /oneshots/{oneShotId}/votes/{voteId} {
       allow read: if true;
       allow create, update: if isLoggedIn() && request.resource.data.voterUid == request.auth.uid;
-      allow delete: if isLoggedIn() && resource.data.voterUid == request.auth.uid;
+      allow delete: if isLoggedIn() && (resource.data.voterUid == request.auth.uid || isAdmin());
     }
 
     // Événements (ex-Sorties Photo) – lecture publique, création membres connectés
@@ -293,7 +293,7 @@ service cloud.firestore {
       allow read: if isLoggedIn()
                   || get(/databases/$(database)/documents/defis/$(defiId)).data.visibilite == 'public';
       allow create, update: if isLoggedIn() && request.resource.data.voterUid == request.auth.uid;
-      allow delete: if isLoggedIn() && resource.data.voterUid == request.auth.uid;
+      allow delete: if isLoggedIn() && (resource.data.voterUid == request.auth.uid || isAdmin());
     }
 
     match /defis/{defiId}/commentaires/{commentaireId} {
