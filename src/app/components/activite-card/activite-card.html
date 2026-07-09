@@ -30,7 +30,7 @@
         }
         @if (loggedIn() && lieu()) {
           <a class="meta-lieu" [href]="mapsUrl(lieu()!)" target="_blank" (click)="$event.stopPropagation()">
-            📍 {{ lieu() }}
+            <mat-icon class="lieu-icon">location_on</mat-icon> {{ lieu() }}
           </a>
         }
       </div>

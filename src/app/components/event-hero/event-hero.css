@@ -185,7 +185,7 @@
 }
 
 .meta-lieu {
-  color: #1565c0;
+  color: var(--c-blue);
   text-decoration: none;
 }
 .meta-lieu:hover { text-decoration: underline; }
@@ -193,5 +193,5 @@
 .meta-org { font-size: 0.85rem; color: var(--text-secondary); white-space: nowrap; }
 
 .hero-content.dark .meta-item  { color: rgba(255,255,255,0.75); }
-.hero-content.dark .meta-lieu  { color: rgba(255,255,255,0.9); }
+.hero-content.dark .meta-lieu  { color: #90caf9; }
 .hero-content.dark .meta-org   { color: rgba(255,255,255,0.6); }

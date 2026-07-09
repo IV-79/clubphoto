@@ -315,7 +315,7 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
     const animTL = gsap.timeline({
       scrollTrigger: {
         trigger: section,
-        start:   'top 80%',
+        start:   'top 50%',
         end:     'top top',
         scrub:   0.8,
       },
@@ -356,7 +356,7 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
     gsap.timeline({
       scrollTrigger: {
         trigger: section,
-        start:   'top 80%',
+        start:   'top 50%',
         end:     'top 20%',
         scrub:   0.8,
       },
@@ -379,6 +379,8 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
     const [y, m] = mois.split('-');
     return new Date(+y, +m - 1, 1).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
   }
+
+  mapsUrl(lieu: string): string { return `https://maps.google.com/?q=${encodeURIComponent(lieu)}`; }
 
   nomComplet(m: UserProfile): string { return m.prenom ? `${m.prenom} ${m.nom}` : m.nom; }
 

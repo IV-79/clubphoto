@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { Sortie, SORTIE_TYPE_META } from '../../models/sortie.model';
 import { OneShot, ONESHOT_STATUT_LABELS } from '../../models/oneshot.model';
 import { Defi, DEFI_STATUT_LABELS, getDefiStatut } from '../../models/defi.model';
+import { MatIconModule } from '@angular/material/icon';
 import { ImgRetryDirective } from '../../directives/img-retry.directive';
 
 export type ActiviteItem =
@@ -12,7 +13,7 @@ export type ActiviteItem =
 
 @Component({
   selector: 'app-activite-card',
-  imports: [RouterLink, ImgRetryDirective],
+  imports: [RouterLink, ImgRetryDirective, MatIconModule],
   templateUrl: './activite-card.html',
   styleUrl: './activite-card.css',
 })

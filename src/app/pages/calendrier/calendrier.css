@@ -197,8 +197,8 @@
 .badge-oneshot  { background: var(--c-violet-bg); color: var(--c-violet); }
 
 .card-titre { margin: 0; font-size: 1rem; font-weight: 500; color: var(--text-primary); }
-.card-lieu  { font-size: 0.82rem; color: var(--text-muted); text-decoration: none; }
-a.card-lieu:hover { color: var(--c-blue); text-decoration: underline; }
+.card-lieu  { font-size: 0.82rem; color: var(--c-blue); text-decoration: none; }
+a.card-lieu:hover { text-decoration: underline; }
 
 .card-desc {
   margin: 4px 0 0;

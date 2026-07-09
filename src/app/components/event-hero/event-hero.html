@@ -37,7 +37,7 @@
       }
       @if (loggedIn() && lieu()) {
         <a [href]="mapsUrl(lieu()!)" target="_blank" class="meta-item meta-lieu">
-          📍 {{ lieu() }}
+          <mat-icon class="lieu-icon">location_on</mat-icon> {{ lieu() }}
         </a>
       }
     </div>

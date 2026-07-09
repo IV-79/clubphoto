@@ -88,8 +88,8 @@
 .badge-passe   { background: rgba(0,0,0,0.10); color: var(--text-muted); }
 
 .card-titre { margin: 0; font-size: 1rem; font-weight: 500; color: var(--text-primary); }
-.card-lieu  { font-size: 0.82rem; color: var(--text-muted); text-decoration: none; }
-a.card-lieu:hover { color: #1565c0; text-decoration: underline; }
+.card-lieu  { font-size: 0.82rem; color: var(--c-blue); text-decoration: none; }
+a.card-lieu:hover { text-decoration: underline; }
 .card-desc  { margin: 2px 0 0; font-size: 0.875rem; color: var(--text-secondary); line-height: 1.5; white-space: pre-wrap; }
 .card-date-full { font-size: 0.78rem; color: var(--text-hint); margin-top: 2px; }
 

@@ -4,6 +4,14 @@
 
 ## En cours (alpha)
 
+### Page d'accueil — alignement mode clair et animations (2026-07-09)
+
+Correction du mix fond blanc/noir en mode clair sur la page d'accueil. La section "Nos activités" (`#141414` codé en dur) et les séparateurs film-strip (`#080808`) passent désormais par des variables CSS thématiques. Textes, cartes et badges de la section activités adaptés aux deux modes via `var(--text-*)` et `var(--bg-*)`. Ajout des variables `--film-strip-bg` et `--film-perf-color` dans `styles.css`. Navigation verticale (dots) adaptée au thème. Trigger des animations cartes décalé de `top 80%` à `top 50%` (toutes sections, galerie incluse) pour que les éléments n'apparaissent qu'une fois la section suffisamment visible. Cartes actualités (`actu-card`) : date (`0.72rem` → `0.82rem`) et espacement de label (`2px` → `3px`) alignés sur le style des cartes activités ; ajout de l'affichage conditionnel de `article.date` (📅) et `article.lieu` (icône localisation) quand renseignés.
+
+### Uniformisation icône et couleur de lieu (2026-07-09)
+
+Remplacement de l'emoji 📍 par `<mat-icon>location_on</mat-icon>` (classe `.lieu-icon`) dans l'ensemble de l'application : `event-hero`, `activite-card`, `calendrier`, `reunions`, `home`, `gps-consent-modal`. Ajout de `MatIconModule` dans les 4 composants qui en manquaient. Style global `.lieu-icon` dans `styles.css` (1 rem, `vertical-align: text-bottom`). Couleur du texte de lieu unifiée à `var(--c-blue)` dans tous les composants (`event-hero`, `activite-card`, `article-card`, `article-lightbox`, `calendrier`, `reunions`, `sortie-detail`) — liens cliquables vers Google Maps partout. Dans `home.html` les lieux convertis de `<p>` statiques en `<a>` cliquables. Icône calendrier dans `article-card` alignée sur `📅` (cohérence avec `activite-card`). Hero sombre : `.meta-lieu` passe de blanc `rgba(255,255,255,0.9)` à bleu clair `#90caf9` lisible sur fond d'image.
+
 ### Dashboard admin — indicateurs & visualisations (2026-07-08)
 
 Refonte complète de la page `/admin` (Tableau de bord) : 4 KPI cards en temps-réel (membres, actifs 30 j., événements, articles publiés), section stockage avec barres de progression par catégorie (Portfolio / Thèmes / One-shots / Documents) + donut `conic-gradient` CSS avec total au centre, top-10 membres par stockage (barres horizontales), agenda des événements à venir (30 j.) fusionnant sorties et réunions. Bouton Actualiser. Responsive 4 → 2 → 1 colonne. Coût : **4 reads Firestore** au chargement (one-shot `getDocs`, aucun listener temps-réel).

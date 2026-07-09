@@ -38,7 +38,9 @@
           @if (s.lieu) {
             <div class="stat-row">
               <span>Lieu</span>
-              <strong>{{ s.lieu }}</strong>
+              <a class="stat-lieu" [href]="mapsUrl(s.lieu)" target="_blank" rel="noopener">
+                <mat-icon class="lieu-icon">location_on</mat-icon>{{ s.lieu }}
+              </a>
             </div>
           }
           <div class="stat-row">

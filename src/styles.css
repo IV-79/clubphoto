@@ -55,6 +55,8 @@
   --card-shadow:        rgba(0,0,0,0.06);
   --placeholder-bg:     #e0e0e0;
   --text-accent:        #1a237e;
+  --film-strip-bg:      #e0e0e0;
+  --film-perf-color:    #c4c4c4;
 }
 
 /* ── Tokens dark ── */
@@ -135,6 +137,8 @@ html[data-theme="dark"] {
   --card-shadow:        rgba(0,0,0,0.30);
   --placeholder-bg:     #2a2a2a;
   --text-accent:        #818cf8;
+  --film-strip-bg:      #080808;
+  --film-perf-color:    #222222;
 }
 
 html[data-theme="light"] {
@@ -157,6 +161,15 @@ img {
 
 .multiline-tooltip {
   white-space: pre-line !important;
+}
+
+/* Icône lieu — alignement inline dans le texte */
+.lieu-icon {
+  font-size: 1rem !important;
+  height: 1rem !important;
+  width: 1rem !important;
+  vertical-align: text-bottom;
+  margin-right: 2px;
 }
 
 /* ── Scroll-Driven Animations (Chrome/Edge/Firefox 115+, Safari 18+) ── */

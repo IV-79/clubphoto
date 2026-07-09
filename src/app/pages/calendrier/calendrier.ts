@@ -11,6 +11,7 @@ import { LoginModalService } from '../../services/login-modal.service';
 import { Reunion, REUNION_TYPES } from '../../models/reunion.model';
 import { OneShot, ONESHOT_STATUT_LABELS } from '../../models/oneshot.model';
 import { Sortie, SORTIE_TYPE_META, SortieType } from '../../models/sortie.model';
+import { MatIconModule } from '@angular/material/icon';
 
 const INIT = 3;
 const PAGE = 5;
@@ -26,7 +27,7 @@ interface CalItem {
 
 @Component({
   selector: 'app-calendrier',
-  imports: [SlicePipe, RouterLink],
+  imports: [SlicePipe, RouterLink, MatIconModule],
   templateUrl: './calendrier.html',
   styleUrl: './calendrier.css',
 })

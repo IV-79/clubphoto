@@ -1,5 +1,6 @@
 import { Component, input, output } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { MatIconModule } from '@angular/material/icon';
 import { ImgRetryDirective } from '../../directives/img-retry.directive';
 
 export interface HeroBadge {
@@ -9,7 +10,7 @@ export interface HeroBadge {
 
 @Component({
   selector: 'app-event-hero',
-  imports: [RouterLink, ImgRetryDirective],
+  imports: [RouterLink, ImgRetryDirective, MatIconModule],
   templateUrl: './event-hero.html',
   styleUrl: './event-hero.css',
 })

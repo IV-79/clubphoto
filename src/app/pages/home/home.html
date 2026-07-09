@@ -41,6 +41,12 @@
               @if (article.description) {
                 <p class="actu-desc">{{ article.description }}</p>
               }
+              @if (article.date) {
+                <p class="actu-meta">📅 {{ article.date | date:'d MMMM yyyy':'':'fr' }}</p>
+              }
+              @if (article.lieu) {
+                <a class="actu-meta lieu-lien" [href]="mapsUrl(article.lieu!)" target="_blank" rel="noopener" (click)="$event.stopPropagation()"><mat-icon class="lieu-icon">location_on</mat-icon> {{ article.lieu }}</a>
+              }
               <span class="actu-date">{{ article.dateCreation | date:'d MMMM yyyy':'':'fr' }}</span>
             </div>
           </article>
@@ -68,7 +74,7 @@
             <div class="act-info">
               <span class="act-label">Dernière sortie</span>
               <h2 class="act-titre">{{ sortie.titre }}</h2>
-              @if (sortie.lieu) { <p class="act-meta">📍 {{ sortie.lieu }}</p> }
+              @if (sortie.lieu) { <a class="act-meta lieu-lien" [href]="mapsUrl(sortie.lieu)" target="_blank" rel="noopener"><mat-icon class="lieu-icon">location_on</mat-icon> {{ sortie.lieu }}</a> }
               <p class="act-meta">{{ sortie.date | date:'d MMMM yyyy':'':'fr' }}</p>
             </div>
           </div>

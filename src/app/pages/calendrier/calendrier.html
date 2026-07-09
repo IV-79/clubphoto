@@ -50,7 +50,7 @@
                 </div>
                 @if (expandedId() === item.id) {
                   <div class="card-detail">
-                    @if (isMembre() && item.event!.lieu) { <a class="card-lieu" [href]="mapsUrl(item.event!.lieu)" target="_blank" rel="noopener" (click)="$event.stopPropagation()">📍 {{ item.event!.lieu }}</a> }
+                    @if (isMembre() && item.event!.lieu) { <a class="card-lieu" [href]="mapsUrl(item.event!.lieu)" target="_blank" rel="noopener" (click)="$event.stopPropagation()"><mat-icon class="lieu-icon">location_on</mat-icon> {{ item.event!.lieu }}</a> }
                     @if (isMembre() && item.event!.description) { <p class="card-desc">{{ item.event!.description }}</p> }
                     <span class="card-date-full">{{ formatDate(item.date) }}</span>
                   </div>
@@ -108,7 +108,7 @@
                 </div>
                 @if (expandedId() === item.id) {
                   <div class="card-detail">
-                    @if (isMembre() && item.sortie!.lieu) { <a class="card-lieu" [href]="mapsUrl(item.sortie!.lieu)" target="_blank" rel="noopener" (click)="$event.stopPropagation()">📍 {{ item.sortie!.lieu }}</a> }
+                    @if (isMembre() && item.sortie!.lieu) { <a class="card-lieu" [href]="mapsUrl(item.sortie!.lieu)" target="_blank" rel="noopener" (click)="$event.stopPropagation()"><mat-icon class="lieu-icon">location_on</mat-icon> {{ item.sortie!.lieu }}</a> }
                     @if (isMembre() && item.sortie!.description) { <p class="card-desc">{{ item.sortie!.description }}</p> }
                     @if (isMembre()) { <span class="os-createur">Organisé par {{ item.sortie!.nomOrganisateur }}</span> }
                     @if (item.sortie!.inscriptionObligatoire) {
@@ -158,7 +158,7 @@
                 </div>
                 @if (expandedId() === item.id) {
                   <div class="card-detail">
-                    @if (isMembre() && item.event!.lieu) { <a class="card-lieu" [href]="mapsUrl(item.event!.lieu)" target="_blank" rel="noopener" (click)="$event.stopPropagation()">📍 {{ item.event!.lieu }}</a> }
+                    @if (isMembre() && item.event!.lieu) { <a class="card-lieu" [href]="mapsUrl(item.event!.lieu)" target="_blank" rel="noopener" (click)="$event.stopPropagation()"><mat-icon class="lieu-icon">location_on</mat-icon> {{ item.event!.lieu }}</a> }
                     @if (isMembre() && item.event!.description) { <p class="card-desc">{{ item.event!.description }}</p> }
                     <span class="card-date-full">{{ formatDate(item.date) }}</span>
                   </div>
@@ -201,7 +201,7 @@
                 </div>
                 @if (expandedId() === item.id) {
                   <div class="card-detail">
-                    @if (isMembre() && item.sortie!.lieu) { <a class="card-lieu" [href]="mapsUrl(item.sortie!.lieu)" target="_blank" rel="noopener" (click)="$event.stopPropagation()">📍 {{ item.sortie!.lieu }}</a> }
+                    @if (isMembre() && item.sortie!.lieu) { <a class="card-lieu" [href]="mapsUrl(item.sortie!.lieu)" target="_blank" rel="noopener" (click)="$event.stopPropagation()"><mat-icon class="lieu-icon">location_on</mat-icon> {{ item.sortie!.lieu }}</a> }
                     @if (isMembre() && item.sortie!.description) { <p class="card-desc">{{ item.sortie!.description }}</p> }
                     @if (isMembre()) { <span class="os-createur">Organisé par {{ item.sortie!.nomOrganisateur }}</span> }
                     @if (item.sortie!.inscriptionObligatoire) {

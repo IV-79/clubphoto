@@ -105,7 +105,7 @@
 }
 
 .actu-section    { background: var(--bg-surface); }
-.act-section     { background: #141414; }
+.act-section     { background: var(--bg-surface-alt); }
 .gallery-section { background: var(--bg-surface-raised); }
 .membres-section { background: var(--bg-surface); }
 
@@ -135,7 +135,7 @@
   margin: 0 0 24px;
   text-align: center;
 }
-.eyebrow-light { color: rgba(255,255,255,0.70); }
+.eyebrow-light { color: var(--text-secondary); }
 
 /* ═══════════════════════════════════════
    À LA UNE — 3 cartes horizontales
@@ -168,7 +168,7 @@
 .actu-type {
   font-size: 0.65rem;
   font-weight: 700;
-  letter-spacing: 2px;
+  letter-spacing: 3px;
   text-transform: uppercase;
 }
 
@@ -224,8 +224,14 @@
   overflow: hidden;
 }
 
+.actu-meta {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
 .actu-date {
-  font-size: 0.72rem;
+  font-size: 0.82rem;
   color: var(--text-secondary);
   margin-top: auto;
   padding-top: 8px;
@@ -245,8 +251,8 @@
 }
 
 .act-card {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-medium);
   border-radius: 8px;
   overflow: hidden;
   display: flex;
@@ -263,7 +269,7 @@
 .act-img-ph {
   width: 100%;
   height: 200px;
-  background: rgba(255,255,255,0.04);
+  background: var(--bg-surface-raised);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -288,7 +294,7 @@
 }
 .act-theme-yr {
   font-size: 0.85rem;
-  color: rgba(255,255,255,0.25);
+  color: var(--text-muted);
   letter-spacing: 4px;
   text-transform: uppercase;
 }
@@ -311,14 +317,14 @@
 .act-titre {
   font-size: clamp(1.1rem, 2.5vw, 1.5rem);
   font-weight: 300;
-  color: white;
+  color: var(--text-primary);
   margin: 0;
   line-height: 1.3;
 }
 
 .act-meta {
   font-size: 0.82rem;
-  color: rgba(255,255,255,0.4);
+  color: var(--text-secondary);
   margin: 0;
 }
 
@@ -335,7 +341,7 @@
 .theme-badge--ouvert    { background: rgba(39,174,96,0.2);  color: #27ae60; }
 .theme-badge--vote      { background: rgba(52,152,219,0.2); color: #3498db; }
 .theme-badge--resultats { background: rgba(155,89,182,0.2); color: #9b59b6; }
-.theme-badge--en_attente{ background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.35); }
+.theme-badge--en_attente{ background: var(--bg-surface-raised); color: var(--text-muted); }
 
 @media (max-width: 768px) {
   .act-duo { grid-template-columns: 1fr; max-width: 480px; margin: 0 auto; }
@@ -376,6 +382,14 @@
   margin-top: 28px;
   text-align: center;
 }
+
+.lieu-lien {
+  display: flex;
+  align-items: center;
+  color: var(--c-blue);
+  text-decoration: none;
+}
+.lieu-lien:hover { text-decoration: underline; }
 
 .link-cta {
   color: #cc0000;
@@ -429,8 +443,8 @@
   width: 100px;
   height: 100px;
   border-radius: 50%;
-  background: #1a1a1a;
-  color: white;
+  background: var(--text-primary);
+  color: var(--bg-page);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -488,7 +502,7 @@
 ═══════════════════════════════════════ */
 .film-strip {
   height: 56px;
-  background: #080808;
+  background: var(--film-strip-bg);
   position: relative;
   overflow: hidden;
   flex-shrink: 0;
@@ -505,7 +519,7 @@
   background-image: repeating-linear-gradient(
     to right,
     transparent 0px, transparent 4px,
-    #222 4px, #222 14px,
+    var(--film-perf-color) 4px, var(--film-perf-color) 14px,
     transparent 14px, transparent 20px
   );
   background-size: 20px 10px;
@@ -543,7 +557,9 @@
   flex-direction: column;
   align-items: center;
   padding: 10px 6px;
-  background: rgba(0,0,0,0.18);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-medium);
+  box-shadow: 0 2px 12px var(--card-shadow);
   backdrop-filter: blur(6px);
   border-radius: 24px;
   gap: 2px;
@@ -555,7 +571,7 @@
   bottom: 18px;
   left: 50%;
   width: 1px;
-  background: rgba(255,255,255,0.2);
+  background: var(--border-medium);
   transform: translateX(-50%);
   pointer-events: none;
 }
@@ -577,14 +593,14 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.35);
-  border: 1.5px solid rgba(255,255,255,0.5);
+  background: var(--text-muted);
+  border: 1.5px solid var(--text-secondary);
   transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
   box-shadow: 0 1px 4px rgba(0,0,0,0.25);
 }
 
 .section-nav-item:hover .section-nav-dot {
-  background: rgba(255,255,255,0.75);
+  background: var(--text-primary);
   transform: scale(1.4);
 }
 

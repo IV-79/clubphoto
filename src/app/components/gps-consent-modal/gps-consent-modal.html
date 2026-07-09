@@ -1,7 +1,7 @@
 @if (gpsService.state()) {
   <div class="gps-backdrop" (click)="gpsService.respond(true)">
     <div class="gps-dialog" (click)="$event.stopPropagation()">
-      <h3 class="gps-title">📍 Coordonnées GPS détectées</h3>
+      <h3 class="gps-title"><mat-icon class="lieu-icon">location_on</mat-icon> Coordonnées GPS détectées</h3>
       <p class="gps-message">
         Cette photo contient des coordonnées GPS (lieu de prise de vue).
         Voulez-vous les conserver ? Elles permettront d'afficher la localisation dans la fiche info.

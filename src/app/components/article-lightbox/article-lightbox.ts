@@ -124,8 +124,8 @@ import { AuthService } from '../../services/auth.service';
     }
     .lb-meta mat-icon { font-size: 14px; width: 14px; height: 14px; }
     .lb-auteur { color: var(--text-muted); }
-    .lieu-link { color: inherit; text-decoration: none; }
-    .lieu-link:hover { color: var(--text-accent); text-decoration: underline; }
+    .lieu-link { color: var(--c-blue); text-decoration: none; }
+    .lieu-link:hover { text-decoration: underline; }
     .lb-description {
       font-size: .95rem; line-height: 1.75; color: var(--text-primary);
       white-space: pre-wrap; margin-bottom: 22px;

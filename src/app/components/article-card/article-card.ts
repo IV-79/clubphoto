@@ -39,11 +39,11 @@ import { Article, getArticleTypeMeta } from '../../models/article.model';
         }
         <h3 class="titre">{{ article().titre }}</h3>
         @if (article().date) {
-          <p class="meta"><mat-icon>calendar_today</mat-icon>{{ article().date | date:'d MMM yyyy':'':'fr' }}</p>
+          <p class="meta">📅 {{ article().date | date:'d MMM yyyy':'':'fr' }}</p>
         }
         @if (article().lieu) {
           <p class="meta">
-            <mat-icon>place</mat-icon>
+            <mat-icon class="lieu-icon">location_on</mat-icon>
             <a [href]="mapsUrl(article().lieu!)" target="_blank" rel="noopener noreferrer"
                class="lieu-link" (click)="$event.stopPropagation()">{{ article().lieu }}</a>
           </p>
@@ -96,7 +96,7 @@ import { Article, getArticleTypeMeta } from '../../models/article.model';
       margin: 4px 0 0; font-size: .78rem; color: var(--text-secondary);
     }
     .meta mat-icon { font-size: 13px; width: 13px; height: 13px; flex-shrink: 0; margin-top: 1px; }
-    .lieu-link { color: inherit; text-decoration: none; }
+    .lieu-link { color: var(--c-blue); text-decoration: none; }
     .lieu-link:hover { text-decoration: underline; }
     .edit-btn {
       position: absolute; top: 8px; right: 8px; z-index: 10;

@@ -98,7 +98,7 @@
                   } @else {
                     @if (r.lieu) {
                       <a class="card-lieu" [href]="mapsUrl(r.lieu)" target="_blank" rel="noopener" (click)="$event.stopPropagation()">
-                        📍 {{ r.lieu }}
+                        <mat-icon class="lieu-icon">location_on</mat-icon> {{ r.lieu }}
                       </a>
                     }
                     @if (r.description) { <p class="card-desc">{{ r.description }}</p> }
@@ -172,7 +172,7 @@
                   } @else {
                     @if (r.lieu) {
                       <a class="card-lieu" [href]="mapsUrl(r.lieu)" target="_blank" rel="noopener" (click)="$event.stopPropagation()">
-                        📍 {{ r.lieu }}
+                        <mat-icon class="lieu-icon">location_on</mat-icon> {{ r.lieu }}
                       </a>
                     }
                     @if (r.description) { <p class="card-desc">{{ r.description }}</p> }

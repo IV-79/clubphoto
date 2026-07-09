@@ -56,6 +56,8 @@
 .stat-row:last-child { border-bottom: none; }
 .stat-row > span { font-size: 0.72rem; color: var(--text-secondary); }
 .stat-row > strong { font-size: 0.85rem; color: var(--text-primary); }
+.stat-lieu { display: flex; align-items: center; gap: 2px; font-size: 0.85rem; color: var(--c-blue); text-decoration: none; }
+.stat-lieu:hover { text-decoration: underline; }
 
 /* ── Main ────────────────────────────────────────────────────── */
 

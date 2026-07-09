@@ -419,6 +419,8 @@ export class SortieDetail {
     this.refresh();
   }
 
+  mapsUrl(lieu: string): string { return `https://maps.google.com/?q=${encodeURIComponent(lieu)}`; }
+
   formatDate(date: string): string {
     return new Date(date + 'T12:00:00').toLocaleDateString('fr-FR', {
       weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
