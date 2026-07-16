@@ -6,6 +6,7 @@ import { ThemeService } from './theme.service';
 import { OneShotService } from './oneshot.service';
 import { DefiService } from './defi.service';
 import { SortieService } from './sortie.service';
+import { ArticleService } from './article.service';
 import { OneShot } from '../models/oneshot.model';
 
 export interface CleanupPreview {
@@ -38,10 +39,11 @@ export class CleanupService {
   private firestore     = inject(Firestore);
   private storage       = inject(Storage);
   private injector      = inject(Injector);
-  private themeService  = inject(ThemeService);
-  private osService     = inject(OneShotService);
-  private defiService   = inject(DefiService);
-  private sortieService = inject(SortieService);
+  private themeService   = inject(ThemeService);
+  private osService      = inject(OneShotService);
+  private defiService    = inject(DefiService);
+  private sortieService  = inject(SortieService);
+  private articleService = inject(ArticleService);
 
   progress = signal<CleanupProgress | null>(null);
 
@@ -319,51 +321,92 @@ export class CleanupService {
     return { processed: old.length, photosDeleted, bytesFreed: 0 };
   }
 
+  // ── Actualités ───────────────────────────────────────────────────────────
+
+  async previewArticles(beforeDate: string, expiredOnly: boolean): Promise<CleanupPreview> {
+    const all = await firstValueFrom(this.articleService.getAllArticles());
+    const old = all.filter(a =>
+      (a.dateCreation ?? '').substring(0, 10) < beforeDate &&
+      (!expiredOnly || a.statut === 'expire')
+    );
+    const withCouverture = old.filter(a => !!a.couvertureStoragePath).length;
+    return { events: old.length, photosToDelete: withCouverture, photosToKeep: 0, bytesToFree: 0 };
+  }
+
+  async executeArticles(beforeDate: string, expiredOnly: boolean): Promise<CleanupResult> {
+    const all = await firstValueFrom(this.articleService.getAllArticles());
+    const old = all.filter(a =>
+      (a.dateCreation ?? '').substring(0, 10) < beforeDate &&
+      (!expiredOnly || a.statut === 'expire')
+    );
+
+    let photosDeleted = 0;
+    this.progress.set({ label: 'Préparation…', current: 0, total: old.length });
+
+    for (let i = 0; i < old.length; i++) {
+      const article = old[i];
+      this.progress.set({ label: article.titre, current: i + 1, total: old.length });
+      await this.articleService.deleteArticle(article.id!, article.couvertureStoragePath);
+      if (article.couvertureStoragePath) photosDeleted++;
+    }
+    this.progress.set(null);
+    return { processed: old.length, photosDeleted, bytesFreed: 0 };
+  }
+
   // ── Orphelins Storage ─────────────────────────────────────────────────────
 
   async previewOrphans(): Promise<OrphanPreview> {
-    this.progress.set({ label: 'Lecture Firestore…', current: 0, total: 4 });
+    this.progress.set({ label: 'Lecture Firestore…', current: 0, total: 5 });
 
     const known = new Set<string>();
 
     // Thèmes
     const themes = await firstValueFrom(this.themeService.getThemesOnce());
     for (const theme of themes) {
+      if (theme.photoCouverturePath) known.add(theme.photoCouverturePath);
       const subs = await firstValueFrom(this.themeService.getSoumissionsOnce(theme.id));
       subs.forEach(s => { known.add(s.storagePath); if (s.thumbnailPath) known.add(s.thumbnailPath); });
     }
-    this.progress.set({ label: 'Lecture Firestore…', current: 1, total: 4 });
+    this.progress.set({ label: 'Lecture Firestore…', current: 1, total: 5 });
 
     // One-shots
     const oneshots = await this.getAllOneShotsOnce();
     for (const os of oneshots) {
+      if (os.photoCouverturePath) known.add(os.photoCouverturePath);
       const photos = await firstValueFrom(this.osService.getPhotosOnce(os.id));
       photos.forEach(p => { known.add(p.storagePath); if (p.thumbnailPath) known.add(p.thumbnailPath); });
     }
-    this.progress.set({ label: 'Lecture Firestore…', current: 2, total: 4 });
+    this.progress.set({ label: 'Lecture Firestore…', current: 2, total: 5 });
 
     // Défis
     const defis = await firstValueFrom(this.defiService.getDefisOnce());
     for (const defi of defis) {
+      if (defi.photoCouverturePath) known.add(defi.photoCouverturePath);
       const photos = await firstValueFrom(this.defiService.getPhotosOnce(defi.id));
       photos.forEach(p => { known.add(p.storagePath); if (p.thumbnailPath) known.add(p.thumbnailPath); });
     }
-    this.progress.set({ label: 'Lecture Firestore…', current: 3, total: 4 });
+    this.progress.set({ label: 'Lecture Firestore…', current: 3, total: 5 });
 
     // Sorties
     const sorties = await firstValueFrom(this.sortieService.getSortiesOnce());
     for (const sortie of sorties) {
+      if (sortie.imageEvenementPath) known.add(sortie.imageEvenementPath);
       const photos = await firstValueFrom(this.sortieService.getPhotosOnce(sortie.id));
       photos.forEach(p => { known.add(p.storagePath); if (p.thumbnailPath) known.add(p.thumbnailPath); });
     }
-    this.progress.set({ label: 'Lecture Firestore…', current: 4, total: 4 });
+    this.progress.set({ label: 'Lecture Firestore…', current: 4, total: 5 });
 
-    // Lister les fichiers Storage sous les 4 préfixes
-    this.progress.set({ label: 'Scan Storage…', current: 0, total: 4 });
+    // Actualités
+    const articles = await firstValueFrom(this.articleService.getAllArticles());
+    articles.forEach(a => { if (a.couvertureStoragePath) known.add(a.couvertureStoragePath); });
+    this.progress.set({ label: 'Lecture Firestore…', current: 5, total: 5 });
+
+    // Lister les fichiers Storage sous les 5 préfixes
+    this.progress.set({ label: 'Scan Storage…', current: 0, total: 5 });
     const storageFiles: string[] = [];
-    const prefixes = ['themes', 'oneshots', 'defis', 'sorties'];
+    const prefixes = ['themes', 'oneshots', 'defis', 'sorties', 'articles'];
     for (let i = 0; i < prefixes.length; i++) {
-      this.progress.set({ label: `Scan Storage — ${prefixes[i]}/…`, current: i, total: 4 });
+      this.progress.set({ label: `Scan Storage — ${prefixes[i]}/…`, current: i, total: 5 });
       storageFiles.push(...await this.listStorageFiles(prefixes[i]));
     }
 

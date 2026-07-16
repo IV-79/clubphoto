@@ -38,7 +38,7 @@ export class Overview implements OnInit {
   totalArticles = signal(0);
 
   storageTotal = signal(0);
-  storageByCat = signal({ portfolio: 0, themes: 0, oneshots: 0, documents: 0 });
+  storageByCat = signal({ portfolio: 0, themes: 0, oneshots: 0, defis: 0, documents: 0 });
   topMembers   = signal<MemberBar[]>([]);
 
   storageItems = computed<StorageItem[]>(() => {
@@ -48,6 +48,7 @@ export class Overview implements OnInit {
       { label: 'Portfolio',      color: '#3b82f6', bytes: cat.portfolio, pct: Math.round(cat.portfolio / total * 100) },
       { label: 'Thèmes du mois', color: '#10b981', bytes: cat.themes,    pct: Math.round(cat.themes    / total * 100) },
       { label: 'One-shots',      color: '#f59e0b', bytes: cat.oneshots,  pct: Math.round(cat.oneshots  / total * 100) },
+      { label: 'Défis',          color: '#ef4444', bytes: cat.defis,     pct: Math.round(cat.defis     / total * 100) },
       { label: 'Documents',      color: '#8b5cf6', bytes: cat.documents, pct: Math.round(cat.documents / total * 100) },
     ];
   });
@@ -67,26 +68,30 @@ export class Overview implements OnInit {
 
   // ── Cleanup ──────────────────────────────────────────────────────────────
 
-  cleanupThemesDate  = signal('');
-  cleanupOsDate      = signal('');
-  cleanupDefiDate    = signal('');
-  cleanupSortieDate  = signal('');
+  cleanupThemesDate   = signal('');
+  cleanupOsDate       = signal('');
+  cleanupDefiDate     = signal('');
+  cleanupSortieDate   = signal('');
+  cleanupArticleDate  = signal('');
 
-  keepTop3Themes = signal(true);
-  keepTop3Os     = signal(true);
-  keepTop3Defis  = signal(true);
+  keepTop3Themes       = signal(true);
+  keepTop3Os           = signal(true);
+  keepTop3Defis        = signal(true);
+  articleExpiredOnly   = signal(true);
 
-  cleanupThemesPreview  = signal<CleanupPreview | null>(null);
-  cleanupOsPreview      = signal<CleanupPreview | null>(null);
-  cleanupDefiPreview    = signal<CleanupPreview | null>(null);
-  cleanupSortiePreview  = signal<CleanupPreview | null>(null);
-  orphanPreview         = signal<OrphanPreview | null>(null);
+  cleanupThemesPreview   = signal<CleanupPreview | null>(null);
+  cleanupOsPreview       = signal<CleanupPreview | null>(null);
+  cleanupDefiPreview     = signal<CleanupPreview | null>(null);
+  cleanupSortiePreview   = signal<CleanupPreview | null>(null);
+  cleanupArticlePreview  = signal<CleanupPreview | null>(null);
+  orphanPreview          = signal<OrphanPreview | null>(null);
 
-  cleanupThemesResult  = signal<CleanupResult | null>(null);
-  cleanupOsResult      = signal<CleanupResult | null>(null);
-  cleanupDefiResult    = signal<CleanupResult | null>(null);
-  cleanupSortieResult  = signal<CleanupResult | null>(null);
-  orphanResult         = signal<{ deleted: number } | null>(null);
+  cleanupThemesResult   = signal<CleanupResult | null>(null);
+  cleanupOsResult       = signal<CleanupResult | null>(null);
+  cleanupDefiResult     = signal<CleanupResult | null>(null);
+  cleanupSortieResult   = signal<CleanupResult | null>(null);
+  cleanupArticleResult  = signal<CleanupResult | null>(null);
+  orphanResult          = signal<{ deleted: number } | null>(null);
 
   cleanupRunning = signal(false);
 
@@ -102,6 +107,7 @@ export class Overview implements OnInit {
     this.cleanupOsDate.set(ago);
     this.cleanupDefiDate.set(ago);
     this.cleanupSortieDate.set(ago);
+    this.cleanupArticleDate.set(ago);
     this.load();
   }
 
@@ -133,21 +139,23 @@ export class Overview implements OnInit {
         this.totalArticles.set(articles.filter(a => a.statut === 'publie').length);
         this.totalSorties.set(sorties.length);
 
-        const cat = { portfolio: 0, themes: 0, oneshots: 0, documents: 0 };
+        const cat = { portfolio: 0, themes: 0, oneshots: 0, defis: 0, documents: 0 };
         membres.forEach(m => {
           cat.portfolio += m.storageUsed?.portfolio ?? 0;
           cat.themes    += m.storageUsed?.themes    ?? 0;
           cat.oneshots  += m.storageUsed?.oneshots  ?? 0;
+          cat.defis     += m.storageUsed?.defis     ?? 0;
           cat.documents += m.storageUsed?.documents ?? 0;
         });
         this.storageByCat.set(cat);
-        this.storageTotal.set(cat.portfolio + cat.themes + cat.oneshots + cat.documents);
+        this.storageTotal.set(cat.portfolio + cat.themes + cat.oneshots + cat.defis + cat.documents);
         this.topMembers.set(
           membres
             .map(m => ({
               nom: [m.prenom, m.nom].filter(Boolean).join(' '),
               total: (m.storageUsed?.portfolio ?? 0) + (m.storageUsed?.themes ?? 0)
-                   + (m.storageUsed?.oneshots  ?? 0) + (m.storageUsed?.documents ?? 0),
+                   + (m.storageUsed?.oneshots  ?? 0) + (m.storageUsed?.defis ?? 0)
+                   + (m.storageUsed?.documents ?? 0),
             }))
             .filter(m => m.total > 0)
             .sort((a, b) => b.total - a.total)
@@ -170,14 +178,16 @@ export class Overview implements OnInit {
     return Math.round(total / this.maxMemberStorage() * 100);
   }
 
-  onThemesDateChange(d: string)  { this.cleanupThemesDate.set(d);  this.cleanupThemesPreview.set(null);  this.cleanupThemesResult.set(null);  }
-  onOsDateChange(d: string)      { this.cleanupOsDate.set(d);      this.cleanupOsPreview.set(null);      this.cleanupOsResult.set(null);      }
-  onDefiDateChange(d: string)    { this.cleanupDefiDate.set(d);    this.cleanupDefiPreview.set(null);    this.cleanupDefiResult.set(null);    }
-  onSortieDate(d: string)        { this.cleanupSortieDate.set(d);  this.cleanupSortiePreview.set(null);  this.cleanupSortieResult.set(null);  }
+  onThemesDateChange(d: string)  { this.cleanupThemesDate.set(d);   this.cleanupThemesPreview.set(null);   this.cleanupThemesResult.set(null);   }
+  onOsDateChange(d: string)      { this.cleanupOsDate.set(d);       this.cleanupOsPreview.set(null);       this.cleanupOsResult.set(null);       }
+  onDefiDateChange(d: string)    { this.cleanupDefiDate.set(d);     this.cleanupDefiPreview.set(null);     this.cleanupDefiResult.set(null);     }
+  onSortieDate(d: string)        { this.cleanupSortieDate.set(d);   this.cleanupSortiePreview.set(null);   this.cleanupSortieResult.set(null);   }
+  onArticleDateChange(d: string) { this.cleanupArticleDate.set(d);  this.cleanupArticlePreview.set(null);  this.cleanupArticleResult.set(null);  }
 
-  onTop3ThemesChange(e: Event)   { this.keepTop3Themes.set((e.target as HTMLInputElement).checked); this.cleanupThemesPreview.set(null); }
-  onTop3OsChange(e: Event)       { this.keepTop3Os.set((e.target as HTMLInputElement).checked);     this.cleanupOsPreview.set(null);     }
-  onTop3DefiChange(e: Event)     { this.keepTop3Defis.set((e.target as HTMLInputElement).checked);  this.cleanupDefiPreview.set(null);   }
+  onTop3ThemesChange(e: Event)         { this.keepTop3Themes.set((e.target as HTMLInputElement).checked);     this.cleanupThemesPreview.set(null);  }
+  onTop3OsChange(e: Event)             { this.keepTop3Os.set((e.target as HTMLInputElement).checked);         this.cleanupOsPreview.set(null);      }
+  onTop3DefiChange(e: Event)           { this.keepTop3Defis.set((e.target as HTMLInputElement).checked);      this.cleanupDefiPreview.set(null);    }
+  onArticleExpiredOnlyChange(e: Event) { this.articleExpiredOnly.set((e.target as HTMLInputElement).checked); this.cleanupArticlePreview.set(null); }
 
   async previewThemes() {
     this.cleanupRunning.set(true);
@@ -255,6 +265,27 @@ export class Overview implements OnInit {
     try {
       this.cleanupSortieResult.set(await this.cleanupService.executeSorties(this.cleanupSortieDate()));
       this.cleanupSortiePreview.set(null);
+    } catch (e) { console.error(e); }
+    finally { this.cleanupRunning.set(false); }
+  }
+
+  async previewArticles() {
+    this.cleanupRunning.set(true);
+    try {
+      this.cleanupArticleResult.set(null);
+      this.cleanupArticlePreview.set(await this.cleanupService.previewArticles(this.cleanupArticleDate(), this.articleExpiredOnly()));
+    } catch (e) { console.error(e); }
+    finally { this.cleanupRunning.set(false); }
+  }
+
+  async executeArticles() {
+    const p = this.cleanupArticlePreview();
+    if (!p || !await this.confirmService.confirm(`Supprimer définitivement ${p.events} article(s) et leur image de couverture ? Cette action est irréversible.`)) return;
+    this.cleanupRunning.set(true);
+    try {
+      this.cleanupArticleResult.set(await this.cleanupService.executeArticles(this.cleanupArticleDate(), this.articleExpiredOnly()));
+      this.cleanupArticlePreview.set(null);
+      this.load();
     } catch (e) { console.error(e); }
     finally { this.cleanupRunning.set(false); }
   }

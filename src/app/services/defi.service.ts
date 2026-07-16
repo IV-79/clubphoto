@@ -301,6 +301,11 @@ export class DefiService {
               const docRef = await runInInjectionContext(this.injector, () =>
                 addDoc(collection(this.firestore, `defis/${defiId}/photos`), photoData)
               );
+              await runInInjectionContext(this.injector, () =>
+                updateDoc(doc(this.firestore, 'users', user.uid), {
+                  'storageUsed.defis': increment(fileSize),
+                })
+              ).catch(() => {});
               const existingSnap = await runInInjectionContext(this.injector, () =>
                 getDocs(query(collection(this.firestore, `defis/${defiId}/photos`), where('membreUid', '==', user.uid), limit(2)))
               );
@@ -329,6 +334,13 @@ export class DefiService {
     ];
     if (photo.thumbnailPath) deletes.push(deleteObject(ref(this.storage, photo.thumbnailPath)).catch(() => {}));
     await Promise.all(deletes);
+    if (photo.fileSize && photo.membreUid) {
+      await runInInjectionContext(this.injector, () =>
+        updateDoc(doc(this.firestore, 'users', photo.membreUid), {
+          'storageUsed.defis': increment(-photo.fileSize),
+        })
+      ).catch(() => {});
+    }
     const remainingSnap = await runInInjectionContext(this.injector, () =>
       getDocs(query(collection(this.firestore, `defis/${defiId}/photos`), where('membreUid', '==', photo.membreUid), limit(1)))
     );

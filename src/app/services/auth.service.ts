@@ -198,6 +198,7 @@ export class AuthService {
     let portfolio = 0;
     let themes = 0;
     let oneshots = 0;
+    let defis = 0;
 
     const photosSnap = await runInInjectionContext(this.injector, () =>
       getDocs(query(collection(this.firestore, 'photos'), where('uid', '==', uid)))
@@ -236,6 +237,21 @@ export class AuthService {
       }
     }
 
+    const defisSnap = await runInInjectionContext(this.injector, () =>
+      getDocs(collection(this.firestore, 'defis'))
+    );
+    for (const defiDoc of defisSnap.docs) {
+      const defiPhotosSnap = await runInInjectionContext(this.injector, () =>
+        getDocs(query(
+          collection(this.firestore, 'defis', defiDoc.id, 'photos'),
+          where('membreUid', '==', uid)
+        ))
+      );
+      for (const pd of defiPhotosSnap.docs) {
+        defis += (pd.data() as { fileSize?: number }).fileSize ?? 0;
+      }
+    }
+
     let documents = 0;
     const docsSnap = await runInInjectionContext(this.injector, () =>
       getDocs(query(collection(this.firestore, 'documents'), where('uploadeurUid', '==', uid)))
@@ -246,7 +262,7 @@ export class AuthService {
 
     await runInInjectionContext(this.injector, () =>
       updateDoc(doc(this.firestore, 'users', uid), {
-        storageUsed: { portfolio, themes, oneshots, documents },
+        storageUsed: { portfolio, themes, oneshots, defis, documents },
         photoCount: photosSnap.docs.length,
       })
     );
@@ -307,7 +323,25 @@ export class AuthService {
       }
     }
 
-    // 4. Sorties : inscriptions directes (id doc == uid)
+    // 4. Défis : photos
+    const defisSnap = await runInInjectionContext(this.injector, () =>
+      getDocs(collection(this.firestore, 'defis'))
+    );
+    for (const defiDoc of defisSnap.docs) {
+      const defiPhotosSnap = await runInInjectionContext(this.injector, () =>
+        getDocs(query(
+          collection(this.firestore, 'defis', defiDoc.id, 'photos'),
+          where('membreUid', '==', uid)
+        ))
+      );
+      for (const pd of defiPhotosSnap.docs) {
+        const sp = (pd.data() as { storagePath?: string }).storagePath;
+        if (sp) deletes.push(deleteObject(ref(this.storage, sp)).catch(() => {}));
+        deletes.push(runInInjectionContext(this.injector, () => deleteDoc(pd.ref)));
+      }
+    }
+
+    // 5. Sorties : inscriptions directes (id doc == uid)
     const sortiesSnap = await runInInjectionContext(this.injector, () =>
       getDocs(collection(this.firestore, 'sorties'))
     );

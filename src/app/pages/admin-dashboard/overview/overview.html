@@ -324,6 +324,44 @@
             </div>
           </div>
 
+          <!-- Actualités -->
+          <div class="cleanup-block cleanup-block--warn">
+            <div class="cleanup-block-head">
+              <mat-icon class="cu-icon">newspaper</mat-icon>
+              <span>Actualités</span>
+            </div>
+            <p class="cleanup-block-desc">Supprime le doc article et son image de couverture.</p>
+            <div class="cleanup-opts">
+              <label class="cu-opt">
+                <input type="checkbox" [checked]="articleExpiredOnly()" (change)="onArticleExpiredOnlyChange($event)">
+                Expirés seulement
+              </label>
+            </div>
+            <div class="cleanup-date-row">
+              <span class="cleanup-date-lbl">Avant le</span>
+              <app-date-picker class="cleanup-dp" label="Date" [value]="cleanupArticleDate()" (valueChange)="onArticleDateChange($event)"></app-date-picker>
+            </div>
+            @if (cleanupArticlePreview(); as p) {
+              <div class="cleanup-summary">
+                @if (p.events === 0) {
+                  <span class="cu-empty">Aucun article à nettoyer.</span>
+                } @else {
+                  <strong>{{ p.events }}</strong> article(s) à supprimer
+                  @if (p.photosToDelete > 0) { · <span class="cu-del">{{ p.photosToDelete }}</span> image(s) de couverture}
+                }
+              </div>
+            }
+            @if (cleanupArticleResult(); as r) {
+              <div class="cleanup-result">✓ {{ r.processed }} article(s) supprimé(s)</div>
+            }
+            <div class="cleanup-btns">
+              <button class="btn-cu-preview" (click)="previewArticles()" [disabled]="cleanupRunning() || !cleanupArticleDate()">Analyser</button>
+              @if ((cleanupArticlePreview()?.events ?? 0) > 0) {
+                <button class="btn-cu-exec btn-cu-exec--danger" (click)="executeArticles()" [disabled]="cleanupRunning()">Supprimer</button>
+              }
+            </div>
+          </div>
+
           <!-- Orphelins Storage -->
           <div class="cleanup-block cleanup-block--full cleanup-block--orphan">
             <div class="cleanup-block-head">
@@ -333,7 +371,7 @@
             </div>
             <p class="cleanup-block-desc">
               Fichiers présents dans Storage sans document Firestore correspondant.
-              Périmètre : thèmes, one-shots, défis, sorties (portfolio et profils exclus).
+              Périmètre : thèmes, one-shots, défis, sorties, actualités (portfolio et profils exclus).
             </p>
             @if (orphanPreview(); as p) {
               <div class="cleanup-summary">
