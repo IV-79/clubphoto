@@ -6,7 +6,8 @@ import { AuthService } from '../../../services/auth.service';
 import { PhotoService } from '../../../services/photo.service';
 import { ConfirmService } from '../../../services/confirm.service';
 import { NotificationService } from '../../../services/notification.service';
-import { Photo, PhotoCategorie, PHOTO_CATEGORIES } from '../../../models/photo.model';
+import { ConfigService } from '../../../services/config.service';
+import { Photo, PhotoCategorie } from '../../../models/photo.model';
 import { LightboxPhoto, PhotoLightboxCallbacks } from '../../../models/commentaire.model';
 import { PhotoLightbox } from '../../../components/photo-lightbox/photo-lightbox';
 import { ImgRetryDirective } from '../../../directives/img-retry.directive';
@@ -23,8 +24,9 @@ export class MembreDetail {
   private photoService   = inject(PhotoService);
   private confirmService = inject(ConfirmService);
   private notifService   = inject(NotificationService);
+  private configService  = inject(ConfigService);
 
-  private readonly categoriesMap = new Map(PHOTO_CATEGORIES.map(c => [c.value, c.label]));
+  private readonly categoriesConfig = toSignal(this.configService.getCategories(), { initialValue: [] });
 
   profile = toSignal(this.authService.currentUserProfile$);
   private readonly loggedIn = computed(() => !!this.profile());
@@ -142,7 +144,8 @@ export class MembreDetail {
   }
 
   getCategorieLabel(val?: PhotoCategorie): string {
-    return val ? (this.categoriesMap.get(val) ?? val) : '';
+    if (!val) return '';
+    return this.categoriesConfig().find(c => c.value === val)?.label ?? val;
   }
 
   userName = computed(() => {
