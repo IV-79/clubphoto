@@ -103,6 +103,60 @@
                     }
                     @if (r.description) { <p class="card-desc">{{ r.description }}</p> }
                     <span class="card-date-full">{{ formatDateFull(r.date) }}</span>
+
+                    <!-- Documents -->
+                    <div class="doc-section">
+                      <div class="doc-section-header">
+                        <span class="doc-section-title">Documents</span>
+                        @if (uploadingFor() === r.id) {
+                          <span class="doc-upload-progress">Envoi {{ uploadProgress() }}%…</span>
+                        } @else {
+                          <label class="btn-doc-add" [for]="'upload-' + r.id">+ Ajouter</label>
+                          <input [id]="'upload-' + r.id" type="file" class="file-input-hidden" (change)="onFileSelected($event, r)" />
+                          <button class="btn-doc-lier" (click)="openPicker(r.id)">Lier un existant</button>
+                        }
+                      </div>
+                      @for (d of reunionDocs(r.id); track d.id) {
+                        <div class="doc-row">
+                          <mat-icon class="doc-icon" [style.color]="extMeta(d.extension).color">{{ extMeta(d.extension).icon }}</mat-icon>
+                          <span class="doc-nom">{{ d.nom }}.{{ d.extension }}</span>
+                          @if (d.type === 'reunion') {
+                            <span class="doc-badge-propre">Ajouté</span>
+                          } @else {
+                            <span class="doc-badge-lie">Lié</span>
+                          }
+                          <a [href]="d.url" target="_blank" rel="noopener" class="btn-doc-dl" (click)="$event.stopPropagation()" title="Télécharger">
+                            <mat-icon>download</mat-icon>
+                          </a>
+                          <button class="btn-doc-retirer" (click)="retirerDoc(r.id, d)" title="{{ d.type === 'reunion' ? 'Supprimer' : 'Délier' }}">×</button>
+                        </div>
+                      }
+                      @if (reunionDocs(r.id).length === 0 && uploadingFor() !== r.id) {
+                        <p class="doc-empty">Aucun document lié à cette réunion.</p>
+                      }
+                      @if (pickerOpenFor() === r.id) {
+                        <div class="doc-picker" (click)="$event.stopPropagation()">
+                          <input class="doc-picker-search" type="text" placeholder="Rechercher…"
+                                 [value]="pickerSearch()"
+                                 (input)="pickerSearch.set($any($event.target).value)"
+                                 (click)="$event.stopPropagation()" />
+                          @if (pickerLoading()) {
+                            <p class="doc-picker-msg">Chargement…</p>
+                          } @else if (filteredPickerDocs().length === 0) {
+                            <p class="doc-picker-msg">{{ pickerSearch() ? 'Aucun résultat.' : 'Aucun document disponible.' }}</p>
+                          } @else {
+                            @for (d of filteredPickerDocs(); track d.id) {
+                              <button class="doc-picker-item" [disabled]="liaisonLoading()"
+                                      (click)="lierDoc($event, r.id, d)">
+                                <mat-icon class="doc-icon-sm" [style.color]="extMeta(d.extension).color">{{ extMeta(d.extension).icon }}</mat-icon>
+                                {{ d.nom }}.{{ d.extension }}
+                              </button>
+                            }
+                          }
+                        </div>
+                      }
+                    </div>
+
                     <div class="card-actions">
                       <button class="btn-edit-sm" (click)="startEdit(r)">Modifier</button>
                       <button class="btn-delete-sm" (click)="supprimer(r)">Supprimer</button>
@@ -177,6 +231,60 @@
                     }
                     @if (r.description) { <p class="card-desc">{{ r.description }}</p> }
                     <span class="card-date-full">{{ formatDateFull(r.date) }}</span>
+
+                    <!-- Documents -->
+                    <div class="doc-section">
+                      <div class="doc-section-header">
+                        <span class="doc-section-title">Documents</span>
+                        @if (uploadingFor() === r.id) {
+                          <span class="doc-upload-progress">Envoi {{ uploadProgress() }}%…</span>
+                        } @else {
+                          <label class="btn-doc-add" [for]="'upload-p-' + r.id">+ Ajouter</label>
+                          <input [id]="'upload-p-' + r.id" type="file" class="file-input-hidden" (change)="onFileSelected($event, r)" />
+                          <button class="btn-doc-lier" (click)="openPicker(r.id)">Lier un existant</button>
+                        }
+                      </div>
+                      @for (d of reunionDocs(r.id); track d.id) {
+                        <div class="doc-row">
+                          <mat-icon class="doc-icon" [style.color]="extMeta(d.extension).color">{{ extMeta(d.extension).icon }}</mat-icon>
+                          <span class="doc-nom">{{ d.nom }}.{{ d.extension }}</span>
+                          @if (d.type === 'reunion') {
+                            <span class="doc-badge-propre">Ajouté</span>
+                          } @else {
+                            <span class="doc-badge-lie">Lié</span>
+                          }
+                          <a [href]="d.url" target="_blank" rel="noopener" class="btn-doc-dl" (click)="$event.stopPropagation()" title="Télécharger">
+                            <mat-icon>download</mat-icon>
+                          </a>
+                          <button class="btn-doc-retirer" (click)="retirerDoc(r.id, d)" title="{{ d.type === 'reunion' ? 'Supprimer' : 'Délier' }}">×</button>
+                        </div>
+                      }
+                      @if (reunionDocs(r.id).length === 0 && uploadingFor() !== r.id) {
+                        <p class="doc-empty">Aucun document lié à cette réunion.</p>
+                      }
+                      @if (pickerOpenFor() === r.id) {
+                        <div class="doc-picker" (click)="$event.stopPropagation()">
+                          <input class="doc-picker-search" type="text" placeholder="Rechercher…"
+                                 [value]="pickerSearch()"
+                                 (input)="pickerSearch.set($any($event.target).value)"
+                                 (click)="$event.stopPropagation()" />
+                          @if (pickerLoading()) {
+                            <p class="doc-picker-msg">Chargement…</p>
+                          } @else if (filteredPickerDocs().length === 0) {
+                            <p class="doc-picker-msg">{{ pickerSearch() ? 'Aucun résultat.' : 'Aucun document disponible.' }}</p>
+                          } @else {
+                            @for (d of filteredPickerDocs(); track d.id) {
+                              <button class="doc-picker-item" [disabled]="liaisonLoading()"
+                                      (click)="lierDoc($event, r.id, d)">
+                                <mat-icon class="doc-icon-sm" [style.color]="extMeta(d.extension).color">{{ extMeta(d.extension).icon }}</mat-icon>
+                                {{ d.nom }}.{{ d.extension }}
+                              </button>
+                            }
+                          }
+                        </div>
+                      }
+                    </div>
+
                     <div class="card-actions">
                       <button class="btn-edit-sm" (click)="startEdit(r)">Modifier</button>
                       <button class="btn-delete-sm" (click)="supprimer(r)">Supprimer</button>

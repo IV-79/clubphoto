@@ -18,6 +18,7 @@
       }
       <button class="filtre-btn" [class.actif]="filtre() === 'oneshot'" (click)="filtre.set('oneshot')">OneShot</button>
       <button class="filtre-btn" [class.actif]="filtre() === 'sortie'" (click)="filtre.set('sortie')">Événement</button>
+      <button class="filtre-btn" [class.actif]="filtre() === 'defi'" (click)="filtre.set('defi')">Défi</button>
     </div>
     <div class="filtre-sep"></div>
     <div class="filtre-group">
@@ -53,6 +54,17 @@
                     @if (isMembre() && item.event!.lieu) { <a class="card-lieu" [href]="mapsUrl(item.event!.lieu)" target="_blank" rel="noopener" (click)="$event.stopPropagation()"><mat-icon class="lieu-icon">location_on</mat-icon> {{ item.event!.lieu }}</a> }
                     @if (isMembre() && item.event!.description) { <p class="card-desc">{{ item.event!.description }}</p> }
                     <span class="card-date-full">{{ formatDate(item.date) }}</span>
+                    @if (isMembre() && getReunionDocs(item.event!.id).length > 0) {
+                      <div class="cal-docs">
+                        @for (d of getReunionDocs(item.event!.id); track d.id) {
+                          <a [href]="d.url" target="_blank" rel="noopener" class="cal-doc-link" (click)="$event.stopPropagation()">
+                            <mat-icon class="cal-doc-icon" [style.color]="extMeta(d.extension).color">{{ extMeta(d.extension).icon }}</mat-icon>
+                            <span class="cal-doc-nom">{{ d.nom }}.{{ d.extension }}</span>
+                            <mat-icon class="cal-doc-dl">download</mat-icon>
+                          </a>
+                        }
+                      </div>
+                    }
                   </div>
                 }
               </div>
@@ -95,7 +107,7 @@
               </div>
             </div>
 
-          } @else {
+          } @else if (item.kind === 'sortie') {
             <div class="event-card card-sortie" (click)="toggleExpand(item.id)">
               <div class="card-date-col">
                 <span class="card-day">{{ item.date | slice:8:10 }}</span>
@@ -116,6 +128,35 @@
                     }
                     <a [routerLink]="['/galeries/sorties', item.sortie!.id]" class="btn-os-voir" (click)="$event.stopPropagation()">Voir →</a>
                     <span class="card-date-full">{{ formatDate(item.date) }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+
+          } @else if (item.kind === 'defi') {
+            <div class="event-card card-defi" (click)="toggleExpand(item.id)">
+              <div class="card-date-col">
+                <span class="card-day">{{ item.date | slice:8:10 }}</span>
+              </div>
+              <div class="card-body">
+                <div class="card-summary">
+                  <span class="type-badge badge-defi">Défi Photo</span>
+                  <span class="os-statut-badge defi-statut-{{ defiStatut(item.defi!) }}">{{ defiStatutLabel(item.defi!) }}</span>
+                  <h3 class="card-titre">{{ item.defi!.titre }}</h3>
+                  <span class="expand-arrow">{{ expandedId() === item.id ? '▲' : '▼' }}</span>
+                </div>
+                @if (expandedId() === item.id) {
+                  <div class="card-detail">
+                    @if (item.defi!.description) { <p class="card-desc">{{ item.defi!.description }}</p> }
+                    @if (isMembre()) { <span class="os-createur">Organisé par {{ item.defi!.organisateurNom }}</span> }
+                    @if (item.defi!.inscriptionObligatoire) {
+                      <span class="os-createur">{{ item.defi!.nbInscrits }} inscrit(s)</span>
+                    }
+                    <span class="card-date-full">Soumissions du {{ formatDate(item.date) }} au {{ formatDate(item.defi!.dateFinSoumission) }}</span>
+                    <span class="card-date-full">Votes jusqu'au {{ formatDate(item.endDate!) }}</span>
+                    <div class="os-actions-inline" (click)="$event.stopPropagation()">
+                      <a [routerLink]="['/galeries/defis', item.defi!.id]" class="btn-os-voir">Voir le défi →</a>
+                    </div>
                   </div>
                 }
               </div>
@@ -161,6 +202,17 @@
                     @if (isMembre() && item.event!.lieu) { <a class="card-lieu" [href]="mapsUrl(item.event!.lieu)" target="_blank" rel="noopener" (click)="$event.stopPropagation()"><mat-icon class="lieu-icon">location_on</mat-icon> {{ item.event!.lieu }}</a> }
                     @if (isMembre() && item.event!.description) { <p class="card-desc">{{ item.event!.description }}</p> }
                     <span class="card-date-full">{{ formatDate(item.date) }}</span>
+                    @if (isMembre() && getReunionDocs(item.event!.id).length > 0) {
+                      <div class="cal-docs">
+                        @for (d of getReunionDocs(item.event!.id); track d.id) {
+                          <a [href]="d.url" target="_blank" rel="noopener" class="cal-doc-link" (click)="$event.stopPropagation()">
+                            <mat-icon class="cal-doc-icon" [style.color]="extMeta(d.extension).color">{{ extMeta(d.extension).icon }}</mat-icon>
+                            <span class="cal-doc-nom">{{ d.nom }}.{{ d.extension }}</span>
+                            <mat-icon class="cal-doc-dl">download</mat-icon>
+                          </a>
+                        }
+                      </div>
+                    }
                   </div>
                 }
               </div>
@@ -188,7 +240,7 @@
               </div>
             </div>
 
-          } @else {
+          } @else if (item.kind === 'sortie') {
             <div class="event-card card-passe" (click)="toggleExpand(item.id)">
               <div class="card-date-col">
                 <span class="card-day">{{ item.date | slice:8:10 }}</span>
@@ -208,6 +260,28 @@
                       <span class="os-createur">{{ item.sortie!.nbInscrits ?? 0 }} inscrit(s){{ item.sortie!.maxParticipants ? ' / ' + item.sortie!.maxParticipants : '' }}</span>
                     }
                     <a [routerLink]="['/galeries/sorties', item.sortie!.id]" class="btn-os-voir" (click)="$event.stopPropagation()">Voir les photos →</a>
+                    <span class="card-date-full">{{ formatDate(item.date) }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+
+          } @else if (item.kind === 'defi') {
+            <div class="event-card card-passe" (click)="toggleExpand(item.id)">
+              <div class="card-date-col">
+                <span class="card-day">{{ item.date | slice:8:10 }}</span>
+              </div>
+              <div class="card-body">
+                <div class="card-summary">
+                  <span class="type-badge badge-passe">Défi Photo</span>
+                  <h3 class="card-titre">{{ item.defi!.titre }}</h3>
+                  <span class="expand-arrow">{{ expandedId() === item.id ? '▲' : '▼' }}</span>
+                </div>
+                @if (expandedId() === item.id) {
+                  <div class="card-detail">
+                    @if (item.defi!.description) { <p class="card-desc">{{ item.defi!.description }}</p> }
+                    @if (isMembre()) { <span class="os-createur">Organisé par {{ item.defi!.organisateurNom }}</span> }
+                    <a [routerLink]="['/galeries/defis', item.defi!.id]" class="btn-os-voir" (click)="$event.stopPropagation()">Voir les résultats →</a>
                     <span class="card-date-full">{{ formatDate(item.date) }}</span>
                   </div>
                 }

@@ -2,27 +2,33 @@ import { Component, inject, signal, computed, effect, untracked } from '@angular
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { SlicePipe } from '@angular/common';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
-import { combineLatest, of, switchMap, map } from 'rxjs';
+import { combineLatest, firstValueFrom, of, switchMap, map } from 'rxjs';
 import { ReunionService } from '../../services/reunion.service';
 import { OneShotService } from '../../services/oneshot.service';
 import { SortieService } from '../../services/sortie.service';
+import { DefiService } from '../../services/defi.service';
+import { DocumentService } from '../../services/document.service';
 import { AuthService } from '../../services/auth.service';
 import { LoginModalService } from '../../services/login-modal.service';
 import { Reunion, REUNION_TYPES } from '../../models/reunion.model';
 import { OneShot, ONESHOT_STATUT_LABELS } from '../../models/oneshot.model';
 import { Sortie, SORTIE_TYPE_META, SortieType } from '../../models/sortie.model';
+import { Defi, DEFI_STATUT_LABELS, getDefiStatut } from '../../models/defi.model';
+import { ClubDocument, getExtensionMeta } from '../../models/document.model';
 import { MatIconModule } from '@angular/material/icon';
 
 const INIT = 3;
 const PAGE = 5;
 
 interface CalItem {
-  kind: 'event' | 'oneshot' | 'sortie';
+  kind: 'event' | 'oneshot' | 'sortie' | 'defi';
   id: string;
   date: string;
+  endDate?: string;  // défis: dateCloturVotes — used for passé detection
   event?: Reunion;
   oneshot?: OneShot;
   sortie?: Sortie;
+  defi?: Defi;
 }
 
 @Component({
@@ -35,13 +41,15 @@ export class Calendrier {
   private service = inject(ReunionService);
   private oneShotService = inject(OneShotService);
   private sortieService = inject(SortieService);
+  private defiService = inject(DefiService);
+  private docService = inject(DocumentService);
   private authService = inject(AuthService);
   private loginModal = inject(LoginModalService);
   private route = inject(ActivatedRoute);
 
   // --- Filtres ---
   types = REUNION_TYPES;
-  filtre = signal<'tous' | 'reunion' | 'oneshot' | 'sortie'>('tous');
+  filtre = signal<'tous' | 'reunion' | 'oneshot' | 'sortie' | 'defi'>('tous');
   showPasses = signal(false);
 
   private limitAVenir = signal(INIT);
@@ -77,14 +85,24 @@ export class Calendrier {
     { initialValue: [] as Sortie[] }
   );
 
+  private defis = toSignal(
+    toObservable(this.loggedIn).pipe(
+      switchMap(loggedIn =>
+        loggedIn ? this.defiService.getDefisOnce() : this.defiService.getPublicDefisOnce()
+      )
+    ),
+    { initialValue: [] as Defi[] }
+  );
+
   isMembre = computed(() => this.loggedIn());
 
-  // --- Items unifiés (événements + oneshots + sorties avec une date) ---
+  // --- Items unifiés (événements + oneshots + sorties + défis) ---
   private filtresItems = computed((): CalItem[] => {
     const f = this.filtre();
     const showEvents  = f === 'tous' || f === 'reunion';
     const showShots   = f === 'tous' || f === 'oneshot';
     const showSorties = f === 'tous' || f === 'sortie';
+    const showDefis   = f === 'tous' || f === 'defi';
 
     const events: CalItem[] = showEvents
       ? this.tous().map(e => ({ kind: 'event' as const, id: 'e.' + e.id, date: e.date, event: e }))
@@ -96,14 +114,23 @@ export class Calendrier {
     const sortieItems: CalItem[] = showSorties
       ? this.sorties().map(s => ({ kind: 'sortie' as const, id: 's.' + s.id, date: s.date, sortie: s }))
       : [];
-    return [...events, ...shots, ...sortieItems];
+    const defiItems: CalItem[] = showDefis
+      ? this.defis().map(d => ({
+          kind: 'defi' as const,
+          id: 'd.' + d.id,
+          date: d.dateDebutSoumission,
+          endDate: d.dateCloturVotes,
+          defi: d,
+        }))
+      : [];
+    return [...events, ...shots, ...sortieItems, ...defiItems];
   });
 
   private aVenirAll = computed((): CalItem[] =>
-    [...this.filtresItems().filter(i => !this.isPasse(i.date))].sort((a, b) => a.date.localeCompare(b.date))
+    [...this.filtresItems().filter(i => !this.isPasse(i.endDate ?? i.date))].sort((a, b) => a.date.localeCompare(b.date))
   );
   private passesAll = computed((): CalItem[] =>
-    [...this.filtresItems().filter(i => this.isPasse(i.date))].sort((a, b) => b.date.localeCompare(a.date))
+    [...this.filtresItems().filter(i => this.isPasse(i.endDate ?? i.date))].sort((a, b) => b.date.localeCompare(a.date))
   );
 
   aVenir        = computed(() => this.aVenirAll().slice(0, this.limitAVenir()));
@@ -136,6 +163,19 @@ export class Calendrier {
         });
       }
     });
+
+    effect(() => {
+      const expanded = this.expandedId();
+      if (!expanded?.startsWith('e.')) return;
+      const reunionId = expanded.slice(2);
+      untracked(() => this.loadReunionDocs(reunionId));
+    });
+  }
+
+  private async loadReunionDocs(reunionId: string) {
+    if (this.reunionDocs()[reunionId]) return;
+    const docs = await firstValueFrom(this.docService.getDocumentsByReunion(reunionId));
+    this.reunionDocs.update(m => ({ ...m, [reunionId]: docs }));
   }
 
   loadMoreAVenir() { this.limitAVenir.update(n => n + PAGE); }
@@ -144,6 +184,12 @@ export class Calendrier {
   expandedId = signal<string | null>(null);
   private reunionAutoExpanded = signal(false);
   private queryParams = toSignal(this.route.queryParamMap);
+
+  // --- Documents de réunion ---
+  private reunionDocs = signal<Record<string, ClubDocument[]>>({});
+
+  getReunionDocs(reunionId: string): ClubDocument[] { return this.reunionDocs()[reunionId] ?? []; }
+  extMeta(ext: string) { return getExtensionMeta(ext); }
 
   toggleExpand(id: string) {
     this.expandedId.set(this.expandedId() === id ? null : id);
@@ -225,4 +271,7 @@ export class Calendrier {
   }
 
   openLogin() { this.loginModal.open(); }
+
+  defiStatutLabel(defi: Defi): string { return DEFI_STATUT_LABELS[getDefiStatut(defi)]; }
+  defiStatut(defi: Defi)      { return getDefiStatut(defi); }
 }

@@ -37,7 +37,7 @@
 }
 .btn-action:hover { background: var(--bg-surface-raised); }
 .btn-action.btn-danger { border-color: #e53935; color: #e53935; }
-.btn-action.btn-danger:hover { background: #ffebee; }
+.btn-action.btn-danger:hover { background: rgba(229, 57, 53, 0.15); }
 
 /* ── Liste ─────────────────────────────────────── */
 
@@ -57,7 +57,7 @@
 }
 .notif-item:hover { background: var(--bg-surface-raised); }
 .notif-item.unread { background: var(--notif-unread-bg); border-color: #c5d8f5; }
-.notif-item.unread:hover { background: #e4eeff; }
+.notif-item.unread:hover { background: var(--notif-unread-hover-bg); }
 
 .notif-type-icon {
   font-size: 1.2rem;

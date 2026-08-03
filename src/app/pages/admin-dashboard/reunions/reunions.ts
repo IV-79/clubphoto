@@ -1,6 +1,7 @@
 import { Component, inject, signal, computed } from '@angular/core';
 import { SlicePipe } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { firstValueFrom } from 'rxjs';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -8,8 +9,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { DatePickerComponent } from '../../../components/date-picker/date-picker';
 import { ReunionService } from '../../../services/reunion.service';
+import { DocumentService } from '../../../services/document.service';
+import { AuthService } from '../../../services/auth.service';
 import { ConfirmService } from '../../../services/confirm.service';
 import { Reunion } from '../../../models/reunion.model';
+import { ClubDocument, getExtensionMeta, extractExtension } from '../../../models/document.model';
 
 const INIT = 8;
 const PAGE = 8;
@@ -26,7 +30,9 @@ const PAGE = 8;
   styleUrl: './reunions.css',
 })
 export class Reunions {
-  private service = inject(ReunionService);
+  private service       = inject(ReunionService);
+  private docService    = inject(DocumentService);
+  private authService   = inject(AuthService);
   private confirmService = inject(ConfirmService);
 
   private readonly todayStr = (() => {
@@ -43,6 +49,25 @@ export class Reunions {
   saving = signal(false);
   flashEdit = signal(false);
   private flashTimer: ReturnType<typeof setTimeout> | null = null;
+
+  // --- Documents ---
+  docsByReunion   = signal<Record<string, ClubDocument[]>>({});
+  uploadingFor    = signal<string | null>(null);
+  uploadProgress  = signal<number>(0);
+  pickerOpenFor   = signal<string | null>(null);
+  pickerDocs      = signal<ClubDocument[]>([]);
+  pickerLoading   = signal(false);
+  pickerSearch    = signal('');
+  liaisonLoading  = signal(false);
+  private reunionDossierId: string | null = null;
+
+  filteredPickerDocs = computed(() => {
+    const q = this.pickerSearch().toLowerCase().trim();
+    if (!q) return this.pickerDocs();
+    return this.pickerDocs().filter(d =>
+      d.nom.toLowerCase().includes(q) || d.extension.toLowerCase().includes(q)
+    );
+  });
 
   private limitAVenir = signal(INIT);
   private limitPasses = signal(INIT);
@@ -95,11 +120,11 @@ export class Reunions {
 
   toggleExpand(id: string) {
     if (this.editingId() === id) { this.cancelEdit(); return; }
-    if (this.editingId() !== null) {
-      this.triggerFlash();
-      return;
-    }
-    this.expandedId.set(this.expandedId() === id ? null : id);
+    if (this.editingId() !== null) { this.triggerFlash(); return; }
+    const newId = this.expandedId() === id ? null : id;
+    this.expandedId.set(newId);
+    this.pickerOpenFor.set(null);
+    if (newId) this.loadDocs(newId);
   }
 
   private triggerFlash() {
@@ -147,6 +172,110 @@ export class Reunions {
     await this.service.supprimer(r.id);
     if (this.editingId() === r.id) this.editingId.set(null);
     if (this.expandedId() === r.id) this.expandedId.set(null);
+  }
+
+  // --- Méthodes documents ---
+
+  reunionDocs(reunionId: string): ClubDocument[] { return this.docsByReunion()[reunionId] ?? []; }
+
+  extMeta(ext: string) { return getExtensionMeta(ext); }
+
+  private async loadDocs(reunionId: string) {
+    const docs = await firstValueFrom(this.docService.getDocumentsByReunion(reunionId));
+    docs.sort((a, b) => a.dateCreation.localeCompare(b.dateCreation));
+    this.docsByReunion.update(m => ({ ...m, [reunionId]: docs }));
+  }
+
+  async onFileSelected(event: Event, reunion: Reunion) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file || this.uploadingFor()) return;
+    input.value = '';
+
+    const [profile, dossier] = await Promise.all([
+      firstValueFrom(this.authService.currentUserProfile$),
+      this.getOrCreateReunionDossier(),
+    ]);
+    if (!profile) return;
+
+    this.uploadingFor.set(reunion.id);
+    this.uploadProgress.set(0);
+    try {
+      const ext = extractExtension(file.name);
+      const nom = file.name.slice(0, file.name.lastIndexOf('.')) || file.name;
+      const docId = this.docService.generateDocId();
+      const { url, storagePath } = await this.docService.uploadFile(
+        docId, file, file.name,
+        pct => this.uploadProgress.set(pct)
+      );
+      await this.docService.createDocument(docId, {
+        nom, extension: ext, taille: file.size, dossier,
+        storagePath, url,
+        uploadeurUid: profile.uid,
+        uploadeurNom: `${profile.prenom ?? ''} ${profile.nom}`.trim(),
+        dateCreation: new Date().toISOString(),
+        type: 'reunion',
+        reunionId: reunion.id,
+      });
+      await this.docService.incrementStorage(profile.uid, file.size);
+      await this.loadDocs(reunion.id);
+    } finally {
+      this.uploadingFor.set(null);
+    }
+  }
+
+  private async getOrCreateReunionDossier(): Promise<string> {
+    if (this.reunionDossierId) return this.reunionDossierId;
+    const nom = 'Réunions';
+    const dossiers = await firstValueFrom(this.docService.getDossiers());
+    if (!dossiers.find(d => d.nom === nom)) {
+      await this.docService.addDossier(nom, dossiers.length);
+    }
+    // dossier stocke le nom (pas l'id) — convention du composant documents
+    this.reunionDossierId = nom;
+    return nom;
+  }
+
+  async openPicker(reunionId: string) {
+    if (this.pickerOpenFor() === reunionId) { this.pickerOpenFor.set(null); return; }
+    this.pickerSearch.set('');
+    this.pickerOpenFor.set(reunionId);
+    this.pickerLoading.set(true);
+    try {
+      const all = await firstValueFrom(this.docService.getDocumentsOnce());
+      this.pickerDocs.set(all.filter(d => !d.reunionId && (!d.type || d.type === 'general')));
+    } finally {
+      this.pickerLoading.set(false);
+    }
+  }
+
+  async lierDoc(event: Event, reunionId: string, d: ClubDocument) {
+    event.stopPropagation();
+    if (this.liaisonLoading()) return;
+    this.liaisonLoading.set(true);
+    try {
+      await this.docService.lierAReunion(d.id!, reunionId);
+      this.pickerOpenFor.set(null);
+      this.pickerSearch.set('');
+      await this.loadDocs(reunionId);
+    } finally {
+      this.liaisonLoading.set(false);
+    }
+  }
+
+  async retirerDoc(reunionId: string, d: ClubDocument) {
+    const msg = d.type === 'reunion'
+      ? `Supprimer définitivement « ${d.nom} » ?`
+      : `Retirer le lien vers « ${d.nom} » ? Le document restera dans la bibliothèque.`;
+    const ok = await this.confirmService.confirm(msg);
+    if (!ok) return;
+    if (d.type === 'reunion') {
+      await this.docService.deleteDocument(d.id!, d.storagePath);
+      await this.docService.decrementStorage(d.uploadeurUid, d.taille);
+    } else {
+      await this.docService.delierReunion(d.id!);
+    }
+    await this.loadDocs(reunionId);
   }
 
   loadMoreAVenir() { this.limitAVenir.update(n => n + PAGE); }

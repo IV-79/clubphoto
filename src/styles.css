@@ -48,6 +48,7 @@
   --nav-panel-text:     #1a1a1a;
   --nav-panel-icon:     #444444;
   --notif-unread-bg:    #eef4ff;
+  --notif-unread-hover-bg: #ddeaff;
   --chip-bg:            #f3f3f3;
   --chip-border:        #e5e5e5;
   --avatar-border:      #f0f0f0;
@@ -130,6 +131,7 @@ html[data-theme="dark"] {
   --nav-panel-text:     #e8e8e8;
   --nav-panel-icon:     #aaaaaa;
   --notif-unread-bg:    #1a2a4a;
+  --notif-unread-hover-bg: #1f3258;
   --chip-bg:            #2a2a2a;
   --chip-border:        #3a3a3a;
   --avatar-border:      #3a3a3a;

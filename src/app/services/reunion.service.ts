@@ -7,13 +7,15 @@ import { map } from 'rxjs/operators';
 import { Reunion } from '../models/reunion.model';
 import { NotificationService } from './notification.service';
 import { AuthService } from './auth.service';
+import { DocumentService } from './document.service';
 
 @Injectable({ providedIn: 'root' })
 export class ReunionService {
-  private firestore = inject(Firestore);
-  private injector = inject(Injector);
+  private firestore   = inject(Firestore);
+  private injector    = inject(Injector);
   private notifService = inject(NotificationService);
-  private authService = inject(AuthService);
+  private authService  = inject(AuthService);
+  private docService   = inject(DocumentService);
 
   getReunions(): Observable<Reunion[]> {
     const q = query(collection(this.firestore, 'reunions'), orderBy('date', 'asc'));
@@ -68,6 +70,7 @@ export class ReunionService {
   }
 
   async supprimer(id: string): Promise<void> {
+    await this.docService.unlinkDocumentsByReunion(id);
     await runInInjectionContext(this.injector, () =>
       deleteDoc(doc(this.firestore, 'reunions', id))
     );

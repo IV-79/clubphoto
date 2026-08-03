@@ -64,6 +64,11 @@ export class Notifications {
     if (uid) await this.notifService.deleteNotif(uid, n.id);
   }
 
+  async deleteUnread() {
+    const uid = this.profile()?.uid;
+    if (uid) await this.notifService.deleteUnread(uid);
+  }
+
   async deleteAll() {
     const uid = this.profile()?.uid;
     if (uid) await this.notifService.deleteAll(uid);

@@ -4,6 +4,24 @@
 
 ## En cours (alpha)
 
+### Documents — modification par les admins (2026-08-03)
+
+L'admin voit désormais le bouton "Modifier" sur tous les documents (pas seulement les siens). `canEdit()` accepte `isAdmin()` en plus du propriétaire. Correction associée : quand un admin remplace le fichier d'un autre membre, le delta de taille est imputé sur le quota de l'uploadeur original (`doc.uploadeurUid`) et non sur celui de l'admin.
+
+### Notifications — fix dark mode et bouton adaptatif (2026-08-03)
+
+Correction du survol des notifications non lues en mode sombre : la couleur de fond `#e4eeff` (codée en dur, invisible en dark) est remplacée par `var(--notif-unread-hover-bg)` (nouveau token CSS : `#ddeaff` en clair, `#1f3258` en sombre). Même correction pour le hover du bouton "danger" (`#ffebee` → `rgba(229,57,53,0.15)`). Comportement du bouton de suppression rendu adaptatif : quand il existe des notifications non lues, le bouton affiche "Supprimer non lus" (nouvelle méthode `deleteUnread` dans `NotificationService`) ; une fois toutes lues, il affiche "Tout supprimer".
+
+### Calendrier — défis photo (2026-08-03)
+
+Les défis photo apparaissent désormais dans la page `/calendrier` comme 4ᵉ type d'événement (aux côtés des réunions, one-shots et sorties). Filtre "Défi" ajouté. Carte verte avec badge statut (À venir / Soumissions / Vote / Résultats) et plage de dates. Le calcul "passé" repose sur `dateCloturVotes` (et non `dateDebutSoumission`). Membres connectés : chargement via `getDefisOnce()` (tous) ; visiteurs : `getPublicDefisOnce()`.
+
+### Réunions — documents liés (admin + calendrier) (2026-08-03)
+
+**Admin (`/admin/reunions`)** : chaque réunion (à venir et passées) dispose d'une section "Documents" dans son détail. Deux modes d'ajout : upload d'un nouveau fichier (type `'reunion'`, rangé automatiquement dans le dossier "Réunions" — créé à la volée si absent) ou liaison d'un document général existant via un picker avec recherche. Badge "Ajouté" (vert) pour les fichiers uploadés directement, "Lié" (bleu) pour les documents généraux liés. Croix de retrait : supprime le fichier si `type:'reunion'`, délier seulement si général. Suppression d'une réunion : délie les documents liés sans les supprimer. `ClubDocument` étendu avec `type?: 'general'|'reunion'` et `reunionId?: string`. Nouvelles méthodes dans `DocumentService` : `getDocumentsOnce`, `getDocumentsByReunion`, `lierAReunion`, `delierReunion`, `unlinkDocumentsByReunion`. Règle Firestore `documents` mise à jour : `allow update` accepte désormais `isAdmin()` en plus du propriétaire.
+
+**Calendrier (`/calendrier`)** : les cartes réunion affichent la liste des documents liés (membres connectés uniquement), avec icône, nom et lien de téléchargement. Chargement paresseux et mis en cache par `reunionId` via un signal `Record<string, ClubDocument[]>`.
+
 ### Dashboard admin — Maintenance : actualités, storageUsed défis, corrections orphelins (2026-07-16)
 
 **Nettoyage actualités** : nouveau panneau dans la section Maintenance du dashboard. Critère : `dateCreation < date choisie` (défaut −2 ans). Option checkbox « Expirés seulement » cochée par défaut (ne cible que les articles avec `statut === 'expire'`). Supprime le doc Firestore et l'image de couverture Storage (`articles/{id}/couverture.webp`) via `articleService.deleteArticle()`. Rafraîchit les KPI après exécution.

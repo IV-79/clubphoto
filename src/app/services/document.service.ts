@@ -1,10 +1,11 @@
 import { Injectable, inject, Injector, runInInjectionContext } from '@angular/core';
 import {
   Firestore, collection, collectionData, doc,
-  addDoc, updateDoc, deleteDoc, setDoc, query, orderBy, increment, getDocs, where
+  addDoc, updateDoc, deleteDoc, setDoc, query, orderBy, increment, getDocs, where, deleteField
 } from '@angular/fire/firestore';
 import { Storage, ref, uploadBytesResumable, getDownloadURL, deleteObject, updateMetadata } from '@angular/fire/storage';
-import { Observable } from 'rxjs';
+import { Observable, from } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { ClubDocument, DocumentDossier } from '../models/document.model';
 
 @Injectable({ providedIn: 'root' })
@@ -81,6 +82,39 @@ export class DocumentService {
     await runInInjectionContext(this.injector, () =>
       deleteDoc(doc(this.firestore, 'documents', id))
     );
+  }
+
+  getDocumentsOnce(): Observable<ClubDocument[]> {
+    return from(runInInjectionContext(this.injector, () =>
+      getDocs(query(collection(this.firestore, 'documents'), orderBy('dateCreation', 'desc')))
+    )).pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as ClubDocument))));
+  }
+
+  getDocumentsByReunion(reunionId: string): Observable<ClubDocument[]> {
+    return from(runInInjectionContext(this.injector, () =>
+      getDocs(query(collection(this.firestore, 'documents'), where('reunionId', '==', reunionId)))
+    )).pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as ClubDocument))));
+  }
+
+  async lierAReunion(docId: string, reunionId: string): Promise<void> {
+    await runInInjectionContext(this.injector, () =>
+      updateDoc(doc(this.firestore, 'documents', docId), { reunionId })
+    );
+  }
+
+  async delierReunion(docId: string): Promise<void> {
+    await runInInjectionContext(this.injector, () =>
+      updateDoc(doc(this.firestore, 'documents', docId), { reunionId: deleteField() })
+    );
+  }
+
+  async unlinkDocumentsByReunion(reunionId: string): Promise<void> {
+    const snap = await runInInjectionContext(this.injector, () =>
+      getDocs(query(collection(this.firestore, 'documents'), where('reunionId', '==', reunionId)))
+    );
+    await Promise.all(snap.docs.map(d =>
+      this.delierReunion(d.id)
+    ));
   }
 
   async getDocumentsByUser(uid: string): Promise<ClubDocument[]> {

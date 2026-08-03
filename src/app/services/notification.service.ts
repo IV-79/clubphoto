@@ -140,6 +140,19 @@ export class NotificationService {
     );
   }
 
+  async deleteUnread(uid: string): Promise<void> {
+    const snap = await runInInjectionContext(this.injector, () =>
+      getDocs(query(
+        collection(this.firestore, `notifications/${uid}/items`),
+        where('lu', '==', false)
+      ))
+    );
+    if (!snap.docs.length) return;
+    const batch = writeBatch(this.firestore);
+    for (const d of snap.docs) batch.delete(d.ref);
+    await batch.commit();
+  }
+
   async deleteAll(uid: string): Promise<void> {
     const snap = await runInInjectionContext(this.injector, () =>
       getDocs(collection(this.firestore, `notifications/${uid}/items`))

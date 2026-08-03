@@ -139,6 +139,7 @@
 .card-sortie   .card-date-col { background: #f57c00; }
 .card-passe    .card-date-col { background: #bdbdbd; }
 .card-oneshot  .card-date-col { background: #7e57c2; }
+.card-defi     .card-date-col { background: #388e3c; }
 
 .card-day {
   font-size: 1.6rem;
@@ -195,6 +196,12 @@
 .badge-sortie   { background: var(--c-orange-bg); color: var(--c-orange); }
 .badge-passe    { background: var(--border-medium); color: var(--text-muted); }
 .badge-oneshot  { background: var(--c-violet-bg); color: var(--c-violet); }
+.badge-defi     { background: var(--c-green-bg);  color: var(--c-green); }
+
+.defi-statut-a_venir    { background: var(--border-medium);  color: var(--text-muted); }
+.defi-statut-soumission { background: var(--c-green-bg);     color: var(--c-green); }
+.defi-statut-vote       { background: var(--c-blue-bg);      color: var(--c-blue); }
+.defi-statut-resultats  { background: var(--c-amber-bg);     color: var(--c-amber); }
 
 .card-titre { margin: 0; font-size: 1rem; font-weight: 500; color: var(--text-primary); }
 .card-lieu  { font-size: 0.82rem; color: var(--c-blue); text-decoration: none; }
@@ -311,3 +318,22 @@ a.card-lieu:hover { text-decoration: underline; }
 .load-more-btn:hover { border-color: var(--border-medium); color: var(--text-primary); }
 
 .empty-state { text-align: center; padding: 80px 24px; color: var(--text-hint); }
+
+.cal-docs { display: flex; flex-direction: column; gap: 2px; margin-top: 6px; }
+
+.cal-doc-link {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+  padding: 4px 6px;
+  border-radius: 5px;
+  transition: background 0.12s;
+}
+.cal-doc-link:hover { background: var(--border); color: var(--text-primary); }
+
+.cal-doc-icon { font-size: 1rem; width: 18px; height: 18px; flex-shrink: 0; }
+.cal-doc-nom  { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cal-doc-dl   { font-size: 0.85rem; width: 16px; height: 16px; color: var(--text-hint); flex-shrink: 0; }

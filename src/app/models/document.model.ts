@@ -4,6 +4,8 @@ export interface DocumentDossier {
   ordre: number;
 }
 
+export type DocumentType = 'general' | 'reunion';
+
 export interface ClubDocument {
   id?: string;
   nom: string;
@@ -16,6 +18,8 @@ export interface ClubDocument {
   uploadeurNom: string;
   dateCreation: string;
   dateMiseAJour?: string;
+  type?: DocumentType;  // undefined = 'general' (rétrocompat)
+  reunionId?: string;   // défini quand le doc est lié à une réunion
 }
 
 interface ExtensionMeta { icon: string; color: string; label: string; }

@@ -429,7 +429,7 @@ export class Documents {
   }
 
   canEdit(doc: ClubDocument): boolean {
-    return doc.uploadeurUid === this.currentUid();
+    return doc.uploadeurUid === this.currentUid() || this.isAdmin();
   }
 
   canDelete(doc: ClubDocument): boolean {
@@ -557,8 +557,8 @@ export class Documents {
           extension, taille: file.size, url, storagePath,
         });
         const diff = file.size - doc.taille;
-        if (diff > 0) await this.documentService.incrementStorage(profile.uid, diff);
-        else if (diff < 0) await this.documentService.decrementStorage(profile.uid, -diff);
+        if (diff > 0) await this.documentService.incrementStorage(doc.uploadeurUid, diff);
+        else if (diff < 0) await this.documentService.decrementStorage(doc.uploadeurUid, -diff);
         await this.notifService.broadcast('document',
           `Document mis à jour : ${this.replaceNom.trim()}`,
           { lien: '/membre/documents', sourceNom: `${profile.prenom ?? ''} ${profile.nom}`.trim() }
