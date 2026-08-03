@@ -20,7 +20,7 @@ npm run test       # unit tests via Vitest
 - **Angular Material 21 + PrimeNG 21** — UI components
 - **Vitest 4 + jsdom** — unit tests
 
-Firebase project: `clubphotopj` (single project for dev & prod).
+Firebase project: `clubphototaintournon` (project ID: `clubphotopj`, single project for dev & prod).
 
 ## Architecture
 

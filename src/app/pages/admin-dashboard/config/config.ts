@@ -27,10 +27,12 @@ export class AdminConfig implements OnInit {
   sortedCategories = computed(() =>
     [...this.categories()].sort((a, b) => a.label.localeCompare(b.label, 'fr', { sensitivity: 'base' }))
   );
-  saving     = signal(false);
-  newLabel   = '';
-  errorMsg   = '';
-  confirmReset = signal(false);
+  saving        = signal(false);
+  newLabel      = '';
+  errorMsg      = '';
+  confirmReset  = signal(false);
+  editingCatValue = signal<string | null>(null);
+  editCatLabel    = '';
 
   // Image page d'accueil
   siteConfig     = toSignal(this.configService.getSiteConfig(), { initialValue: {} as any });
@@ -61,6 +63,23 @@ export class AdminConfig implements OnInit {
     this.errorMsg = '';
     this.save();
   }
+
+  startEditCat(cat: CategorieConfig) {
+    this.editingCatValue.set(cat.value);
+    this.editCatLabel = cat.label;
+  }
+
+  saveEditCat(cat: CategorieConfig) {
+    const label = this.editCatLabel.trim();
+    if (!label) return;
+    this.categories.update(list =>
+      list.map(c => c.value === cat.value ? { ...c, label } : c)
+    );
+    this.editingCatValue.set(null);
+    this.save();
+  }
+
+  cancelEditCat() { this.editingCatValue.set(null); }
 
   async deleteCategorie(cat: CategorieConfig) {
     const ok = await this.confirmService.confirm(`Supprimer la catégorie « ${cat.label} » ?`);

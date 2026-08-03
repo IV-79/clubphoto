@@ -83,9 +83,18 @@
     <div class="categories-list">
       @for (cat of sortedCategories(); track cat.value) {
         <div class="category-row">
-          <span class="cat-label">{{ cat.label }}</span>
-          <span class="cat-value">{{ cat.value }}</span>
-          <button class="btn-delete" (click)="deleteCategorie(cat)" title="Supprimer">×</button>
+          @if (editingCatValue() === cat.value) {
+            <input class="input-edit-cat" [(ngModel)]="editCatLabel"
+                   (keydown.enter)="saveEditCat(cat)" (keydown.escape)="cancelEditCat()"
+                   autofocus />
+            <button class="btn-edit-ok" (click)="saveEditCat(cat)" title="Enregistrer">✓</button>
+            <button class="btn-edit-cancel" (click)="cancelEditCat()" title="Annuler">×</button>
+          } @else {
+            <span class="cat-label">{{ cat.label }}</span>
+            <span class="cat-value">{{ cat.value }}</span>
+            <button class="btn-edit" (click)="startEditCat(cat)" title="Renommer">✎</button>
+            <button class="btn-delete" (click)="deleteCategorie(cat)" title="Supprimer">×</button>
+          }
         </div>
       } @empty {
         <p class="empty-msg">Aucune catégorie. Ajoutez-en une ci-dessous.</p>
