@@ -23,4 +23,8 @@ export class MembresGuide {
   scrollToTop(): void {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
+
+  printGuide(): void {
+    window.print();
+  }
 }

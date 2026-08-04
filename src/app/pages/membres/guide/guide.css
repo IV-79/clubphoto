@@ -384,5 +384,87 @@ kbd {
   background: var(--text-secondary);
 }
 
+/* Bouton impression */
+.guide-print-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+  padding: 0.55rem 1.3rem;
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1.5px solid var(--border-medium);
+  border-radius: 2rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.guide-print-btn mat-icon {
+  font-size: 1.1rem;
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.guide-print-btn:hover {
+  border-color: var(--text-accent);
+  color: var(--text-accent);
+  background: var(--bg-surface-alt);
+}
+
 /* Les dark overrides sont dans styles.css (global) car ViewEncapsulation.Emulated
    scoperait incorrectement html[data-theme] avec [_ngcontent]. */
+
+/* ── Impression / Save as PDF ─────────────────────────── */
+@media print {
+  /* Masquer les éléments interactifs */
+  .guide-nav,
+  .guide-print-btn,
+  .scroll-top-btn {
+    display: none !important;
+  }
+
+  /* Supprimer les marges inutiles */
+  .guide-page {
+    max-width: 100%;
+    padding: 0;
+  }
+
+  /* Éviter les coupures de page au milieu d'une carte */
+  .guide-card,
+  .step,
+  .admin-field-row {
+    break-inside: avoid;
+  }
+
+  /* Chaque section commence sur la même page si possible */
+  .guide-section {
+    break-inside: avoid;
+  }
+
+  /* Simplifier les fonds colorés pour l'impression */
+  .guide-card {
+    background: #fff;
+    border: 1px solid #ccc;
+    box-shadow: none;
+  }
+
+  .guide-card-admin {
+    background: #f9f7ff;
+    border-color: #c7d2fe;
+  }
+
+  .guide-note {
+    background: #fffbeb;
+    border-left: 3px solid #f59e0b;
+  }
+
+  /* Forcer les couleurs de badges à rester visibles */
+  .step-preparation, .tl-attente, .step-attente { background: #f3f4f6 !important; color: #374151 !important; }
+  .step-ouvert, .tl-ouvert, .badge-inline.step-ouvert { background: #dcfce7 !important; color: #166534 !important; }
+  .step-vote, .tl-vote, .badge-inline.step-vote, .badge-inline.vote { background: #fef3c7 !important; color: #92400e !important; }
+  .step-resultats, .tl-resultats, .badge-inline.resultats { background: #ede9fe !important; color: #5b21b6 !important; }
+  .step-inscription, .badge-inline.inscription { background: #dbeafe !important; color: #1d4ed8 !important; }
+  .step-fermeture { background: #e0f2fe !important; color: #0369a1 !important; }
+}
