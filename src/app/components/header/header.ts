@@ -59,9 +59,10 @@ export class Header {
   // Notifications
   private profile = toSignal(this.authService.currentUserProfile$);
   private readonly uid = computed(() => this.profile()?.uid ?? null);
+  private readonly notifTrigger = computed(() => ({ uid: this.uid(), r: this.notifService.refresh() }));
 
-  private notifs$ = toObservable(this.uid).pipe(
-    switchMap(uid => uid ? this.notifService.getNotifications(uid) : of([] as AppNotification[]))
+  private notifs$ = toObservable(this.notifTrigger).pipe(
+    switchMap(({ uid }) => uid ? this.notifService.getNotifications(uid) : of([] as AppNotification[]))
   );
   notifications = toSignal(this.notifs$, { initialValue: [] as AppNotification[] });
   unreadCount   = computed(() => this.notifications().filter(n => !n.lu).length);

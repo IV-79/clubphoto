@@ -45,6 +45,13 @@
           </div>
         </div>
 
+        @if (d.theme) {
+          <div class="info-card info-card-theme">
+            <h3 class="info-card-title">Thème</h3>
+            <p class="theme-text">{{ d.theme }}</p>
+          </div>
+        }
+
         @if (profile() && isInscrit() && s === 'vote') {
           <div class="votes-restants">
             Votes effectués : {{ mesVotesIds().length }} / {{ d.maxVotes }}

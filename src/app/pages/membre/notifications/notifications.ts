@@ -1,4 +1,4 @@
-import { Component, inject, computed, signal } from '@angular/core';
+import { Component, inject, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { switchMap, of } from 'rxjs';
@@ -20,9 +20,8 @@ export class Notifications {
 
   profile = toSignal(this.authService.currentUserProfile$);
   private readonly uid = computed(() => this.profile()?.uid ?? null);
-  private refreshTick = signal(0);
 
-  private readonly notifTrigger = computed(() => ({ uid: this.uid(), tick: this.refreshTick() }));
+  private readonly notifTrigger = computed(() => ({ uid: this.uid(), r: this.notifService.refresh() }));
 
   notifications = toSignal(
     toObservable(this.notifTrigger).pipe(
@@ -32,6 +31,7 @@ export class Notifications {
   );
 
   unreadCount = computed(() => this.notifications().filter(n => !n.lu).length);
+  readCount   = computed(() => this.notifications().filter(n =>  n.lu).length);
 
   notifIcon(type: AppNotification['type']): string {
     return NOTIF_ICONS[type] ?? '🔔';
@@ -52,43 +52,30 @@ export class Notifications {
   async onNotifClick(n: AppNotification) {
     const uid = this.profile()?.uid;
     if (!uid) return;
-    if (!n.lu) {
-      await this.notifService.markAsRead(uid, n.id);
-      this.refreshTick.update(t => t + 1);
-    }
+    if (!n.lu) await this.notifService.markAsRead(uid, n.id);
     if (n.type !== 'admin' && n.lien) this.router.navigateByUrl(n.lien);
   }
 
   async markAllRead() {
     const uid = this.profile()?.uid;
-    if (uid) {
-      await this.notifService.markAllAsRead(uid);
-      this.refreshTick.update(t => t + 1);
-    }
+    if (uid) await this.notifService.markAllAsRead(uid);
   }
 
   async deleteNotif(n: AppNotification, event: Event) {
     event.stopPropagation();
     const uid = this.profile()?.uid;
-    if (uid) {
-      await this.notifService.deleteNotif(uid, n.id);
-      this.refreshTick.update(t => t + 1);
-    }
+    if (uid) await this.notifService.deleteNotif(uid, n.id);
   }
 
-  async deleteUnread() {
+  async deleteLus() {
     const uid = this.profile()?.uid;
-    if (uid) {
-      await this.notifService.deleteUnread(uid);
-      this.refreshTick.update(t => t + 1);
-    }
+    if (!uid) return;
+    const ids = this.notifications().filter(n => n.lu).map(n => n.id);
+    if (ids.length) await this.notifService.deleteByIds(uid, ids);
   }
 
   async deleteAll() {
     const uid = this.profile()?.uid;
-    if (uid) {
-      await this.notifService.deleteAll(uid);
-      this.refreshTick.update(t => t + 1);
-    }
+    if (uid) await this.notifService.deleteAll(uid);
   }
 }

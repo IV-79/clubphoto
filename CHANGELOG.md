@@ -4,6 +4,34 @@
 
 ## En cours (alpha)
 
+### Actualités — correction de l'ordre après "Charger plus" (2026-08-04)
+
+Après un chargement supplémentaire, les nouveaux articles s'inséraient au milieu de la liste déjà affichée (selon leur `dateCreation`), ce qui donnait l'impression que l'ordre changeait. Cause : le `filtered()` re-triait l'intégralité du tableau à chaque page. Correction : remplacement du `.sort()` global par une **partition stable** — les épinglés actifs d'abord (dans leur ordre Firestore), le reste ensuite (dans leur ordre Firestore). Les nouvelles pages s'ajoutent proprement à la fin, sans bouleverser ce qui est déjà affiché.
+
+### Actualités — pagination + tri épinglé (2026-08-04)
+
+Chargement initial de 6 articles, puis "Charger plus" par tranche de 3 (`getDocs` avec curseur `startAfter`). Le tri est géré au niveau Firestore (`orderBy('epingle', 'desc')` + `orderBy('dateCreation', 'desc')`) : les articles épinglés apparaissent toujours dans les premières pages, même s'ils sont anciens. Trois index composites ajoutés dans `firestore.indexes.json` (et créés dans la Console Firebase) pour couvrir les trois cas de la requête (anonyme / membre / admin). Côté client, un badge 📌 (`push_pin`) s'affiche en haut à droite des cartes d'articles épinglés actifs (épingle active et date événement future ou absente). Épinglés expirés (date passée) sont traités comme des articles normaux côté tri.
+
+### Notifications — bouton "Supprimer les lus" (2026-08-04)
+
+Inversion du comportement du bouton de suppression groupée : au lieu de supprimer les notifications non lues (contre-intuitif — on efface ce qu'on a déjà vu), le bouton supprime désormais les **notifications lues**. Phase 1 : "Supprimer les lus" (s'affiche tant qu'il reste des notifications lues) ; phase 2 : "Tout supprimer" (quand il ne reste que des non lues ou aucune). La suppression est basée sur les IDs déjà chargés dans le signal local plutôt qu'une re-query Firestore avec `where('lu', '==', false)` — évite de manquer les docs anciens sans le champ `lu`.
+
+### Admin Réunions — rafraîchissement de la liste après création (2026-08-04)
+
+La liste des réunions était chargée une seule fois au montage du composant (`getDocs` one-shot via `toSignal`). Après création d'une réunion, la liste ne se mettait pas à jour sans F5. Correction : `reunions` passe de `toSignal(observable)` à un `signal<Reunion[]>` avec méthode `loadReunions()` appelée au montage et après chaque `creer()`.
+
+### Fix double étoiles sur les champs obligatoires (2026-08-04)
+
+Angular Material ajoute automatiquement un `*` sur les labels de champs `Validators.required`. Un `*` manuel dans les `<mat-label>` produisait `**`. Correction dans : Thèmes du mois (titre, mois, année, fin du vote), Admin Réunions (titre), Compléter le profil (nom, mot de passe, confirmation), Sortie-détail (titre), Créer un événement (type, titre, thème à photographier). Le champ "Thème à photographier" dans le formulaire de création d'événement (type Défi) est simultanément rendu optionnel (`Validators.required` retiré de l'`effect()`).
+
+### Défi — champ Thème optionnel + affichage dans la fiche détail (2026-08-04)
+
+Le champ "Thème / sujet à photographier" n'est plus obligatoire à la création d'un défi (formulaire `defi-creer` et formulaire unifié `sortie-creer` type Défi Photo). Label mis à jour en "(optionnel)", message d'erreur réduit à "3 caractères minimum". Si le thème est renseigné, il apparaît dans la sidebar de `/galeries/defis/:id` dans une carte dédiée (entre le calendrier et les votes restants).
+
+### Page Maintenance admin — séparation du tableau de bord (2026-08-04)
+
+Les opérations d'entretien lourd sont extraites du tableau de bord vers une nouvelle page dédiée `/admin/maintenance`, accessible via **Admin → Maintenance** dans le header. Bannière d'avertissement en haut : "opérations à utiliser avec parcimonie — lecture approfondie". Deux sections : **Nettoyage photos** (6 panneaux : Thèmes, One-shots, Défis, Sorties, Actualités, Orphelins Storage, chacun avec date picker et badge lecture approfondie) et **Recalculs** (compteurs Thèmes du mois + espace utilisé par membre). Le tableau de bord (`/admin`) ne conserve que les KPIs, les graphes de stockage et le top membres. Suppression du composant mort `AdminDashboard` (sidenav jamais routé — 4 fichiers).
+
 ### Documents — modification par les admins (2026-08-03)
 
 L'admin voit désormais le bouton "Modifier" sur tous les documents (pas seulement les siens). `canEdit()` accepte `isAdmin()` en plus du propriétaire. Correction associée : quand un admin remplace le fichier d'un autre membre, le delta de taille est imputé sur le quota de l'uploadeur original (`doc.uploadeurUid`) et non sur celui de l'admin.

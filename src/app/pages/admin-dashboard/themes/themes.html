@@ -44,12 +44,12 @@
         </div>
 
         <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-full">
-          <mat-label>Titre *</mat-label>
+          <mat-label>Titre</mat-label>
           <input matInput formControlName="titre" placeholder="ex. Lumière naturelle" />
         </mat-form-field>
         <div class="form-row">
           <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-mois">
-            <mat-label>Mois *</mat-label>
+            <mat-label>Mois</mat-label>
             <mat-select formControlName="moisMonth" (selectionChange)="syncVoteDate()">
               @for (m of moisOptions; track m.value) {
                 <mat-option [value]="m.value">{{ m.label }}</mat-option>
@@ -57,14 +57,14 @@
             </mat-select>
           </mat-form-field>
           <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-year">
-            <mat-label>Année *</mat-label>
+            <mat-label>Année</mat-label>
             <mat-select formControlName="moisYear" (selectionChange)="syncVoteDate()">
               @for (y of yearOptions; track y) {
                 <mat-option [value]="y">{{ y }}</mat-option>
               }
             </mat-select>
           </mat-form-field>
-          <app-date-picker label="Fin du vote *" formControlName="dateFinVote" class="field-date"></app-date-picker>
+          <app-date-picker label="Fin du vote" formControlName="dateFinVote" class="field-date"></app-date-picker>
         </div>
         <mat-form-field appearance="outline" class="field-full">
           <mat-label>Lettre de couverture</mat-label>
@@ -166,7 +166,7 @@
                       </div>
 
                       <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-full">
-                        <mat-label>Titre *</mat-label>
+                        <mat-label>Titre</mat-label>
                         <input matInput formControlName="titre" />
                       </mat-form-field>
                       <div class="form-row">
@@ -187,7 +187,7 @@
                           </mat-select>
                         </mat-form-field>
                         <app-date-picker
-                          label="Fin du vote *"
+                          label="Fin du vote"
                           formControlName="dateFinVote"
                           [min]="editMinFinVote()"
                           class="field-date">
@@ -312,5 +312,6 @@
       }
     </section>
   }
+
 
 </div>

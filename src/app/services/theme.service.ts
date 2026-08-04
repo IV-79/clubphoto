@@ -139,6 +139,8 @@ export class ThemeService {
   }): Promise<string> {
     const docRef = await addDoc(collection(this.firestore, 'themes'), {
       ...data,
+      nbSoumissions: 0,
+      nbParticipants: 0,
       dateCreation: new Date().toISOString(),
     });
     return docRef.id;
@@ -189,6 +191,16 @@ export class ThemeService {
     exif?: PhotoExif,
     onProgress?: (pct: number) => void
   ): Promise<void> {
+    // Vérifie avant l'upload si c'est la première soumission du membre pour ce thème
+    const existingSnap = await runInInjectionContext(this.injector, () =>
+      getDocs(query(
+        collection(this.firestore, 'themes', themeId, 'soumissions'),
+        where('membreUid', '==', uid),
+        limit(1)
+      ))
+    );
+    const isFirstSoumission = existingSnap.empty;
+
     const ts = Date.now();
     const storagePath = `themes/${themeId}/${uid}_${ts}.webp`;
     const thumbPath   = `themes/${themeId}/${uid}_${ts}_thumb.webp`;
@@ -218,6 +230,12 @@ export class ThemeService {
               }
             );
             await runInInjectionContext(this.injector, () =>
+              updateDoc(doc(this.firestore, 'themes', themeId), {
+                nbSoumissions: increment(1),
+                ...(isFirstSoumission ? { nbParticipants: increment(1) } : {}),
+              })
+            ).catch(() => {});
+            await runInInjectionContext(this.injector, () =>
               updateDoc(doc(this.firestore, 'users', uid), {
                 'storageUsed.themes': increment(file.size),
               })
@@ -232,12 +250,33 @@ export class ThemeService {
   }
 
   async deleteSoumission(themeId: string, soumissionId: string, storagePath: string, membreUid?: string, fileSize?: number, thumbnailPath?: string): Promise<void> {
+    // Vérifie avant suppression si c'est la dernière soumission du membre
+    let isLastSoumission = false;
+    if (membreUid) {
+      const snap = await runInInjectionContext(this.injector, () =>
+        getDocs(query(
+          collection(this.firestore, 'themes', themeId, 'soumissions'),
+          where('membreUid', '==', membreUid),
+          limit(2)
+        ))
+      );
+      isLastSoumission = snap.size === 1;
+    }
+
     const deletes: Promise<unknown>[] = [
       deleteObject(ref(this.storage, storagePath)).catch(() => {}),
       deleteDoc(doc(this.firestore, 'themes', themeId, 'soumissions', soumissionId)),
     ];
     if (thumbnailPath) deletes.push(deleteObject(ref(this.storage, thumbnailPath)).catch(() => {}));
     await Promise.all(deletes);
+
+    await runInInjectionContext(this.injector, () =>
+      updateDoc(doc(this.firestore, 'themes', themeId), {
+        nbSoumissions: increment(-1),
+        ...(isLastSoumission ? { nbParticipants: increment(-1) } : {}),
+      })
+    ).catch(() => {});
+
     if (membreUid && fileSize) {
       await runInInjectionContext(this.injector, () =>
         updateDoc(doc(this.firestore, 'users', membreUid), {
@@ -245,6 +284,20 @@ export class ThemeService {
         })
       ).catch(() => {});
     }
+  }
+
+  async recalculeCompteurs(themeId: string): Promise<void> {
+    const snap = await runInInjectionContext(this.injector, () =>
+      getDocs(collection(this.firestore, 'themes', themeId, 'soumissions'))
+    );
+    const nbSoumissions  = snap.size;
+    const uids           = new Set(snap.docs.map(d => d.data()['membreUid'] as string));
+    await runInInjectionContext(this.injector, () =>
+      updateDoc(doc(this.firestore, 'themes', themeId), {
+        nbSoumissions,
+        nbParticipants: uids.size,
+      })
+    );
   }
 
   async voter(themeId: string, voterUid: string, soumissionId: string): Promise<void> {

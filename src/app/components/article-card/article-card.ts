@@ -30,6 +30,9 @@ import { Article, getArticleTypeMeta } from '../../models/article.model';
         @if (article().portee === 'membre') {
           <span class="membre-badge" title="Membres uniquement"><mat-icon>lock</mat-icon></span>
         }
+        @if (isActivePinned()) {
+          <span class="pin-badge" title="Épinglé"><mat-icon>push_pin</mat-icon></span>
+        }
       </div>
       <div class="body">
         @if (isEditor() && article().statut !== 'publie') {
@@ -89,6 +92,13 @@ import { Article, getArticleTypeMeta } from '../../models/article.model';
       display: flex; align-items: center; justify-content: center;
     }
     .membre-badge mat-icon { font-size: 16px; width: 16px; height: 16px; }
+    .pin-badge {
+      position: absolute; top: 8px; right: 8px;
+      background: rgba(0,0,0,.55); color: #ffb300;
+      border-radius: 50%; width: 28px; height: 28px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .pin-badge mat-icon { font-size: 16px; width: 16px; height: 16px; }
     .body { padding: 14px 16px 18px; flex: 1; }
     .titre { margin: 0 0 8px; font-size: .97rem; font-weight: 600; line-height: 1.35; color: var(--text-primary); }
     .meta {
@@ -124,6 +134,11 @@ export class ArticleCard {
   isEditor = input<boolean>(false);
   clicked  = output<Article>();
   meta = computed(() => getArticleTypeMeta(this.article().type));
+  isActivePinned = computed(() => {
+    const a = this.article();
+    const today = new Date().toISOString().slice(0, 10);
+    return a.epingle && (!a.date || a.date >= today);
+  });
 
   mapsUrl(lieu: string): string {
     return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(lieu)}`;

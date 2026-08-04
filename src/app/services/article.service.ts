@@ -1,7 +1,8 @@
 import { Injectable, inject, Injector, runInInjectionContext } from '@angular/core';
 import {
   Firestore, collection, collectionData, doc,
-  addDoc, updateDoc, deleteDoc, query, orderBy, where, deleteField, getDocs
+  addDoc, updateDoc, deleteDoc, query, orderBy, where, deleteField, getDocs,
+  limit, startAfter, QueryDocumentSnapshot, DocumentData, QueryConstraint
 } from '@angular/fire/firestore';
 import { Storage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from '@angular/fire/storage';
 import { Observable, from } from 'rxjs';
@@ -34,6 +35,33 @@ export class ArticleService {
 
   getPublicArticlesOnce(): Observable<Article[]> {
     return this.getPublicArticles();
+  }
+
+  async getArticlesPaged(
+    role: string | null,
+    pageSize: number,
+    after?: QueryDocumentSnapshot<DocumentData>
+  ): Promise<{ items: Article[]; cursor: QueryDocumentSnapshot<DocumentData> | null; hasMore: boolean }> {
+    const constraints: QueryConstraint[] = [];
+    if (role !== 'admin' && role !== 'contributeur') {
+      constraints.push(where('statut', '==', 'publie'));
+      if (!role) constraints.push(where('portee', '==', 'public'));
+    }
+    constraints.push(orderBy('epingle', 'desc'));
+    constraints.push(orderBy('dateCreation', 'desc'));
+    if (after) constraints.push(startAfter(after));
+    constraints.push(limit(pageSize + 1));
+
+    const snap = await runInInjectionContext(this.injector, () =>
+      getDocs(query(collection(this.firestore, 'articles'), ...constraints))
+    );
+    const hasMore = snap.docs.length > pageSize;
+    const docs    = snap.docs.slice(0, pageSize);
+    return {
+      items:  docs.map(d => ({ id: d.id, ...d.data() } as Article)),
+      cursor: docs[docs.length - 1] ?? null,
+      hasMore,
+    };
   }
 
   getPublishedArticles(): Observable<Article[]> {

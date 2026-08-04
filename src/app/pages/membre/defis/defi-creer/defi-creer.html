@@ -46,11 +46,11 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Thème / sujet à photographier</mat-label>
+      <mat-label>Thème / sujet à photographier (optionnel)</mat-label>
       <input matInput formControlName="theme" placeholder="ex. Reflets sur l'eau" />
       <mat-hint>Décrivez précisément le sujet que les participants devront photographier</mat-hint>
       @if (form.get('theme')?.invalid && form.get('theme')?.touched) {
-        <mat-error>Thème requis (3 caractères minimum)</mat-error>
+        <mat-error>3 caractères minimum</mat-error>
       }
     </mat-form-field>
 

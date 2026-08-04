@@ -1,4 +1,4 @@
-import { Injectable, inject, Injector, runInInjectionContext } from '@angular/core';
+import { Injectable, inject, Injector, runInInjectionContext, signal } from '@angular/core';
 import {
   Firestore, collection, doc, addDoc, updateDoc, deleteDoc,
   getDocs, collectionData, query, orderBy, limit, writeBatch, where
@@ -12,6 +12,9 @@ import { UserProfile } from '../models/user.model';
 export class NotificationService {
   private firestore = inject(Firestore);
   private injector  = inject(Injector);
+
+  readonly refresh = signal(0);
+  private bump() { this.refresh.update(v => v + 1); }
 
   // ── Lecture ─────────────────────────────────────────────────
 
@@ -117,6 +120,7 @@ export class NotificationService {
     await runInInjectionContext(this.injector, () =>
       updateDoc(doc(this.firestore, `notifications/${uid}/items`, notifId), { lu: true })
     );
+    this.bump();
   }
 
   async markAllAsRead(uid: string): Promise<void> {
@@ -130,6 +134,7 @@ export class NotificationService {
     const batch = writeBatch(this.firestore);
     for (const d of snap.docs) batch.update(d.ref, { lu: true });
     await batch.commit();
+    this.bump();
   }
 
   // ── Suppression ──────────────────────────────────────────────
@@ -138,19 +143,15 @@ export class NotificationService {
     await runInInjectionContext(this.injector, () =>
       deleteDoc(doc(this.firestore, `notifications/${uid}/items`, notifId))
     );
+    this.bump();
   }
 
-  async deleteUnread(uid: string): Promise<void> {
-    const snap = await runInInjectionContext(this.injector, () =>
-      getDocs(query(
-        collection(this.firestore, `notifications/${uid}/items`),
-        where('lu', '==', false)
-      ))
-    );
-    if (!snap.docs.length) return;
+  async deleteByIds(uid: string, ids: string[]): Promise<void> {
+    if (!ids.length) return;
     const batch = writeBatch(this.firestore);
-    for (const d of snap.docs) batch.delete(d.ref);
+    for (const id of ids) batch.delete(doc(this.firestore, `notifications/${uid}/items`, id));
     await batch.commit();
+    this.bump();
   }
 
   async deleteAll(uid: string): Promise<void> {
@@ -161,5 +162,6 @@ export class NotificationService {
     const batch = writeBatch(this.firestore);
     for (const d of snap.docs) batch.delete(d.ref);
     await batch.commit();
+    this.bump();
   }
 }

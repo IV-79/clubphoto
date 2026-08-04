@@ -1,6 +1,5 @@
 import { Component, inject, signal, computed } from '@angular/core';
 import { SlicePipe } from '@angular/common';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -40,7 +39,7 @@ export class Reunions {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   })();
 
-  reunions = toSignal(this.service.getReunions(), { initialValue: [] as Reunion[] });
+  reunions = signal<Reunion[]>([]);
 
   showPasses = signal(false);
   showCreateForm = signal(false);
@@ -93,6 +92,13 @@ export class Reunions {
   createForm = this.buildForm();
   editForm   = this.buildForm();
 
+  constructor() { this.loadReunions(); }
+
+  private async loadReunions() {
+    const list = await firstValueFrom(this.service.getReunions());
+    this.reunions.set(list);
+  }
+
   openCreate() {
     this.editingId.set(null);
     this.createForm.reset({ titre: '', date: '', lieu: '', description: '' });
@@ -115,6 +121,7 @@ export class Reunions {
       });
       this.showCreateForm.set(false);
       this.createForm.reset();
+      await this.loadReunions();
     } finally { this.saving.set(false); }
   }
 

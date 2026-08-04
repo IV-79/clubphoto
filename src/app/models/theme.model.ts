@@ -12,6 +12,8 @@ export interface ThemeMensuel {
   createdBy: string;
   photoCouvertureUrl?:  string;
   photoCouverturePath?: string;
+  nbSoumissions?:  number;
+  nbParticipants?: number;
 }
 
 export function getThemeDates(theme: ThemeMensuel): {

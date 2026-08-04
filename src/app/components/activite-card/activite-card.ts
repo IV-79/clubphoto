@@ -31,10 +31,7 @@ export class ActiviteCard {
 
   protected coverUrl = computed((): string | undefined => {
     const { kind, data } = this.item();
-    if (kind === 'sortie') {
-      const s = data as Sortie;
-      return this.isPast() ? (s.photoCouvertureUrl || s.imageEvenementUrl) : s.imageEvenementUrl;
-    }
+    if (kind === 'sortie') return (data as Sortie).imageEvenementUrl;
     return (data as OneShot | Defi).photoCouvertureUrl;
   });
 

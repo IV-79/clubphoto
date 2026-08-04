@@ -7,8 +7,8 @@
         <button class="btn-action" (click)="markAllRead()">Tout marquer lu</button>
       }
       @if (notifications().length > 0) {
-        @if (unreadCount() > 0) {
-          <button class="btn-action btn-danger" (click)="deleteUnread()">Supprimer non lus</button>
+        @if (readCount() > 0) {
+          <button class="btn-action btn-danger" (click)="deleteLus()">Supprimer les lus</button>
         } @else {
           <button class="btn-action btn-danger" (click)="deleteAll()">Tout supprimer</button>
         }

@@ -62,6 +62,36 @@
       "density": "SPARSE_ALL"
     },
     {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "epingle",      "order": "DESCENDING" },
+        { "fieldPath": "dateCreation", "order": "DESCENDING" },
+        { "fieldPath": "__name__",     "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "statut",       "order": "ASCENDING"  },
+        { "fieldPath": "epingle",      "order": "DESCENDING" },
+        { "fieldPath": "dateCreation", "order": "DESCENDING" },
+        { "fieldPath": "__name__",     "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "portee",       "order": "ASCENDING"  },
+        { "fieldPath": "statut",       "order": "ASCENDING"  },
+        { "fieldPath": "epingle",      "order": "DESCENDING" },
+        { "fieldPath": "dateCreation", "order": "DESCENDING" },
+        { "fieldPath": "__name__",     "order": "DESCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "defis",
       "queryScope": "COLLECTION",
       "fields": [

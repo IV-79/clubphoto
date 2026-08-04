@@ -92,7 +92,13 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
     this.articleService.getPublicArticlesOnce().pipe(
       map(list =>
         list
-          .sort((a, b) => (+!!b.epingle) - (+!!a.epingle) || b.dateCreation.localeCompare(a.dateCreation))
+          .sort((a, b) => {
+            const today = new Date().toISOString().slice(0, 10);
+            const aPin = a.epingle && (!a.date || a.date >= today);
+            const bPin = b.epingle && (!b.date || b.date >= today);
+            if (aPin !== bPin) return aPin ? -1 : 1;
+            return b.dateCreation.localeCompare(a.dateCreation);
+          })
           .slice(0, 3)
       )
     ),

@@ -22,6 +22,10 @@
             <p class="card-desc">{{ t.description }}</p>
           }
           <p class="card-date">Votes jusqu'au <strong>{{ formatDate(dates(t).dateFinVote) }}</strong></p>
+          <div class="card-stats">
+            <span class="theme-stat-chip">📸 {{ t.nbSoumissions ?? 0 }} photo(s)</span>
+            <span class="theme-stat-chip">👤 {{ t.nbParticipants ?? 0 }} participant(s)</span>
+          </div>
           <div class="card-actions">
             @if (isLoggedIn()) {
               <a [routerLink]="['/galeries/themesdumois', t.id]" class="btn-voir-photos btn-vote-theme">Voir & voter</a>
@@ -43,6 +47,10 @@
             <p class="card-desc">{{ t.description }}</p>
           }
           <p class="card-date">Clôture le <strong>{{ formatDate(dates(t).dateCloture) }}</strong></p>
+          <div class="card-stats">
+            <span class="theme-stat-chip">📸 {{ t.nbSoumissions ?? 0 }} photo(s)</span>
+            <span class="theme-stat-chip">👤 {{ t.nbParticipants ?? 0 }} participant(s)</span>
+          </div>
           <div class="card-actions">
             @if (isLoggedIn()) {
               <a [routerLink]="['/galeries/themesdumois', t.id]" class="btn-voir-photos">Voir et soumettre</a>
@@ -64,6 +72,10 @@
             <p class="card-desc">{{ t.description }}</p>
           }
           <p class="card-date">Votes terminés le <strong>{{ formatDate(dates(t).dateFinVote) }}</strong></p>
+          <div class="card-stats">
+            <span class="theme-stat-chip">📸 {{ t.nbSoumissions ?? 0 }} photo(s)</span>
+            <span class="theme-stat-chip">👤 {{ t.nbParticipants ?? 0 }} participant(s)</span>
+          </div>
           <div class="card-actions">
             <a [routerLink]="['/galeries/themesdumois', t.id]" class="btn-voir-photos btn-resultats-theme">Voir les résultats</a>
           </div>
@@ -86,6 +98,10 @@
             <p class="card-desc">{{ t.description }}</p>
           }
           <p class="card-date">Clôture le <strong>{{ formatDate(dates(t).dateCloture) }}</strong></p>
+          <div class="card-stats">
+            <span class="theme-stat-chip">📸 {{ t.nbSoumissions ?? 0 }} photo(s)</span>
+            <span class="theme-stat-chip">👤 {{ t.nbParticipants ?? 0 }} participant(s)</span>
+          </div>
           <div class="card-actions">
             @if (isLoggedIn()) {
               <a [routerLink]="['/galeries/themesdumois', t.id]" class="btn-voir-photos">Voir et soumettre</a>
@@ -107,6 +123,10 @@
             <p class="card-desc">{{ t.description }}</p>
           }
           <p class="card-date">Votes terminés le <strong>{{ formatDate(dates(t).dateFinVote) }}</strong></p>
+          <div class="card-stats">
+            <span class="theme-stat-chip">📸 {{ t.nbSoumissions ?? 0 }} photo(s)</span>
+            <span class="theme-stat-chip">👤 {{ t.nbParticipants ?? 0 }} participant(s)</span>
+          </div>
           <div class="card-actions">
             <a [routerLink]="['/galeries/themesdumois', t.id]" class="btn-voir-photos btn-resultats-theme">Voir les résultats</a>
           </div>
@@ -141,6 +161,10 @@
           <div class="termine-entry">
             <span class="termine-mois">{{ formatMois(t.mois) }}</span>
             <span class="termine-titre">{{ t.titre }}</span>
+            <div class="termine-stats">
+              <span class="theme-stat-chip-sm">📸 {{ t.nbSoumissions ?? 0 }}</span>
+              <span class="theme-stat-chip-sm">👤 {{ t.nbParticipants ?? 0 }}</span>
+            </div>
             <a [routerLink]="['/galeries/themesdumois', t.id]" class="btn-voir-archive">Voir les photos</a>
           </div>
         }

@@ -79,6 +79,13 @@
   margin: 0 0 0.75rem;
 }
 
+.theme-text {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.5;
+}
+
 .date-row, .stat-row {
   display: flex;
   flex-direction: column;

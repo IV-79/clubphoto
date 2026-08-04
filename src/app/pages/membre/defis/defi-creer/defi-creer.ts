@@ -45,7 +45,7 @@ export class DefiCreer {
 
   form = new FormGroup({
     titre:               new FormControl('', { validators: [Validators.required, Validators.minLength(3)], nonNullable: true }),
-    theme:               new FormControl('', { validators: [Validators.required, Validators.minLength(3)], nonNullable: true }),
+    theme:               new FormControl('', { validators: [Validators.minLength(3)], nonNullable: true }),
     description:         new FormControl('', { nonNullable: true }),
     dateDebutSoumission: new FormControl(this.today, { validators: [Validators.required], nonNullable: true }),
     dateFinSoumission:   new FormControl('', { validators: [Validators.required], nonNullable: true }),

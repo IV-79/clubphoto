@@ -20,7 +20,11 @@
       <!-- Informations -->
       <section class="form-section">
         <h2>Informations</h2>
-        <div class="field-row">
+        <label class="full">
+          <span>Adresse e-mail <em class="field-readonly-hint">(non modifiable)</em></span>
+          <input type="email" [value]="profile()?.email ?? ''" readonly class="input-readonly">
+        </label>
+        <div class="field-row field-mt">
           <label>
             <span>Prénom</span>
             <input type="text" [(ngModel)]="form.prenom" name="prenom" placeholder="Votre prénom">

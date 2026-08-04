@@ -6,6 +6,7 @@ import { Reunions } from './pages/admin-dashboard/reunions/reunions';
 import { AdminConfig } from './pages/admin-dashboard/config/config';
 import { AdminThemes } from './pages/admin-dashboard/themes/themes';
 import { AdminPages } from './pages/admin-dashboard/pages/admin-pages';
+import { Maintenance } from './pages/admin-dashboard/maintenance/maintenance';
 import { authGuard, memberGuard, loginGuard, editorGuard } from './guards/auth.guard';
 import { PublicLayout } from './layouts/public-layout/public-layout';
 import { MemberLayout } from './layouts/member-layout/member-layout';
@@ -84,6 +85,7 @@ export const routes: Routes = [
           { path: 'config', component: AdminConfig },
           { path: 'dossiers', component: DocumentDossiers },
           { path: 'pages', component: AdminPages },
+          { path: 'maintenance', component: Maintenance },
         ]
       },
     ]

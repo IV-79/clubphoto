@@ -32,7 +32,7 @@
 
     <!-- Type -->
     <mat-form-field appearance="outline" class="field-half">
-      <mat-label>Type *</mat-label>
+      <mat-label>Type</mat-label>
       <mat-select formControlName="type">
         <mat-option value="sortie_photo">📸 Sortie Photo</mat-option>
         <mat-option value="sortie_club">🚶 Sortie Club</mat-option>
@@ -43,7 +43,7 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="field-full">
-      <mat-label>Titre *</mat-label>
+      <mat-label>Titre</mat-label>
       <input matInput formControlName="titre"
         [placeholder]="isOneShot() ? 'Ex: Battle Automne 2026' : 'Ex: Sortie au bords du Rhône'" />
     </mat-form-field>
@@ -113,7 +113,7 @@
 
     @if (isDefi()) {
       <mat-form-field appearance="outline" class="field-full">
-        <mat-label>Thème à photographier *</mat-label>
+        <mat-label>Thème à photographier (optionnel)</mat-label>
         <input matInput formControlName="theme" placeholder="Ex: Reflets sur l'eau" />
       </mat-form-field>
 

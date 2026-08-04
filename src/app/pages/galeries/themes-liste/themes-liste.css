@@ -152,6 +152,37 @@
 
 .card-date strong { color: var(--text-secondary); }
 
+/* Stats chips — featured cards */
+.card-stats {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.theme-stat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  white-space: nowrap;
+  background: var(--c-blue-bg);
+  border: 1px solid var(--c-blue-bd);
+  color: var(--c-blue);
+}
+
+/* Sur fond d'image : verre semi-opaque */
+.featured-card.has-cover .theme-stat-chip {
+  background: rgba(255,255,255,0.15);
+  border-color: rgba(255,255,255,0.25);
+  color: rgba(255,255,255,0.90);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
 .card-actions {
   display: flex;
   align-items: center;
@@ -289,6 +320,26 @@
 
 .termine-entry:last-child { border-bottom: none; }
 .termine-entry:nth-child(even) { background: var(--bg-surface-alt); }
+
+/* Stats chips — liste terminés */
+.termine-stats {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.theme-stat-chip-sm {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  white-space: nowrap;
+  background: var(--c-blue-bg);
+  border: 1px solid var(--c-blue-bd);
+  color: var(--c-blue);
+}
 
 .termine-mois {
   font-size: 0.7rem;

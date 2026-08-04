@@ -113,7 +113,7 @@ export class SortieCreer {
       const d2 = this.form.get('dateFinSoumission')!;
       const d3 = this.form.get('dateCloturVotes')!;
       if (this.isDefi()) {
-        themeCtrl.setValidators([Validators.required, Validators.minLength(2)]);
+        themeCtrl.setValidators([Validators.minLength(2)]);
         d1.setValidators([Validators.required]);
         d2.setValidators([Validators.required]);
         d3.setValidators([Validators.required]);

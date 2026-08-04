@@ -182,6 +182,9 @@
                 <a routerLink="/admin" class="nav-panel-item" (click)="openMenu.set(null)">
                   <mat-icon>dashboard</mat-icon>Tableau de bord
                 </a>
+                <a routerLink="/admin/maintenance" class="nav-panel-item" (click)="openMenu.set(null)">
+                  <mat-icon>build</mat-icon>Maintenance
+                </a>
                 <div class="nav-panel-divider"></div>
                 <a routerLink="/admin/reunions" class="nav-panel-item" (click)="openMenu.set(null)">
                   <mat-icon>event</mat-icon>Réunions
@@ -351,6 +354,7 @@
           @if (mobileOpenSection() === 'admin') {
             <ul class="mobile-sub">
               <li><a routerLink="/admin" (click)="closeMobileMenu()">Tableau de bord</a></li>
+              <li><a routerLink="/admin/maintenance" (click)="closeMobileMenu()">Maintenance</a></li>
               <li><a routerLink="/admin/reunions" (click)="closeMobileMenu()">Réunions</a></li>
               <li><a routerLink="/admin/themes" (click)="closeMobileMenu()">Thèmes du mois</a></li>
               <li><a routerLink="/admin/membres" (click)="closeMobileMenu()">Membres</a></li>
