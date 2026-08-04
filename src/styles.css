@@ -246,3 +246,54 @@ html[data-theme="dark"] .event-hero.has-cover .hero-status {
    Seul le role-select-membre reste ici (UI admin, pas de token dédié).
    ─────────────────────────────────────────────────────────────────────────── */
 html[data-theme="dark"] .role-select-membre { background: rgba(255,255,255,0.08); color: var(--text-secondary); }
+
+/* ── Guide du site — impression toujours en mode clair ──────────────────────
+   Même spécificité que html[data-theme="dark"] mais déclaré après → gagne.
+   Réinitialise les tokens de couleur et les règles hardcodées du guide.
+   ─────────────────────────────────────────────────────────────────────────── */
+@media print {
+  html[data-theme="dark"] {
+    color-scheme: light;
+    --bg-page:            #ffffff;
+    --bg-surface:         #ffffff;
+    --bg-surface-alt:     #fafafa;
+    --bg-surface-raised:  #f5f5f5;
+    --bg-input:           #ffffff;
+    --text-primary:       #1a1a1a;
+    --text-secondary:     rgba(0,0,0,0.55);
+    --text-muted:         rgba(0,0,0,0.40);
+    --text-hint:          rgba(0,0,0,0.28);
+    --border:             rgba(0,0,0,0.08);
+    --border-medium:      rgba(0,0,0,0.12);
+    --border-strong:      rgba(0,0,0,0.20);
+    --text-accent:        #1a237e;
+    --c-green:     #2e7d32;  --c-green-bg:  rgba(46,125,50,0.10);  --c-green-bd:  rgba(46,125,50,0.25);
+    --c-blue:      #1565c0;  --c-blue-bg:   rgba(21,101,192,0.10); --c-blue-bd:   rgba(21,101,192,0.25);
+    --c-amber:     #d97706;  --c-amber-bg:  rgba(217,119,6,0.10);  --c-amber-bd:  rgba(217,119,6,0.25);
+    --c-orange:    #e65100;  --c-orange-bg: rgba(230,81,0,0.10);   --c-orange-bd: rgba(230,81,0,0.25);
+    --c-violet:    #5e35b1;  --c-violet-bg: rgba(94,53,177,0.10);  --c-violet-bd: rgba(94,53,177,0.25);
+    --c-teal:      #2e7d5a;  --c-teal-bg:   rgba(46,125,90,0.10);  --c-teal-bd:   rgba(46,125,90,0.25);
+    --c-red:       #c62828;  --c-red-bg:    rgba(198,40,40,0.10);  --c-red-bd:    rgba(198,40,40,0.25);
+  }
+
+  /* Couleurs hardcodées du guide (non couvertes par les tokens) */
+  html[data-theme="dark"] .guide-card-admin { background: #f5f3ff; border-color: #c7d2fe; }
+  html[data-theme="dark"] .guide-note       { background: #fffbeb; border-left-color: #f59e0b; color: #78350f; }
+
+  html[data-theme="dark"] .step-preparation,
+  html[data-theme="dark"] .step-attente,
+  html[data-theme="dark"] .tl-attente      { background: #f3f4f6; color: #374151; border-color: #d1d5db; }
+  html[data-theme="dark"] .step-fermeture  { background: #e0f2fe; color: #0369a1; }
+  html[data-theme="dark"] .step-inscription,
+  html[data-theme="dark"] .badge-inline.inscription { background: #dbeafe; color: #1d4ed8; }
+  html[data-theme="dark"] .step-ouvert,
+  html[data-theme="dark"] .tl-ouvert,
+  html[data-theme="dark"] .badge-inline.step-ouvert { background: #dcfce7; color: #166534; }
+  html[data-theme="dark"] .step-vote,
+  html[data-theme="dark"] .tl-vote,
+  html[data-theme="dark"] .badge-inline.vote,
+  html[data-theme="dark"] .badge-inline.step-vote   { background: #fef3c7; color: #92400e; }
+  html[data-theme="dark"] .step-resultats,
+  html[data-theme="dark"] .tl-resultats,
+  html[data-theme="dark"] .badge-inline.resultats   { background: #ede9fe; color: #5b21b6; }
+}
