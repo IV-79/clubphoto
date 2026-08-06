@@ -4,81 +4,22 @@
       "collectionGroup": "articles",
       "queryScope": "COLLECTION",
       "fields": [
-        {
-          "fieldPath": "portee",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "statut",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "dateCreation",
-          "order": "DESCENDING"
-        },
-        {
-          "fieldPath": "__name__",
-          "order": "DESCENDING"
-        }
-      ],
-      "density": "SPARSE_ALL"
-    },
-    {
-      "collectionGroup": "articles",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "publie",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "datePublication",
-          "order": "DESCENDING"
-        },
-        {
-          "fieldPath": "__name__",
-          "order": "DESCENDING"
-        }
-      ],
-      "density": "SPARSE_ALL"
-    },
-    {
-      "collectionGroup": "articles",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "statut",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "dateCreation",
-          "order": "DESCENDING"
-        },
-        {
-          "fieldPath": "__name__",
-          "order": "DESCENDING"
-        }
-      ],
-      "density": "SPARSE_ALL"
-    },
-    {
-      "collectionGroup": "articles",
-      "queryScope": "COLLECTION",
-      "fields": [
         { "fieldPath": "epingle",      "order": "DESCENDING" },
         { "fieldPath": "dateCreation", "order": "DESCENDING" },
         { "fieldPath": "__name__",     "order": "DESCENDING" }
-      ]
+      ],
+      "density": "SPARSE_ALL"
     },
     {
       "collectionGroup": "articles",
       "queryScope": "COLLECTION",
       "fields": [
+        { "fieldPath": "portee",       "order": "ASCENDING"  },
         { "fieldPath": "statut",       "order": "ASCENDING"  },
-        { "fieldPath": "epingle",      "order": "DESCENDING" },
         { "fieldPath": "dateCreation", "order": "DESCENDING" },
         { "fieldPath": "__name__",     "order": "DESCENDING" }
-      ]
+      ],
+      "density": "SPARSE_ALL"
     },
     {
       "collectionGroup": "articles",
@@ -89,7 +30,49 @@
         { "fieldPath": "epingle",      "order": "DESCENDING" },
         { "fieldPath": "dateCreation", "order": "DESCENDING" },
         { "fieldPath": "__name__",     "order": "DESCENDING" }
-      ]
+      ],
+      "density": "SPARSE_ALL"
+    },
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "publie",          "order": "ASCENDING"  },
+        { "fieldPath": "datePublication", "order": "DESCENDING" },
+        { "fieldPath": "__name__",        "order": "DESCENDING" }
+      ],
+      "density": "SPARSE_ALL"
+    },
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "statut",       "order": "ASCENDING"  },
+        { "fieldPath": "dateCreation", "order": "DESCENDING" },
+        { "fieldPath": "__name__",     "order": "DESCENDING" }
+      ],
+      "density": "SPARSE_ALL"
+    },
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "statut",       "order": "ASCENDING"  },
+        { "fieldPath": "epingle",      "order": "DESCENDING" },
+        { "fieldPath": "dateCreation", "order": "DESCENDING" },
+        { "fieldPath": "__name__",     "order": "DESCENDING" }
+      ],
+      "density": "SPARSE_ALL"
+    },
+    {
+      "collectionGroup": "defis",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "visibilite",   "order": "ASCENDING"  },
+        { "fieldPath": "dateCreation", "order": "DESCENDING" },
+        { "fieldPath": "__name__",     "order": "DESCENDING" }
+      ],
+      "density": "SPARSE_ALL"
     },
     {
       "collectionGroup": "expositions",
@@ -98,24 +81,6 @@
         { "fieldPath": "statut",       "order": "ASCENDING"  },
         { "fieldPath": "dateCreation", "order": "DESCENDING" },
         { "fieldPath": "__name__",     "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "defis",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "visibilite",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "dateCreation",
-          "order": "DESCENDING"
-        },
-        {
-          "fieldPath": "__name__",
-          "order": "DESCENDING"
-        }
       ],
       "density": "SPARSE_ALL"
     },
@@ -123,18 +88,9 @@
       "collectionGroup": "oneshots",
       "queryScope": "COLLECTION",
       "fields": [
-        {
-          "fieldPath": "creatorUid",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "dateCreation",
-          "order": "DESCENDING"
-        },
-        {
-          "fieldPath": "__name__",
-          "order": "DESCENDING"
-        }
+        { "fieldPath": "creatorUid",   "order": "ASCENDING"  },
+        { "fieldPath": "dateCreation", "order": "DESCENDING" },
+        { "fieldPath": "__name__",     "order": "DESCENDING" }
       ],
       "density": "SPARSE_ALL"
     },
@@ -142,18 +98,9 @@
       "collectionGroup": "photos",
       "queryScope": "COLLECTION",
       "fields": [
-        {
-          "fieldPath": "uid",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "dateUpload",
-          "order": "DESCENDING"
-        },
-        {
-          "fieldPath": "__name__",
-          "order": "DESCENDING"
-        }
+        { "fieldPath": "uid",        "order": "ASCENDING"  },
+        { "fieldPath": "dateUpload", "order": "DESCENDING" },
+        { "fieldPath": "__name__",   "order": "DESCENDING" }
       ],
       "density": "SPARSE_ALL"
     },
@@ -161,18 +108,9 @@
       "collectionGroup": "photos",
       "queryScope": "COLLECTION",
       "fields": [
-        {
-          "fieldPath": "visibilite",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "dateUpload",
-          "order": "DESCENDING"
-        },
-        {
-          "fieldPath": "__name__",
-          "order": "DESCENDING"
-        }
+        { "fieldPath": "visibilite", "order": "ASCENDING"  },
+        { "fieldPath": "dateUpload", "order": "DESCENDING" },
+        { "fieldPath": "__name__",   "order": "DESCENDING" }
       ],
       "density": "SPARSE_ALL"
     },
@@ -180,18 +118,9 @@
       "collectionGroup": "sorties",
       "queryScope": "COLLECTION",
       "fields": [
-        {
-          "fieldPath": "organisateurUid",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "date",
-          "order": "DESCENDING"
-        },
-        {
-          "fieldPath": "__name__",
-          "order": "DESCENDING"
-        }
+        { "fieldPath": "organisateurUid", "order": "ASCENDING"  },
+        { "fieldPath": "date",            "order": "DESCENDING" },
+        { "fieldPath": "__name__",        "order": "DESCENDING" }
       ],
       "density": "SPARSE_ALL"
     }
@@ -202,22 +131,10 @@
       "fieldPath": "uid",
       "ttl": false,
       "indexes": [
-        {
-          "order": "ASCENDING",
-          "queryScope": "COLLECTION"
-        },
-        {
-          "order": "DESCENDING",
-          "queryScope": "COLLECTION"
-        },
-        {
-          "arrayConfig": "CONTAINS",
-          "queryScope": "COLLECTION"
-        },
-        {
-          "order": "ASCENDING",
-          "queryScope": "COLLECTION_GROUP"
-        }
+        { "order": "ASCENDING",         "queryScope": "COLLECTION"       },
+        { "order": "DESCENDING",        "queryScope": "COLLECTION"       },
+        { "arrayConfig": "CONTAINS",    "queryScope": "COLLECTION"       },
+        { "order": "ASCENDING",         "queryScope": "COLLECTION_GROUP" }
       ]
     }
   ]
