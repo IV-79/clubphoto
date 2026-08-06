@@ -67,3 +67,5 @@ src/environments/environment.prod.ts
 /cleanup_audit.xlsx
 /workflows_evenements.xlsx
 /~$workflows_evenements.xlsx
+/ExpositionWorkflow.md
+/ExpostionWorkflow.png
