@@ -21,8 +21,9 @@ export class Preferences {
     return {
       oneshots:  isSubscribed(s, 'oneshot'),
       sorties:   isSubscribed(s, 'sortie'),
-      defis:     isSubscribed(s, 'defi'),
-      articles:  isSubscribed(s, 'article'),
+      defis:       isSubscribed(s, 'defi'),
+      expositions: isSubscribed(s, 'exposition'),
+      articles:    isSubscribed(s, 'article'),
       reunions:  isSubscribed(s, 'reunion'),
       documents: isSubscribed(s, 'document'),
       likes:     isSubscribed(s, 'like'),

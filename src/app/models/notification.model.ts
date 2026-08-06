@@ -1,4 +1,4 @@
-export type NotifType = 'oneshot' | 'sortie' | 'article' | 'reunion' | 'document' | 'defi' | 'like' | 'comment' | 'admin';
+export type NotifType = 'oneshot' | 'sortie' | 'article' | 'reunion' | 'document' | 'defi' | 'exposition' | 'like' | 'comment' | 'admin';
 
 export interface AppNotification {
   id: string;
@@ -18,6 +18,7 @@ export interface UserSubscriptions {
   reunions?: boolean;
   documents?: boolean;
   defis?: boolean;
+  expositions?: boolean;
   likes?: boolean;
   comments?: boolean;
   admin?: boolean; // undefined = toujours livré, pas d'opt-out exposé en UI
@@ -29,8 +30,9 @@ const TYPE_TO_SUB: Record<NotifType, keyof UserSubscriptions> = {
   article:  'articles',
   reunion:  'reunions',
   document: 'documents',
-  defi:     'defis',
-  like:     'likes',
+  defi:        'defis',
+  exposition:  'expositions',
+  like:        'likes',
   comment:  'comments',
   admin:    'admin',
 };
@@ -50,8 +52,9 @@ export const NOTIF_ICONS: Record<NotifType, string> = {
   article:  '📰',
   reunion:  '📅',
   document: '📁',
-  defi:     '🏅',
-  like:     '♥',
+  defi:       '🏅',
+  exposition: '🖼️',
+  like:       '♥',
   comment:  '💬',
   admin:    '🛡️',
 };
@@ -62,8 +65,9 @@ export const NOTIF_LABELS: Record<NotifType, string> = {
   article:  'Actualité',
   reunion:  'Réunion',
   document: 'Documents',
-  defi:     'Défi',
-  like:     'J\'aime',
+  defi:       'Défi',
+  exposition: 'Exposition',
+  like:       'J\'aime',
   comment:  'Commentaire',
   admin:    'Administration',
 };

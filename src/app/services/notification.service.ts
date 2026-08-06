@@ -82,7 +82,7 @@ export class NotificationService {
   // ── Broadcast vers tous les membres abonnés ──────────────────
 
   async broadcast(
-    type: 'oneshot' | 'sortie' | 'article' | 'reunion' | 'document' | 'defi',
+    type: 'oneshot' | 'sortie' | 'article' | 'reunion' | 'document' | 'defi' | 'exposition',
     message: string,
     options: { lien?: string; sourceNom: string; excludeUid?: string }
   ): Promise<void> {

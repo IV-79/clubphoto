@@ -23,9 +23,9 @@
           </button>
         }
       }
-      <button class="filtre-btn" [class.actif]="filtre() === 'oneshot'" (click)="filtre.set('oneshot')">OneShot</button>
       <button class="filtre-btn" [class.actif]="filtre() === 'sortie'" (click)="filtre.set('sortie')">Événement</button>
       <button class="filtre-btn" [class.actif]="filtre() === 'defi'" (click)="filtre.set('defi')">Défi</button>
+      <button class="filtre-btn" [class.actif]="filtre() === 'oneshot'" (click)="filtre.set('oneshot')">OneShot</button>
       <button class="filtre-btn" [class.actif]="filtre() === 'exposition'" (click)="filtre.set('exposition')">Exposition</button>
     </div>
     <div class="filtre-sep"></div>
