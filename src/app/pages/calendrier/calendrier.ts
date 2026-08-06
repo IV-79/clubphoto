@@ -145,11 +145,11 @@ export class Calendrier {
       : [];
     const expoItems: CalItem[] = showExpos
       ? this.expositions()
-          .filter(e => !!e.dateOuverturePublic)
+          .filter(e => !!e.dateExposition)
           .map(e => ({
             kind: 'exposition' as const,
             id: 'ex.' + e.id,
-            date: e.dateOuverturePublic!,
+            date: e.dateExposition!,
             exposition: e,
           }))
       : [];
