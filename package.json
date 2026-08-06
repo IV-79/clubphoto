@@ -11,12 +11,12 @@
   "private": true,
   "packageManager": "npm@11.10.1",
   "dependencies": {
-    "@angular/cdk": "^21.2.14",
+    "@angular/cdk": "^22.1.1",
     "@angular/common": "^22.1.0",
     "@angular/compiler": "^22.1.0",
     "@angular/core": "^22.1.0",
     "@angular/forms": "^22.1.0",
-    "@angular/material": "^21.2.14",
+    "@angular/material": "^22.1.1",
     "@angular/platform-browser": "^22.1.0",
     "@angular/router": "^22.1.0",
     "@fontsource/roboto": "^5.2.10",
@@ -26,16 +26,19 @@
     "marked": "^18.0.5",
     "material-design-icons-iconfont": "^6.7.0",
     "material-icons": "^1.13.14",
-    "primeicons": "^7.0.0",
+    "primeicons": "^8.0.0",
     "primeng": "^22.0.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
+  },
+  "overrides": {
+    "@hono/node-server": "^2.1.0"
   },
   "devDependencies": {
     "@angular/build": "^22.1.3",
     "@angular/cli": "^22.1.3",
     "@angular/compiler-cli": "^22.1.0",
-    "jsdom": "^28.0.0",
+    "jsdom": "^30.0.1",
     "prettier": "^3.8.1",
     "typescript": "~6.0.3",
     "vitest": "^4.1.9"
