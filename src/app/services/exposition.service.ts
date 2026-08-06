@@ -9,6 +9,7 @@ import { Observable, from, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Exposition, ExpoSuggestion, ExpoVoteDoc, ExpoPhoto } from '../models/exposition.model';
 import { generateId } from '../utils/id';
+import { NotificationService } from './notification.service';
 
 export interface ExpoUploadState {
   progress: number;
@@ -18,9 +19,10 @@ export interface ExpoUploadState {
 
 @Injectable({ providedIn: 'root' })
 export class ExpositionService {
-  private firestore = inject(Firestore);
-  private storage   = inject(Storage);
-  private injector  = inject(Injector);
+  private firestore    = inject(Firestore);
+  private storage      = inject(Storage);
+  private injector     = inject(Injector);
+  private notifService = inject(NotificationService);
 
   // ── Exposition CRUD ─────────────────────────────────────────────────────────
 
@@ -42,6 +44,10 @@ export class ExpositionService {
     const ref = await runInInjectionContext(this.injector, () =>
       addDoc(collection(this.firestore, 'expositions'), payload)
     );
+    this.notifService.broadcast('exposition',
+      `${data.nomOrganisateur} lance une nouvelle exposition « ${data.titre} »`,
+      { lien: `/galeries/expositions/${ref.id}`, sourceNom: data.nomOrganisateur, excludeUid: data.organisateurUid }
+    ).catch(() => {});
     return ref.id;
   }
 
