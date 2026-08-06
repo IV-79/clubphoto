@@ -62,10 +62,11 @@ export class Calendrier {
   profile = toSignal(this.authService.currentUserProfile$);
   private readonly loggedIn = computed(() => !!this.profile());
   private readonly uid      = computed(() => this.profile()?.uid ?? null);
-  isEditor = computed(() => {
+  isEditor  = computed(() => {
     const role = this.profile()?.role;
     return role === 'admin' || role === 'contributeur';
   });
+  isAdmin = computed(() => this.profile()?.role === 'admin');
 
   private tous = toSignal(
     toObservable(this.loggedIn).pipe(
@@ -103,7 +104,12 @@ export class Calendrier {
   );
 
   private expositions = toSignal(
-    this.expoService.getExpositionsOnce(),
+    toObservable(this.loggedIn).pipe(
+      switchMap(loggedIn => loggedIn
+        ? this.expoService.getExpositionsOnce()
+        : this.expoService.getPublicExpositionsOnce()
+      )
+    ),
     { initialValue: [] as Exposition[] }
   );
 

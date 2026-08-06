@@ -7,7 +7,7 @@
 /* Hero */
 .guide-hero {
   text-align: center;
-  margin-bottom: 2.5rem;
+  margin-bottom: 2rem;
 }
 
 .guide-hero h1 {
@@ -21,36 +21,58 @@
   font-size: 1.05rem;
 }
 
-/* Nav rapide */
-.guide-nav {
+/* Onglets */
+.guide-tabs {
   display: flex;
-  gap: 1rem;
-  justify-content: center;
-  margin-bottom: 3rem;
-  flex-wrap: wrap;
-}
-
-.guide-nav-link {
-  display: flex;
-  align-items: center;
   gap: 0.5rem;
-  padding: 0.6rem 1.4rem;
-  border: 2px solid var(--border-medium);
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 2.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid var(--border-medium);
+}
+
+.guide-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1.2rem;
+  border: 1.5px solid var(--border-medium);
   border-radius: 2rem;
-  text-decoration: none;
-  color: var(--text-primary);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.88rem;
   font-weight: 500;
-  transition: border-color 0.15s, background 0.15s;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
 }
 
-.guide-nav-link:hover {
+.guide-tab mat-icon {
+  font-size: 1rem;
+  width: 1rem;
+  height: 1rem;
+}
+
+.guide-tab:hover {
   border-color: var(--text-accent);
-  background: var(--bg-surface-alt);
   color: var(--text-accent);
+  background: var(--bg-surface-alt);
 }
 
-.guide-nav-icon {
-  font-size: 1.1rem;
+.guide-tab.active {
+  border-color: var(--text-accent);
+  background: var(--text-accent);
+  color: #fff;
+}
+
+/* Tab content */
+.tab-content {
+  animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* Sections */
@@ -103,7 +125,7 @@
   margin-bottom: 0;
 }
 
-/* Steps ol */
+/* Steps ol/ul */
 .guide-steps {
   padding-left: 1.25rem;
   margin: 0;
@@ -119,7 +141,7 @@
   margin-bottom: 0;
 }
 
-/* Steps (cycle de vie) */
+/* Steps cycle de vie */
 .steps-list {
   display: flex;
   flex-direction: column;
@@ -138,7 +160,7 @@
   font-size: 0.9rem;
 }
 
-/* Badges statut — semantic colors preserved */
+/* Badges statut */
 .step-badge {
   display: inline-block;
   flex-shrink: 0;
@@ -151,14 +173,16 @@
 }
 
 .step-preparation { background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; }
+.step-nettoyage   { background: #fce7f3; color: #9d174d; }
+.step-ideation    { background: #e0f2fe; color: #075985; }
 .step-fermeture   { background: #e0f2fe; color: #0369a1; }
-.step-inscription  { background: #dbeafe; color: #1d4ed8; }
-.step-attente      { background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; }
-.step-ouvert       { background: #dcfce7; color: #166534; }
-.step-vote         { background: #fef3c7; color: #92400e; }
-.step-resultats    { background: #ede9fe; color: #5b21b6; }
+.step-inscription { background: #dbeafe; color: #1d4ed8; }
+.step-attente     { background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; }
+.step-ouvert      { background: #dcfce7; color: #166534; }
+.step-vote        { background: #fef3c7; color: #92400e; }
+.step-resultats   { background: #ede9fe; color: #5b21b6; }
 
-/* Inline badges in text */
+/* Inline badges */
 .badge-inline {
   display: inline-block;
   font-size: 0.72rem;
@@ -168,43 +192,13 @@
   vertical-align: middle;
 }
 
-.badge-inline.inscription { background: #dbeafe; color: #1d4ed8; }
-.badge-inline.vote        { background: #fef3c7; color: #92400e; }
-.badge-inline.resultats   { background: #ede9fe; color: #5b21b6; }
-.badge-inline.step-ouvert { background: #dcfce7; color: #166534; }
-.badge-inline.step-vote   { background: #fef3c7; color: #92400e; }
+.badge-inline.inscription  { background: #dbeafe; color: #1d4ed8; }
+.badge-inline.vote         { background: #fef3c7; color: #92400e; }
+.badge-inline.resultats    { background: #ede9fe; color: #5b21b6; }
+.badge-inline.step-ouvert  { background: #dcfce7; color: #166534; }
+.badge-inline.step-vote    { background: #fef3c7; color: #92400e; }
 
-.optional-label {
-  font-style: italic;
-  font-weight: 400;
-  opacity: 0.75;
-  font-size: 0.7rem;
-}
-
-/* Bloc admin */
-.guide-card-admin {
-  border-color: #c7d2fe;
-  background: #f5f3ff;
-}
-
-.admin-card-header {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.75rem;
-}
-
-.admin-card-header h3 {
-  margin-bottom: 0;
-}
-
-.admin-icon {
-  color: var(--text-accent);
-  font-size: 1.2rem;
-  width: 1.2rem;
-  height: 1.2rem;
-}
-
+/* Admin fields */
 .admin-fields {
   display: flex;
   flex-direction: column;
@@ -251,18 +245,12 @@
 
 .tl-label { font-weight: 600; }
 .tl-hint  { font-size: 0.68rem; opacity: 0.8; }
-
 .tl-arrow { color: var(--text-secondary); font-weight: 600; }
 
 .tl-attente   { background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; }
 .tl-ouvert    { background: #dcfce7; color: #166534; }
 .tl-vote      { background: #fef3c7; color: #92400e; }
 .tl-resultats { background: #ede9fe; color: #5b21b6; }
-
-@media (max-width: 600px) {
-  .admin-field-row { grid-template-columns: 1fr; gap: 0.1rem; }
-  .admin-timeline  { gap: 0.2rem; font-size: 0.75rem; }
-}
 
 /* Navigation flow diagram */
 .nav-flow {
@@ -294,8 +282,7 @@
 }
 
 .flow-emoji { font-size: 1.35rem; line-height: 1; margin-bottom: 0.15rem; }
-
-.flow-sub { font-size: 0.62rem; color: var(--text-secondary); }
+.flow-sub   { font-size: 0.62rem; color: var(--text-secondary); }
 
 .flow-conn {
   display: flex;
@@ -306,12 +293,6 @@
 }
 
 .flow-act { font-size: 0.62rem; color: var(--text-accent); font-weight: 600; white-space: nowrap; }
-
-@media (max-width: 600px) {
-  .nav-flow { flex-direction: column; gap: 0.15rem; }
-  .flow-conn { flex-direction: row; gap: 0.3rem; }
-  .flow-conn .flow-act { order: 2; }
-}
 
 /* Note */
 .guide-note {
@@ -342,129 +323,17 @@ kbd {
   color: var(--text-primary);
 }
 
+/* Responsive */
 @media (max-width: 600px) {
   .guide-hero h1 { font-size: 1.5rem; }
-  .guide-card { padding: 1rem 1rem; }
-  .step { flex-direction: column; gap: 0.4rem; }
-  .step-badge { min-width: unset; }
-}
-
-/* Bouton retour en haut */
-.scroll-top-btn {
-  position: fixed;
-  bottom: 2rem;
-  right: 2rem;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background: var(--text-primary);
-  color: var(--bg-page);
-  border: none;
-  font-size: 1.1rem;
-  line-height: 1;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.18);
-  opacity: 0;
-  transform: translateY(10px);
-  transition: opacity 0.25s, transform 0.25s;
-  pointer-events: none;
-  z-index: 200;
-}
-
-.scroll-top-btn.visible {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-}
-
-.scroll-top-btn:hover {
-  background: var(--text-secondary);
-}
-
-/* Bouton impression */
-.guide-print-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 1.25rem;
-  padding: 0.55rem 1.3rem;
-  background: transparent;
-  color: var(--text-secondary);
-  border: 1.5px solid var(--border-medium);
-  border-radius: 2rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: border-color 0.15s, color 0.15s, background 0.15s;
-}
-
-.guide-print-btn mat-icon {
-  font-size: 1.1rem;
-  width: 1.1rem;
-  height: 1.1rem;
-}
-
-.guide-print-btn:hover {
-  border-color: var(--text-accent);
-  color: var(--text-accent);
-  background: var(--bg-surface-alt);
-}
-
-/* Les dark overrides sont dans styles.css (global) car ViewEncapsulation.Emulated
-   scoperait incorrectement html[data-theme] avec [_ngcontent]. */
-
-/* ── Impression / Save as PDF ─────────────────────────── */
-@media print {
-  /* Masquer les éléments interactifs */
-  .guide-nav,
-  .guide-print-btn,
-  .scroll-top-btn {
-    display: none !important;
-  }
-
-  /* Supprimer les marges inutiles */
-  .guide-page {
-    max-width: 100%;
-    padding: 0;
-  }
-
-  /* Éviter les coupures de page au milieu d'une carte */
-  .guide-card,
-  .step,
-  .admin-field-row {
-    break-inside: avoid;
-  }
-
-  /* Chaque section commence sur la même page si possible */
-  .guide-section {
-    break-inside: avoid;
-  }
-
-  /* Simplifier les fonds colorés pour l'impression */
-  .guide-card {
-    background: #fff;
-    border: 1px solid #ccc;
-    box-shadow: none;
-  }
-
-  .guide-card-admin {
-    background: #f9f7ff;
-    border-color: #c7d2fe;
-  }
-
-  .guide-note {
-    background: #fffbeb;
-    border-left: 3px solid #f59e0b;
-  }
-
-  /* Forcer les couleurs de badges à rester visibles */
-  .step-preparation, .tl-attente, .step-attente { background: #f3f4f6 !important; color: #374151 !important; }
-  .step-ouvert, .tl-ouvert, .badge-inline.step-ouvert { background: #dcfce7 !important; color: #166534 !important; }
-  .step-vote, .tl-vote, .badge-inline.step-vote, .badge-inline.vote { background: #fef3c7 !important; color: #92400e !important; }
-  .step-resultats, .tl-resultats, .badge-inline.resultats { background: #ede9fe !important; color: #5b21b6 !important; }
-  .step-inscription, .badge-inline.inscription { background: #dbeafe !important; color: #1d4ed8 !important; }
-  .step-fermeture { background: #e0f2fe !important; color: #0369a1 !important; }
+  .guide-tabs    { gap: 0.4rem; }
+  .guide-tab     { font-size: 0.8rem; padding: 0.45rem 0.9rem; }
+  .guide-card    { padding: 1rem; }
+  .step          { flex-direction: column; gap: 0.4rem; }
+  .step-badge    { min-width: unset; }
+  .admin-field-row { grid-template-columns: 1fr; gap: 0.1rem; }
+  .admin-timeline  { gap: 0.2rem; font-size: 0.75rem; }
+  .nav-flow        { flex-direction: column; gap: 0.15rem; }
+  .flow-conn       { flex-direction: row; gap: 0.3rem; }
+  .flow-conn .flow-act { order: 2; }
 }

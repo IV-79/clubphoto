@@ -19,6 +19,21 @@ Nouveau type d'activité **Exposition** avec une machine à 5 statuts : Idéatio
 - **Notifications** : quand un admin/organisateur supprime la photo d'un autre membre, celui-ci reçoit une notification avec lien direct vers l'exposition.
 - **Modale de confirmation contextuelle** : boutons non-destructifs en violet ("Terminer", "Clôturer") au lieu du rouge "Supprimer".
 
+### Guide du site — refonte en 4 onglets (2026-08-06)
+
+Le guide passe d'un unique long défilement (avec bouton PDF) à **4 onglets** accessibles à tous les membres connectés, sans restriction de rôle.
+
+- **Informations générales** : rôle du site, fonctionnalités communes (navigation, upload, EXIF avec champ Définition ajouté, likes/commentaires), section dédiée à la description des 6 types d'activités. Le Calendrier est décrit comme accessible sans connexion (certains éléments masqués pour les visiteurs non connectés).
+- **Pour les membres** : workflows de participation par activité — Actualités, Calendrier, Documents, Portfolio, Thème du mois, Sorties/Ateliers, Défi Photo, OneShot, Exposition.
+- **Pour les contributeurs** : Thèmes du mois et Réunions en tête (accessibles aux contributeurs), puis création et gestion de chaque type d'activité, cycle de vie détaillé avec badges de statut.
+- **Pour les admins** : Gestion des membres, Tableau de bord, Maintenance (avec mise en garde), Configuration du site (terme "Image de la page d'accueil" en lieu et place de "Image héro"), Pages du site, Dossiers documents.
+
+Le bouton "Imprimer / Enregistrer en PDF" et le bouton "Retour en haut" ont été supprimés.
+
+### Calendrier — correction erreur Firebase pour les visiteurs non connectés (2026-08-06)
+
+`calendrier.ts` appelait `getExpositionsOnce()` pour tous les utilisateurs, déclenchant une erreur Firestore (`Missing or insufficient permissions`) pour les anonymes — la règle exige `isLoggedIn() || statut == 'cloture'`. Correction : `switchMap(loggedIn => ...)` bascule sur `getPublicExpositionsOnce()` pour les non-connectés. Le bouton "Gérer les réunions" passe de `isAdmin()` à `isEditor()` pour être cohérent avec la route déjà protégée par `editorGuard`.
+
 ### Navigation admin — raccourcis déplacés vers les pages concernées (2026-08-06)
 
 Les liens "Thèmes du mois" et "Réunions" ont été retirés du menu admin du header. À la place, un bouton "Gérer les thèmes du mois" apparaît en haut à droite de `/galeries/themesdumois`, et un bouton "Gérer les réunions" en haut à droite de `/calendrier`. Ces boutons ne s'affichent que pour les admins et les contributeurs. Les routes `/admin/themes` et `/admin/reunions` sont désormais accessibles aux deux rôles (garde `editorGuard`).
