@@ -32,6 +32,7 @@ import { SortieDetail } from './pages/galeries/sortie-detail/sortie-detail';
 import { SortieCreer } from './pages/membre/sorties/sortie-creer/sortie-creer';
 import { DefiCreer } from './pages/membre/defis/defi-creer/defi-creer';
 import { DefiDetail } from './pages/galeries/defi-detail/defi-detail';
+import { ExpositionDetail } from './pages/galeries/exposition-detail/exposition-detail';
 import { MembresGuide } from './pages/membres/guide/guide';
 import { Charte } from './pages/membres/charte/charte';
 import { CompleterProfilComponent } from './pages/completer-profil/completer-profil.component';
@@ -67,6 +68,7 @@ export const routes: Routes = [
       { path: 'galeries/sorties', component: SortiesListe },
       { path: 'galeries/sorties/:id', component: SortieDetail },
       { path: 'galeries/defis/:id', component: DefiDetail },
+      { path: 'galeries/expositions/:id', component: ExpositionDetail },
       { path: 'calendrier', component: Calendrier },
       { path: 'membres/guide', component: MembresGuide, canActivate: [memberGuard] },
       { path: 'membres/charte', component: Charte, canActivate: [memberGuard] },
@@ -74,6 +76,8 @@ export const routes: Routes = [
       { path: 'mentions-legales', component: MentionsLegales },
       { path: 'cgv', component: CGU },
       { path: 'confidentialite', component: Confidentialite },
+      { path: 'admin/themes', component: AdminThemes, canActivate: [editorGuard] },
+      { path: 'admin/reunions', component: Reunions, canActivate: [editorGuard] },
       {
         path: 'admin',
         canActivate: [authGuard],
@@ -81,7 +85,6 @@ export const routes: Routes = [
           { path: '', component: Overview },
           { path: 'membres', component: Membres },
           { path: 'reunions', component: Reunions },
-          { path: 'themes', component: AdminThemes },
           { path: 'config', component: AdminConfig },
           { path: 'dossiers', component: DocumentDossiers },
           { path: 'pages', component: AdminPages },

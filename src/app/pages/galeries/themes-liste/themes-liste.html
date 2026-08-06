@@ -1,8 +1,15 @@
 <div class="page">
 
   <div class="page-header">
-    <h1>Thèmes du mois</h1>
-    <p class="subtitle">Défis photographiques mensuels</p>
+    <div>
+      <h1>Thèmes du mois</h1>
+      <p class="subtitle">Défis photographiques mensuels</p>
+    </div>
+    @if (isEditor()) {
+      <div class="create-btns">
+        <a routerLink="/admin/themes" class="btn-create">Gérer les thèmes du mois</a>
+      </div>
+    }
   </div>
 
   <div class="featured-grid">

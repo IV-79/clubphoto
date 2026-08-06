@@ -100,6 +100,24 @@
   background: rgba(255,80,80,0.18);
 }
 
+/* Dark mode sans cover (html[data-theme="dark"] sans .has-cover) */
+html[data-theme="dark"] .btn-action {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.22);
+  color: rgba(255,255,255,0.85);
+}
+html[data-theme="dark"] .btn-action:hover {
+  background: rgba(255,255,255,0.14);
+  border-color: rgba(255,255,255,0.4);
+}
+html[data-theme="dark"] .btn-action-danger {
+  border-color: rgba(255,100,100,0.4);
+  color: #ff8080;
+}
+html[data-theme="dark"] .btn-action-danger:hover {
+  background: rgba(255,80,80,0.15);
+}
+
 /* Badges : type (gauche) + statut (droite) — poussés en bas par margin-top:auto */
 .hero-badges {
   display: flex;

@@ -74,3 +74,6 @@
 }
 
 .btn-confirm:hover { background: #a93226; }
+
+.btn-confirm-neutral { background: var(--c-violet, #6c3fc5); }
+.btn-confirm-neutral:hover { background: #5a33a8; }

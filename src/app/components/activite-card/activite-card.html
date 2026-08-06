@@ -61,6 +61,12 @@
               <span class="badge badge-defi">{{ d.nbParticipants ?? 0 }} participant(s)</span>
             }
           }
+          @case ('exposition') {
+            @let e = exposition()!;
+            @if (e.themeChoisi) {
+              <span class="badge badge-expo">{{ e.themeChoisi }}</span>
+            }
+          }
         }
       </div>
     </div>

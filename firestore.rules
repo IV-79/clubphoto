@@ -249,6 +249,53 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Expositions photo — membres, organisateur, admin
+    match /expositions/{expoId} {
+      allow read: if isLoggedIn()
+                  || resource.data.statut == 'cloture';
+      allow create: if isLoggedIn();
+      allow update: if isLoggedIn() && (
+        resource.data.organisateurUid == request.auth.uid || isAdmin()
+      );
+      allow delete: if isLoggedIn() && (
+        resource.data.organisateurUid == request.auth.uid || isAdmin()
+      );
+    }
+
+    match /expositions/{expoId}/suggestions/{suggId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn();
+      allow update: if isLoggedIn() && (
+        get(/databases/$(database)/documents/expositions/$(expoId)).data.organisateurUid == request.auth.uid ||
+        isAdmin()
+      );
+      allow delete: if isLoggedIn() && (
+        get(/databases/$(database)/documents/expositions/$(expoId)).data.organisateurUid == request.auth.uid ||
+        isAdmin()
+      );
+    }
+
+    match /expositions/{expoId}/votes/{uid} {
+      allow read: if isLoggedIn();
+      allow create, update: if isLoggedIn() && request.auth.uid == uid;
+      allow delete: if isLoggedIn() && (
+        request.auth.uid == uid ||
+        get(/databases/$(database)/documents/expositions/$(expoId)).data.organisateurUid == request.auth.uid ||
+        isAdmin()
+      );
+    }
+
+    match /expositions/{expoId}/photos/{photoId} {
+      allow read: if isLoggedIn()
+                  || get(/databases/$(database)/documents/expositions/$(expoId)).data.statut == 'cloture';
+      allow create: if isLoggedIn();
+      allow delete: if isLoggedIn() && (
+        resource.data.uid == request.auth.uid ||
+        get(/databases/$(database)/documents/expositions/$(expoId)).data.organisateurUid == request.auth.uid ||
+        isAdmin()
+      );
+    }
+
     match /soumissions/{soumissionId} {
       allow read: if true;
       allow create, update: if isLoggedIn() && request.resource.data.uid == request.auth.uid;

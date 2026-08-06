@@ -54,12 +54,6 @@
               <a routerLink="/galeries/themesdumois" class="nav-panel-item" (click)="openMenu.set(null)">
                 <mat-icon>photo_camera</mat-icon>Thèmes du mois
               </a>
-              @if (isLoggedIn$ | async) {
-                <div class="nav-panel-divider"></div>
-                <a routerLink="/membre/sorties/creer" class="nav-panel-item" (click)="openMenu.set(null)">
-                  <mat-icon>add_circle_outline</mat-icon>Organiser un événement
-                </a>
-              }
             </div>
           }
         </li>
@@ -186,13 +180,6 @@
                   <mat-icon>build</mat-icon>Maintenance
                 </a>
                 <div class="nav-panel-divider"></div>
-                <a routerLink="/admin/reunions" class="nav-panel-item" (click)="openMenu.set(null)">
-                  <mat-icon>event</mat-icon>Réunions
-                </a>
-                <a routerLink="/admin/themes" class="nav-panel-item" (click)="openMenu.set(null)">
-                  <mat-icon>photo_camera</mat-icon>Thèmes du mois
-                </a>
-                <div class="nav-panel-divider"></div>
                 <a routerLink="/admin/membres" class="nav-panel-item" (click)="openMenu.set(null)">
                   <mat-icon>group</mat-icon>Membres
                 </a>
@@ -301,9 +288,6 @@
           <li><a routerLink="/calendrier" (click)="closeMobileMenu()">Calendrier</a></li>
           <li><a routerLink="/galeries/sorties" (click)="closeMobileMenu()">Événements</a></li>
           <li><a routerLink="/galeries/themesdumois" (click)="closeMobileMenu()">Thèmes du mois</a></li>
-          @if (isLoggedIn$ | async) {
-            <li><a routerLink="/membre/sorties/creer" (click)="closeMobileMenu()">+ Organiser un événement</a></li>
-          }
         </ul>
         }
       </li>

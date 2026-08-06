@@ -1,0 +1,503 @@
+@if (notFound()) {
+  <div class="expo-loading">Exposition introuvable.</div>
+} @else if (!expo()) {
+  <div class="expo-loading">Chargement…</div>
+} @else {
+  @let e = expo()!;
+  @let s = e.statut;
+
+  <div class="expo-wrap">
+    <app-event-hero
+      [coverUrl]="e.photoCouvertureUrl"
+      [backLink]="['/galeries/sorties']"
+      backLabel="Activités"
+      [typeBadge]="typeBadgeHero()"
+      [status]="statusHero()"
+      [titre]="e.titre"
+      [organisateur]="e.nomOrganisateur"
+      [loggedIn]="isMembre()"
+      [canEdit]="canManage() && !editMode()"
+      [canDelete]="canManage() && !editMode()"
+      (editClick)="enterEdit()"
+      (deleteClick)="deleteExpo()"
+    />
+  </div>
+
+  <div class="expo-page">
+
+    <!-- ── Sidebar ──────────────────────────────────────────── -->
+    <aside class="expo-aside">
+
+      <div class="info-card">
+        <h3 class="info-card-title">Calendrier</h3>
+        @if (e.dateDebutIdeation) {
+          <div class="stat-row">
+            <span>Début idéation</span>
+            <strong>{{ formatDate(e.dateDebutIdeation) }}</strong>
+          </div>
+        }
+        <div class="stat-row">
+          <span>Fin d'idéation</span>
+          <strong>{{ formatDate(e.dateFinIdeation) }}</strong>
+        </div>
+        @if (e.dateFinVote) {
+          <div class="stat-row">
+            <span>Fin du vote</span>
+            <strong>{{ formatDate(e.dateFinVote) }}</strong>
+          </div>
+        }
+        @if (e.dateFinSoumission) {
+          <div class="stat-row">
+            <span>Fin de soumission de photos</span>
+            <strong>{{ formatDate(e.dateFinSoumission) }}</strong>
+          </div>
+        }
+        @if (e.dateExposition) {
+          <div class="stat-row">
+            <span>Date de l'exposition</span>
+            <strong>{{ formatDate(e.dateExposition) }}</strong>
+          </div>
+        }
+        @if (e.dateOuverturePublic) {
+          <div class="stat-row">
+            <span>Ouverture au public</span>
+            <strong>{{ formatDate(e.dateOuverturePublic) }}</strong>
+          </div>
+        }
+      </div>
+
+      <div class="info-card">
+        <h3 class="info-card-title">Participation</h3>
+        @if (e.themeChoisi) {
+          <div class="stat-row">
+            <span>Thème</span>
+            <strong>{{ e.themeChoisi }}</strong>
+          </div>
+        }
+        <div class="stat-row">
+          <span>Max photos / membre</span>
+          <strong>{{ e.maxPhotosParMembre }}</strong>
+        </div>
+        <div class="stat-row">
+          <span>Suggestions</span>
+          <strong>{{ suggestions().length }}</strong>
+        </div>
+        @if (s === 'soumission' || s === 'cloture') {
+          <div class="stat-row">
+            <span>Photos soumises</span>
+            <strong>{{ photos().length }}</strong>
+          </div>
+        }
+      </div>
+
+      @if (s === 'votation') {
+        <div class="info-card">
+          <h3 class="info-card-title">Votation</h3>
+          <div class="stat-row">
+            <span>Membres ayant voté</span>
+            <strong>{{ nbMembresVote() }}</strong>
+          </div>
+          <div class="stat-row">
+            <span>Votes exprimés</span>
+            <strong>{{ nbVotesUtilises() }}</strong>
+          </div>
+        </div>
+      }
+
+    </aside>
+
+    <!-- ── Main ─────────────────────────────────────────────── -->
+    <main class="expo-main">
+
+      @if (!editMode() && e.description) {
+        <div class="event-description">
+          <span class="event-description-label">Description</span>
+          <p class="event-description-text">{{ e.description }}</p>
+        </div>
+      }
+
+      <!-- Edit panel -->
+      @if (editMode() && canManage()) {
+        <div class="edit-panel">
+          <h3 class="edit-panel-title">Modifier l'exposition</h3>
+          <form [formGroup]="editForm" (ngSubmit)="saveEdit()">
+
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Titre</mat-label>
+              <input matInput formControlName="titre" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Description</mat-label>
+              <textarea matInput formControlName="description" rows="3"></textarea>
+            </mat-form-field>
+
+            @if (s === 'ideation' || s === 'nettoyage') {
+              <mat-form-field appearance="outline" class="field-half">
+                <mat-label>Max photos par membre</mat-label>
+                <input matInput type="number" formControlName="maxPhotosParMembre" min="1" />
+              </mat-form-field>
+            }
+            @if (s === 'ideation') {
+              <app-date-picker label="Fin de l'idéation" formControlName="dateFinIdeation" [required]="true" class="field-half"></app-date-picker>
+            }
+            @if (s === 'votation') {
+              <app-date-picker label="Fin du vote" formControlName="dateFinVote" [required]="true" class="field-half"></app-date-picker>
+            }
+            @if (s === 'soumission') {
+              <app-date-picker label="Fin de soumission de photos" formControlName="dateFinSoumission" [required]="true" class="field-half"></app-date-picker>
+            }
+
+            <app-date-picker label="Début de l'idéation" formControlName="dateDebutIdeation" class="field-half"></app-date-picker>
+            <app-date-picker label="Date de l'exposition" formControlName="dateExposition" class="field-half"></app-date-picker>
+            <app-date-picker label="Ouverture au public" formControlName="dateOuverturePublic" class="field-half"></app-date-picker>
+
+            <!-- Cover photo -->
+            <div class="cover-section">
+              <label class="field-label">Photo de couverture</label>
+              <div class="cover-drop"
+                   [class.drag-over]="coverDragOver()"
+                   (dragover)="$event.preventDefault(); coverDragOver.set(true)"
+                   (dragleave)="coverDragOver.set(false)"
+                   (drop)="onCoverDrop($event)">
+                @if (coverPreviewUrl()) {
+                  <img [src]="coverPreviewUrl()!" class="cover-preview" alt="Aperçu" />
+                  <button type="button" class="cover-remove-btn" (click)="clearCover()">× Retirer</button>
+                } @else if (e.photoCouvertureUrl) {
+                  <img [src]="e.photoCouvertureUrl" class="cover-preview" alt="Couverture actuelle" />
+                  <button type="button" class="cover-remove-btn" (click)="coverInput.click()">Changer</button>
+                } @else {
+                  <div class="cover-placeholder">
+                    <span>Glisser une image ou</span>
+                    <button type="button" class="cover-browse-btn" (click)="coverInput.click()">parcourir</button>
+                  </div>
+                }
+                <input #coverInput type="file" accept="image/*" class="hidden-input" (change)="onCoverSelected($event)" />
+              </div>
+            </div>
+
+            <div class="edit-actions">
+              <button type="button" class="btn-cancel" (click)="cancelEdit()">Annuler</button>
+              <button type="submit" class="btn-save" [disabled]="editForm.invalid || saving()">
+                {{ saving() ? 'Enregistrement…' : 'Enregistrer' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      }
+
+      <!-- ══ IDÉATION ══════════════════════════════════════════ -->
+      @if (s === 'ideation') {
+        <section class="expo-section">
+          <h2 class="section-title">Idéation — suggérez un thème</h2>
+          <p class="section-desc">Les suggestions sont anonymes. Chaque membre peut en soumettre plusieurs.</p>
+
+          @if (isMembre()) {
+            <div class="suggestion-form">
+              <input class="suggestion-input"
+                     [value]="newSuggestion()"
+                     (input)="newSuggestion.set($any($event.target).value)"
+                     placeholder="Votre idée de thème…"
+                     (keydown.enter)="$event.preventDefault(); ajouterSuggestion('membre')" />
+              <button class="btn-ajouter"
+                      (click)="ajouterSuggestion('membre')"
+                      [disabled]="!newSuggestion().trim() || savingSugg()">
+                {{ savingSugg() ? '…' : 'Soumettre' }}
+              </button>
+            </div>
+          } @else {
+            <p class="info-connexion">Connectez-vous pour soumettre un thème.</p>
+          }
+
+          @if (suggestions().length > 0) {
+            <div class="suggestions-list">
+              @for (s of suggestions(); track s.id) {
+                <div class="suggestion-item">
+                  <span class="suggestion-texte">{{ s.texte }}</span>
+                </div>
+              }
+            </div>
+          } @else {
+            <p class="empty-sugg">Aucune suggestion pour l'instant.</p>
+          }
+
+          @if (canManage()) {
+            <div class="manage-actions">
+              <button class="btn-cloture" (click)="terminerIdeation()" [disabled]="savingTransition()">
+                {{ savingTransition() ? '…' : 'Terminer l\'idéation →' }}
+              </button>
+            </div>
+          }
+        </section>
+      }
+
+      <!-- ══ NETTOYAGE ═════════════════════════════════════════ -->
+      @if (s === 'nettoyage') {
+        @if (canManage()) {
+          <section class="expo-section">
+            <h2 class="section-title">Nettoyage — sélection des thèmes</h2>
+            <p class="section-desc">Cochez les thèmes à retenir, modifiez les libellés, ajoutez un thème admin si besoin.</p>
+
+            <!-- Tri -->
+            <div class="sort-bar">
+              <span class="sort-label">Tri :</span>
+              <button class="btn-sort" [class.btn-sort-active]="sortMode() === 'votes'" (click)="sortMode.set('votes')">↓ Votes</button>
+              <button class="btn-sort" [class.btn-sort-active]="sortMode() === 'alpha'" (click)="sortMode.set('alpha')">A → Z</button>
+            </div>
+
+            <!-- Liste des suggestions -->
+            <div class="sugg-curation-list">
+              @for (sugg of suggestionsTriees(); track sugg.id) {
+                <div class="sugg-curation-item" [class.inactif]="!sugg.actif">
+                  <input type="checkbox" class="sugg-check" [checked]="sugg.actif" (change)="toggleActif(sugg)" />
+
+                  @if (editingSuggId() === sugg.id) {
+                    <input class="sugg-edit-input"
+                           [value]="editingSuggTexte()"
+                           (input)="editingSuggTexte.set($any($event.target).value)"
+                           (keydown.enter)="saveEditSugg()"
+                           (keydown.escape)="cancelEditSugg()" />
+                    <button class="btn-icon" (click)="saveEditSugg()">✓</button>
+                    <button class="btn-icon" (click)="cancelEditSugg()">×</button>
+                  } @else {
+                    <span class="sugg-texte">{{ sugg.texte }}</span>
+                    @if (sugg.source === 'admin') {
+                      <span class="badge-admin">admin</span>
+                    }
+                    <button class="btn-icon" (click)="startEditSugg(sugg)" title="Modifier">✏</button>
+                    <button class="btn-icon btn-danger" (click)="supprimerSuggestion(sugg)" title="Supprimer">🗑</button>
+                  }
+                </div>
+              }
+            </div>
+
+            <!-- Ajouter un thème admin -->
+            <div class="suggestion-form suggestion-form-admin">
+              <input class="suggestion-input"
+                     [value]="newSuggestionAdmin()"
+                     (input)="newSuggestionAdmin.set($any($event.target).value)"
+                     placeholder="Ajouter un thème (source admin)…"
+                     (keydown.enter)="$event.preventDefault(); ajouterSuggestion('admin')" />
+              <button class="btn-ajouter" (click)="ajouterSuggestion('admin')"
+                      [disabled]="!newSuggestionAdmin().trim() || savingSugg()">+ Ajouter</button>
+            </div>
+
+            <!-- Transitions -->
+            <div class="transition-panels">
+
+              <div class="transition-panel panel-a">
+                <h3 class="panel-title">Mise en votation</h3>
+                <p class="panel-desc">Les thèmes cochés seront soumis au vote des membres.</p>
+                <form [formGroup]="formVotation" (ngSubmit)="lancerVotation()">
+                  <app-date-picker label="Fin du vote" formControlName="dateFinVote" [required]="true" [min]="today" class="field-half"></app-date-picker>
+                  <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-half">
+                    <mat-label>Votes par membre</mat-label>
+                    <input matInput type="number" formControlName="nombreVotesParMembre" min="1" />
+                  </mat-form-field>
+                  <button type="submit" class="btn-transition btn-votation"
+                          [disabled]="formVotation.invalid || savingTransition() || suggestionsActives().length === 0">
+                    {{ savingTransition() ? '…' : 'Lancer le vote' }}
+                  </button>
+                  @if (suggestionsActives().length === 0) {
+                    <p class="panel-warn">Cochez au moins un thème.</p>
+                  }
+                </form>
+              </div>
+
+              <div class="transition-panel panel-b">
+                <h3 class="panel-title">Sélection du thème définitif</h3>
+                <p class="panel-desc">Choisir et figer définitivement le thème de l'exposition, puis ouvrir la soumission de photos.</p>
+                <form [formGroup]="formSoumission" (ngSubmit)="lancerSoumission()">
+                  <mat-form-field appearance="outline" class="field-full">
+                    <mat-label>Thème retenu</mat-label>
+                    <mat-select formControlName="themeChoisi">
+                      @for (sugg of suggestions(); track sugg.id) {
+                        <mat-option [value]="sugg.texte">
+                          {{ sugg.texte }}
+                          @if (themeVainqueur()?.id === sugg.id) { ★ }
+                        </mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
+                  <app-date-picker label="Fin de soumission de photos" formControlName="dateFinSoumission" [required]="true" [min]="today" class="field-half"></app-date-picker>
+                  <button type="submit" class="btn-transition btn-soumission"
+                          [disabled]="formSoumission.invalid || savingTransition() || suggestions().length === 0">
+                    {{ savingTransition() ? '…' : 'Définir le thème de l\'expo' }}
+                  </button>
+                  @if (suggestions().length === 0) {
+                    <p class="panel-warn">Aucun thème disponible.</p>
+                  }
+                </form>
+              </div>
+
+            </div>
+          </section>
+        } @else {
+          <section class="expo-section">
+            <p class="info-attente">L'organisateur est en train de passer en revue les suggestions soumises — il peut en modifier le libellé, en retirer certaines, puis lancer un vote ou choisir directement le thème retenu.</p>
+          </section>
+        }
+      }
+
+      <!-- ══ VOTATION ══════════════════════════════════════════ -->
+      @if (s === 'votation') {
+        <section class="expo-section">
+          <h2 class="section-title">Vote</h2>
+          @if (e.nombreVotesParMembre) {
+            <p class="section-desc">Votez pour jusqu'à <strong>{{ e.nombreVotesParMembre }}</strong> thème(s). Un vote par thème maximum.</p>
+          }
+
+          @if (isMembre()) {
+            <p class="jetons-restants">
+              Votes restants : <strong>{{ jetonsRestants() }}</strong> / {{ e.nombreVotesParMembre }}
+            </p>
+          }
+
+          <div class="sort-bar">
+            <span class="sort-label">Tri :</span>
+            <button class="btn-sort" [class.btn-sort-active]="sortMode() === 'alpha'" (click)="sortMode.set('alpha')">A → Z</button>
+            <button class="btn-sort" [class.btn-sort-active]="sortMode() === 'votes'" (click)="sortMode.set('votes')">↓ Votes</button>
+          </div>
+
+          <div class="vote-list">
+            @for (sugg of suggestionsTriees(); track sugg.id) {
+              <div class="vote-item">
+                <div class="vote-item-left">
+                  <span class="vote-texte">{{ sugg.texte }}</span>
+                  <span class="vote-score">{{ scoreParSuggestion()[sugg.id] || 0 }} vote(s)</span>
+                </div>
+                @if (isMembre()) {
+                  <button class="btn-vote-toggle"
+                          [class.voted]="(localVoteMap()[sugg.id] || 0) > 0"
+                          (click)="toggleVote(sugg.id)"
+                          [disabled]="jetonsRestants() === 0 && (localVoteMap()[sugg.id] || 0) === 0">
+                    {{ (localVoteMap()[sugg.id] || 0) > 0 ? '✓ Voté' : 'Voter' }}
+                  </button>
+                }
+              </div>
+            }
+          </div>
+
+          @if (canManage()) {
+            <div class="manage-actions">
+              <button class="btn-cloture" (click)="terminerVote()" [disabled]="savingTransition()">
+                {{ savingTransition() ? '…' : 'Terminer le vote →' }}
+              </button>
+            </div>
+          }
+
+        </section>
+      }
+
+      <!-- ══ SOUMISSION ════════════════════════════════════════ -->
+      @if (s === 'soumission') {
+        <section class="expo-section">
+          <h2 class="section-title">Soumission de photos</h2>
+          @if (e.themeChoisi) {
+            <p class="theme-choisi">Thème : <strong>{{ e.themeChoisi }}</strong></p>
+          }
+
+          @if (isMembre()) {
+            @if (canUploadMore()) {
+              <div class="upload-zone"
+                   [class.drag-over]="dragOver()"
+                   (dragover)="$event.preventDefault(); dragOver.set(true)"
+                   (dragleave)="dragOver.set(false)"
+                   (drop)="onDrop($event)"
+                   (click)="photoFileInput.click()">
+                @if (uploading()) {
+                  <div class="progress-bar-wrap">
+                    <div class="progress-bar-fill" [style.width.%]="uploadProgress()"></div>
+                  </div>
+                  <span class="upload-label">Envoi… {{ uploadProgress() }}%</span>
+                } @else {
+                  <div class="upload-plus">+</div>
+                  <span class="upload-label">Soumettre une photo — glissez ici ou cliquez</span>
+                  <span class="upload-hint">{{ monPhotos().length }} / {{ e.maxPhotosParMembre }} · Compressé automatiquement</span>
+                }
+              </div>
+              <input #photoFileInput type="file" accept="image/*" style="display:none" (change)="onFileSelected($event)" />
+              @if (uploadError()) {
+                <p class="upload-error">{{ uploadError() }}</p>
+              }
+            } @else {
+              <p class="upload-quota">Quota atteint — {{ e.maxPhotosParMembre }} photo(s) soumise(s).</p>
+            }
+          } @else {
+            <p class="info-connexion">Connectez-vous pour soumettre des photos.</p>
+          }
+
+          <!-- Galerie membres -->
+          @if (photos().length > 0) {
+            <div class="photos-grid">
+              @for (photo of photos(); track photo.id; let i = $index) {
+                <div class="photo-item" (click)="openLightbox(i)" style="cursor:pointer">
+                  <img [src]="photo.url" [alt]="photo.nomAuteur" loading="lazy" />
+                  <div class="photo-overlay">
+                    <span class="photo-auteur">{{ photo.nomAuteur }}</span>
+                    @if (photo.uid === uid() || canManage()) {
+                      <button class="btn-del-photo"
+                              (click)="$event.stopPropagation(); supprimerPhoto(photo)"
+                              [disabled]="deletingPhoto() === photo.id">×</button>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
+
+          @if (canManage()) {
+            <div class="manage-actions">
+              <button class="btn-cloture" (click)="cloturerManuellement()" [disabled]="savingTransition()">
+                Clôturer la soumission →
+              </button>
+            </div>
+          }
+        </section>
+      }
+
+      <!-- ══ CLÔTURÉ ═══════════════════════════════════════════ -->
+      @if (s === 'cloture') {
+        <section class="expo-section">
+          @if (!isPublic() && !isMembre()) {
+            <p class="info-attente">L'exposition est en cours de finalisation. Revenez bientôt !</p>
+          } @else {
+            <h2 class="section-title">
+              @if (e.themeChoisi) { Photos — {{ e.themeChoisi }} }
+              @else { Photos de l'exposition }
+            </h2>
+
+            @if (photos().length > 0) {
+              <div class="photos-grid">
+                @for (photo of photos(); track photo.id; let i = $index) {
+                  <div class="photo-item" (click)="openLightbox(i)" style="cursor:pointer">
+                    <img [src]="photo.url" [alt]="photo.nomAuteur" loading="lazy" />
+                    <div class="photo-overlay">
+                      <span class="photo-auteur">{{ photo.nomAuteur }}</span>
+                    </div>
+                  </div>
+                }
+              </div>
+            } @else {
+              <p class="empty-sugg">Aucune photo pour cette exposition.</p>
+            }
+          }
+        </section>
+      }
+
+    </main>
+  </div>
+}
+
+@if (lightboxIndex() !== null && photos().length > 0) {
+  <app-photo-lightbox
+    [photos]="lightboxPhotos()"
+    [callbacks]="lightboxCallbacks()"
+    [startIndex]="lightboxIndex()!"
+    [userUid]="uid()"
+    [userName]="(profile()?.prenom ?? '') + ' ' + (profile()?.nom ?? '')"
+    [canInteract]="isMembre()"
+    [hideLikes]="true"
+    (closed)="closeLightbox()"
+  />
+}

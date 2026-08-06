@@ -13,11 +13,12 @@ import { DatePickerComponent } from '../../../../components/date-picker/date-pic
 import { SortieService } from '../../../../services/sortie.service';
 import { OneShotService } from '../../../../services/oneshot.service';
 import { DefiService } from '../../../../services/defi.service';
+import { ExpositionService } from '../../../../services/exposition.service';
 import { AuthService } from '../../../../services/auth.service';
 import { SortieType } from '../../../../models/sortie.model';
 import { compressImage, COMPRESS_COUVERTURE } from '../../../../utils/image-compress';
 
-type CreationType = SortieType | 'oneshot' | 'defi';
+type CreationType = SortieType | 'oneshot' | 'defi' | 'exposition';
 
 @Component({
   selector: 'app-sortie-creer',
@@ -31,12 +32,13 @@ type CreationType = SortieType | 'oneshot' | 'defi';
   styleUrl: './sortie-creer.css',
 })
 export class SortieCreer {
-  private sortieService  = inject(SortieService);
-  private oneShotService = inject(OneShotService);
-  private defiService    = inject(DefiService);
-  private authService    = inject(AuthService);
-  private router         = inject(Router);
-  private route          = inject(ActivatedRoute);
+  private sortieService     = inject(SortieService);
+  private oneShotService    = inject(OneShotService);
+  private defiService       = inject(DefiService);
+  private expositionService = inject(ExpositionService);
+  private authService       = inject(AuthService);
+  private router            = inject(Router);
+  private route             = inject(ActivatedRoute);
 
   profile = toSignal(this.authService.currentUserProfile$);
   saving = signal(false);
@@ -76,6 +78,11 @@ export class SortieCreer {
     maxPhotos:           new FormControl(2, { nonNullable: true }),
     maxVotes:            new FormControl(3, { nonNullable: true }),
     visibilite:          new FormControl<'public' | 'membre'>('public', { nonNullable: true }),
+    // Exposition-specific
+    dateDebutIdeation:   new FormControl('', { nonNullable: true }),
+    dateFinIdeation:     new FormControl('', { nonNullable: true }),
+    dateExposition:      new FormControl('', { nonNullable: true }),
+    dateOuverturePublic: new FormControl('', { nonNullable: true }),
   });
 
   isOneShot = toSignal(
@@ -94,11 +101,19 @@ export class SortieCreer {
     { initialValue: false }
   );
 
+  isExposition = toSignal(
+    this.form.get('type')!.valueChanges.pipe(
+      startWith(this.form.get('type')!.value),
+      map(v => v === 'exposition')
+    ),
+    { initialValue: false }
+  );
+
   constructor() {
-    // date: required pour sortie uniquement
+    // date: required pour sortie uniquement (pas oneshot, défi, ni exposition)
     effect(() => {
       const dateCtrl = this.form.get('date')!;
-      if (this.isOneShot() || this.isDefi()) {
+      if (this.isOneShot() || this.isDefi() || this.isExposition()) {
         dateCtrl.clearValidators();
       } else {
         dateCtrl.setValidators([Validators.required]);
@@ -131,10 +146,28 @@ export class SortieCreer {
       });
     });
 
+    // dateDebutIdeation + dateFinIdeation: required pour exposition uniquement
+    effect(() => {
+      const debut = this.form.get('dateDebutIdeation')!;
+      const fin   = this.form.get('dateFinIdeation')!;
+      if (this.isExposition()) {
+        debut.setValidators([Validators.required]);
+        fin.setValidators([Validators.required]);
+      } else {
+        debut.clearValidators();
+        fin.clearValidators();
+      }
+      untracked(() => {
+        debut.updateValueAndValidity({ emitEvent: false });
+        fin.updateValueAndValidity({ emitEvent: false });
+      });
+    });
+
     // Preselect depuis query param
     const qtype = this.route.snapshot.queryParamMap.get('type');
-    if (qtype === 'oneshot') this.form.patchValue({ type: 'oneshot' });
-    if (qtype === 'defi')    this.form.patchValue({ type: 'defi' });
+    if (qtype === 'oneshot')    this.form.patchValue({ type: 'oneshot' });
+    if (qtype === 'defi')       this.form.patchValue({ type: 'defi' });
+    if (qtype === 'exposition') this.form.patchValue({ type: 'exposition' });
   }
 
   get defiDateError(): string | null {
@@ -197,6 +230,23 @@ export class SortieCreer {
           await this.oneShotService.setCouverture(id, compressed);
         }
         this.router.navigate(['/galeries/oneshots', id]);
+      } else if (v.type === 'exposition') {
+        const id = await this.expositionService.create({
+          titre:              v.titre.trim(),
+          maxPhotosParMembre: v.maxPhotos,
+          dateDebutIdeation:  v.dateDebutIdeation  || undefined,
+          dateFinIdeation:    v.dateFinIdeation,
+          dateExposition:     v.dateExposition     || undefined,
+          dateOuverturePublic: v.dateOuverturePublic || undefined,
+          organisateurUid:    profile.uid,
+          nomOrganisateur:    nom,
+          ...(v.description.trim() ? { description: v.description.trim() } : {}),
+        });
+        if (this.pendingCoverFile()) {
+          const compressed = await compressImage(this.pendingCoverFile()!, COMPRESS_COUVERTURE);
+          await this.expositionService.setCouverture(id, compressed);
+        }
+        this.router.navigate(['/galeries/expositions', id]);
       } else {
         const inscriptionObligatoire = v.inscriptionObligatoire;
         const id = await this.sortieService.createSortie({

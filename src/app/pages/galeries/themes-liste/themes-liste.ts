@@ -22,6 +22,10 @@ export class ThemesListe {
 
   profile    = toSignal(this.authService.currentUserProfile$);
   isLoggedIn = computed(() => !!this.profile());
+  isEditor   = computed(() => {
+    const role = this.profile()?.role;
+    return role === 'admin' || role === 'contributeur';
+  });
 
   private readonly PAGE_SIZE    = 3;
   private terminesPagines       = signal<ThemeMensuel[]>([]);

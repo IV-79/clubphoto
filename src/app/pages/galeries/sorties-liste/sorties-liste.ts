@@ -7,9 +7,11 @@ import { SortieService } from '../../../services/sortie.service';
 import { AuthService } from '../../../services/auth.service';
 import { OneShotService } from '../../../services/oneshot.service';
 import { DefiService } from '../../../services/defi.service';
+import { ExpositionService } from '../../../services/exposition.service';
 import { Sortie, SORTIE_TYPE_META, SortieType } from '../../../models/sortie.model';
 import { OneShot } from '../../../models/oneshot.model';
 import { Defi } from '../../../models/defi.model';
+import { Exposition } from '../../../models/exposition.model';
 import { DatePickerComponent } from '../../../components/date-picker/date-picker';
 import { ActiviteCard, ActiviteItem } from '../../../components/activite-card/activite-card';
 
@@ -25,6 +27,7 @@ export class SortiesListe {
   private sortieService  = inject(SortieService);
   private oneShotService = inject(OneShotService);
   private defiService    = inject(DefiService);
+  private expoService    = inject(ExpositionService);
   private authService    = inject(AuthService);
 
   profile = toSignal(this.authService.currentUserProfile$);
@@ -60,6 +63,14 @@ export class SortiesListe {
   );
   defis = toSignal(this.defis$, { initialValue: [] as Defi[] });
 
+  private expositions$ = toObservable(this.loggedIn).pipe(
+    switchMap(loggedIn => loggedIn
+      ? this.expoService.getExpositionsOnce()
+      : this.expoService.getPublicExpositionsOnce()
+    )
+  );
+  expositions = toSignal(this.expositions$, { initialValue: [] as Exposition[] });
+
   private mesSorties$ = toObservable(this.uid).pipe(
     switchMap(uid => uid ? this.sortieService.getMesSortiesOnce(uid) : of([] as Sortie[]))
   );
@@ -90,8 +101,13 @@ export class SortiesListe {
   );
   mesDefisInscritsIds = toSignal(this.mesDefisInscritsIds$, { initialValue: [] as string[] });
 
+  mesExpositions = computed(() =>
+    this.expositions().filter(e => e.organisateurUid === this.uid())
+  );
+
   hasOrganisees = computed(() =>
-    this.mesSorties().length > 0 || this.mesOneShots().length > 0 || this.mesDefis().length > 0
+    this.mesSorties().length > 0 || this.mesOneShots().length > 0 ||
+    this.mesDefis().length > 0   || this.mesExpositions().length > 0
   );
 
   constructor() {
@@ -128,7 +144,7 @@ export class SortiesListe {
   readonly sortieTypes = Object.entries(SORTIE_TYPE_META) as [SortieType, { label: string; emoji: string }][];
 
   filterTexte      = signal('');
-  filterType       = signal<SortieType | 'oneshot' | 'defi' | null>(null);
+  filterType       = signal<SortieType | 'oneshot' | 'defi' | 'exposition' | null>(null);
   filterDateDu     = signal('');
   filterDateAu     = signal('');
   filterOrganisees = signal(false);
@@ -141,7 +157,7 @@ export class SortiesListe {
   );
 
   onTypeChange(value: string): void {
-    this.filterType.set(value ? value as SortieType | 'oneshot' | 'defi' : null);
+    this.filterType.set(value ? value as SortieType | 'oneshot' | 'defi' | 'exposition' : null);
   }
 
   resetFilters(): void {
@@ -174,7 +190,12 @@ export class SortiesListe {
       .filter(d => !this.isAfterWindow(d.dateDebutSoumission) && !this.isBeforeWindow(d.dateCloturVotes))
       .map(data => ({ kind: 'defi' as const, data }));
 
-    return [...sorties, ...oneshots, ...defis]
+    // Expositions : ni à venir (dateDebutIdeation futur) ni terminées (dateOuverturePublic passée)
+    const expos: ActiviteItem[] = this.expositions()
+      .filter(e => !this.isExpoAVenir(e) && !this.isExpoPassee(e))
+      .map(data => ({ kind: 'exposition' as const, data }));
+
+    return [...sorties, ...oneshots, ...defis, ...expos]
       .sort((a, b) => this.effectiveDate(a).localeCompare(this.effectiveDate(b)));
   });
 
@@ -194,7 +215,12 @@ export class SortiesListe {
       .filter(d => this.isAfterWindow(d.dateDebutSoumission))
       .map(data => ({ kind: 'defi' as const, data }));
 
-    return [...sorties, ...defis]
+    // Expositions dont l'idéation n'a pas encore commencé
+    const expos: ActiviteItem[] = this.expositions()
+      .filter(e => this.isExpoAVenir(e))
+      .map(data => ({ kind: 'exposition' as const, data }));
+
+    return [...sorties, ...defis, ...expos]
       .sort((a, b) => this.effectiveDate(a).localeCompare(this.effectiveDate(b)));
   });
 
@@ -214,7 +240,12 @@ export class SortiesListe {
       .filter(d => this.isBeforeWindow(d.dateCloturVotes))
       .map(data => ({ kind: 'defi' as const, data }));
 
-    return [...sorties, ...oneshots, ...defis]
+    // Expositions dont la date d'exposition est passée (> 7 jours)
+    const expos: ActiviteItem[] = this.expositions()
+      .filter(e => this.isExpoPassee(e))
+      .map(data => ({ kind: 'exposition' as const, data }));
+
+    return [...sorties, ...oneshots, ...defis, ...expos]
       .sort((a, b) => this.effectiveDate(b).localeCompare(this.effectiveDate(a)));
   });
 
@@ -234,9 +265,11 @@ export class SortiesListe {
       if (texte && !item.data.titre.toLowerCase().includes(texte)) return false;
 
       if (type !== null) {
-        if (type === 'oneshot' && item.kind !== 'oneshot') return false;
-        if (type === 'defi'    && item.kind !== 'defi')    return false;
-        if (type !== 'oneshot' && type !== 'defi' && (item.kind !== 'sortie' || (item.data as Sortie).type !== type)) return false;
+        if (type === 'oneshot'    && item.kind !== 'oneshot')    return false;
+        if (type === 'defi'       && item.kind !== 'defi')       return false;
+        if (type === 'exposition' && item.kind !== 'exposition') return false;
+        if (type !== 'oneshot' && type !== 'defi' && type !== 'exposition' &&
+            (item.kind !== 'sortie' || (item.data as Sortie).type !== type)) return false;
       }
 
       const date = this.effectiveDate(item);
@@ -248,12 +281,16 @@ export class SortiesListe {
           ? (item.data as Sortie).organisateurUid === uid
           : item.kind === 'oneshot'
             ? (item.data as OneShot).creatorUid === uid
-            : (item.data as Defi).organisateurUid === uid;
+            : item.kind === 'exposition'
+              ? (item.data as Exposition).organisateurUid === uid
+              : (item.data as Defi).organisateurUid === uid;
         const isInscrit = item.kind === 'sortie'
           ? inscritsSortieIds.has(item.data.id!)
           : item.kind === 'oneshot'
             ? inscritsOneShotIds.has(item.data.id!)
-            : inscritsDefiIds.has(item.data.id!);
+            : item.kind === 'defi'
+              ? inscritsDefiIds.has(item.data.id!)
+              : false; // les expositions n'ont pas d'inscriptions
         if (!((organisees && isOrganisateur) || (participe && isInscrit))) return false;
       }
 
@@ -276,6 +313,10 @@ export class SortiesListe {
   private effectiveDate(item: ActiviteItem): string {
     if (item.kind === 'sortie')  return (item.data as Sortie).date;
     if (item.kind === 'oneshot') return (item.data as OneShot).date ?? (item.data as OneShot).dateCreation.slice(0, 10);
+    if (item.kind === 'exposition') {
+      const e = item.data as Exposition;
+      return e.dateExposition ?? e.dateDebutIdeation ?? e.dateFinIdeation;
+    }
     return (item.data as Defi).dateDebutSoumission;
   }
 
@@ -285,9 +326,13 @@ export class SortiesListe {
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   }
 
+  private get today():       string { return this.dateOffset(0);  }
   private get windowStart(): string { return this.dateOffset(-7); }
   private get windowEnd():   string { return this.dateOffset(7);  }
 
   private isBeforeWindow(date: string): boolean { return date < this.windowStart; }
   private isAfterWindow(date: string):  boolean { return date > this.windowEnd;   }
+
+  private isExpoAVenir(e: Exposition):  boolean { return !!e.dateDebutIdeation && e.dateDebutIdeation > this.today; }
+  private isExpoPassee(e: Exposition):  boolean { return !!e.dateExposition && this.isBeforeWindow(e.dateExposition); }
 }

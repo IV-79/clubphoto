@@ -3,13 +3,15 @@ import { RouterLink } from '@angular/router';
 import { Sortie, SORTIE_TYPE_META } from '../../models/sortie.model';
 import { OneShot, ONESHOT_STATUT_LABELS } from '../../models/oneshot.model';
 import { Defi, DEFI_STATUT_LABELS, getDefiStatut } from '../../models/defi.model';
+import { Exposition, EXPO_STATUT_LABELS } from '../../models/exposition.model';
 import { MatIconModule } from '@angular/material/icon';
 import { ImgRetryDirective } from '../../directives/img-retry.directive';
 
 export type ActiviteItem =
-  | { kind: 'sortie';  data: Sortie  }
-  | { kind: 'oneshot'; data: OneShot }
-  | { kind: 'defi';    data: Defi    };
+  | { kind: 'sortie';     data: Sortie     }
+  | { kind: 'oneshot';    data: OneShot    }
+  | { kind: 'defi';       data: Defi       }
+  | { kind: 'exposition'; data: Exposition };
 
 @Component({
   selector: 'app-activite-card',
@@ -24,21 +26,23 @@ export class ActiviteCard {
 
   protected routerLink = computed((): string[] => {
     const { kind, data } = this.item();
-    if (kind === 'sortie')  return ['/galeries/sorties',  data.id];
-    if (kind === 'oneshot') return ['/galeries/oneshots', data.id];
+    if (kind === 'sortie')     return ['/galeries/sorties',     data.id];
+    if (kind === 'oneshot')    return ['/galeries/oneshots',    data.id];
+    if (kind === 'exposition') return ['/galeries/expositions', data.id];
     return ['/galeries/defis', data.id];
   });
 
   protected coverUrl = computed((): string | undefined => {
     const { kind, data } = this.item();
     if (kind === 'sortie') return (data as Sortie).imageEvenementUrl;
-    return (data as OneShot | Defi).photoCouvertureUrl;
+    return (data as OneShot | Defi | Exposition).photoCouvertureUrl;
   });
 
   protected placeholderIcon = computed((): string => {
     const { kind, data } = this.item();
-    if (kind === 'sortie') return SORTIE_TYPE_META[(data as Sortie).type]?.emoji ?? '📷';
-    if (kind === 'oneshot') return '📸';
+    if (kind === 'sortie')     return SORTIE_TYPE_META[(data as Sortie).type]?.emoji ?? '📷';
+    if (kind === 'oneshot')    return '📸';
+    if (kind === 'exposition') return '🖼';
     return '🏅';
   });
 
@@ -49,8 +53,9 @@ export class ActiviteCard {
 
   protected cardClass = computed((): string => {
     const kind = this.item().kind;
-    if (kind === 'oneshot') return 'event-card event-card-oneshot';
-    if (kind === 'defi')    return 'event-card event-card-defi';
+    if (kind === 'oneshot')    return 'event-card event-card-oneshot';
+    if (kind === 'defi')       return 'event-card event-card-defi';
+    if (kind === 'exposition') return 'event-card event-card-exposition';
     return 'event-card';
   });
 
@@ -63,8 +68,9 @@ export class ActiviteCard {
         css: 'card-type-badge badge-sortie',
       };
     }
-    if (kind === 'oneshot') return { text: '🏆 OneShot',   css: 'card-type-badge badge-oneshot-type' };
-    return                         { text: '🏅 Défi Photo', css: 'card-type-badge badge-defi-type'    };
+    if (kind === 'oneshot')    return { text: '🏆 OneShot',   css: 'card-type-badge badge-oneshot-type' };
+    if (kind === 'exposition') return { text: '🖼 Exposition', css: 'card-type-badge badge-expo-type'   };
+    return                            { text: '🏅 Défi Photo', css: 'card-type-badge badge-defi-type'   };
   });
 
   protected statusBadge = computed((): { text: string; css: string } => {
@@ -92,6 +98,17 @@ export class ActiviteCard {
       };
       return { text: ONESHOT_STATUT_LABELS[o.statut], css: cssMap[o.statut] ?? 'card-status' };
     }
+    if (kind === 'exposition') {
+      const e = data as Exposition;
+      const cssMap: Record<string, string> = {
+        ideation:   'card-status status-expo-ideation',
+        nettoyage:  'card-status status-expo-nettoyage',
+        votation:   'card-status status-expo-votation',
+        soumission: 'card-status status-expo-soumission',
+        cloture:    'card-status status-passee',
+      };
+      return { text: EXPO_STATUT_LABELS[e.statut], css: cssMap[e.statut] ?? 'card-status' };
+    }
     const statut = getDefiStatut(data as Defi);
     if (statut === 'a_venir') {
       const debut = (data as Defi).dateDebutSoumission;
@@ -114,6 +131,11 @@ export class ActiviteCard {
       const d = (data as OneShot).date;
       return d ? this.formatDate(d) : null;
     }
+    if (kind === 'exposition') {
+      const e = data as Exposition;
+      const d = e.dateOuverturePublic ?? e.dateFinIdeation;
+      return d ? this.formatDate(d) : null;
+    }
     return this.formatDate((data as Defi).dateDebutSoumission);
   });
 
@@ -126,14 +148,16 @@ export class ActiviteCard {
 
   protected organisateur = computed((): string | null => {
     const { kind, data } = this.item();
-    if (kind === 'sortie')  return (data as Sortie).nomOrganisateur ?? null;
-    if (kind === 'oneshot') return (data as OneShot).nomCreateur    ?? null;
+    if (kind === 'sortie')     return (data as Sortie).nomOrganisateur     ?? null;
+    if (kind === 'oneshot')    return (data as OneShot).nomCreateur        ?? null;
+    if (kind === 'exposition') return (data as Exposition).nomOrganisateur ?? null;
     return (data as Defi).organisateurNom ?? null;
   });
 
-  protected sortie  = computed(() => this.item().kind === 'sortie'  ? this.item().data as Sortie  : null);
-  protected oneshot = computed(() => this.item().kind === 'oneshot' ? this.item().data as OneShot : null);
-  protected defi    = computed(() => this.item().kind === 'defi'    ? this.item().data as Defi    : null);
+  protected sortie     = computed(() => this.item().kind === 'sortie'     ? this.item().data as Sortie     : null);
+  protected oneshot    = computed(() => this.item().kind === 'oneshot'    ? this.item().data as OneShot    : null);
+  protected defi       = computed(() => this.item().kind === 'defi'       ? this.item().data as Defi       : null);
+  protected exposition = computed(() => this.item().kind === 'exposition' ? this.item().data as Exposition : null);
 
   protected formatDate(date: string): string {
     return new Date(date + 'T12:00:00').toLocaleDateString('fr-FR', {

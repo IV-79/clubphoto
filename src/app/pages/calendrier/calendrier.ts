@@ -7,6 +7,7 @@ import { ReunionService } from '../../services/reunion.service';
 import { OneShotService } from '../../services/oneshot.service';
 import { SortieService } from '../../services/sortie.service';
 import { DefiService } from '../../services/defi.service';
+import { ExpositionService } from '../../services/exposition.service';
 import { DocumentService } from '../../services/document.service';
 import { AuthService } from '../../services/auth.service';
 import { LoginModalService } from '../../services/login-modal.service';
@@ -14,6 +15,7 @@ import { Reunion, REUNION_TYPES } from '../../models/reunion.model';
 import { OneShot, ONESHOT_STATUT_LABELS } from '../../models/oneshot.model';
 import { Sortie, SORTIE_TYPE_META, SortieType } from '../../models/sortie.model';
 import { Defi, DEFI_STATUT_LABELS, getDefiStatut } from '../../models/defi.model';
+import { Exposition, EXPO_STATUT_LABELS } from '../../models/exposition.model';
 import { ClubDocument, getExtensionMeta } from '../../models/document.model';
 import { MatIconModule } from '@angular/material/icon';
 
@@ -21,14 +23,15 @@ const INIT = 3;
 const PAGE = 5;
 
 interface CalItem {
-  kind: 'event' | 'oneshot' | 'sortie' | 'defi';
+  kind: 'event' | 'oneshot' | 'sortie' | 'defi' | 'exposition';
   id: string;
   date: string;
-  endDate?: string;  // défis: dateCloturVotes — used for passé detection
+  endDate?: string;
   event?: Reunion;
   oneshot?: OneShot;
   sortie?: Sortie;
   defi?: Defi;
+  exposition?: Exposition;
 }
 
 @Component({
@@ -38,18 +41,19 @@ interface CalItem {
   styleUrl: './calendrier.css',
 })
 export class Calendrier {
-  private service = inject(ReunionService);
-  private oneShotService = inject(OneShotService);
-  private sortieService = inject(SortieService);
-  private defiService = inject(DefiService);
-  private docService = inject(DocumentService);
-  private authService = inject(AuthService);
-  private loginModal = inject(LoginModalService);
-  private route = inject(ActivatedRoute);
+  private service          = inject(ReunionService);
+  private oneShotService   = inject(OneShotService);
+  private sortieService    = inject(SortieService);
+  private defiService      = inject(DefiService);
+  private expoService      = inject(ExpositionService);
+  private docService       = inject(DocumentService);
+  private authService      = inject(AuthService);
+  private loginModal       = inject(LoginModalService);
+  private route            = inject(ActivatedRoute);
 
   // --- Filtres ---
   types = REUNION_TYPES;
-  filtre = signal<'tous' | 'reunion' | 'oneshot' | 'sortie' | 'defi'>('tous');
+  filtre = signal<'tous' | 'reunion' | 'oneshot' | 'sortie' | 'defi' | 'exposition'>('tous');
   showPasses = signal(false);
 
   private limitAVenir = signal(INIT);
@@ -58,6 +62,10 @@ export class Calendrier {
   profile = toSignal(this.authService.currentUserProfile$);
   private readonly loggedIn = computed(() => !!this.profile());
   private readonly uid      = computed(() => this.profile()?.uid ?? null);
+  isEditor = computed(() => {
+    const role = this.profile()?.role;
+    return role === 'admin' || role === 'contributeur';
+  });
 
   private tous = toSignal(
     toObservable(this.loggedIn).pipe(
@@ -94,15 +102,21 @@ export class Calendrier {
     { initialValue: [] as Defi[] }
   );
 
+  private expositions = toSignal(
+    this.expoService.getExpositionsOnce(),
+    { initialValue: [] as Exposition[] }
+  );
+
   isMembre = computed(() => this.loggedIn());
 
   // --- Items unifiés (événements + oneshots + sorties + défis) ---
   private filtresItems = computed((): CalItem[] => {
     const f = this.filtre();
-    const showEvents  = f === 'tous' || f === 'reunion';
-    const showShots   = f === 'tous' || f === 'oneshot';
-    const showSorties = f === 'tous' || f === 'sortie';
-    const showDefis   = f === 'tous' || f === 'defi';
+    const showEvents   = f === 'tous' || f === 'reunion';
+    const showShots    = f === 'tous' || f === 'oneshot';
+    const showSorties  = f === 'tous' || f === 'sortie';
+    const showDefis    = f === 'tous' || f === 'defi';
+    const showExpos    = f === 'tous' || f === 'exposition';
 
     const events: CalItem[] = showEvents
       ? this.tous().map(e => ({ kind: 'event' as const, id: 'e.' + e.id, date: e.date, event: e }))
@@ -123,7 +137,17 @@ export class Calendrier {
           defi: d,
         }))
       : [];
-    return [...events, ...shots, ...sortieItems, ...defiItems];
+    const expoItems: CalItem[] = showExpos
+      ? this.expositions()
+          .filter(e => !!e.dateOuverturePublic)
+          .map(e => ({
+            kind: 'exposition' as const,
+            id: 'ex.' + e.id,
+            date: e.dateOuverturePublic!,
+            exposition: e,
+          }))
+      : [];
+    return [...events, ...shots, ...sortieItems, ...defiItems, ...expoItems];
   });
 
   private aVenirAll = computed((): CalItem[] =>
@@ -274,4 +298,6 @@ export class Calendrier {
 
   defiStatutLabel(defi: Defi): string { return DEFI_STATUT_LABELS[getDefiStatut(defi)]; }
   defiStatut(defi: Defi)      { return getDefiStatut(defi); }
+
+  expoStatutLabel(expo: Exposition): string { return EXPO_STATUT_LABELS[expo.statut]; }
 }

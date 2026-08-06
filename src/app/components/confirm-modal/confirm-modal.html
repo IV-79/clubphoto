@@ -5,7 +5,7 @@
       <p class="confirm-message">{{ s.message }}</p>
       <div class="confirm-actions">
         <button class="btn-cancel" (click)="confirmService.respond(false)">Annuler</button>
-        <button class="btn-confirm" (click)="confirmService.respond(true)">Supprimer</button>
+        <button class="btn-confirm" [class.btn-confirm-neutral]="!s.danger" (click)="confirmService.respond(true)">{{ s.confirmLabel }}</button>
       </div>
     </div>
   </div>

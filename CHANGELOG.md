@@ -4,6 +4,25 @@
 
 ## En cours (alpha)
 
+### Exposition photo — nouvelle fonctionnalité (2026-08-06)
+
+Nouveau type d'activité **Exposition** avec une machine à 5 statuts : Idéation → Nettoyage → Votation → Soumission → Clôturé.
+
+- **Création** dans `membre/sorties/creer` (option "🖼 Exposition") : dates d'idéation (début + fin, obligatoires), date physique de l'expo et date d'ouverture au public (optionnelles, modifiables en tout temps), max photos par membre.
+- **Page de gestion** `/galeries/expositions/:id` : titre et description éditables en tout temps. Sidebar avec calendrier complet, participation, et statistiques de vote.
+- **Idéation** : les membres soumettent des thèmes librement. Bouton rapide "Terminer l'idéation" pour l'organisateur.
+- **Nettoyage** : l'organisateur active/désactive/édite les suggestions. Tri A→Z ou par score de votes. Deux sous-phases : 1re passe (3 votes/membre par défaut), 2e passe si ex-æquo (1 vote/membre par défaut). Bouton "Mettre en votation".
+- **Votation** : les membres votent avec leurs jetons. Statistiques en temps réel (membres ayant voté, votes exprimés). Bouton rapide "Terminer le vote". Retour au nettoyage possible si ex-æquo.
+- **Soumission** : le thème définitif est sélectionné, les membres uploadent leurs photos (EXIF extrait, compression automatique). Lightbox plein écran avec infos EXIF au clic. Bouton "Clôturer" pour l'organisateur.
+- **Clôturé** : galerie des photos soumises, accessible selon `dateOuverturePublic` pour les non-membres.
+- **Catégorisation dans la liste** : À venir (si `dateDebutIdeation` future), En ce moment (en cours), Terminée (si `dateExposition` + 7 jours dépassée).
+- **Notifications** : quand un admin/organisateur supprime la photo d'un autre membre, celui-ci reçoit une notification avec lien direct vers l'exposition.
+- **Modale de confirmation contextuelle** : boutons non-destructifs en violet ("Terminer", "Clôturer") au lieu du rouge "Supprimer".
+
+### Navigation admin — raccourcis déplacés vers les pages concernées (2026-08-06)
+
+Les liens "Thèmes du mois" et "Réunions" ont été retirés du menu admin du header. À la place, un bouton "Gérer les thèmes du mois" apparaît en haut à droite de `/galeries/themesdumois`, et un bouton "Gérer les réunions" en haut à droite de `/calendrier`. Ces boutons ne s'affichent que pour les admins et les contributeurs. Les routes `/admin/themes` et `/admin/reunions` sont désormais accessibles aux deux rôles (garde `editorGuard`).
+
 ### Actualités — correction de l'ordre après "Charger plus" (2026-08-04)
 
 Après un chargement supplémentaire, les nouveaux articles s'inséraient au milieu de la liste déjà affichée (selon leur `dateCreation`), ce qui donnait l'impression que l'ordre changeait. Cause : le `filtered()` re-triait l'intégralité du tableau à chaque page. Correction : remplacement du `.sort()` global par une **partition stable** — les épinglés actifs d'abord (dans leur ordre Firestore), le reste ensuite (dans leur ordre Firestore). Les nouvelles pages s'ajoutent proprement à la fin, sans bouleverser ce qui est déjà affiché.

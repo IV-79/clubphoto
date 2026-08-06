@@ -25,6 +25,25 @@
   margin: 0;
 }
 
+.search-bar {
+  margin-bottom: 24px;
+}
+
+.search-input {
+  width: 100%;
+  max-width: 360px;
+  padding: 8px 14px;
+  border: 1px solid var(--border-medium);
+  border-radius: 6px;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.search-input:focus { border-color: var(--text-accent); }
+.search-input::placeholder { color: var(--text-hint); }
+
 .membres-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
