@@ -1,8 +1,8 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { DomSanitizer, SafeStyle } from '@angular/platform-browser';
-import { QueryDocumentSnapshot, DocumentData } from '@angular/fire/firestore';
+import { QueryDocumentSnapshot, DocumentData } from 'firebase/firestore';
 import { ThemeService } from '../../../services/theme.service';
 import { AuthService } from '../../../services/auth.service';
 import { ThemeMensuel, computeThemeStatut, getThemeDates } from '../../../models/theme.model';
@@ -11,36 +11,40 @@ import { ThemeMensuel, computeThemeStatut, getThemeDates } from '../../../models
   selector: 'app-themes-liste',
   imports: [RouterLink],
   templateUrl: './themes-liste.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './themes-liste.css',
 })
 export class ThemesListe {
   private themeService = inject(ThemeService);
-  private authService  = inject(AuthService);
-  private sanitizer    = inject(DomSanitizer);
+  private authService = inject(AuthService);
+  private sanitizer = inject(DomSanitizer);
 
-  private themesActifs = toSignal(this.themeService.getThemesActifsOnce(), { initialValue: [] as ThemeMensuel[] });
+  private themesActifs = toSignal(this.themeService.getThemesActifsOnce(), {
+    initialValue: [] as ThemeMensuel[],
+  });
 
-  profile    = toSignal(this.authService.currentUserProfile$);
+  profile = toSignal(this.authService.currentUserProfile$);
   isLoggedIn = computed(() => !!this.profile());
-  isEditor   = computed(() => {
+  isEditor = computed(() => {
     const role = this.profile()?.role;
     return role === 'admin' || role === 'contributeur';
   });
 
-  private readonly PAGE_SIZE    = 3;
-  private terminesPagines       = signal<ThemeMensuel[]>([]);
-  private terminesCursor        = signal<QueryDocumentSnapshot<DocumentData> | null>(null);
-  private hasMoreFirestore      = signal(false);
-  private visibleTermCount      = signal(3);
+  private readonly PAGE_SIZE = 3;
+  private terminesPagines = signal<ThemeMensuel[]>([]);
+  private terminesCursor = signal<QueryDocumentSnapshot<DocumentData> | null>(null);
+  private hasMoreFirestore = signal(false);
+  private visibleTermCount = signal(3);
 
   constructor() {
     this.loadTerminesPage();
   }
 
   private loadTerminesPage(): void {
-    this.themeService.getThemesTerminesPage(this.terminesCursor(), this.PAGE_SIZE)
+    this.themeService
+      .getThemesTerminesPage(this.terminesCursor(), this.PAGE_SIZE)
       .subscribe(({ items, cursor, hasMore }) => {
-        this.terminesPagines.update(prev => [...prev, ...items]);
+        this.terminesPagines.update((prev) => [...prev, ...items]);
         this.terminesCursor.set(cursor);
         this.hasMoreFirestore.set(hasMore);
       });
@@ -54,12 +58,12 @@ export class ThemesListe {
     }
   }
 
-  themeOuvert = computed(() =>
-    this.themesActifs().find(t => computeThemeStatut(t) === 'ouvert') ?? null
+  themeOuvert = computed(
+    () => this.themesActifs().find((t) => computeThemeStatut(t) === 'ouvert') ?? null,
   );
 
-  themeVote = computed(() =>
-    this.themesActifs().find(t => computeThemeStatut(t) === 'vote') ?? null
+  themeVote = computed(
+    () => this.themesActifs().find((t) => computeThemeStatut(t) === 'vote') ?? null,
   );
 
   themeCompagnon = computed((): ThemeMensuel | null => this.themeVote() ?? null);
@@ -67,27 +71,30 @@ export class ThemesListe {
   themeResultats = computed(() => this.themesTermines()[0] ?? null);
 
   themesAVenir = computed(() =>
-    this.themesActifs().filter(t => computeThemeStatut(t) === 'en_attente')
+    this.themesActifs().filter((t) => computeThemeStatut(t) === 'en_attente'),
   );
 
   themesTermines = computed(() => [
-    ...this.themesActifs().filter(t => computeThemeStatut(t) === 'resultats'),
+    ...this.themesActifs().filter((t) => computeThemeStatut(t) === 'resultats'),
     ...this.terminesPagines(),
   ]);
 
-  themesTerminesVisible = computed(() =>
-    this.themesTermines().slice(0, this.visibleTermCount())
+  themesTerminesVisible = computed(() => this.themesTermines().slice(0, this.visibleTermCount()));
+
+  hasMoreTermines = computed(
+    () => this.themesTermines().length > this.visibleTermCount() || this.hasMoreFirestore(),
   );
 
-  hasMoreTermines = computed(() =>
-    this.themesTermines().length > this.visibleTermCount() || this.hasMoreFirestore()
-  );
-
-  dates(theme: ThemeMensuel) { return getThemeDates(theme); }
+  dates(theme: ThemeMensuel) {
+    return getThemeDates(theme);
+  }
 
   formatMois(mois: string): string {
     const [year, month] = mois.split('-');
-    const label = new Date(+year, +month - 1).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+    const label = new Date(+year, +month - 1).toLocaleDateString('fr-FR', {
+      month: 'long',
+      year: 'numeric',
+    });
     return label.charAt(0).toUpperCase() + label.slice(1);
   }
 

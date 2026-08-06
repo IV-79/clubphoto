@@ -1,12 +1,12 @@
-import { Injectable, inject, Injector, runInInjectionContext } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {
-  Firestore, collection, collectionData, doc, docData,
-  addDoc, updateDoc, deleteDoc, setDoc, getDocs, getDoc,
+  collection, doc, addDoc, updateDoc, deleteDoc, setDoc, getDocs, getDoc,
   query, orderBy, where, deleteField, increment,
-} from '@angular/fire/firestore';
-import { Storage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from '@angular/fire/storage';
-import { Observable, from, of } from 'rxjs';
+} from 'firebase/firestore';
+import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
+import { Observable, from } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { db, storage, collectionStream, docStream } from '../utils/firebase';
 import { Exposition, ExpoSuggestion, ExpoVoteDoc, ExpoPhoto } from '../models/exposition.model';
 import { generateId } from '../utils/id';
 import { NotificationService } from './notification.service';
@@ -19,9 +19,6 @@ export interface ExpoUploadState {
 
 @Injectable({ providedIn: 'root' })
 export class ExpositionService {
-  private firestore    = inject(Firestore);
-  private storage      = inject(Storage);
-  private injector     = inject(Injector);
   private notifService = inject(NotificationService);
 
   // ── Exposition CRUD ─────────────────────────────────────────────────────────
@@ -41,9 +38,7 @@ export class ExpositionService {
       Object.entries({ ...data, statut: 'ideation', dateCreation: new Date().toISOString() })
         .filter(([, v]) => v !== undefined)
     );
-    const ref = await runInInjectionContext(this.injector, () =>
-      addDoc(collection(this.firestore, 'expositions'), payload)
-    );
+    const ref = await addDoc(collection(db, 'expositions'), payload);
     this.notifService.broadcast('exposition',
       `${data.nomOrganisateur} lance une nouvelle exposition « ${data.titre} »`,
       { lien: `/galeries/expositions/${ref.id}`, sourceNom: data.nomOrganisateur, excludeUid: data.organisateurUid }
@@ -52,29 +47,23 @@ export class ExpositionService {
   }
 
   getExposition(id: string): Observable<Exposition | null> {
-    return (runInInjectionContext(this.injector, () =>
-      docData(doc(this.firestore, 'expositions', id), { idField: 'id' })
-    ) as Observable<Exposition | undefined>).pipe(map(e => e ?? null));
+    return docStream<Exposition>(doc(db, 'expositions', id), 'id').pipe(map(e => e ?? null));
   }
 
   getExpositionOnce(id: string): Observable<Exposition | undefined> {
-    return from(runInInjectionContext(this.injector, () =>
-      getDoc(doc(this.firestore, 'expositions', id))
-    )).pipe(map(d => d.exists() ? { id: d.id, ...d.data() } as Exposition : undefined));
+    return from(getDoc(doc(db, 'expositions', id)))
+      .pipe(map(d => d.exists() ? { id: d.id, ...d.data() } as Exposition : undefined));
   }
 
   getExpositionsOnce(): Observable<Exposition[]> {
-    return from(runInInjectionContext(this.injector, () =>
-      getDocs(query(collection(this.firestore, 'expositions'), orderBy('dateCreation', 'desc')))
-    )).pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as Exposition))));
+    return from(getDocs(query(collection(db, 'expositions'), orderBy('dateCreation', 'desc'))))
+      .pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as Exposition))));
   }
 
-  // Expositions clôturées uniquement — lisibles sans authentification (règle: statut == 'cloture')
   getPublicExpositionsOnce(): Observable<Exposition[]> {
-    return from(runInInjectionContext(this.injector, () =>
-      getDocs(query(collection(this.firestore, 'expositions'),
-        where('statut', '==', 'cloture'), orderBy('dateCreation', 'desc')))
-    )).pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as Exposition))));
+    return from(getDocs(query(collection(db, 'expositions'),
+      where('statut', '==', 'cloture'), orderBy('dateCreation', 'desc'))))
+      .pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as Exposition))));
   }
 
   async update(id: string, data: Record<string, unknown>): Promise<void> {
@@ -82,156 +71,119 @@ export class ExpositionService {
     for (const [k, v] of Object.entries(data)) {
       clean[k] = (v === undefined || v === '') ? deleteField() : v;
     }
-    await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, 'expositions', id), clean)
-    );
+    await updateDoc(doc(db, 'expositions', id), clean);
   }
 
   async setCouverture(id: string, file: File): Promise<{ url: string; path: string }> {
     const path = `expositions/${id}/couverture`;
-    const storageRef = ref(this.storage, path);
+    const storageRef = ref(storage, path);
     await uploadBytesResumable(storageRef, file).then();
     const url = await getDownloadURL(storageRef);
-    await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, 'expositions', id), { photoCouvertureUrl: url, photoCouverturePath: path })
-    );
+    await updateDoc(doc(db, 'expositions', id), { photoCouvertureUrl: url, photoCouverturePath: path });
     return { url, path };
   }
 
   async removeCouverture(id: string, path: string): Promise<void> {
-    await deleteObject(ref(this.storage, path)).catch(() => {});
-    await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, 'expositions', id), {
-        photoCouvertureUrl: deleteField(),
-        photoCouverturePath: deleteField(),
-      })
-    );
+    await deleteObject(ref(storage, path)).catch(() => {});
+    await updateDoc(doc(db, 'expositions', id), {
+      photoCouvertureUrl: deleteField(),
+      photoCouverturePath: deleteField(),
+    });
   }
 
   async deleteExposition(id: string, photoCouverturePath?: string): Promise<void> {
-    const [photosSnap, suggsSnap, votesSnap] = await runInInjectionContext(this.injector, () =>
-      Promise.all([
-        getDocs(collection(this.firestore, `expositions/${id}/photos`)),
-        getDocs(collection(this.firestore, `expositions/${id}/suggestions`)),
-        getDocs(collection(this.firestore, `expositions/${id}/votes`)),
-      ])
-    );
+    const [photosSnap, suggsSnap, votesSnap] = await Promise.all([
+      getDocs(collection(db, `expositions/${id}/photos`)),
+      getDocs(collection(db, `expositions/${id}/suggestions`)),
+      getDocs(collection(db, `expositions/${id}/votes`)),
+    ]);
     const storageDels: Promise<void>[] = photosSnap.docs
-      .map(p => deleteObject(ref(this.storage, (p.data() as ExpoPhoto).storagePath)).catch(() => {}));
-    if (photoCouverturePath) storageDels.push(deleteObject(ref(this.storage, photoCouverturePath)).catch(() => {}));
+      .map(p => deleteObject(ref(storage, (p.data() as ExpoPhoto).storagePath)).catch(() => {}));
+    if (photoCouverturePath) storageDels.push(deleteObject(ref(storage, photoCouverturePath)).catch(() => {}));
 
     await Promise.all([
       ...storageDels,
-      ...photosSnap.docs.map(p => runInInjectionContext(this.injector, () => deleteDoc(p.ref))),
-      ...suggsSnap.docs.map(p => runInInjectionContext(this.injector, () => deleteDoc(p.ref))),
-      ...votesSnap.docs.map(p => runInInjectionContext(this.injector, () => deleteDoc(p.ref))),
+      ...photosSnap.docs.map(p => deleteDoc(p.ref)),
+      ...suggsSnap.docs.map(p => deleteDoc(p.ref)),
+      ...votesSnap.docs.map(p => deleteDoc(p.ref)),
     ]);
-    await runInInjectionContext(this.injector, () =>
-      deleteDoc(doc(this.firestore, 'expositions', id))
-    );
+    await deleteDoc(doc(db, 'expositions', id));
   }
 
   // ── Suggestions ─────────────────────────────────────────────────────────────
 
   getSuggestions(expoId: string): Observable<ExpoSuggestion[]> {
-    return runInInjectionContext(this.injector, () =>
-      collectionData(collection(this.firestore, `expositions/${expoId}/suggestions`), { idField: 'id' })
-    ) as Observable<ExpoSuggestion[]>;
+    return collectionStream<ExpoSuggestion>(collection(db, `expositions/${expoId}/suggestions`), 'id');
   }
 
   async addSuggestion(expoId: string, texte: string, source: 'membre' | 'admin'): Promise<string> {
-    const ref = await runInInjectionContext(this.injector, () =>
-      addDoc(collection(this.firestore, `expositions/${expoId}/suggestions`), {
-        texte: texte.trim(), actif: true, source,
-      })
-    );
+    const ref = await addDoc(collection(db, `expositions/${expoId}/suggestions`), {
+      texte: texte.trim(), actif: true, source,
+    });
     return ref.id;
   }
 
   async getSuggestionsOnce(expoId: string): Promise<ExpoSuggestion[]> {
-    const snap = await runInInjectionContext(this.injector, () =>
-      getDocs(collection(this.firestore, `expositions/${expoId}/suggestions`))
-    );
+    const snap = await getDocs(collection(db, `expositions/${expoId}/suggestions`));
     return snap.docs.map(d => ({ id: d.id, ...d.data() } as ExpoSuggestion));
   }
 
   async updateSuggestion(expoId: string, suggId: string, data: Partial<Pick<ExpoSuggestion, 'texte' | 'actif'>>): Promise<void> {
-    await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, `expositions/${expoId}/suggestions`, suggId), data as Record<string, unknown>)
-    );
+    await updateDoc(doc(db, `expositions/${expoId}/suggestions`, suggId), data as Record<string, unknown>);
   }
 
   async deleteSuggestion(expoId: string, suggId: string): Promise<void> {
-    await runInInjectionContext(this.injector, () =>
-      deleteDoc(doc(this.firestore, `expositions/${expoId}/suggestions`, suggId))
-    );
+    await deleteDoc(doc(db, `expositions/${expoId}/suggestions`, suggId));
   }
 
   // ── Votes ────────────────────────────────────────────────────────────────────
 
   getMonVote(expoId: string, uid: string): Observable<ExpoVoteDoc | null> {
-    return runInInjectionContext(this.injector, () =>
-      docData(doc(this.firestore, `expositions/${expoId}/votes`, uid))
-    ).pipe(map(d => d ? d as ExpoVoteDoc : null)) as Observable<ExpoVoteDoc | null>;
+    return docStream<any>(doc(db, `expositions/${expoId}/votes`, uid)).pipe(
+      map(d => d ? d as ExpoVoteDoc : null)
+    );
   }
 
   async getMonVoteOnce(expoId: string, uid: string): Promise<ExpoVoteDoc | null> {
-    const d = await runInInjectionContext(this.injector, () =>
-      getDoc(doc(this.firestore, `expositions/${expoId}/votes`, uid))
-    );
+    const d = await getDoc(doc(db, `expositions/${expoId}/votes`, uid));
     return d.exists() ? d.data() as ExpoVoteDoc : null;
   }
 
   getTousVotes(expoId: string): Observable<ExpoVoteDoc[]> {
-    return runInInjectionContext(this.injector, () =>
-      collectionData(collection(this.firestore, `expositions/${expoId}/votes`))
-    ) as Observable<ExpoVoteDoc[]>;
+    return collectionStream<ExpoVoteDoc>(collection(db, `expositions/${expoId}/votes`));
   }
 
   async getTousVotesOnce(expoId: string): Promise<ExpoVoteDoc[]> {
-    const snap = await runInInjectionContext(this.injector, () =>
-      getDocs(collection(this.firestore, `expositions/${expoId}/votes`))
-    );
+    const snap = await getDocs(collection(db, `expositions/${expoId}/votes`));
     return snap.docs.map(d => d.data() as ExpoVoteDoc);
   }
 
   async voter(expoId: string, uid: string, themeIds: string[]): Promise<void> {
-    await runInInjectionContext(this.injector, () =>
-      setDoc(doc(this.firestore, `expositions/${expoId}/votes`, uid), { themeIds })
-    );
+    await setDoc(doc(db, `expositions/${expoId}/votes`, uid), { themeIds });
   }
 
   private async supprimerTousVotes(expoId: string): Promise<void> {
-    const snap = await runInInjectionContext(this.injector, () =>
-      getDocs(collection(this.firestore, `expositions/${expoId}/votes`))
-    );
-    await Promise.all(snap.docs.map(d => runInInjectionContext(this.injector, () => deleteDoc(d.ref))));
+    const snap = await getDocs(collection(db, `expositions/${expoId}/votes`));
+    await Promise.all(snap.docs.map(d => deleteDoc(d.ref)));
   }
 
   // ── Transitions ──────────────────────────────────────────────────────────────
 
   async passerNettoyage(expoId: string): Promise<void> {
-    await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, 'expositions', expoId), { statut: 'nettoyage' })
-    );
+    await updateDoc(doc(db, 'expositions', expoId), { statut: 'nettoyage' });
   }
 
   async passerVotation(expoId: string, dateFinVote: string, nombreVotesParMembre: number): Promise<void> {
-    await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, 'expositions', expoId), {
-        statut: 'votation', dateFinVote, nombreVotesParMembre,
-      })
-    );
+    await updateDoc(doc(db, 'expositions', expoId), {
+      statut: 'votation', dateFinVote, nombreVotesParMembre,
+    });
   }
 
   async retourNettoyageDepuisVotation(expoId: string): Promise<void> {
-    // Compte les scores, pré-coche les ex-aequo, reset les votes
-    const [suggsSnap, votesSnap] = await runInInjectionContext(this.injector, () =>
-      Promise.all([
-        getDocs(collection(this.firestore, `expositions/${expoId}/suggestions`)),
-        getDocs(collection(this.firestore, `expositions/${expoId}/votes`)),
-      ])
-    );
+    const [suggsSnap, votesSnap] = await Promise.all([
+      getDocs(collection(db, `expositions/${expoId}/suggestions`)),
+      getDocs(collection(db, `expositions/${expoId}/votes`)),
+    ]);
 
     const scores: Record<string, number> = {};
     for (const voteDoc of votesSnap.docs) {
@@ -244,51 +196,35 @@ export class ExpositionService {
       : [];
 
     await Promise.all([
-      ...suggsSnap.docs.map(s =>
-        runInInjectionContext(this.injector, () =>
-          updateDoc(s.ref, { actif: exaequoIds.includes(s.id) })
-        )
-      ),
-      ...votesSnap.docs.map(d =>
-        runInInjectionContext(this.injector, () => deleteDoc(d.ref))
-      ),
+      ...suggsSnap.docs.map(s => updateDoc(s.ref, { actif: exaequoIds.includes(s.id) })),
+      ...votesSnap.docs.map(d => deleteDoc(d.ref)),
     ]);
 
-    await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, 'expositions', expoId), {
-        statut: 'nettoyage',
-        dateFinVote: deleteField(),
-        nombreVotesParMembre: deleteField(),
-      })
-    );
+    await updateDoc(doc(db, 'expositions', expoId), {
+      statut: 'nettoyage',
+      dateFinVote: deleteField(),
+      nombreVotesParMembre: deleteField(),
+    });
   }
 
   async passerSoumission(expoId: string, themeChoisi: string, dateFinSoumission: string): Promise<void> {
-    await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, 'expositions', expoId), {
-        statut: 'soumission', themeChoisi: themeChoisi.trim(), dateFinSoumission,
-      })
-    );
+    await updateDoc(doc(db, 'expositions', expoId), {
+      statut: 'soumission', themeChoisi: themeChoisi.trim(), dateFinSoumission,
+    });
   }
 
   async cloture(expoId: string): Promise<void> {
-    await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, 'expositions', expoId), { statut: 'cloture' })
-    );
+    await updateDoc(doc(db, 'expositions', expoId), { statut: 'cloture' });
   }
 
   // ── Photos ───────────────────────────────────────────────────────────────────
 
   getPhotos(expoId: string): Observable<ExpoPhoto[]> {
-    return runInInjectionContext(this.injector, () =>
-      collectionData(collection(this.firestore, `expositions/${expoId}/photos`), { idField: 'id' })
-    ) as Observable<ExpoPhoto[]>;
+    return collectionStream<ExpoPhoto>(collection(db, `expositions/${expoId}/photos`), 'id');
   }
 
   async getPhotosOnce(expoId: string): Promise<ExpoPhoto[]> {
-    const snap = await runInInjectionContext(this.injector, () =>
-      getDocs(collection(this.firestore, `expositions/${expoId}/photos`))
-    );
+    const snap = await getDocs(collection(db, `expositions/${expoId}/photos`));
     return snap.docs.map(d => ({ id: d.id, ...d.data() } as ExpoPhoto));
   }
 
@@ -297,7 +233,7 @@ export class ExpositionService {
       const id = generateId();
       const ext = file.name.split('.').pop() ?? 'jpg';
       const storagePath = `expositions/${expoId}/${id}.${ext}`;
-      const storageRef = ref(this.storage, storagePath);
+      const storageRef = ref(storage, storagePath);
       const task = uploadBytesResumable(storageRef, file);
 
       task.on('state_changed',
@@ -311,14 +247,10 @@ export class ExpositionService {
             uploadedAt: new Date().toISOString(),
             ...(meta.exif != null ? { exif: meta.exif } : {}),
           };
-          const docRef = await runInInjectionContext(this.injector, () =>
-            addDoc(collection(this.firestore, `expositions/${expoId}/photos`), data)
-          );
-          runInInjectionContext(this.injector, () =>
-            updateDoc(doc(this.firestore, 'users', meta.uid), {
-              'storageUsed.expositions': increment(file.size),
-            })
-          ).catch(() => {});
+          const docRef = await addDoc(collection(db, `expositions/${expoId}/photos`), data);
+          updateDoc(doc(db, 'users', meta.uid), {
+            'storageUsed.expositions': increment(file.size),
+          }).catch(() => {});
           observer.next({ progress: 100, done: true, photo: { id: docRef.id, ...data } });
           observer.complete();
         }
@@ -328,15 +260,11 @@ export class ExpositionService {
 
   async deletePhoto(expoId: string, photo: ExpoPhoto): Promise<void> {
     await Promise.all([
-      deleteObject(ref(this.storage, photo.storagePath)).catch(() => {}),
-      runInInjectionContext(this.injector, () =>
-        deleteDoc(doc(this.firestore, `expositions/${expoId}/photos`, photo.id))
-      ),
+      deleteObject(ref(storage, photo.storagePath)).catch(() => {}),
+      deleteDoc(doc(db, `expositions/${expoId}/photos`, photo.id)),
     ]);
-    runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, 'users', photo.uid), {
-        'storageUsed.expositions': increment(-photo.fileSize),
-      })
-    ).catch(() => {});
+    updateDoc(doc(db, 'users', photo.uid), {
+      'storageUsed.expositions': increment(-photo.fileSize),
+    }).catch(() => {});
   }
 }

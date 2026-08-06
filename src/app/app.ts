@@ -1,4 +1,4 @@
-import { Component, HostListener, inject, signal } from '@angular/core';
+import { Component, HostListener, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { LoginModalComponent } from './components/login-modal/login-modal';
@@ -11,7 +11,8 @@ import { CharteService } from './services/charte.service';
   selector: 'app-root',
   imports: [RouterOutlet, LoginModalComponent, ConfirmModal, GpsConsentModal, CharteModal],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './app.css',
 })
 export class App {
   protected readonly title = signal('club-photo');

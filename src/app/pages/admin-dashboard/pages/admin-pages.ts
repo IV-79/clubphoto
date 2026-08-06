@@ -1,23 +1,29 @@
-import { Component, inject, signal, computed, effect } from '@angular/core';
+import {
+  Component,
+  inject,
+  signal,
+  computed,
+  effect,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { switchMap } from 'rxjs/operators';
-import { Auth } from '@angular/fire/auth';
+import { auth } from '../../../utils/firebase';
 import { PageContentService, PageId } from '../../../services/page-content.service';
 
 const PAGE_LABELS: Record<PageId, string> = {
-  histoire:           'Histoire du club',
-  bureau:             'Le Bureau',
-  adhesion:           'Adhésion',
-  contact:            'Contact',
-  charte:             'Charte du site',
+  histoire: 'Histoire du club',
+  bureau: 'Le Bureau',
+  adhesion: 'Adhésion',
+  contact: 'Contact',
+  charte: 'Charte du site',
   'mentions-legales': 'Mentions légales',
-  cgv:                'CGU',
-  confidentialite:    'Confidentialité',
+  cgv: 'CGU',
+  confidentialite: 'Confidentialité',
 };
 
 const DEFAULT_TEMPLATES: Partial<Record<PageId, string>> = {
-
   'mentions-legales': `# Mentions légales
 
 ## Éditeur du site
@@ -194,48 +200,51 @@ Les seuls cookies présents sont des cookies techniques de **Firebase Authentica
   selector: 'app-admin-pages',
   imports: [FormsModule],
   templateUrl: './admin-pages.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './admin-pages.css',
 })
 export class AdminPages {
   private pageService = inject(PageContentService);
-  private auth        = inject(Auth);
 
   // Ordre logique : pages club → règles → documents légaux
   readonly pages: PageId[] = [
-    'histoire', 'bureau', 'adhesion', 'contact',
+    'histoire',
+    'bureau',
+    'adhesion',
+    'contact',
     'charte',
-    'mentions-legales', 'cgv', 'confidentialite',
+    'mentions-legales',
+    'cgv',
+    'confidentialite',
   ];
   readonly pageLabels = PAGE_LABELS;
 
   currentPage = signal<PageId>('histoire');
-  pageLabel   = computed(() => PAGE_LABELS[this.currentPage()]);
+  pageLabel = computed(() => PAGE_LABELS[this.currentPage()]);
 
-  saving  = signal(false);
-  saved   = signal(false);
+  saving = signal(false);
+  saved = signal(false);
 
-  editorValue   = '';
+  editorValue = '';
   originalContent = '';
   forceReaccept = false;
 
   hasTemplate = computed(() => !!DEFAULT_TEMPLATES[this.currentPage()]);
 
   private isLegalPage = computed(() =>
-    (['charte', 'cgv', 'confidentialite'] as PageId[]).includes(this.currentPage())
+    (['charte', 'cgv', 'confidentialite'] as PageId[]).includes(this.currentPage()),
   );
 
   loaded = toSignal(
-    toObservable(this.currentPage).pipe(
-      switchMap(id => this.pageService.getContent(id))
-    ),
-    { initialValue: null as any }
+    toObservable(this.currentPage).pipe(switchMap((id) => this.pageService.getContent(id))),
+    { initialValue: null as any },
   );
 
   constructor() {
     effect(() => {
       const c = this.loaded() as string | null;
       if (c !== null) {
-        this.editorValue   = c;
+        this.editorValue = c;
         this.originalContent = c;
         this.forceReaccept = false;
       }
@@ -266,7 +275,7 @@ export class AdminPages {
     this.saving.set(true);
     this.saved.set(false);
     try {
-      const uid = this.auth.currentUser?.uid ?? '';
+      const uid = auth.currentUser?.uid ?? '';
       await this.pageService.saveContent(this.currentPage(), this.editorValue, uid);
       if (this.forceReaccept) {
         if (this.currentPage() === 'charte') {

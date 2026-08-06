@@ -1,9 +1,11 @@
-import { Injectable, inject, Injector, runInInjectionContext } from '@angular/core';
-import { Storage, ref, uploadBytesResumable, uploadBytes, getDownloadURL, deleteObject } from '@angular/fire/storage';
+import { Injectable, inject } from '@angular/core';
+import { ref, uploadBytesResumable, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import {
-  Firestore, collection, collectionData, doc, addDoc, deleteDoc, updateDoc, query, where, orderBy, limit, deleteField, arrayUnion, arrayRemove, increment, getDocs
-} from '@angular/fire/firestore';
+  collection, doc, addDoc, deleteDoc, updateDoc, query, where, orderBy, limit,
+  deleteField, arrayUnion, arrayRemove, increment, getDocs
+} from 'firebase/firestore';
 import { Observable, from, map } from 'rxjs';
+import { db, storage, collectionStream } from '../utils/firebase';
 import { Photo, PhotoExif, PhotoVisibilite, UploadState } from '../models/photo.model';
 import { Commentaire, Reponse } from '../models/commentaire.model';
 import { hasExif } from '../utils/exif-reader';
@@ -14,9 +16,6 @@ import { UserSubscriptions } from '../models/notification.model';
 
 @Injectable({ providedIn: 'root' })
 export class PhotoService {
-  private storage      = inject(Storage);
-  private firestore    = inject(Firestore);
-  private injector     = inject(Injector);
   private notifService = inject(NotificationService);
 
   uploadPhoto(
@@ -30,7 +29,7 @@ export class PhotoService {
       const ext = file.name.split('.').pop() ?? 'webp';
       const storagePath = `photos/${uid}/${id}.${ext}`;
       const thumbPath   = `photos/${uid}/${id}_thumb.${ext}`;
-      const storageRef = ref(this.storage, storagePath);
+      const storageRef = ref(storage, storagePath);
       const task = uploadBytesResumable(storageRef, file);
 
       task.on(
@@ -46,7 +45,7 @@ export class PhotoService {
               getDownloadURL(task.snapshot.ref),
               compressImage(file, COMPRESS_THUMB),
             ]);
-            const thumbSnap = await uploadBytes(ref(this.storage, thumbPath), thumb);
+            const thumbSnap = await uploadBytes(ref(storage, thumbPath), thumb);
             const thumbnailUrl = await getDownloadURL(thumbSnap.ref);
             const data: Omit<Photo, 'id'> = {
               uid,
@@ -62,15 +61,11 @@ export class PhotoService {
               ...(meta.categorie ? { categorie: meta.categorie as Photo['categorie'] } : {}),
               ...(hasExif(meta.exif) ? { exif: meta.exif } : {}),
             };
-            const docRef = await runInInjectionContext(this.injector, () =>
-              addDoc(collection(this.firestore, 'photos'), data)
-            );
-            await runInInjectionContext(this.injector, () =>
-              updateDoc(doc(this.firestore, 'users', uid), {
-                'storageUsed.portfolio': increment(file.size),
-                'photoCount': increment(1),
-              })
-            ).catch(() => {});
+            const docRef = await addDoc(collection(db, 'photos'), data);
+            updateDoc(doc(db, 'users', uid), {
+              'storageUsed.portfolio': increment(file.size),
+              'photoCount': increment(1),
+            }).catch(() => {});
             observer.next({ state: 'done', progress: 100, photo: { id: docRef.id, ...data } });
             observer.complete();
           } catch (e) {
@@ -83,115 +78,93 @@ export class PhotoService {
 
   getMyPhotos(uid: string): Observable<Photo[]> {
     const q = query(
-      collection(this.firestore, 'photos'),
+      collection(db, 'photos'),
       where('uid', '==', uid),
       orderBy('dateUpload', 'desc')
     );
-    return runInInjectionContext(this.injector, () =>
-      collectionData(q, { idField: 'id' })
-    ) as Observable<Photo[]>;
+    return collectionStream<Photo>(q, 'id');
   }
 
-  /** Photos visibles par un visiteur anonyme — one-shot. */
   getPhotosVisiteurOnce(uid: string): Observable<Photo[]> {
-    const q = query(collection(this.firestore, 'photos'),
+    const q = query(collection(db, 'photos'),
       where('uid', '==', uid), where('visibilite', '==', 'public'));
-    return from(runInInjectionContext(this.injector, () => getDocs(q)))
-      .pipe(map(snap => snap.docs
-        .map(d => ({ id: d.id, ...d.data() } as Photo))
-        .sort((a, b) => b.dateUpload.localeCompare(a.dateUpload))
-      ));
+    return from(getDocs(q)).pipe(map(snap => snap.docs
+      .map(d => ({ id: d.id, ...d.data() } as Photo))
+      .sort((a, b) => b.dateUpload.localeCompare(a.dateUpload))
+    ));
   }
 
-  /** Photos visibles par un membre connecté — one-shot. */
   getPhotosMembreOnce(uid: string): Observable<Photo[]> {
-    const q = query(collection(this.firestore, 'photos'),
+    const q = query(collection(db, 'photos'),
       where('uid', '==', uid), where('visibilite', 'in', ['public', 'membre']));
-    return from(runInInjectionContext(this.injector, () => getDocs(q)))
-      .pipe(map(snap => snap.docs
-        .map(d => ({ id: d.id, ...d.data() } as Photo))
-        .sort((a, b) => b.dateUpload.localeCompare(a.dateUpload))
-      ));
+    return from(getDocs(q)).pipe(map(snap => snap.docs
+      .map(d => ({ id: d.id, ...d.data() } as Photo))
+      .sort((a, b) => b.dateUpload.localeCompare(a.dateUpload))
+    ));
   }
 
-  /** Photos visibles par un visiteur anonyme (public seulement). */
   getPhotosVisiteur(uid: string): Observable<Photo[]> {
     const q = query(
-      collection(this.firestore, 'photos'),
+      collection(db, 'photos'),
       where('uid', '==', uid),
       where('visibilite', '==', 'public')
     );
-    return (runInInjectionContext(this.injector, () =>
-      collectionData(q, { idField: 'id' })
-    ) as Observable<Photo[]>).pipe(
+    return collectionStream<Photo>(q, 'id').pipe(
       map(photos => [...photos].sort((a, b) => b.dateUpload.localeCompare(a.dateUpload)))
     );
   }
 
-  /** Photos visibles par un membre connecté (public + membre). */
   getPhotosMembre(uid: string): Observable<Photo[]> {
     const q = query(
-      collection(this.firestore, 'photos'),
+      collection(db, 'photos'),
       where('uid', '==', uid),
       where('visibilite', 'in', ['public', 'membre'])
     );
-    return (runInInjectionContext(this.injector, () =>
-      collectionData(q, { idField: 'id' })
-    ) as Observable<Photo[]>).pipe(
+    return collectionStream<Photo>(q, 'id').pipe(
       map(photos => [...photos].sort((a, b) => b.dateUpload.localeCompare(a.dateUpload)))
     );
   }
 
-  /** Dernières photos publiques toutes sections confondues. */
   getRecentPublicPhotos(limitCount = 8): Observable<Photo[]> {
     const q = query(
-      collection(this.firestore, 'photos'),
+      collection(db, 'photos'),
       where('visibilite', '==', 'public'),
       orderBy('dateUpload', 'desc'),
       limit(limitCount)
     );
-    return runInInjectionContext(this.injector, () =>
-      collectionData(q, { idField: 'id' })
-    ) as Observable<Photo[]>;
+    return collectionStream<Photo>(q, 'id');
   }
 
   getRecentPublicPhotosOnce(limitCount = 8): Observable<Photo[]> {
-    return from(runInInjectionContext(this.injector, () =>
-      getDocs(query(collection(this.firestore, 'photos'),
-        where('visibilite', '==', 'public'), orderBy('dateUpload', 'desc'), limit(limitCount)))
-    )).pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as Photo))));
+    return from(getDocs(query(collection(db, 'photos'),
+      where('visibilite', '==', 'public'), orderBy('dateUpload', 'desc'), limit(limitCount))))
+      .pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as Photo))));
   }
 
   async deletePhoto(photo: Photo): Promise<void> {
     const deletes: Promise<unknown>[] = [
-      deleteObject(ref(this.storage, photo.storagePath)),
-      deleteDoc(doc(this.firestore, 'photos', photo.id)),
+      deleteObject(ref(storage, photo.storagePath)),
+      deleteDoc(doc(db, 'photos', photo.id)),
     ];
-    if (photo.thumbnailPath) deletes.push(deleteObject(ref(this.storage, photo.thumbnailPath)).catch(() => {}));
-    await runInInjectionContext(this.injector, () => Promise.all(deletes));
+    if (photo.thumbnailPath) deletes.push(deleteObject(ref(storage, photo.thumbnailPath)).catch(() => {}));
+    await Promise.all(deletes);
     const update: Record<string, unknown> = { 'photoCount': increment(-1) };
     if (photo.fileSize) update['storageUsed.portfolio'] = increment(-photo.fileSize);
-    await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, 'users', photo.uid), update)
-    ).catch(() => {});
+    updateDoc(doc(db, 'users', photo.uid), update).catch(() => {});
   }
 
   async updatePhotoMeta(photoId: string, data: { titre: string; description: string; visibilite: PhotoVisibilite; categorie: string }): Promise<void> {
-    await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, 'photos', photoId), {
-        titre: data.titre,
-        description: data.description.trim(),
-        visibilite: data.visibilite,
-        categorie: data.categorie || deleteField(),
-      })
-    );
+    await updateDoc(doc(db, 'photos', photoId), {
+      titre: data.titre,
+      description: data.description.trim(),
+      visibilite: data.visibilite,
+      categorie: data.categorie || deleteField(),
+    });
   }
 
   async toggleVisibilite(photo: Photo): Promise<void> {
     const next: PhotoVisibilite = photo.visibilite === 'public' ? 'membre' : 'public';
-    await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, 'photos', photo.id), { visibilite: next })
-    );
+    await updateDoc(doc(db, 'photos', photo.id), { visibilite: next });
   }
 
   // --- Likes ---
@@ -202,11 +175,9 @@ export class PhotoService {
     currentlyLiked: boolean,
     notif?: { ownerUid: string; likerNom: string; lien: string; photoTitre?: string; ownerSubscriptions?: UserSubscriptions }
   ): Promise<void> {
-    await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, 'photos', photoId), {
-        likes: currentlyLiked ? arrayRemove(uid) : arrayUnion(uid),
-      })
-    );
+    await updateDoc(doc(db, 'photos', photoId), {
+      likes: currentlyLiked ? arrayRemove(uid) : arrayUnion(uid),
+    });
     if (notif && !currentlyLiked) {
       const msg = notif.photoTitre
         ? `${notif.likerNom} a aimé votre photo «${notif.photoTitre}»`
@@ -221,10 +192,10 @@ export class PhotoService {
 
   getCommentaires(photoId: string): Observable<Commentaire[]> {
     const q = query(
-      collection(this.firestore, `photos/${photoId}/commentaires`),
+      collection(db, `photos/${photoId}/commentaires`),
       orderBy('createdAt', 'asc')
     );
-    return from(runInInjectionContext(this.injector, () => getDocs(q))).pipe(
+    return from(getDocs(q)).pipe(
       map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as Commentaire)))
     );
   }
@@ -234,11 +205,9 @@ export class PhotoService {
     data: { texte: string; auteurUid: string; nomAuteur: string },
     notif?: { ownerUid: string; lien: string; photoTitre?: string; ownerSubscriptions?: UserSubscriptions }
   ): Promise<void> {
-    await runInInjectionContext(this.injector, () =>
-      addDoc(collection(this.firestore, `photos/${photoId}/commentaires`), {
-        ...data, likes: [], replies: [], createdAt: new Date().toISOString(),
-      })
-    );
+    await addDoc(collection(db, `photos/${photoId}/commentaires`), {
+      ...data, likes: [], replies: [], createdAt: new Date().toISOString(),
+    });
     if (notif) {
       const msg = notif.photoTitre
         ? `${data.nomAuteur} a commenté votre photo «${notif.photoTitre}»`
@@ -250,33 +219,25 @@ export class PhotoService {
   }
 
   async deleteCommentaire(photoId: string, commentId: string): Promise<void> {
-    await runInInjectionContext(this.injector, () =>
-      deleteDoc(doc(this.firestore, `photos/${photoId}/commentaires`, commentId))
-    );
+    await deleteDoc(doc(db, `photos/${photoId}/commentaires`, commentId));
   }
 
   async toggleLikeCommentaire(photoId: string, commentId: string, uid: string, currentlyLiked: boolean): Promise<void> {
-    await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, `photos/${photoId}/commentaires`, commentId), {
-        likes: currentlyLiked ? arrayRemove(uid) : arrayUnion(uid),
-      })
-    );
+    await updateDoc(doc(db, `photos/${photoId}/commentaires`, commentId), {
+      likes: currentlyLiked ? arrayRemove(uid) : arrayUnion(uid),
+    });
   }
 
   async addReply(photoId: string, commentId: string, reply: Omit<Reponse, 'id'>): Promise<void> {
     const replyWithId: Reponse = { ...reply, id: generateId() };
-    await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, `photos/${photoId}/commentaires`, commentId), {
-        replies: arrayUnion(replyWithId),
-      })
-    );
+    await updateDoc(doc(db, `photos/${photoId}/commentaires`, commentId), {
+      replies: arrayUnion(replyWithId),
+    });
   }
 
   async deleteReply(photoId: string, commentId: string, replyId: string, allReplies: Reponse[]): Promise<void> {
-    await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, `photos/${photoId}/commentaires`, commentId), {
-        replies: allReplies.filter(r => r.id !== replyId),
-      })
-    );
+    await updateDoc(doc(db, `photos/${photoId}/commentaires`, commentId), {
+      replies: allReplies.filter(r => r.id !== replyId),
+    });
   }
 }

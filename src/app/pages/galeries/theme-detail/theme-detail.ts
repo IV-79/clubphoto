@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { switchMap, of, combineLatest } from 'rxjs';
@@ -11,8 +11,12 @@ import { compressImage, COMPRESS_THEME } from '../../../utils/image-compress';
 import { readExifWithConsent } from '../../../utils/exif-reader';
 import { GpsConsentService } from '../../../services/gps-consent.service';
 import {
-  ThemeMensuel, ThemeSoumission, ThemeVote,
-  computeThemeStatut, getThemeDates, THEME_STATUT_LABELS,
+  ThemeMensuel,
+  ThemeSoumission,
+  ThemeVote,
+  computeThemeStatut,
+  getThemeDates,
+  THEME_STATUT_LABELS,
 } from '../../../models/theme.model';
 import { LightboxPhoto, PhotoLightboxCallbacks } from '../../../models/commentaire.model';
 import { PhotoLightbox } from '../../../components/photo-lightbox/photo-lightbox';
@@ -23,24 +27,27 @@ import { ImgRetryDirective } from '../../../directives/img-retry.directive';
   selector: 'app-theme-detail',
   imports: [RouterLink, PhotoLightbox, ImgRetryDirective, VoteRankingComponent],
   templateUrl: './theme-detail.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './theme-detail.css',
 })
 export class ThemeDetail {
-  private route             = inject(ActivatedRoute);
-  private themeService      = inject(ThemeService);
-  private authService       = inject(AuthService);
-  private confirmService    = inject(ConfirmService);
-  private notifService      = inject(NotificationService);
+  private route = inject(ActivatedRoute);
+  private themeService = inject(ThemeService);
+  private authService = inject(AuthService);
+  private confirmService = inject(ConfirmService);
+  private notifService = inject(NotificationService);
   private gpsConsentService = inject(GpsConsentService);
-  readonly loginModal       = inject(LoginModalService);
+  readonly loginModal = inject(LoginModalService);
 
   readonly id = this.route.snapshot.paramMap.get('id')!;
 
   private refreshTick = signal(0);
-  private refresh() { this.refreshTick.update(n => n + 1); }
+  private refresh() {
+    this.refreshTick.update((n) => n + 1);
+  }
 
   // One-shot — theme metadata changes rarely during a session
-  theme   = toSignal(this.themeService.getThemeOnce(this.id));
+  theme = toSignal(this.themeService.getThemeOnce(this.id));
   profile = toSignal(this.authService.currentUserProfile$);
   private readonly uid = computed(() => this.profile()?.uid ?? null);
 
@@ -49,51 +56,50 @@ export class ThemeDetail {
     return t ? computeThemeStatut(t) : null;
   });
 
-  authReady  = computed(() => this.profile() !== undefined);
+  authReady = computed(() => this.profile() !== undefined);
   isLoggedIn = computed(() => !!this.profile());
-  isAdmin    = computed(() => this.profile()?.role === 'admin');
+  isAdmin = computed(() => this.profile()?.role === 'admin');
 
   // One-shot, refreshed after every mutation
   soumissions = toSignal(
     toObservable(this.refreshTick).pipe(
-      switchMap(() => this.themeService.getSoumissionsOnce(this.id))
+      switchMap(() => this.themeService.getSoumissionsOnce(this.id)),
     ),
-    { initialValue: [] as ThemeSoumission[] }
+    { initialValue: [] as ThemeSoumission[] },
   );
 
   mesSoumissions = computed(() =>
-    this.soumissions().filter(s => s.membreUid === this.profile()?.uid)
+    this.soumissions().filter((s) => s.membreUid === this.profile()?.uid),
   );
 
-  peutSoumettre = computed(() =>
-    this.statut() === 'ouvert' &&
-    this.isLoggedIn() &&
-    this.mesSoumissions().length < (this.theme()?.maxPhotos ?? 1)
+  peutSoumettre = computed(
+    () =>
+      this.statut() === 'ouvert' &&
+      this.isLoggedIn() &&
+      this.mesSoumissions().length < (this.theme()?.maxPhotos ?? 1),
   );
 
   // One-shot, refreshed after vote/unvote or any mutation that touches soumissions
   mesVotes = toSignal(
     combineLatest([toObservable(this.uid), toObservable(this.refreshTick)]).pipe(
-      switchMap(([uid]) => uid
-        ? this.themeService.getMesVotesOnce(this.id, uid)
-        : of([] as ThemeVote[])
-      )
+      switchMap(([uid]) =>
+        uid ? this.themeService.getMesVotesOnce(this.id, uid) : of([] as ThemeVote[]),
+      ),
     ),
-    { initialValue: [] as ThemeVote[] }
+    { initialValue: [] as ThemeVote[] },
   );
 
-  mesVotesIds     = computed(() => new Set(this.mesVotes().map(v => v.soumissionId)));
+  mesVotesIds = computed(() => new Set(this.mesVotes().map((v) => v.soumissionId)));
   nbVotesRestants = computed(() => (this.theme()?.maxVotes ?? 3) - this.mesVotes().length);
 
   // One-shot, loaded once when statut reaches 'resultats' (results never change after close)
   tousVotes = toSignal(
     toObservable(this.statut).pipe(
-      switchMap(s => s === 'resultats'
-        ? this.themeService.getTousVotesOnce(this.id)
-        : of([] as ThemeVote[])
-      )
+      switchMap((s) =>
+        s === 'resultats' ? this.themeService.getTousVotesOnce(this.id) : of([] as ThemeVote[]),
+      ),
     ),
-    { initialValue: [] as ThemeVote[] }
+    { initialValue: [] as ThemeVote[] },
   );
 
   votesParSoumission = computed((): Record<string, number | undefined> => {
@@ -105,22 +111,22 @@ export class ThemeDetail {
   });
 
   resultats = computed(() =>
-    [...this.soumissions()].sort((a, b) =>
-      (this.votesParSoumission()[b.id] ?? 0) - (this.votesParSoumission()[a.id] ?? 0)
-    )
+    [...this.soumissions()].sort(
+      (a, b) => (this.votesParSoumission()[b.id] ?? 0) - (this.votesParSoumission()[a.id] ?? 0),
+    ),
   );
 
   allRankingItems = computed((): RankingItem[] =>
-    this.resultats().map(s => ({
+    this.resultats().map((s) => ({
       id: s.id,
       url: s.url,
       authorName: s.nomMembre,
       votes: this.votesParSoumission()[s.id] ?? 0,
-    }))
+    })),
   );
 
   onRankingClick(id: string): void {
-    const soum = this.resultats().find(s => s.id === id);
+    const soum = this.resultats().find((s) => s.id === id);
     if (soum) this.openLightbox(soum);
   }
 
@@ -132,13 +138,13 @@ export class ThemeDetail {
   lightboxIndex = signal<number | null>(null);
 
   lightboxSoumissions = computed(() =>
-    this.statut() === 'resultats' ? this.resultats() : this.soumissions()
+    this.statut() === 'resultats' ? this.resultats() : this.soumissions(),
   );
 
   lightboxPhotos = computed((): LightboxPhoto[] => {
     const showAuteur = this.statut() === 'resultats';
     const uid = this.profile()?.uid;
-    return this.lightboxSoumissions().map(s => ({
+    return this.lightboxSoumissions().map((s) => ({
       id: s.id,
       url: s.url,
       nomAuteur: showAuteur || s.membreUid === uid ? s.nomMembre : '',
@@ -157,8 +163,7 @@ export class ThemeDetail {
         await this.themeService.toggleLikePhoto(themeId, soumId, uid, liked);
         this.refresh();
       },
-      getComments: (soumId) =>
-        this.themeService.getCommentaires(themeId, soumId),
+      getComments: (soumId) => this.themeService.getCommentaires(themeId, soumId),
       addComment: (soumId, texte, auteurUid, nomAuteur) =>
         this.themeService.addCommentaire(themeId, soumId, { texte, auteurUid, nomAuteur }),
       deleteComment: (soumId, commentId) =>
@@ -167,23 +172,36 @@ export class ThemeDetail {
         this.themeService.toggleLikeCommentaire(themeId, soumId, commentId, cUid, liked),
       addReply: (soumId, commentId, texte, auteurUid, nomAuteur) =>
         this.themeService.addReply(themeId, soumId, commentId, {
-          texte, auteurUid, nomAuteur, createdAt: new Date().toISOString(),
+          texte,
+          auteurUid,
+          nomAuteur,
+          createdAt: new Date().toISOString(),
         }),
       deleteReply: (soumId, commentId, replyId, allReplies) =>
         this.themeService.deleteReply(themeId, soumId, commentId, replyId, allReplies),
       deletePhoto: async (lbPhoto) => {
-        const soum = this.soumissions().find(s => s.id === lbPhoto.id);
+        const soum = this.soumissions().find((s) => s.id === lbPhoto.id);
         if (!soum) return;
-        await this.themeService.deleteSoumission(themeId, soum.id, soum.storagePath, soum.membreUid, soum.fileSize, soum.thumbnailPath);
+        await this.themeService.deleteSoumission(
+          themeId,
+          soum.id,
+          soum.storagePath,
+          soum.membreUid,
+          soum.fileSize,
+          soum.thumbnailPath,
+        );
         this.refresh();
         const actor = this.profile();
         if (actor && soum.membreUid !== actor.uid) {
           const titre = lbPhoto.titre ? ` « ${lbPhoto.titre} »` : '';
-          this.notifService.sendToUser(
-            soum.membreUid, 'admin',
-            `L'admin ${this.userName()} a supprimé votre soumission${titre} au thème « ${this.theme()?.titre ?? ''} »`,
-            { sourceNom: this.userName(), sourceUid: actor.uid }
-          ).catch(() => {});
+          this.notifService
+            .sendToUser(
+              soum.membreUid,
+              'admin',
+              `L'admin ${this.userName()} a supprimé votre soumission${titre} au thème « ${this.theme()?.titre ?? ''} »`,
+              { sourceNom: this.userName(), sourceUid: actor.uid },
+            )
+            .catch(() => {});
         }
       },
     };
@@ -210,17 +228,19 @@ export class ThemeDetail {
 
   openLightbox(soum: ThemeSoumission, $event?: MouseEvent) {
     $event?.stopPropagation();
-    const idx = this.lightboxSoumissions().findIndex(s => s.id === soum.id);
+    const idx = this.lightboxSoumissions().findIndex((s) => s.id === soum.id);
     if (idx >= 0) this.lightboxIndex.set(idx);
   }
 
-  closeLightbox() { this.lightboxIndex.set(null); }
+  closeLightbox() {
+    this.lightboxIndex.set(null);
+  }
 
   // Upload
-  uploading      = signal(false);
+  uploading = signal(false);
   uploadProgress = signal(0);
-  dragOver       = signal(false);
-  uploadError    = signal('');
+  dragOver = signal(false);
+  uploadError = signal('');
 
   async onFileSelected(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0];
@@ -247,19 +267,22 @@ export class ThemeDetail {
     this.uploading.set(true);
     this.uploadError.set('');
     try {
-      const [exif, compressed] = await Promise.all([readExifWithConsent(file, this.gpsConsentService), compressImage(file, COMPRESS_THEME)]);
+      const [exif, compressed] = await Promise.all([
+        readExifWithConsent(file, this.gpsConsentService),
+        compressImage(file, COMPRESS_THEME),
+      ]);
       await this.themeService.uploadSoumission(
         this.id,
         profile.uid,
         `${profile.prenom ?? ''} ${profile.nom}`.trim(),
         compressed,
         exif,
-        pct => this.uploadProgress.set(pct)
+        (pct) => this.uploadProgress.set(pct),
       );
       this.uploadProgress.set(0);
       this.refresh();
     } catch {
-      this.uploadError.set('Erreur lors de l\'envoi. Réessayez.');
+      this.uploadError.set("Erreur lors de l'envoi. Réessayez.");
     } finally {
       this.uploading.set(false);
     }
@@ -268,7 +291,14 @@ export class ThemeDetail {
   async supprimerSoumission(soum: ThemeSoumission) {
     const ok = await this.confirmService.confirm('Supprimer cette photo du thème définitivement ?');
     if (!ok) return;
-    await this.themeService.deleteSoumission(this.id, soum.id, soum.storagePath, soum.membreUid, soum.fileSize, soum.thumbnailPath);
+    await this.themeService.deleteSoumission(
+      this.id,
+      soum.id,
+      soum.storagePath,
+      soum.membreUid,
+      soum.fileSize,
+      soum.thumbnailPath,
+    );
     this.refresh();
   }
 
@@ -292,15 +322,24 @@ export class ThemeDetail {
     }
   }
 
-  dates(theme: ThemeMensuel) { return getThemeDates(theme); }
+  dates(theme: ThemeMensuel) {
+    return getThemeDates(theme);
+  }
 
   formatDate(iso: string): string {
-    return new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+    return new Date(iso).toLocaleDateString('fr-FR', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
   }
 
   formatMois(mois: string): string {
     const [year, month] = mois.split('-');
-    const label = new Date(+year, +month - 1).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+    const label = new Date(+year, +month - 1).toLocaleDateString('fr-FR', {
+      month: 'long',
+      year: 'numeric',
+    });
     return label.charAt(0).toUpperCase() + label.slice(1);
   }
 }

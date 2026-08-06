@@ -1,36 +1,33 @@
-import { Injectable, inject, Injector, runInInjectionContext } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {
-  Auth, signInWithEmailAndPassword, signOut, authState,
+  signInWithEmailAndPassword, signOut, onAuthStateChanged,
   createUserWithEmailAndPassword, sendSignInLinkToEmail, sendPasswordResetEmail,
   reauthenticateWithCredential, updatePassword, EmailAuthProvider
-} from '@angular/fire/auth';
+} from 'firebase/auth';
 import {
-  Firestore, doc, setDoc, getDoc, updateDoc, deleteDoc,
-  collection, collectionData, query, where, getDocs, docData
-} from '@angular/fire/firestore';
-import { Storage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from '@angular/fire/storage';
+  doc, setDoc, getDoc, updateDoc, deleteDoc,
+  collection, getDocs, query, where
+} from 'firebase/firestore';
+import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
 import { Router } from '@angular/router';
 import { from, switchMap, of, Observable, map, shareReplay, pairwise, filter } from 'rxjs';
+import { db, auth, storage, collectionStream, docStream } from '../utils/firebase';
 import { DocumentService } from './document.service';
 import { UserProfile } from '../models/user.model';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private auth = inject(Auth);
-  private firestore = inject(Firestore);
-  private storage = inject(Storage);
   private router = inject(Router);
-  private injector = inject(Injector);
   private documentService = inject(DocumentService);
 
-  user$ = authState(this.auth).pipe(shareReplay(1));
+  user$ = new Observable<import('firebase/auth').User | null>(sub =>
+    onAuthStateChanged(auth, user => sub.next(user))
+  ).pipe(shareReplay(1));
 
   currentUserProfile$: Observable<UserProfile | null> = this.user$.pipe(
     switchMap(user => {
       if (!user) return of(null);
-      return (runInInjectionContext(this.injector, () =>
-        docData(doc(this.firestore, 'users', user.uid))
-      ) as Observable<UserProfile | undefined>).pipe(
+      return docStream<UserProfile>(doc(db, 'users', user.uid)).pipe(
         map(data => data ?? null)
       );
     }),
@@ -46,35 +43,27 @@ export class AuthService {
   }
 
   login(email: string, password: string) {
-    return runInInjectionContext(this.injector, () =>
-      signInWithEmailAndPassword(this.auth, email, password)
-    );
+    return signInWithEmailAndPassword(auth, email, password);
   }
 
   async logoutSilent(): Promise<void> {
-    await runInInjectionContext(this.injector, () => signOut(this.auth));
+    await signOut(auth);
   }
 
   async acceptCharte(version: number): Promise<void> {
-    const uid = this.auth.currentUser?.uid;
+    const uid = auth.currentUser?.uid;
     if (!uid) return;
-    await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, 'users', uid), { charteAccepteeVersion: version })
-    );
+    await updateDoc(doc(db, 'users', uid), { charteAccepteeVersion: version });
   }
 
   async acceptCgu(version: number): Promise<void> {
-    const uid = this.auth.currentUser?.uid;
+    const uid = auth.currentUser?.uid;
     if (!uid) return;
-    await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, 'users', uid), { cguAccepteeVersion: version })
-    );
+    await updateDoc(doc(db, 'users', uid), { cguAccepteeVersion: version });
   }
 
   async register(email: string, password: string, nom: string) {
-    const credential = await runInInjectionContext(this.injector, () =>
-      createUserWithEmailAndPassword(this.auth, email, password)
-    );
+    const credential = await createUserWithEmailAndPassword(auth, email, password);
     const profile: UserProfile = {
       uid: credential.user.uid,
       email,
@@ -82,18 +71,14 @@ export class AuthService {
       role: 'membre',
       dateAdhesion: new Date().toISOString().split('T')[0]
     };
-    await runInInjectionContext(this.injector, () =>
-      setDoc(doc(this.firestore, 'users', credential.user.uid), profile)
-    );
+    await setDoc(doc(db, 'users', credential.user.uid), profile);
     return credential;
   }
 
   async ensureUserDocument(): Promise<UserProfile | null> {
-    const user = this.auth.currentUser;
+    const user = auth.currentUser;
     if (!user) return null;
-    const snap = await runInInjectionContext(this.injector, () =>
-      getDoc(doc(this.firestore, 'users', user.uid))
-    );
+    const snap = await getDoc(doc(db, 'users', user.uid));
     if (snap.exists()) return snap.data() as UserProfile;
     const profile: UserProfile = {
       uid: user.uid,
@@ -102,81 +87,58 @@ export class AuthService {
       role: 'membre',
       dateAdhesion: new Date().toISOString().split('T')[0]
     };
-    await runInInjectionContext(this.injector, () =>
-      setDoc(doc(this.firestore, 'users', user.uid), profile)
-    );
+    await setDoc(doc(db, 'users', user.uid), profile);
     return profile;
   }
 
   async getUserRole(): Promise<'admin' | 'contributeur' | 'membre' | null> {
-    const user = this.auth.currentUser;
+    const user = auth.currentUser;
     if (!user) return null;
-    const snap = await runInInjectionContext(this.injector, () =>
-      getDoc(doc(this.firestore, 'users', user.uid))
-    );
+    const snap = await getDoc(doc(db, 'users', user.uid));
     if (!snap.exists()) return null;
     return (snap.data() as UserProfile).role;
   }
 
   getAllMembers(): Observable<UserProfile[]> {
-    return runInInjectionContext(this.injector, () =>
-      collectionData(collection(this.firestore, 'users'), { idField: 'uid' })
-    ) as Observable<UserProfile[]>;
+    return collectionStream<UserProfile>(collection(db, 'users'), 'uid');
   }
 
   getAllMembersOnce(): Observable<UserProfile[]> {
-    return from(runInInjectionContext(this.injector, () =>
-      getDocs(collection(this.firestore, 'users'))
-    )).pipe(map(snap => snap.docs.map(d => ({ uid: d.id, ...d.data() } as UserProfile))));
+    return from(getDocs(collection(db, 'users')))
+      .pipe(map(snap => snap.docs.map(d => ({ uid: d.id, ...d.data() } as UserProfile))));
   }
 
   getMemberProfile(uid: string): Observable<UserProfile | null> {
-    return from(
-      runInInjectionContext(this.injector, () =>
-        getDoc(doc(this.firestore, 'users', uid))
-      )
-    ).pipe(
+    return from(getDoc(doc(db, 'users', uid))).pipe(
       map(snap => snap.exists() ? (snap.data() as UserProfile) : null)
     );
   }
 
   async updateProfile(uid: string, data: Partial<Omit<UserProfile, 'uid' | 'email' | 'role' | 'dateAdhesion'>>): Promise<void> {
-    await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, 'users', uid), data as Record<string, unknown>)
-    );
+    await updateDoc(doc(db, 'users', uid), data as Record<string, unknown>);
   }
 
   async updateLastConnection(uid: string): Promise<void> {
-    await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, 'users', uid), {
-        derniereConnexion: new Date().toISOString(),
-      })
-    );
+    await updateDoc(doc(db, 'users', uid), { derniereConnexion: new Date().toISOString() });
   }
 
   async changeMemberRole(uid: string, role: string): Promise<void> {
-    await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, 'users', uid), { role })
-    );
+    await updateDoc(doc(db, 'users', uid), { role });
   }
 
   async suspendMember(uid: string, isSuspended: boolean): Promise<void> {
-    await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, 'users', uid), { isSuspended })
-    );
+    await updateDoc(doc(db, 'users', uid), { isSuspended });
   }
 
   async resetPassword(email: string): Promise<void> {
-    await runInInjectionContext(this.injector, () =>
-      sendPasswordResetEmail(this.auth, email, {
-        url: `${window.location.origin}/`,
-        handleCodeInApp: false,
-      })
-    );
+    await sendPasswordResetEmail(auth, email, {
+      url: `${window.location.origin}/`,
+      handleCodeInApp: false,
+    });
   }
 
   async changePassword(currentPassword: string, newPassword: string): Promise<void> {
-    const user = this.auth.currentUser;
+    const user = auth.currentUser;
     if (!user || !user.email) throw new Error('Non connecté');
     const credential = EmailAuthProvider.credential(user.email, currentPassword);
     await reauthenticateWithCredential(user, credential);
@@ -188,9 +150,7 @@ export class AuthService {
       url: `${window.location.origin}/completer-profil`,
       handleCodeInApp: true,
     };
-    await runInInjectionContext(this.injector, () =>
-      sendSignInLinkToEmail(this.auth, email, actionCodeSettings)
-    );
+    await sendSignInLinkToEmail(auth, email, actionCodeSettings);
     window.localStorage.setItem('emailForSignIn', email);
   }
 
@@ -200,166 +160,122 @@ export class AuthService {
     let oneshots = 0;
     let defis = 0;
 
-    const photosSnap = await runInInjectionContext(this.injector, () =>
-      getDocs(query(collection(this.firestore, 'photos'), where('uid', '==', uid)))
-    );
+    const photosSnap = await getDocs(query(collection(db, 'photos'), where('uid', '==', uid)));
     for (const d of photosSnap.docs) {
       portfolio += (d.data() as { fileSize?: number }).fileSize ?? 0;
     }
 
-    const themesSnap = await runInInjectionContext(this.injector, () =>
-      getDocs(collection(this.firestore, 'themes'))
-    );
+    const themesSnap = await getDocs(collection(db, 'themes'));
     for (const themeDoc of themesSnap.docs) {
-      const soumSnap = await runInInjectionContext(this.injector, () =>
-        getDocs(query(
-          collection(this.firestore, 'themes', themeDoc.id, 'soumissions'),
-          where('membreUid', '==', uid)
-        ))
-      );
+      const soumSnap = await getDocs(query(
+        collection(db, 'themes', themeDoc.id, 'soumissions'),
+        where('membreUid', '==', uid)
+      ));
       for (const d of soumSnap.docs) {
         themes += (d.data() as { fileSize?: number }).fileSize ?? 0;
       }
     }
 
-    const oneshotsSnap = await runInInjectionContext(this.injector, () =>
-      getDocs(collection(this.firestore, 'oneshots'))
-    );
+    const oneshotsSnap = await getDocs(collection(db, 'oneshots'));
     for (const osDoc of oneshotsSnap.docs) {
-      const osPhotosSnap = await runInInjectionContext(this.injector, () =>
-        getDocs(query(
-          collection(this.firestore, 'oneshots', osDoc.id, 'photos'),
-          where('membreUid', '==', uid)
-        ))
-      );
+      const osPhotosSnap = await getDocs(query(
+        collection(db, 'oneshots', osDoc.id, 'photos'),
+        where('membreUid', '==', uid)
+      ));
       for (const pd of osPhotosSnap.docs) {
         oneshots += (pd.data() as { fileSize?: number }).fileSize ?? 0;
       }
     }
 
-    const defisSnap = await runInInjectionContext(this.injector, () =>
-      getDocs(collection(this.firestore, 'defis'))
-    );
+    const defisSnap = await getDocs(collection(db, 'defis'));
     for (const defiDoc of defisSnap.docs) {
-      const defiPhotosSnap = await runInInjectionContext(this.injector, () =>
-        getDocs(query(
-          collection(this.firestore, 'defis', defiDoc.id, 'photos'),
-          where('membreUid', '==', uid)
-        ))
-      );
+      const defiPhotosSnap = await getDocs(query(
+        collection(db, 'defis', defiDoc.id, 'photos'),
+        where('membreUid', '==', uid)
+      ));
       for (const pd of defiPhotosSnap.docs) {
         defis += (pd.data() as { fileSize?: number }).fileSize ?? 0;
       }
     }
 
     let documents = 0;
-    const docsSnap = await runInInjectionContext(this.injector, () =>
-      getDocs(query(collection(this.firestore, 'documents'), where('uploadeurUid', '==', uid)))
-    );
+    const docsSnap = await getDocs(query(collection(db, 'documents'), where('uploadeurUid', '==', uid)));
     for (const d of docsSnap.docs) {
       documents += (d.data() as { taille?: number }).taille ?? 0;
     }
 
-    await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, 'users', uid), {
-        storageUsed: { portfolio, themes, oneshots, defis, documents },
-        photoCount: photosSnap.docs.length,
-      })
-    );
+    await updateDoc(doc(db, 'users', uid), {
+      storageUsed: { portfolio, themes, oneshots, defis, documents },
+      photoCount: photosSnap.docs.length,
+    });
   }
 
   async deleteMemberData(uid: string): Promise<void> {
     const deletes: Promise<void>[] = [];
 
     // 1. Photos portfolio
-    const photosSnap = await runInInjectionContext(this.injector, () =>
-      getDocs(query(collection(this.firestore, 'photos'), where('uid', '==', uid)))
-    );
+    const photosSnap = await getDocs(query(collection(db, 'photos'), where('uid', '==', uid)));
     for (const d of photosSnap.docs) {
       const sp = (d.data() as { storagePath?: string }).storagePath;
-      if (sp) deletes.push(deleteObject(ref(this.storage, sp)).catch(() => {}));
-      deletes.push(runInInjectionContext(this.injector, () => deleteDoc(d.ref)));
+      if (sp) deletes.push(deleteObject(ref(storage, sp)).catch(() => {}));
+      deletes.push(deleteDoc(d.ref));
     }
 
-    // 2. Soumissions thèmes (par thème pour éviter collectionGroup et son index requis)
-    const themesSnap = await runInInjectionContext(this.injector, () =>
-      getDocs(collection(this.firestore, 'themes'))
-    );
+    // 2. Soumissions thèmes
+    const themesSnap = await getDocs(collection(db, 'themes'));
     for (const themeDoc of themesSnap.docs) {
-      const soumSnap = await runInInjectionContext(this.injector, () =>
-        getDocs(query(
-          collection(this.firestore, 'themes', themeDoc.id, 'soumissions'),
-          where('membreUid', '==', uid)
-        ))
-      );
+      const soumSnap = await getDocs(query(
+        collection(db, 'themes', themeDoc.id, 'soumissions'),
+        where('membreUid', '==', uid)
+      ));
       for (const d of soumSnap.docs) {
         const sp = (d.data() as { storagePath?: string }).storagePath;
-        if (sp) deletes.push(deleteObject(ref(this.storage, sp)).catch(() => {}));
-        deletes.push(runInInjectionContext(this.injector, () => deleteDoc(d.ref)));
+        if (sp) deletes.push(deleteObject(ref(storage, sp)).catch(() => {}));
+        deletes.push(deleteDoc(d.ref));
       }
     }
 
-    // 3. OneShots : photos + inscriptions directes (id doc == uid)
-    const oneshotsSnap = await runInInjectionContext(this.injector, () =>
-      getDocs(collection(this.firestore, 'oneshots'))
-    );
+    // 3. OneShots : photos + inscriptions
+    const oneshotsSnap = await getDocs(collection(db, 'oneshots'));
     for (const osDoc of oneshotsSnap.docs) {
       const osId = osDoc.id;
-      deletes.push(
-        runInInjectionContext(this.injector, () =>
-          deleteDoc(doc(this.firestore, 'oneshots', osId, 'inscriptions', uid))
-        ).catch(() => {})
-      );
-      const osPhotosSnap = await runInInjectionContext(this.injector, () =>
-        getDocs(query(
-          collection(this.firestore, 'oneshots', osId, 'photos'),
-          where('membreUid', '==', uid)
-        ))
-      );
+      deletes.push(deleteDoc(doc(db, 'oneshots', osId, 'inscriptions', uid)).catch(() => {}) as Promise<void>);
+      const osPhotosSnap = await getDocs(query(
+        collection(db, 'oneshots', osId, 'photos'),
+        where('membreUid', '==', uid)
+      ));
       for (const pd of osPhotosSnap.docs) {
         const sp = (pd.data() as { storagePath?: string }).storagePath;
-        if (sp) deletes.push(deleteObject(ref(this.storage, sp)).catch(() => {}));
-        deletes.push(runInInjectionContext(this.injector, () => deleteDoc(pd.ref)));
+        if (sp) deletes.push(deleteObject(ref(storage, sp)).catch(() => {}));
+        deletes.push(deleteDoc(pd.ref));
       }
     }
 
     // 4. Défis : photos
-    const defisSnap = await runInInjectionContext(this.injector, () =>
-      getDocs(collection(this.firestore, 'defis'))
-    );
+    const defisSnap = await getDocs(collection(db, 'defis'));
     for (const defiDoc of defisSnap.docs) {
-      const defiPhotosSnap = await runInInjectionContext(this.injector, () =>
-        getDocs(query(
-          collection(this.firestore, 'defis', defiDoc.id, 'photos'),
-          where('membreUid', '==', uid)
-        ))
-      );
+      const defiPhotosSnap = await getDocs(query(
+        collection(db, 'defis', defiDoc.id, 'photos'),
+        where('membreUid', '==', uid)
+      ));
       for (const pd of defiPhotosSnap.docs) {
         const sp = (pd.data() as { storagePath?: string }).storagePath;
-        if (sp) deletes.push(deleteObject(ref(this.storage, sp)).catch(() => {}));
-        deletes.push(runInInjectionContext(this.injector, () => deleteDoc(pd.ref)));
+        if (sp) deletes.push(deleteObject(ref(storage, sp)).catch(() => {}));
+        deletes.push(deleteDoc(pd.ref));
       }
     }
 
-    // 5. Sorties : inscriptions directes (id doc == uid)
-    const sortiesSnap = await runInInjectionContext(this.injector, () =>
-      getDocs(collection(this.firestore, 'sorties'))
-    );
+    // 5. Sorties : inscriptions
+    const sortiesSnap = await getDocs(collection(db, 'sorties'));
     for (const sortieDoc of sortiesSnap.docs) {
-      deletes.push(
-        runInInjectionContext(this.injector, () =>
-          deleteDoc(doc(this.firestore, 'sorties', sortieDoc.id, 'inscriptions', uid))
-        ).catch(() => {})
-      );
+      deletes.push(deleteDoc(doc(db, 'sorties', sortieDoc.id, 'inscriptions', uid)).catch(() => {}) as Promise<void>);
     }
 
-    // 5. Documents partagés
+    // 6. Documents partagés
     await this.documentService.deleteAllDocumentsByUser(uid);
 
-    // 6. Profil Firestore
-    deletes.push(runInInjectionContext(this.injector, () =>
-      deleteDoc(doc(this.firestore, 'users', uid))
-    ));
+    // 7. Profil Firestore
+    deletes.push(deleteDoc(doc(db, 'users', uid)));
 
     await Promise.all(deletes);
   }
@@ -367,7 +283,7 @@ export class AuthService {
   uploadUserPhoto(uid: string, file: File, type: 'profil' | 'bandeau'): Observable<{ state: 'uploading' | 'done'; progress: number; url?: string }> {
     return new Observable(observer => {
       const storagePath = `user-photos/${uid}/${type}.webp`;
-      const storageRef = ref(this.storage, storagePath);
+      const storageRef = ref(storage, storagePath);
       const task = uploadBytesResumable(storageRef, file);
       task.on(
         'state_changed',
@@ -383,9 +299,7 @@ export class AuthService {
   }
 
   logout() {
-    return runInInjectionContext(this.injector, () =>
-      signOut(this.auth)
-    ).then(() => {
+    return signOut(auth).then(() => {
       this.router.navigate(['/']);
     });
   }

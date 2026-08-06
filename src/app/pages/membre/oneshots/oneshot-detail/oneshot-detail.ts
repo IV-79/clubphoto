@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
@@ -9,13 +9,21 @@ import { ConfirmService } from '../../../../services/confirm.service';
 import { NotificationService } from '../../../../services/notification.service';
 import { LoginModalService } from '../../../../services/login-modal.service';
 import {
-  OneShot, OneShotInscription, OneShotPhoto, OneShotTheme, OneShotVote,
-  OneShotStatut, ONESHOT_STATUT_LABELS
+  OneShot,
+  OneShotInscription,
+  OneShotPhoto,
+  OneShotTheme,
+  OneShotVote,
+  OneShotStatut,
+  ONESHOT_STATUT_LABELS,
 } from '../../../../models/oneshot.model';
 import { UserProfile } from '../../../../models/user.model';
 import { LightboxPhoto, PhotoLightboxCallbacks } from '../../../../models/commentaire.model';
 import { PhotoLightbox } from '../../../../components/photo-lightbox/photo-lightbox';
-import { VoteRankingComponent, RankingItem } from '../../../../components/vote-ranking/vote-ranking';
+import {
+  VoteRankingComponent,
+  RankingItem,
+} from '../../../../components/vote-ranking/vote-ranking';
 import { ImgRetryDirective } from '../../../../directives/img-retry.directive';
 import { EventHero, HeroBadge } from '../../../../components/event-hero/event-hero';
 import { DatePickerComponent } from '../../../../components/date-picker/date-picker';
@@ -23,8 +31,17 @@ import { compressImage, COMPRESS_COUVERTURE } from '../../../../utils/image-comp
 
 @Component({
   selector: 'app-oneshot-detail',
-  imports: [RouterLink, FormsModule, PhotoLightbox, ImgRetryDirective, VoteRankingComponent, EventHero, DatePickerComponent],
+  imports: [
+    RouterLink,
+    FormsModule,
+    PhotoLightbox,
+    ImgRetryDirective,
+    VoteRankingComponent,
+    EventHero,
+    DatePickerComponent,
+  ],
   templateUrl: './oneshot-detail.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './oneshot-detail.css',
 })
 export class OneShotDetail {
@@ -41,77 +58,94 @@ export class OneShotDetail {
   profile = toSignal(this.authService.currentUserProfile$);
 
   private refreshTick = signal(0);
-  private refresh() { this.refreshTick.update(n => n + 1); }
+  private refresh() {
+    this.refreshTick.update((n) => n + 1);
+  }
 
-  private inscriptionsTrigger = computed(() => ({ profile: this.profile(), tick: this.refreshTick() }));
-  private myVotesTrigger      = computed(() => ({ profile: this.profile(), tick: this.refreshTick() }));
+  private inscriptionsTrigger = computed(() => ({
+    profile: this.profile(),
+    tick: this.refreshTick(),
+  }));
+  private myVotesTrigger = computed(() => ({ profile: this.profile(), tick: this.refreshTick() }));
 
   event = toSignal(
-    toObservable(this.refreshTick).pipe(switchMap(() => this.oneShotService.getOneShotOnce(this.id))),
-    { initialValue: undefined as OneShot | undefined }
+    toObservable(this.refreshTick).pipe(
+      switchMap(() => this.oneShotService.getOneShotOnce(this.id)),
+    ),
+    { initialValue: undefined as OneShot | undefined },
   );
 
   themes = toSignal(
-    toObservable(this.refreshTick).pipe(switchMap(() => this.oneShotService.getThemesOnce(this.id))),
-    { initialValue: [] as OneShotTheme[] }
+    toObservable(this.refreshTick).pipe(
+      switchMap(() => this.oneShotService.getThemesOnce(this.id)),
+    ),
+    { initialValue: [] as OneShotTheme[] },
   );
 
   photos = toSignal(
-    toObservable(this.refreshTick).pipe(switchMap(() => this.oneShotService.getPhotosOnce(this.id))),
-    { initialValue: [] as OneShotPhoto[] }
+    toObservable(this.refreshTick).pipe(
+      switchMap(() => this.oneShotService.getPhotosOnce(this.id)),
+    ),
+    { initialValue: [] as OneShotPhoto[] },
   );
 
   inscriptions = toSignal(
     toObservable(this.inscriptionsTrigger).pipe(
-      switchMap(({ profile }) => !profile ? of([] as OneShotInscription[]) :
-        this.oneShotService.getInscriptionsOnce(this.id)
-      )
+      switchMap(({ profile }) =>
+        !profile
+          ? of([] as OneShotInscription[])
+          : this.oneShotService.getInscriptionsOnce(this.id),
+      ),
     ),
-    { initialValue: [] as OneShotInscription[] }
+    { initialValue: [] as OneShotInscription[] },
   );
 
   isLoggedIn = computed(() => !!this.profile());
-  authReady  = computed(() => this.profile() !== undefined);
+  authReady = computed(() => this.profile() !== undefined);
 
-  typeBadgeHero = computed((): HeroBadge => ({ text: '🏆 OneShot', css: 'event-type-badge badge-oneshot-type' }));
+  typeBadgeHero = computed(
+    (): HeroBadge => ({ text: '🏆 OneShot', css: 'event-type-badge badge-oneshot-type' }),
+  );
   statusHero = computed((): HeroBadge => {
     const e = this.event();
     if (!e) return { text: '', css: 'hero-status' };
     const cssMap: Record<string, string> = {
-      preparation:            'hero-status',
-      inscription:            'hero-status status-avenir',
+      preparation: 'hero-status',
+      inscription: 'hero-status status-avenir',
       fermeture_inscriptions: 'hero-status status-oneshot-fermee',
-      vote:                   'hero-status status-oneshot-vote',
-      resultats:              'hero-status status-passee',
+      vote: 'hero-status status-oneshot-vote',
+      resultats: 'hero-status status-passee',
     };
     return { text: ONESHOT_STATUT_LABELS[e.statut], css: cssMap[e.statut] ?? 'hero-status' };
   });
 
-  isCreator          = computed(() => this.event()?.creatorUid === this.profile()?.uid);
-  isAdmin            = computed(() => this.profile()?.role === 'admin');
-  canManage          = computed(() => this.isCreator() || this.isAdmin());
-  isInscrit          = computed(() => this.inscriptions().some(i => i.uid === this.profile()?.uid));
-  viewAsAdmin        = computed(() => this.isCreator() && !this.isInscrit());
+  isCreator = computed(() => this.event()?.creatorUid === this.profile()?.uid);
+  isAdmin = computed(() => this.profile()?.role === 'admin');
+  canManage = computed(() => this.isCreator() || this.isAdmin());
+  isInscrit = computed(() => this.inscriptions().some((i) => i.uid === this.profile()?.uid));
+  viewAsAdmin = computed(() => this.isCreator() && !this.isInscrit());
 
   private allMembres$ = toObservable(this.canManage).pipe(
-    switchMap(can => can ? this.authService.getAllMembersOnce() : of([] as UserProfile[]))
+    switchMap((can) => (can ? this.authService.getAllMembersOnce() : of([] as UserProfile[]))),
   );
   allMembres = toSignal(this.allMembres$, { initialValue: [] as UserProfile[] });
 
   membresDisponibles = computed(() => {
-    const inscritUids = new Set(this.inscriptions().map(i => i.uid));
+    const inscritUids = new Set(this.inscriptions().map((i) => i.uid));
     return this.allMembres()
-      .filter(m => !inscritUids.has(m.uid) && !m.isSuspended)
+      .filter((m) => !inscritUids.has(m.uid) && !m.isSuspended)
       .sort((a, b) => `${a.prenom ?? ''} ${a.nom}`.localeCompare(`${b.prenom ?? ''} ${b.nom}`));
   });
 
   myVotes = toSignal(
     toObservable(this.myVotesTrigger).pipe(
-      switchMap(({ profile }) => !profile ? of([] as OneShotVote[]) :
-        this.oneShotService.getMyVotesOnce(this.id, profile.uid)
-      )
+      switchMap(({ profile }) =>
+        !profile
+          ? of([] as OneShotVote[])
+          : this.oneShotService.getMyVotesOnce(this.id, profile.uid),
+      ),
     ),
-    { initialValue: [] as OneShotVote[] }
+    { initialValue: [] as OneShotVote[] },
   );
 
   private allVotes$ = combineLatest([
@@ -125,7 +159,7 @@ export class OneShotDetail {
       if (!profile) return of([] as OneShotVote[]);
       const canSeeVotes = event.creatorUid === profile.uid || profile.role === 'admin';
       return canSeeVotes ? this.oneShotService.getAllVotesOnce(this.id) : of([] as OneShotVote[]);
-    })
+    }),
   );
   allVotes = toSignal(this.allVotes$, { initialValue: [] as OneShotVote[] });
 
@@ -133,27 +167,37 @@ export class OneShotDetail {
 
   nextStatut = computed<OneShotStatut | null>(() => {
     switch (this.event()?.statut) {
-      case 'preparation':            return 'inscription';
-      case 'inscription':            return 'vote';
-      case 'fermeture_inscriptions': return 'vote';
-      case 'vote':                   return 'resultats';
-      default:                       return null;
+      case 'preparation':
+        return 'inscription';
+      case 'inscription':
+        return 'vote';
+      case 'fermeture_inscriptions':
+        return 'vote';
+      case 'vote':
+        return 'resultats';
+      default:
+        return null;
     }
   });
 
   nextStatutLabel = computed(() => {
     switch (this.event()?.statut) {
-      case 'preparation':            return 'Ouvrir les inscriptions';
-      case 'inscription':            return 'Passer directement au vote';
-      case 'fermeture_inscriptions': return 'Ouvrir les votes';
-      case 'vote':                   return 'Publier les résultats';
-      default:                       return '';
+      case 'preparation':
+        return 'Ouvrir les inscriptions';
+      case 'inscription':
+        return 'Passer directement au vote';
+      case 'fermeture_inscriptions':
+        return 'Ouvrir les votes';
+      case 'vote':
+        return 'Publier les résultats';
+      default:
+        return '';
     }
   });
 
   peutFermerInscriptions = computed(() => this.event()?.statut === 'inscription');
 
-  transitioning     = signal(false);
+  transitioning = signal(false);
   confirmTransition = signal(false);
 
   async avancer() {
@@ -163,9 +207,17 @@ export class OneShotDetail {
     this.confirmTransition.set(false);
     try {
       const ev = this.event();
-      await this.oneShotService.updateStatut(this.id, next, ev ? {
-        titre: ev.titre, nomCreateur: ev.nomCreateur, creatorUid: ev.creatorUid,
-      } : undefined);
+      await this.oneShotService.updateStatut(
+        this.id,
+        next,
+        ev
+          ? {
+              titre: ev.titre,
+              nomCreateur: ev.nomCreateur,
+              creatorUid: ev.creatorUid,
+            }
+          : undefined,
+      );
       this.refresh();
     } finally {
       this.transitioning.set(false);
@@ -183,15 +235,13 @@ export class OneShotDetail {
     }
   }
 
-  statutLabel           = computed(() => ONESHOT_STATUT_LABELS[this.event()?.statut ?? 'preparation']);
-  inscriptionOuverte    = computed(() => this.event()?.statut === 'inscription');
+  statutLabel = computed(() => ONESHOT_STATUT_LABELS[this.event()?.statut ?? 'preparation']);
+  inscriptionOuverte = computed(() => this.event()?.statut === 'inscription');
   canManageInscriptions = computed(() =>
-    ['inscription', 'fermeture_inscriptions'].includes(this.event()?.statut ?? '')
+    ['inscription', 'fermeture_inscriptions'].includes(this.event()?.statut ?? ''),
   );
 
-  hasUnassignedPhotos = computed(() =>
-    this.photos().some(p => !p.membreUid || !p.themeId)
-  );
+  hasUnassignedPhotos = computed(() => this.photos().some((p) => !p.membreUid || !p.themeId));
 
   dupeCount = computed(() => {
     const counts = new Map<string, number>();
@@ -201,46 +251,58 @@ export class OneShotDetail {
         counts.set(key, (counts.get(key) ?? 0) + 1);
       }
     }
-    return [...counts.values()].filter(n => n > 1).length;
+    return [...counts.values()].filter((n) => n > 1).length;
   });
 
   submissionProgress = computed(() => {
-    const themes   = this.themes();
+    const themes = this.themes();
     const inscrits = this.inscriptions();
-    const photos   = this.photos();
+    const photos = this.photos();
     if (!themes.length || !inscrits.length) return null;
 
-    const total   = themes.length * inscrits.length;
+    const total = themes.length * inscrits.length;
     const covered = new Set(
-      photos.filter(p => p.membreUid && p.themeId).map(p => `${p.membreUid}:${p.themeId}`)
+      photos.filter((p) => p.membreUid && p.themeId).map((p) => `${p.membreUid}:${p.themeId}`),
     ).size;
 
-    const byTheme = themes.map(t => ({
+    const byTheme = themes.map((t) => ({
       theme: t,
-      submitted: photos.filter(p => p.themeId === t.id && p.membreUid).length,
+      submitted: photos.filter((p) => p.themeId === t.id && p.membreUid).length,
     }));
 
-    return { covered, total, pct: Math.round(covered / total * 100), byTheme, nbMembers: inscrits.length };
+    return {
+      covered,
+      total,
+      pct: Math.round((covered / total) * 100),
+      byTheme,
+      nbMembers: inscrits.length,
+    };
   });
 
   voteProgress = computed(() => {
-    const themes  = this.themes();
-    const membres = this.allMembres().filter(m => !m.isSuspended);
-    const votes   = this.allVotes();
+    const themes = this.themes();
+    const membres = this.allMembres().filter((m) => !m.isSuspended);
+    const votes = this.allVotes();
     if (!themes.length || !membres.length) return null;
 
     const total = themes.length * membres.length;
-    const cast  = votes.length;
+    const cast = votes.length;
 
-    const byTheme = themes.map(t => ({
+    const byTheme = themes.map((t) => ({
       theme: t,
-      votes: votes.filter(v => v.themeId === t.id).length,
+      votes: votes.filter((v) => v.themeId === t.id).length,
     }));
 
-    return { cast, total, pct: Math.round(cast / total * 100), byTheme, nbMembers: membres.length };
+    return {
+      cast,
+      total,
+      pct: Math.round((cast / total) * 100),
+      byTheme,
+      nbMembers: membres.length,
+    };
   });
 
-  addingMembre      = signal(false);
+  addingMembre = signal(false);
   selectedMembreUid = signal('');
 
   voteCountByPhoto = computed((): Record<string, number | undefined> => {
@@ -259,73 +321,76 @@ export class OneShotDetail {
     return counts;
   });
 
-  myVoteByTheme = computed((): Record<string, string> =>
-    Object.fromEntries(this.myVotes().map(v => [v.themeId, v.photoId]))
+  myVoteByTheme = computed(
+    (): Record<string, string> =>
+      Object.fromEntries(this.myVotes().map((v) => [v.themeId, v.photoId])),
   );
 
-  themesVoted = computed(() =>
-    new Set(this.myVotes().map(v => v.themeId))
-  );
+  themesVoted = computed(() => new Set(this.myVotes().map((v) => v.themeId)));
 
   photosByTheme = computed(() =>
     this.themes()
-      .map(t => ({ theme: t, photos: this.photos().filter(p => p.themeId === t.id) }))
-      .filter(g => g.photos.length > 0)
+      .map((t) => ({ theme: t, photos: this.photos().filter((p) => p.themeId === t.id) }))
+      .filter((g) => g.photos.length > 0),
   );
 
   resultsByTheme = computed(() =>
     this.themes()
-      .map(t => ({
+      .map((t) => ({
         theme: t,
-        photos: [...this.photos().filter(p => p.themeId === t.id)]
-          .sort((a, b) => (this.voteCountByPhoto()[b.id] ?? 0) - (this.voteCountByPhoto()[a.id] ?? 0)),
+        photos: [...this.photos().filter((p) => p.themeId === t.id)].sort(
+          (a, b) => (this.voteCountByPhoto()[b.id] ?? 0) - (this.voteCountByPhoto()[a.id] ?? 0),
+        ),
       }))
-      .filter(g => g.photos.length > 0)
+      .filter((g) => g.photos.length > 0),
   );
 
   memberRankingByTheme = computed(() =>
-    this.resultsByTheme().map(g => ({
-      theme:     g.theme,
+    this.resultsByTheme().map((g) => ({
+      theme: g.theme,
       voteCount: this.voteCountByTheme()[g.theme.id] ?? 0,
-      items:     g.photos.map(p => ({
-        id:         p.id,
-        url:        p.url,
+      items: g.photos.map((p) => ({
+        id: p.id,
+        url: p.url,
         authorName: p.nomMembre,
-        votes:      this.voteCountByPhoto()[p.id] ?? 0,
+        votes: this.voteCountByPhoto()[p.id] ?? 0,
       })) as RankingItem[],
-    }))
+    })),
   );
 
   visitorRankingByTheme = computed(() =>
-    this.resultsByTheme().map(g => ({
+    this.resultsByTheme().map((g) => ({
       theme: g.theme,
-      items: g.photos.map(p => ({
-        id:         p.id,
-        url:        p.url,
+      items: g.photos.map((p) => ({
+        id: p.id,
+        url: p.url,
         authorName: p.nomMembre,
-        votes:      this.voteCountByPhoto()[p.id] ?? 0,
+        votes: this.voteCountByPhoto()[p.id] ?? 0,
       })) as RankingItem[],
-    }))
+    })),
   );
 
   onRankingClick(id: string): void {
     for (const g of this.resultsByTheme()) {
-      const photo = g.photos.find(p => p.id === id);
-      if (photo) { this.openLightbox(photo); return; }
+      const photo = g.photos.find((p) => p.id === id);
+      if (photo) {
+        this.openLightbox(photo);
+        return;
+      }
     }
   }
 
   lightboxIndex = signal<number | null>(null);
 
   lightboxPhotoList = computed(() => {
-    if (this.event()?.statut === 'resultats') return this.resultsByTheme().flatMap(g => g.photos);
-    return this.photosByTheme().flatMap(g => g.photos);
+    if (this.event()?.statut === 'resultats') return this.resultsByTheme().flatMap((g) => g.photos);
+    return this.photosByTheme().flatMap((g) => g.photos);
   });
 
   lightboxPhotos = computed((): LightboxPhoto[] => {
     const isVote = this.event()?.statut === 'vote';
     const uid = this.profile()?.uid;
-    return this.lightboxPhotoList().map(p => ({
+    return this.lightboxPhotoList().map((p) => ({
       id: p.id,
       url: p.url,
       nomAuteur: isVote && !this.viewAsAdmin() && p.membreUid !== uid ? '' : p.nomMembre,
@@ -342,8 +407,7 @@ export class OneShotDetail {
     return {
       toggleLike: (photoId, liked) =>
         this.oneShotService.toggleLikePhoto(oneShotId, photoId, uid, liked),
-      getComments: (photoId) =>
-        this.oneShotService.getCommentaires(oneShotId, photoId),
+      getComments: (photoId) => this.oneShotService.getCommentaires(oneShotId, photoId),
       addComment: (photoId, texte, auteurUid, nomAuteur) =>
         this.oneShotService.addCommentaire(oneShotId, photoId, { texte, auteurUid, nomAuteur }),
       deleteComment: (photoId, commentId) =>
@@ -352,24 +416,29 @@ export class OneShotDetail {
         this.oneShotService.toggleLikeCommentaire(oneShotId, photoId, commentId, cUid, liked),
       addReply: (photoId, commentId, texte, auteurUid, nomAuteur) =>
         this.oneShotService.addReply(oneShotId, photoId, commentId, {
-          texte, auteurUid, nomAuteur, createdAt: new Date().toISOString(),
+          texte,
+          auteurUid,
+          nomAuteur,
+          createdAt: new Date().toISOString(),
         }),
       deleteReply: (photoId, commentId, replyId, allReplies) =>
         this.oneShotService.deleteReply(oneShotId, photoId, commentId, replyId, allReplies),
-      canDeletePhoto: (photo) =>
-        this.isCreator() || photo.uploaderUid === uid,
+      canDeletePhoto: (photo) => this.isCreator() || photo.uploaderUid === uid,
       deletePhoto: async (photo) => {
-        const p = this.photos().find(p => p.id === photo.id)!;
+        const p = this.photos().find((p) => p.id === photo.id)!;
         await this.oneShotService.deletePhoto(oneShotId, p);
         const actor = this.profile();
         if (actor && photo.uploaderUid && photo.uploaderUid !== actor.uid) {
           const role = this.isAdmin() ? "L'admin" : 'Le créateur';
           const titre = photo.titre ? ` « ${photo.titre} »` : '';
-          this.notifService.sendToUser(
-            photo.uploaderUid, 'admin',
-            `${role} ${this.userName()} a supprimé votre photo${titre} dans le OneShot « ${this.event()?.titre ?? ''} »`,
-            { sourceNom: this.userName(), sourceUid: actor.uid }
-          ).catch(() => {});
+          this.notifService
+            .sendToUser(
+              photo.uploaderUid,
+              'admin',
+              `${role} ${this.userName()} a supprimé votre photo${titre} dans le OneShot « ${this.event()?.titre ?? ''} »`,
+              { sourceNom: this.userName(), sourceUid: actor.uid },
+            )
+            .catch(() => {});
         }
         this.refresh();
       },
@@ -384,24 +453,31 @@ export class OneShotDetail {
 
   openLightbox(photo: OneShotPhoto, $event?: MouseEvent) {
     $event?.stopPropagation();
-    const idx = this.lightboxPhotoList().findIndex(p => p.id === photo.id);
+    const idx = this.lightboxPhotoList().findIndex((p) => p.id === photo.id);
     if (idx >= 0) this.lightboxIndex.set(idx);
   }
 
-  closeLightbox() { this.lightboxIndex.set(null); }
+  closeLightbox() {
+    this.lightboxIndex.set(null);
+  }
 
   async deleteOneShot() {
     const e = this.event();
     const ok = await this.confirmService.confirm(
-      `Supprimer « ${e?.titre ?? 'ce OneShot'} » et toutes ses photos définitivement ?`
+      `Supprimer « ${e?.titre ?? 'ce OneShot'} » et toutes ses photos définitivement ?`,
     );
     if (!ok) return;
-    await this.oneShotService.deleteOneShot(this.id, e ? {
-      titre: e.titre,
-      nomCreateur: e.nomCreateur,
-      creatorUid: e.creatorUid,
-      photoCouverturePath: e.photoCouverturePath,
-    } : undefined);
+    await this.oneShotService.deleteOneShot(
+      this.id,
+      e
+        ? {
+            titre: e.titre,
+            nomCreateur: e.nomCreateur,
+            creatorUid: e.creatorUid,
+            photoCouverturePath: e.photoCouverturePath,
+          }
+        : undefined,
+    );
     this.router.navigate(['/galeries/sorties']);
   }
 
@@ -410,7 +486,7 @@ export class OneShotDetail {
   async castVote(themeId: string, photoId: string) {
     const profile = this.profile();
     if (!profile || this.voting()) return;
-    const photo = this.photos().find(p => p.id === photoId);
+    const photo = this.photos().find((p) => p.id === photoId);
     if (photo?.membreUid === profile.uid) return;
     this.voting.set(themeId);
     if (this.myVoteByTheme()[themeId] === photoId) {
@@ -432,17 +508,21 @@ export class OneShotDetail {
   }
 
   async retirerInscrit(targetUid: string, targetNom: string) {
-    const e = this.event(); const p = this.profile();
+    const e = this.event();
+    const p = this.profile();
     if (!e || !p) return;
     const ok = await this.confirmService.confirm(`Désinscrire ${targetNom} de ce OneShot ?`);
     if (!ok) return;
     await this.oneShotService.desinscrire(this.id, targetUid);
     if (targetUid !== p.uid) {
-      this.notifService.sendToUser(
-        targetUid, 'oneshot',
-        `${this.userName()} vous a désinscrit(e) du OneShot « ${e.titre} »`,
-        { lien: `/galeries/oneshots/${this.id}`, sourceNom: this.userName(), sourceUid: p.uid }
-      ).catch(() => {});
+      this.notifService
+        .sendToUser(
+          targetUid,
+          'oneshot',
+          `${this.userName()} vous a désinscrit(e) du OneShot « ${e.titre} »`,
+          { lien: `/galeries/oneshots/${this.id}`, sourceNom: this.userName(), sourceUid: p.uid },
+        )
+        .catch(() => {});
     }
     this.refresh();
   }
@@ -450,18 +530,22 @@ export class OneShotDetail {
   async inscrireSelected() {
     const uid = this.selectedMembreUid();
     if (!uid) return;
-    if (this.inscriptions().some(i => i.uid === uid)) return;
-    const e = this.event(); const p = this.profile();
+    if (this.inscriptions().some((i) => i.uid === uid)) return;
+    const e = this.event();
+    const p = this.profile();
     if (!e || !p) return;
-    const membre = this.allMembres().find(m => m.uid === uid);
+    const membre = this.allMembres().find((m) => m.uid === uid);
     if (!membre) return;
     const nom = `${membre.prenom ?? ''} ${membre.nom}`.trim();
     await this.oneShotService.inscrire(this.id, uid, nom);
-    this.notifService.sendToUser(
-      uid, 'oneshot',
-      `${this.userName()} vous a inscrit(e) au OneShot « ${e.titre} »`,
-      { lien: `/galeries/oneshots/${this.id}`, sourceNom: this.userName(), sourceUid: p.uid }
-    ).catch(() => {});
+    this.notifService
+      .sendToUser(
+        uid,
+        'oneshot',
+        `${this.userName()} vous a inscrit(e) au OneShot « ${e.titre} »`,
+        { lien: `/galeries/oneshots/${this.id}`, sourceNom: this.userName(), sourceUid: p.uid },
+      )
+      .catch(() => {});
     this.selectedMembreUid.set('');
     this.addingMembre.set(false);
     this.refresh();
@@ -474,7 +558,11 @@ export class OneShotDetail {
     if (!profile || this.saving()) return;
     this.saving.set(true);
     try {
-      await this.oneShotService.inscrire(this.id, profile.uid, `${profile.prenom ?? ''} ${profile.nom}`.trim());
+      await this.oneShotService.inscrire(
+        this.id,
+        profile.uid,
+        `${profile.prenom ?? ''} ${profile.nom}`.trim(),
+      );
       this.refresh();
     } finally {
       this.saving.set(false);
@@ -495,32 +583,34 @@ export class OneShotDetail {
 
   // ── Édition inline ──────────────────────────────────────────────────
 
-  editMode       = signal(false);
+  editMode = signal(false);
   coverUploading = signal(false);
-  coverDragOver  = signal(false);
+  coverDragOver = signal(false);
 
-  titreValue       = '';
+  titreValue = '';
   descriptionValue = '';
-  dateValue        = '';
-  lieuValue        = '';
+  dateValue = '';
+  lieuValue = '';
   visibiliteValue: 'public' | 'membre' = 'public';
 
   peutEditerDetails = computed(() =>
-    ['preparation', 'inscription', 'fermeture_inscriptions'].includes(this.event()?.statut ?? '')
+    ['preparation', 'inscription', 'fermeture_inscriptions'].includes(this.event()?.statut ?? ''),
   );
 
   startEdit() {
     const e = this.event();
     if (!e) return;
-    this.titreValue       = e.titre;
+    this.titreValue = e.titre;
     this.descriptionValue = e.description ?? '';
-    this.dateValue        = e.date ?? '';
-    this.lieuValue        = e.lieu ?? '';
-    this.visibiliteValue  = e.visibilite ?? 'public';
+    this.dateValue = e.date ?? '';
+    this.lieuValue = e.lieu ?? '';
+    this.visibiliteValue = e.visibilite ?? 'public';
     this.editMode.set(true);
   }
 
-  cancelEdit() { this.editMode.set(false); }
+  cancelEdit() {
+    this.editMode.set(false);
+  }
 
   async saveEvent() {
     if (this.saving()) return;
@@ -586,10 +676,10 @@ export class OneShotDetail {
 
   // Thèmes (CRUD)
 
-  newThemeNom     = '';
-  editingThemeId  = signal<string | null>(null);
+  newThemeNom = '';
+  editingThemeId = signal<string | null>(null);
   editingThemeNom = '';
-  savingTheme     = signal(false);
+  savingTheme = signal(false);
 
   async addTheme() {
     const nom = this.newThemeNom.trim();
@@ -609,7 +699,9 @@ export class OneShotDetail {
     this.editingThemeNom = theme.nom;
   }
 
-  cancelThemeEdit() { this.editingThemeId.set(null); }
+  cancelThemeEdit() {
+    this.editingThemeId.set(null);
+  }
 
   async saveThemeEdit(themeId: string) {
     const nom = this.editingThemeNom.trim();
@@ -625,7 +717,9 @@ export class OneShotDetail {
   }
 
   async deleteTheme(theme: OneShotTheme) {
-    const ok = await this.confirmService.confirm(`Supprimer le thème « ${theme.nom} » définitivement ?`);
+    const ok = await this.confirmService.confirm(
+      `Supprimer le thème « ${theme.nom} » définitivement ?`,
+    );
     if (!ok) return;
     await this.oneShotService.deleteTheme(this.id, theme.id);
     this.refresh();
@@ -633,7 +727,10 @@ export class OneShotDetail {
 
   formatDate(date: string): string {
     return new Date(date + 'T12:00:00').toLocaleDateString('fr-FR', {
-      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
     });
   }
 }

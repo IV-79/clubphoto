@@ -1,4 +1,14 @@
-import { Component, inject, signal, computed, OnInit, ElementRef, ViewChild, HostListener } from '@angular/core';
+import {
+  Component,
+  inject,
+  signal,
+  computed,
+  OnInit,
+  ElementRef,
+  ViewChild,
+  HostListener,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { PhotoService } from '../../../services/photo.service';
@@ -18,7 +28,8 @@ import { ImgRetryDirective } from '../../../directives/img-retry.directive';
   selector: 'app-portfolio',
   imports: [FormsModule, PhotoLightbox, ImgRetryDirective],
   templateUrl: './portfolio.html',
-  styleUrl: './portfolio.css'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './portfolio.css',
 })
 export class MembrePortfolio implements OnInit {
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
@@ -34,16 +45,18 @@ export class MembrePortfolio implements OnInit {
   private readonly uid = computed(() => this.profile()?.uid ?? null);
 
   private myPhotos$ = toObservable(this.uid).pipe(
-    switchMap(uid => uid ? this.photoService.getMyPhotos(uid) : of([]))
+    switchMap((uid) => (uid ? this.photoService.getMyPhotos(uid) : of([]))),
   );
   photos = toSignal(this.myPhotos$, { initialValue: [] as Photo[] });
-  photoCount   = computed(() => this.photos().length);
-  publicCount  = computed(() => this.photos().filter(p => p.visibilite === 'public').length);
-  membreCount  = computed(() => this.photos().filter(p => p.visibilite === 'membre').length);
+  photoCount = computed(() => this.photos().length);
+  publicCount = computed(() => this.photos().filter((p) => p.visibilite === 'public').length);
+  membreCount = computed(() => this.photos().filter((p) => p.visibilite === 'membre').length);
 
   private categoriesRaw = toSignal(this.configService.getCategories(), { initialValue: [] });
   categories = computed(() =>
-    [...this.categoriesRaw()].sort((a, b) => a.label.localeCompare(b.label, 'fr', { sensitivity: 'base' }))
+    [...this.categoriesRaw()].sort((a, b) =>
+      a.label.localeCompare(b.label, 'fr', { sensitivity: 'base' }),
+    ),
   );
 
   // --- Upload ---
@@ -68,10 +81,10 @@ export class MembrePortfolio implements OnInit {
   editSaving = signal(false);
 
   // --- Multi-select ---
-  selectMode   = signal(false);
-  selectedIds  = signal(new Set<string>());
+  selectMode = signal(false);
+  selectedIds = signal(new Set<string>());
   selectedCount = computed(() => this.selectedIds().size);
-  deleting     = signal(false);
+  deleting = signal(false);
 
   toggleSelectMode() {
     if (this.selectMode()) {
@@ -92,13 +105,13 @@ export class MembrePortfolio implements OnInit {
     const count = this.selectedCount();
     if (!count || this.deleting()) return;
     const ok = await this.confirmService.confirm(
-      `Supprimer ${count} photo${count > 1 ? 's' : ''} définitivement ?`
+      `Supprimer ${count} photo${count > 1 ? 's' : ''} définitivement ?`,
     );
     if (!ok) return;
     this.deleting.set(true);
     const ids = this.selectedIds();
-    const toDelete = this.photos().filter(p => ids.has(p.id));
-    await Promise.all(toDelete.map(p => this.photoService.deletePhoto(p)));
+    const toDelete = this.photos().filter((p) => ids.has(p.id));
+    await Promise.all(toDelete.map((p) => this.photoService.deletePhoto(p)));
     this.deleting.set(false);
     this.toggleSelectMode();
   }
@@ -115,7 +128,7 @@ export class MembrePortfolio implements OnInit {
   });
 
   lightboxPhotos = computed((): LightboxPhoto[] =>
-    this.photos().map(p => ({
+    this.photos().map((p) => ({
       id: p.id,
       url: p.url,
       titre: p.titre,
@@ -125,16 +138,14 @@ export class MembrePortfolio implements OnInit {
       likes: p.likes ?? [],
       uploadedAt: p.dateUpload,
       exif: p.exif,
-    }))
+    })),
   );
 
   lightboxCallbacks = computed((): PhotoLightboxCallbacks => {
     const uid = this.profile()?.uid ?? '';
     return {
-      toggleLike: (photoId, liked) =>
-        this.photoService.toggleLikePhoto(photoId, uid, liked),
-      getComments: (photoId) =>
-        this.photoService.getCommentaires(photoId),
+      toggleLike: (photoId, liked) => this.photoService.toggleLikePhoto(photoId, uid, liked),
+      getComments: (photoId) => this.photoService.getCommentaires(photoId),
       addComment: (photoId, texte, auteurUid, nomAuteur) =>
         this.photoService.addCommentaire(photoId, { texte, auteurUid, nomAuteur }),
       deleteComment: (photoId, commentId) =>
@@ -143,12 +154,15 @@ export class MembrePortfolio implements OnInit {
         this.photoService.toggleLikeCommentaire(photoId, commentId, cUid, liked),
       addReply: (photoId, commentId, texte, auteurUid, nomAuteur) =>
         this.photoService.addReply(photoId, commentId, {
-          texte, auteurUid, nomAuteur, createdAt: new Date().toISOString(),
+          texte,
+          auteurUid,
+          nomAuteur,
+          createdAt: new Date().toISOString(),
         }),
       deleteReply: (photoId, commentId, replyId, allReplies) =>
         this.photoService.deleteReply(photoId, commentId, replyId, allReplies),
       deletePhoto: async (photo) => {
-        const p = this.photos().find(x => x.id === photo.id);
+        const p = this.photos().find((x) => x.id === photo.id);
         if (!p) return;
         const ok = await this.confirmService.confirm('Supprimer cette photo définitivement ?');
         if (ok) await this.photoService.deletePhoto(p);
@@ -161,15 +175,29 @@ export class MembrePortfolio implements OnInit {
   @HostListener('document:keydown', ['$event'])
   onKeydown(e: KeyboardEvent) {
     if (e.key === 'Escape') {
-      if (this.lightboxIndex() !== null) { this.closeLightbox(); return; }
-      if (this.selectMode()) { this.toggleSelectMode(); return; }
-      if (this.editPhoto()) { this.closeEdit(); return; }
-      if (this.showModal()) { this.closeModal(); return; }
+      if (this.lightboxIndex() !== null) {
+        this.closeLightbox();
+        return;
+      }
+      if (this.selectMode()) {
+        this.toggleSelectMode();
+        return;
+      }
+      if (this.editPhoto()) {
+        this.closeEdit();
+        return;
+      }
+      if (this.showModal()) {
+        this.closeModal();
+        return;
+      }
     }
   }
 
   // --- Upload ---
-  openUpload() { this.showModal.set(true); }
+  openUpload() {
+    this.showModal.set(true);
+  }
 
   closeModal() {
     if (this.uploading()) return;
@@ -195,7 +223,7 @@ export class MembrePortfolio implements OnInit {
     this.selectedFile.set(compressed);
     this.uploadTitre = '';
     const reader = new FileReader();
-    reader.onload = e => this.previewUrl.set(e.target?.result as string);
+    reader.onload = (e) => this.previewUrl.set(e.target?.result as string);
     reader.readAsDataURL(compressed);
   }
 
@@ -216,21 +244,29 @@ export class MembrePortfolio implements OnInit {
     const file = this.selectedFile();
     const profile = this.profile();
     if (!file || !profile) return;
-    if (!this.uploadTitre.trim()) { this.uploadTitreError.set(true); return; }
+    if (!this.uploadTitre.trim()) {
+      this.uploadTitreError.set(true);
+      return;
+    }
     this.uploading.set(true);
-    this.photoService.uploadPhoto(file, profile.uid, profile.nom, {
-      titre: this.uploadTitre,
-      description: this.uploadDescription,
-      visibilite: this.uploadVisibilite,
-      categorie: this.uploadCategorie || undefined,
-      exif: this.pendingExif,
-    }).subscribe({
-      next: state => {
-        this.uploadProgress.set(state.progress);
-        if (state.state === 'done') { this.uploading.set(false); this.closeModal(); }
-      },
-      error: () => this.uploading.set(false)
-    });
+    this.photoService
+      .uploadPhoto(file, profile.uid, profile.nom, {
+        titre: this.uploadTitre,
+        description: this.uploadDescription,
+        visibilite: this.uploadVisibilite,
+        categorie: this.uploadCategorie || undefined,
+        exif: this.pendingExif,
+      })
+      .subscribe({
+        next: (state) => {
+          this.uploadProgress.set(state.progress);
+          if (state.state === 'done') {
+            this.uploading.set(false);
+            this.closeModal();
+          }
+        },
+        error: () => this.uploading.set(false),
+      });
   }
 
   // --- Edit ---
@@ -271,17 +307,25 @@ export class MembrePortfolio implements OnInit {
   }
 
   // --- Lightbox ---
-  openLightbox(index: number) { this.lightboxIndex.set(index); }
-  closeLightbox() { this.lightboxIndex.set(null); }
+  openLightbox(index: number) {
+    this.lightboxIndex.set(index);
+  }
+  closeLightbox() {
+    this.lightboxIndex.set(null);
+  }
 
   // --- Helpers ---
   getCategorieLabel(val?: Photo['categorie']): string {
-    const cat = this.categories().find(c => c.value === val);
+    const cat = this.categories().find((c) => c.value === val);
     return cat?.label ?? '';
   }
 
   formatDateCapture(iso: string): string {
-    return new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+    return new Date(iso).toLocaleDateString('fr-FR', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
   }
 
   visibiliteLabel(v: PhotoVisibilite): string {
@@ -289,6 +333,8 @@ export class MembrePortfolio implements OnInit {
   }
 
   visibiliteTitle(v: PhotoVisibilite): string {
-    return v === 'public' ? 'Visible par tous — cliquer pour passer en membres' : 'Visible par les membres — cliquer pour passer en public';
+    return v === 'public'
+      ? 'Visible par tous — cliquer pour passer en membres'
+      : 'Visible par les membres — cliquer pour passer en public';
   }
 }

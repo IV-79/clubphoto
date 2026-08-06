@@ -4,6 +4,19 @@
 
 ## En cours (alpha)
 
+### Migration Firebase natif + Angular 22 (2026-08-06)
+
+Suppression complète de `@angular/fire` (bloqué en `21.0.0-rc.0`) au profit du SDK Firebase natif, puis montée en version Angular 21 → 22.
+
+- **SDK Firebase natif** : `src/app/utils/firebase.ts` — singletons `db`, `auth`, `storage` + helpers `collectionStream<T>()` et `docStream<T>()` (wrappers `onSnapshot` → Observable, remplacent `collectionData`/`docData` d'AngularFire).
+- **Boilerplate éliminé** : 355 occurrences de `runInInjectionContext` supprimées sur 14 services. Les fonctions SDK natif n'ont jamais besoin du contexte d'injection Angular.
+- **`AuthService`** : `authState(auth)` → `new Observable(sub => onAuthStateChanged(auth, ...))` + `docStream` pour le profil.
+- **Guards** : `inject(Auth)` supprimé — `auth.authStateReady()` est une API native Firebase identique.
+- **`@angular/fire` supprimé** du `package.json`.
+- **Angular 22.1.0** (`ng update @angular/core@22 @angular/cli@22`) + TypeScript 6.0.3.
+- **PrimeNG 22** mis à jour (peer dep Angular 22 requis).
+- **Migration automatique** : `ChangeDetectionStrategy.Eager` ajouté à tous les composants (55 fichiers) par le schematic Angular 22.
+
 ### Exposition photo — nouvelle fonctionnalité (2026-08-06)
 
 Nouveau type d'activité **Exposition** avec une machine à 5 statuts : Idéation → Nettoyage → Votation → Soumission → Clôturé.

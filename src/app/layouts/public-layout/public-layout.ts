@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { RouterOutlet, RouterLink } from '@angular/router';
 import { Header } from '../../components/header/header';
 
@@ -21,24 +21,34 @@ import { Header } from '../../components/header/header';
       </p>
     </footer>
   `,
-  styles: [`
-    .page-content { min-height: calc(100vh - 122px); padding-top: 122px; background: var(--bg-page); }
-    .site-footer {
-      background: #1a1a1a;
-      color: rgba(255,255,255,0.65);
-      text-align: center;
-      padding: 24px;
-      font-size: 0.8rem;
-      letter-spacing: 0.5px;
-      border-top: 3px solid #cc0000;
-    }
-    .site-footer a {
-      color: rgba(255,255,255,0.85);
-      text-decoration: underline;
-      margin: 0 8px;
-    }
-    .site-footer a:hover { color: white; text-decoration: none; }
-  `]
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styles: [
+    `
+      .page-content {
+        min-height: calc(100vh - 122px);
+        padding-top: 122px;
+        background: var(--bg-page);
+      }
+      .site-footer {
+        background: #1a1a1a;
+        color: rgba(255, 255, 255, 0.65);
+        text-align: center;
+        padding: 24px;
+        font-size: 0.8rem;
+        letter-spacing: 0.5px;
+        border-top: 3px solid #cc0000;
+      }
+      .site-footer a {
+        color: rgba(255, 255, 255, 0.85);
+        text-decoration: underline;
+        margin: 0 8px;
+      }
+      .site-footer a:hover {
+        color: white;
+        text-decoration: none;
+      }
+    `,
+  ],
 })
 export class PublicLayout {
   year = new Date().getFullYear();

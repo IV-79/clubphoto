@@ -1,4 +1,11 @@
-import { Component, inject, signal, OnInit, ChangeDetectorRef } from '@angular/core';
+import {
+  Component,
+  inject,
+  signal,
+  OnInit,
+  ChangeDetectorRef,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Location } from '@angular/common';
@@ -16,15 +23,26 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ArticleService } from '../../../services/article.service';
 import { AuthService } from '../../../services/auth.service';
 import { ConfirmService } from '../../../services/confirm.service';
-import { Article, ArticleType, ArticleStatut, ArticlePortee, ARTICLE_TYPES } from '../../../models/article.model';
+import {
+  Article,
+  ArticleType,
+  ArticleStatut,
+  ArticlePortee,
+  ARTICLE_TYPES,
+} from '../../../models/article.model';
 
 @Component({
   selector: 'app-article-form',
   imports: [
     FormsModule,
-    MatFormFieldModule, MatInputModule, MatSelectModule,
-    MatCheckboxModule, MatButtonModule, MatIconModule,
-    MatProgressBarModule, MatDatepickerModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatCheckboxModule,
+    MatButtonModule,
+    MatIconModule,
+    MatProgressBarModule,
+    MatDatepickerModule,
   ],
   template: `
     <div class="form-wrap">
@@ -34,7 +52,13 @@ import { Article, ArticleType, ArticleStatut, ArticlePortee, ARTICLE_TYPES } fro
         </button>
         <h2 class="form-title">{{ articleId() ? "Modifier l'article" : 'Nouvel article' }}</h2>
         @if (articleId()) {
-          <button mat-icon-button color="warn" (click)="deleteArticle()" [disabled]="deleteLoading()" title="Supprimer">
+          <button
+            mat-icon-button
+            color="warn"
+            (click)="deleteArticle()"
+            [disabled]="deleteLoading()"
+            title="Supprimer"
+          >
             <mat-icon>delete</mat-icon>
           </button>
         }
@@ -45,22 +69,37 @@ import { Article, ArticleType, ArticleStatut, ArticlePortee, ARTICLE_TYPES } fro
         @if (previewUrl() || couvertureUrl()) {
           <div class="cover-preview">
             <img [src]="previewUrl() || couvertureUrl()" alt="Couverture" />
-            <button class="remove-cover" (click)="removeCouverture()" mat-icon-button color="warn" title="Supprimer la couverture">
+            <button
+              class="remove-cover"
+              (click)="removeCouverture()"
+              mat-icon-button
+              color="warn"
+              title="Supprimer la couverture"
+            >
               <mat-icon>delete</mat-icon>
             </button>
           </div>
         } @else {
-          <label class="cover-drop" for="cover-input"
+          <label
+            class="cover-drop"
+            for="cover-input"
             [class.dragging]="isDragging()"
             (dragover)="onDragOver($event)"
             (dragleave)="onDragLeave()"
-            (drop)="onDrop($event)">
+            (drop)="onDrop($event)"
+          >
             <mat-icon>add_photo_alternate</mat-icon>
             <span>Glisser une image ici ou cliquer pour choisir</span>
             <span class="cover-hint">Compressé automatiquement pour le site</span>
           </label>
         }
-        <input id="cover-input" type="file" accept="image/*" style="display:none" (change)="onFileSelected($event)" />
+        <input
+          id="cover-input"
+          type="file"
+          accept="image/*"
+          style="display:none"
+          (change)="onFileSelected($event)"
+        />
         @if (uploadPct() > 0 && uploadPct() < 100) {
           <mat-progress-bar mode="determinate" [value]="uploadPct()" />
         }
@@ -116,8 +155,12 @@ import { Article, ArticleType, ArticleStatut, ArticlePortee, ARTICLE_TYPES } fro
 
         <mat-form-field appearance="outline" class="full">
           <mat-label>Description</mat-label>
-          <textarea matInput [(ngModel)]="description" rows="6"
-            placeholder="Contenu de l'article..."></textarea>
+          <textarea
+            matInput
+            [(ngModel)]="description"
+            rows="6"
+            placeholder="Contenu de l'article..."
+          ></textarea>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full">
@@ -144,8 +187,12 @@ import { Article, ArticleType, ArticleStatut, ArticlePortee, ARTICLE_TYPES } fro
 
       <div class="actions">
         <button mat-button (click)="goBack()">Annuler</button>
-        <button mat-raised-button color="primary" (click)="save()"
-          [disabled]="saving() || uploading() || !titre.trim()">
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="save()"
+          [disabled]="saving() || uploading() || !titre.trim()"
+        >
           @if (saving() || uploading()) {
             <mat-icon>hourglass_empty</mat-icon>
           } @else {
@@ -156,103 +203,184 @@ import { Article, ArticleType, ArticleStatut, ArticlePortee, ARTICLE_TYPES } fro
       </div>
     </div>
   `,
-  styles: [`
-    .form-wrap { max-width: 760px; margin: 0 auto; padding: 24px; }
-    .form-header { display: flex; align-items: center; gap: 8px; margin-bottom: 28px; }
-    .form-title { margin: 0; font-size: 1.3rem; font-weight: 600; flex: 1; }
-    .cover-section { margin-bottom: 24px; }
-    .cover-preview {
-      position: relative; aspect-ratio: 16/9; border-radius: 10px;
-      overflow: hidden; max-width: 500px; background: var(--bg-surface-raised);
-    }
-    .cover-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .remove-cover { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,.5); }
-    .cover-drop {
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 8px; border: 2px dashed var(--border-strong); border-radius: 10px; padding: 40px;
-      cursor: pointer; color: var(--text-muted); max-width: 500px;
-      transition: border-color .2s, color .2s, background .2s;
-    }
-    .cover-drop:hover, .cover-drop.dragging {
-      border-color: #1976d2; color: #1976d2; background: rgba(25,118,210,0.08);
-    }
-    .cover-drop mat-icon { font-size: 40px; width: 40px; height: 40px; }
-    .cover-hint { font-size: 0.75rem; color: var(--text-muted); }
-    mat-progress-bar { margin-top: 8px; max-width: 500px; }
-    .fields { display: flex; flex-direction: column; gap: 4px; }
-    .full { width: 100%; }
-    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .checkbox-row { padding: 8px 0 16px; }
-    .actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 8px; }
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styles: [
+    `
+      .form-wrap {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+      .form-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 28px;
+      }
+      .form-title {
+        margin: 0;
+        font-size: 1.3rem;
+        font-weight: 600;
+        flex: 1;
+      }
+      .cover-section {
+        margin-bottom: 24px;
+      }
+      .cover-preview {
+        position: relative;
+        aspect-ratio: 16/9;
+        border-radius: 10px;
+        overflow: hidden;
+        max-width: 500px;
+        background: var(--bg-surface-raised);
+      }
+      .cover-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+      .remove-cover {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: rgba(0, 0, 0, 0.5);
+      }
+      .cover-drop {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        border: 2px dashed var(--border-strong);
+        border-radius: 10px;
+        padding: 40px;
+        cursor: pointer;
+        color: var(--text-muted);
+        max-width: 500px;
+        transition:
+          border-color 0.2s,
+          color 0.2s,
+          background 0.2s;
+      }
+      .cover-drop:hover,
+      .cover-drop.dragging {
+        border-color: #1976d2;
+        color: #1976d2;
+        background: rgba(25, 118, 210, 0.08);
+      }
+      .cover-drop mat-icon {
+        font-size: 40px;
+        width: 40px;
+        height: 40px;
+      }
+      .cover-hint {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+      }
+      mat-progress-bar {
+        margin-top: 8px;
+        max-width: 500px;
+      }
+      .fields {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .full {
+        width: 100%;
+      }
+      .row-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      .checkbox-row {
+        padding: 8px 0 16px;
+      }
+      .actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        margin-top: 8px;
+      }
 
-    @media (max-width: 560px) { .row-2 { grid-template-columns: 1fr; } }
-  `]
+      @media (max-width: 560px) {
+        .row-2 {
+          grid-template-columns: 1fr;
+        }
+      }
+    `,
+  ],
 })
 export class ArticleForm implements OnInit {
-  private route          = inject(ActivatedRoute);
-  private router         = inject(Router);
-  private location       = inject(Location);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private location = inject(Location);
   private articleService = inject(ArticleService);
-  private authService    = inject(AuthService);
-  private snackBar       = inject(MatSnackBar);
+  private authService = inject(AuthService);
+  private snackBar = inject(MatSnackBar);
   private confirmService = inject(ConfirmService);
 
   types = ARTICLE_TYPES;
 
-  articleId     = signal<string | null>(null);
-  saving        = signal(false);
-  uploading     = signal(false);
-  uploadPct     = signal(0);
+  articleId = signal<string | null>(null);
+  saving = signal(false);
+  uploading = signal(false);
+  uploadPct = signal(0);
   deleteLoading = signal(false);
-  isDragging    = signal(false);
+  isDragging = signal(false);
 
-  titre          = '';
-  type: ArticleType   = 'info';
+  titre = '';
+  type: ArticleType = 'info';
   statut: ArticleStatut = 'brouillon';
   portee: ArticlePortee = 'public';
-  dateObj: Date | null         = null;
+  dateObj: Date | null = null;
   dateExpirationObj: Date | null = null;
-  lieu        = '';
+  lieu = '';
   description = '';
   lienExterne = '';
-  epingle     = false;
+  epingle = false;
 
-  couvertureUrl         = signal('');
+  couvertureUrl = signal('');
   couvertureStoragePath = signal('');
-  pendingFile           = signal<File | null>(null);
-  previewUrl            = signal('');
-  removePendingCover    = signal(false);
+  pendingFile = signal<File | null>(null);
+  previewUrl = signal('');
+  removePendingCover = signal(false);
 
   private profile = toSignal(this.authService.currentUserProfile$);
-  private cdRef   = inject(ChangeDetectorRef);
+  private cdRef = inject(ChangeDetectorRef);
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) return;
     this.articleId.set(id);
-    this.articleService.getAllArticles().pipe(take(1)).subscribe(list => {
-      const a = list.find(x => x.id === id);
-      if (!a) return;
-      this.titre             = a.titre;
-      this.type              = a.type;
-      this.statut            = a.statut;
-      this.portee            = a.portee;
-      this.dateObj           = a.date ? new Date(a.date) : null;
-      this.dateExpirationObj = a.dateExpiration ? new Date(a.dateExpiration) : null;
-      this.lieu              = a.lieu ?? '';
-      this.description       = a.description ?? '';
-      this.lienExterne       = a.lienExterne ?? '';
-      this.epingle           = a.epingle;
-      this.couvertureUrl.set(a.couvertureUrl ?? '');
-      this.couvertureStoragePath.set(a.couvertureStoragePath ?? '');
-      this.cdRef.detectChanges();
-    });
+    this.articleService
+      .getAllArticles()
+      .pipe(take(1))
+      .subscribe((list) => {
+        const a = list.find((x) => x.id === id);
+        if (!a) return;
+        this.titre = a.titre;
+        this.type = a.type;
+        this.statut = a.statut;
+        this.portee = a.portee;
+        this.dateObj = a.date ? new Date(a.date) : null;
+        this.dateExpirationObj = a.dateExpiration ? new Date(a.dateExpiration) : null;
+        this.lieu = a.lieu ?? '';
+        this.description = a.description ?? '';
+        this.lienExterne = a.lienExterne ?? '';
+        this.epingle = a.epingle;
+        this.couvertureUrl.set(a.couvertureUrl ?? '');
+        this.couvertureStoragePath.set(a.couvertureStoragePath ?? '');
+        this.cdRef.detectChanges();
+      });
   }
 
   private handleFile(file: File) {
     this.pendingFile.set(file);
     const reader = new FileReader();
-    reader.onload = e => this.previewUrl.set(e.target!.result as string);
+    reader.onload = (e) => this.previewUrl.set(e.target!.result as string);
     reader.readAsDataURL(file);
   }
 
@@ -277,7 +405,9 @@ export class ArticleForm implements OnInit {
     if (file?.type.startsWith('image/')) this.handleFile(file);
   }
 
-  goBack() { this.location.back(); }
+  goBack() {
+    this.location.back();
+  }
 
   private dateToString(d: Date | null): string | undefined {
     if (!d) return undefined;
@@ -290,18 +420,18 @@ export class ArticleForm implements OnInit {
     this.saving.set(true);
     try {
       const fields = {
-        titre:          this.titre.trim(),
-        type:           this.type,
-        statut:         this.statut,
-        portee:         this.portee,
-        date:           this.dateToString(this.dateObj),
-        lieu:           this.lieu.trim() || undefined,
-        description:    this.description.trim() || undefined,
-        lienExterne:    this.lienExterne.trim() || undefined,
+        titre: this.titre.trim(),
+        type: this.type,
+        statut: this.statut,
+        portee: this.portee,
+        date: this.dateToString(this.dateObj),
+        lieu: this.lieu.trim() || undefined,
+        description: this.description.trim() || undefined,
+        lienExterne: this.lienExterne.trim() || undefined,
         dateExpiration: this.dateToString(this.dateExpirationObj),
-        epingle:        this.epingle,
-        auteurUid:      profile.uid,
-        auteurNom:      `${profile.prenom ?? ''} ${profile.nom}`.trim(),
+        epingle: this.epingle,
+        auteurUid: profile.uid,
+        auteurNom: `${profile.prenom ?? ''} ${profile.nom}`.trim(),
       };
 
       let id = this.articleId();
@@ -319,7 +449,10 @@ export class ArticleForm implements OnInit {
         const oldPath = this.couvertureStoragePath();
         if (oldPath) {
           await this.articleService.deleteCouverture(oldPath);
-          await this.articleService.updateArticle(id!, { couvertureUrl: undefined, couvertureStoragePath: undefined });
+          await this.articleService.updateArticle(id!, {
+            couvertureUrl: undefined,
+            couvertureStoragePath: undefined,
+          });
           this.couvertureStoragePath.set('');
         }
         this.removePendingCover.set(false);
@@ -332,9 +465,14 @@ export class ArticleForm implements OnInit {
           await this.articleService.deleteCouverture(this.couvertureStoragePath());
         }
         const { url, storagePath } = await this.articleService.uploadCouverture(
-          id!, this.pendingFile()!, pct => this.uploadPct.set(pct)
+          id!,
+          this.pendingFile()!,
+          (pct) => this.uploadPct.set(pct),
         );
-        await this.articleService.updateArticle(id!, { couvertureUrl: url, couvertureStoragePath: storagePath });
+        await this.articleService.updateArticle(id!, {
+          couvertureUrl: url,
+          couvertureStoragePath: storagePath,
+        });
         this.pendingFile.set(null);
         this.previewUrl.set('');
         this.couvertureUrl.set(url);
@@ -343,7 +481,9 @@ export class ArticleForm implements OnInit {
         this.uploading.set(false);
       }
 
-      this.snackBar.open(this.articleId() ? 'Article mis à jour' : 'Article créé', '', { duration: 3000 });
+      this.snackBar.open(this.articleId() ? 'Article mis à jour' : 'Article créé', '', {
+        duration: 3000,
+      });
       this.location.back();
     } catch (e) {
       console.error(e);
@@ -361,7 +501,7 @@ export class ArticleForm implements OnInit {
     try {
       await this.articleService.deleteArticle(
         this.articleId()!,
-        this.couvertureStoragePath() || undefined
+        this.couvertureStoragePath() || undefined,
       );
       this.location.back();
     } catch {

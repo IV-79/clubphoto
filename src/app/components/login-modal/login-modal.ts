@@ -1,4 +1,4 @@
-import { Component, inject, signal, HostListener } from '@angular/core';
+import { Component, inject, signal, HostListener, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Router } from '@angular/router';
@@ -11,6 +11,7 @@ import { SuspenduDialogComponent } from '../../shared/suspendu-dialog/suspendu-d
   selector: 'app-login-modal',
   imports: [FormsModule, RouterLink],
   templateUrl: './login-modal.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './login-modal.css',
 })
 export class LoginModalComponent {
@@ -87,7 +88,7 @@ export class LoginModalComponent {
       this.resetMessage.set('Email envoyé ! Vérifiez votre boîte mail (et vos spams).');
       this.resetSuccess.set(true);
     } catch {
-      this.resetMessage.set('Adresse introuvable ou erreur. Vérifiez l\'email saisi.');
+      this.resetMessage.set("Adresse introuvable ou erreur. Vérifiez l'email saisi.");
       this.resetSuccess.set(false);
     } finally {
       this.resetLoading.set(false);

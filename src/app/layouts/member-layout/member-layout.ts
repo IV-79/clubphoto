@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { Header } from '../../components/header/header';
 
@@ -11,12 +11,15 @@ import { Header } from '../../components/header/header';
       <router-outlet />
     </main>
   `,
-  styles: [`
-    .member-content {
-      min-height: calc(100vh - 122px);
-      background: var(--bg-page);
-      padding-top: 122px;
-    }
-  `]
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styles: [
+    `
+      .member-content {
+        min-height: calc(100vh - 122px);
+        background: var(--bg-page);
+        padding-top: 122px;
+      }
+    `,
+  ],
 })
 export class MemberLayout {}

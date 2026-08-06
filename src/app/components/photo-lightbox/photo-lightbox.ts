@@ -1,6 +1,16 @@
 import {
-  Component, signal, computed, effect,
-  input, output, HostListener, OnInit, OnDestroy, ElementRef, inject
+  Component,
+  signal,
+  computed,
+  effect,
+  input,
+  output,
+  HostListener,
+  OnInit,
+  OnDestroy,
+  ElementRef,
+  inject,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
@@ -13,26 +23,27 @@ import { ImgRetryDirective } from '../../directives/img-retry.directive';
   selector: 'app-photo-lightbox',
   imports: [FormsModule, ImgRetryDirective],
   templateUrl: './photo-lightbox.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './photo-lightbox.css',
 })
 export class PhotoLightbox implements OnInit, OnDestroy {
-  private el            = inject(ElementRef);
+  private el = inject(ElementRef);
   private confirmService = inject(ConfirmService);
-  photos      = input.required<LightboxPhoto[]>();
-  startIndex  = input<number>(0);
-  userUid     = input<string | null>(null);
-  userName    = input<string>('');
+  photos = input.required<LightboxPhoto[]>();
+  startIndex = input<number>(0);
+  userUid = input<string | null>(null);
+  userName = input<string>('');
   canInteract = input<boolean>(false);
-  isAdmin     = input<boolean>(false);
-  anonyme     = input<boolean>(false);
-  hideLikes   = input<boolean>(false);
-  callbacks   = input.required<PhotoLightboxCallbacks>();
+  isAdmin = input<boolean>(false);
+  anonyme = input<boolean>(false);
+  hideLikes = input<boolean>(false);
+  callbacks = input.required<PhotoLightboxCallbacks>();
 
   closed = output<void>();
 
-  currentIdx   = signal(0);
-  fullscreen   = signal(false);
-  imgLoading   = signal(false);
+  currentIdx = signal(0);
+  fullscreen = signal(false);
+  imgLoading = signal(false);
 
   ngOnInit() {
     this.currentIdx.set(this.startIndex());
@@ -64,17 +75,19 @@ export class PhotoLightbox implements OnInit, OnDestroy {
   private commentRefresh = signal(0);
 
   commentaires = toSignal(
-    toObservable(computed(() => ({ photoId: this.currentPhotoId(), r: this.commentRefresh() }))).pipe(
+    toObservable(
+      computed(() => ({ photoId: this.currentPhotoId(), r: this.commentRefresh() })),
+    ).pipe(
       switchMap(({ photoId }) => {
         if (!photoId) return of([] as Commentaire[]);
         return this.callbacks().getComments(photoId);
-      })
+      }),
     ),
-    { initialValue: [] as Commentaire[] }
+    { initialValue: [] as Commentaire[] },
   );
 
   newComment = '';
-  newReply   = '';
+  newReply = '';
   submitting = signal(false);
   replyingTo = signal<string | null>(null);
 
@@ -99,14 +112,20 @@ export class PhotoLightbox implements OnInit, OnDestroy {
 
   closeFullscreen() {
     if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
-    if (this.anonyme()) { this.closed.emit(); return; }
+    if (this.anonyme()) {
+      this.closed.emit();
+      return;
+    }
     this.fullscreen.set(false);
   }
 
   @HostListener('document:fullscreenchange')
   onFullscreenChange() {
     if (!document.fullscreenElement && this.fullscreen()) {
-      if (this.anonyme()) { this.closed.emit(); return; }
+      if (this.anonyme()) {
+        this.closed.emit();
+        return;
+      }
       this.fullscreen.set(false);
     }
   }
@@ -115,7 +134,10 @@ export class PhotoLightbox implements OnInit, OnDestroy {
   onKey(e: KeyboardEvent) {
     if ((e.target as HTMLElement).tagName === 'TEXTAREA') return;
     if (e.key === 'Escape') {
-      if (this.fullscreen()) { this.closeFullscreen(); return; }
+      if (this.fullscreen()) {
+        this.closeFullscreen();
+        return;
+      }
       this.closed.emit();
     }
     if (e.key === 'ArrowLeft') this.prev();
@@ -144,7 +166,7 @@ export class PhotoLightbox implements OnInit, OnDestroy {
     try {
       await this.callbacks().addComment(photo.id, texte, uid, this.userName() || 'Membre');
       this.newComment = '';
-      this.commentRefresh.update(n => n + 1);
+      this.commentRefresh.update((n) => n + 1);
     } finally {
       this.submitting.set(false);
     }
@@ -156,7 +178,7 @@ export class PhotoLightbox implements OnInit, OnDestroy {
     const ok = await this.confirmService.confirm('Supprimer ce commentaire ?');
     if (!ok) return;
     await this.callbacks().deleteComment(photo.id, commentId);
-    this.commentRefresh.update(n => n + 1);
+    this.commentRefresh.update((n) => n + 1);
   }
 
   isLikedComment(c: Commentaire): boolean {
@@ -169,7 +191,7 @@ export class PhotoLightbox implements OnInit, OnDestroy {
     const photo = this.currentPhoto();
     if (!uid || !photo) return;
     await this.callbacks().toggleCommentLike(photo.id, c.id, uid, this.isLikedComment(c));
-    this.commentRefresh.update(n => n + 1);
+    this.commentRefresh.update((n) => n + 1);
   }
 
   private touchStartX = 0;
@@ -199,12 +221,10 @@ export class PhotoLightbox implements OnInit, OnDestroy {
     const uid = this.userUid();
     const photo = this.currentPhoto();
     if (!texte || !uid || !photo) return;
-    await this.callbacks().addReply(
-      photo.id, c.id, texte, uid, this.userName() || 'Membre'
-    );
+    await this.callbacks().addReply(photo.id, c.id, texte, uid, this.userName() || 'Membre');
     this.replyingTo.set(null);
     this.newReply = '';
-    this.commentRefresh.update(n => n + 1);
+    this.commentRefresh.update((n) => n + 1);
   }
 
   async deleteReply(c: Commentaire, replyId: string) {
@@ -213,7 +233,7 @@ export class PhotoLightbox implements OnInit, OnDestroy {
     const ok = await this.confirmService.confirm('Supprimer cette réponse ?');
     if (!ok) return;
     await this.callbacks().deleteReply(photo.id, c.id, replyId, c.replies);
-    this.commentRefresh.update(n => n + 1);
+    this.commentRefresh.update((n) => n + 1);
   }
 
   canDeleteComment(auteurUid: string): boolean {
@@ -236,17 +256,32 @@ export class PhotoLightbox implements OnInit, OnDestroy {
   }
 
   initiales(nom: string): string {
-    return nom.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+    return nom
+      .split(' ')
+      .map((w) => w[0])
+      .slice(0, 2)
+      .join('')
+      .toUpperCase();
   }
 
   hasExifData = computed((): boolean => {
     const exif = this.currentPhoto()?.exif;
     if (!exif) return false;
-    return !!(exif.appareil || exif.objectif || exif.focale || exif.ouverture || exif.vitesse || exif.iso || exif.dateCapture || exif.gps || exif.largeur);
+    return !!(
+      exif.appareil ||
+      exif.objectif ||
+      exif.focale ||
+      exif.ouverture ||
+      exif.vitesse ||
+      exif.iso ||
+      exif.dateCapture ||
+      exif.gps ||
+      exif.largeur
+    );
   });
 
   formatDefinition(largeur: number, hauteur: number): string {
-    const mpx = (largeur * hauteur / 1_000_000);
+    const mpx = (largeur * hauteur) / 1_000_000;
     const mpxStr = mpx >= 1 ? ` · ${mpx % 1 === 0 ? mpx : mpx.toFixed(1)} Mpx` : '';
     return `${largeur.toLocaleString('fr-FR')} × ${hauteur.toLocaleString('fr-FR')} px${mpxStr}`;
   }
@@ -258,13 +293,17 @@ export class PhotoLightbox implements OnInit, OnDestroy {
   }
 
   formatDateExif(iso: string): string {
-    return new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+    return new Date(iso).toLocaleDateString('fr-FR', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
   }
 
   formatTime(isoDate: string): string {
     const diff = Date.now() - new Date(isoDate).getTime();
     const min = Math.floor(diff / 60000);
-    if (min < 1) return 'à l\'instant';
+    if (min < 1) return "à l'instant";
     if (min < 60) return `il y a ${min} min`;
     const h = Math.floor(min / 60);
     if (h < 24) return `il y a ${h}h`;

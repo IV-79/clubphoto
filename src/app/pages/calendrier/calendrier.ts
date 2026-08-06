@@ -1,4 +1,12 @@
-import { Component, inject, signal, computed, effect, untracked } from '@angular/core';
+import {
+  Component,
+  inject,
+  signal,
+  computed,
+  effect,
+  untracked,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { SlicePipe } from '@angular/common';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
@@ -38,18 +46,19 @@ interface CalItem {
   selector: 'app-calendrier',
   imports: [SlicePipe, RouterLink, MatIconModule],
   templateUrl: './calendrier.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './calendrier.css',
 })
 export class Calendrier {
-  private service          = inject(ReunionService);
-  private oneShotService   = inject(OneShotService);
-  private sortieService    = inject(SortieService);
-  private defiService      = inject(DefiService);
-  private expoService      = inject(ExpositionService);
-  private docService       = inject(DocumentService);
-  private authService      = inject(AuthService);
-  private loginModal       = inject(LoginModalService);
-  private route            = inject(ActivatedRoute);
+  private service = inject(ReunionService);
+  private oneShotService = inject(OneShotService);
+  private sortieService = inject(SortieService);
+  private defiService = inject(DefiService);
+  private expoService = inject(ExpositionService);
+  private docService = inject(DocumentService);
+  private authService = inject(AuthService);
+  private loginModal = inject(LoginModalService);
+  private route = inject(ActivatedRoute);
 
   // --- Filtres ---
   types = REUNION_TYPES;
@@ -61,8 +70,8 @@ export class Calendrier {
 
   profile = toSignal(this.authService.currentUserProfile$);
   private readonly loggedIn = computed(() => !!this.profile());
-  private readonly uid      = computed(() => this.profile()?.uid ?? null);
-  isEditor  = computed(() => {
+  private readonly uid = computed(() => this.profile()?.uid ?? null);
+  isEditor = computed(() => {
     const role = this.profile()?.role;
     return role === 'admin' || role === 'contributeur';
   });
@@ -70,47 +79,60 @@ export class Calendrier {
 
   private tous = toSignal(
     toObservable(this.loggedIn).pipe(
-      switchMap(loggedIn => loggedIn ? this.service.getReunions() : of([] as Reunion[]))
+      switchMap((loggedIn) => (loggedIn ? this.service.getReunions() : of([] as Reunion[]))),
     ),
-    { initialValue: [] as Reunion[] }
+    { initialValue: [] as Reunion[] },
   );
 
   // --- OneShots publics + sorties (one-shot, filtrés par visibilité) ---
   private oneshots = toSignal(
     toObservable(this.loggedIn).pipe(
-      switchMap(loggedIn => this.oneShotService.getPublicOneShotsOnce().pipe(
-        map(list => loggedIn ? list : list.filter(o => (o.visibilite ?? 'public') === 'public'))
-      ))
+      switchMap((loggedIn) =>
+        this.oneShotService
+          .getPublicOneShotsOnce()
+          .pipe(
+            map((list) =>
+              loggedIn ? list : list.filter((o) => (o.visibilite ?? 'public') === 'public'),
+            ),
+          ),
+      ),
     ),
-    { initialValue: [] as OneShot[] }
+    { initialValue: [] as OneShot[] },
   );
 
   private sorties = toSignal(
     toObservable(this.loggedIn).pipe(
-      switchMap(loggedIn => this.sortieService.getSortiesOnce().pipe(
-        map(list => loggedIn ? list : list.filter(s => (s.visibilite ?? 'public') === 'public'))
-      ))
+      switchMap((loggedIn) =>
+        this.sortieService
+          .getSortiesOnce()
+          .pipe(
+            map((list) =>
+              loggedIn ? list : list.filter((s) => (s.visibilite ?? 'public') === 'public'),
+            ),
+          ),
+      ),
     ),
-    { initialValue: [] as Sortie[] }
+    { initialValue: [] as Sortie[] },
   );
 
   private defis = toSignal(
     toObservable(this.loggedIn).pipe(
-      switchMap(loggedIn =>
-        loggedIn ? this.defiService.getDefisOnce() : this.defiService.getPublicDefisOnce()
-      )
+      switchMap((loggedIn) =>
+        loggedIn ? this.defiService.getDefisOnce() : this.defiService.getPublicDefisOnce(),
+      ),
     ),
-    { initialValue: [] as Defi[] }
+    { initialValue: [] as Defi[] },
   );
 
   private expositions = toSignal(
     toObservable(this.loggedIn).pipe(
-      switchMap(loggedIn => loggedIn
-        ? this.expoService.getExpositionsOnce()
-        : this.expoService.getPublicExpositionsOnce()
-      )
+      switchMap((loggedIn) =>
+        loggedIn
+          ? this.expoService.getExpositionsOnce()
+          : this.expoService.getPublicExpositionsOnce(),
+      ),
     ),
-    { initialValue: [] as Exposition[] }
+    { initialValue: [] as Exposition[] },
   );
 
   isMembre = computed(() => this.loggedIn());
@@ -118,24 +140,40 @@ export class Calendrier {
   // --- Items unifiés (événements + oneshots + sorties + défis) ---
   private filtresItems = computed((): CalItem[] => {
     const f = this.filtre();
-    const showEvents   = f === 'tous' || f === 'reunion';
-    const showShots    = f === 'tous' || f === 'oneshot';
-    const showSorties  = f === 'tous' || f === 'sortie';
-    const showDefis    = f === 'tous' || f === 'defi';
-    const showExpos    = f === 'tous' || f === 'exposition';
+    const showEvents = f === 'tous' || f === 'reunion';
+    const showShots = f === 'tous' || f === 'oneshot';
+    const showSorties = f === 'tous' || f === 'sortie';
+    const showDefis = f === 'tous' || f === 'defi';
+    const showExpos = f === 'tous' || f === 'exposition';
 
     const events: CalItem[] = showEvents
-      ? this.tous().map(e => ({ kind: 'event' as const, id: 'e.' + e.id, date: e.date, event: e }))
+      ? this.tous().map((e) => ({
+          kind: 'event' as const,
+          id: 'e.' + e.id,
+          date: e.date,
+          event: e,
+        }))
       : [];
     const shots: CalItem[] = showShots
-      ? this.oneshots().filter(os => !!os.date)
-          .map(os => ({ kind: 'oneshot' as const, id: 'os.' + os.id, date: os.date!, oneshot: os }))
+      ? this.oneshots()
+          .filter((os) => !!os.date)
+          .map((os) => ({
+            kind: 'oneshot' as const,
+            id: 'os.' + os.id,
+            date: os.date!,
+            oneshot: os,
+          }))
       : [];
     const sortieItems: CalItem[] = showSorties
-      ? this.sorties().map(s => ({ kind: 'sortie' as const, id: 's.' + s.id, date: s.date, sortie: s }))
+      ? this.sorties().map((s) => ({
+          kind: 'sortie' as const,
+          id: 's.' + s.id,
+          date: s.date,
+          sortie: s,
+        }))
       : [];
     const defiItems: CalItem[] = showDefis
-      ? this.defis().map(d => ({
+      ? this.defis().map((d) => ({
           kind: 'defi' as const,
           id: 'd.' + d.id,
           date: d.dateDebutSoumission,
@@ -145,8 +183,8 @@ export class Calendrier {
       : [];
     const expoItems: CalItem[] = showExpos
       ? this.expositions()
-          .filter(e => !!e.dateExposition)
-          .map(e => ({
+          .filter((e) => !!e.dateExposition)
+          .map((e) => ({
             kind: 'exposition' as const,
             id: 'ex.' + e.id,
             date: e.dateExposition!,
@@ -157,16 +195,20 @@ export class Calendrier {
   });
 
   private aVenirAll = computed((): CalItem[] =>
-    [...this.filtresItems().filter(i => !this.isPasse(i.endDate ?? i.date))].sort((a, b) => a.date.localeCompare(b.date))
+    [...this.filtresItems().filter((i) => !this.isPasse(i.endDate ?? i.date))].sort((a, b) =>
+      a.date.localeCompare(b.date),
+    ),
   );
   private passesAll = computed((): CalItem[] =>
-    [...this.filtresItems().filter(i => this.isPasse(i.endDate ?? i.date))].sort((a, b) => b.date.localeCompare(a.date))
+    [...this.filtresItems().filter((i) => this.isPasse(i.endDate ?? i.date))].sort((a, b) =>
+      b.date.localeCompare(a.date),
+    ),
   );
 
-  aVenir        = computed(() => this.aVenirAll().slice(0, this.limitAVenir()));
-  passes        = computed(() => this.passesAll().slice(0, this.limitPasses()));
-  aVenirCount   = computed(() => this.aVenirAll().length);
-  passesCount   = computed(() => this.passesAll().length);
+  aVenir = computed(() => this.aVenirAll().slice(0, this.limitAVenir()));
+  passes = computed(() => this.passesAll().slice(0, this.limitPasses()));
+  aVenirCount = computed(() => this.aVenirAll().length);
+  passesCount = computed(() => this.passesAll().length);
   hasMoreAVenir = computed(() => this.limitAVenir() < this.aVenirAll().length);
   hasMorePasses = computed(() => this.limitPasses() < this.passesAll().length);
   restantAVenir = computed(() => Math.min(PAGE, this.aVenirAll().length - this.limitAVenir()));
@@ -175,7 +217,10 @@ export class Calendrier {
   constructor() {
     effect(() => {
       this.filtre();
-      untracked(() => { this.limitAVenir.set(INIT); this.limitPasses.set(INIT); });
+      untracked(() => {
+        this.limitAVenir.set(INIT);
+        this.limitPasses.set(INIT);
+      });
     });
 
     effect(() => {
@@ -184,8 +229,8 @@ export class Calendrier {
       const itemId = 'e.' + target;
       const allItems = [...this.aVenirAll(), ...this.passesAll()];
       if (allItems.length === 0) return;
-      if (allItems.some(i => i.id === itemId)) {
-        const isInPasses = this.passesAll().some(i => i.id === itemId);
+      if (allItems.some((i) => i.id === itemId)) {
+        const isInPasses = this.passesAll().some((i) => i.id === itemId);
         untracked(() => {
           if (isInPasses) this.showPasses.set(true);
           this.expandedId.set(itemId);
@@ -205,11 +250,15 @@ export class Calendrier {
   private async loadReunionDocs(reunionId: string) {
     if (this.reunionDocs()[reunionId]) return;
     const docs = await firstValueFrom(this.docService.getDocumentsByReunion(reunionId));
-    this.reunionDocs.update(m => ({ ...m, [reunionId]: docs }));
+    this.reunionDocs.update((m) => ({ ...m, [reunionId]: docs }));
   }
 
-  loadMoreAVenir() { this.limitAVenir.update(n => n + PAGE); }
-  loadMorePasses()  { this.limitPasses.update(n => n + PAGE); }
+  loadMoreAVenir() {
+    this.limitAVenir.update((n) => n + PAGE);
+  }
+  loadMorePasses() {
+    this.limitPasses.update((n) => n + PAGE);
+  }
 
   expandedId = signal<string | null>(null);
   private reunionAutoExpanded = signal(false);
@@ -218,32 +267,41 @@ export class Calendrier {
   // --- Documents de réunion ---
   private reunionDocs = signal<Record<string, ClubDocument[]>>({});
 
-  getReunionDocs(reunionId: string): ClubDocument[] { return this.reunionDocs()[reunionId] ?? []; }
-  extMeta(ext: string) { return getExtensionMeta(ext); }
+  getReunionDocs(reunionId: string): ClubDocument[] {
+    return this.reunionDocs()[reunionId] ?? [];
+  }
+  extMeta(ext: string) {
+    return getExtensionMeta(ext);
+  }
 
   toggleExpand(id: string) {
     this.expandedId.set(this.expandedId() === id ? null : id);
   }
 
   // --- Inscriptions OneShot ---
-  private readonly inscriptionTrigger = computed(() => ({ uid: this.uid(), oneshots: this.oneshots() }));
+  private readonly inscriptionTrigger = computed(() => ({
+    uid: this.uid(),
+    oneshots: this.oneshots(),
+  }));
 
   private inscriptionStatus$ = toObservable(this.inscriptionTrigger).pipe(
     switchMap(({ uid, oneshots }) => {
       if (!uid) return of({} as Record<string, boolean>);
-      const open = oneshots.filter(e => e.statut === 'inscription');
+      const open = oneshots.filter((e) => e.statut === 'inscription');
       if (open.length === 0) return of({} as Record<string, boolean>);
       return combineLatest(
-        open.map(os =>
-          this.oneShotService.getInscriptionsOnce(os.id).pipe(
-            map(ins => [os.id, ins.some(i => i.uid === uid)] as [string, boolean])
-          )
-        )
-      ).pipe(map(pairs => Object.fromEntries(pairs)));
-    })
+        open.map((os) =>
+          this.oneShotService
+            .getInscriptionsOnce(os.id)
+            .pipe(map((ins) => [os.id, ins.some((i) => i.uid === uid)] as [string, boolean])),
+        ),
+      ).pipe(map((pairs) => Object.fromEntries(pairs)));
+    }),
   );
 
-  inscriptionStatus = toSignal(this.inscriptionStatus$, { initialValue: {} as Record<string, boolean> });
+  inscriptionStatus = toSignal(this.inscriptionStatus$, {
+    initialValue: {} as Record<string, boolean>,
+  });
   inscrisSaving = signal<string | null>(null);
 
   isInscrit(oneShotId: string): boolean {
@@ -277,17 +335,27 @@ export class Calendrier {
   }
 
   formatDate(date: string): string {
-    return new Date(date + 'T00:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    return new Date(date + 'T00:00:00').toLocaleDateString('fr-FR', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
   }
 
-  monthOf(date: string): string { return date.slice(0, 7); }
+  monthOf(date: string): string {
+    return date.slice(0, 7);
+  }
 
   formatMonth(date: string): string {
-    return new Date(date + 'T00:00:00').toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+    return new Date(date + 'T00:00:00').toLocaleDateString('fr-FR', {
+      month: 'long',
+      year: 'numeric',
+    });
   }
 
   labelType(type: string): string {
-    return REUNION_TYPES.find(t => t.value === type)?.label ?? type;
+    return REUNION_TYPES.find((t) => t.value === type)?.label ?? type;
   }
 
   mapsUrl(lieu: string): string {
@@ -300,10 +368,18 @@ export class Calendrier {
     return `${m.emoji} ${m.label}`;
   }
 
-  openLogin() { this.loginModal.open(); }
+  openLogin() {
+    this.loginModal.open();
+  }
 
-  defiStatutLabel(defi: Defi): string { return DEFI_STATUT_LABELS[getDefiStatut(defi)]; }
-  defiStatut(defi: Defi)      { return getDefiStatut(defi); }
+  defiStatutLabel(defi: Defi): string {
+    return DEFI_STATUT_LABELS[getDefiStatut(defi)];
+  }
+  defiStatut(defi: Defi) {
+    return getDefiStatut(defi);
+  }
 
-  expoStatutLabel(expo: Exposition): string { return EXPO_STATUT_LABELS[expo.statut]; }
+  expoStatutLabel(expo: Exposition): string {
+    return EXPO_STATUT_LABELS[expo.statut];
+  }
 }

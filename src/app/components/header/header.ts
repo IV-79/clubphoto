@@ -1,4 +1,11 @@
-import { Component, inject, signal, computed, HostListener } from '@angular/core';
+import {
+  Component,
+  inject,
+  signal,
+  computed,
+  HostListener,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AsyncPipe } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
@@ -14,14 +21,15 @@ import { AppNotification, NOTIF_ICONS } from '../../models/notification.model';
   selector: 'app-header',
   imports: [RouterLink, RouterLinkActive, AsyncPipe, MatIconModule],
   templateUrl: './header.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './header.css',
 })
 export class Header {
-  private authService  = inject(AuthService);
+  private authService = inject(AuthService);
   private notifService = inject(NotificationService);
-  private router       = inject(Router);
-  private loginModal   = inject(LoginModalService);
-  readonly darkMode    = inject(DarkModeService);
+  private router = inject(Router);
+  private loginModal = inject(LoginModalService);
+  readonly darkMode = inject(DarkModeService);
 
   // Desktop dropdowns
   openMenu = signal<string | null>(null);
@@ -32,10 +40,12 @@ export class Header {
   }
 
   @HostListener('document:click')
-  closeMenus() { this.openMenu.set(null); }
+  closeMenus() {
+    this.openMenu.set(null);
+  }
 
   // Mobile menu
-  mobileMenuOpen    = signal(false);
+  mobileMenuOpen = signal(false);
   mobileOpenSection = signal<string | null>(null);
 
   toggleMobileSection(section: string) {
@@ -52,21 +62,26 @@ export class Header {
     this.closeMobileMenu();
   }
 
-  profile$    = this.authService.currentUserProfile$;
-  isAdmin$    = this.profile$.pipe(map(p => p?.role === 'admin'));
-  isLoggedIn$ = this.authService.user$.pipe(map(user => !!user));
+  profile$ = this.authService.currentUserProfile$;
+  isAdmin$ = this.profile$.pipe(map((p) => p?.role === 'admin'));
+  isLoggedIn$ = this.authService.user$.pipe(map((user) => !!user));
 
   // Notifications
   private profile = toSignal(this.authService.currentUserProfile$);
   private readonly uid = computed(() => this.profile()?.uid ?? null);
-  private readonly notifTrigger = computed(() => ({ uid: this.uid(), r: this.notifService.refresh() }));
+  private readonly notifTrigger = computed(() => ({
+    uid: this.uid(),
+    r: this.notifService.refresh(),
+  }));
 
   private notifs$ = toObservable(this.notifTrigger).pipe(
-    switchMap(({ uid }) => uid ? this.notifService.getNotifications(uid) : of([] as AppNotification[]))
+    switchMap(({ uid }) =>
+      uid ? this.notifService.getNotifications(uid) : of([] as AppNotification[]),
+    ),
   );
   notifications = toSignal(this.notifs$, { initialValue: [] as AppNotification[] });
-  unreadCount   = computed(() => this.notifications().filter(n => !n.lu).length);
-  recentNotifs  = computed(() => this.notifications().slice(0, 8));
+  unreadCount = computed(() => this.notifications().filter((n) => !n.lu).length);
+  recentNotifs = computed(() => this.notifications().slice(0, 8));
 
   notifIcon(type: AppNotification['type']): string {
     return NOTIF_ICONS[type] ?? '🔔';
@@ -96,5 +111,7 @@ export class Header {
     if (uid) await this.notifService.markAllAsRead(uid);
   }
 
-  logout() { this.authService.logout(); }
+  logout() {
+    this.authService.logout();
+  }
 }

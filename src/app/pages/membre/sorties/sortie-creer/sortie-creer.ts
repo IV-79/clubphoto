@@ -1,4 +1,11 @@
-import { Component, inject, signal, effect, untracked } from '@angular/core';
+import {
+  Component,
+  inject,
+  signal,
+  effect,
+  untracked,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -23,90 +30,99 @@ type CreationType = SortieType | 'oneshot' | 'defi' | 'exposition';
 @Component({
   selector: 'app-sortie-creer',
   imports: [
-    RouterLink, ReactiveFormsModule,
-    MatFormFieldModule, MatInputModule, MatCheckboxModule,
-    MatButtonModule, MatSelectModule, MatIconModule,
+    RouterLink,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatCheckboxModule,
+    MatButtonModule,
+    MatSelectModule,
+    MatIconModule,
     DatePickerComponent,
   ],
   templateUrl: './sortie-creer.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './sortie-creer.css',
 })
 export class SortieCreer {
-  private sortieService     = inject(SortieService);
-  private oneShotService    = inject(OneShotService);
-  private defiService       = inject(DefiService);
+  private sortieService = inject(SortieService);
+  private oneShotService = inject(OneShotService);
+  private defiService = inject(DefiService);
   private expositionService = inject(ExpositionService);
-  private authService       = inject(AuthService);
-  private router            = inject(Router);
-  private route             = inject(ActivatedRoute);
+  private authService = inject(AuthService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   profile = toSignal(this.authService.currentUserProfile$);
   saving = signal(false);
-  today  = new Date().toISOString().slice(0, 10);
+  today = new Date().toISOString().slice(0, 10);
 
   pendingCoverFile = signal<File | null>(null);
-  coverPreviewUrl  = signal<string | null>(null);
-  coverDragOver    = signal(false);
+  coverPreviewUrl = signal<string | null>(null);
+  coverDragOver = signal(false);
 
   pendingThemes = signal<string[]>([]);
-  newThemeNom   = signal('');
+  newThemeNom = signal('');
 
   addPendingTheme(): void {
     const nom = this.newThemeNom().trim();
     if (!nom) return;
-    this.pendingThemes.update(ts => [...ts, nom]);
+    this.pendingThemes.update((ts) => [...ts, nom]);
     this.newThemeNom.set('');
   }
 
   removePendingTheme(index: number): void {
-    this.pendingThemes.update(ts => ts.filter((_, i) => i !== index));
+    this.pendingThemes.update((ts) => ts.filter((_, i) => i !== index));
   }
 
   form = new FormGroup({
-    type:                   new FormControl<CreationType>('sortie_photo', { nonNullable: true }),
-    titre:                  new FormControl('', { validators: [Validators.required, Validators.minLength(3)], nonNullable: true }),
-    description:            new FormControl('', { nonNullable: true }),
-    date:                   new FormControl('', { validators: [Validators.required], nonNullable: true }),
-    lieu:                   new FormControl('', { nonNullable: true }),
-    maxParticipants:        new FormControl<number | null>(null),
+    type: new FormControl<CreationType>('sortie_photo', { nonNullable: true }),
+    titre: new FormControl('', {
+      validators: [Validators.required, Validators.minLength(3)],
+      nonNullable: true,
+    }),
+    description: new FormControl('', { nonNullable: true }),
+    date: new FormControl('', { validators: [Validators.required], nonNullable: true }),
+    lieu: new FormControl('', { nonNullable: true }),
+    maxParticipants: new FormControl<number | null>(null),
     inscriptionObligatoire: new FormControl(true, { nonNullable: true }),
     // Défi-specific
-    theme:               new FormControl('', { nonNullable: true }),
+    theme: new FormControl('', { nonNullable: true }),
     dateDebutSoumission: new FormControl('', { nonNullable: true }),
-    dateFinSoumission:   new FormControl('', { nonNullable: true }),
-    dateCloturVotes:     new FormControl('', { nonNullable: true }),
-    maxPhotos:           new FormControl(2, { nonNullable: true }),
-    maxVotes:            new FormControl(3, { nonNullable: true }),
-    visibilite:          new FormControl<'public' | 'membre'>('public', { nonNullable: true }),
+    dateFinSoumission: new FormControl('', { nonNullable: true }),
+    dateCloturVotes: new FormControl('', { nonNullable: true }),
+    maxPhotos: new FormControl(2, { nonNullable: true }),
+    maxVotes: new FormControl(3, { nonNullable: true }),
+    visibilite: new FormControl<'public' | 'membre'>('public', { nonNullable: true }),
     // Exposition-specific
-    dateDebutIdeation:   new FormControl('', { nonNullable: true }),
-    dateFinIdeation:     new FormControl('', { nonNullable: true }),
-    dateExposition:      new FormControl('', { nonNullable: true }),
+    dateDebutIdeation: new FormControl('', { nonNullable: true }),
+    dateFinIdeation: new FormControl('', { nonNullable: true }),
+    dateExposition: new FormControl('', { nonNullable: true }),
     dateOuverturePublic: new FormControl('', { nonNullable: true }),
   });
 
   isOneShot = toSignal(
     this.form.get('type')!.valueChanges.pipe(
       startWith(this.form.get('type')!.value),
-      map(v => v === 'oneshot')
+      map((v) => v === 'oneshot'),
     ),
-    { initialValue: false }
+    { initialValue: false },
   );
 
   isDefi = toSignal(
     this.form.get('type')!.valueChanges.pipe(
       startWith(this.form.get('type')!.value),
-      map(v => v === 'defi')
+      map((v) => v === 'defi'),
     ),
-    { initialValue: false }
+    { initialValue: false },
   );
 
   isExposition = toSignal(
     this.form.get('type')!.valueChanges.pipe(
       startWith(this.form.get('type')!.value),
-      map(v => v === 'exposition')
+      map((v) => v === 'exposition'),
     ),
-    { initialValue: false }
+    { initialValue: false },
   );
 
   constructor() {
@@ -149,7 +165,7 @@ export class SortieCreer {
     // dateDebutIdeation + dateFinIdeation: required pour exposition uniquement
     effect(() => {
       const debut = this.form.get('dateDebutIdeation')!;
-      const fin   = this.form.get('dateFinIdeation')!;
+      const fin = this.form.get('dateFinIdeation')!;
       if (this.isExposition()) {
         debut.setValidators([Validators.required]);
         fin.setValidators([Validators.required]);
@@ -165,8 +181,8 @@ export class SortieCreer {
 
     // Preselect depuis query param
     const qtype = this.route.snapshot.queryParamMap.get('type');
-    if (qtype === 'oneshot')    this.form.patchValue({ type: 'oneshot' });
-    if (qtype === 'defi')       this.form.patchValue({ type: 'defi' });
+    if (qtype === 'oneshot') this.form.patchValue({ type: 'oneshot' });
+    if (qtype === 'defi') this.form.patchValue({ type: 'defi' });
     if (qtype === 'exposition') this.form.patchValue({ type: 'exposition' });
   }
 
@@ -196,18 +212,18 @@ export class SortieCreer {
 
       if (v.type === 'defi') {
         const id = await this.defiService.createDefi({
-          titre:               v.titre.trim(),
-          theme:               v.theme.trim(),
-          description:         v.description.trim(),
+          titre: v.titre.trim(),
+          theme: v.theme.trim(),
+          description: v.description.trim(),
           dateDebutSoumission: v.dateDebutSoumission,
-          dateFinSoumission:   v.dateFinSoumission,
-          dateCloturVotes:     v.dateCloturVotes,
-          maxPhotos:           v.maxPhotos,
-          maxVotes:            v.maxVotes,
-          visibilite:              v.visibilite,
-          organisateurUid:         profile.uid,
-          organisateurNom:         nom,
-          inscriptionObligatoire:  v.inscriptionObligatoire,
+          dateFinSoumission: v.dateFinSoumission,
+          dateCloturVotes: v.dateCloturVotes,
+          maxPhotos: v.maxPhotos,
+          maxVotes: v.maxVotes,
+          visibilite: v.visibilite,
+          organisateurUid: profile.uid,
+          organisateurNom: nom,
+          inscriptionObligatoire: v.inscriptionObligatoire,
         });
         if (this.pendingCoverFile()) {
           await this.defiService.setCouverture(id, this.pendingCoverFile()!);
@@ -223,7 +239,9 @@ export class SortieCreer {
           ...(v.date ? { date: v.date } : {}),
           ...(v.lieu.trim() ? { lieu: v.lieu.trim() } : {}),
         });
-        await Promise.all(this.pendingThemes().map((t, i) => this.oneShotService.addTheme(id, t, i)));
+        await Promise.all(
+          this.pendingThemes().map((t, i) => this.oneShotService.addTheme(id, t, i)),
+        );
         await this.oneShotService.inscrire(id, profile.uid, nom);
         if (this.pendingCoverFile()) {
           const compressed = await compressImage(this.pendingCoverFile()!, COMPRESS_COUVERTURE);
@@ -232,14 +250,14 @@ export class SortieCreer {
         this.router.navigate(['/galeries/oneshots', id]);
       } else if (v.type === 'exposition') {
         const id = await this.expositionService.create({
-          titre:              v.titre.trim(),
+          titre: v.titre.trim(),
           maxPhotosParMembre: v.maxPhotos,
-          dateDebutIdeation:  v.dateDebutIdeation  || undefined,
-          dateFinIdeation:    v.dateFinIdeation,
-          dateExposition:     v.dateExposition     || undefined,
+          dateDebutIdeation: v.dateDebutIdeation || undefined,
+          dateFinIdeation: v.dateFinIdeation,
+          dateExposition: v.dateExposition || undefined,
           dateOuverturePublic: v.dateOuverturePublic || undefined,
-          organisateurUid:    profile.uid,
-          nomOrganisateur:    nom,
+          organisateurUid: profile.uid,
+          nomOrganisateur: nom,
           ...(v.description.trim() ? { description: v.description.trim() } : {}),
         });
         if (this.pendingCoverFile()) {
@@ -260,7 +278,9 @@ export class SortieCreer {
           visibilite: v.visibilite,
           ...(v.lieu.trim() ? { lieu: v.lieu.trim() } : {}),
           ...(v.description.trim() ? { description: v.description.trim() } : {}),
-          ...(inscriptionObligatoire && v.maxParticipants != null ? { maxParticipants: v.maxParticipants } : {}),
+          ...(inscriptionObligatoire && v.maxParticipants != null
+            ? { maxParticipants: v.maxParticipants }
+            : {}),
         });
         if (inscriptionObligatoire) {
           await this.sortieService.inscrire(id, profile.uid, nom);

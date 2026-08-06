@@ -1,4 +1,11 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import {
+  Component,
+  inject,
+  signal,
+  computed,
+  OnInit,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ConfigService, CategorieConfig } from '../../../services/config.service';
@@ -6,8 +13,11 @@ import { ConfirmService } from '../../../services/confirm.service';
 import { PHOTO_CATEGORIES } from '../../../models/photo.model';
 
 function toSlug(label: string): string {
-  return label.trim().toLowerCase()
-    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+  return label
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '');
 }
@@ -16,36 +26,41 @@ function toSlug(label: string): string {
   selector: 'app-admin-config',
   imports: [FormsModule],
   templateUrl: './config.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './config.css',
 })
 export class AdminConfig implements OnInit {
-  private configService  = inject(ConfigService);
+  private configService = inject(ConfigService);
   private confirmService = inject(ConfirmService);
 
   // Catégories
-  categories       = signal<CategorieConfig[]>([]);
+  categories = signal<CategorieConfig[]>([]);
   sortedCategories = computed(() =>
-    [...this.categories()].sort((a, b) => a.label.localeCompare(b.label, 'fr', { sensitivity: 'base' }))
+    [...this.categories()].sort((a, b) =>
+      a.label.localeCompare(b.label, 'fr', { sensitivity: 'base' }),
+    ),
   );
-  saving        = signal(false);
-  newLabel      = '';
-  errorMsg      = '';
-  confirmReset  = signal(false);
+  saving = signal(false);
+  newLabel = '';
+  errorMsg = '';
+  confirmReset = signal(false);
   editingCatValue = signal<string | null>(null);
-  editCatLabel    = '';
+  editCatLabel = '';
 
   // Image page d'accueil
-  siteConfig     = toSignal(this.configService.getSiteConfig(), { initialValue: {} as any });
-  heroCurrentUrl = computed(() => (this.siteConfig() as any)?.heroImageUrl as string ?? '');
-  heroSource     = computed<'manuel' | 'theme_du_mois'>(() => (this.siteConfig() as any)?.heroSource ?? 'manuel');
-  heroPreview    = signal<string | null>(null);
-  heroFile       = signal<File | null>(null);
-  heroUploading  = signal(false);
-  heroError      = signal('');
-  isDragging     = signal(false);
+  siteConfig = toSignal(this.configService.getSiteConfig(), { initialValue: {} as any });
+  heroCurrentUrl = computed(() => ((this.siteConfig() as any)?.heroImageUrl as string) ?? '');
+  heroSource = computed<'manuel' | 'theme_du_mois'>(
+    () => (this.siteConfig() as any)?.heroSource ?? 'manuel',
+  );
+  heroPreview = signal<string | null>(null);
+  heroFile = signal<File | null>(null);
+  heroUploading = signal(false);
+  heroError = signal('');
+  isDragging = signal(false);
 
   ngOnInit() {
-    this.configService.getCategories().subscribe(cats => this.categories.set(cats));
+    this.configService.getCategories().subscribe((cats) => this.categories.set(cats));
   }
 
   // ---- Catégories ----
@@ -53,12 +68,15 @@ export class AdminConfig implements OnInit {
     const label = this.newLabel.trim();
     if (!label) return;
     const value = toSlug(label);
-    if (!value) { this.errorMsg = 'Nom invalide.'; return; }
-    if (this.categories().some(c => c.value === value)) {
+    if (!value) {
+      this.errorMsg = 'Nom invalide.';
+      return;
+    }
+    if (this.categories().some((c) => c.value === value)) {
       this.errorMsg = 'Cette catégorie existe déjà.';
       return;
     }
-    this.categories.update(list => [...list, { value, label }]);
+    this.categories.update((list) => [...list, { value, label }]);
     this.newLabel = '';
     this.errorMsg = '';
     this.save();
@@ -72,19 +90,21 @@ export class AdminConfig implements OnInit {
   saveEditCat(cat: CategorieConfig) {
     const label = this.editCatLabel.trim();
     if (!label) return;
-    this.categories.update(list =>
-      list.map(c => c.value === cat.value ? { ...c, label } : c)
+    this.categories.update((list) =>
+      list.map((c) => (c.value === cat.value ? { ...c, label } : c)),
     );
     this.editingCatValue.set(null);
     this.save();
   }
 
-  cancelEditCat() { this.editingCatValue.set(null); }
+  cancelEditCat() {
+    this.editingCatValue.set(null);
+  }
 
   async deleteCategorie(cat: CategorieConfig) {
     const ok = await this.confirmService.confirm(`Supprimer la catégorie « ${cat.label} » ?`);
     if (!ok) return;
-    this.categories.update(list => list.filter(c => c.value !== cat.value));
+    this.categories.update((list) => list.filter((c) => c.value !== cat.value));
     this.save();
   }
 
@@ -110,7 +130,7 @@ export class AdminConfig implements OnInit {
     this.heroFile.set(file);
     this.heroError.set('');
     const reader = new FileReader();
-    reader.onload = e => this.heroPreview.set(e.target?.result as string);
+    reader.onload = (e) => this.heroPreview.set(e.target?.result as string);
     reader.readAsDataURL(file);
   }
 
@@ -150,18 +170,21 @@ export class AdminConfig implements OnInit {
     this.heroError.set('');
     try {
       const { url, storagePath } = await this.configService.uploadHeroImage(file);
-      await this.configService.saveSiteConfig({ heroImageUrl: url, heroImageStoragePath: storagePath });
+      await this.configService.saveSiteConfig({
+        heroImageUrl: url,
+        heroImageStoragePath: storagePath,
+      });
       this.heroFile.set(null);
       this.heroPreview.set(null);
     } catch {
-      this.heroError.set('Erreur lors de l\'upload.');
+      this.heroError.set("Erreur lors de l'upload.");
     } finally {
       this.heroUploading.set(false);
     }
   }
 
   async deleteHero() {
-    const ok = await this.confirmService.confirm('Supprimer l\'image de la page d\'accueil ?');
+    const ok = await this.confirmService.confirm("Supprimer l'image de la page d'accueil ?");
     if (!ok) return;
     const cfg = this.siteConfig() as any;
     if (cfg?.heroImageStoragePath) {

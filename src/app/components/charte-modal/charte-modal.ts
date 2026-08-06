@@ -1,4 +1,4 @@
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject, computed, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
@@ -10,34 +10,37 @@ import { CharteService } from '../../services/charte.service';
   selector: 'app-charte-modal',
   imports: [FormsModule, RouterLink],
   templateUrl: './charte-modal.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './charte-modal.css',
 })
 export class CharteModal {
   private charteService = inject(CharteService);
-  private sanitizer     = inject(DomSanitizer);
+  private sanitizer = inject(DomSanitizer);
 
   private charteDoc = toSignal(this.charteService.getCharteDoc(), {
-    initialValue: { contenu: '', charteVersion: 0 }
+    initialValue: { contenu: '', charteVersion: 0 },
   });
   private cguDoc = toSignal(this.charteService.getCguDoc(), {
-    initialValue: { contenu: '', cguVersion: 0 }
+    initialValue: { contenu: '', cguVersion: 0 },
   });
 
   mustAcceptCharte = toSignal(this.charteService.mustAcceptCharte$, { initialValue: false });
-  mustAcceptCgu    = toSignal(this.charteService.mustAcceptCgu$,    { initialValue: false });
+  mustAcceptCgu = toSignal(this.charteService.mustAcceptCgu$, { initialValue: false });
 
   charteChecked = false;
-  cguChecked    = false;
+  cguChecked = false;
 
-  safeCharteHtml = computed((): SafeHtml =>
-    this.sanitizer.bypassSecurityTrustHtml(
-      marked.parse(this.charteDoc().contenu, { async: false }) as string
-    )
+  safeCharteHtml = computed(
+    (): SafeHtml =>
+      this.sanitizer.bypassSecurityTrustHtml(
+        marked.parse(this.charteDoc().contenu, { async: false }) as string,
+      ),
   );
 
   get canAccept(): boolean {
-    return (!this.mustAcceptCharte() || this.charteChecked) &&
-           (!this.mustAcceptCgu()    || this.cguChecked);
+    return (
+      (!this.mustAcceptCharte() || this.charteChecked) && (!this.mustAcceptCgu() || this.cguChecked)
+    );
   }
 
   accepting = false;

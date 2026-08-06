@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 
@@ -8,6 +8,7 @@ type Tab = 'general' | 'membres' | 'contributeurs' | 'admins';
   selector: 'app-guide',
   imports: [RouterLink, MatIconModule],
   templateUrl: './guide.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './guide.css',
 })
 export class MembresGuide {

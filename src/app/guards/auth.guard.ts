@@ -1,14 +1,13 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { Auth } from '@angular/fire/auth';
 import { AuthService } from '../services/auth.service';
 import { LoginModalService } from '../services/login-modal.service';
+import { auth } from '../utils/firebase';
 import { from, switchMap, map, take, of } from 'rxjs';
 
 export const authGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
-  const auth = inject(Auth);
   const loginModal = inject(LoginModalService);
 
   return from(auth.authStateReady()).pipe(
@@ -32,7 +31,6 @@ export const authGuard: CanActivateFn = (route, state) => {
 export const editorGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
-  const auth = inject(Auth);
   const loginModal = inject(LoginModalService);
 
   return from(auth.authStateReady()).pipe(
@@ -55,7 +53,6 @@ export const editorGuard: CanActivateFn = (route, state) => {
 
 export const memberGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
-  const auth = inject(Auth);
   const loginModal = inject(LoginModalService);
 
   return from(auth.authStateReady()).pipe(
@@ -73,7 +70,6 @@ export const memberGuard: CanActivateFn = (route, state) => {
 export const loginGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
   const router = inject(Router);
-  const auth = inject(Auth);
 
   return from(auth.authStateReady()).pipe(
     switchMap(() => authService.user$.pipe(take(1))),

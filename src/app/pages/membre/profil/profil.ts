@@ -1,4 +1,12 @@
-import { Component, inject, signal, OnInit, ViewChild, ElementRef } from '@angular/core';
+import {
+  Component,
+  inject,
+  signal,
+  OnInit,
+  ViewChild,
+  ElementRef,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../services/auth.service';
@@ -9,7 +17,8 @@ import { compressImage, COMPRESS_AVATAR, COMPRESS_BANDEAU } from '../../../utils
   selector: 'app-membre-profil',
   imports: [FormsModule],
   templateUrl: './profil.html',
-  styleUrl: './profil.css'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './profil.css',
 })
 export class MembreProfil implements OnInit {
   @ViewChild('profilInput') profilInput!: ElementRef<HTMLInputElement>;
@@ -42,8 +51,8 @@ export class MembreProfil implements OnInit {
   pwModalOpen = signal(false);
   pwForm = { current: '', newPw: '', confirm: '' };
   pwSaving = signal(false);
-  pwSaved  = signal(false);
-  pwError  = signal('');
+  pwSaved = signal(false);
+  pwError = signal('');
 
   profilFile = signal<File | null>(null);
   profilPreviewUrl = signal('');
@@ -54,18 +63,18 @@ export class MembreProfil implements OnInit {
   uploadingBandeau = signal(false);
 
   ngOnInit() {
-    this.authService.currentUserProfile$.subscribe(p => {
+    this.authService.currentUserProfile$.subscribe((p) => {
       if (!p) return;
-      this.form.nom        = p.nom ?? '';
-      this.form.prenom     = p.prenom ?? '';
-      this.form.bio        = p.bio ?? '';
-      this.form.appareil   = p.appareil ?? '';
+      this.form.nom = p.nom ?? '';
+      this.form.prenom = p.prenom ?? '';
+      this.form.bio = p.bio ?? '';
+      this.form.appareil = p.appareil ?? '';
       this.form.stylesPhoto = p.stylesPhoto ? [...p.stylesPhoto] : [];
-      this.form.instagram  = p.instagram ?? '';
-      this.form.facebook   = p.facebook ?? '';
-      this.form.px500      = p.px500 ?? '';
-      this.form.flickr     = p.flickr ?? '';
-      this.form.siteWeb    = p.siteWeb ?? '';
+      this.form.instagram = p.instagram ?? '';
+      this.form.facebook = p.facebook ?? '';
+      this.form.px500 = p.px500 ?? '';
+      this.form.flickr = p.flickr ?? '';
+      this.form.siteWeb = p.siteWeb ?? '';
       this.form.visibilite = p.visibilite ?? 'public';
     });
   }
@@ -96,17 +105,17 @@ export class MembreProfil implements OnInit {
 
     try {
       await this.authService.updateProfile(p.uid, {
-        nom:         this.form.nom.trim(),
-        prenom:      this.form.prenom.trim(),
-        bio:         this.form.bio.trim(),
-        appareil:    this.form.appareil.trim(),
+        nom: this.form.nom.trim(),
+        prenom: this.form.prenom.trim(),
+        bio: this.form.bio.trim(),
+        appareil: this.form.appareil.trim(),
         stylesPhoto: this.form.stylesPhoto,
-        instagram:   this.form.instagram.trim(),
-        facebook:    this.form.facebook.trim(),
-        px500:       this.form.px500.trim(),
-        flickr:      this.form.flickr.trim(),
-        siteWeb:     this.form.siteWeb.trim(),
-        visibilite:  this.form.visibilite,
+        instagram: this.form.instagram.trim(),
+        facebook: this.form.facebook.trim(),
+        px500: this.form.px500.trim(),
+        flickr: this.form.flickr.trim(),
+        siteWeb: this.form.siteWeb.trim(),
+        visibilite: this.form.visibilite,
       });
       this.saved.set(true);
       setTimeout(() => this.saved.set(false), 3000);
@@ -145,7 +154,10 @@ export class MembreProfil implements OnInit {
       await this.authService.changePassword(this.pwForm.current, this.pwForm.newPw);
       this.pwSaved.set(true);
       this.pwForm = { current: '', newPw: '', confirm: '' };
-      setTimeout(() => { this.pwSaved.set(false); this.pwModalOpen.set(false); }, 1500);
+      setTimeout(() => {
+        this.pwSaved.set(false);
+        this.pwModalOpen.set(false);
+      }, 1500);
     } catch (e: unknown) {
       const code = (e as { code?: string })?.code;
       if (code === 'auth/wrong-password' || code === 'auth/invalid-credential') {
@@ -165,7 +177,7 @@ export class MembreProfil implements OnInit {
     const compressed = await compressImage(file, COMPRESS_AVATAR);
     this.profilFile.set(compressed);
     const reader = new FileReader();
-    reader.onload = e => this.profilPreviewUrl.set(e.target?.result as string);
+    reader.onload = (e) => this.profilPreviewUrl.set(e.target?.result as string);
     reader.readAsDataURL(compressed);
   }
 
@@ -181,14 +193,14 @@ export class MembreProfil implements OnInit {
     if (!file || !profile || this.uploadingProfil()) return;
     this.uploadingProfil.set(true);
     this.authService.uploadUserPhoto(profile.uid, file, 'profil').subscribe({
-      next: async state => {
+      next: async (state) => {
         if (state.state === 'done' && state.url) {
           await this.authService.updateProfile(profile.uid, { photoProfilUrl: state.url });
           this.cancelProfil();
           this.uploadingProfil.set(false);
         }
       },
-      error: () => this.uploadingProfil.set(false)
+      error: () => this.uploadingProfil.set(false),
     });
   }
 
@@ -199,7 +211,7 @@ export class MembreProfil implements OnInit {
     const compressed = await compressImage(file, COMPRESS_BANDEAU);
     this.bandeauFile.set(compressed);
     const reader = new FileReader();
-    reader.onload = e => this.bandeauPreviewUrl.set(e.target?.result as string);
+    reader.onload = (e) => this.bandeauPreviewUrl.set(e.target?.result as string);
     reader.readAsDataURL(compressed);
   }
 
@@ -215,14 +227,14 @@ export class MembreProfil implements OnInit {
     if (!file || !profile || this.uploadingBandeau()) return;
     this.uploadingBandeau.set(true);
     this.authService.uploadUserPhoto(profile.uid, file, 'bandeau').subscribe({
-      next: async state => {
+      next: async (state) => {
         if (state.state === 'done' && state.url) {
           await this.authService.updateProfile(profile.uid, { photoBandeauUrl: state.url });
           this.cancelBandeau();
           this.uploadingBandeau.set(false);
         }
       },
-      error: () => this.uploadingBandeau.set(false)
+      error: () => this.uploadingBandeau.set(false),
     });
   }
 }

@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -12,9 +12,17 @@ import { MatButtonModule } from '@angular/material/button';
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+  ],
   templateUrl: './register.component.html',
-  styleUrl: './register.component.css'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './register.component.css',
 })
 export class RegisterComponent {
   private authService = inject(AuthService);

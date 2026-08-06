@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { SlicePipe } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
@@ -20,18 +20,22 @@ const PAGE = 8;
 @Component({
   selector: 'app-reunions',
   imports: [
-    SlicePipe, ReactiveFormsModule,
-    MatFormFieldModule, MatInputModule,
-    MatButtonModule, MatIconModule,
+    SlicePipe,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
     DatePickerComponent,
   ],
   templateUrl: './reunions.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './reunions.css',
 })
 export class Reunions {
-  private service       = inject(ReunionService);
-  private docService    = inject(DocumentService);
-  private authService   = inject(AuthService);
+  private service = inject(ReunionService);
+  private docService = inject(DocumentService);
+  private authService = inject(AuthService);
   private confirmService = inject(ConfirmService);
 
   private readonly todayStr = (() => {
@@ -50,21 +54,21 @@ export class Reunions {
   private flashTimer: ReturnType<typeof setTimeout> | null = null;
 
   // --- Documents ---
-  docsByReunion   = signal<Record<string, ClubDocument[]>>({});
-  uploadingFor    = signal<string | null>(null);
-  uploadProgress  = signal<number>(0);
-  pickerOpenFor   = signal<string | null>(null);
-  pickerDocs      = signal<ClubDocument[]>([]);
-  pickerLoading   = signal(false);
-  pickerSearch    = signal('');
-  liaisonLoading  = signal(false);
+  docsByReunion = signal<Record<string, ClubDocument[]>>({});
+  uploadingFor = signal<string | null>(null);
+  uploadProgress = signal<number>(0);
+  pickerOpenFor = signal<string | null>(null);
+  pickerDocs = signal<ClubDocument[]>([]);
+  pickerLoading = signal(false);
+  pickerSearch = signal('');
+  liaisonLoading = signal(false);
   private reunionDossierId: string | null = null;
 
   filteredPickerDocs = computed(() => {
     const q = this.pickerSearch().toLowerCase().trim();
     if (!q) return this.pickerDocs();
-    return this.pickerDocs().filter(d =>
-      d.nom.toLowerCase().includes(q) || d.extension.toLowerCase().includes(q)
+    return this.pickerDocs().filter(
+      (d) => d.nom.toLowerCase().includes(q) || d.extension.toLowerCase().includes(q),
     );
   });
 
@@ -73,26 +77,28 @@ export class Reunions {
 
   private aVenirAll = computed(() =>
     this.reunions()
-      .filter(r => r.date >= this.todayStr)
-      .sort((a, b) => a.date.localeCompare(b.date))
+      .filter((r) => r.date >= this.todayStr)
+      .sort((a, b) => a.date.localeCompare(b.date)),
   );
   private passesAll = computed(() =>
     this.reunions()
-      .filter(r => r.date < this.todayStr)
-      .sort((a, b) => b.date.localeCompare(a.date))
+      .filter((r) => r.date < this.todayStr)
+      .sort((a, b) => b.date.localeCompare(a.date)),
   );
 
-  aVenir        = computed(() => this.aVenirAll().slice(0, this.limitAVenir()));
-  passes        = computed(() => this.passesAll().slice(0, this.limitPasses()));
-  aVenirCount   = computed(() => this.aVenirAll().length);
-  passesCount   = computed(() => this.passesAll().length);
+  aVenir = computed(() => this.aVenirAll().slice(0, this.limitAVenir()));
+  passes = computed(() => this.passesAll().slice(0, this.limitPasses()));
+  aVenirCount = computed(() => this.aVenirAll().length);
+  passesCount = computed(() => this.passesAll().length);
   hasMoreAVenir = computed(() => this.limitAVenir() < this.aVenirAll().length);
   hasMorePasses = computed(() => this.limitPasses() < this.passesAll().length);
 
   createForm = this.buildForm();
-  editForm   = this.buildForm();
+  editForm = this.buildForm();
 
-  constructor() { this.loadReunions(); }
+  constructor() {
+    this.loadReunions();
+  }
 
   private async loadReunions() {
     const list = await firstValueFrom(this.service.getReunions());
@@ -106,7 +112,9 @@ export class Reunions {
     this.expandedId.set(null);
   }
 
-  cancelCreate() { this.showCreateForm.set(false); }
+  cancelCreate() {
+    this.showCreateForm.set(false);
+  }
 
   async creer() {
     if (this.createForm.invalid) return;
@@ -116,18 +124,26 @@ export class Reunions {
       await this.service.creer({
         titre: v.titre.trim(),
         date: v.date,
-        ...(v.lieu.trim()        ? { lieu: v.lieu.trim() }               : {}),
+        ...(v.lieu.trim() ? { lieu: v.lieu.trim() } : {}),
         ...(v.description.trim() ? { description: v.description.trim() } : {}),
       });
       this.showCreateForm.set(false);
       this.createForm.reset();
       await this.loadReunions();
-    } finally { this.saving.set(false); }
+    } finally {
+      this.saving.set(false);
+    }
   }
 
   toggleExpand(id: string) {
-    if (this.editingId() === id) { this.cancelEdit(); return; }
-    if (this.editingId() !== null) { this.triggerFlash(); return; }
+    if (this.editingId() === id) {
+      this.cancelEdit();
+      return;
+    }
+    if (this.editingId() !== null) {
+      this.triggerFlash();
+      return;
+    }
     const newId = this.expandedId() === id ? null : id;
     this.expandedId.set(newId);
     this.pickerOpenFor.set(null);
@@ -155,22 +171,30 @@ export class Reunions {
     this.expandedId.set(r.id);
   }
 
-  cancelEdit() { this.editingId.set(null); }
+  cancelEdit() {
+    this.editingId.set(null);
+  }
 
   async sauvegarder(id: string) {
     if (this.editForm.invalid) return;
     this.saving.set(true);
     try {
       const v = this.editForm.getRawValue();
-      const oldReunion = this.reunions().find(r => r.id === id);
-      await this.service.modifier(id, {
-        titre:       v.titre.trim(),
-        date:        v.date,
-        lieu:        v.lieu.trim(),
-        description: v.description.trim(),
-      }, oldReunion ? { oldDate: oldReunion.date, titre: v.titre.trim() } : undefined);
+      const oldReunion = this.reunions().find((r) => r.id === id);
+      await this.service.modifier(
+        id,
+        {
+          titre: v.titre.trim(),
+          date: v.date,
+          lieu: v.lieu.trim(),
+          description: v.description.trim(),
+        },
+        oldReunion ? { oldDate: oldReunion.date, titre: v.titre.trim() } : undefined,
+      );
       this.editingId.set(null);
-    } finally { this.saving.set(false); }
+    } finally {
+      this.saving.set(false);
+    }
   }
 
   async supprimer(r: Reunion) {
@@ -183,14 +207,18 @@ export class Reunions {
 
   // --- Méthodes documents ---
 
-  reunionDocs(reunionId: string): ClubDocument[] { return this.docsByReunion()[reunionId] ?? []; }
+  reunionDocs(reunionId: string): ClubDocument[] {
+    return this.docsByReunion()[reunionId] ?? [];
+  }
 
-  extMeta(ext: string) { return getExtensionMeta(ext); }
+  extMeta(ext: string) {
+    return getExtensionMeta(ext);
+  }
 
   private async loadDocs(reunionId: string) {
     const docs = await firstValueFrom(this.docService.getDocumentsByReunion(reunionId));
     docs.sort((a, b) => a.dateCreation.localeCompare(b.dateCreation));
-    this.docsByReunion.update(m => ({ ...m, [reunionId]: docs }));
+    this.docsByReunion.update((m) => ({ ...m, [reunionId]: docs }));
   }
 
   async onFileSelected(event: Event, reunion: Reunion) {
@@ -211,13 +239,16 @@ export class Reunions {
       const ext = extractExtension(file.name);
       const nom = file.name.slice(0, file.name.lastIndexOf('.')) || file.name;
       const docId = this.docService.generateDocId();
-      const { url, storagePath } = await this.docService.uploadFile(
-        docId, file, file.name,
-        pct => this.uploadProgress.set(pct)
+      const { url, storagePath } = await this.docService.uploadFile(docId, file, file.name, (pct) =>
+        this.uploadProgress.set(pct),
       );
       await this.docService.createDocument(docId, {
-        nom, extension: ext, taille: file.size, dossier,
-        storagePath, url,
+        nom,
+        extension: ext,
+        taille: file.size,
+        dossier,
+        storagePath,
+        url,
         uploadeurUid: profile.uid,
         uploadeurNom: `${profile.prenom ?? ''} ${profile.nom}`.trim(),
         dateCreation: new Date().toISOString(),
@@ -235,7 +266,7 @@ export class Reunions {
     if (this.reunionDossierId) return this.reunionDossierId;
     const nom = 'Réunions';
     const dossiers = await firstValueFrom(this.docService.getDossiers());
-    if (!dossiers.find(d => d.nom === nom)) {
+    if (!dossiers.find((d) => d.nom === nom)) {
       await this.docService.addDossier(nom, dossiers.length);
     }
     // dossier stocke le nom (pas l'id) — convention du composant documents
@@ -244,13 +275,16 @@ export class Reunions {
   }
 
   async openPicker(reunionId: string) {
-    if (this.pickerOpenFor() === reunionId) { this.pickerOpenFor.set(null); return; }
+    if (this.pickerOpenFor() === reunionId) {
+      this.pickerOpenFor.set(null);
+      return;
+    }
     this.pickerSearch.set('');
     this.pickerOpenFor.set(reunionId);
     this.pickerLoading.set(true);
     try {
       const all = await firstValueFrom(this.docService.getDocumentsOnce());
-      this.pickerDocs.set(all.filter(d => !d.reunionId && (!d.type || d.type === 'general')));
+      this.pickerDocs.set(all.filter((d) => !d.reunionId && (!d.type || d.type === 'general')));
     } finally {
       this.pickerLoading.set(false);
     }
@@ -271,9 +305,10 @@ export class Reunions {
   }
 
   async retirerDoc(reunionId: string, d: ClubDocument) {
-    const msg = d.type === 'reunion'
-      ? `Supprimer définitivement « ${d.nom} » ?`
-      : `Retirer le lien vers « ${d.nom} » ? Le document restera dans la bibliothèque.`;
+    const msg =
+      d.type === 'reunion'
+        ? `Supprimer définitivement « ${d.nom} » ?`
+        : `Retirer le lien vers « ${d.nom} » ? Le document restera dans la bibliothèque.`;
     const ok = await this.confirmService.confirm(msg);
     if (!ok) return;
     if (d.type === 'reunion') {
@@ -285,18 +320,30 @@ export class Reunions {
     await this.loadDocs(reunionId);
   }
 
-  loadMoreAVenir() { this.limitAVenir.update(n => n + PAGE); }
-  loadMorePasses()  { this.limitPasses.update(n => n + PAGE); }
+  loadMoreAVenir() {
+    this.limitAVenir.update((n) => n + PAGE);
+  }
+  loadMorePasses() {
+    this.limitPasses.update((n) => n + PAGE);
+  }
 
-  monthOf(date: string): string { return date.slice(0, 7); }
+  monthOf(date: string): string {
+    return date.slice(0, 7);
+  }
 
   formatMonth(date: string): string {
-    return new Date(date + 'T00:00:00').toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+    return new Date(date + 'T00:00:00').toLocaleDateString('fr-FR', {
+      month: 'long',
+      year: 'numeric',
+    });
   }
 
   formatDateFull(date: string): string {
     return new Date(date + 'T12:00:00').toLocaleDateString('fr-FR', {
-      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
     });
   }
 
@@ -306,9 +353,9 @@ export class Reunions {
 
   private buildForm() {
     return new FormGroup({
-      titre:       new FormControl('', { validators: [Validators.required], nonNullable: true }),
-      date:        new FormControl('', { validators: [Validators.required], nonNullable: true }),
-      lieu:        new FormControl('', { nonNullable: true }),
+      titre: new FormControl('', { validators: [Validators.required], nonNullable: true }),
+      date: new FormControl('', { validators: [Validators.required], nonNullable: true }),
+      lieu: new FormControl('', { nonNullable: true }),
       description: new FormControl('', { nonNullable: true }),
     });
   }

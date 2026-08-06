@@ -1,7 +1,8 @@
-import { Injectable, inject, Injector, runInInjectionContext, signal } from '@angular/core';
-import { Firestore, collection, doc, getDocs, deleteDoc, updateDoc } from '@angular/fire/firestore';
-import { Storage, ref, deleteObject, listAll } from '@angular/fire/storage';
+import { Injectable, inject, signal } from '@angular/core';
+import { collection, doc, getDocs, deleteDoc, updateDoc } from 'firebase/firestore';
+import { ref, deleteObject, listAll } from 'firebase/storage';
 import { firstValueFrom } from 'rxjs';
+import { db, storage } from '../utils/firebase';
 import { ThemeService } from './theme.service';
 import { OneShotService } from './oneshot.service';
 import { DefiService } from './defi.service';
@@ -36,9 +37,6 @@ export interface CleanupProgress {
 
 @Injectable({ providedIn: 'root' })
 export class CleanupService {
-  private firestore     = inject(Firestore);
-  private storage       = inject(Storage);
-  private injector      = inject(Injector);
   private themeService   = inject(ThemeService);
   private osService      = inject(OneShotService);
   private defiService    = inject(DefiService);
@@ -56,17 +54,13 @@ export class CleanupService {
   }
 
   private async deleteVotes(collPath: string): Promise<void> {
-    const snap = await runInInjectionContext(this.injector, () =>
-      getDocs(collection(this.firestore, collPath))
-    );
+    const snap = await getDocs(collection(db, collPath));
     if (snap.empty) return;
-    await Promise.all(snap.docs.map(d => runInInjectionContext(this.injector, () => deleteDoc(d.ref))));
+    await Promise.all(snap.docs.map(d => deleteDoc(d.ref)));
   }
 
   private async listStorageFiles(prefix: string): Promise<string[]> {
-    const result = await runInInjectionContext(this.injector, () =>
-      listAll(ref(this.storage, prefix))
-    );
+    const result = await listAll(ref(storage, prefix));
     const files = result.items.map(item => item.fullPath);
     for (const subDir of result.prefixes) {
       files.push(...await this.listStorageFiles(subDir.fullPath));
@@ -138,9 +132,7 @@ export class CleanupService {
   // ── One-shots ────────────────────────────────────────────────────────────
 
   private async getAllOneShotsOnce(): Promise<OneShot[]> {
-    const snap = await runInInjectionContext(this.injector, () =>
-      getDocs(collection(this.firestore, 'oneshots'))
-    );
+    const snap = await getDocs(collection(db, 'oneshots'));
     return snap.docs.map(d => ({ id: d.id, ...d.data() } as OneShot));
   }
 
@@ -312,9 +304,7 @@ export class CleanupService {
         photosDeleted++;
       }
       if (photos.length > 0 && sortie.photoCouvertureUrl) {
-        await runInInjectionContext(this.injector, () =>
-          updateDoc(doc(this.firestore, 'sorties', sortie.id), { photoCouvertureUrl: null })
-        );
+        await updateDoc(doc(db, 'sorties', sortie.id), { photoCouvertureUrl: null });
       }
     }
     this.progress.set(null);
@@ -426,9 +416,7 @@ export class CleanupService {
       const path = full.orphanPaths[i];
       this.progress.set({ label: path, current: i + 1, total: full.orphanPaths.length });
       try {
-        await runInInjectionContext(this.injector, () =>
-          deleteObject(ref(this.storage, path))
-        );
+        await deleteObject(ref(storage, path));
         deleted++;
       } catch { /* fichier déjà absent, on continue */ }
     }

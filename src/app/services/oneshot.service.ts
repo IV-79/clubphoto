@@ -1,11 +1,12 @@
-import { Injectable, inject, Injector, runInInjectionContext } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {
-  Firestore, collection, collectionData, collectionGroup, doc, docData,
-  addDoc, updateDoc, deleteDoc, setDoc, query, where, orderBy, arrayUnion, arrayRemove, increment, getDocs, getDoc, deleteField
-} from '@angular/fire/firestore';
-import { Storage, ref, uploadBytes, uploadBytesResumable, getDownloadURL, deleteObject } from '@angular/fire/storage';
+  collection, collectionGroup, doc, addDoc, updateDoc, deleteDoc, setDoc,
+  query, where, orderBy, arrayUnion, arrayRemove, increment, getDocs, getDoc, deleteField
+} from 'firebase/firestore';
+import { ref, uploadBytes, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
 import { Observable, from } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { db, storage, collectionStream, docStream } from '../utils/firebase';
 import {
   OneShot, OneShotTheme, OneShotInscription,
   OneShotPhoto, OneShotVote, OneShotStatut
@@ -25,101 +26,74 @@ export interface OneShotUploadState {
 
 @Injectable({ providedIn: 'root' })
 export class OneShotService {
-  private firestore     = inject(Firestore);
-  private storage       = inject(Storage);
-  private injector      = inject(Injector);
-  private notifService  = inject(NotificationService);
+  private notifService = inject(NotificationService);
 
   // --- OneShot ---
 
   async create(data: { titre: string; description?: string; lieu?: string; creatorUid: string; nomCreateur: string; date?: string; visibilite?: 'public' | 'membre' }): Promise<string> {
-    const ref = await runInInjectionContext(this.injector, () =>
-      addDoc(collection(this.firestore, 'oneshots'), {
-        ...data,
-        statut: 'preparation' as OneShotStatut,
-        dateCreation: new Date().toISOString(),
-      })
-    );
+    const ref = await addDoc(collection(db, 'oneshots'), {
+      ...data,
+      statut: 'preparation' as OneShotStatut,
+      dateCreation: new Date().toISOString(),
+    });
     return ref.id;
   }
 
   getOneShot(id: string): Observable<OneShot> {
-    return runInInjectionContext(this.injector, () =>
-      docData(doc(this.firestore, 'oneshots', id), { idField: 'id' })
-    ) as Observable<OneShot>;
+    return docStream<OneShot>(doc(db, 'oneshots', id), 'id') as Observable<OneShot>;
   }
 
   getMyOneShots(uid: string): Observable<OneShot[]> {
-    const q = query(
-      collection(this.firestore, 'oneshots'),
-      where('creatorUid', '==', uid),
-      orderBy('dateCreation', 'desc')
-    );
-    return runInInjectionContext(this.injector, () =>
-      collectionData(q, { idField: 'id' })
-    ) as Observable<OneShot[]>;
+    const q = query(collection(db, 'oneshots'), where('creatorUid', '==', uid), orderBy('dateCreation', 'desc'));
+    return collectionStream<OneShot>(q, 'id');
   }
 
   getPublicOneShots(): Observable<OneShot[]> {
-    const q = query(
-      collection(this.firestore, 'oneshots'),
-      where('statut', 'in', ['inscription', 'fermeture_inscriptions', 'vote', 'resultats'])
-    );
-    return runInInjectionContext(this.injector, () =>
-      collectionData(q, { idField: 'id' })
-    ) as Observable<OneShot[]>;
+    const q = query(collection(db, 'oneshots'),
+      where('statut', 'in', ['inscription', 'fermeture_inscriptions', 'vote', 'resultats']));
+    return collectionStream<OneShot>(q, 'id');
   }
 
   getPublicOneShotsOnce(): Observable<OneShot[]> {
-    const q = query(
-      collection(this.firestore, 'oneshots'),
-      where('statut', 'in', ['inscription', 'fermeture_inscriptions', 'vote', 'resultats'])
-    );
-    return from(runInInjectionContext(this.injector, () => getDocs(q)))
-      .pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as OneShot))));
+    const q = query(collection(db, 'oneshots'),
+      where('statut', 'in', ['inscription', 'fermeture_inscriptions', 'vote', 'resultats']));
+    return from(getDocs(q)).pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as OneShot))));
   }
 
   getMyOneShotsOnce(uid: string): Observable<OneShot[]> {
-    return from(runInInjectionContext(this.injector, () =>
-      getDocs(query(collection(this.firestore, 'oneshots'),
-        where('creatorUid', '==', uid), orderBy('dateCreation', 'desc')))
-    )).pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as OneShot))));
+    return from(getDocs(query(collection(db, 'oneshots'),
+      where('creatorUid', '==', uid), orderBy('dateCreation', 'desc'))))
+      .pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as OneShot))));
   }
 
   getOneShotOnce(id: string): Observable<OneShot | undefined> {
-    return from(runInInjectionContext(this.injector, () =>
-      getDoc(doc(this.firestore, 'oneshots', id))
-    )).pipe(map(d => d.exists() ? { id: d.id, ...d.data() } as OneShot : undefined));
+    return from(getDoc(doc(db, 'oneshots', id)))
+      .pipe(map(d => d.exists() ? { id: d.id, ...d.data() } as OneShot : undefined));
   }
 
   getThemesOnce(oneShotId: string): Observable<OneShotTheme[]> {
-    return from(runInInjectionContext(this.injector, () =>
-      getDocs(query(collection(this.firestore, `oneshots/${oneShotId}/themes`), orderBy('ordre')))
-    )).pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as OneShotTheme))));
+    return from(getDocs(query(collection(db, `oneshots/${oneShotId}/themes`), orderBy('ordre'))))
+      .pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as OneShotTheme))));
   }
 
   getPhotosOnce(oneShotId: string): Observable<OneShotPhoto[]> {
-    return from(runInInjectionContext(this.injector, () =>
-      getDocs(collection(this.firestore, `oneshots/${oneShotId}/photos`))
-    )).pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as OneShotPhoto))));
+    return from(getDocs(collection(db, `oneshots/${oneShotId}/photos`)))
+      .pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as OneShotPhoto))));
   }
 
   getInscriptionsOnce(oneShotId: string): Observable<OneShotInscription[]> {
-    return from(runInInjectionContext(this.injector, () =>
-      getDocs(collection(this.firestore, `oneshots/${oneShotId}/inscriptions`))
-    )).pipe(map(snap => snap.docs.map(d => d.data() as OneShotInscription)));
+    return from(getDocs(collection(db, `oneshots/${oneShotId}/inscriptions`)))
+      .pipe(map(snap => snap.docs.map(d => d.data() as OneShotInscription)));
   }
 
   getMyVotesOnce(oneShotId: string, voterUid: string): Observable<OneShotVote[]> {
-    return from(runInInjectionContext(this.injector, () =>
-      getDocs(query(collection(this.firestore, `oneshots/${oneShotId}/votes`), where('voterUid', '==', voterUid)))
-    )).pipe(map(snap => snap.docs.map(d => d.data() as OneShotVote)));
+    return from(getDocs(query(collection(db, `oneshots/${oneShotId}/votes`), where('voterUid', '==', voterUid))))
+      .pipe(map(snap => snap.docs.map(d => d.data() as OneShotVote)));
   }
 
   getAllVotesOnce(oneShotId: string): Observable<OneShotVote[]> {
-    return from(runInInjectionContext(this.injector, () =>
-      getDocs(collection(this.firestore, `oneshots/${oneShotId}/votes`))
-    )).pipe(map(snap => snap.docs.map(d => d.data() as OneShotVote)));
+    return from(getDocs(collection(db, `oneshots/${oneShotId}/votes`)))
+      .pipe(map(snap => snap.docs.map(d => d.data() as OneShotVote)));
   }
 
   async updateDate(
@@ -127,9 +101,7 @@ export class OneShotService {
     date: string,
     notifCtx?: { oldDate: string; titre: string; nomCreateur: string; creatorUid: string }
   ): Promise<void> {
-    await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, 'oneshots', id), { date })
-    );
+    await updateDoc(doc(db, 'oneshots', id), { date });
     if (notifCtx && date && date !== notifCtx.oldDate) {
       const dateStr = new Date(date + 'T00:00:00').toLocaleDateString('fr-FR', {
         weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
@@ -142,85 +114,68 @@ export class OneShotService {
   }
 
   async updateLieu(id: string, lieu: string): Promise<void> {
-    await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, 'oneshots', id), { lieu })
-    );
+    await updateDoc(doc(db, 'oneshots', id), { lieu });
   }
 
   async updateTitre(id: string, titre: string): Promise<void> {
-    await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, 'oneshots', id), { titre: titre.trim() })
-    );
+    await updateDoc(doc(db, 'oneshots', id), { titre: titre.trim() });
   }
 
   async updateDescription(id: string, description: string): Promise<void> {
     const value = description.trim();
-    await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, 'oneshots', id), { description: value || deleteField() })
-    );
+    await updateDoc(doc(db, 'oneshots', id), { description: value || deleteField() });
   }
 
   async updateVisibilite(id: string, visibilite: 'public' | 'membre'): Promise<void> {
-    await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, 'oneshots', id), { visibilite })
-    );
+    await updateDoc(doc(db, 'oneshots', id), { visibilite });
   }
 
   async setCouverture(id: string, file: File): Promise<void> {
     const path = `oneshots/${id}/couverture`;
-    const storageRef = ref(this.storage, path);
+    const storageRef = ref(storage, path);
     await uploadBytes(storageRef, file);
     const url = await getDownloadURL(storageRef);
-    await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, 'oneshots', id), { photoCouvertureUrl: url, photoCouverturePath: path })
-    );
+    await updateDoc(doc(db, 'oneshots', id), { photoCouvertureUrl: url, photoCouverturePath: path });
   }
 
   async removeCouverture(id: string, path: string): Promise<void> {
-    await deleteObject(ref(this.storage, path)).catch(() => {});
-    await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, 'oneshots', id), {
-        photoCouvertureUrl: deleteField(),
-        photoCouverturePath: deleteField(),
-      })
-    );
+    await deleteObject(ref(storage, path)).catch(() => {});
+    await updateDoc(doc(db, 'oneshots', id), {
+      photoCouvertureUrl: deleteField(),
+      photoCouverturePath: deleteField(),
+    });
   }
 
   async deleteOneShot(
     id: string,
     notifCtx?: { titre: string; nomCreateur: string; creatorUid: string; photoCouverturePath?: string }
   ): Promise<void> {
-    const [oneShotSnap, photosSnap, inscritsSnap, themesSnap, votesSnap] = await runInInjectionContext(this.injector, () =>
-      Promise.all([
-        getDoc(doc(this.firestore, 'oneshots', id)),
-        getDocs(collection(this.firestore, `oneshots/${id}/photos`)),
-        getDocs(collection(this.firestore, `oneshots/${id}/inscriptions`)),
-        getDocs(collection(this.firestore, `oneshots/${id}/themes`)),
-        getDocs(collection(this.firestore, `oneshots/${id}/votes`)),
-      ])
-    );
+    const [oneShotSnap, photosSnap, inscritsSnap, themesSnap, votesSnap] = await Promise.all([
+      getDoc(doc(db, 'oneshots', id)),
+      getDocs(collection(db, `oneshots/${id}/photos`)),
+      getDocs(collection(db, `oneshots/${id}/inscriptions`)),
+      getDocs(collection(db, `oneshots/${id}/themes`)),
+      getDocs(collection(db, `oneshots/${id}/votes`)),
+    ]);
     const oneShotData = oneShotSnap.data() as { photoCouverturePath?: string } | undefined;
 
     const storageDeletions: Promise<void>[] = [];
     for (const p of photosSnap.docs) {
       const d = p.data();
-      if (d['storagePath'])   storageDeletions.push(deleteObject(ref(this.storage, d['storagePath'])).catch(() => {}));
-      if (d['thumbnailPath']) storageDeletions.push(deleteObject(ref(this.storage, d['thumbnailPath'])).catch(() => {}));
+      if (d['storagePath'])   storageDeletions.push(deleteObject(ref(storage, d['storagePath'])).catch(() => {}));
+      if (d['thumbnailPath']) storageDeletions.push(deleteObject(ref(storage, d['thumbnailPath'])).catch(() => {}));
     }
     const coverPath = oneShotData?.photoCouverturePath ?? notifCtx?.photoCouverturePath;
-    if (coverPath) storageDeletions.push(deleteObject(ref(this.storage, coverPath)).catch(() => {}));
+    if (coverPath) storageDeletions.push(deleteObject(ref(storage, coverPath)).catch(() => {}));
 
-    const firestoreDeletes = [
-      ...photosSnap.docs.map(p  => runInInjectionContext(this.injector, () => deleteDoc(p.ref))),
-      ...inscritsSnap.docs.map(p => runInInjectionContext(this.injector, () => deleteDoc(p.ref))),
-      ...themesSnap.docs.map(p   => runInInjectionContext(this.injector, () => deleteDoc(p.ref))),
-      ...votesSnap.docs.map(p    => runInInjectionContext(this.injector, () => deleteDoc(p.ref))),
-    ];
-
-    await Promise.all([...storageDeletions, ...firestoreDeletes]);
-    await runInInjectionContext(this.injector, () =>
-      deleteDoc(doc(this.firestore, 'oneshots', id))
-    );
+    await Promise.all([
+      ...storageDeletions,
+      ...photosSnap.docs.map(p  => deleteDoc(p.ref)),
+      ...inscritsSnap.docs.map(p => deleteDoc(p.ref)),
+      ...themesSnap.docs.map(p   => deleteDoc(p.ref)),
+      ...votesSnap.docs.map(p    => deleteDoc(p.ref)),
+    ]);
+    await deleteDoc(doc(db, 'oneshots', id));
     if (notifCtx && inscritsSnap.docs.length > 0) {
       const msg = `Le OneShot « ${notifCtx.titre} » auquel vous étiez inscrit(e) a été annulé.`;
       Promise.all(
@@ -243,9 +198,7 @@ export class OneShotService {
     if (statut === 'resultats') {
       update['datePassageResultats'] = new Date().toISOString().slice(0, 10);
     }
-    await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, 'oneshots', id), update)
-    );
+    await updateDoc(doc(db, 'oneshots', id), update);
     if (notifCtx) {
       const msgs: Partial<Record<OneShotStatut, string>> = {
         inscription:  `${notifCtx.nomCreateur} a ouvert les inscriptions pour le OneShot « ${notifCtx.titre} »`,
@@ -266,85 +219,56 @@ export class OneShotService {
   // --- Thèmes ---
 
   getThemes(oneShotId: string): Observable<OneShotTheme[]> {
-    const q = query(
-      collection(this.firestore, `oneshots/${oneShotId}/themes`),
-      orderBy('ordre')
-    );
-    return runInInjectionContext(this.injector, () =>
-      collectionData(q, { idField: 'id' })
-    ) as Observable<OneShotTheme[]>;
+    const q = query(collection(db, `oneshots/${oneShotId}/themes`), orderBy('ordre'));
+    return collectionStream<OneShotTheme>(q, 'id');
   }
 
   async addTheme(oneShotId: string, nom: string, ordre: number): Promise<void> {
-    await runInInjectionContext(this.injector, () =>
-      addDoc(collection(this.firestore, `oneshots/${oneShotId}/themes`), { nom, ordre })
-    );
-    await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, 'oneshots', oneShotId), { nbThemes: increment(1) })
-    ).catch(() => {});
+    await addDoc(collection(db, `oneshots/${oneShotId}/themes`), { nom, ordre });
+    updateDoc(doc(db, 'oneshots', oneShotId), { nbThemes: increment(1) }).catch(() => {});
   }
 
   async updateTheme(oneShotId: string, themeId: string, nom: string): Promise<void> {
-    await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, `oneshots/${oneShotId}/themes`, themeId), { nom })
-    );
+    await updateDoc(doc(db, `oneshots/${oneShotId}/themes`, themeId), { nom });
   }
 
   async deleteTheme(oneShotId: string, themeId: string): Promise<void> {
-    await runInInjectionContext(this.injector, () =>
-      deleteDoc(doc(this.firestore, `oneshots/${oneShotId}/themes`, themeId))
-    );
-    await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, 'oneshots', oneShotId), { nbThemes: increment(-1) })
-    ).catch(() => {});
+    await deleteDoc(doc(db, `oneshots/${oneShotId}/themes`, themeId));
+    updateDoc(doc(db, 'oneshots', oneShotId), { nbThemes: increment(-1) }).catch(() => {});
   }
 
   // --- Inscriptions ---
 
   getMesOneShotsInscritsIds(uid: string): Observable<string[]> {
-    return runInInjectionContext(this.injector, () => {
-      const q = query(collectionGroup(this.firestore, 'inscriptions'), where('uid', '==', uid));
-      return from(getDocs(q)).pipe(
-        map(snap => snap.docs
-          .filter(d => d.ref.parent.parent?.path.startsWith('oneshots/'))
-          .map(d => d.ref.parent.parent!.id)
-        )
-      );
-    });
+    const q = query(collectionGroup(db, 'inscriptions'), where('uid', '==', uid));
+    return from(getDocs(q)).pipe(
+      map(snap => snap.docs
+        .filter(d => d.ref.parent.parent?.path.startsWith('oneshots/'))
+        .map(d => d.ref.parent.parent!.id)
+      )
+    );
   }
 
   getInscriptions(oneShotId: string): Observable<OneShotInscription[]> {
-    return runInInjectionContext(this.injector, () =>
-      collectionData(collection(this.firestore, `oneshots/${oneShotId}/inscriptions`))
-    ) as Observable<OneShotInscription[]>;
+    return collectionStream<OneShotInscription>(collection(db, `oneshots/${oneShotId}/inscriptions`));
   }
 
   async inscrire(oneShotId: string, uid: string, nomMembre: string): Promise<void> {
-    await runInInjectionContext(this.injector, () =>
-      setDoc(doc(this.firestore, `oneshots/${oneShotId}/inscriptions`, uid), {
-        uid, nomMembre, dateInscription: new Date().toISOString(),
-      })
-    );
-    await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, 'oneshots', oneShotId), { nbInscrits: increment(1) })
-    ).catch(() => {});
+    await setDoc(doc(db, `oneshots/${oneShotId}/inscriptions`, uid), {
+      uid, nomMembre, dateInscription: new Date().toISOString(),
+    });
+    updateDoc(doc(db, 'oneshots', oneShotId), { nbInscrits: increment(1) }).catch(() => {});
   }
 
   async desinscrire(oneShotId: string, uid: string): Promise<void> {
-    await runInInjectionContext(this.injector, () =>
-      deleteDoc(doc(this.firestore, `oneshots/${oneShotId}/inscriptions`, uid))
-    );
-    await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, 'oneshots', oneShotId), { nbInscrits: increment(-1) })
-    ).catch(() => {});
+    await deleteDoc(doc(db, `oneshots/${oneShotId}/inscriptions`, uid));
+    updateDoc(doc(db, 'oneshots', oneShotId), { nbInscrits: increment(-1) }).catch(() => {});
   }
 
   // --- Photos ---
 
   getPhotos(oneShotId: string): Observable<OneShotPhoto[]> {
-    return runInInjectionContext(this.injector, () =>
-      collectionData(collection(this.firestore, `oneshots/${oneShotId}/photos`), { idField: 'id' })
-    ) as Observable<OneShotPhoto[]>;
+    return collectionStream<OneShotPhoto>(collection(db, `oneshots/${oneShotId}/photos`), 'id');
   }
 
   uploadPhoto(
@@ -357,7 +281,7 @@ export class OneShotService {
       const ext = file.name.split('.').pop() ?? 'webp';
       const storagePath = `oneshots/${oneShotId}/${id}.${ext}`;
       const thumbPath   = `oneshots/${oneShotId}/${id}_thumb.${ext}`;
-      const storageRef = ref(this.storage, storagePath);
+      const storageRef = ref(storage, storagePath);
       const task = uploadBytesResumable(storageRef, file);
 
       task.on('state_changed',
@@ -368,7 +292,7 @@ export class OneShotService {
             getDownloadURL(task.snapshot.ref),
             compressImage(file, COMPRESS_THUMB),
           ]);
-          const thumbSnap = await uploadBytes(ref(this.storage, thumbPath), thumb);
+          const thumbSnap = await uploadBytes(ref(storage, thumbPath), thumb);
           const thumbnailUrl = await getDownloadURL(thumbSnap.ref);
           const data: Omit<OneShotPhoto, 'id'> = {
             url, storagePath, uploadedAt: new Date().toISOString(),
@@ -377,15 +301,11 @@ export class OneShotService {
             ...(meta.titre ? { titre: meta.titre } : {}),
             ...(hasExif(meta.exif) ? { exif: meta.exif } : {}),
           };
-          const docRef = await runInInjectionContext(this.injector, () =>
-            addDoc(collection(this.firestore, `oneshots/${oneShotId}/photos`), data)
-          );
+          const docRef = await addDoc(collection(db, `oneshots/${oneShotId}/photos`), data);
           if (meta.membreUid) {
-            await runInInjectionContext(this.injector, () =>
-              updateDoc(doc(this.firestore, 'users', meta.membreUid), {
-                'storageUsed.oneshots': increment(file.size),
-              })
-            ).catch(() => {});
+            updateDoc(doc(db, 'users', meta.membreUid), {
+              'storageUsed.oneshots': increment(file.size),
+            }).catch(() => {});
           }
           observer.next({ progress: 100, done: true, photo: { id: docRef.id, ...data } });
           observer.complete();
@@ -401,118 +321,90 @@ export class OneShotService {
     oldMembreUid?: string,
     fileSize?: number
   ): Promise<void> {
-    await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, `oneshots/${oneShotId}/photos`, photoId), data)
-    );
-    // La mise à jour cross-user de storageUsed est bloquée par les règles Firestore
-    // (allow write: if request.auth.uid == uid || isAdmin() — l'appel isAdmin() est
-    // interceptable). Le recalcul est délégué au bouton "Recalculer" dans admin/membre.
+    await updateDoc(doc(db, `oneshots/${oneShotId}/photos`, photoId), data);
   }
 
   async deletePhoto(oneShotId: string, photo: OneShotPhoto): Promise<void> {
     const deletes: Promise<unknown>[] = [
-      deleteObject(ref(this.storage, photo.storagePath)),
-      deleteDoc(doc(this.firestore, `oneshots/${oneShotId}/photos`, photo.id)),
+      deleteObject(ref(storage, photo.storagePath)),
+      deleteDoc(doc(db, `oneshots/${oneShotId}/photos`, photo.id)),
     ];
-    if (photo.thumbnailPath) deletes.push(deleteObject(ref(this.storage, photo.thumbnailPath)).catch(() => {}));
-    await runInInjectionContext(this.injector, () => Promise.all(deletes));
+    if (photo.thumbnailPath) deletes.push(deleteObject(ref(storage, photo.thumbnailPath)).catch(() => {}));
+    await Promise.all(deletes);
     if (photo.fileSize && photo.membreUid) {
-      await runInInjectionContext(this.injector, () =>
-        updateDoc(doc(this.firestore, 'users', photo.membreUid), {
-          'storageUsed.oneshots': increment(-photo.fileSize!),
-        })
-      ).catch(() => {});
+      updateDoc(doc(db, 'users', photo.membreUid), {
+        'storageUsed.oneshots': increment(-photo.fileSize!),
+      }).catch(() => {});
     }
   }
 
   // --- Votes ---
 
   getMyVotes(oneShotId: string, voterUid: string): Observable<OneShotVote[]> {
-    const q = query(
-      collection(this.firestore, `oneshots/${oneShotId}/votes`),
-      where('voterUid', '==', voterUid)
-    );
-    return runInInjectionContext(this.injector, () => collectionData(q)) as Observable<OneShotVote[]>;
+    const q = query(collection(db, `oneshots/${oneShotId}/votes`), where('voterUid', '==', voterUid));
+    return collectionStream<OneShotVote>(q);
   }
 
   getAllVotes(oneShotId: string): Observable<OneShotVote[]> {
-    return runInInjectionContext(this.injector, () =>
-      collectionData(collection(this.firestore, `oneshots/${oneShotId}/votes`))
-    ) as Observable<OneShotVote[]>;
+    return collectionStream<OneShotVote>(collection(db, `oneshots/${oneShotId}/votes`));
   }
 
   async vote(oneShotId: string, voterUid: string, themeId: string, photoId: string): Promise<void> {
-    await runInInjectionContext(this.injector, () =>
-      setDoc(doc(this.firestore, `oneshots/${oneShotId}/votes`, `${voterUid}_${themeId}`), {
-        voterUid, themeId, photoId, votedAt: new Date().toISOString(),
-      })
-    );
+    await setDoc(doc(db, `oneshots/${oneShotId}/votes`, `${voterUid}_${themeId}`), {
+      voterUid, themeId, photoId, votedAt: new Date().toISOString(),
+    });
   }
 
   async unvote(oneShotId: string, voterUid: string, themeId: string): Promise<void> {
-    await runInInjectionContext(this.injector, () =>
-      deleteDoc(doc(this.firestore, `oneshots/${oneShotId}/votes`, `${voterUid}_${themeId}`))
-    );
+    await deleteDoc(doc(db, `oneshots/${oneShotId}/votes`, `${voterUid}_${themeId}`));
   }
 
   // --- Likes ---
 
   async toggleLikePhoto(oneShotId: string, photoId: string, uid: string, currentlyLiked: boolean): Promise<void> {
-    await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, `oneshots/${oneShotId}/photos`, photoId), {
-        likes: currentlyLiked ? arrayRemove(uid) : arrayUnion(uid),
-      })
-    );
+    await updateDoc(doc(db, `oneshots/${oneShotId}/photos`, photoId), {
+      likes: currentlyLiked ? arrayRemove(uid) : arrayUnion(uid),
+    });
   }
 
   // --- Commentaires ---
 
   getCommentaires(oneShotId: string, photoId: string): Observable<Commentaire[]> {
     const q = query(
-      collection(this.firestore, `oneshots/${oneShotId}/photos/${photoId}/commentaires`),
+      collection(db, `oneshots/${oneShotId}/photos/${photoId}/commentaires`),
       orderBy('createdAt', 'asc')
     );
-    return from(runInInjectionContext(this.injector, () => getDocs(q))).pipe(
+    return from(getDocs(q)).pipe(
       map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as Commentaire)))
     );
   }
 
   async addCommentaire(oneShotId: string, photoId: string, data: { texte: string; auteurUid: string; nomAuteur: string }): Promise<void> {
-    await runInInjectionContext(this.injector, () =>
-      addDoc(collection(this.firestore, `oneshots/${oneShotId}/photos/${photoId}/commentaires`), {
-        ...data, likes: [], replies: [], createdAt: new Date().toISOString(),
-      })
-    );
+    await addDoc(collection(db, `oneshots/${oneShotId}/photos/${photoId}/commentaires`), {
+      ...data, likes: [], replies: [], createdAt: new Date().toISOString(),
+    });
   }
 
   async deleteCommentaire(oneShotId: string, photoId: string, commentId: string): Promise<void> {
-    await runInInjectionContext(this.injector, () =>
-      deleteDoc(doc(this.firestore, `oneshots/${oneShotId}/photos/${photoId}/commentaires`, commentId))
-    );
+    await deleteDoc(doc(db, `oneshots/${oneShotId}/photos/${photoId}/commentaires`, commentId));
   }
 
   async toggleLikeCommentaire(oneShotId: string, photoId: string, commentId: string, uid: string, currentlyLiked: boolean): Promise<void> {
-    await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, `oneshots/${oneShotId}/photos/${photoId}/commentaires`, commentId), {
-        likes: currentlyLiked ? arrayRemove(uid) : arrayUnion(uid),
-      })
-    );
+    await updateDoc(doc(db, `oneshots/${oneShotId}/photos/${photoId}/commentaires`, commentId), {
+      likes: currentlyLiked ? arrayRemove(uid) : arrayUnion(uid),
+    });
   }
 
   async addReply(oneShotId: string, photoId: string, commentId: string, reply: Omit<Reponse, 'id'>): Promise<void> {
     const replyWithId: Reponse = { ...reply, id: generateId() };
-    await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, `oneshots/${oneShotId}/photos/${photoId}/commentaires`, commentId), {
-        replies: arrayUnion(replyWithId),
-      })
-    );
+    await updateDoc(doc(db, `oneshots/${oneShotId}/photos/${photoId}/commentaires`, commentId), {
+      replies: arrayUnion(replyWithId),
+    });
   }
 
   async deleteReply(oneShotId: string, photoId: string, commentId: string, replyId: string, allReplies: Reponse[]): Promise<void> {
-    await runInInjectionContext(this.injector, () =>
-      updateDoc(doc(this.firestore, `oneshots/${oneShotId}/photos/${photoId}/commentaires`, commentId), {
-        replies: allReplies.filter(r => r.id !== replyId),
-      })
-    );
+    await updateDoc(doc(db, `oneshots/${oneShotId}/photos/${photoId}/commentaires`, commentId), {
+      replies: allReplies.filter(r => r.id !== replyId),
+    });
   }
 }

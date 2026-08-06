@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -13,7 +13,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSortModule, Sort } from '@angular/material/sort';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Auth } from '@angular/fire/auth';
+import { auth } from '../../../utils/firebase';
 import { AuthService } from '../../../services/auth.service';
 import { ConfirmService } from '../../../services/confirm.service';
 import { UserProfile } from '../../../models/user.model';
@@ -22,27 +22,35 @@ import { UserProfile } from '../../../models/user.model';
   selector: 'app-membres',
   imports: [
     FormsModule,
-    MatCardModule, MatButtonModule, MatIconModule, MatTableModule,
-    MatChipsModule, MatFormFieldModule, MatInputModule, MatSelectModule,
-    MatTooltipModule, MatProgressSpinnerModule, MatSortModule,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatTableModule,
+    MatChipsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatTooltipModule,
+    MatProgressSpinnerModule,
+    MatSortModule,
   ],
   templateUrl: './membres.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './membres.css',
 })
 export class Membres {
   private authService = inject(AuthService);
   private confirmService = inject(ConfirmService);
   private snackBar = inject(MatSnackBar);
-  private auth = inject(Auth);
 
-  currentUid = signal(this.auth.currentUser?.uid ?? '');
+  currentUid = signal(auth.currentUser?.uid ?? '');
 
   readonly roles = ['admin', 'contributeur', 'membre'];
 
   membres = toSignal(this.authService.getAllMembers(), { initialValue: [] as UserProfile[] });
   filterText = signal('');
   loadingUid = signal<string | null>(null);
-  recalcUid  = signal<string | null>(null);
+  recalcUid = signal<string | null>(null);
 
   inviteEmail = '';
   inviteLoading = signal(false);
@@ -52,14 +60,22 @@ export class Membres {
   sortCol = signal<string>('nom');
   sortDir = signal<'asc' | 'desc'>('asc');
 
-  displayedColumns = ['nom', 'email', 'role', 'statut', 'dateAdhesion', 'derniereConnexion', 'stockage', 'actions'];
+  displayedColumns = [
+    'nom',
+    'email',
+    'role',
+    'statut',
+    'dateAdhesion',
+    'derniereConnexion',
+    'stockage',
+    'actions',
+  ];
 
   filteredMembres = computed(() => {
     const q = this.filterText().toLowerCase().trim();
     if (!q) return this.membres();
-    return this.membres().filter(m =>
-      m.nom.toLowerCase().includes(q) ||
-      m.email.toLowerCase().includes(q)
+    return this.membres().filter(
+      (m) => m.nom.toLowerCase().includes(q) || m.email.toLowerCase().includes(q),
     );
   });
 
@@ -87,7 +103,10 @@ export class Membres {
   totalStorage(m: UserProfile): number {
     const s = m.storageUsed;
     if (!s) return 0;
-    return Math.max(0, (s.portfolio ?? 0) + (s.themes ?? 0) + (s.oneshots ?? 0) + (s.documents ?? 0));
+    return Math.max(
+      0,
+      (s.portfolio ?? 0) + (s.themes ?? 0) + (s.oneshots ?? 0) + (s.documents ?? 0),
+    );
   }
 
   formatStorage(bytes: number): string {
@@ -115,7 +134,11 @@ export class Membres {
 
   formatDate(iso: string | undefined): string {
     if (!iso) return '—';
-    return new Date(iso).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: '2-digit' });
+    return new Date(iso).toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: '2-digit',
+    });
   }
 
   async recalcStorage(membre: UserProfile) {
@@ -148,10 +171,9 @@ export class Membres {
     this.loadingUid.set(membre.uid);
     try {
       await this.authService.suspendMember(membre.uid, !membre.isSuspended);
-      this.snackBar.open(
-        membre.isSuspended ? 'Compte réactivé' : 'Compte suspendu',
-        '', { duration: 3000 }
-      );
+      this.snackBar.open(membre.isSuspended ? 'Compte réactivé' : 'Compte suspendu', '', {
+        duration: 3000,
+      });
     } catch {
       this.snackBar.open('Erreur lors de la mise à jour', '', { duration: 3000 });
     } finally {
@@ -169,7 +191,7 @@ export class Membres {
       this.inviteSuccess.set(`Invitation envoyée à ${this.inviteEmail.trim()}`);
       this.inviteEmail = '';
     } catch {
-      this.inviteError.set('Erreur lors de l\'envoi. Vérifiez l\'adresse email.');
+      this.inviteError.set("Erreur lors de l'envoi. Vérifiez l'adresse email.");
     } finally {
       this.inviteLoading.set(false);
     }
@@ -178,7 +200,7 @@ export class Membres {
   async requestDelete(membre: UserProfile) {
     const ok = await this.confirmService.confirm(
       `Supprimer ${membre.nom} ? Toutes ses photos et son profil seront effacés définitivement.`,
-      'Supprimer le membre'
+      'Supprimer le membre',
     );
     if (!ok) return;
     this.loadingUid.set(membre.uid);

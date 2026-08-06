@@ -1,4 +1,11 @@
-import { Component, inject, computed, signal, HostListener } from '@angular/core';
+import {
+  Component,
+  inject,
+  computed,
+  signal,
+  HostListener,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -10,22 +17,38 @@ import { NotificationService } from '../../../services/notification.service';
 import { DatePickerComponent } from '../../../components/date-picker/date-picker';
 import { PhotoLightbox } from '../../../components/photo-lightbox/photo-lightbox';
 import { VoteRankingComponent, RankingItem } from '../../../components/vote-ranking/vote-ranking';
-import { Defi, DefiPhoto, DefiPhotoResult, DefiStatut, DefiVote, DEFI_STATUT_LABELS, getDefiStatut } from '../../../models/defi.model';
+import {
+  Defi,
+  DefiPhoto,
+  DefiPhotoResult,
+  DefiStatut,
+  DefiVote,
+  DEFI_STATUT_LABELS,
+  getDefiStatut,
+} from '../../../models/defi.model';
 import { LightboxPhoto, PhotoLightboxCallbacks } from '../../../models/commentaire.model';
 import { ImgRetryDirective } from '../../../directives/img-retry.directive';
 import { EventHero, HeroBadge } from '../../../components/event-hero/event-hero';
 
 @Component({
   selector: 'app-defi-detail',
-  imports: [FormsModule, DatePickerComponent, PhotoLightbox, ImgRetryDirective, VoteRankingComponent, EventHero],
+  imports: [
+    FormsModule,
+    DatePickerComponent,
+    PhotoLightbox,
+    ImgRetryDirective,
+    VoteRankingComponent,
+    EventHero,
+  ],
   templateUrl: './defi-detail.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './defi-detail.css',
 })
 export class DefiDetail {
-  private route       = inject(ActivatedRoute);
-  private router      = inject(Router);
-  private defiService  = inject(DefiService);
-  private authService  = inject(AuthService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private defiService = inject(DefiService);
+  private authService = inject(AuthService);
   private notifService = inject(NotificationService);
 
   readonly id = this.route.snapshot.paramMap.get('id')!;
@@ -33,30 +56,35 @@ export class DefiDetail {
   profile = toSignal(this.authService.currentUserProfile$);
 
   private refreshTick = signal(0);
-  private refresh() { this.refreshTick.update(n => n + 1); }
+  private refresh() {
+    this.refreshTick.update((n) => n + 1);
+  }
 
-  private inscriptionsTrigger = computed(() => ({ profile: this.profile(), tick: this.refreshTick() }));
-  private monVoteTrigger      = computed(() => ({ profile: this.profile(), tick: this.refreshTick() }));
+  private inscriptionsTrigger = computed(() => ({
+    profile: this.profile(),
+    tick: this.refreshTick(),
+  }));
+  private monVoteTrigger = computed(() => ({ profile: this.profile(), tick: this.refreshTick() }));
 
   defi = toSignal(
     toObservable(this.refreshTick).pipe(switchMap(() => this.defiService.getDefiOnce(this.id))),
-    { initialValue: null as Defi | null }
+    { initialValue: null as Defi | null },
   );
 
   inscriptions = toSignal(
     toObservable(this.inscriptionsTrigger).pipe(
-      switchMap(({ profile }) => !profile ? of([]) :
-        this.defiService.getInscriptionsOnce(this.id)
-      )
+      switchMap(({ profile }) =>
+        !profile ? of([]) : this.defiService.getInscriptionsOnce(this.id),
+      ),
     ),
-    { initialValue: [] }
+    { initialValue: [] },
   );
 
   // Triggers réactifs : defi en dépendance directe pour réagir au chargement initial
   private photosTrigger = computed(() => ({
-    defi:    this.defi(),
+    defi: this.defi(),
     profile: this.profile(),
-    tick:    this.refreshTick(),
+    tick: this.refreshTick(),
   }));
 
   private votesTrigger = computed(() => ({
@@ -68,7 +96,7 @@ export class DefiDetail {
   photos = toSignal(
     toObservable(this.photosTrigger).pipe(
       switchMap(({ defi, profile }) => {
-        const s   = defi ? getDefiStatut(defi) : 'a_venir';
+        const s = defi ? getDefiStatut(defi) : 'a_venir';
         const uid = profile?.uid ?? null;
         const can = profile?.role === 'admin' || (uid !== null && defi?.organisateurUid === uid);
         if (s === 'a_venir') return of([] as DefiPhoto[]);
@@ -76,9 +104,9 @@ export class DefiDetail {
           return uid ? this.defiService.getMyPhotosOnce(this.id, uid) : of([] as DefiPhoto[]);
         }
         return this.defiService.getPhotosOnce(this.id);
-      })
+      }),
     ),
-    { initialValue: [] as DefiPhoto[] }
+    { initialValue: [] as DefiPhoto[] },
   );
 
   // a_venir + soumission → aucun vote ; vote/resultats → tous
@@ -88,40 +116,42 @@ export class DefiDetail {
         const s = defi ? getDefiStatut(defi) : 'a_venir';
         if (s === 'a_venir' || s === 'soumission') return of([] as DefiVote[]);
         return this.defiService.getVotesOnce(this.id);
-      })
+      }),
     ),
-    { initialValue: [] as DefiVote[] }
+    { initialValue: [] as DefiVote[] },
   );
 
   monVote = toSignal(
     toObservable(this.monVoteTrigger).pipe(
-      switchMap(({ profile }) => !profile ? of(null) :
-        this.defiService.getMonVoteOnce(this.id, profile.uid)
-      )
+      switchMap(({ profile }) =>
+        !profile ? of(null) : this.defiService.getMonVoteOnce(this.id, profile.uid),
+      ),
     ),
-    { initialValue: null }
+    { initialValue: null },
   );
 
-  statut            = computed((): DefiStatut => this.defi() ? getDefiStatut(this.defi()!) : 'a_venir');
+  statut = computed((): DefiStatut => (this.defi() ? getDefiStatut(this.defi()!) : 'a_venir'));
   totalVotesDeposes = computed(() => this.votes().reduce((acc, v) => acc + v.photoIds.length, 0));
 
-  typeBadgeHero = computed((): HeroBadge => ({ text: '🏅 Défi Photo', css: 'event-type-badge badge-defi-type' }));
+  typeBadgeHero = computed(
+    (): HeroBadge => ({ text: '🏅 Défi Photo', css: 'event-type-badge badge-defi-type' }),
+  );
   statusHero = computed((): HeroBadge => {
     const s = this.statut();
     const css: Record<string, string> = {
-      a_venir:    'hero-status status-defi-avenir',
+      a_venir: 'hero-status status-defi-avenir',
       soumission: 'hero-status status-defi-soumission',
-      vote:       'hero-status status-defi-vote',
-      resultats:  'hero-status status-passee',
+      vote: 'hero-status status-defi-vote',
+      resultats: 'hero-status status-passee',
     };
     return { text: DEFI_STATUT_LABELS[s], css: css[s] ?? 'hero-status' };
   });
-  isAdmin    = computed(() => this.profile()?.role === 'admin');
-  isOrg      = computed(() => !!this.profile() && this.defi()?.organisateurUid === this.profile()!.uid);
-  canManage  = computed(() => this.isOrg() || this.isAdmin());
-  isInscrit  = computed(() => {
+  isAdmin = computed(() => this.profile()?.role === 'admin');
+  isOrg = computed(() => !!this.profile() && this.defi()?.organisateurUid === this.profile()!.uid);
+  canManage = computed(() => this.isOrg() || this.isAdmin());
+  isInscrit = computed(() => {
     const uid = this.profile()?.uid;
-    return uid ? this.inscriptions().some(i => i.uid === uid) : false;
+    return uid ? this.inscriptions().some((i) => i.uid === uid) : false;
   });
   userName = computed(() => {
     const p = this.profile();
@@ -132,39 +162,51 @@ export class DefiDetail {
   lightboxIndex = signal<number | null>(null);
 
   private toLb = (p: DefiPhoto): LightboxPhoto => ({
-    id: p.id, url: p.url, nomAuteur: p.membreNom,
-    likes: [], uploadedAt: p.uploadedAt, exif: p.exif,
+    id: p.id,
+    url: p.url,
+    nomAuteur: p.membreNom,
+    likes: [],
+    uploadedAt: p.uploadedAt,
+    exif: p.exif,
   });
 
-  private votePhotosLb   = computed<LightboxPhoto[]>(() => this.photosVisibles().map(p => this.toLb(p)));
-  private resultPhotosLb = computed<LightboxPhoto[]>(() => this.photosRanked().map(p => this.toLb(p)));
-  lightboxPhotos         = computed<LightboxPhoto[]>(() =>
-    this.statut() === 'vote' ? this.votePhotosLb() : this.resultPhotosLb()
+  private votePhotosLb = computed<LightboxPhoto[]>(() =>
+    this.photosVisibles().map((p) => this.toLb(p)),
+  );
+  private resultPhotosLb = computed<LightboxPhoto[]>(() =>
+    this.photosRanked().map((p) => this.toLb(p)),
+  );
+  lightboxPhotos = computed<LightboxPhoto[]>(() =>
+    this.statut() === 'vote' ? this.votePhotosLb() : this.resultPhotosLb(),
   );
 
   readonly lightboxCallbacks: PhotoLightboxCallbacks = {
-    toggleLike:        async () => {},
-    getComments:       ()     => of([]),
-    addComment:        async () => {},
-    deleteComment:     async () => {},
+    toggleLike: async () => {},
+    getComments: () => of([]),
+    addComment: async () => {},
+    deleteComment: async () => {},
     toggleCommentLike: async () => {},
-    addReply:          async () => {},
-    deleteReply:       async () => {},
+    addReply: async () => {},
+    deleteReply: async () => {},
   };
 
   openLightbox(photo: { id: string }): void {
-    const idx = this.lightboxPhotos().findIndex(p => p.id === photo.id);
+    const idx = this.lightboxPhotos().findIndex((p) => p.id === photo.id);
     if (idx !== -1) this.lightboxIndex.set(idx);
   }
 
-  closeLightbox(): void { this.lightboxIndex.set(null); }
+  closeLightbox(): void {
+    this.lightboxIndex.set(null);
+  }
 
   @HostListener('document:keydown.escape')
-  onEscape(): void { this.closeLightbox(); }
+  onEscape(): void {
+    this.closeLightbox();
+  }
 
   mesPhotos = computed(() => {
     const uid = this.profile()?.uid;
-    return uid ? this.photos().filter(p => p.membreUid === uid) : [];
+    return uid ? this.photos().filter((p) => p.membreUid === uid) : [];
   });
 
   uniqueSubmitters = computed(() => {
@@ -186,19 +228,20 @@ export class DefiDetail {
     if (s === 'a_venir') return [];
     if (s === 'soumission') {
       if (!uid) return [];
-      return photos.filter(p => p.membreUid === uid);
+      return photos.filter((p) => p.membreUid === uid);
     }
     return photos;
   });
 
-  mesVotesIds   = computed(() => this.monVote()?.photoIds ?? []);
+  mesVotesIds = computed(() => this.monVote()?.photoIds ?? []);
   votesRestants = computed(() => (this.defi()?.maxVotes ?? 0) - this.mesVotesIds().length);
 
-  canUpload = computed(() =>
-    this.statut() === 'soumission' &&
-    !!this.profile() &&
-    this.mesPhotos().length < (this.defi()?.maxPhotos ?? 1) &&
-    (!(this.defi()?.inscriptionObligatoire ?? true) || this.isInscrit())
+  canUpload = computed(
+    () =>
+      this.statut() === 'soumission' &&
+      !!this.profile() &&
+      this.mesPhotos().length < (this.defi()?.maxPhotos ?? 1) &&
+      (!(this.defi()?.inscriptionObligatoire ?? true) || this.isInscrit()),
   );
 
   photosRanked = computed((): DefiPhotoResult[] => {
@@ -209,7 +252,7 @@ export class DefiDetail {
       }
     }
     const sorted = [...this.photos()]
-      .map(p => ({ ...p, voteCount: counts.get(p.id) ?? 0, rank: 0 }))
+      .map((p) => ({ ...p, voteCount: counts.get(p.id) ?? 0, rank: 0 }))
       .sort((a, b) => b.voteCount - a.voteCount);
     let rank = 1;
     return sorted.map((p, i) => {
@@ -219,30 +262,30 @@ export class DefiDetail {
   });
 
   rankingItems = computed((): RankingItem[] =>
-    this.photosRanked().map(p => ({
+    this.photosRanked().map((p) => ({
       id: p.id,
       url: p.url,
       authorName: p.membreNom,
       votes: p.voteCount,
-    }))
+    })),
   );
 
   onRankingClick(id: string): void {
-    const photo = this.photosRanked().find(p => p.id === id);
+    const photo = this.photosRanked().find((p) => p.id === id);
     if (photo) this.openLightbox(photo);
   }
 
   // ── Upload ────────────────────────────────────────────────────────────
 
-  uploadProgress  = signal<number | null>(null);
-  uploadCurrent   = signal(0);
+  uploadProgress = signal<number | null>(null);
+  uploadCurrent = signal(0);
   uploadBatchSize = signal(0);
-  uploadError     = signal<string | null>(null);
-  photoDragOver   = signal(false);
+  uploadError = signal<string | null>(null);
+  photoDragOver = signal(false);
 
   onPhotoSelected(event: Event) {
     const input = event.target as HTMLInputElement;
-    const files = Array.from(input.files ?? []).filter(f => f.type.startsWith('image/'));
+    const files = Array.from(input.files ?? []).filter((f) => f.type.startsWith('image/'));
     input.value = '';
     if (files.length) this.doUploadMultiple(files);
   }
@@ -250,7 +293,9 @@ export class DefiDetail {
   onPhotoDrop(event: DragEvent) {
     event.preventDefault();
     this.photoDragOver.set(false);
-    const files = Array.from(event.dataTransfer?.files ?? []).filter(f => f.type.startsWith('image/'));
+    const files = Array.from(event.dataTransfer?.files ?? []).filter((f) =>
+      f.type.startsWith('image/'),
+    );
     if (files.length) this.doUploadMultiple(files);
   }
 
@@ -263,10 +308,12 @@ export class DefiDetail {
     if (remaining <= 0) return;
 
     const toUpload = files.slice(0, remaining);
-    const skipped  = files.length - toUpload.length;
+    const skipped = files.length - toUpload.length;
 
     this.uploadError.set(
-      skipped > 0 ? `${skipped} photo(s) ignorée(s) : limite de ${maxPhotos} par participant atteinte.` : null
+      skipped > 0
+        ? `${skipped} photo(s) ignorée(s) : limite de ${maxPhotos} par participant atteinte.`
+        : null,
     );
     this.uploadCurrent.set(0);
     this.uploadBatchSize.set(toUpload.length);
@@ -277,13 +324,15 @@ export class DefiDetail {
       try {
         await new Promise<void>((resolve, reject) => {
           this.defiService.uploadPhoto(this.id, toUpload[i], profile).subscribe({
-            next: state => { if (!state.done) this.uploadProgress.set(state.progress); },
+            next: (state) => {
+              if (!state.done) this.uploadProgress.set(state.progress);
+            },
             complete: resolve,
             error: reject,
           });
         });
       } catch {
-        this.uploadError.set('Erreur lors de l\'upload.');
+        this.uploadError.set("Erreur lors de l'upload.");
         break;
       }
     }
@@ -321,8 +370,12 @@ export class DefiDetail {
     const profile = this.profile();
     if (!profile || this.inscribing()) return;
     this.inscribing.set(true);
-    try { await this.defiService.inscrire(this.id, profile); this.refresh(); }
-    finally { this.inscribing.set(false); }
+    try {
+      await this.defiService.inscrire(this.id, profile);
+      this.refresh();
+    } finally {
+      this.inscribing.set(false);
+    }
   }
 
   async desinscrire() {
@@ -334,31 +387,31 @@ export class DefiDetail {
 
   // ── Edit mode ─────────────────────────────────────────────────────────
 
-  editMode    = signal(false);
-  saving      = signal(false);
-  editTitre   = '';
-  editTheme   = '';
-  editDesc    = '';
-  editDebut   = '';
-  editFin     = '';
-  editVotes   = '';
+  editMode = signal(false);
+  saving = signal(false);
+  editTitre = '';
+  editTheme = '';
+  editDesc = '';
+  editDebut = '';
+  editFin = '';
+  editVotes = '';
   editMaxPhotos = 2;
-  editMaxVotes  = 3;
+  editMaxVotes = 3;
   editVisibilite: 'public' | 'membre' = 'public';
   editInscriptionObligatoire = true;
 
   enterEdit() {
     const d = this.defi();
     if (!d) return;
-    this.editTitre       = d.titre;
-    this.editTheme       = d.theme;
-    this.editDesc        = d.description;
-    this.editDebut       = d.dateDebutSoumission;
-    this.editFin         = d.dateFinSoumission;
-    this.editVotes       = d.dateCloturVotes;
-    this.editMaxPhotos              = d.maxPhotos;
-    this.editMaxVotes               = d.maxVotes;
-    this.editVisibilite             = d.visibilite;
+    this.editTitre = d.titre;
+    this.editTheme = d.theme;
+    this.editDesc = d.description;
+    this.editDebut = d.dateDebutSoumission;
+    this.editFin = d.dateFinSoumission;
+    this.editVotes = d.dateCloturVotes;
+    this.editMaxPhotos = d.maxPhotos;
+    this.editMaxVotes = d.maxVotes;
+    this.editVisibilite = d.visibilite;
     this.editInscriptionObligatoire = d.inscriptionObligatoire ?? true;
     this.editMode.set(true);
   }
@@ -366,38 +419,42 @@ export class DefiDetail {
   async saveEdit() {
     if (this.saving()) return;
     const d = this.defi()!;
-    const finChanged   = this.editFin   !== d.dateFinSoumission;
+    const finChanged = this.editFin !== d.dateFinSoumission;
     const votesChanged = this.editVotes !== d.dateCloturVotes;
 
     this.saving.set(true);
     try {
       await this.defiService.updateDefi(this.id, {
-        titre:                  this.editTitre,
-        theme:                  this.editTheme,
-        description:            this.editDesc,
-        dateDebutSoumission:    this.editDebut,
-        dateFinSoumission:      this.editFin,
-        dateCloturVotes:        this.editVotes,
-        maxPhotos:              this.editMaxPhotos,
-        maxVotes:               this.editMaxVotes,
-        visibilite:             this.editVisibilite,
+        titre: this.editTitre,
+        theme: this.editTheme,
+        description: this.editDesc,
+        dateDebutSoumission: this.editDebut,
+        dateFinSoumission: this.editFin,
+        dateCloturVotes: this.editVotes,
+        maxPhotos: this.editMaxPhotos,
+        maxVotes: this.editMaxVotes,
+        visibilite: this.editVisibilite,
         inscriptionObligatoire: this.editInscriptionObligatoire,
       });
 
       if (finChanged || votesChanged) {
         const editorUid = this.profile()!.uid;
         const editorNom = this.userName();
-        const lien      = `/galeries/defis/${this.id}`;
+        const lien = `/galeries/defis/${this.id}`;
         const parts: string[] = [];
-        if (finChanged)   parts.push(`fin de soumission le ${this.formatDate(this.editFin)}`);
+        if (finChanged) parts.push(`fin de soumission le ${this.formatDate(this.editFin)}`);
         if (votesChanged) parts.push(`clôture des votes le ${this.formatDate(this.editVotes)}`);
         const msg = `🏅 Défi "${this.editTitre}" · Dates modifiées : ${parts.join(', ')}`;
-        this.notifService.broadcast('defi', msg, { lien, sourceNom: editorNom, excludeUid: editorUid }).catch(() => {});
+        this.notifService
+          .broadcast('defi', msg, { lien, sourceNom: editorNom, excludeUid: editorUid })
+          .catch(() => {});
       }
 
       this.refresh();
       this.editMode.set(false);
-    } finally { this.saving.set(false); }
+    } finally {
+      this.saving.set(false);
+    }
   }
 
   async deleteDefi() {
@@ -408,8 +465,8 @@ export class DefiDetail {
 
   // ── Cover (dans le formulaire d'édition) ─────────────────────────────
 
-  pendingCover   = signal<File | null>(null);
-  coverPreview   = signal<string | null>(null);
+  pendingCover = signal<File | null>(null);
+  coverPreview = signal<string | null>(null);
   uploadingCover = signal(false);
 
   onCoverSelected(event: Event) {
@@ -440,7 +497,9 @@ export class DefiDetail {
       await this.defiService.setCouverture(this.id, file);
       this.clearCoverPreview();
       this.refresh();
-    } finally { this.uploadingCover.set(false); }
+    } finally {
+      this.uploadingCover.set(false);
+    }
   }
 
   async removeCouverture() {
@@ -452,12 +511,16 @@ export class DefiDetail {
 
   // ── Helpers ───────────────────────────────────────────────────────────
 
-  get today(): string { return new Date().toISOString().slice(0, 10); }
+  get today(): string {
+    return new Date().toISOString().slice(0, 10);
+  }
 
   formatDate(date: string): string {
     return new Date(date + 'T12:00:00').toLocaleDateString('fr-FR', {
-      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
     });
   }
-
 }

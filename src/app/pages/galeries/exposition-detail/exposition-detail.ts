@@ -1,4 +1,14 @@
-import { Component, inject, signal, computed, effect, untracked, ViewChild, ElementRef } from '@angular/core';
+import {
+  Component,
+  inject,
+  signal,
+  computed,
+  effect,
+  untracked,
+  ViewChild,
+  ElementRef,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -11,7 +21,12 @@ import { DatePickerComponent } from '../../../components/date-picker/date-picker
 import { ExpositionService } from '../../../services/exposition.service';
 import { AuthService } from '../../../services/auth.service';
 import { ConfirmService } from '../../../services/confirm.service';
-import { Exposition, ExpoSuggestion, ExpoVoteDoc, ExpoPhoto } from '../../../models/exposition.model';
+import {
+  Exposition,
+  ExpoSuggestion,
+  ExpoVoteDoc,
+  ExpoPhoto,
+} from '../../../models/exposition.model';
 import { LightboxPhoto, PhotoLightboxCallbacks } from '../../../models/commentaire.model';
 import { EventHero, HeroBadge } from '../../../components/event-hero/event-hero';
 import { PhotoLightbox } from '../../../components/photo-lightbox/photo-lightbox';
@@ -24,45 +39,51 @@ import { NotificationService } from '../../../services/notification.service';
   selector: 'app-exposition-detail',
   imports: [
     ReactiveFormsModule,
-    MatFormFieldModule, MatInputModule, MatSelectModule, MatIconModule,
-    DatePickerComponent, EventHero, PhotoLightbox,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatIconModule,
+    DatePickerComponent,
+    EventHero,
+    PhotoLightbox,
   ],
   templateUrl: './exposition-detail.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './exposition-detail.css',
 })
 export class ExpositionDetail {
   @ViewChild('coverInput') coverInput!: ElementRef<HTMLInputElement>;
 
-  private route              = inject(ActivatedRoute);
-  private router             = inject(Router);
-  private expoService        = inject(ExpositionService);
-  private authService        = inject(AuthService);
-  private confirmService     = inject(ConfirmService);
-  private gpsConsentService  = inject(GpsConsentService);
-  private notifService       = inject(NotificationService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private expoService = inject(ExpositionService);
+  private authService = inject(AuthService);
+  private confirmService = inject(ConfirmService);
+  private gpsConsentService = inject(GpsConsentService);
+  private notifService = inject(NotificationService);
 
   readonly expoId = this.route.snapshot.paramMap.get('id')!;
 
   profile = toSignal(this.authService.currentUserProfile$);
-  uid     = computed(() => this.profile()?.uid ?? null);
+  uid = computed(() => this.profile()?.uid ?? null);
 
   // ── Data signals (one-shot, mis à jour localement après mutations) ───────────
 
-  expo        = signal<Exposition | null>(null);   // null = chargement en cours
-  notFound    = signal(false);
+  expo = signal<Exposition | null>(null); // null = chargement en cours
+  notFound = signal(false);
   suggestions = signal<ExpoSuggestion[]>([]);
-  tousVotes   = signal<ExpoVoteDoc[]>([]);
-  photos      = signal<ExpoPhoto[]>([]);
+  tousVotes = signal<ExpoVoteDoc[]>([]);
+  photos = signal<ExpoPhoto[]>([]);
 
   private loaded = signal(false);
 
   // ── Permissions ──────────────────────────────────────────────────────────────
 
   isOrganisateur = computed(() => !!this.uid() && this.uid() === this.expo()?.organisateurUid);
-  isAdmin        = computed(() => this.profile()?.role === 'admin');
-  canManage      = computed(() => this.isOrganisateur() || this.isAdmin());
-  isMembre       = computed(() => !!this.profile());
-  isPublic       = computed(() => {
+  isAdmin = computed(() => this.profile()?.role === 'admin');
+  canManage = computed(() => this.isOrganisateur() || this.isAdmin());
+  isMembre = computed(() => !!this.profile());
+  isPublic = computed(() => {
     const d = this.expo()?.dateOuverturePublic;
     return !!d && new Date(d + 'T00:00:00') <= new Date();
   });
@@ -72,11 +93,11 @@ export class ExpositionDetail {
   typeBadgeHero = computed((): HeroBadge => ({ text: '🖼 Exposition', css: 'badge-expo' }));
   statusHero = computed((): HeroBadge => {
     const labels: Record<string, { text: string; css: string }> = {
-      ideation:   { text: 'Idéation',   css: 'status-ideation' },
-      nettoyage:  { text: 'Nettoyage',  css: 'status-nettoyage' },
-      votation:   { text: 'Vote',        css: 'status-votation' },
+      ideation: { text: 'Idéation', css: 'status-ideation' },
+      nettoyage: { text: 'Nettoyage', css: 'status-nettoyage' },
+      votation: { text: 'Vote', css: 'status-votation' },
       soumission: { text: 'Soumission', css: 'status-soumission' },
-      cloture:    { text: 'Clôturé',    css: 'status-cloture' },
+      cloture: { text: 'Clôturé', css: 'status-cloture' },
     };
     return labels[this.expo()?.statut ?? 'ideation'] ?? labels['ideation'];
   });
@@ -100,7 +121,7 @@ export class ExpositionDetail {
     // Pré-remplir nombreVotesParMembre : 3 au 1er passage, 1 aux suivants
     effect(() => {
       if (this.expo()?.statut !== 'nettoyage') return;
-      const secondPasse = this.suggestions().some(s => !s.actif);
+      const secondPasse = this.suggestions().some((s) => !s.actif);
       untracked(() => {
         if (!this.formVotation.get('nombreVotesParMembre')?.dirty) {
           this.formVotation.patchValue({ nombreVotesParMembre: secondPasse ? 1 : 3 });
@@ -132,31 +153,45 @@ export class ExpositionDetail {
         triggered = true;
         untracked(() =>
           this.expoService.passerNettoyage(this.expoId).then(() => {
-            this.expo.update(ex => ex ? { ...ex, statut: 'nettoyage' } : ex);
+            this.expo.update((ex) => (ex ? { ...ex, statut: 'nettoyage' } : ex));
             this.sortMode.set('votes');
-          })
+          }),
         );
-      } else if (e.statut === 'votation' && e.dateFinVote && new Date(e.dateFinVote + 'T23:59:59') < now) {
+      } else if (
+        e.statut === 'votation' &&
+        e.dateFinVote &&
+        new Date(e.dateFinVote + 'T23:59:59') < now
+      ) {
         triggered = true;
         untracked(() =>
           this.expoService.retourNettoyageDepuisVotation(this.expoId).then(async () => {
-            this.expo.update(ex => ex ? {
-              ...ex, statut: 'nettoyage',
-              dateFinVote: undefined, nombreVotesParMembre: undefined,
-            } : ex);
+            this.expo.update((ex) =>
+              ex
+                ? {
+                    ...ex,
+                    statut: 'nettoyage',
+                    dateFinVote: undefined,
+                    nombreVotesParMembre: undefined,
+                  }
+                : ex,
+            );
             // tousVotes conservé pour trier par score en nettoyage
             this.localVoteMap.set({});
             this.sortMode.set('votes');
             const suggs = await this.expoService.getSuggestionsOnce(this.expoId);
             this.suggestions.set(suggs);
-          })
+          }),
         );
-      } else if (e.statut === 'soumission' && e.dateFinSoumission && new Date(e.dateFinSoumission + 'T23:59:59') < now) {
+      } else if (
+        e.statut === 'soumission' &&
+        e.dateFinSoumission &&
+        new Date(e.dateFinSoumission + 'T23:59:59') < now
+      ) {
         triggered = true;
         untracked(() =>
-          this.expoService.cloture(this.expoId).then(() =>
-            this.expo.update(ex => ex ? { ...ex, statut: 'cloture' } : ex)
-          )
+          this.expoService
+            .cloture(this.expoId)
+            .then(() => this.expo.update((ex) => (ex ? { ...ex, statut: 'cloture' } : ex))),
         );
       }
 
@@ -178,8 +213,7 @@ export class ExpositionDetail {
 
     if (uid) {
       loads.push(
-        this.expoService.getSuggestionsOnce(this.expoId)
-          .then(data => this.suggestions.set(data))
+        this.expoService.getSuggestionsOnce(this.expoId).then((data) => this.suggestions.set(data)),
       );
     }
 
@@ -195,21 +229,17 @@ export class ExpositionDetail {
             for (const id of monVote.themeIds) map[id] = (map[id] ?? 0) + 1;
             this.localVoteMap.set(map);
           }
-        })
+        }),
       );
     }
 
     if (s === 'soumission' && uid) {
-      loads.push(
-        this.expoService.getPhotosOnce(this.expoId).then(p => this.photos.set(p))
-      );
+      loads.push(this.expoService.getPhotosOnce(this.expoId).then((p) => this.photos.set(p)));
     }
 
     if (s === 'cloture') {
       // Photos visibles anonymes aussi (règles Firestore : cloture = public)
-      loads.push(
-        this.expoService.getPhotosOnce(this.expoId).then(p => this.photos.set(p))
-      );
+      loads.push(this.expoService.getPhotosOnce(this.expoId).then((p) => this.photos.set(p)));
     }
 
     await Promise.all(loads);
@@ -217,13 +247,13 @@ export class ExpositionDetail {
 
   // ── Suggestions ──────────────────────────────────────────────────────────────
 
-  newSuggestion      = signal('');
+  newSuggestion = signal('');
   newSuggestionAdmin = signal('');
-  savingSugg         = signal(false);
-  editingSuggId      = signal<string | null>(null);
-  editingSuggTexte   = signal('');
+  savingSugg = signal(false);
+  editingSuggId = signal<string | null>(null);
+  editingSuggTexte = signal('');
 
-  suggestionsActives = computed(() => this.suggestions().filter(s => s.actif));
+  suggestionsActives = computed(() => this.suggestions().filter((s) => s.actif));
 
   sortMode = signal<'alpha' | 'votes'>('alpha');
 
@@ -231,19 +261,17 @@ export class ExpositionDetail {
   themeVainqueur = computed(() => {
     const all = this.suggestions();
     if (all.length === 0) return null;
-    const scores   = this.scoreParSuggestion();
-    const maxScore = Math.max(...all.map(s => scores[s.id] ?? 0));
+    const scores = this.scoreParSuggestion();
+    const maxScore = Math.max(...all.map((s) => scores[s.id] ?? 0));
     if (maxScore === 0) return null;
-    const winners = all.filter(s => (scores[s.id] ?? 0) === maxScore);
+    const winners = all.filter((s) => (scores[s.id] ?? 0) === maxScore);
     return winners.length === 1 ? winners[0] : null;
   });
 
   suggestionsTriees = computed(() => {
     const statut = this.expo()?.statut;
-    const mode   = this.sortMode();
-    const items  = statut === 'nettoyage'
-      ? [...this.suggestions()]
-      : [...this.suggestionsActives()];
+    const mode = this.sortMode();
+    const items = statut === 'nettoyage' ? [...this.suggestions()] : [...this.suggestionsActives()];
     if (mode === 'votes') {
       const scores = this.scoreParSuggestion();
       return items.sort((a, b) => {
@@ -259,7 +287,7 @@ export class ExpositionDetail {
     if (!texte.trim() || this.savingSugg()) return;
     this.savingSugg.set(true);
     const id = await this.expoService.addSuggestion(this.expoId, texte, source);
-    this.suggestions.update(s => [...s, { id, texte: texte.trim(), actif: true, source }]);
+    this.suggestions.update((s) => [...s, { id, texte: texte.trim(), actif: true, source }]);
     source === 'admin' ? this.newSuggestionAdmin.set('') : this.newSuggestion.set('');
     this.savingSugg.set(false);
   }
@@ -274,47 +302,62 @@ export class ExpositionDetail {
     if (!id) return;
     const texte = this.editingSuggTexte();
     await this.expoService.updateSuggestion(this.expoId, id, { texte });
-    this.suggestions.update(s => s.map(x => x.id === id ? { ...x, texte } : x));
+    this.suggestions.update((s) => s.map((x) => (x.id === id ? { ...x, texte } : x)));
     this.editingSuggId.set(null);
   }
 
-  cancelEditSugg() { this.editingSuggId.set(null); }
+  cancelEditSugg() {
+    this.editingSuggId.set(null);
+  }
 
   async toggleActif(s: ExpoSuggestion) {
     await this.expoService.updateSuggestion(this.expoId, s.id, { actif: !s.actif });
-    this.suggestions.update(list => list.map(x => x.id === s.id ? { ...x, actif: !x.actif } : x));
+    this.suggestions.update((list) =>
+      list.map((x) => (x.id === s.id ? { ...x, actif: !x.actif } : x)),
+    );
   }
 
   async supprimerSuggestion(s: ExpoSuggestion) {
     const ok = await this.confirmService.confirm('Supprimer cette suggestion ?');
     if (!ok) return;
     await this.expoService.deleteSuggestion(this.expoId, s.id);
-    this.suggestions.update(list => list.filter(x => x.id !== s.id));
+    this.suggestions.update((list) => list.filter((x) => x.id !== s.id));
   }
 
   // ── Transitions ──────────────────────────────────────────────────────────────
 
   formVotation = new FormGroup({
-    dateFinVote:          new FormControl('', { validators: [Validators.required], nonNullable: true }),
-    nombreVotesParMembre: new FormControl(1,  { validators: [Validators.required, Validators.min(1)], nonNullable: true }),
+    dateFinVote: new FormControl('', { validators: [Validators.required], nonNullable: true }),
+    nombreVotesParMembre: new FormControl(1, {
+      validators: [Validators.required, Validators.min(1)],
+      nonNullable: true,
+    }),
   });
 
   formSoumission = new FormGroup({
-    themeChoisi:       new FormControl('', { validators: [Validators.required, Validators.minLength(2)], nonNullable: true }),
-    dateFinSoumission: new FormControl('', { validators: [Validators.required], nonNullable: true }),
+    themeChoisi: new FormControl('', {
+      validators: [Validators.required, Validators.minLength(2)],
+      nonNullable: true,
+    }),
+    dateFinSoumission: new FormControl('', {
+      validators: [Validators.required],
+      nonNullable: true,
+    }),
   });
 
   savingTransition = signal(false);
 
   async terminerIdeation() {
     const ok = await this.confirmService.confirm(
-      'La phase d\'idéation sera clôturée. Vous pourrez ensuite sélectionner et affiner les suggestions avant de lancer le vote.',
-      'Terminer l\'idéation', 'Terminer', false
+      "La phase d'idéation sera clôturée. Vous pourrez ensuite sélectionner et affiner les suggestions avant de lancer le vote.",
+      "Terminer l'idéation",
+      'Terminer',
+      false,
     );
     if (!ok) return;
     this.savingTransition.set(true);
     await this.expoService.passerNettoyage(this.expoId);
-    this.expo.update(e => e ? { ...e, statut: 'nettoyage' } : e);
+    this.expo.update((e) => (e ? { ...e, statut: 'nettoyage' } : e));
     this.sortMode.set('votes');
     this.autoTransitioned.set(true);
     this.savingTransition.set(false);
@@ -323,14 +366,23 @@ export class ExpositionDetail {
   async terminerVote() {
     const ok = await this.confirmService.confirm(
       'Les scores sont calculés et les thèmes ex-aequo restent présélectionnés. Les bulletins de vote sont ensuite réinitialisés pour un éventuel second tour.',
-      'Terminer le vote', 'Terminer', false
+      'Terminer le vote',
+      'Terminer',
+      false,
     );
     if (!ok) return;
     this.savingTransition.set(true);
     await this.expoService.retourNettoyageDepuisVotation(this.expoId);
-    this.expo.update(e => e ? {
-      ...e, statut: 'nettoyage', dateFinVote: undefined, nombreVotesParMembre: undefined,
-    } : e);
+    this.expo.update((e) =>
+      e
+        ? {
+            ...e,
+            statut: 'nettoyage',
+            dateFinVote: undefined,
+            nombreVotesParMembre: undefined,
+          }
+        : e,
+    );
     this.localVoteMap.set({});
     this.sortMode.set('votes');
     const suggs = await this.expoService.getSuggestionsOnce(this.expoId);
@@ -344,7 +396,9 @@ export class ExpositionDetail {
     const { dateFinVote, nombreVotesParMembre } = this.formVotation.getRawValue();
     this.savingTransition.set(true);
     await this.expoService.passerVotation(this.expoId, dateFinVote, nombreVotesParMembre);
-    this.expo.update(e => e ? { ...e, statut: 'votation', dateFinVote, nombreVotesParMembre } : e);
+    this.expo.update((e) =>
+      e ? { ...e, statut: 'votation', dateFinVote, nombreVotesParMembre } : e,
+    );
     this.sortMode.set('alpha');
     // Charge les votes pour la nouvelle phase
     const uid = this.uid();
@@ -368,10 +422,17 @@ export class ExpositionDetail {
     const { themeChoisi, dateFinSoumission } = this.formSoumission.getRawValue();
     this.savingTransition.set(true);
     await this.expoService.passerSoumission(this.expoId, themeChoisi, dateFinSoumission);
-    this.expo.update(e => e ? {
-      ...e, statut: 'soumission', themeChoisi: themeChoisi.trim(), dateFinSoumission,
-    } : e);
-    this.tousVotes.set([]);   // votes non nécessaires en soumission
+    this.expo.update((e) =>
+      e
+        ? {
+            ...e,
+            statut: 'soumission',
+            themeChoisi: themeChoisi.trim(),
+            dateFinSoumission,
+          }
+        : e,
+    );
+    this.tousVotes.set([]); // votes non nécessaires en soumission
     this.localVoteMap.set({});
     const photosData = await this.expoService.getPhotosOnce(this.expoId);
     this.photos.set(photosData);
@@ -380,13 +441,15 @@ export class ExpositionDetail {
 
   async cloturerManuellement() {
     const ok = await this.confirmService.confirm(
-      'Plus aucune photo ne pourra être soumise. L\'exposition passera en mode clôturé.',
-      'Clôturer la soumission', 'Clôturer', false
+      "Plus aucune photo ne pourra être soumise. L'exposition passera en mode clôturé.",
+      'Clôturer la soumission',
+      'Clôturer',
+      false,
     );
     if (!ok) return;
     this.savingTransition.set(true);
     await this.expoService.cloture(this.expoId);
-    this.expo.update(e => e ? { ...e, statut: 'cloture' } : e);
+    this.expo.update((e) => (e ? { ...e, statut: 'cloture' } : e));
     this.savingTransition.set(false);
   }
 
@@ -394,7 +457,7 @@ export class ExpositionDetail {
 
   localVoteMap = signal<Record<string, number>>({});
 
-  nbMembresVote  = computed(() => this.tousVotes().length);
+  nbMembresVote = computed(() => this.tousVotes().length);
   nbVotesUtilises = computed(() => this.tousVotes().reduce((sum, v) => sum + v.themeIds.length, 0));
 
   scoreParSuggestion = computed(() => {
@@ -407,16 +470,20 @@ export class ExpositionDetail {
 
   jetonsRestants = computed(() => {
     const total = this.expo()?.nombreVotesParMembre ?? 1;
-    const used  = Object.values(this.localVoteMap()).reduce((a, b) => a + b, 0);
+    const used = Object.values(this.localVoteMap()).reduce((a, b) => a + b, 0);
     return total - used;
   });
 
   toggleVote(suggId: string) {
     if ((this.localVoteMap()[suggId] ?? 0) > 0) {
-      this.localVoteMap.update(m => { const n = { ...m }; delete n[suggId]; return n; });
+      this.localVoteMap.update((m) => {
+        const n = { ...m };
+        delete n[suggId];
+        return n;
+      });
     } else {
       if (this.jetonsRestants() <= 0) return;
-      this.localVoteMap.update(m => ({ ...m, [suggId]: 1 }));
+      this.localVoteMap.update((m) => ({ ...m, [suggId]: 1 }));
     }
     this.sauvegarderVote();
   }
@@ -439,43 +506,52 @@ export class ExpositionDetail {
   lightboxIndex = signal<number | null>(null);
 
   lightboxPhotos = computed((): LightboxPhoto[] =>
-    this.photos().map(p => ({
-      id: p.id, url: p.url, nomAuteur: p.nomAuteur,
-      uploaderUid: p.uid, likes: [], uploadedAt: p.uploadedAt,
+    this.photos().map((p) => ({
+      id: p.id,
+      url: p.url,
+      nomAuteur: p.nomAuteur,
+      uploaderUid: p.uid,
+      likes: [],
+      uploadedAt: p.uploadedAt,
       exif: p.exif ?? undefined,
-    }))
+    })),
   );
 
-  lightboxCallbacks = computed((): PhotoLightboxCallbacks => ({
-    toggleLike:        async () => {},
-    getComments:       ()      => of([]),
-    addComment:        async () => {},
-    deleteComment:     async () => {},
-    toggleCommentLike: async () => {},
-    addReply:          async () => {},
-    deleteReply:       async () => {},
-    canDeletePhoto: (photo) =>
-      photo.uploaderUid === this.uid() || this.canManage(),
-    deletePhoto: async (photo) => {
-      const p = this.photos().find(x => x.id === photo.id);
-      if (!p) return;
-      await this.supprimerPhoto(p);
-      if (this.photos().length === 0) this.lightboxIndex.set(null);
-    },
-  }));
+  lightboxCallbacks = computed(
+    (): PhotoLightboxCallbacks => ({
+      toggleLike: async () => {},
+      getComments: () => of([]),
+      addComment: async () => {},
+      deleteComment: async () => {},
+      toggleCommentLike: async () => {},
+      addReply: async () => {},
+      deleteReply: async () => {},
+      canDeletePhoto: (photo) => photo.uploaderUid === this.uid() || this.canManage(),
+      deletePhoto: async (photo) => {
+        const p = this.photos().find((x) => x.id === photo.id);
+        if (!p) return;
+        await this.supprimerPhoto(p);
+        if (this.photos().length === 0) this.lightboxIndex.set(null);
+      },
+    }),
+  );
 
-  openLightbox(index: number)  { this.lightboxIndex.set(index); }
-  closeLightbox()               { this.lightboxIndex.set(null); }
+  openLightbox(index: number) {
+    this.lightboxIndex.set(index);
+  }
+  closeLightbox() {
+    this.lightboxIndex.set(null);
+  }
 
-  uploading      = signal(false);
+  uploading = signal(false);
   uploadProgress = signal(0);
-  dragOver       = signal(false);
-  uploadError    = signal('');
-  deletingPhoto  = signal<string | null>(null);
+  dragOver = signal(false);
+  uploadError = signal('');
+  deletingPhoto = signal<string | null>(null);
 
   monPhotos = computed(() => {
     const uid = this.uid();
-    return uid ? this.photos().filter(p => p.uid === uid) : [];
+    return uid ? this.photos().filter((p) => p.uid === uid) : [];
   });
 
   canUploadMore = computed(() => {
@@ -509,12 +585,12 @@ export class ExpositionDetail {
     ]);
 
     this.expoService.uploadPhoto(compressed, this.expoId, { uid, nomAuteur: nom, exif }).subscribe({
-      next: state => {
+      next: (state) => {
         this.uploadProgress.set(state.progress);
-        if (state.done && state.photo) this.photos.update(ps => [...ps, state.photo!]);
+        if (state.done && state.photo) this.photos.update((ps) => [...ps, state.photo!]);
       },
       error: () => {
-        this.uploadError.set('Erreur lors de l\'envoi. Réessayez.');
+        this.uploadError.set("Erreur lors de l'envoi. Réessayez.");
         this.uploading.set(false);
       },
       complete: () => {
@@ -529,37 +605,47 @@ export class ExpositionDetail {
     if (!ok) return;
     this.deletingPhoto.set(photo.id);
     await this.expoService.deletePhoto(this.expoId, photo);
-    this.photos.update(ps => ps.filter(p => p.id !== photo.id));
+    this.photos.update((ps) => ps.filter((p) => p.id !== photo.id));
     this.deletingPhoto.set(null);
 
     const uid = this.uid();
     if (uid && photo.uid !== uid) {
       const expo = this.expo();
       const moi = `${this.profile()?.prenom ?? ''} ${this.profile()?.nom ?? ''}`.trim();
-      this.notifService.sendToUser(photo.uid, 'admin',
-        `Votre photo a été supprimée de l'exposition "${expo?.titre ?? ''}" par ${moi}.`,
-        { lien: `/galeries/expositions/${this.expoId}`, sourceNom: moi, sourceUid: uid }
-      ).catch(() => {});
+      this.notifService
+        .sendToUser(
+          photo.uid,
+          'admin',
+          `Votre photo a été supprimée de l'exposition "${expo?.titre ?? ''}" par ${moi}.`,
+          { lien: `/galeries/expositions/${this.expoId}`, sourceNom: moi, sourceUid: uid },
+        )
+        .catch(() => {});
     }
   }
 
   // ── Edit panel ───────────────────────────────────────────────────────────────
 
-  editMode         = signal(false);
-  saving           = signal(false);
+  editMode = signal(false);
+  saving = signal(false);
   pendingCoverFile = signal<File | null>(null);
-  coverPreviewUrl  = signal<string | null>(null);
-  coverDragOver    = signal(false);
+  coverPreviewUrl = signal<string | null>(null);
+  coverDragOver = signal(false);
 
   editForm = new FormGroup({
-    titre:               new FormControl('', { validators: [Validators.required, Validators.minLength(3)], nonNullable: true }),
-    description:         new FormControl('', { nonNullable: true }),
-    maxPhotosParMembre:  new FormControl(1,  { validators: [Validators.required, Validators.min(1)], nonNullable: true }),
-    dateDebutIdeation:   new FormControl('', { nonNullable: true }),
-    dateFinIdeation:     new FormControl('', { nonNullable: true }),
-    dateFinVote:         new FormControl('', { nonNullable: true }),
-    dateFinSoumission:   new FormControl('', { nonNullable: true }),
-    dateExposition:      new FormControl('', { nonNullable: true }),
+    titre: new FormControl('', {
+      validators: [Validators.required, Validators.minLength(3)],
+      nonNullable: true,
+    }),
+    description: new FormControl('', { nonNullable: true }),
+    maxPhotosParMembre: new FormControl(1, {
+      validators: [Validators.required, Validators.min(1)],
+      nonNullable: true,
+    }),
+    dateDebutIdeation: new FormControl('', { nonNullable: true }),
+    dateFinIdeation: new FormControl('', { nonNullable: true }),
+    dateFinVote: new FormControl('', { nonNullable: true }),
+    dateFinSoumission: new FormControl('', { nonNullable: true }),
+    dateExposition: new FormControl('', { nonNullable: true }),
     dateOuverturePublic: new FormControl('', { nonNullable: true }),
   });
 
@@ -567,14 +653,14 @@ export class ExpositionDetail {
     const e = this.expo();
     if (!e) return;
     this.editForm.patchValue({
-      titre:               e.titre,
-      description:         e.description ?? '',
-      maxPhotosParMembre:  e.maxPhotosParMembre,
-      dateDebutIdeation:   e.dateDebutIdeation ?? '',
-      dateFinIdeation:     e.dateFinIdeation,
-      dateFinVote:         e.dateFinVote ?? '',
-      dateFinSoumission:   e.dateFinSoumission ?? '',
-      dateExposition:      e.dateExposition ?? '',
+      titre: e.titre,
+      description: e.description ?? '',
+      maxPhotosParMembre: e.maxPhotosParMembre,
+      dateDebutIdeation: e.dateDebutIdeation ?? '',
+      dateFinIdeation: e.dateFinIdeation,
+      dateFinVote: e.dateFinVote ?? '',
+      dateFinSoumission: e.dateFinSoumission ?? '',
+      dateExposition: e.dateExposition ?? '',
       dateOuverturePublic: e.dateOuverturePublic ?? '',
     });
     this.editMode.set(true);
@@ -593,15 +679,15 @@ export class ExpositionDetail {
       const v = this.editForm.getRawValue();
 
       const firestoreUpdate: Record<string, unknown> = {
-        titre:               v.titre.trim(),
-        description:         v.description.trim() || undefined,
-        dateDebutIdeation:   v.dateDebutIdeation   || undefined,
-        dateExposition:      v.dateExposition      || undefined,
+        titre: v.titre.trim(),
+        description: v.description.trim() || undefined,
+        dateDebutIdeation: v.dateDebutIdeation || undefined,
+        dateExposition: v.dateExposition || undefined,
         dateOuverturePublic: v.dateOuverturePublic || undefined,
       };
       if (e.statut === 'ideation') {
         firestoreUpdate['maxPhotosParMembre'] = v.maxPhotosParMembre;
-        firestoreUpdate['dateFinIdeation']    = v.dateFinIdeation;
+        firestoreUpdate['dateFinIdeation'] = v.dateFinIdeation;
       } else if (e.statut === 'nettoyage') {
         firestoreUpdate['maxPhotosParMembre'] = v.maxPhotosParMembre;
       } else if (e.statut === 'votation') {
@@ -612,7 +698,7 @@ export class ExpositionDetail {
       await this.expoService.update(this.expoId, firestoreUpdate);
 
       // Applique localement sans re-fetch
-      this.expo.update(ex => {
+      this.expo.update((ex) => {
         if (!ex) return ex;
         const updated: Exposition = { ...ex };
         updated.titre = v.titre.trim();
@@ -626,7 +712,7 @@ export class ExpositionDetail {
         else delete updated.dateOuverturePublic;
         if (e.statut === 'ideation') {
           updated.maxPhotosParMembre = v.maxPhotosParMembre;
-          updated.dateFinIdeation    = v.dateFinIdeation;
+          updated.dateFinIdeation = v.dateFinIdeation;
         } else if (e.statut === 'nettoyage') {
           updated.maxPhotosParMembre = v.maxPhotosParMembre;
         } else if (e.statut === 'votation' && v.dateFinVote) {
@@ -638,9 +724,15 @@ export class ExpositionDetail {
       });
 
       if (this.pendingCoverFile()) {
-        if (e.photoCouverturePath) await this.expoService.removeCouverture(this.expoId, e.photoCouverturePath);
-        const { url, path } = await this.expoService.setCouverture(this.expoId, this.pendingCoverFile()!);
-        this.expo.update(ex => ex ? { ...ex, photoCouvertureUrl: url, photoCouverturePath: path } : ex);
+        if (e.photoCouverturePath)
+          await this.expoService.removeCouverture(this.expoId, e.photoCouverturePath);
+        const { url, path } = await this.expoService.setCouverture(
+          this.expoId,
+          this.pendingCoverFile()!,
+        );
+        this.expo.update((ex) =>
+          ex ? { ...ex, photoCouvertureUrl: url, photoCouverturePath: path } : ex,
+        );
         this.clearCover();
       }
       this.editMode.set(false);
@@ -653,7 +745,7 @@ export class ExpositionDetail {
     const e = this.expo();
     if (!e) return;
     const ok = await this.confirmService.confirm(
-      `Supprimer l'exposition « ${e.titre} » ? Cette action est irréversible.`
+      `Supprimer l'exposition « ${e.titre} » ? Cette action est irréversible.`,
     );
     if (!ok) return;
     await this.expoService.deleteExposition(this.expoId, e.photoCouverturePath);
@@ -692,7 +784,9 @@ export class ExpositionDetail {
   formatDate(date?: string): string {
     if (!date) return '—';
     return new Date(date + 'T00:00:00').toLocaleDateString('fr-FR', {
-      day: 'numeric', month: 'long', year: 'numeric',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
     });
   }
 

@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
@@ -12,10 +12,7 @@ import { DocumentDossier } from '../../../models/document.model';
 
 @Component({
   selector: 'app-document-dossiers',
-  imports: [
-    FormsModule,
-    MatButtonModule, MatIconModule, MatFormFieldModule, MatInputModule,
-  ],
+  imports: [FormsModule, MatButtonModule, MatIconModule, MatFormFieldModule, MatInputModule],
   template: `
     <div class="page-wrap">
       <h2 class="page-title">Dossiers de documents</h2>
@@ -25,10 +22,19 @@ import { DocumentDossier } from '../../../models/document.model';
       <div class="add-form">
         <mat-form-field appearance="outline">
           <mat-label>Nom du dossier</mat-label>
-          <input matInput [(ngModel)]="newNom" placeholder="ex: Compte-rendus" (keydown.enter)="addDossier()" />
+          <input
+            matInput
+            [(ngModel)]="newNom"
+            placeholder="ex: Compte-rendus"
+            (keydown.enter)="addDossier()"
+          />
         </mat-form-field>
-        <button mat-raised-button color="primary" (click)="addDossier()"
-          [disabled]="adding() || !newNom.trim()">
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="addDossier()"
+          [disabled]="adding() || !newNom.trim()"
+        >
           <mat-icon>add</mat-icon> Ajouter
         </button>
       </div>
@@ -73,48 +79,111 @@ import { DocumentDossier } from '../../../models/document.model';
       </div>
     </div>
   `,
-  styles: [`
-    .page-wrap { max-width: 600px; padding: 24px 16px; }
-    .page-title { font-size: 2rem; font-weight: 300; letter-spacing: 1px; color: var(--text-accent); padding-bottom: 8px; border-bottom: 3px solid #ffb300; display: inline-block; margin: 0 0 4px; }
-    .page-sub { margin: 0 0 24px; color: var(--text-secondary); font-size: .9rem; }
-    .add-form { display: flex; gap: 12px; align-items: center; margin-bottom: 24px; }
-    .add-form mat-form-field { flex: 1; }
-    .dossier-list { display: flex; flex-direction: column; gap: 4px; }
-    .dossier-row {
-      display: flex; align-items: center; gap: 10px;
-      background: var(--bg-surface); border: 1px solid var(--border-medium); border-radius: 8px; padding: 8px 12px;
-    }
-    .dossier-ordre {
-      width: 24px; height: 24px; border-radius: 50%; background: var(--c-blue-bg); color: var(--c-blue);
-      font-size: .75rem; font-weight: 700; display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-    }
-    .dossier-nom { flex: 1; font-weight: 500; color: var(--text-primary); }
-    .dossier-actions { display: flex; gap: 0; }
-    .edit-field { flex: 1; }
-    .empty { color: var(--text-muted); text-align: center; padding: 24px 0; }
-  `]
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styles: [
+    `
+      .page-wrap {
+        max-width: 600px;
+        padding: 24px 16px;
+      }
+      .page-title {
+        font-size: 2rem;
+        font-weight: 300;
+        letter-spacing: 1px;
+        color: var(--text-accent);
+        padding-bottom: 8px;
+        border-bottom: 3px solid #ffb300;
+        display: inline-block;
+        margin: 0 0 4px;
+      }
+      .page-sub {
+        margin: 0 0 24px;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+      }
+      .add-form {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 24px;
+      }
+      .add-form mat-form-field {
+        flex: 1;
+      }
+      .dossier-list {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .dossier-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: var(--bg-surface);
+        border: 1px solid var(--border-medium);
+        border-radius: 8px;
+        padding: 8px 12px;
+      }
+      .dossier-ordre {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: var(--c-blue-bg);
+        color: var(--c-blue);
+        font-size: 0.75rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      .dossier-nom {
+        flex: 1;
+        font-weight: 500;
+        color: var(--text-primary);
+      }
+      .dossier-actions {
+        display: flex;
+        gap: 0;
+      }
+      .edit-field {
+        flex: 1;
+      }
+      .empty {
+        color: var(--text-muted);
+        text-align: center;
+        padding: 24px 0;
+      }
+    `,
+  ],
 })
 export class DocumentDossiers {
   private documentService = inject(DocumentService);
-  private confirmService  = inject(ConfirmService);
-  private snackBar        = inject(MatSnackBar);
+  private confirmService = inject(ConfirmService);
+  private snackBar = inject(MatSnackBar);
 
-  dossiers = toSignal(this.documentService.getDossiers(), { initialValue: [] as DocumentDossier[] });
+  dossiers = toSignal(this.documentService.getDossiers(), {
+    initialValue: [] as DocumentDossier[],
+  });
 
   newNom = '';
   adding = signal(false);
-  editId  = signal<string | null>(null);
+  editId = signal<string | null>(null);
   editNom = '';
 
-  isFirst(d: DocumentDossier): boolean { return this.dossiers()[0]?.id === d.id; }
-  isLast(d: DocumentDossier): boolean  { return this.dossiers()[this.dossiers().length - 1]?.id === d.id; }
+  isFirst(d: DocumentDossier): boolean {
+    return this.dossiers()[0]?.id === d.id;
+  }
+  isLast(d: DocumentDossier): boolean {
+    return this.dossiers()[this.dossiers().length - 1]?.id === d.id;
+  }
 
   async addDossier() {
     if (!this.newNom.trim() || this.adding()) return;
     this.adding.set(true);
     try {
-      const ordre = (this.dossiers().length > 0 ? Math.max(...this.dossiers().map(d => d.ordre)) : 0) + 1;
+      const ordre =
+        (this.dossiers().length > 0 ? Math.max(...this.dossiers().map((d) => d.ordre)) : 0) + 1;
       await this.documentService.addDossier(this.newNom.trim(), ordre);
       this.newNom = '';
       this.snackBar.open('Dossier créé', '', { duration: 2500 });
@@ -143,7 +212,7 @@ export class DocumentDossiers {
 
   async moveUp(d: DocumentDossier) {
     const list = this.dossiers();
-    const idx = list.findIndex(x => x.id === d.id);
+    const idx = list.findIndex((x) => x.id === d.id);
     if (idx <= 0) return;
     const prev = list[idx - 1];
     await Promise.all([
@@ -154,7 +223,7 @@ export class DocumentDossiers {
 
   async moveDown(d: DocumentDossier) {
     const list = this.dossiers();
-    const idx = list.findIndex(x => x.id === d.id);
+    const idx = list.findIndex((x) => x.id === d.id);
     if (idx >= list.length - 1) return;
     const next = list[idx + 1];
     await Promise.all([
@@ -166,7 +235,7 @@ export class DocumentDossiers {
   async deleteDossier(d: DocumentDossier) {
     const ok = await this.confirmService.confirm(
       `Supprimer le dossier "${d.nom}" ? Les documents existants dans ce dossier ne seront pas supprimés.`,
-      'Supprimer le dossier'
+      'Supprimer le dossier',
     );
     if (!ok) return;
     try {

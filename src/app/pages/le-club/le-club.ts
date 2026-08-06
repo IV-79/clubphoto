@@ -1,4 +1,4 @@
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject, computed, ChangeDetectionStrategy } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -12,7 +12,8 @@ function renderMarkdown(md: string): string {
 @Component({
   selector: 'app-le-club',
   imports: [RouterOutlet],
-  template: `<router-outlet />`
+  changeDetection: ChangeDetectionStrategy.Eager,
+  template: `<router-outlet />`,
 })
 export class LeClub {}
 
@@ -31,16 +32,17 @@ export class LeClub {}
       }
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './le-club.css',
 })
 export class Histoire {
   private pageService = inject(PageContentService);
-  private sanitizer   = inject(DomSanitizer);
+  private sanitizer = inject(DomSanitizer);
 
-  raw      = toSignal(this.pageService.getContent('histoire'), { initialValue: null as any });
-  loading  = computed(() => this.raw() === null);
-  safeHtml = computed((): SafeHtml =>
-    this.sanitizer.bypassSecurityTrustHtml(renderMarkdown(this.raw() ?? ''))
+  raw = toSignal(this.pageService.getContent('histoire'), { initialValue: null as any });
+  loading = computed(() => this.raw() === null);
+  safeHtml = computed(
+    (): SafeHtml => this.sanitizer.bypassSecurityTrustHtml(renderMarkdown(this.raw() ?? '')),
   );
 }
 
@@ -59,16 +61,17 @@ export class Histoire {
       }
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './le-club.css',
 })
 export class Bureau {
   private pageService = inject(PageContentService);
-  private sanitizer   = inject(DomSanitizer);
+  private sanitizer = inject(DomSanitizer);
 
-  raw      = toSignal(this.pageService.getContent('bureau'), { initialValue: null as any });
-  loading  = computed(() => this.raw() === null);
-  safeHtml = computed((): SafeHtml =>
-    this.sanitizer.bypassSecurityTrustHtml(renderMarkdown(this.raw() ?? ''))
+  raw = toSignal(this.pageService.getContent('bureau'), { initialValue: null as any });
+  loading = computed(() => this.raw() === null);
+  safeHtml = computed(
+    (): SafeHtml => this.sanitizer.bypassSecurityTrustHtml(renderMarkdown(this.raw() ?? '')),
   );
 }
 
@@ -87,15 +90,16 @@ export class Bureau {
       }
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './le-club.css',
 })
 export class Adhesion {
   private pageService = inject(PageContentService);
-  private sanitizer   = inject(DomSanitizer);
+  private sanitizer = inject(DomSanitizer);
 
-  raw      = toSignal(this.pageService.getContent('adhesion'), { initialValue: null as any });
-  loading  = computed(() => this.raw() === null);
-  safeHtml = computed((): SafeHtml =>
-    this.sanitizer.bypassSecurityTrustHtml(renderMarkdown(this.raw() ?? ''))
+  raw = toSignal(this.pageService.getContent('adhesion'), { initialValue: null as any });
+  loading = computed(() => this.raw() === null);
+  safeHtml = computed(
+    (): SafeHtml => this.sanitizer.bypassSecurityTrustHtml(renderMarkdown(this.raw() ?? '')),
   );
 }

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -19,27 +19,30 @@ import { MatIconModule } from '@angular/material/icon';
       <button mat-raised-button color="warn" mat-dialog-close>Fermer</button>
     </mat-dialog-actions>
   `,
-  styles: [`
-    .dialog-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 24px 24px 0;
-    }
-    .warning-icon {
-      font-size: 32px;
-      width: 32px;
-      height: 32px;
-      color: #c62828;
-    }
-    h2[mat-dialog-title] {
-      margin: 0;
-      font-size: 1.3rem;
-    }
-    mat-dialog-content p {
-      margin: 8px 0;
-      color: #444;
-    }
-  `]
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styles: [
+    `
+      .dialog-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 24px 24px 0;
+      }
+      .warning-icon {
+        font-size: 32px;
+        width: 32px;
+        height: 32px;
+        color: #c62828;
+      }
+      h2[mat-dialog-title] {
+        margin: 0;
+        font-size: 1.3rem;
+      }
+      mat-dialog-content p {
+        margin: 8px 0;
+        color: #444;
+      }
+    `,
+  ],
 })
 export class SuspenduDialogComponent {}

@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -12,74 +12,95 @@ import { AuthService } from '../../../services/auth.service';
 import { ConfirmService } from '../../../services/confirm.service';
 import { compressImage, COMPRESS_ACTUALITE } from '../../../utils/image-compress';
 import {
-  ThemeMensuel, computeThemeStatut, getThemeDates, ThemeStatut, THEME_STATUT_LABELS,
+  ThemeMensuel,
+  computeThemeStatut,
+  getThemeDates,
+  ThemeStatut,
+  THEME_STATUT_LABELS,
 } from '../../../models/theme.model';
 
 const INIT = 8;
 const PAGE = 8;
 
-const MOIS_FR = ['', 'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-                 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+const MOIS_FR = [
+  '',
+  'Janvier',
+  'Février',
+  'Mars',
+  'Avril',
+  'Mai',
+  'Juin',
+  'Juillet',
+  'Août',
+  'Septembre',
+  'Octobre',
+  'Novembre',
+  'Décembre',
+];
 
 @Component({
   selector: 'app-admin-themes',
   imports: [
     ReactiveFormsModule,
-    MatFormFieldModule, MatInputModule, MatSelectModule,
-    MatButtonModule, MatIconModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatIconModule,
     DatePickerComponent,
   ],
   templateUrl: './themes.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './themes.css',
 })
 export class AdminThemes {
-  private themeService   = inject(ThemeService);
-  private authService    = inject(AuthService);
+  private themeService = inject(ThemeService);
+  private authService = inject(AuthService);
   private confirmService = inject(ConfirmService);
 
   private readonly todayStr = new Date().toISOString().slice(0, 10);
 
-  themes  = toSignal(this.themeService.getThemes(), { initialValue: [] as ThemeMensuel[] });
+  themes = toSignal(this.themeService.getThemes(), { initialValue: [] as ThemeMensuel[] });
   profile = toSignal(this.authService.currentUserProfile$);
 
   showCreateForm = signal(false);
-  showPasses     = signal(false);
-  expandedId     = signal<string | null>(null);
-  editingId      = signal<string | null>(null);
-  saving         = signal(false);
-  createError    = signal('');
-  editError      = signal('');
-  editStatut      = signal<ThemeStatut | null>(null);
-  editMinFinVote  = signal('');
-  flashEdit       = signal(false);
+  showPasses = signal(false);
+  expandedId = signal<string | null>(null);
+  editingId = signal<string | null>(null);
+  saving = signal(false);
+  createError = signal('');
+  editError = signal('');
+  editStatut = signal<ThemeStatut | null>(null);
+  editMinFinVote = signal('');
+  flashEdit = signal(false);
   private flashTimer: ReturnType<typeof setTimeout> | null = null;
 
   // Cover upload — create form (pending file, uploaded after theme creation)
   createPendingFile = signal<File | null>(null);
-  createPendingUrl  = signal<string | null>(null);
-  createCoverDrag   = signal(false);
+  createPendingUrl = signal<string | null>(null);
+  createCoverDrag = signal(false);
   // Cover upload — edit form (immediate upload on file select)
   editCoverUploading = signal(false);
-  editCoverDrag      = signal(false);
+  editCoverDrag = signal(false);
 
   private limitActifs = signal(INIT);
   private limitPasses = signal(INIT);
 
   private actifsAll = computed(() =>
     this.themes()
-      .filter(t => computeThemeStatut(t) !== 'resultats')
-      .sort((a, b) => a.mois.localeCompare(b.mois))
+      .filter((t) => computeThemeStatut(t) !== 'resultats')
+      .sort((a, b) => a.mois.localeCompare(b.mois)),
   );
   private passesAll = computed(() =>
     this.themes()
-      .filter(t => computeThemeStatut(t) === 'resultats')
-      .sort((a, b) => b.mois.localeCompare(a.mois))
+      .filter((t) => computeThemeStatut(t) === 'resultats')
+      .sort((a, b) => b.mois.localeCompare(a.mois)),
   );
 
-  actifs        = computed(() => this.actifsAll().slice(0, this.limitActifs()));
-  passes        = computed(() => this.passesAll().slice(0, this.limitPasses()));
-  actifsCount   = computed(() => this.actifsAll().length);
-  passesCount   = computed(() => this.passesAll().length);
+  actifs = computed(() => this.actifsAll().slice(0, this.limitActifs()));
+  passes = computed(() => this.passesAll().slice(0, this.limitPasses()));
+  actifsCount = computed(() => this.actifsAll().length);
+  passesCount = computed(() => this.passesAll().length);
   hasMoreActifs = computed(() => this.limitActifs() < this.actifsAll().length);
   hasMorePasses = computed(() => this.limitPasses() < this.passesAll().length);
 
@@ -96,17 +117,19 @@ export class AdminThemes {
   readonly STATUT_LABELS = THEME_STATUT_LABELS;
 
   createForm = this.buildForm();
-  editForm   = this.buildForm();
+  editForm = this.buildForm();
 
   openCreate() {
     this.editingId.set(null);
-    const now       = new Date();
-    const next      = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    const now = new Date();
+    const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
     const moisMonth = String(next.getMonth() + 1).padStart(2, '0');
-    const moisYear  = String(next.getFullYear());
+    const moisYear = String(next.getFullYear());
     this.createForm.reset({
-      maxPhotos: 1, maxVotes: 3,
-      moisMonth, moisYear,
+      maxPhotos: 1,
+      maxVotes: 3,
+      moisMonth,
+      moisYear,
       dateFinVote: this.secondSundayOfNextMonth(moisYear, moisMonth),
     });
     this.createError.set('');
@@ -131,22 +154,22 @@ export class AdminThemes {
 
   async creer() {
     if (this.createForm.invalid || this.saving()) return;
-    const v    = this.createForm.getRawValue();
+    const v = this.createForm.getRawValue();
     const mois = `${v.moisYear}-${v.moisMonth}`;
-    if (this.themes().some(t => t.mois === mois)) {
+    if (this.themes().some((t) => t.mois === mois)) {
       this.createError.set('Un thème existe déjà pour ce mois.');
       return;
     }
     this.saving.set(true);
     try {
       const id = await this.themeService.creerTheme({
-        titre:       v.titre.trim(),
+        titre: v.titre.trim(),
         description: v.description.trim(),
         mois,
         dateFinVote: v.dateFinVote,
-        maxPhotos:   Number(v.maxPhotos),
-        maxVotes:    Number(v.maxVotes),
-        createdBy:   this.profile()?.uid ?? '',
+        maxPhotos: Number(v.maxPhotos),
+        maxVotes: Number(v.maxVotes),
+        createdBy: this.profile()?.uid ?? '',
       });
       const pendingFile = this.createPendingFile();
       if (pendingFile) {
@@ -226,7 +249,10 @@ export class AdminThemes {
   }
 
   toggleExpand(id: string) {
-    if (this.editingId() === id) { this.cancelEdit(); return; }
+    if (this.editingId() === id) {
+      this.cancelEdit();
+      return;
+    }
     if (this.editingId() !== null) {
       this.triggerFlash();
       return;
@@ -248,13 +274,13 @@ export class AdminThemes {
     const s = computeThemeStatut(theme);
     const [moisYear, moisMonth] = theme.mois.split('-');
     this.editForm.reset({
-      titre:       theme.titre,
+      titre: theme.titre,
       description: theme.description ?? '',
       moisMonth,
       moisYear,
       dateFinVote: theme.dateFinVote,
-      maxPhotos:   theme.maxPhotos,
-      maxVotes:    theme.maxVotes,
+      maxPhotos: theme.maxPhotos,
+      maxVotes: theme.maxVotes,
     });
     if (s === 'en_attente') {
       this.editForm.controls.moisMonth.enable();
@@ -284,26 +310,26 @@ export class AdminThemes {
 
   async sauvegarder(id: string) {
     if (this.editForm.invalid || this.saving()) return;
-    const v    = this.editForm.getRawValue();
+    const v = this.editForm.getRawValue();
     const mois = `${v.moisYear}-${v.moisMonth}`;
-    if (this.themes().some(t => t.mois === mois && t.id !== id)) {
+    if (this.themes().some((t) => t.mois === mois && t.id !== id)) {
       this.editError.set('Un thème existe déjà pour ce mois.');
       return;
     }
     const minFin = this.editMinFinVote();
     if (minFin && v.dateFinVote < minFin) {
-      this.editError.set('En phase de vote, la date de fin ne peut qu\'être étendue, pas réduite.');
+      this.editError.set("En phase de vote, la date de fin ne peut qu'être étendue, pas réduite.");
       return;
     }
     this.saving.set(true);
     try {
       await this.themeService.modifierTheme(id, {
-        titre:       v.titre.trim(),
+        titre: v.titre.trim(),
         description: v.description.trim(),
         mois,
         dateFinVote: v.dateFinVote,
-        maxPhotos:   Number(v.maxPhotos),
-        maxVotes:    Number(v.maxVotes),
+        maxPhotos: Number(v.maxPhotos),
+        maxVotes: Number(v.maxVotes),
       });
       this.editingId.set(null);
       this.editError.set('');
@@ -313,23 +339,33 @@ export class AdminThemes {
   }
 
   async supprimer(theme: ThemeMensuel) {
-    const ok = await this.confirmService.confirm(`Supprimer le thème « ${theme.titre} » définitivement ?`);
+    const ok = await this.confirmService.confirm(
+      `Supprimer le thème « ${theme.titre} » définitivement ?`,
+    );
     if (!ok) return;
     await this.themeService.supprimerTheme(theme.id);
     if (this.editingId() === theme.id) this.editingId.set(null);
     if (this.expandedId() === theme.id) this.expandedId.set(null);
   }
 
-  loadMoreActifs() { this.limitActifs.update(n => n + PAGE); }
-  loadMorePasses()  { this.limitPasses.update(n => n + PAGE); }
+  loadMoreActifs() {
+    this.limitActifs.update((n) => n + PAGE);
+  }
+  loadMorePasses() {
+    this.limitPasses.update((n) => n + PAGE);
+  }
 
-  statut(theme: ThemeMensuel): ThemeStatut { return computeThemeStatut(theme); }
+  statut(theme: ThemeMensuel): ThemeStatut {
+    return computeThemeStatut(theme);
+  }
 
   canEdit(theme: ThemeMensuel): boolean {
     return computeThemeStatut(theme) !== 'resultats';
   }
 
-  dates(theme: ThemeMensuel) { return getThemeDates(theme); }
+  dates(theme: ThemeMensuel) {
+    return getThemeDates(theme);
+  }
 
   formatMoisShort(mois: string): string {
     const [year, month] = mois.split('-');
@@ -341,10 +377,10 @@ export class AdminThemes {
   }
 
   private secondSundayOfNextMonth(moisYear: string, moisMonth: string): string {
-    const m   = +moisMonth;
-    const y   = +moisYear;
+    const m = +moisMonth;
+    const y = +moisYear;
     const nextM0 = m % 12;
-    const nextY  = m === 12 ? y + 1 : y;
+    const nextY = m === 12 ? y + 1 : y;
     const d = new Date(nextY, nextM0, 1);
     while (d.getDay() !== 0) d.setDate(d.getDate() + 1);
     d.setDate(d.getDate() + 7);
@@ -356,13 +392,19 @@ export class AdminThemes {
 
   private buildForm() {
     return new FormGroup({
-      titre:       new FormControl('', { validators: [Validators.required], nonNullable: true }),
+      titre: new FormControl('', { validators: [Validators.required], nonNullable: true }),
       description: new FormControl('', { nonNullable: true }),
-      moisMonth:   new FormControl('', { validators: [Validators.required], nonNullable: true }),
-      moisYear:    new FormControl('', { validators: [Validators.required], nonNullable: true }),
+      moisMonth: new FormControl('', { validators: [Validators.required], nonNullable: true }),
+      moisYear: new FormControl('', { validators: [Validators.required], nonNullable: true }),
       dateFinVote: new FormControl('', { validators: [Validators.required], nonNullable: true }),
-      maxPhotos:   new FormControl(1,  { validators: [Validators.required, Validators.min(1)], nonNullable: true }),
-      maxVotes:    new FormControl(3,  { validators: [Validators.required, Validators.min(1)], nonNullable: true }),
+      maxPhotos: new FormControl(1, {
+        validators: [Validators.required, Validators.min(1)],
+        nonNullable: true,
+      }),
+      maxVotes: new FormControl(3, {
+        validators: [Validators.required, Validators.min(1)],
+        nonNullable: true,
+      }),
     });
   }
 }

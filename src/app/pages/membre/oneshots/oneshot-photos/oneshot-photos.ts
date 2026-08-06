@@ -1,8 +1,22 @@
-import { Component, inject, signal, computed, ViewChild, ElementRef } from '@angular/core';
+import {
+  Component,
+  inject,
+  signal,
+  computed,
+  ViewChild,
+  ElementRef,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { CdkDragDrop, CdkDrag, CdkDropList, CdkDropListGroup, CdkDragPreview } from '@angular/cdk/drag-drop';
+import {
+  CdkDragDrop,
+  CdkDrag,
+  CdkDropList,
+  CdkDropListGroup,
+  CdkDragPreview,
+} from '@angular/cdk/drag-drop';
 import { OneShotService } from '../../../../services/oneshot.service';
 import { ConfirmService } from '../../../../services/confirm.service';
 import { OneShotPhoto, OneShotTheme, OneShotInscription } from '../../../../models/oneshot.model';
@@ -27,24 +41,35 @@ interface PhotoSection {
 
 @Component({
   selector: 'app-oneshot-photos',
-  imports: [FormsModule, RouterLink, CdkDrag, CdkDropList, CdkDropListGroup, CdkDragPreview, ImgRetryDirective],
+  imports: [
+    FormsModule,
+    RouterLink,
+    CdkDrag,
+    CdkDropList,
+    CdkDropListGroup,
+    CdkDragPreview,
+    ImgRetryDirective,
+  ],
   templateUrl: './oneshot-photos.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './oneshot-photos.css',
 })
 export class OneShotPhotos {
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
   private oneShotService = inject(OneShotService);
-  private route          = inject(ActivatedRoute);
+  private route = inject(ActivatedRoute);
   private confirmService = inject(ConfirmService);
   private gpsConsentService = inject(GpsConsentService);
 
   readonly id = this.route.snapshot.paramMap.get('id')!;
 
-  event        = toSignal(this.oneShotService.getOneShot(this.id));
-  themes       = toSignal(this.oneShotService.getThemes(this.id),       { initialValue: [] as OneShotTheme[] });
-  inscriptions = toSignal(this.oneShotService.getInscriptions(this.id), { initialValue: [] as OneShotInscription[] });
-  photos       = toSignal(this.oneShotService.getPhotos(this.id),       { initialValue: [] as OneShotPhoto[] });
+  event = toSignal(this.oneShotService.getOneShot(this.id));
+  themes = toSignal(this.oneShotService.getThemes(this.id), { initialValue: [] as OneShotTheme[] });
+  inscriptions = toSignal(this.oneShotService.getInscriptions(this.id), {
+    initialValue: [] as OneShotInscription[],
+  });
+  photos = toSignal(this.oneShotService.getPhotos(this.id), { initialValue: [] as OneShotPhoto[] });
 
   // Moves optimistes en attente (photoId → nouveau themeId)
   pendingMoves = signal<Map<string, string>>(new Map());
@@ -52,8 +77,8 @@ export class OneShotPhotos {
   // Photos groupées par section, moves optimistes appliqués, non-assignées en premier
   allSections = computed((): PhotoSection[] => {
     const pending = this.pendingMoves();
-    const photos = this.photos().map(p =>
-      pending.has(p.id) ? { ...p, themeId: pending.get(p.id)! } : p
+    const photos = this.photos().map((p) =>
+      pending.has(p.id) ? { ...p, themeId: pending.get(p.id)! } : p,
     );
 
     const buildCounts = (list: OneShotPhoto[]) => {
@@ -68,19 +93,25 @@ export class OneShotPhotos {
       {
         id: '',
         nom: 'Non assignées',
-        photos: photos.filter(p => !p.themeId),
+        photos: photos.filter((p) => !p.themeId),
         isUnassigned: true,
         memberCounts: new Map(),
       },
-      ...this.themes().map(t => {
-        const tp = photos.filter(p => p.themeId === t.id);
-        return { id: t.id, nom: t.nom, photos: tp, isUnassigned: false, memberCounts: buildCounts(tp) };
+      ...this.themes().map((t) => {
+        const tp = photos.filter((p) => p.themeId === t.id);
+        return {
+          id: t.id,
+          nom: t.nom,
+          photos: tp,
+          isUnassigned: false,
+          memberCounts: buildCounts(tp),
+        };
       }),
     ];
   });
 
-  nonAssigneesCount = computed(() =>
-    this.photos().filter(p => !p.membreUid || !p.themeId).length
+  nonAssigneesCount = computed(
+    () => this.photos().filter((p) => !p.membreUid || !p.themeId).length,
   );
 
   // Nombre de paires (membre, thème) où un membre a > 1 photo
@@ -92,43 +123,49 @@ export class OneShotPhotos {
         counts.set(key, (counts.get(key) ?? 0) + 1);
       }
     }
-    return [...counts.values()].filter(n => n > 1).length;
+    return [...counts.values()].filter((n) => n > 1).length;
   });
 
   submissionProgress = computed(() => {
-    const themes   = this.themes();
+    const themes = this.themes();
     const inscrits = this.inscriptions();
-    const photos   = this.photos();
+    const photos = this.photos();
     if (!themes.length || !inscrits.length) return null;
 
-    const total   = themes.length * inscrits.length;
+    const total = themes.length * inscrits.length;
     const covered = new Set(
-      photos.filter(p => p.membreUid && p.themeId).map(p => `${p.membreUid}:${p.themeId}`)
+      photos.filter((p) => p.membreUid && p.themeId).map((p) => `${p.membreUid}:${p.themeId}`),
     ).size;
 
-    const byTheme = themes.map(t => ({
+    const byTheme = themes.map((t) => ({
       theme: t,
-      submitted: photos.filter(p => p.themeId === t.id && p.membreUid).length,
+      submitted: photos.filter((p) => p.themeId === t.id && p.membreUid).length,
     }));
 
-    return { covered, total, pct: Math.round(covered / total * 100), byTheme, nbMembers: inscrits.length };
+    return {
+      covered,
+      total,
+      pct: Math.round((covered / total) * 100),
+      byTheme,
+      nbMembers: inscrits.length,
+    };
   });
 
   peutUploader = computed(() =>
-    ['inscription', 'fermeture_inscriptions'].includes(this.event()?.statut ?? '')
+    ['inscription', 'fermeture_inscriptions'].includes(this.event()?.statut ?? ''),
   );
 
   peutGerer = computed(() =>
-    ['inscription', 'fermeture_inscriptions'].includes(this.event()?.statut ?? '')
+    ['inscription', 'fermeture_inscriptions'].includes(this.event()?.statut ?? ''),
   );
 
   // --- Upload ---
-  selectedFiles      = signal<FileEntry[]>([]);
+  selectedFiles = signal<FileEntry[]>([]);
   preassignMembreUid = '';
-  preassignThemeId   = '';
-  uploading          = signal(false);
-  uploadDone         = signal(0);
-  uploadTotal        = signal(0);
+  preassignThemeId = '';
+  uploading = signal(false);
+  uploadDone = signal(0);
+  uploadTotal = signal(0);
 
   onFilesSelected(event: Event) {
     const input = event.target as HTMLInputElement;
@@ -137,16 +174,20 @@ export class OneShotPhotos {
 
   onFileDrop(event: DragEvent) {
     event.preventDefault();
-    const files = Array.from(event.dataTransfer?.files ?? []).filter(f => f.type.startsWith('image/'));
+    const files = Array.from(event.dataTransfer?.files ?? []).filter((f) =>
+      f.type.startsWith('image/'),
+    );
     if (files.length) this.setFiles(files);
   }
 
   private setFiles(files: File[]) {
-    this.selectedFiles.set(files.map(f => ({
-      file: f,
-      name: f.name.replace(/\.[^.]+$/, ''),
-      sizeMb: (f.size / 1024 / 1024).toFixed(1),
-    })));
+    this.selectedFiles.set(
+      files.map((f) => ({
+        file: f,
+        name: f.name.replace(/\.[^.]+$/, ''),
+        sizeMb: (f.size / 1024 / 1024).toFixed(1),
+      })),
+    );
   }
 
   clearFiles() {
@@ -158,11 +199,11 @@ export class OneShotPhotos {
     const entries = this.selectedFiles();
     if (!entries.length || this.uploading()) return;
 
-    const membre = this.inscriptions().find(i => i.uid === this.preassignMembreUid);
+    const membre = this.inscriptions().find((i) => i.uid === this.preassignMembreUid);
     const meta = {
       membreUid: this.preassignMembreUid || '',
-      nomMembre: membre?.nomMembre       || '',
-      themeId:   this.preassignThemeId   || '',
+      nomMembre: membre?.nomMembre || '',
+      themeId: this.preassignThemeId || '',
     };
 
     this.uploading.set(true);
@@ -170,45 +211,58 @@ export class OneShotPhotos {
     this.uploadTotal.set(entries.length);
 
     // Lire tous les EXIF en parallèle, puis demander le consentement GPS une seule fois pour le lot
-    const exifResults = await Promise.all(entries.map(e => readExif(e.file)));
-    if (exifResults.some(e => !!e.gps)) {
+    const exifResults = await Promise.all(entries.map((e) => readExif(e.file)));
+    if (exifResults.some((e) => !!e.gps)) {
       const keepGps = await this.gpsConsentService.requestConsent();
-      if (!keepGps) exifResults.forEach(e => delete e.gps);
+      if (!keepGps) exifResults.forEach((e) => delete e.gps);
     }
 
     for (let i = 0; i < entries.length; i++) {
       const compressed = await compressImage(entries[i].file, COMPRESS_EVENT);
       await new Promise<void>((resolve, reject) => {
-        this.oneShotService.uploadPhoto(compressed, this.id, {
-          ...meta, titre: entries[i].name, exif: exifResults[i],
-        }).subscribe({
-          complete: () => { this.uploadDone.update(n => n + 1); resolve(); },
-          error: reject,
-        });
+        this.oneShotService
+          .uploadPhoto(compressed, this.id, {
+            ...meta,
+            titre: entries[i].name,
+            exif: exifResults[i],
+          })
+          .subscribe({
+            complete: () => {
+              this.uploadDone.update((n) => n + 1);
+              resolve();
+            },
+            error: reject,
+          });
       });
     }
 
     this.uploading.set(false);
     this.clearFiles();
     this.preassignMembreUid = '';
-    this.preassignThemeId   = '';
+    this.preassignThemeId = '';
   }
 
   // --- Assignation directe ---
   savingPhotoIds = signal<Set<string>>(new Set());
 
-  isSaving(photoId: string) { return this.savingPhotoIds().has(photoId); }
+  isSaving(photoId: string) {
+    return this.savingPhotoIds().has(photoId);
+  }
 
   private addSaving(id: string) {
-    this.savingPhotoIds.update(s => new Set([...s, id]));
+    this.savingPhotoIds.update((s) => new Set([...s, id]));
   }
   private removeSaving(id: string) {
-    this.savingPhotoIds.update(s => { const n = new Set(s); n.delete(id); return n; });
+    this.savingPhotoIds.update((s) => {
+      const n = new Set(s);
+      n.delete(id);
+      return n;
+    });
   }
 
   async onMembreChange(photo: OneShotPhoto, uid: string) {
     if (this.isSaving(photo.id)) return;
-    const membre = this.inscriptions().find(i => i.uid === uid);
+    const membre = this.inscriptions().find((i) => i.uid === uid);
     this.addSaving(photo.id);
     try {
       await this.oneShotService.updatePhotoAssignment(this.id, photo.id, {
@@ -224,7 +278,7 @@ export class OneShotPhotos {
   async onThemeChange(photo: OneShotPhoto, themeId: string) {
     if (this.isSaving(photo.id)) return;
     this.addSaving(photo.id);
-    this.pendingMoves.update(m => new Map(m).set(photo.id, themeId));
+    this.pendingMoves.update((m) => new Map(m).set(photo.id, themeId));
     try {
       await this.oneShotService.updatePhotoAssignment(this.id, photo.id, {
         membreUid: photo.membreUid,
@@ -233,7 +287,11 @@ export class OneShotPhotos {
       });
     } finally {
       this.removeSaving(photo.id);
-      this.pendingMoves.update(m => { const n = new Map(m); n.delete(photo.id); return n; });
+      this.pendingMoves.update((m) => {
+        const n = new Map(m);
+        n.delete(photo.id);
+        return n;
+      });
     }
   }
 
@@ -243,7 +301,7 @@ export class OneShotPhotos {
     const photo = event.item.data as OneShotPhoto;
     const newThemeId = event.container.data ?? '';
 
-    this.pendingMoves.update(m => new Map(m).set(photo.id, newThemeId));
+    this.pendingMoves.update((m) => new Map(m).set(photo.id, newThemeId));
     try {
       await this.oneShotService.updatePhotoAssignment(this.id, photo.id, {
         membreUid: photo.membreUid,
@@ -251,11 +309,19 @@ export class OneShotPhotos {
         themeId: newThemeId,
       });
     } catch {
-      this.pendingMoves.update(m => { const n = new Map(m); n.delete(photo.id); return n; });
+      this.pendingMoves.update((m) => {
+        const n = new Map(m);
+        n.delete(photo.id);
+        return n;
+      });
       return;
     }
     setTimeout(() => {
-      this.pendingMoves.update(m => { const n = new Map(m); n.delete(photo.id); return n; });
+      this.pendingMoves.update((m) => {
+        const n = new Map(m);
+        n.delete(photo.id);
+        return n;
+      });
     }, 600);
   }
 
