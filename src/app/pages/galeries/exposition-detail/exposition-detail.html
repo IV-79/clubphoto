@@ -90,9 +90,15 @@
         }
       </div>
 
-      @if (s === 'votation') {
+      @if (s === 'votation' || (s === 'nettoyage' && nbMembresVote() > 0)) {
         <div class="info-card">
           <h3 class="info-card-title">Votation</h3>
+          @if (e.nombreVotesParMembre) {
+            <div class="stat-row">
+              <span>Votes / membre</span>
+              <strong>{{ e.nombreVotesParMembre }}</strong>
+            </div>
+          }
           <div class="stat-row">
             <span>Membres ayant voté</span>
             <strong>{{ nbMembresVote() }}</strong>
@@ -263,6 +269,9 @@
                     <span class="sugg-texte">{{ sugg.texte }}</span>
                     @if (sugg.source === 'admin') {
                       <span class="badge-admin">admin</span>
+                    }
+                    @if (nbMembresVote() > 0) {
+                      <span class="sugg-vote-count">{{ scoreParSuggestion()[sugg.id] ?? 0 }} vote{{ (scoreParSuggestion()[sugg.id] ?? 0) !== 1 ? 's' : '' }}</span>
                     }
                     <button class="btn-icon" (click)="startEditSugg(sugg)" title="Modifier">✏</button>
                     <button class="btn-icon btn-danger" (click)="supprimerSuggestion(sugg)" title="Supprimer">🗑</button>

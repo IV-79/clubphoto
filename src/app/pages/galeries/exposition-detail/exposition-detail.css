@@ -294,6 +294,18 @@
 
 .sugg-texte { flex: 1; }
 
+.sugg-vote-count {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--c-violet);
+  background: var(--c-violet-bg);
+  border: 1px solid var(--c-violet-bd);
+  border-radius: 10px;
+  padding: 1px 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
 .badge-admin {
   font-size: 0.65rem;
   background: #3b82f6;
