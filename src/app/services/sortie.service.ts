@@ -159,10 +159,14 @@ export class SortieService {
     const sortieData = sortieSnap.data() as { imageEvenementPath?: string } | undefined;
 
     const storageDeletions: Promise<void>[] = [];
+    const sizeByUser: Record<string, number> = {};
     for (const p of photosSnap.docs) {
       const d = p.data();
       if (d['storagePath'])   storageDeletions.push(deleteObject(ref(storage, d['storagePath'])).catch(() => {}));
       if (d['thumbnailPath']) storageDeletions.push(deleteObject(ref(storage, d['thumbnailPath'])).catch(() => {}));
+      if (d['uploaderUid'] && d['fileSize']) {
+        sizeByUser[d['uploaderUid']] = (sizeByUser[d['uploaderUid']] ?? 0) + d['fileSize'];
+      }
     }
     const coverPath = sortieData?.imageEvenementPath ?? notifCtx?.imageEvenementPath;
     if (coverPath) storageDeletions.push(deleteObject(ref(storage, coverPath)).catch(() => {}));
@@ -173,6 +177,9 @@ export class SortieService {
       ...inscritsSnap.docs.map(p => deleteDoc(p.ref)),
     ]);
     await deleteDoc(doc(db, 'sorties', sortieId));
+    Object.entries(sizeByUser).forEach(([uid, size]) =>
+      updateDoc(doc(db, 'users', uid), { 'storageUsed.sorties': increment(-size) }).catch(() => {})
+    );
     if (notifCtx && inscritsSnap.docs.length > 0) {
       const msg = `L'événement « ${notifCtx.titre} » auquel vous étiez inscrit(e) a été annulé.`;
       Promise.all(
@@ -248,7 +255,7 @@ export class SortieService {
           ]);
           const thumbSnap = await uploadBytes(ref(storage, thumbPath), thumb);
           const thumbnailUrl = await getDownloadURL(thumbSnap.ref);
-          const fileSize = file.size;
+          const fileSize = file.size + thumb.size;
           const imageData: Omit<SortieImage, 'id'> = {
             url, storagePath, fileSize, likes: [], uploadedAt: new Date().toISOString(),
             uploaderUid: meta.uploaderUid, nomUploader: meta.nomUploader,

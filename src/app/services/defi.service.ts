@@ -134,10 +134,14 @@ export class DefiService {
     ]);
 
     const storageDeletes: Promise<void>[] = [];
+    const sizeByUser: Record<string, number> = {};
     for (const p of photosSnap.docs) {
-      const d = p.data() as { storagePath?: string; thumbnailPath?: string };
+      const d = p.data() as { storagePath?: string; thumbnailPath?: string; membreUid?: string; fileSize?: number };
       if (d.storagePath)   storageDeletes.push(deleteObject(ref(storage, d.storagePath)).catch(() => {}));
       if (d.thumbnailPath) storageDeletes.push(deleteObject(ref(storage, d.thumbnailPath)).catch(() => {}));
+      if (d.membreUid && d.fileSize) {
+        sizeByUser[d.membreUid] = (sizeByUser[d.membreUid] ?? 0) + d.fileSize;
+      }
     }
     if (defiData?.photoCouverturePath) {
       storageDeletes.push(deleteObject(ref(storage, defiData.photoCouverturePath)).catch(() => {}));
@@ -150,6 +154,9 @@ export class DefiService {
       ...votesSnap.docs.map(p   => deleteDoc(p.ref)),
     ]);
     await deleteDoc(doc(db, 'defis', id));
+    Object.entries(sizeByUser).forEach(([uid, size]) =>
+      updateDoc(doc(db, 'users', uid), { 'storageUsed.defis': increment(-size) }).catch(() => {})
+    );
   }
 
   // ── Couverture ───────────────────────────────────────────────────────
@@ -186,14 +193,24 @@ export class DefiService {
 
   async desinscrire(defiId: string, uid: string): Promise<void> {
     const photosSnap = await getDocs(query(collection(db, `defis/${defiId}/photos`), where('membreUid', '==', uid)));
+    let totalSize = 0;
+    const storageDels: Promise<void>[] = [];
     for (const photoDoc of photosSnap.docs) {
-      const storagePath = (photoDoc.data() as DefiPhoto).storagePath;
-      if (storagePath) await deleteObject(ref(storage, storagePath)).catch(() => {});
-      await deleteDoc(photoDoc.ref);
+      const d = photoDoc.data() as DefiPhoto;
+      if (d.storagePath)   storageDels.push(deleteObject(ref(storage, d.storagePath)).catch(() => {}));
+      if (d.thumbnailPath) storageDels.push(deleteObject(ref(storage, d.thumbnailPath)).catch(() => {}));
+      totalSize += d.fileSize ?? 0;
     }
-    await deleteDoc(doc(db, `defis/${defiId}/votes`, uid)).catch(() => {});
-    await deleteDoc(doc(db, `defis/${defiId}/inscriptions`, uid));
-    await updateDoc(doc(db, 'defis', defiId), { nbInscrits: increment(-1) });
+    await Promise.all([
+      ...storageDels,
+      ...photosSnap.docs.map(d => deleteDoc(d.ref)),
+      deleteDoc(doc(db, `defis/${defiId}/votes`, uid)).catch(() => {}),
+      deleteDoc(doc(db, `defis/${defiId}/inscriptions`, uid)),
+      updateDoc(doc(db, 'defis', defiId), { nbInscrits: increment(-1) }),
+    ]);
+    if (totalSize > 0) {
+      updateDoc(doc(db, 'users', uid), { 'storageUsed.defis': increment(-totalSize) }).catch(() => {});
+    }
   }
 
   // ── Photos ───────────────────────────────────────────────────────────
@@ -217,7 +234,7 @@ export class DefiService {
             compressImage(file, COMPRESS_EVENT),
             compressImage(file, COMPRESS_THUMB),
           ]);
-          const fileSize = compressed.size;
+          const fileSize = compressed.size + thumb.size;
           const storageRef = ref(storage, storagePath);
           const task = uploadBytesResumable(storageRef, compressed);
 

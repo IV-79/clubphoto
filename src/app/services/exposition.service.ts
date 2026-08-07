@@ -3,12 +3,13 @@ import {
   collection, doc, addDoc, updateDoc, deleteDoc, setDoc, getDocs, getDoc,
   query, orderBy, where, deleteField, increment,
 } from 'firebase/firestore';
-import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
+import { ref, uploadBytesResumable, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { Observable, from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { db, storage, collectionStream, docStream } from '../utils/firebase';
 import { Exposition, ExpoSuggestion, ExpoVoteDoc, ExpoPhoto } from '../models/exposition.model';
 import { generateId } from '../utils/id';
+import { compressImage, COMPRESS_THUMB } from '../utils/image-compress';
 import { NotificationService } from './notification.service';
 
 export interface ExpoUploadState {
@@ -97,8 +98,16 @@ export class ExpositionService {
       getDocs(collection(db, `expositions/${id}/suggestions`)),
       getDocs(collection(db, `expositions/${id}/votes`)),
     ]);
-    const storageDels: Promise<void>[] = photosSnap.docs
-      .map(p => deleteObject(ref(storage, (p.data() as ExpoPhoto).storagePath)).catch(() => {}));
+    const storageDels: Promise<void>[] = [];
+    const sizeByUser: Record<string, number> = {};
+    for (const p of photosSnap.docs) {
+      const d = p.data() as ExpoPhoto;
+      storageDels.push(deleteObject(ref(storage, d.storagePath)).catch(() => {}));
+      if (d.thumbnailPath) storageDels.push(deleteObject(ref(storage, d.thumbnailPath)).catch(() => {}));
+      if (d.uid && d.fileSize) {
+        sizeByUser[d.uid] = (sizeByUser[d.uid] ?? 0) + d.fileSize;
+      }
+    }
     if (photoCouverturePath) storageDels.push(deleteObject(ref(storage, photoCouverturePath)).catch(() => {}));
 
     await Promise.all([
@@ -108,6 +117,9 @@ export class ExpositionService {
       ...votesSnap.docs.map(p => deleteDoc(p.ref)),
     ]);
     await deleteDoc(doc(db, 'expositions', id));
+    Object.entries(sizeByUser).forEach(([uid, size]) =>
+      updateDoc(doc(db, 'users', uid), { 'storageUsed.expositions': increment(-size) }).catch(() => {})
+    );
   }
 
   // ── Suggestions ─────────────────────────────────────────────────────────────
@@ -233,6 +245,7 @@ export class ExpositionService {
       const id = generateId();
       const ext = file.name.split('.').pop() ?? 'jpg';
       const storagePath = `expositions/${expoId}/${id}.${ext}`;
+      const thumbPath   = `expositions/${expoId}/${id}_thumb.${ext}`;
       const storageRef = ref(storage, storagePath);
       const task = uploadBytesResumable(storageRef, file);
 
@@ -240,16 +253,22 @@ export class ExpositionService {
         snap => observer.next({ progress: Math.round(snap.bytesTransferred / snap.totalBytes * 100), done: false }),
         err => observer.error(err),
         async () => {
-          const url = await getDownloadURL(task.snapshot.ref);
+          const [url, thumb] = await Promise.all([
+            getDownloadURL(task.snapshot.ref),
+            compressImage(file, COMPRESS_THUMB),
+          ]);
+          const thumbSnap = await uploadBytes(ref(storage, thumbPath), thumb);
+          const thumbnailUrl = await getDownloadURL(thumbSnap.ref);
+          const fileSize = file.size + thumb.size;
           const data: Omit<ExpoPhoto, 'id'> = {
-            url, storagePath, fileSize: file.size,
+            url, storagePath, thumbnailUrl, thumbnailPath: thumbPath, fileSize,
             uid: meta.uid, nomAuteur: meta.nomAuteur,
             uploadedAt: new Date().toISOString(),
             ...(meta.exif != null ? { exif: meta.exif } : {}),
           };
           const docRef = await addDoc(collection(db, `expositions/${expoId}/photos`), data);
           updateDoc(doc(db, 'users', meta.uid), {
-            'storageUsed.expositions': increment(file.size),
+            'storageUsed.expositions': increment(fileSize),
           }).catch(() => {});
           observer.next({ progress: 100, done: true, photo: { id: docRef.id, ...data } });
           observer.complete();
@@ -261,6 +280,7 @@ export class ExpositionService {
   async deletePhoto(expoId: string, photo: ExpoPhoto): Promise<void> {
     await Promise.all([
       deleteObject(ref(storage, photo.storagePath)).catch(() => {}),
+      ...(photo.thumbnailPath ? [deleteObject(ref(storage, photo.thumbnailPath)).catch(() => {})] : []),
       deleteDoc(doc(db, `expositions/${expoId}/photos`, photo.id)),
     ]);
     updateDoc(doc(db, 'users', photo.uid), {

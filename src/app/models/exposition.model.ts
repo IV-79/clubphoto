@@ -46,6 +46,8 @@ export interface ExpoPhoto {
   id: string;
   url: string;
   storagePath: string;
+  thumbnailUrl?: string;
+  thumbnailPath?: string;
   fileSize: number;
   uid: string;
   nomAuteur: string;

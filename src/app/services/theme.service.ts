@@ -141,7 +141,25 @@ export class ThemeService {
   }
 
   async supprimerTheme(id: string): Promise<void> {
+    const soumSnap = await getDocs(collection(db, 'themes', id, 'soumissions'));
+    const storageDels: Promise<void>[] = [];
+    const sizeByUser: Record<string, number> = {};
+    for (const s of soumSnap.docs) {
+      const d = s.data() as { storagePath?: string; thumbnailPath?: string; membreUid?: string; fileSize?: number };
+      if (d.storagePath)   storageDels.push(deleteObject(ref(storage, d.storagePath)).catch(() => {}));
+      if (d.thumbnailPath) storageDels.push(deleteObject(ref(storage, d.thumbnailPath)).catch(() => {}));
+      if (d.membreUid && d.fileSize) {
+        sizeByUser[d.membreUid] = (sizeByUser[d.membreUid] ?? 0) + d.fileSize;
+      }
+    }
+    await Promise.all([
+      ...storageDels,
+      ...soumSnap.docs.map(d => deleteDoc(d.ref)),
+    ]);
     await deleteDoc(doc(db, 'themes', id));
+    Object.entries(sizeByUser).forEach(([uid, size]) =>
+      updateDoc(doc(db, 'users', uid), { 'storageUsed.themes': increment(-size) }).catch(() => {})
+    );
   }
 
   async uploadSoumission(
@@ -180,7 +198,7 @@ export class ThemeService {
             const thumbnailUrl = await getDownloadURL(thumbSnap.ref);
             await addDoc(collection(db, 'themes', themeId, 'soumissions'), {
               membreUid: uid, nomMembre, url, storagePath,
-              fileSize: file.size, thumbnailUrl, thumbnailPath: thumbPath,
+              fileSize: file.size + thumb.size, thumbnailUrl, thumbnailPath: thumbPath,
               uploadedAt: new Date().toISOString(),
               ...(hasExif(exif) ? { exif } : {}),
             });
@@ -189,7 +207,7 @@ export class ThemeService {
               ...(isFirstSoumission ? { nbParticipants: increment(1) } : {}),
             }).catch(() => {});
             updateDoc(doc(db, 'users', uid), {
-              'storageUsed.themes': increment(file.size),
+              'storageUsed.themes': increment(file.size + thumb.size),
             }).catch(() => {});
             resolve();
           } catch (e) {

@@ -56,14 +56,14 @@ export class PhotoService {
               visibilite: meta.visibilite,
               dateUpload: new Date().toISOString(),
               storagePath,
-              fileSize: file.size,
+              fileSize: file.size + thumb.size,
               thumbnailUrl, thumbnailPath: thumbPath,
               ...(meta.categorie ? { categorie: meta.categorie as Photo['categorie'] } : {}),
               ...(hasExif(meta.exif) ? { exif: meta.exif } : {}),
             };
             const docRef = await addDoc(collection(db, 'photos'), data);
             updateDoc(doc(db, 'users', uid), {
-              'storageUsed.portfolio': increment(file.size),
+              'storageUsed.portfolio': increment(file.size + thumb.size),
               'photoCount': increment(1),
             }).catch(() => {});
             observer.next({ state: 'done', progress: 100, photo: { id: docRef.id, ...data } });

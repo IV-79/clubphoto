@@ -6,6 +6,7 @@
 
 ### Corrections et améliorations — Exposition & stockage (2026-08-07)
 
+- **Taille thumbnail incluse dans fileSize** : tous les services d'upload (portfolio, thèmes, sorties, oneshots, défis) comptabilisent désormais `photo principale + thumbnail` dans `fileSize` et dans `storageUsed` — la taille affichée dans le dashboard correspond exactement à l'espace réellement occupé sur Firebase Storage.
 - **Bug fileSize défis** : `defi.service.ts` capturait `file.size` avant compression ; corrigé en `compressed.size` — les compteurs de stockage afficheront désormais la taille réelle uploadée pour les nouvelles soumissions.
 - **Exposition — max photos modifiable en soumission** : le champ "Max photos par membre" n'était éditable que jusqu'à la phase nettoyage ; désormais aussi accessible et sauvegardé en phase soumission.
 - **Exposition nettoyage — votes visibles** : les scores de votes (issus d'un tour de votation précédent) s'affichent maintenant à côté de chaque suggestion dans la liste de curation.

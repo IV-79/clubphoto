@@ -441,7 +441,7 @@
             <div class="photos-grid">
               @for (photo of photos(); track photo.id; let i = $index) {
                 <div class="photo-item" (click)="openLightbox(i)" style="cursor:pointer">
-                  <img [src]="photo.url" [alt]="photo.nomAuteur" loading="lazy" />
+                  <img [src]="photo.thumbnailUrl || photo.url" [alt]="photo.nomAuteur" loading="lazy" />
                   <div class="photo-overlay">
                     <span class="photo-auteur">{{ photo.nomAuteur }}</span>
                     @if (photo.uid === uid() || canManage()) {
@@ -480,7 +480,7 @@
               <div class="photos-grid">
                 @for (photo of photos(); track photo.id; let i = $index) {
                   <div class="photo-item" (click)="openLightbox(i)" style="cursor:pointer">
-                    <img [src]="photo.url" [alt]="photo.nomAuteur" loading="lazy" />
+                    <img [src]="photo.thumbnailUrl || photo.url" [alt]="photo.nomAuteur" loading="lazy" />
                     <div class="photo-overlay">
                       <span class="photo-auteur">{{ photo.nomAuteur }}</span>
                     </div>

@@ -160,10 +160,14 @@ export class OneShotService {
     const oneShotData = oneShotSnap.data() as { photoCouverturePath?: string } | undefined;
 
     const storageDeletions: Promise<void>[] = [];
+    const sizeByUser: Record<string, number> = {};
     for (const p of photosSnap.docs) {
       const d = p.data();
       if (d['storagePath'])   storageDeletions.push(deleteObject(ref(storage, d['storagePath'])).catch(() => {}));
       if (d['thumbnailPath']) storageDeletions.push(deleteObject(ref(storage, d['thumbnailPath'])).catch(() => {}));
+      if (d['membreUid'] && d['fileSize']) {
+        sizeByUser[d['membreUid']] = (sizeByUser[d['membreUid']] ?? 0) + d['fileSize'];
+      }
     }
     const coverPath = oneShotData?.photoCouverturePath ?? notifCtx?.photoCouverturePath;
     if (coverPath) storageDeletions.push(deleteObject(ref(storage, coverPath)).catch(() => {}));
@@ -176,6 +180,9 @@ export class OneShotService {
       ...votesSnap.docs.map(p    => deleteDoc(p.ref)),
     ]);
     await deleteDoc(doc(db, 'oneshots', id));
+    Object.entries(sizeByUser).forEach(([uid, size]) =>
+      updateDoc(doc(db, 'users', uid), { 'storageUsed.oneshots': increment(-size) }).catch(() => {})
+    );
     if (notifCtx && inscritsSnap.docs.length > 0) {
       const msg = `Le OneShot « ${notifCtx.titre} » auquel vous étiez inscrit(e) a été annulé.`;
       Promise.all(
@@ -296,7 +303,7 @@ export class OneShotService {
           const thumbnailUrl = await getDownloadURL(thumbSnap.ref);
           const data: Omit<OneShotPhoto, 'id'> = {
             url, storagePath, uploadedAt: new Date().toISOString(),
-            fileSize: file.size, thumbnailUrl, thumbnailPath: thumbPath,
+            fileSize: file.size + thumb.size, thumbnailUrl, thumbnailPath: thumbPath,
             membreUid: meta.membreUid, nomMembre: meta.nomMembre, themeId: meta.themeId,
             ...(meta.titre ? { titre: meta.titre } : {}),
             ...(hasExif(meta.exif) ? { exif: meta.exif } : {}),
@@ -304,7 +311,7 @@ export class OneShotService {
           const docRef = await addDoc(collection(db, `oneshots/${oneShotId}/photos`), data);
           if (meta.membreUid) {
             updateDoc(doc(db, 'users', meta.membreUid), {
-              'storageUsed.oneshots': increment(file.size),
+              'storageUsed.oneshots': increment(file.size + thumb.size),
             }).catch(() => {});
           }
           observer.next({ progress: 100, done: true, photo: { id: docRef.id, ...data } });
