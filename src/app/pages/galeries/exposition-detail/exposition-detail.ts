@@ -268,6 +268,27 @@ export class ExpositionDetail {
     return winners.length === 1 ? winners[0] : null;
   });
 
+  // Score max parmi toutes les suggestions (0 si aucun vote)
+  maxScoreVote = computed(() => {
+    const all = this.suggestions();
+    if (all.length === 0) return 0;
+    const scores = this.scoreParSuggestion();
+    return Math.max(0, ...all.map((s) => scores[s.id] ?? 0));
+  });
+
+  // Liste triée pour le sélecteur : gagnants (ex-aequo) en premier en alpha, puis le reste en alpha
+  suggestionsPourSelection = computed(() => {
+    const all = [...this.suggestions()];
+    const scores = this.scoreParSuggestion();
+    const max = this.maxScoreVote();
+    return all.sort((a, b) => {
+      const aWins = max > 0 && (scores[a.id] ?? 0) === max;
+      const bWins = max > 0 && (scores[b.id] ?? 0) === max;
+      if (aWins !== bWins) return aWins ? -1 : 1;
+      return a.texte.localeCompare(b.texte, 'fr');
+    });
+  });
+
   suggestionsTriees = computed(() => {
     const statut = this.expo()?.statut;
     const mode = this.sortMode();

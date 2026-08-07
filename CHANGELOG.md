@@ -4,6 +4,15 @@
 
 ## En cours (alpha)
 
+### Corrections et améliorations — Exposition & stockage (2026-08-07)
+
+- **Bug fileSize défis** : `defi.service.ts` capturait `file.size` avant compression ; corrigé en `compressed.size` — les compteurs de stockage afficheront désormais la taille réelle uploadée pour les nouvelles soumissions.
+- **Exposition — max photos modifiable en soumission** : le champ "Max photos par membre" n'était éditable que jusqu'à la phase nettoyage ; désormais aussi accessible et sauvegardé en phase soumission.
+- **Exposition nettoyage — votes visibles** : les scores de votes (issus d'un tour de votation précédent) s'affichent maintenant à côté de chaque suggestion dans la liste de curation.
+- **Exposition nettoyage — sidebox** : le bloc "Votation" (membres ayant voté, votes exprimés, votes/membre) apparaît dans la sidebox dès que des votes existent, même en phase nettoyage.
+- **Exposition nettoyage — sélecteur thème** : dans "Sélection du thème définitif", les gagnants (tous les ex-aequo) remontent en tête de liste (★) triés alphabétiquement, puis le reste en alpha — sans pré-sélection automatique.
+- **Guide du site** : la section "Types d'activités" affiche maintenant des chips colorés (teal / rouge / ambre / violet) cohérents avec le code couleur du reste du site.
+
 ### Migration Firebase natif + Angular 22 (2026-08-06)
 
 Suppression complète de `@angular/fire` (bloqué en `21.0.0-rc.0`) au profit du SDK Firebase natif, puis montée en version Angular 21 → 22.

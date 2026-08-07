@@ -320,10 +320,10 @@
                   <mat-form-field appearance="outline" class="field-full">
                     <mat-label>Thème retenu</mat-label>
                     <mat-select formControlName="themeChoisi">
-                      @for (sugg of suggestions(); track sugg.id) {
+                      @for (sugg of suggestionsPourSelection(); track sugg.id) {
                         <mat-option [value]="sugg.texte">
+                          @if (maxScoreVote() > 0 && (scoreParSuggestion()[sugg.id] ?? 0) === maxScoreVote()) { ★ }
                           {{ sugg.texte }}
-                          @if (themeVainqueur()?.id === sugg.id) { ★ }
                         </mat-option>
                       }
                     </mat-select>
