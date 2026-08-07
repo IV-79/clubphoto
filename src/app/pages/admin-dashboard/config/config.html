@@ -69,6 +69,25 @@
     }
   </section>
 
+  <!-- Section limites -->
+  <section class="config-section" style="margin-bottom: 24px">
+    <div class="section-header">
+      <div>
+        <h3 class="section-title">Limites du portfolio</h3>
+        <p class="section-sub">Nombre maximum de photos qu'un membre peut avoir dans son portfolio.</p>
+      </div>
+    </div>
+    <div class="limit-row">
+      <label class="limit-label" for="maxPhotos">Max photos par membre</label>
+      <input id="maxPhotos" type="number" class="input-limit" min="1" max="500"
+             [(ngModel)]="portfolioLimit" [ngModelOptions]="{standalone: true}" />
+      <button class="btn-add" (click)="savePortfolioLimit()"
+              [disabled]="portfolioLimitSaving() || portfolioLimit() < 1">
+        {{ portfolioLimitSaving() ? 'Sauvegarde…' : 'Enregistrer' }}
+      </button>
+    </div>
+  </section>
+
   <!-- Section catégories -->
   <section class="config-section">
     <div class="section-header">

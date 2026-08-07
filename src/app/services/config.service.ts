@@ -15,6 +15,7 @@ export interface SiteConfig {
   heroImageUrl?: string;
   heroImageStoragePath?: string;
   heroSource?: 'manuel' | 'theme_du_mois';
+  maxPhotosPortfolio?: number;
 }
 
 const CONFIG_CATEGORIES = 'config/photoCategories';

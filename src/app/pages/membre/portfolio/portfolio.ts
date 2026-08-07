@@ -13,7 +13,7 @@ import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { PhotoService } from '../../../services/photo.service';
 import { AuthService } from '../../../services/auth.service';
-import { ConfigService } from '../../../services/config.service';
+import { ConfigService, SiteConfig } from '../../../services/config.service';
 import { ConfirmService } from '../../../services/confirm.service';
 import { Photo, PhotoExif, PhotoVisibilite } from '../../../models/photo.model';
 import { LightboxPhoto, PhotoLightboxCallbacks } from '../../../models/commentaire.model';
@@ -58,6 +58,10 @@ export class MembrePortfolio implements OnInit {
       a.label.localeCompare(b.label, 'fr', { sensitivity: 'base' }),
     ),
   );
+
+  private siteConfig = toSignal(this.configService.getSiteConfig(), { initialValue: {} as SiteConfig });
+  maxPhotosPortfolio = computed(() => this.siteConfig().maxPhotosPortfolio ?? 20);
+  atPortfolioLimit = computed(() => this.photoCount() >= this.maxPhotosPortfolio());
 
   // --- Upload ---
   showModal = signal(false);

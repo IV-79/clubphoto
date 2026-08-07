@@ -7,6 +7,7 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { firstValueFrom } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ConfigService, CategorieConfig } from '../../../services/config.service';
 import { ConfirmService } from '../../../services/confirm.service';
@@ -47,6 +48,10 @@ export class AdminConfig implements OnInit {
   editingCatValue = signal<string | null>(null);
   editCatLabel = '';
 
+  // Limites
+  portfolioLimit = signal(20);
+  portfolioLimitSaving = signal(false);
+
   // Image page d'accueil
   siteConfig = toSignal(this.configService.getSiteConfig(), { initialValue: {} as any });
   heroCurrentUrl = computed(() => ((this.siteConfig() as any)?.heroImageUrl as string) ?? '');
@@ -59,8 +64,19 @@ export class AdminConfig implements OnInit {
   heroError = signal('');
   isDragging = signal(false);
 
-  ngOnInit() {
+  async ngOnInit() {
     this.configService.getCategories().subscribe((cats) => this.categories.set(cats));
+    const cfg = await firstValueFrom(this.configService.getSiteConfigOnce());
+    this.portfolioLimit.set(cfg.maxPhotosPortfolio ?? 20);
+  }
+
+  // ---- Limites ----
+  async savePortfolioLimit() {
+    const val = this.portfolioLimit();
+    if (val < 1 || val > 500) return;
+    this.portfolioLimitSaving.set(true);
+    await this.configService.saveSiteConfig({ maxPhotosPortfolio: val });
+    this.portfolioLimitSaving.set(false);
   }
 
   // ---- Catégories ----

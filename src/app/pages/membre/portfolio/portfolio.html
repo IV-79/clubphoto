@@ -5,17 +5,22 @@
     <div>
       <h1>Mon Portfolio</h1>
       <div class="stats">
-        <span>{{ photoCount() }} photo{{ photoCount() !== 1 ? 's' : '' }}</span>
+        <span>{{ photoCount() }} / {{ maxPhotosPortfolio() }} photo{{ maxPhotosPortfolio() !== 1 ? 's' : '' }}</span>
         <span class="sep">·</span>
-        <span>{{ publicCount() }} publique{{ publicCount() !== 1 ? 's' : '' }}</span>
-        <span class="sep">·</span>
-        <span>{{ membreCount() }} membres</span>
+        <span>Profil : {{ profile()?.visibilite === 'public' ? 'Public' : 'Membres' }}</span>
+        @if (profile()?.visibilite === 'public') {
+          <span class="sep">·</span>
+          <span>{{ publicCount() }} photo{{ publicCount() !== 1 ? 's' : '' }} publique{{ publicCount() !== 1 ? 's' : '' }}</span>
+        }
       </div>
     </div>
     <div class="header-actions">
       @if (!selectMode()) {
         <button class="btn-select" (click)="toggleSelectMode()" [disabled]="photos().length === 0">Sélectionner</button>
-        <button class="btn-add" (click)="openUpload()">+ Ajouter une photo</button>
+        <button class="btn-add" (click)="openUpload()" [disabled]="atPortfolioLimit()"
+                [title]="atPortfolioLimit() ? 'Limite de ' + maxPhotosPortfolio() + ' photos atteinte' : ''">
+          + Ajouter une photo
+        </button>
       } @else {
         <button class="btn-select" (click)="toggleSelectMode()">Annuler</button>
         <button class="btn-delete-selected" (click)="deleteSelected()" [disabled]="selectedCount() === 0 || deleting()">
@@ -34,6 +39,11 @@
       <button class="btn-add" (click)="openUpload()">Uploader une photo</button>
     </div>
   }
+
+  @if (atPortfolioLimit()) {
+    <p class="limit-notice">Limite de {{ maxPhotosPortfolio() }} photos atteinte — supprimez des photos pour en ajouter de nouvelles.</p>
+  }
+
 
   <!-- Grille de photos -->
   @if (photos().length > 0) {

@@ -43,6 +43,11 @@
 .btn-cancel { background: none; border: 1px solid var(--border-strong); color: var(--text-muted); padding: 6px 14px; border-radius: 4px; font-size: 0.82rem; cursor: pointer; }
 .saving-msg { margin-top: 12px; font-size: 0.82rem; color: var(--text-secondary); }
 
+.limit-row { display: flex; align-items: center; gap: 12px; }
+.limit-label { font-size: 0.88rem; color: var(--text-secondary); white-space: nowrap; }
+.input-limit { width: 80px; border: 1px solid var(--input-border); border-radius: 4px; padding: 7px 10px; font-size: 0.9rem; font-family: inherit; outline: none; background: var(--bg-input); color: var(--text-primary); text-align: center; }
+.input-limit:focus { border-color: #cc0000; }
+
 .source-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
 .source-label { font-size: 0.85rem; color: var(--text-secondary); white-space: nowrap; }
 .source-segmented { display: flex; border: 1px solid var(--border-strong); border-radius: 6px; overflow: hidden; }

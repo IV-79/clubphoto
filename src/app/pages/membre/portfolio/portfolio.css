@@ -102,6 +102,16 @@
 .empty-sub { font-size: 0.85rem; margin-bottom: 24px !important; }
 .empty-state .btn-add { margin: 0 auto; display: inline-block; }
 
+.limit-notice {
+  margin: 0 0 20px;
+  padding: 10px 16px;
+  background: var(--c-amber-bg);
+  border: 1px solid var(--c-amber-bd);
+  color: var(--c-amber);
+  border-radius: 6px;
+  font-size: 0.875rem;
+}
+
 /* Grille photos */
 .photos-grid {
   display: grid;
