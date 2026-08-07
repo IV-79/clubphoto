@@ -63,10 +63,12 @@ export class ActiviteCard {
   protected typeBadge = computed((): { text: string; css: string } => {
     const { kind, data } = this.item();
     if (kind === 'sortie') {
-      const meta = SORTIE_TYPE_META[(data as Sortie).type];
+      const type = (data as Sortie).type;
+      const meta = SORTIE_TYPE_META[type];
+      const badgeCss = type === 'sortie_club' ? 'badge-sortie-club' : 'badge-sortie';
       return {
         text: `${meta?.emoji ?? '📸'} ${meta?.label ?? 'Sortie Photo'}`,
-        css: 'card-type-badge badge-sortie',
+        css: `card-type-badge ${badgeCss}`,
       };
     }
     if (kind === 'oneshot')

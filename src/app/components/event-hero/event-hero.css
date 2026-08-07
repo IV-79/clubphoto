@@ -138,6 +138,7 @@ html[data-theme="dark"] .btn-action-danger:hover {
   padding: 0.2rem 0.5rem;
 }
 .badge-sortie       { background: var(--c-teal-bg);   border: 1px solid var(--c-teal-bd);   color: var(--c-teal); }
+.badge-sortie-club  { background: var(--c-green-bg);  border: 1px solid var(--c-green-bd);  color: var(--c-green); }
 .badge-oneshot-type { background: var(--c-amber-bg);  border: 1px solid var(--c-amber-bd);  color: var(--c-amber); }
 .badge-defi-type    { background: var(--c-red-bg);    border: 1px solid var(--c-red-bd);    color: var(--c-red); }
 

@@ -130,6 +130,7 @@
 }
 
 .badge-sortie       { background: var(--c-teal-bg);   border: 1px solid var(--c-teal-bd);   color: var(--c-teal);   border-radius: 4px; padding: 0.2rem 0.5rem; }
+.badge-sortie-club  { background: var(--c-green-bg);  border: 1px solid var(--c-green-bd);  color: var(--c-green);  border-radius: 4px; padding: 0.2rem 0.5rem; }
 .badge-oneshot-type { background: var(--c-amber-bg);  border: 1px solid var(--c-amber-bd);  color: var(--c-amber);  border-radius: 4px; padding: 0.2rem 0.5rem; }
 .badge-defi-type    { background: var(--c-red-bg);    border: 1px solid var(--c-red-bd);    color: var(--c-red);    border-radius: 4px; padding: 0.2rem 0.5rem; }
 .badge-expo-type    { background: var(--c-violet-bg); border: 1px solid var(--c-violet-bd); color: var(--c-violet); border-radius: 4px; padding: 0.2rem 0.5rem; }

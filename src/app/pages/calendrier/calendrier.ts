@@ -368,6 +368,14 @@ export class Calendrier {
     return `${m.emoji} ${m.label}`;
   }
 
+  sortieTypeBadgeCss(type: SortieType | undefined): string {
+    return type === 'sortie_club' ? 'type-badge badge-sortie-club' : 'type-badge badge-sortie';
+  }
+
+  sortieCardCss(type: SortieType | undefined): string {
+    return type === 'sortie_club' ? 'event-card card-sortie-club' : 'event-card card-sortie';
+  }
+
   openLogin() {
     this.loginModal.open();
   }

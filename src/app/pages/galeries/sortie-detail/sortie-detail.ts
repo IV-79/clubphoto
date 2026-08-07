@@ -128,8 +128,10 @@ export class SortieDetail {
 
   typeBadgeHero = computed((): HeroBadge => {
     const s = this.sortie();
-    const meta = SORTIE_TYPE_META[s?.type ?? 'sortie_photo'];
-    return { text: `${meta.emoji} ${meta.label}`, css: 'event-type-badge badge-sortie' };
+    const type = s?.type ?? 'sortie_photo';
+    const meta = SORTIE_TYPE_META[type];
+    const badgeCss = type === 'sortie_club' ? 'badge-sortie-club' : 'badge-sortie';
+    return { text: `${meta.emoji} ${meta.label}`, css: `event-type-badge ${badgeCss}` };
   });
   statusHero = computed(
     (): HeroBadge =>

@@ -351,6 +351,7 @@ kbd {
 }
 
 .chip-teal   { background: var(--c-teal-bg);   border: 1px solid var(--c-teal-bd);   color: var(--c-teal); }
+.chip-green  { background: var(--c-green-bg);  border: 1px solid var(--c-green-bd);  color: var(--c-green); }
 .chip-red    { background: var(--c-red-bg);    border: 1px solid var(--c-red-bd);    color: var(--c-red); }
 .chip-amber  { background: var(--c-amber-bg);  border: 1px solid var(--c-amber-bd);  color: var(--c-amber); }
 .chip-violet { background: var(--c-violet-bg); border: 1px solid var(--c-violet-bd); color: var(--c-violet); }

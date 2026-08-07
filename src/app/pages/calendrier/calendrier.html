@@ -116,13 +116,13 @@
             </div>
 
           } @else if (item.kind === 'sortie') {
-            <div class="event-card card-sortie" (click)="toggleExpand(item.id)">
+            <div [class]="sortieCardCss(item.sortie!.type)" (click)="toggleExpand(item.id)">
               <div class="card-date-col">
                 <span class="card-day">{{ item.date | slice:8:10 }}</span>
               </div>
               <div class="card-body">
                 <div class="card-summary">
-                  <span class="type-badge badge-sortie">{{ sortieTypeBadge(item.sortie!.type) }}</span>
+                  <span [class]="sortieTypeBadgeCss(item.sortie!.type)">{{ sortieTypeBadge(item.sortie!.type) }}</span>
                   <h3 class="card-titre">{{ item.sortie!.titre }}</h3>
                   <span class="expand-arrow">{{ expandedId() === item.id ? '▲' : '▼' }}</span>
                 </div>

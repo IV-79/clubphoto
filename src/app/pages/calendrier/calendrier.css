@@ -163,10 +163,11 @@
 }
 
 .card-reunion  .card-date-col { background: #1565c0; }
-.card-sortie   .card-date-col { background: #0f766e; }
+.card-sortie      .card-date-col { background: #0f766e; }
+.card-sortie-club .card-date-col { background: #1b5e20; }
 .card-passe    .card-date-col { background: #bdbdbd; }
 .card-oneshot  .card-date-col { background: #b45309; }
-.card-defi     .card-date-col { background: #b91c1c; }
+.card-defi     .card-date-col { background: #bf360c; }
 .card-expo     .card-date-col { background: #6d28d9; }
 
 .card-day {
@@ -221,7 +222,8 @@
 }
 
 .badge-reunion  { background: var(--c-blue-bg);   color: var(--c-blue); }
-.badge-sortie   { background: var(--c-teal-bg);   color: var(--c-teal); }
+.badge-sortie      { background: var(--c-teal-bg);  color: var(--c-teal); }
+.badge-sortie-club { background: var(--c-green-bg); color: var(--c-green); }
 .badge-passe    { background: var(--border-medium); color: var(--text-muted); }
 .badge-oneshot  { background: var(--c-amber-bg);  color: var(--c-amber); }
 .badge-defi     { background: var(--c-red-bg);    color: var(--c-red); }

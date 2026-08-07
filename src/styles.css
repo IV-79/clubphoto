@@ -26,9 +26,9 @@
   --c-teal:      #2e7d5a;
   --c-teal-bg:   rgba(46,125,90,0.10);
   --c-teal-bd:   rgba(46,125,90,0.25);
-  --c-red:       #c62828;
-  --c-red-bg:    rgba(198,40,40,0.10);
-  --c-red-bd:    rgba(198,40,40,0.25);
+  --c-red:       #d84315;
+  --c-red-bg:    rgba(216,67,21,0.10);
+  --c-red-bd:    rgba(216,67,21,0.25);
 
   --bg-page:            #ffffff;
   --bg-surface:         #ffffff;
@@ -109,9 +109,9 @@ html[data-theme="dark"] {
   --c-teal:      #34d399;
   --c-teal-bg:   rgba(52,211,153,0.12);
   --c-teal-bd:   rgba(52,211,153,0.22);
-  --c-red:       #f87171;
-  --c-red-bg:    rgba(248,113,113,0.12);
-  --c-red-bd:    rgba(248,113,113,0.22);
+  --c-red:       #ff7043;
+  --c-red-bg:    rgba(255,112,67,0.12);
+  --c-red-bd:    rgba(255,112,67,0.22);
 
   --bg-page:            #121212;
   --bg-surface:         #1e1e1e;
@@ -273,7 +273,7 @@ html[data-theme="dark"] .role-select-membre { background: rgba(255,255,255,0.08)
     --c-orange:    #e65100;  --c-orange-bg: rgba(230,81,0,0.10);   --c-orange-bd: rgba(230,81,0,0.25);
     --c-violet:    #5e35b1;  --c-violet-bg: rgba(94,53,177,0.10);  --c-violet-bd: rgba(94,53,177,0.25);
     --c-teal:      #2e7d5a;  --c-teal-bg:   rgba(46,125,90,0.10);  --c-teal-bd:   rgba(46,125,90,0.25);
-    --c-red:       #c62828;  --c-red-bg:    rgba(198,40,40,0.10);  --c-red-bd:    rgba(198,40,40,0.25);
+    --c-red:       #d84315;  --c-red-bg:    rgba(216,67,21,0.10);  --c-red-bd:    rgba(216,67,21,0.25);
   }
 
   /* Couleurs hardcodées du guide (non couvertes par les tokens) */
