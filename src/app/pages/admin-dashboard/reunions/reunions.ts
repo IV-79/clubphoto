@@ -191,6 +191,7 @@ export class Reunions {
         },
         oldReunion ? { oldDate: oldReunion.date, titre: v.titre.trim() } : undefined,
       );
+      await this.loadReunions();
       this.editingId.set(null);
     } finally {
       this.saving.set(false);
@@ -203,6 +204,7 @@ export class Reunions {
     await this.service.supprimer(r.id);
     if (this.editingId() === r.id) this.editingId.set(null);
     if (this.expandedId() === r.id) this.expandedId.set(null);
+    await this.loadReunions();
   }
 
   // --- Méthodes documents ---
