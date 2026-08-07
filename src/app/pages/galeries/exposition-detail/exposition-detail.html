@@ -132,7 +132,7 @@
               <textarea matInput formControlName="description" rows="3"></textarea>
             </mat-form-field>
 
-            @if (s === 'ideation' || s === 'nettoyage') {
+            @if (s === 'ideation' || s === 'nettoyage' || s === 'soumission') {
               <mat-form-field appearance="outline" class="field-half">
                 <mat-label>Max photos par membre</mat-label>
                 <input matInput type="number" formControlName="maxPhotosParMembre" min="1" />

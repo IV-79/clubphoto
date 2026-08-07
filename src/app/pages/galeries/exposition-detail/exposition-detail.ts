@@ -693,6 +693,7 @@ export class ExpositionDetail {
       } else if (e.statut === 'votation') {
         firestoreUpdate['dateFinVote'] = v.dateFinVote;
       } else if (e.statut === 'soumission') {
+        firestoreUpdate['maxPhotosParMembre'] = v.maxPhotosParMembre;
         firestoreUpdate['dateFinSoumission'] = v.dateFinSoumission;
       }
       await this.expoService.update(this.expoId, firestoreUpdate);
@@ -717,8 +718,9 @@ export class ExpositionDetail {
           updated.maxPhotosParMembre = v.maxPhotosParMembre;
         } else if (e.statut === 'votation' && v.dateFinVote) {
           updated.dateFinVote = v.dateFinVote;
-        } else if (e.statut === 'soumission' && v.dateFinSoumission) {
-          updated.dateFinSoumission = v.dateFinSoumission;
+        } else if (e.statut === 'soumission') {
+          updated.maxPhotosParMembre = v.maxPhotosParMembre;
+          if (v.dateFinSoumission) updated.dateFinSoumission = v.dateFinSoumission;
         }
         return updated;
       });
