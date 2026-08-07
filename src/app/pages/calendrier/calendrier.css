@@ -162,11 +162,12 @@
   padding: 10px 0;
 }
 
-.card-reunion  .card-date-col { background: #1976d2; }
-.card-sortie   .card-date-col { background: #f57c00; }
+.card-reunion  .card-date-col { background: #1565c0; }
+.card-sortie   .card-date-col { background: #0f766e; }
 .card-passe    .card-date-col { background: #bdbdbd; }
-.card-oneshot  .card-date-col { background: #7e57c2; }
-.card-defi     .card-date-col { background: #388e3c; }
+.card-oneshot  .card-date-col { background: #b45309; }
+.card-defi     .card-date-col { background: #b91c1c; }
+.card-expo     .card-date-col { background: #6d28d9; }
 
 .card-day {
   font-size: 1.6rem;
@@ -220,10 +221,11 @@
 }
 
 .badge-reunion  { background: var(--c-blue-bg);   color: var(--c-blue); }
-.badge-sortie   { background: var(--c-orange-bg); color: var(--c-orange); }
+.badge-sortie   { background: var(--c-teal-bg);   color: var(--c-teal); }
 .badge-passe    { background: var(--border-medium); color: var(--text-muted); }
-.badge-oneshot  { background: var(--c-violet-bg); color: var(--c-violet); }
-.badge-defi     { background: var(--c-green-bg);  color: var(--c-green); }
+.badge-oneshot  { background: var(--c-amber-bg);  color: var(--c-amber); }
+.badge-defi     { background: var(--c-red-bg);    color: var(--c-red); }
+.badge-expo     { background: var(--c-violet-bg); color: var(--c-violet); }
 
 .defi-statut-a_venir    { background: var(--border-medium);  color: var(--text-muted); }
 .defi-statut-soumission { background: var(--c-green-bg);     color: var(--c-green); }
@@ -252,7 +254,7 @@ a.card-lieu:hover { text-decoration: underline; }
   border-radius: 8px;
   padding: 16px 20px;
   box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-  border-left: 4px solid #8aabff;
+  border-left: 4px solid var(--c-amber-bd);
 }
 
 .oneshot-body { flex: 1; display: flex; flex-direction: column; gap: 4px; }

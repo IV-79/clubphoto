@@ -49,7 +49,7 @@ export class Overview implements OnInit {
   totalArticles = signal(0);
 
   storageTotal = signal(0);
-  storageByCat = signal({ portfolio: 0, themes: 0, oneshots: 0, defis: 0, documents: 0 });
+  storageByCat = signal({ portfolio: 0, sorties: 0, themes: 0, defis: 0, oneshots: 0, expositions: 0, documents: 0 });
   topMembers = signal<MemberBar[]>([]);
 
   storageItems = computed<StorageItem[]>(() => {
@@ -58,31 +58,43 @@ export class Overview implements OnInit {
     return [
       {
         label: 'Portfolio',
-        color: '#3b82f6',
+        color: '#2563eb',
         bytes: cat.portfolio,
         pct: Math.round((cat.portfolio / total) * 100),
       },
       {
+        label: 'Sorties',
+        color: '#0d9488',
+        bytes: cat.sorties,
+        pct: Math.round((cat.sorties / total) * 100),
+      },
+      {
         label: 'Thèmes du mois',
-        color: '#10b981',
+        color: '#16a34a',
         bytes: cat.themes,
         pct: Math.round((cat.themes / total) * 100),
       },
       {
-        label: 'One-shots',
-        color: '#f59e0b',
-        bytes: cat.oneshots,
-        pct: Math.round((cat.oneshots / total) * 100),
-      },
-      {
         label: 'Défis',
-        color: '#ef4444',
+        color: '#dc2626',
         bytes: cat.defis,
         pct: Math.round((cat.defis / total) * 100),
       },
       {
+        label: 'One-shots',
+        color: '#d97706',
+        bytes: cat.oneshots,
+        pct: Math.round((cat.oneshots / total) * 100),
+      },
+      {
+        label: 'Expositions',
+        color: '#7c3aed',
+        bytes: cat.expositions,
+        pct: Math.round((cat.expositions / total) * 100),
+      },
+      {
         label: 'Documents',
-        color: '#8b5cf6',
+        color: '#ea580c',
         bytes: cat.documents,
         pct: Math.round((cat.documents / total) * 100),
       },
@@ -137,17 +149,19 @@ export class Overview implements OnInit {
         this.totalArticles.set(articles.filter((a) => a.statut === 'publie').length);
         this.totalSorties.set(sorties.length);
 
-        const cat = { portfolio: 0, themes: 0, oneshots: 0, defis: 0, documents: 0 };
+        const cat = { portfolio: 0, sorties: 0, themes: 0, defis: 0, oneshots: 0, expositions: 0, documents: 0 };
         membres.forEach((m) => {
           cat.portfolio += m.storageUsed?.portfolio ?? 0;
+          cat.sorties += m.storageUsed?.sorties ?? 0;
           cat.themes += m.storageUsed?.themes ?? 0;
-          cat.oneshots += m.storageUsed?.oneshots ?? 0;
           cat.defis += m.storageUsed?.defis ?? 0;
+          cat.oneshots += m.storageUsed?.oneshots ?? 0;
+          cat.expositions += m.storageUsed?.expositions ?? 0;
           cat.documents += m.storageUsed?.documents ?? 0;
         });
         this.storageByCat.set(cat);
         this.storageTotal.set(
-          cat.portfolio + cat.themes + cat.oneshots + cat.defis + cat.documents,
+          cat.portfolio + cat.sorties + cat.themes + cat.defis + cat.oneshots + cat.expositions + cat.documents,
         );
         this.topMembers.set(
           membres
@@ -155,9 +169,11 @@ export class Overview implements OnInit {
               nom: [m.prenom, m.nom].filter(Boolean).join(' '),
               total:
                 (m.storageUsed?.portfolio ?? 0) +
+                (m.storageUsed?.sorties ?? 0) +
                 (m.storageUsed?.themes ?? 0) +
-                (m.storageUsed?.oneshots ?? 0) +
                 (m.storageUsed?.defis ?? 0) +
+                (m.storageUsed?.oneshots ?? 0) +
+                (m.storageUsed?.expositions ?? 0) +
                 (m.storageUsed?.documents ?? 0),
             }))
             .filter((m) => m.total > 0)

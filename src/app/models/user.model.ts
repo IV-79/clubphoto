@@ -8,7 +8,7 @@ export interface UserProfile {
   role: 'admin' | 'contributeur' | 'membre';
   isSuspended?: boolean;
   derniereConnexion?: string;
-  storageUsed?: { portfolio: number; themes: number; oneshots: number; documents?: number; defis?: number };
+  storageUsed?: { portfolio: number; themes: number; oneshots: number; defis?: number; sorties?: number; expositions?: number; documents?: number };
   subscriptions?: UserSubscriptions;
   dateAdhesion: string;
   bio?: string;

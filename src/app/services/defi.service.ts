@@ -210,7 +210,6 @@ export class DefiService {
       (async () => {
         try {
           const exif = await readExif(file);
-          const fileSize = file.size;
           const id = generateId();
           const storagePath = `defis/${defiId}/${user.uid}-${id}.webp`;
           const thumbPath   = `defis/${defiId}/${user.uid}-${id}_thumb.webp`;
@@ -218,6 +217,7 @@ export class DefiService {
             compressImage(file, COMPRESS_EVENT),
             compressImage(file, COMPRESS_THUMB),
           ]);
+          const fileSize = compressed.size;
           const storageRef = ref(storage, storagePath);
           const task = uploadBytesResumable(storageRef, compressed);
 

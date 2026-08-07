@@ -248,13 +248,17 @@ export class SortieService {
           ]);
           const thumbSnap = await uploadBytes(ref(storage, thumbPath), thumb);
           const thumbnailUrl = await getDownloadURL(thumbSnap.ref);
+          const fileSize = file.size;
           const imageData: Omit<SortieImage, 'id'> = {
-            url, storagePath, likes: [], uploadedAt: new Date().toISOString(),
+            url, storagePath, fileSize, likes: [], uploadedAt: new Date().toISOString(),
             uploaderUid: meta.uploaderUid, nomUploader: meta.nomUploader,
             thumbnailUrl, thumbnailPath: thumbPath,
             ...(hasExif(meta.exif) ? { exif: meta.exif } : {}),
           };
           const docRef = await addDoc(collection(db, `sorties/${sortieId}/photos`), imageData);
+          updateDoc(doc(db, 'users', meta.uploaderUid), {
+            'storageUsed.sorties': increment(fileSize),
+          }).catch(() => {});
           const sortieDoc = await getDoc(doc(db, 'sorties', sortieId));
           if (!sortieDoc.data()?.['photoCouvertureUrl']) {
             await updateDoc(doc(db, 'sorties', sortieId), { photoCouvertureUrl: url });
@@ -273,6 +277,11 @@ export class SortieService {
     ];
     if (image.thumbnailPath) deletes.push(deleteObject(ref(storage, image.thumbnailPath)).catch(() => {}));
     await Promise.all(deletes);
+    if (image.fileSize) {
+      updateDoc(doc(db, 'users', image.uploaderUid), {
+        'storageUsed.sorties': increment(-image.fileSize),
+      }).catch(() => {});
+    }
     if (currentCoverUrl === image.url) {
       const photosSnap = await getDocs(query(collection(db, `sorties/${sortieId}/photos`), orderBy('uploadedAt', 'asc')));
       const first = photosSnap.docs[0];

@@ -137,9 +137,9 @@ html[data-theme="dark"] .btn-action-danger:hover {
   border-radius: 4px;
   padding: 0.2rem 0.5rem;
 }
-.badge-sortie       { background: rgba(61,90,128,0.1);   border: 1px solid rgba(61,90,128,0.25);  color: #3d5a80; }
-.badge-oneshot-type { background: rgba(46,125,90,0.1);   border: 1px solid rgba(46,125,90,0.25);  color: #2e7d5a; }
-.badge-defi-type    { background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.3);  color: #d97706; }
+.badge-sortie       { background: var(--c-teal-bg);   border: 1px solid var(--c-teal-bd);   color: var(--c-teal); }
+.badge-oneshot-type { background: var(--c-amber-bg);  border: 1px solid var(--c-amber-bd);  color: var(--c-amber); }
+.badge-defi-type    { background: var(--c-red-bg);    border: 1px solid var(--c-red-bd);    color: var(--c-red); }
 
 /* Base badge statut */
 .hero-status {

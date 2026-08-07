@@ -159,6 +159,8 @@ export class AuthService {
     let themes = 0;
     let oneshots = 0;
     let defis = 0;
+    let sorties = 0;
+    let expositions = 0;
 
     const photosSnap = await getDocs(query(collection(db, 'photos'), where('uid', '==', uid)));
     for (const d of photosSnap.docs) {
@@ -198,6 +200,28 @@ export class AuthService {
       }
     }
 
+    const sortiesSnap = await getDocs(collection(db, 'sorties'));
+    for (const sortieDoc of sortiesSnap.docs) {
+      const sortiePhotosSnap = await getDocs(query(
+        collection(db, 'sorties', sortieDoc.id, 'photos'),
+        where('uploaderUid', '==', uid)
+      ));
+      for (const pd of sortiePhotosSnap.docs) {
+        sorties += (pd.data() as { fileSize?: number }).fileSize ?? 0;
+      }
+    }
+
+    const expositionsSnap = await getDocs(collection(db, 'expositions'));
+    for (const expoDoc of expositionsSnap.docs) {
+      const expoPhotosSnap = await getDocs(query(
+        collection(db, 'expositions', expoDoc.id, 'photos'),
+        where('uid', '==', uid)
+      ));
+      for (const pd of expoPhotosSnap.docs) {
+        expositions += (pd.data() as { fileSize?: number }).fileSize ?? 0;
+      }
+    }
+
     let documents = 0;
     const docsSnap = await getDocs(query(collection(db, 'documents'), where('uploadeurUid', '==', uid)));
     for (const d of docsSnap.docs) {
@@ -205,7 +229,7 @@ export class AuthService {
     }
 
     await updateDoc(doc(db, 'users', uid), {
-      storageUsed: { portfolio, themes, oneshots, defis, documents },
+      storageUsed: { portfolio, themes, oneshots, defis, sorties, expositions, documents },
       photoCount: photosSnap.docs.length,
     });
   }

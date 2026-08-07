@@ -22,11 +22,14 @@
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
-.event-card-oneshot { border-color: var(--c-teal-bd); }
-.event-card-oneshot:hover { border-color: var(--c-teal); }
+.event-card-sortie { border-color: var(--c-teal-bd); }
+.event-card-sortie:hover { border-color: var(--c-teal); }
 
-.event-card-defi { border-color: var(--c-amber-bd); }
-.event-card-defi:hover { border-color: var(--c-amber); }
+.event-card-oneshot { border-color: var(--c-amber-bd); }
+.event-card-oneshot:hover { border-color: var(--c-amber); }
+
+.event-card-defi { border-color: var(--c-red-bd); }
+.event-card-defi:hover { border-color: var(--c-red); }
 
 .event-card-exposition { border-color: var(--c-violet-bd); }
 .event-card-exposition:hover { border-color: var(--c-violet); }
@@ -58,9 +61,9 @@
   opacity: 0.45;
 }
 
-.placeholder-sortie     { background: linear-gradient(135deg, #e8edf5 0%, #c4d0e6 100%); }
-.placeholder-oneshot    { background: linear-gradient(135deg, #e8f5ee 0%, #b8ddc8 100%); }
-.placeholder-defi       { background: linear-gradient(135deg, #fef3e2 0%, #fddfa0 100%); }
+.placeholder-sortie     { background: linear-gradient(135deg, #e0f2f1 0%, #b2dfdb 100%); }
+.placeholder-oneshot    { background: linear-gradient(135deg, #fff8e1 0%, #ffe082 100%); }
+.placeholder-defi       { background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%); }
 .placeholder-exposition { background: linear-gradient(135deg, #ede8ff 0%, #c4b0f5 100%); }
 
 .card-cover .card-status {
@@ -126,9 +129,9 @@
   white-space: nowrap;
 }
 
-.badge-sortie       { background: var(--c-blue-bg);   border: 1px solid var(--c-blue-bd);   color: var(--c-blue);   border-radius: 4px; padding: 0.2rem 0.5rem; }
-.badge-oneshot-type { background: var(--c-teal-bg);  border: 1px solid var(--c-teal-bd);  color: var(--c-teal);  border-radius: 4px; padding: 0.2rem 0.5rem; }
-.badge-defi-type    { background: var(--c-amber-bg); border: 1px solid var(--c-amber-bd); color: var(--c-amber); border-radius: 4px; padding: 0.2rem 0.5rem; }
+.badge-sortie       { background: var(--c-teal-bg);   border: 1px solid var(--c-teal-bd);   color: var(--c-teal);   border-radius: 4px; padding: 0.2rem 0.5rem; }
+.badge-oneshot-type { background: var(--c-amber-bg);  border: 1px solid var(--c-amber-bd);  color: var(--c-amber);  border-radius: 4px; padding: 0.2rem 0.5rem; }
+.badge-defi-type    { background: var(--c-red-bg);    border: 1px solid var(--c-red-bd);    color: var(--c-red);    border-radius: 4px; padding: 0.2rem 0.5rem; }
 .badge-expo-type    { background: var(--c-violet-bg); border: 1px solid var(--c-violet-bd); color: var(--c-violet); border-radius: 4px; padding: 0.2rem 0.5rem; }
 
 /* Titre + organisateur sur la même ligne */
@@ -210,15 +213,15 @@
 }
 
 .badge-oneshot-count {
-  background: var(--c-teal-bg);
-  border: 1px solid var(--c-teal-bd);
-  color: var(--c-teal);
-}
-
-.badge-defi {
   background: var(--c-amber-bg);
   border: 1px solid var(--c-amber-bd);
   color: var(--c-amber);
+}
+
+.badge-defi {
+  background: var(--c-red-bg);
+  border: 1px solid var(--c-red-bd);
+  color: var(--c-red);
   max-width: 180px;
   overflow: hidden;
   text-overflow: ellipsis;

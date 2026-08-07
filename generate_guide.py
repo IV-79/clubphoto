@@ -124,6 +124,14 @@ def fields_table(rows):
     doc.add_paragraph()
     return tbl
 
+EVENT_TYPE_COLORS = {
+    'sortie':  ('E0F2F1', '0F766E'),
+    'defi':    ('FEE2E2', 'B91C1C'),
+    'oneshot': ('FEF3C7', 'B45309'),
+    'expo':    ('EDE9FE', '6D28D9'),
+    'reunion': ('DBEAFE', '1565C0'),
+}
+
 STATUT_COLORS = {
     'preparation': ('F3F4F6', '374151'),
     'ideation':    ('E0F2FE', '075985'),
@@ -158,6 +166,37 @@ def statuts_table(rows):
         p0 = c0.paragraphs[0]
         p0.alignment = WD_ALIGN_PARAGRAPH.CENTER
         r0 = p0.add_run(statut)
+        r0.bold = True
+        r0.font.name = 'Calibri'
+        r0.font.size = Pt(9)
+        r0.font.color.rgb = RGBColor(int(fg[0:2], 16), int(fg[2:4], 16), int(fg[4:6], 16))
+        c1 = row.cells[1]
+        p1 = c1.paragraphs[0]
+        r1 = p1.add_run(desc)
+        r1.font.name = 'Calibri'
+        r1.font.size = Pt(10)
+    doc.add_paragraph()
+    return tbl
+
+def event_types_table(rows):
+    """rows : list of (label, color_key, description)"""
+    tbl = doc.add_table(rows=len(rows), cols=2)
+    tbl.style = 'Table Grid'
+    for i, (label, key, desc) in enumerate(rows):
+        bg, fg = EVENT_TYPE_COLORS.get(key, ('F3F4F6', '374151'))
+        row = tbl.rows[i]
+        c0 = row.cells[0]
+        c0.width = Cm(4.5)
+        tc0 = c0._tc
+        tcPr0 = tc0.get_or_add_tcPr()
+        shd = OxmlElement('w:shd')
+        shd.set(qn('w:val'), 'clear')
+        shd.set(qn('w:color'), 'auto')
+        shd.set(qn('w:fill'), bg)
+        tcPr0.append(shd)
+        p0 = c0.paragraphs[0]
+        p0.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        r0 = p0.add_run(label)
         r0.bold = True
         r0.font.name = 'Calibri'
         r0.font.size = Pt(9)
@@ -254,28 +293,35 @@ fields_table([
 ])
 
 h2(u'1.2 Les types d’activit\xe9s')
-para(u'Le site g\xe8re six types d’activit\xe9s, chacun avec son propre fonctionnement :')
-fields_table([
-    (u'Sortie photo',
+para(
+    u'Le site g\xe8re sept types d’activit\xe9s, chacun avec son propre fonctionnement. '
+    u'Sur tout le site — calendrier, listes d’\xe9v\xe9nements, cartes — chaque type '
+    u'est identifi\xe9 par une couleur distincte. Les trois types de sortie partagent '
+    u'la m\xeame couleur : c’est le libell\xe9 qui les distingue.'
+)
+event_types_table([
+    (u'Sortie Photo', 'sortie',
      u'On se retrouve \xe0 un endroit pour photographier ensemble. Inscription optionnelle, '
      u'chacun uploade ses propres photos apr\xe8s la sortie.'),
-    (u'Sortie club',
+    (u'Sortie Club', 'sortie',
      u'Balade, visite de mus\xe9e, sortie culturelle — pas forc\xe9ment centr\xe9e sur la photo. '
      u'M\xeame fonctionnement que la sortie photo.'),
-    (u'D\xe9fi photo',
-     u'Comp\xe9tition th\xe9matique. Les membres s’inscrivent, uploadent leurs photos, puis '
-     u'votent anonymement. Les phases changent automatiquement selon les dates.'),
-    (u'Atelier',
+    (u'Atelier', 'sortie',
      u"Session d’apprentissage ou de travail en groupe (retouche, technique, partage "
      u"d’exp\xe9rience). Pas de vote, pas de comp\xe9tition."),
-    (u'OneShot',
+    (u'D\xe9fi Photo', 'defi',
+     u'Comp\xe9tition th\xe9matique. Les membres s’inscrivent, uploadent leurs photos, puis '
+     u'votent anonymement. Les phases changent automatiquement selon les dates.'),
+    (u'OneShot', 'oneshot',
      u"\xc9v\xe9nement photo comp\xe9titif avec th\xe8mes multiples g\xe9r\xe9 manuellement par "
      u"l’organisateur. C’est l’organisateur qui uploade les photos des participants."),
-    (u'Exposition',
+    (u'Exposition', 'expo',
      u"Projet d’exposition photo en plusieurs phases : id\xe9ation collective des th\xe8mes, "
-     u"vote, soumission des photos, puis cl\xf4ture. Nouveau type d’activit\xe9 sur le site."),
+     u"vote, soumission des photos, puis cl\xf4ture."),
+    (u'R\xe9union', 'reunion',
+     u"Assembl\xe9es, conseils d’administration, s\xe9ances de travail. Visible uniquement "
+     u"dans le Calendrier, pour les membres connect\xe9s."),
 ])
-
 h2(u'1.3 Comment naviguer dans le site')
 para(
     u"La navigation suit toujours le m\xeame sch\xe9ma : page liste (grille de cartes) "
