@@ -78,7 +78,7 @@
       "collectionGroup": "expositions",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "statut",       "order": "ASCENDING"  },
+        { "fieldPath": "visibilite",   "order": "ASCENDING"  },
         { "fieldPath": "dateCreation", "order": "DESCENDING" },
         { "fieldPath": "__name__",     "order": "DESCENDING" }
       ],

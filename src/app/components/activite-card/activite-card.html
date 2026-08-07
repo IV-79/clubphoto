@@ -23,6 +23,10 @@
       }
     </div>
 
+    @if (themeLabel()) {
+      <p class="card-theme-line">{{ themeLabel() }}</p>
+    }
+
     <div class="card-meta-row">
       <div class="card-meta">
         @if (dateStr()) {
@@ -52,9 +56,6 @@
           }
           @case ('defi') {
             @let d = defi()!;
-            @if (d.theme) {
-              <span class="badge badge-defi">{{ d.theme }}</span>
-            }
             @if (d.inscriptionObligatoire) {
               <span class="badge badge-defi">{{ d.nbInscrits }} inscrit(s)</span>
             } @else {
@@ -62,10 +63,6 @@
             }
           }
           @case ('exposition') {
-            @let e = exposition()!;
-            @if (e.themeChoisi) {
-              <span class="badge badge-expo">{{ e.themeChoisi }}</span>
-            }
           }
         }
       </div>

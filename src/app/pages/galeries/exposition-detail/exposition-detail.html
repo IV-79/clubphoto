@@ -4,7 +4,7 @@
   <div class="expo-loading">Chargement…</div>
 } @else {
   @let e = expo()!;
-  @let s = e.statut;
+  @let s = expoStatut();
 
   <div class="expo-wrap">
     <app-event-hero
@@ -58,12 +58,6 @@
             <strong>{{ formatDate(e.dateExposition) }}</strong>
           </div>
         }
-        @if (e.dateOuverturePublic) {
-          <div class="stat-row">
-            <span>Ouverture au public</span>
-            <strong>{{ formatDate(e.dateOuverturePublic) }}</strong>
-          </div>
-        }
       </div>
 
       <div class="info-card">
@@ -88,6 +82,18 @@
             <strong>{{ photos().length }}</strong>
           </div>
         }
+      </div>
+
+      <div class="info-card">
+        <h3 class="info-card-title">Visibilité</h3>
+        <div class="stat-row">
+          <span>Exposition</span>
+          <strong>{{ visibilitePublique() ? 'Publique' : 'Membres' }}</strong>
+        </div>
+        <div class="stat-row">
+          <span>Photos</span>
+          <strong>{{ photosPubliques() ? 'Publiques' : 'Membres' }}</strong>
+        </div>
       </div>
 
       @if (s === 'votation' || (s === 'nettoyage' && nbMembresVote() > 0)) {
@@ -138,25 +144,70 @@
               <textarea matInput formControlName="description" rows="3"></textarea>
             </mat-form-field>
 
-            @if (s === 'ideation' || s === 'nettoyage' || s === 'soumission') {
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Thème choisi (laisser vide pour annuler la soumission)</mat-label>
+              <input matInput formControlName="themeChoisi" />
+            </mat-form-field>
+            @if (expoStatut() === 'soumission' && !editForm.get('themeChoisi')!.value.trim()) {
+              <div class="dates-warning dates-info" style="margin-top:-0.5rem; margin-bottom:0.75rem">
+                <mat-icon>info</mat-icon>
+                Vider le thème repasse l'expo en nettoyage — les photos soumises sont conservées.
+              </div>
+            }
+
+            <div class="form-row">
               <mat-form-field appearance="outline" class="field-half">
                 <mat-label>Max photos par membre</mat-label>
                 <input matInput type="number" formControlName="maxPhotosParMembre" min="1" />
               </mat-form-field>
+
+              <mat-form-field appearance="outline" class="field-half">
+                <mat-label>Visibilité</mat-label>
+                <mat-select formControlName="visibilite">
+                  <mat-option value="public">Public (tout le monde)</mat-option>
+                  <mat-option value="membre">Membres seulement</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <div class="edit-section-header">Calendrier</div>
+
+            @if (datesChronoError) {
+              <div class="dates-warning">
+                <mat-icon>warning</mat-icon>
+                {{ datesChronoError }}
+              </div>
             }
-            @if (s === 'ideation') {
-              <app-date-picker label="Fin de l'idéation" formControlName="dateFinIdeation" [required]="true" class="field-half"></app-date-picker>
+            @if (expoStatut() === 'soumission') {
+              <div class="dates-warning dates-info">
+                <mat-icon>info</mat-icon>
+                L'expo est en phase soumission — vider la date de fin de soumission ferait repasser en nettoyage.
+              </div>
             }
-            @if (s === 'votation') {
-              <app-date-picker label="Fin du vote" formControlName="dateFinVote" [required]="true" class="field-half"></app-date-picker>
+            @if (expoStatut() === 'nettoyage' || expoStatut() === 'votation') {
+              <div class="dates-warning dates-info">
+                <mat-icon>info</mat-icon>
+                Avancer la fin d'idéation dans le futur ferait repasser l'expo en idéation.
+              </div>
             }
-            @if (s === 'soumission') {
-              <app-date-picker label="Fin de soumission de photos" formControlName="dateFinSoumission" [required]="true" class="field-half"></app-date-picker>
+            @if (datesLocked) {
+              <div class="dates-warning dates-info">
+                <mat-icon>lock</mat-icon>
+                Dates verrouillées — le thème est fixé. Videz le champ « Thème choisi » pour modifier.
+              </div>
             }
 
-            <app-date-picker label="Début de l'idéation" formControlName="dateDebutIdeation" class="field-half"></app-date-picker>
-            <app-date-picker label="Date de l'exposition" formControlName="dateExposition" class="field-half"></app-date-picker>
-            <app-date-picker label="Ouverture au public" formControlName="dateOuverturePublic" class="field-half"></app-date-picker>
+            <div class="form-row">
+              <app-date-picker label="Début de l'idéation" formControlName="dateDebutIdeation" class="field-half"></app-date-picker>
+              <app-date-picker label="Fin de l'idéation" formControlName="dateFinIdeation" [required]="true" class="field-half"></app-date-picker>
+            </div>
+            <div class="form-row">
+              <app-date-picker label="Fin du vote" formControlName="dateFinVote" class="field-half"></app-date-picker>
+              <app-date-picker label="Fin de soumission" formControlName="dateFinSoumission" class="field-half"></app-date-picker>
+            </div>
+            <div class="form-row">
+              <app-date-picker label="Date de l'exposition (informelle)" formControlName="dateExposition" class="field-half"></app-date-picker>
+            </div>
 
             <!-- Cover photo -->
             <div class="cover-section">
@@ -458,7 +509,7 @@
           @if (canManage()) {
             <div class="manage-actions">
               <button class="btn-cloture" (click)="cloturerManuellement()" [disabled]="savingTransition()">
-                Clôturer la soumission →
+                {{ savingTransition() ? '…' : 'Clôturer la soumission →' }}
               </button>
             </div>
           }
@@ -468,7 +519,14 @@
       <!-- ══ CLÔTURÉ ═══════════════════════════════════════════ -->
       @if (s === 'cloture') {
         <section class="expo-section">
-          @if (!isPublic() && !isMembre()) {
+          @if (canManage() && visibilitePublique()) {
+            <div class="vis-actions">
+              <button class="btn-publier-photos" (click)="togglePhotosPubliques()">
+                {{ photosPubliques() ? '🔒 Réserver les photos aux membres' : '🌐 Publier les photos — visibles par tous' }}
+              </button>
+            </div>
+          }
+          @if (!photosPubliques() && !isMembre()) {
             <p class="info-attente">L'exposition est en cours de finalisation. Revenez bientôt !</p>
           } @else {
             <h2 class="section-title">

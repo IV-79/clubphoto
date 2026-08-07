@@ -98,7 +98,6 @@ export class SortieCreer {
     dateDebutIdeation: new FormControl('', { nonNullable: true }),
     dateFinIdeation: new FormControl('', { nonNullable: true }),
     dateExposition: new FormControl('', { nonNullable: true }),
-    dateOuverturePublic: new FormControl('', { nonNullable: true }),
   });
 
   isOneShot = toSignal(
@@ -255,7 +254,7 @@ export class SortieCreer {
           dateDebutIdeation: v.dateDebutIdeation || undefined,
           dateFinIdeation: v.dateFinIdeation,
           dateExposition: v.dateExposition || undefined,
-          dateOuverturePublic: v.dateOuverturePublic || undefined,
+          visibilite: v.visibilite,
           organisateurUid: profile.uid,
           nomOrganisateur: nom,
           ...(v.description.trim() ? { description: v.description.trim() } : {}),

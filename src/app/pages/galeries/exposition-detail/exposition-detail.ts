@@ -26,6 +26,8 @@ import {
   ExpoSuggestion,
   ExpoVoteDoc,
   ExpoPhoto,
+  ExpoStatut,
+  getExpoStatut,
 } from '../../../models/exposition.model';
 import { LightboxPhoto, PhotoLightboxCallbacks } from '../../../models/commentaire.model';
 import { EventHero, HeroBadge } from '../../../components/event-hero/event-hero';
@@ -83,12 +85,12 @@ export class ExpositionDetail {
   isAdmin = computed(() => this.profile()?.role === 'admin');
   canManage = computed(() => this.isOrganisateur() || this.isAdmin());
   isMembre = computed(() => !!this.profile());
-  isPublic = computed(() => {
-    const d = this.expo()?.dateOuverturePublic;
-    return !!d && new Date(d + 'T00:00:00') <= new Date();
-  });
+  photosPubliques = computed(() => !!this.expo()?.photosPubliques);
+  visibilitePublique = computed(() => this.expo()?.visibilite === 'public');
 
-  // ── Statut helpers ───────────────────────────────────────────────────────────
+  // ── Statut calculé depuis les dates ─────────────────────────────────────────
+
+  expoStatut = computed((): ExpoStatut => this.expo() ? getExpoStatut(this.expo()!) : 'ideation');
 
   typeBadgeHero = computed((): HeroBadge => ({ text: '🖼 Exposition', css: 'badge-expo' }));
   statusHero = computed((): HeroBadge => {
@@ -97,20 +99,16 @@ export class ExpositionDetail {
       nettoyage: { text: 'Nettoyage', css: 'status-nettoyage' },
       votation: { text: 'Vote', css: 'status-votation' },
       soumission: { text: 'Soumission', css: 'status-soumission' },
-      cloture: { text: 'Clôturé', css: 'status-cloture' },
+      cloture: { text: 'En exposition', css: 'status-cloture' },
     };
-    return labels[this.expo()?.statut ?? 'ideation'] ?? labels['ideation'];
+    return labels[this.expoStatut()] ?? labels['ideation'];
   });
-
-  // ── Auto-transition (canManage, dates dépassées) ─────────────────────────────
-
-  private autoTransitioned = signal(false);
 
   constructor() {
     // Charge les données une seule fois quand l'état d'auth est connu
     effect(() => {
       const p = this.profile();
-      if (p === undefined) return; // auth pas encore résolu
+      if (p === undefined) return;
       if (this.loaded()) return;
       untracked(() => {
         this.loaded.set(true);
@@ -120,7 +118,7 @@ export class ExpositionDetail {
 
     // Pré-remplir nombreVotesParMembre : 3 au 1er passage, 1 aux suivants
     effect(() => {
-      if (this.expo()?.statut !== 'nettoyage') return;
+      if (this.expoStatut() !== 'nettoyage') return;
       const secondPasse = this.suggestions().some((s) => !s.actif);
       untracked(() => {
         if (!this.formVotation.get('nombreVotesParMembre')?.dirty) {
@@ -131,7 +129,7 @@ export class ExpositionDetail {
 
     // Pré-remplir themeChoisi avec le vainqueur clair (si pas ex-aequo)
     effect(() => {
-      if (this.expo()?.statut !== 'nettoyage') return;
+      if (this.expoStatut() !== 'nettoyage') return;
       const winner = this.themeVainqueur();
       if (!winner) return;
       untracked(() => {
@@ -141,61 +139,35 @@ export class ExpositionDetail {
       });
     });
 
-    // Auto-transition si les dates sont dépassées (canManage seulement)
+    // Verrouille les dates pré-soumission quand un thème est saisi dans le formulaire d'édition
     effect(() => {
-      if (this.autoTransitioned()) return;
+      if (!this.editMode()) return;
+      const locked = !!this.editThemeSignal()?.trim();
+      untracked(() => {
+        ['dateDebutIdeation', 'dateFinIdeation', 'dateFinVote'].forEach(name => {
+          const ctrl = this.editForm.get(name)!;
+          locked ? ctrl.disable({ emitEvent: false }) : ctrl.enable({ emitEvent: false });
+        });
+      });
+    });
+
+    // Auto-transition votation→nettoyage uniquement (effets de bord sur suggestions/votes)
+    effect(() => {
       const e = this.expo();
       if (!e || !this.canManage()) return;
-      const now = new Date();
-      let triggered = false;
-
-      if (e.statut === 'ideation' && new Date(e.dateFinIdeation + 'T23:59:59') < now) {
-        triggered = true;
-        untracked(() =>
-          this.expoService.passerNettoyage(this.expoId).then(() => {
-            this.expo.update((ex) => (ex ? { ...ex, statut: 'nettoyage' } : ex));
-            this.sortMode.set('votes');
-          }),
-        );
-      } else if (
-        e.statut === 'votation' &&
-        e.dateFinVote &&
-        new Date(e.dateFinVote + 'T23:59:59') < now
-      ) {
-        triggered = true;
-        untracked(() =>
-          this.expoService.retourNettoyageDepuisVotation(this.expoId).then(async () => {
-            this.expo.update((ex) =>
-              ex
-                ? {
-                    ...ex,
-                    statut: 'nettoyage',
-                    dateFinVote: undefined,
-                    nombreVotesParMembre: undefined,
-                  }
-                : ex,
-            );
-            // tousVotes conservé pour trier par score en nettoyage
-            this.localVoteMap.set({});
-            this.sortMode.set('votes');
-            const suggs = await this.expoService.getSuggestionsOnce(this.expoId);
-            this.suggestions.set(suggs);
-          }),
-        );
-      } else if (
-        e.statut === 'soumission' &&
-        e.dateFinSoumission &&
-        new Date(e.dateFinSoumission + 'T23:59:59') < now
-      ) {
-        triggered = true;
-        untracked(() =>
-          this.expoService
-            .cloture(this.expoId)
-            .then(() => this.expo.update((ex) => (ex ? { ...ex, statut: 'cloture' } : ex))),
-        );
-      }
-
-      if (triggered) untracked(() => this.autoTransitioned.set(true));
+      if (e.statut !== 'votation' || !e.dateFinVote) return;
+      if (new Date(e.dateFinVote + 'T23:59:59') >= new Date()) return;
+      untracked(() =>
+        this.expoService.retourNettoyageDepuisVotation(this.expoId).then(async () => {
+          this.expo.update((ex) =>
+            ex ? { ...ex, statut: 'nettoyage', dateFinVote: undefined, nombreVotesParMembre: undefined } : ex,
+          );
+          this.localVoteMap.set({});
+          this.sortMode.set('votes');
+          const suggs = await this.expoService.getSuggestionsOnce(this.expoId);
+          this.suggestions.set(suggs);
+        }),
+      );
     });
   }
 
@@ -206,9 +178,9 @@ export class ExpositionDetail {
       return;
     }
     this.expo.set(expoData);
-    this.sortMode.set(expoData.statut === 'nettoyage' ? 'votes' : 'alpha');
+    const s = getExpoStatut(expoData);
+    this.sortMode.set(s === 'nettoyage' ? 'votes' : 'alpha');
 
-    const s = expoData.statut;
     const loads: Promise<void>[] = [];
 
     if (uid) {
@@ -238,7 +210,6 @@ export class ExpositionDetail {
     }
 
     if (s === 'cloture') {
-      // Photos visibles anonymes aussi (règles Firestore : cloture = public)
       loads.push(this.expoService.getPhotosOnce(this.expoId).then((p) => this.photos.set(p)));
     }
 
@@ -290,7 +261,7 @@ export class ExpositionDetail {
   });
 
   suggestionsTriees = computed(() => {
-    const statut = this.expo()?.statut;
+    const statut = this.expoStatut();
     const mode = this.sortMode();
     const items = statut === 'nettoyage' ? [...this.suggestions()] : [...this.suggestionsActives()];
     if (mode === 'votes') {
@@ -368,22 +339,6 @@ export class ExpositionDetail {
 
   savingTransition = signal(false);
 
-  async terminerIdeation() {
-    const ok = await this.confirmService.confirm(
-      "La phase d'idéation sera clôturée. Vous pourrez ensuite sélectionner et affiner les suggestions avant de lancer le vote.",
-      "Terminer l'idéation",
-      'Terminer',
-      false,
-    );
-    if (!ok) return;
-    this.savingTransition.set(true);
-    await this.expoService.passerNettoyage(this.expoId);
-    this.expo.update((e) => (e ? { ...e, statut: 'nettoyage' } : e));
-    this.sortMode.set('votes');
-    this.autoTransitioned.set(true);
-    this.savingTransition.set(false);
-  }
-
   async terminerVote() {
     const ok = await this.confirmService.confirm(
       'Les scores sont calculés et les thèmes ex-aequo restent présélectionnés. Les bulletins de vote sont ensuite réinitialisés pour un éventuel second tour.',
@@ -408,7 +363,6 @@ export class ExpositionDetail {
     this.sortMode.set('votes');
     const suggs = await this.expoService.getSuggestionsOnce(this.expoId);
     this.suggestions.set(suggs);
-    this.autoTransitioned.set(true);
     this.savingTransition.set(false);
   }
 
@@ -441,17 +395,20 @@ export class ExpositionDetail {
   async lancerSoumission() {
     if (this.formSoumission.invalid || this.savingTransition()) return;
     const { themeChoisi, dateFinSoumission } = this.formSoumission.getRawValue();
+    const prenom = this.profile()?.prenom ?? 'Jean-Pierre';
+    const ok = await this.confirmService.confirm(
+      `Thème : « ${themeChoisi} » — soumissions ouvertes jusqu'au ${this.formatDate(dateFinSoumission)}. ` +
+      `Une fois confirmé, les dates d'idéation et de vote seront verrouillées. ` +
+      `C'est votre dernier mot, ${prenom} ? 😄`,
+      'Définir le thème de l\'expo',
+      "C'est mon dernier mot !",
+      false,
+    );
+    if (!ok) return;
     this.savingTransition.set(true);
     await this.expoService.passerSoumission(this.expoId, themeChoisi, dateFinSoumission);
     this.expo.update((e) =>
-      e
-        ? {
-            ...e,
-            statut: 'soumission',
-            themeChoisi: themeChoisi.trim(),
-            dateFinSoumission,
-          }
-        : e,
+      e ? { ...e, themeChoisi: themeChoisi.trim(), dateFinSoumission } : e,
     );
     this.tousVotes.set([]); // votes non nécessaires en soumission
     this.localVoteMap.set({});
@@ -462,7 +419,7 @@ export class ExpositionDetail {
 
   async cloturerManuellement() {
     const ok = await this.confirmService.confirm(
-      "Plus aucune photo ne pourra être soumise. L'exposition passera en mode clôturé.",
+      "Plus aucune photo ne pourra être soumise. L'exposition passera en phase « En exposition ».",
       'Clôturer la soumission',
       'Clôturer',
       false,
@@ -646,6 +603,26 @@ export class ExpositionDetail {
 
   // ── Edit panel ───────────────────────────────────────────────────────────────
 
+  savingVisibilite = signal(false);
+
+  async toggleVisibilite() {
+    const e = this.expo();
+    if (!e || this.savingVisibilite()) return;
+    this.savingVisibilite.set(true);
+    const newVal: 'public' | 'membre' = e.visibilite === 'public' ? 'membre' : 'public';
+    await this.expoService.setVisibilite(this.expoId, newVal);
+    this.expo.update((ex) => (ex ? { ...ex, visibilite: newVal } : ex));
+    this.savingVisibilite.set(false);
+  }
+
+  async togglePhotosPubliques() {
+    const e = this.expo();
+    if (!e) return;
+    const newVal = !e.photosPubliques;
+    await this.expoService.setPhotosPubliques(this.expoId, newVal);
+    this.expo.update((ex) => (ex ? { ...ex, photosPubliques: newVal } : ex));
+  }
+
   editMode = signal(false);
   saving = signal(false);
   pendingCoverFile = signal<File | null>(null);
@@ -658,17 +635,60 @@ export class ExpositionDetail {
       nonNullable: true,
     }),
     description: new FormControl('', { nonNullable: true }),
+    themeChoisi: new FormControl('', { nonNullable: true }),
     maxPhotosParMembre: new FormControl(1, {
       validators: [Validators.required, Validators.min(1)],
       nonNullable: true,
     }),
+    visibilite: new FormControl<'public' | 'membre'>('membre', { nonNullable: true }),
     dateDebutIdeation: new FormControl('', { nonNullable: true }),
     dateFinIdeation: new FormControl('', { nonNullable: true }),
     dateFinVote: new FormControl('', { nonNullable: true }),
     dateFinSoumission: new FormControl('', { nonNullable: true }),
     dateExposition: new FormControl('', { nonNullable: true }),
-    dateOuverturePublic: new FormControl('', { nonNullable: true }),
   });
+
+  // Suit la valeur de themeChoisi dans le formulaire d'édition (pour l'effet de verrouillage)
+  private editThemeSignal = toSignal(
+    this.editForm.get('themeChoisi')!.valueChanges,
+    { initialValue: this.editForm.get('themeChoisi')!.value },
+  );
+
+  get datesLocked(): boolean {
+    return !!this.editForm.get('themeChoisi')!.value?.trim();
+  }
+
+  get datesChronoError(): string | null {
+    const v = this.editForm.getRawValue();
+    const chain = [
+      { label: 'Début idéation',    val: v.dateDebutIdeation },
+      { label: 'Fin idéation',      val: v.dateFinIdeation },
+      { label: 'Fin vote',          val: v.dateFinVote },
+      { label: 'Fin soumission',    val: v.dateFinSoumission },
+      { label: "Date d'exposition", val: v.dateExposition },
+    ].filter(d => d.val);
+    for (let i = 1; i < chain.length; i++) {
+      if (chain[i].val < chain[i - 1].val)
+        return `« ${chain[i - 1].label} » doit être avant « ${chain[i].label} ».`;
+    }
+    return null;
+  }
+
+  async terminerIdeation() {
+    const ok = await this.confirmService.confirm(
+      "La date de fin d'idéation sera avancée à aujourd'hui — le nettoyage démarrera immédiatement.",
+      "Terminer l'idéation",
+      'Terminer',
+      false,
+    );
+    if (!ok) return;
+    this.savingTransition.set(true);
+    // Mettre hier pour que today > dateFinIdeation soit vrai immédiatement
+    const hier = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+    await this.expoService.update(this.expoId, { dateFinIdeation: hier });
+    this.expo.update(e => e ? { ...e, dateFinIdeation: hier } : e);
+    this.savingTransition.set(false);
+  }
 
   enterEdit() {
     const e = this.expo();
@@ -676,13 +696,14 @@ export class ExpositionDetail {
     this.editForm.patchValue({
       titre: e.titre,
       description: e.description ?? '',
+      themeChoisi: e.themeChoisi ?? '',
       maxPhotosParMembre: e.maxPhotosParMembre,
+      visibilite: e.visibilite ?? 'membre',
       dateDebutIdeation: e.dateDebutIdeation ?? '',
       dateFinIdeation: e.dateFinIdeation,
       dateFinVote: e.dateFinVote ?? '',
       dateFinSoumission: e.dateFinSoumission ?? '',
       dateExposition: e.dateExposition ?? '',
-      dateOuverturePublic: e.dateOuverturePublic ?? '',
     });
     this.editMode.set(true);
   }
@@ -696,59 +717,44 @@ export class ExpositionDetail {
     if (this.editForm.invalid || this.saving()) return;
     this.saving.set(true);
     try {
-      const e = this.expo()!;
       const v = this.editForm.getRawValue();
+      const themeChoisi = v.themeChoisi.trim() || undefined;
 
-      const firestoreUpdate: Record<string, unknown> = {
+      await this.expoService.update(this.expoId, {
         titre: v.titre.trim(),
         description: v.description.trim() || undefined,
+        themeChoisi,
+        maxPhotosParMembre: v.maxPhotosParMembre,
+        visibilite: v.visibilite,
         dateDebutIdeation: v.dateDebutIdeation || undefined,
+        dateFinIdeation: v.dateFinIdeation,
+        dateFinVote: v.dateFinVote || undefined,
+        dateFinSoumission: v.dateFinSoumission || undefined,
         dateExposition: v.dateExposition || undefined,
-        dateOuverturePublic: v.dateOuverturePublic || undefined,
-      };
-      if (e.statut === 'ideation') {
-        firestoreUpdate['maxPhotosParMembre'] = v.maxPhotosParMembre;
-        firestoreUpdate['dateFinIdeation'] = v.dateFinIdeation;
-      } else if (e.statut === 'nettoyage') {
-        firestoreUpdate['maxPhotosParMembre'] = v.maxPhotosParMembre;
-      } else if (e.statut === 'votation') {
-        firestoreUpdate['dateFinVote'] = v.dateFinVote;
-      } else if (e.statut === 'soumission') {
-        firestoreUpdate['maxPhotosParMembre'] = v.maxPhotosParMembre;
-        firestoreUpdate['dateFinSoumission'] = v.dateFinSoumission;
-      }
-      await this.expoService.update(this.expoId, firestoreUpdate);
+      });
 
-      // Applique localement sans re-fetch
       this.expo.update((ex) => {
         if (!ex) return ex;
-        const updated: Exposition = { ...ex };
-        updated.titre = v.titre.trim();
-        if (v.description.trim()) updated.description = v.description.trim();
-        else delete updated.description;
-        if (v.dateDebutIdeation) updated.dateDebutIdeation = v.dateDebutIdeation;
-        else delete updated.dateDebutIdeation;
-        if (v.dateExposition) updated.dateExposition = v.dateExposition;
-        else delete updated.dateExposition;
-        if (v.dateOuverturePublic) updated.dateOuverturePublic = v.dateOuverturePublic;
-        else delete updated.dateOuverturePublic;
-        if (e.statut === 'ideation') {
-          updated.maxPhotosParMembre = v.maxPhotosParMembre;
-          updated.dateFinIdeation = v.dateFinIdeation;
-        } else if (e.statut === 'nettoyage') {
-          updated.maxPhotosParMembre = v.maxPhotosParMembre;
-        } else if (e.statut === 'votation' && v.dateFinVote) {
-          updated.dateFinVote = v.dateFinVote;
-        } else if (e.statut === 'soumission') {
-          updated.maxPhotosParMembre = v.maxPhotosParMembre;
-          if (v.dateFinSoumission) updated.dateFinSoumission = v.dateFinSoumission;
-        }
+        const updated: Exposition = {
+          ...ex,
+          titre: v.titre.trim(),
+          maxPhotosParMembre: v.maxPhotosParMembre,
+          visibilite: v.visibilite,
+          dateFinIdeation: v.dateFinIdeation,
+        };
+        if (v.description.trim()) updated.description = v.description.trim(); else delete updated.description;
+        if (themeChoisi) updated.themeChoisi = themeChoisi; else delete updated.themeChoisi;
+        if (v.dateDebutIdeation) updated.dateDebutIdeation = v.dateDebutIdeation; else delete updated.dateDebutIdeation;
+        if (v.dateFinVote) updated.dateFinVote = v.dateFinVote; else delete updated.dateFinVote;
+        if (v.dateFinSoumission) updated.dateFinSoumission = v.dateFinSoumission; else delete updated.dateFinSoumission;
+        if (v.dateExposition) updated.dateExposition = v.dateExposition; else delete updated.dateExposition;
         return updated;
       });
 
       if (this.pendingCoverFile()) {
-        if (e.photoCouverturePath)
-          await this.expoService.removeCouverture(this.expoId, e.photoCouverturePath);
+        const currentExpo = this.expo();
+        if (currentExpo?.photoCouverturePath)
+          await this.expoService.removeCouverture(this.expoId, currentExpo.photoCouverturePath);
         const { url, path } = await this.expoService.setCouverture(
           this.expoId,
           this.pendingCoverFile()!,

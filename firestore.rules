@@ -252,7 +252,7 @@ service cloud.firestore {
     // Expositions photo — membres, organisateur, admin
     match /expositions/{expoId} {
       allow read: if isLoggedIn()
-                  || resource.data.statut == 'cloture';
+                  || resource.data.visibilite == 'public';
       allow create: if isLoggedIn();
       allow update: if isLoggedIn() && (
         resource.data.organisateurUid == request.auth.uid || isAdmin()
@@ -287,7 +287,7 @@ service cloud.firestore {
 
     match /expositions/{expoId}/photos/{photoId} {
       allow read: if isLoggedIn()
-                  || get(/databases/$(database)/documents/expositions/$(expoId)).data.statut == 'cloture';
+                  || get(/databases/$(database)/documents/expositions/$(expoId)).data.photosPubliques == true;
       allow create: if isLoggedIn();
       allow delete: if isLoggedIn() && (
         resource.data.uid == request.auth.uid ||
@@ -310,7 +310,7 @@ service cloud.firestore {
         resource.data.organisateurUid == request.auth.uid || isAdmin()
       );
       allow update: if isLoggedIn() &&
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nbInscrits']);
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nbInscrits', 'nbParticipants']);
       allow delete: if isLoggedIn() && (
         resource.data.organisateurUid == request.auth.uid || isAdmin()
       );

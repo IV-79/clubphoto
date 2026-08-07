@@ -6,7 +6,7 @@ import {
 import { ref, uploadBytesResumable, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { Observable, from } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { db, storage, collectionStream, docStream } from '../utils/firebase';
+import { db, storage } from '../utils/firebase';
 import { Exposition, ExpoSuggestion, ExpoVoteDoc, ExpoPhoto } from '../models/exposition.model';
 import { generateId } from '../utils/id';
 import { compressImage, COMPRESS_THUMB } from '../utils/image-compress';
@@ -33,10 +33,10 @@ export class ExpositionService {
     dateDebutIdeation?: string;
     dateFinIdeation: string;
     dateExposition?: string;
-    dateOuverturePublic?: string;
+    visibilite?: 'public' | 'membre';
   }): Promise<string> {
     const payload = Object.fromEntries(
-      Object.entries({ ...data, statut: 'ideation', dateCreation: new Date().toISOString() })
+      Object.entries({ statut: 'ideation', visibilite: 'membre', ...data, dateCreation: new Date().toISOString() })
         .filter(([, v]) => v !== undefined)
     );
     const ref = await addDoc(collection(db, 'expositions'), payload);
@@ -45,10 +45,6 @@ export class ExpositionService {
       { lien: `/galeries/expositions/${ref.id}`, sourceNom: data.nomOrganisateur, excludeUid: data.organisateurUid }
     ).catch(() => {});
     return ref.id;
-  }
-
-  getExposition(id: string): Observable<Exposition | null> {
-    return docStream<Exposition>(doc(db, 'expositions', id), 'id').pipe(map(e => e ?? null));
   }
 
   getExpositionOnce(id: string): Observable<Exposition | undefined> {
@@ -63,7 +59,7 @@ export class ExpositionService {
 
   getPublicExpositionsOnce(): Observable<Exposition[]> {
     return from(getDocs(query(collection(db, 'expositions'),
-      where('statut', '==', 'cloture'), orderBy('dateCreation', 'desc'))))
+      where('visibilite', '==', 'public'), orderBy('dateCreation', 'desc'))))
       .pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as Exposition))));
   }
 
@@ -124,10 +120,6 @@ export class ExpositionService {
 
   // ── Suggestions ─────────────────────────────────────────────────────────────
 
-  getSuggestions(expoId: string): Observable<ExpoSuggestion[]> {
-    return collectionStream<ExpoSuggestion>(collection(db, `expositions/${expoId}/suggestions`), 'id');
-  }
-
   async addSuggestion(expoId: string, texte: string, source: 'membre' | 'admin'): Promise<string> {
     const ref = await addDoc(collection(db, `expositions/${expoId}/suggestions`), {
       texte: texte.trim(), actif: true, source,
@@ -150,19 +142,9 @@ export class ExpositionService {
 
   // ── Votes ────────────────────────────────────────────────────────────────────
 
-  getMonVote(expoId: string, uid: string): Observable<ExpoVoteDoc | null> {
-    return docStream<any>(doc(db, `expositions/${expoId}/votes`, uid)).pipe(
-      map(d => d ? d as ExpoVoteDoc : null)
-    );
-  }
-
   async getMonVoteOnce(expoId: string, uid: string): Promise<ExpoVoteDoc | null> {
     const d = await getDoc(doc(db, `expositions/${expoId}/votes`, uid));
     return d.exists() ? d.data() as ExpoVoteDoc : null;
-  }
-
-  getTousVotes(expoId: string): Observable<ExpoVoteDoc[]> {
-    return collectionStream<ExpoVoteDoc>(collection(db, `expositions/${expoId}/votes`));
   }
 
   async getTousVotesOnce(expoId: string): Promise<ExpoVoteDoc[]> {
@@ -180,10 +162,6 @@ export class ExpositionService {
   }
 
   // ── Transitions ──────────────────────────────────────────────────────────────
-
-  async passerNettoyage(expoId: string): Promise<void> {
-    await updateDoc(doc(db, 'expositions', expoId), { statut: 'nettoyage' });
-  }
 
   async passerVotation(expoId: string, dateFinVote: string, nombreVotesParMembre: number): Promise<void> {
     await updateDoc(doc(db, 'expositions', expoId), {
@@ -221,7 +199,7 @@ export class ExpositionService {
 
   async passerSoumission(expoId: string, themeChoisi: string, dateFinSoumission: string): Promise<void> {
     await updateDoc(doc(db, 'expositions', expoId), {
-      statut: 'soumission', themeChoisi: themeChoisi.trim(), dateFinSoumission,
+      themeChoisi: themeChoisi.trim(), dateFinSoumission,
     });
   }
 
@@ -229,11 +207,15 @@ export class ExpositionService {
     await updateDoc(doc(db, 'expositions', expoId), { statut: 'cloture' });
   }
 
-  // ── Photos ───────────────────────────────────────────────────────────────────
-
-  getPhotos(expoId: string): Observable<ExpoPhoto[]> {
-    return collectionStream<ExpoPhoto>(collection(db, `expositions/${expoId}/photos`), 'id');
+  async setVisibilite(expoId: string, visibilite: 'public' | 'membre'): Promise<void> {
+    await updateDoc(doc(db, 'expositions', expoId), { visibilite });
   }
+
+  async setPhotosPubliques(expoId: string, value: boolean): Promise<void> {
+    await updateDoc(doc(db, 'expositions', expoId), { photosPubliques: value });
+  }
+
+  // ── Photos ───────────────────────────────────────────────────────────────────
 
   async getPhotosOnce(expoId: string): Promise<ExpoPhoto[]> {
     const snap = await getDocs(collection(db, `expositions/${expoId}/photos`));

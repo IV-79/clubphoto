@@ -118,8 +118,7 @@
         <app-date-picker label="Fin de l'idéation" [required]="true" formControlName="dateFinIdeation" [min]="today" class="field-half"></app-date-picker>
       </div>
       <div class="form-row">
-        <app-date-picker label="Date de l'exposition" formControlName="dateExposition" class="field-half"></app-date-picker>
-        <app-date-picker label="Ouverture au public" formControlName="dateOuverturePublic" class="field-half"></app-date-picker>
+        <app-date-picker label="Date de l'exposition (informelle)" formControlName="dateExposition" class="field-half"></app-date-picker>
       </div>
       <div class="form-row">
         <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-half">
@@ -165,15 +164,13 @@
 
     }
 
-    @if (!isExposition()) {
-      <mat-form-field appearance="outline" class="field-half">
-        <mat-label>Visibilité</mat-label>
-        <mat-select formControlName="visibilite">
-          <mat-option value="public">Public (tout le monde)</mat-option>
-          <mat-option value="membre">Membres seulement</mat-option>
-        </mat-select>
-      </mat-form-field>
-    }
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Visibilité</mat-label>
+      <mat-select formControlName="visibilite">
+        <mat-option value="public">Public (tout le monde)</mat-option>
+        <mat-option value="membre">Membres seulement</mat-option>
+      </mat-select>
+    </mat-form-field>
 
     <div class="form-actions">
       <a routerLink="/galeries/sorties" class="btn-cancel">Annuler</a>

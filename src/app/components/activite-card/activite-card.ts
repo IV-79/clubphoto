@@ -3,7 +3,7 @@ import { RouterLink } from '@angular/router';
 import { Sortie, SORTIE_TYPE_META } from '../../models/sortie.model';
 import { OneShot, ONESHOT_STATUT_LABELS } from '../../models/oneshot.model';
 import { Defi, DEFI_STATUT_LABELS, getDefiStatut } from '../../models/defi.model';
-import { Exposition, EXPO_STATUT_LABELS } from '../../models/exposition.model';
+import { Exposition, EXPO_STATUT_LABELS, getExpoStatut } from '../../models/exposition.model';
 import { MatIconModule } from '@angular/material/icon';
 import { ImgRetryDirective } from '../../directives/img-retry.directive';
 
@@ -106,6 +106,7 @@ export class ActiviteCard {
     }
     if (kind === 'exposition') {
       const e = data as Exposition;
+      const statut = getExpoStatut(e);
       const cssMap: Record<string, string> = {
         ideation: 'card-status status-expo-ideation',
         nettoyage: 'card-status status-expo-nettoyage',
@@ -113,7 +114,7 @@ export class ActiviteCard {
         soumission: 'card-status status-expo-soumission',
         cloture: 'card-status status-passee',
       };
-      return { text: EXPO_STATUT_LABELS[e.statut], css: cssMap[e.statut] ?? 'card-status' };
+      return { text: EXPO_STATUT_LABELS[statut], css: cssMap[statut] ?? 'card-status' };
     }
     const statut = getDefiStatut(data as Defi);
     if (statut === 'a_venir') {
@@ -139,10 +140,17 @@ export class ActiviteCard {
     }
     if (kind === 'exposition') {
       const e = data as Exposition;
-      const d = e.dateOuverturePublic ?? e.dateFinIdeation;
+      const d = e.dateExposition ?? e.dateFinIdeation;
       return d ? this.formatDate(d) : null;
     }
     return this.formatDate((data as Defi).dateDebutSoumission);
+  });
+
+  protected themeLabel = computed((): string | null => {
+    const { kind, data } = this.item();
+    if (kind === 'defi') return (data as Defi).theme ?? null;
+    if (kind === 'exposition') return (data as Exposition).themeChoisi ?? null;
+    return null;
   });
 
   protected lieu = computed((): string | null => {
@@ -173,13 +181,12 @@ export class ActiviteCard {
     this.item().kind === 'exposition' ? (this.item().data as Exposition) : null,
   );
 
+  private static readonly JOURS = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+  private static readonly MOIS  = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+
   protected formatDate(date: string): string {
-    return new Date(date + 'T12:00:00').toLocaleDateString('fr-FR', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    });
+    const d = new Date(date + 'T12:00:00');
+    return `${ActiviteCard.JOURS[d.getDay()]} ${d.getDate()} ${ActiviteCard.MOIS[d.getMonth()]} ${d.getFullYear()}`;
   }
 
   protected mapsUrl(lieu: string): string {

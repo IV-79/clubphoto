@@ -5,25 +5,40 @@ export const EXPO_STATUT_LABELS: Record<ExpoStatut, string> = {
   nettoyage:  'Nettoyage',
   votation:   'Votation',
   soumission: 'Soumission',
-  cloture:    'Clôturé',
+  cloture:    'En exposition',
 };
+
+/**
+ * Statut calculé depuis les dates — `cloture` et `soumission` sont purement date-driven.
+ * `nettoyage` et `votation` restent explicites (actions organisateur avec effets de bord).
+ */
+export function getExpoStatut(expo: Exposition): ExpoStatut {
+  const today = new Date().toISOString().split('T')[0];
+  if (expo.dateFinSoumission && today > expo.dateFinSoumission) return 'cloture';
+  if (expo.statut === 'cloture') return 'cloture';        // clôture manuelle avant deadline
+  if (expo.themeChoisi && expo.dateFinSoumission) return 'soumission';
+  if (expo.statut === 'votation') return 'votation';      // explicite, peut boucler plusieurs fois
+  if (today > expo.dateFinIdeation) return 'nettoyage';  // auto quand deadline passée
+  return 'ideation';
+}
 
 export interface Exposition {
   id: string;
   titre: string;
   description?: string;
   statut: ExpoStatut;
+  visibilite?: 'public' | 'membre';   // qui voit l'expo dans la liste
+  photosPubliques?: boolean;           // photos accessibles aux non-membres (toggle manuel)
   organisateurUid: string;
   nomOrganisateur: string;
   maxPhotosParMembre: number;
-  dateDebutIdeation?: string;      // YYYY-MM-DD — ouverture idéation (optionnel ; si futur → "à venir" dans la liste)
-  dateFinIdeation: string;         // YYYY-MM-DD — fin de la phase d'idéation
-  dateFinVote?: string;            // set at nettoyage→votation
-  nombreVotesParMembre?: number;   // set at nettoyage→votation
-  themeChoisi?: string;            // set at nettoyage→soumission
-  dateFinSoumission?: string;      // set at nettoyage→soumission
-  dateExposition?: string;         // YYYY-MM-DD — date physique de l'expo (après+7j → "terminée" dans la liste)
-  dateOuverturePublic?: string;    // YYYY-MM-DD — visibilité publique (non-membres, indépendant de la catégorisation)
+  dateDebutIdeation?: string;      // YYYY-MM-DD
+  dateFinIdeation: string;         // YYYY-MM-DD
+  dateFinVote?: string;
+  nombreVotesParMembre?: number;
+  themeChoisi?: string;
+  dateFinSoumission?: string;      // YYYY-MM-DD
+  dateExposition?: string;         // YYYY-MM-DD
   photoCouvertureUrl?: string;
   photoCouverturePath?: string;
   dateCreation: string;

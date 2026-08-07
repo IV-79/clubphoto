@@ -240,7 +240,7 @@ export class SortiesListe {
       )
       .map((data) => ({ kind: 'defi' as const, data }));
 
-    // Expositions : ni à venir (dateDebutIdeation futur) ni terminées (dateOuverturePublic passée)
+    // Expositions : ni à venir (dateDebutIdeation futur) ni terminées (dateExposition > 7j passée)
     const expos: ActiviteItem[] = this.expositions()
       .filter((e) => !this.isExpoAVenir(e) && !this.isExpoPassee(e))
       .map((data) => ({ kind: 'exposition' as const, data }));
