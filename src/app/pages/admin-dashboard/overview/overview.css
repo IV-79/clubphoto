@@ -71,7 +71,7 @@
 /* ── KPI grid ──────────────────────────────────────────────── */
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 16px;
 }
 
@@ -94,10 +94,11 @@
 
 .kpi-icon-wrap mat-icon { font-size: 22px; width: 22px; height: 22px; }
 
-.kpi-icon-wrap.members  { background: rgba(21,101,192,0.12); color: #1565c0; }
-.kpi-icon-wrap.active   { background: rgba(16,185,129,0.12); color: #10b981; }
-.kpi-icon-wrap.events   { background: rgba(59,130,246,0.12); color: #3b82f6; }
-.kpi-icon-wrap.articles { background: rgba(245,158,11,0.12); color: #f59e0b; }
+.kpi-icon-wrap.members   { background: rgba(21,101,192,0.12); color: #1565c0; }
+.kpi-icon-wrap.active    { background: rgba(16,185,129,0.12); color: #10b981; }
+.kpi-icon-wrap.events    { background: rgba(59,130,246,0.12); color: #3b82f6; }
+.kpi-icon-wrap.articles  { background: rgba(245,158,11,0.12); color: #f59e0b; }
+.kpi-icon-wrap.documents { background: rgba(100,116,139,0.12); color: #64748b; }
 
 .kpi-num {
   font-size: 2.4rem;
@@ -346,7 +347,7 @@
 
 /* ── Responsive ────────────────────────────────────────────── */
 @media (max-width: 960px) {
-  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .kpi-grid { grid-template-columns: repeat(3, 1fr); }
   .storage-section { grid-template-columns: 1fr; }
 }
 

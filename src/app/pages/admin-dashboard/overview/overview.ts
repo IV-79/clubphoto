@@ -13,6 +13,7 @@ import { forkJoin } from 'rxjs';
 import { AuthService } from '../../../services/auth.service';
 import { SortieService } from '../../../services/sortie.service';
 import { ArticleService } from '../../../services/article.service';
+import { DocumentService } from '../../../services/document.service';
 
 interface MemberBar {
   nom: string;
@@ -36,6 +37,7 @@ export class Overview implements OnInit {
   private authService = inject(AuthService);
   private sortieService = inject(SortieService);
   private articleService = inject(ArticleService);
+  private documentService = inject(DocumentService);
 
   loading = signal(true);
   hasError = signal(false);
@@ -47,6 +49,7 @@ export class Overview implements OnInit {
   roleBreakdown = signal({ admin: 0, contributeur: 0, membre: 0 });
   totalSorties = signal(0);
   totalArticles = signal(0);
+  totalDocuments = signal(0);
 
   storageTotal = signal(0);
   storageByCat = signal({ portfolio: 0, sorties: 0, themes: 0, defis: 0, oneshots: 0, expositions: 0, documents: 0 });
@@ -132,8 +135,9 @@ export class Overview implements OnInit {
       membres: this.authService.getAllMembersOnce(),
       sorties: this.sortieService.getSortiesOnce(),
       articles: this.articleService.getAllArticles(),
+      documents: this.documentService.getDocumentsOnce(),
     }).subscribe({
-      next: ({ membres, sorties, articles }) => {
+      next: ({ membres, sorties, articles, documents }) => {
         const actifs = membres.filter(
           (m) => !m.isSuspended && m.derniereConnexion && new Date(m.derniereConnexion) >= cutoff,
         ).length;
@@ -148,6 +152,7 @@ export class Overview implements OnInit {
         });
         this.totalArticles.set(articles.filter((a) => a.statut === 'publie').length);
         this.totalSorties.set(sorties.length);
+        this.totalDocuments.set(documents.length);
 
         const cat = { portfolio: 0, sorties: 0, themes: 0, defis: 0, oneshots: 0, expositions: 0, documents: 0 };
         membres.forEach((m) => {
