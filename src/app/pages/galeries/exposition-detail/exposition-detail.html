@@ -79,7 +79,7 @@
           <strong>{{ e.maxPhotosParMembre }}</strong>
         </div>
         <div class="stat-row">
-          <span>Suggestions</span>
+          <span>Thèmes proposés</span>
           <strong>{{ suggestions().length }}</strong>
         </div>
         @if (s === 'soumission' || s === 'cloture') {
@@ -224,7 +224,7 @@
               }
             </div>
           } @else {
-            <p class="empty-sugg">Aucune suggestion pour l'instant.</p>
+            <p class="empty-sugg">Aucun thème proposé pour l'instant.</p>
           }
 
           @if (canManage()) {
