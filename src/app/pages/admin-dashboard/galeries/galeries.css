@@ -1,4 +1,4 @@
-.admin-page { max-width: 1200px; margin: 40px 0; padding: 0 24px; }
+.admin-page { max-width: 1200px; margin: 40px auto; padding: 0 24px; }
 
 .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
 

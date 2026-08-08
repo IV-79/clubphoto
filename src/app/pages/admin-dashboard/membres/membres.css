@@ -1,6 +1,6 @@
 .admin-page {
   max-width: 1200px;
-  margin: 40px 0;
+  margin: 40px auto;
   padding: 0 24px;
   display: flex;
   flex-direction: column;
