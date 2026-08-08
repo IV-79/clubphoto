@@ -70,3 +70,8 @@ src/environments/environment.prod.ts
 /ExpositionWorkflow.md
 /ExpostionWorkflow.png
 /exposition_workflow.html
+/audit_clubphoto.docx
+/generate_audit.py
+/generate_tests.py
+/scan_metrics.py
+/tests_clubphoto.xlsx
