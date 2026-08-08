@@ -2,6 +2,6 @@
   "projects": {
     "default": "clubphotopj",
     "dev":     "clubphotopj",
-    "prod":    "clubphototaintournon"
+    "prod":    "clubphototaintournon-prod"
   }
 }

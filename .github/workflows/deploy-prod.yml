@@ -54,7 +54,7 @@ jobs:
           echo "$FIREBASE_SERVICE_ACCOUNT" > /tmp/sa.json
           set +e
           GOOGLE_APPLICATION_CREDENTIALS=/tmp/sa.json npx firebase-tools@latest \
-            deploy --only hosting --project clubphototaintournon --non-interactive \
+            deploy --only hosting --project clubphototaintournon-prod --non-interactive \
             2>&1 | tee /tmp/firebase_deploy.log
           EXIT=${PIPESTATUS[0]}
           set -e

@@ -6,7 +6,7 @@
     "rules": "storage.rules"
   },
   "hosting": {
-    "site": "clubphototaintournon",
+    "site": "clubphototaintournon-prod",
     "public": "dist/club-photo/browser",
     "ignore": [
       "firebase.json",
