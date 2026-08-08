@@ -83,8 +83,9 @@ import { DocumentDossier } from '../../../models/document.model';
   styles: [
     `
       .page-wrap {
-        max-width: 600px;
-        padding: 24px 16px;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 24px 32px;
       }
       .page-title {
         font-size: 2rem;
