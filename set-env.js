@@ -5,8 +5,10 @@ if (!fs.existsSync(dir)) {
   fs.mkdirSync(dir, { recursive: true });
 }
 
+const isProd = process.env.PRODUCTION !== 'false';
+
 const content = `export const environment = {
-  production: true,
+  production: ${isProd},
   firebase: {
     apiKey: "${process.env.FIREBASE_API_KEY}",
     authDomain: "${process.env.FIREBASE_AUTH_DOMAIN}",

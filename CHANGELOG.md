@@ -4,6 +4,11 @@
 
 ## En cours (alpha)
 
+### Bannière site de test + suppression lien inscription (2026-08-08)
+
+- **Bannière orange** affichée en haut du header sur le site de dev (`environment.production = false`), invisible en prod — indique clairement que les données ne sont pas réelles.
+- **Lien "Pas encore de compte ? S'inscrire"** supprimé de la modale de login — l'inscription se fait uniquement par invitation.
+
 ### Couvertures événements comptabilisées dans le stockage (2026-08-08)
 
 Les photos de couverture des événements (sorties, thèmes du mois, défis, one-shots, expositions) sont maintenant comptabilisées dans les statistiques de stockage du dashboard admin.

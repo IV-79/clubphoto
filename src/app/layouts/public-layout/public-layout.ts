@@ -1,13 +1,14 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { RouterOutlet, RouterLink } from '@angular/router';
 import { Header } from '../../components/header/header';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-public-layout',
   imports: [RouterOutlet, RouterLink, Header],
   template: `
     <app-header />
-    <main class="page-content">
+    <main class="page-content" [class.has-test-banner]="isTestEnv">
       <router-outlet />
     </main>
     <footer class="site-footer">
@@ -36,6 +37,10 @@ import { Header } from '../../components/header/header';
         min-height: calc(100vh - 122px);
         padding-top: 122px;
         background: var(--bg-page);
+      }
+      .page-content.has-test-banner {
+        padding-top: 150px;
+        min-height: calc(100vh - 150px);
       }
       .site-footer {
         background: #1a1a1a;
@@ -81,4 +86,5 @@ import { Header } from '../../components/header/header';
 })
 export class PublicLayout {
   year = new Date().getFullYear();
+  readonly isTestEnv = !environment.production;
 }
