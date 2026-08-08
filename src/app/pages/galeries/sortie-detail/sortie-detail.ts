@@ -67,6 +67,7 @@ export class SortieDetail {
   private confirmService = inject(ConfirmService);
   private notifService = inject(NotificationService);
   private gpsConsentService = inject(GpsConsentService);
+  private elRef = inject(ElementRef);
 
   sortieId = this.route.snapshot.paramMap.get('id')!;
   profile = toSignal(this.authService.currentUserProfile$);
@@ -286,7 +287,15 @@ export class SortieDetail {
   }
 
   async saveEdit() {
-    if (this.form.invalid || this.saving()) return;
+    if (this.saving()) return;
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      setTimeout(() => {
+        const el = this.elRef.nativeElement.querySelector('mat-form-field.ng-invalid, app-date-picker.ng-invalid') as HTMLElement | null;
+        el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 50);
+      return;
+    }
     this.saving.set(true);
     try {
       const v = this.form.getRawValue();

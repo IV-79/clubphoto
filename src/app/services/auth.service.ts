@@ -240,8 +240,9 @@ export class AuthService {
     // 1. Photos portfolio
     const photosSnap = await getDocs(query(collection(db, 'photos'), where('uid', '==', uid)));
     for (const d of photosSnap.docs) {
-      const sp = (d.data() as { storagePath?: string }).storagePath;
-      if (sp) deletes.push(deleteObject(ref(storage, sp)).catch(() => {}));
+      const data = d.data() as { storagePath?: string; thumbnailPath?: string };
+      if (data.storagePath)   deletes.push(deleteObject(ref(storage, data.storagePath)).catch(() => {}));
+      if (data.thumbnailPath) deletes.push(deleteObject(ref(storage, data.thumbnailPath)).catch(() => {}));
       deletes.push(deleteDoc(d.ref));
     }
 
@@ -253,8 +254,9 @@ export class AuthService {
         where('membreUid', '==', uid)
       ));
       for (const d of soumSnap.docs) {
-        const sp = (d.data() as { storagePath?: string }).storagePath;
-        if (sp) deletes.push(deleteObject(ref(storage, sp)).catch(() => {}));
+        const data = d.data() as { storagePath?: string; thumbnailPath?: string };
+        if (data.storagePath)   deletes.push(deleteObject(ref(storage, data.storagePath)).catch(() => {}));
+        if (data.thumbnailPath) deletes.push(deleteObject(ref(storage, data.thumbnailPath)).catch(() => {}));
         deletes.push(deleteDoc(d.ref));
       }
     }
@@ -269,8 +271,9 @@ export class AuthService {
         where('membreUid', '==', uid)
       ));
       for (const pd of osPhotosSnap.docs) {
-        const sp = (pd.data() as { storagePath?: string }).storagePath;
-        if (sp) deletes.push(deleteObject(ref(storage, sp)).catch(() => {}));
+        const data = pd.data() as { storagePath?: string; thumbnailPath?: string };
+        if (data.storagePath)   deletes.push(deleteObject(ref(storage, data.storagePath)).catch(() => {}));
+        if (data.thumbnailPath) deletes.push(deleteObject(ref(storage, data.thumbnailPath)).catch(() => {}));
         deletes.push(deleteDoc(pd.ref));
       }
     }
@@ -283,8 +286,9 @@ export class AuthService {
         where('membreUid', '==', uid)
       ));
       for (const pd of defiPhotosSnap.docs) {
-        const sp = (pd.data() as { storagePath?: string }).storagePath;
-        if (sp) deletes.push(deleteObject(ref(storage, sp)).catch(() => {}));
+        const data = pd.data() as { storagePath?: string; thumbnailPath?: string };
+        if (data.storagePath)   deletes.push(deleteObject(ref(storage, data.storagePath)).catch(() => {}));
+        if (data.thumbnailPath) deletes.push(deleteObject(ref(storage, data.thumbnailPath)).catch(() => {}));
         deletes.push(deleteDoc(pd.ref));
       }
     }
@@ -298,7 +302,11 @@ export class AuthService {
     // 6. Documents partagés
     await this.documentService.deleteAllDocumentsByUser(uid);
 
-    // 7. Profil Firestore
+    // 7. Photos profil et bandeau Storage
+    deletes.push(deleteObject(ref(storage, `user-photos/${uid}/profil.webp`)).catch(() => {}));
+    deletes.push(deleteObject(ref(storage, `user-photos/${uid}/bandeau.webp`)).catch(() => {}));
+
+    // 8. Profil Firestore
     deletes.push(deleteDoc(doc(db, 'users', uid)));
 
     await Promise.all(deletes);

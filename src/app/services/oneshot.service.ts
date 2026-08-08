@@ -135,14 +135,15 @@ export class OneShotService {
     const storageRef = ref(storage, path);
     await uploadBytes(storageRef, file);
     const url = await getDownloadURL(storageRef);
-    await updateDoc(doc(db, 'oneshots', id), { photoCouvertureUrl: url, photoCouverturePath: path });
+    await updateDoc(doc(db, 'oneshots', id), { photoCouvertureUrl: url, photoCouverturePath: path, photoCouvertureFileSize: file.size });
   }
 
   async removeCouverture(id: string, path: string): Promise<void> {
     await deleteObject(ref(storage, path)).catch(() => {});
     await updateDoc(doc(db, 'oneshots', id), {
-      photoCouvertureUrl: deleteField(),
-      photoCouverturePath: deleteField(),
+      photoCouvertureUrl:      deleteField(),
+      photoCouverturePath:     deleteField(),
+      photoCouvertureFileSize: deleteField(),
     });
   }
 
@@ -158,6 +159,11 @@ export class OneShotService {
       getDocs(collection(db, `oneshots/${id}/votes`)),
     ]);
     const oneShotData = oneShotSnap.data() as { photoCouverturePath?: string } | undefined;
+
+    // Fetch commentaires for each photo in parallel
+    const photoCommSnaps = await Promise.all(
+      photosSnap.docs.map(p => getDocs(collection(db, `oneshots/${id}/photos/${p.id}/commentaires`)))
+    );
 
     const storageDeletions: Promise<void>[] = [];
     const sizeByUser: Record<string, number> = {};
@@ -175,6 +181,7 @@ export class OneShotService {
     await Promise.all([
       ...storageDeletions,
       ...photosSnap.docs.map(p  => deleteDoc(p.ref)),
+      ...photoCommSnaps.flatMap(snap => snap.docs.map(d => deleteDoc(d.ref))),
       ...inscritsSnap.docs.map(p => deleteDoc(p.ref)),
       ...themesSnap.docs.map(p   => deleteDoc(p.ref)),
       ...votesSnap.docs.map(p    => deleteDoc(p.ref)),
@@ -332,9 +339,11 @@ export class OneShotService {
   }
 
   async deletePhoto(oneShotId: string, photo: OneShotPhoto): Promise<void> {
+    const commSnap = await getDocs(collection(db, `oneshots/${oneShotId}/photos/${photo.id}/commentaires`));
     const deletes: Promise<unknown>[] = [
       deleteObject(ref(storage, photo.storagePath)),
       deleteDoc(doc(db, `oneshots/${oneShotId}/photos`, photo.id)),
+      ...commSnap.docs.map(d => deleteDoc(d.ref)),
     ];
     if (photo.thumbnailPath) deletes.push(deleteObject(ref(storage, photo.thumbnailPath)).catch(() => {}));
     await Promise.all(deletes);

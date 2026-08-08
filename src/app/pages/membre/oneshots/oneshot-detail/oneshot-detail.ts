@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, computed, ChangeDetectionStrategy, ElementRef } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
@@ -52,6 +52,7 @@ export class OneShotDetail {
   private confirmService = inject(ConfirmService);
   private notifService = inject(NotificationService);
   readonly loginModal = inject(LoginModalService);
+  private elRef = inject(ElementRef);
 
   readonly id = this.route.snapshot.paramMap.get('id')!;
 
@@ -614,6 +615,13 @@ export class OneShotDetail {
 
   async saveEvent() {
     if (this.saving()) return;
+    if (!this.titreValue.trim()) {
+      setTimeout(() => {
+        const el = this.elRef.nativeElement.querySelector('.edit-input') as HTMLElement | null;
+        el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 50);
+      return;
+    }
     this.saving.set(true);
     const e = this.event()!;
     try {

@@ -76,15 +76,16 @@ export class ExpositionService {
     const storageRef = ref(storage, path);
     await uploadBytesResumable(storageRef, file).then();
     const url = await getDownloadURL(storageRef);
-    await updateDoc(doc(db, 'expositions', id), { photoCouvertureUrl: url, photoCouverturePath: path });
+    await updateDoc(doc(db, 'expositions', id), { photoCouvertureUrl: url, photoCouverturePath: path, photoCouvertureFileSize: file.size });
     return { url, path };
   }
 
   async removeCouverture(id: string, path: string): Promise<void> {
     await deleteObject(ref(storage, path)).catch(() => {});
     await updateDoc(doc(db, 'expositions', id), {
-      photoCouvertureUrl: deleteField(),
-      photoCouverturePath: deleteField(),
+      photoCouvertureUrl:      deleteField(),
+      photoCouverturePath:     deleteField(),
+      photoCouvertureFileSize: deleteField(),
     });
   }
 

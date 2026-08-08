@@ -5,31 +5,6 @@
 
   <form [formGroup]="form" (ngSubmit)="submit()" class="sortie-form">
 
-    <!-- Photo de couverture -->
-    <div class="field-cover">
-      <label class="field-label">Photo de couverture <span class="field-opt">optionnel</span></label>
-      <p class="field-cover-hint">Format recommandé : 16/9 — redimensionné à 1280×720 px</p>
-      <div class="cover-drop"
-           [class.drag-over]="coverDragOver()"
-           (dragover)="$event.preventDefault(); coverDragOver.set(true)"
-           (dragleave)="coverDragOver.set(false)"
-           (drop)="onCoverDrop($event)">
-        @if (coverPreviewUrl()) {
-          <img [src]="coverPreviewUrl()!" class="cover-preview" alt="Aperçu" />
-          <div class="cover-overlay-actions">
-            <button type="button" class="cover-remove-btn" (click)="clearCover()">× Retirer</button>
-          </div>
-        } @else {
-          <div class="cover-placeholder">
-            <span class="cover-icon">🖼</span>
-            <span>Glisser une image ici ou</span>
-            <button type="button" class="cover-browse-btn" (click)="coverInputEl.click()">parcourir</button>
-          </div>
-        }
-        <input #coverInputEl type="file" accept="image/*" class="hidden-input" (change)="onCoverSelected($event)" />
-      </div>
-    </div>
-
     <!-- Type -->
     <mat-form-field appearance="outline" class="field-half">
       <mat-label>Type</mat-label>
@@ -171,6 +146,32 @@
         <mat-option value="membre">Membres seulement</mat-option>
       </mat-select>
     </mat-form-field>
+
+    <!-- Photo de couverture -->
+    <div class="cover-field">
+      <label class="cover-label">Photo de couverture <span class="cover-optional">optionnel</span></label>
+      <p class="cover-hint">Format recommandé : 16/9 — redimensionné à 1280×720 px</p>
+      <div class="cover-drop"
+           [class.drag-over]="coverDragOver()"
+           (dragover)="$event.preventDefault(); coverDragOver.set(true)"
+           (dragleave)="coverDragOver.set(false)"
+           (drop)="onCoverDrop($event)">
+        @if (coverPreviewUrl()) {
+          <img [src]="coverPreviewUrl()!" class="cover-preview" alt="Aperçu" />
+          <div class="cover-overlay">
+            <button type="button" class="cover-change-btn" (click)="coverInputEl.click()">🔄 Changer</button>
+            <button type="button" class="cover-remove-btn" (click)="clearCover()">× Retirer</button>
+          </div>
+        } @else {
+          <div class="cover-empty">
+            <span class="cover-icon">🖼</span>
+            <span>Glisser une image ici ou</span>
+            <button type="button" class="cover-browse-btn" (click)="coverInputEl.click()">parcourir</button>
+          </div>
+        }
+        <input #coverInputEl type="file" accept="image/*" class="hidden-input" (change)="onCoverSelected($event)" />
+      </div>
+    </div>
 
     <div class="form-actions">
       <a routerLink="/galeries/sorties" class="btn-cancel">Annuler</a>

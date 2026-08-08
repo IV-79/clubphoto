@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import {
   collection, collectionGroup, doc, addDoc, updateDoc, deleteDoc, setDoc,
-  query, orderBy, where, getDocs, getDoc, increment, limit
+  query, orderBy, where, getDocs, getDoc, increment, limit, deleteField
 } from 'firebase/firestore';
 import { ref, uploadBytesResumable, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { Observable, from, map } from 'rxjs';
@@ -167,12 +167,16 @@ export class DefiService {
     const compressed = await compressImage(file, COMPRESS_COUVERTURE);
     await uploadBytesResumable(storageRef, compressed);
     const url = await getDownloadURL(storageRef);
-    await updateDoc(doc(db, 'defis', id), { photoCouvertureUrl: url, photoCouverturePath: storagePath });
+    await updateDoc(doc(db, 'defis', id), { photoCouvertureUrl: url, photoCouverturePath: storagePath, photoCouvertureFileSize: compressed.size });
   }
 
   async removeCouverture(id: string, storagePath: string): Promise<void> {
     await deleteObject(ref(storage, storagePath)).catch(() => {});
-    await updateDoc(doc(db, 'defis', id), { photoCouvertureUrl: null, photoCouverturePath: null });
+    await updateDoc(doc(db, 'defis', id), {
+      photoCouvertureUrl:      deleteField(),
+      photoCouverturePath:     deleteField(),
+      photoCouvertureFileSize: deleteField(),
+    });
   }
 
   // ── Inscriptions ─────────────────────────────────────────────────────

@@ -4,6 +4,36 @@
 
 ## En cours (alpha)
 
+### Couvertures événements comptabilisées dans le stockage (2026-08-08)
+
+Les photos de couverture des événements (sorties, thèmes du mois, défis, one-shots, expositions) sont maintenant comptabilisées dans les statistiques de stockage du dashboard admin.
+- **Taille stockée à l'upload** : chaque `setCouverture()` / `setImageEvenement()` enregistre `photoCouvertureFileSize` (ou `imageEvenementFileSize` pour les sorties) sur le document Firestore de l'événement.
+- **Effacement à la suppression** : `removeCouverture()` / `removeImageEvenement()` supprime le champ avec `deleteField()`.
+- **Dashboard** : les couvertures s'additionnent dans la catégorie de leur événement (ex. les couvertures de sorties s'ajoutent à la barre "Sorties") — pas une section à part, intégré naturellement dans la répartition existante.
+
+### UX formulaires d'édition événements (2026-08-08)
+
+Uniformisation des formulaires d'édition pour toutes les pages d'événements (sortie, OneShot, défi, exposition) :
+- **Boutons Annuler / Enregistrer déplacés en haut à droite** du panneau d'édition, dans un header flex avec le titre à gauche.
+- **Photo de couverture déplacée en bas** du formulaire sur toutes les pages (formulaires de création et d'édition).
+- **Scroll automatique sur la première erreur** lors d'un enregistrement invalide, avec `markAllAsTouched()` sur les ReactiveForm et focus sur le premier champ `.ng-invalid`.
+- **Icônes nettoyage exposition** remplacées par `mat-icon-button` Material.
+- **Photo de couverture** : interface unifiée sur toutes les pages événements (overlay Changer/Retirer au survol, zone de drop 16/9, même CSS).
+
+### Exposition — refonte workflow & nettoyage (2026-08-07)
+
+Refonte profonde du workflow d'exposition après retours d'usage : les transitions d'état sont maintenant majoritairement **date-driven**, le code mort a été purgé et le label final renommé.
+
+- **Workflow date-driven** : `getExpoStatut()` dérive l'état directement depuis les dates (`dateFinIdeation`, `dateFinSoumission`) — seuls `votation` et `cloture` restent des champs `statut` explicites. `passerNettoyage()` supprimé du service.
+- **"Terminer l'idéation"** : le bouton raccourci avance `dateFinIdeation` à hier (déclenche le nettoyage immédiatement via la logique date-driven) plutôt qu'écrire un `statut`.
+- **Visibilité des photos** : `dateOuverturePublic` remplacée par un booléen `photosPubliques`. Un bouton on/off "Publier les photos / Réserver aux membres" est affiché dans la section "En exposition" (visible si l'expo elle-même est publique). La sidebar affiche l'état en lecture seule.
+- **Formulaire d'édition enrichi** : `themeChoisi` (effacer = revenir en nettoyage), toutes les dates éditables, avertissements contextuels selon la phase en cours.
+- **Verrouillage des dates** : une fois le thème sélectionné, `dateDebutIdeation`, `dateFinIdeation` et `dateFinVote` sont verrouillées dans l'édition via `FormControl.disable()`. Vider le champ "Thème choisi" les déverrouille.
+- **Modal de confirmation** au lancement de la soumission : récapitulatif thème + date limite, warning verrouillage, et "C'est votre dernier mot, [Prénom] ?" avec le prénom du membre connecté.
+- **Label "En exposition"** : renomme l'ancien label "Clôturé" sur toutes les pages, badges et le guide — le terme reflète mieux la réalité (les photos sont visibles, l'expo existe).
+- **`exposition_workflow.html`** : document HTML autonome et partageable à la racine du projet — diagramme de flux, cartes des boutons raccourcis, tableau des dates avec badges de verrouillage, tableau de visibilité.
+- **Nettoyage de code** : 5 streams Observable supprimés de `ExpositionService` (seules les variantes `...Once()` sont utilisées), `statut: 'soumission'` retiré (date-driven), imports orphelins nettoyés, 3 classes CSS inutilisées supprimées (`.btn-toggle-vis`, `.btn-save-vote`, `.btn-retour`).
+
 ### Corrections et améliorations — Exposition & stockage (2026-08-07)
 
 - **Taille thumbnail incluse dans fileSize** : tous les services d'upload (portfolio, thèmes, sorties, oneshots, défis, expositions) comptabilisent désormais `photo principale + thumbnail` dans `fileSize` et dans `storageUsed` — la taille affichée dans le dashboard correspond exactement à l'espace réellement occupé sur Firebase Storage.

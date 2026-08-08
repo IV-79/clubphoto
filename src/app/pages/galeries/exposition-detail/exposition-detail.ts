@@ -16,6 +16,7 @@ import { firstValueFrom, of } from 'rxjs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { DatePickerComponent } from '../../../components/date-picker/date-picker';
 import { ExpositionService } from '../../../services/exposition.service';
@@ -44,6 +45,7 @@ import { NotificationService } from '../../../services/notification.service';
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
+    MatButtonModule,
     MatIconModule,
     DatePickerComponent,
     EventHero,
@@ -63,6 +65,7 @@ export class ExpositionDetail {
   private confirmService = inject(ConfirmService);
   private gpsConsentService = inject(GpsConsentService);
   private notifService = inject(NotificationService);
+  private elRef = inject(ElementRef);
 
   readonly expoId = this.route.snapshot.paramMap.get('id')!;
 
@@ -714,7 +717,15 @@ export class ExpositionDetail {
   }
 
   async saveEdit() {
-    if (this.editForm.invalid || this.saving()) return;
+    if (this.saving()) return;
+    if (this.editForm.invalid) {
+      this.editForm.markAllAsTouched();
+      setTimeout(() => {
+        const el = this.elRef.nativeElement.querySelector('mat-form-field.ng-invalid, app-date-picker.ng-invalid') as HTMLElement | null;
+        el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 50);
+      return;
+    }
     this.saving.set(true);
     try {
       const v = this.editForm.getRawValue();
@@ -799,6 +810,20 @@ export class ExpositionDetail {
     if (prev) URL.revokeObjectURL(prev);
     this.pendingCoverFile.set(null);
     this.coverPreviewUrl.set(null);
+  }
+
+  async removeCover() {
+    if (this.coverPreviewUrl()) {
+      this.clearCover();
+      return;
+    }
+    const expo = this.expo();
+    if (expo?.photoCouverturePath) {
+      await this.expoService.removeCouverture(this.expoId, expo.photoCouverturePath);
+      this.expo.update(ex =>
+        ex ? { ...ex, photoCouvertureUrl: undefined, photoCouverturePath: undefined } : ex,
+      );
+    }
   }
 
   private setCoverFile(file: File) {

@@ -346,7 +346,7 @@ export class CleanupService {
   // ── Orphelins Storage ─────────────────────────────────────────────────────
 
   async previewOrphans(): Promise<OrphanPreview> {
-    this.progress.set({ label: 'Lecture Firestore…', current: 0, total: 5 });
+    this.progress.set({ label: 'Lecture Firestore…', current: 0, total: 8 });
 
     const known = new Set<string>();
 
@@ -357,7 +357,7 @@ export class CleanupService {
       const subs = await firstValueFrom(this.themeService.getSoumissionsOnce(theme.id));
       subs.forEach(s => { known.add(s.storagePath); if (s.thumbnailPath) known.add(s.thumbnailPath); });
     }
-    this.progress.set({ label: 'Lecture Firestore…', current: 1, total: 5 });
+    this.progress.set({ label: 'Lecture Firestore…', current: 1, total: 8 });
 
     // One-shots
     const oneshots = await this.getAllOneShotsOnce();
@@ -366,7 +366,7 @@ export class CleanupService {
       const photos = await firstValueFrom(this.osService.getPhotosOnce(os.id));
       photos.forEach(p => { known.add(p.storagePath); if (p.thumbnailPath) known.add(p.thumbnailPath); });
     }
-    this.progress.set({ label: 'Lecture Firestore…', current: 2, total: 5 });
+    this.progress.set({ label: 'Lecture Firestore…', current: 2, total: 8 });
 
     // Défis
     const defis = await firstValueFrom(this.defiService.getDefisOnce());
@@ -375,7 +375,7 @@ export class CleanupService {
       const photos = await firstValueFrom(this.defiService.getPhotosOnce(defi.id));
       photos.forEach(p => { known.add(p.storagePath); if (p.thumbnailPath) known.add(p.thumbnailPath); });
     }
-    this.progress.set({ label: 'Lecture Firestore…', current: 3, total: 5 });
+    this.progress.set({ label: 'Lecture Firestore…', current: 3, total: 8 });
 
     // Sorties
     const sorties = await firstValueFrom(this.sortieService.getSortiesOnce());
@@ -384,19 +384,52 @@ export class CleanupService {
       const photos = await firstValueFrom(this.sortieService.getPhotosOnce(sortie.id));
       photos.forEach(p => { known.add(p.storagePath); if (p.thumbnailPath) known.add(p.thumbnailPath); });
     }
-    this.progress.set({ label: 'Lecture Firestore…', current: 4, total: 5 });
+    this.progress.set({ label: 'Lecture Firestore…', current: 4, total: 8 });
 
     // Actualités
     const articles = await firstValueFrom(this.articleService.getAllArticles());
     articles.forEach(a => { if (a.couvertureStoragePath) known.add(a.couvertureStoragePath); });
-    this.progress.set({ label: 'Lecture Firestore…', current: 5, total: 5 });
+    this.progress.set({ label: 'Lecture Firestore…', current: 5, total: 8 });
 
-    // Lister les fichiers Storage sous les 5 préfixes
-    this.progress.set({ label: 'Scan Storage…', current: 0, total: 5 });
+    // Portfolio membres
+    const portfolioSnap = await getDocs(collection(db, 'photos'));
+    portfolioSnap.docs.forEach(d => {
+      const data = d.data() as { storagePath?: string; thumbnailPath?: string };
+      if (data.storagePath)   known.add(data.storagePath);
+      if (data.thumbnailPath) known.add(data.thumbnailPath);
+    });
+    this.progress.set({ label: 'Lecture Firestore…', current: 6, total: 8 });
+
+    // Photos profil / bandeau membres
+    const usersSnap = await getDocs(collection(db, 'users'));
+    usersSnap.docs.forEach(d => {
+      const uid = d.id;
+      const data = d.data() as { photoProfilUrl?: string; photoBandeauUrl?: string };
+      if (data.photoProfilUrl)  known.add(`user-photos/${uid}/profil.webp`);
+      if (data.photoBandeauUrl) known.add(`user-photos/${uid}/bandeau.webp`);
+    });
+    this.progress.set({ label: 'Lecture Firestore…', current: 7, total: 8 });
+
+    // Expositions
+    const expositionsSnap = await getDocs(collection(db, 'expositions'));
+    for (const expoDoc of expositionsSnap.docs) {
+      const data = expoDoc.data() as { photoCouverturePath?: string };
+      if (data.photoCouverturePath) known.add(data.photoCouverturePath);
+      const expoPhotos = await getDocs(collection(db, 'expositions', expoDoc.id, 'photos'));
+      expoPhotos.docs.forEach(pd => {
+        const p = pd.data() as { storagePath?: string; thumbnailPath?: string };
+        if (p.storagePath)   known.add(p.storagePath);
+        if (p.thumbnailPath) known.add(p.thumbnailPath);
+      });
+    }
+    this.progress.set({ label: 'Lecture Firestore…', current: 8, total: 8 });
+
+    // Lister les fichiers Storage sous les 8 préfixes
+    this.progress.set({ label: 'Scan Storage…', current: 0, total: 8 });
     const storageFiles: string[] = [];
-    const prefixes = ['themes', 'oneshots', 'defis', 'sorties', 'articles'];
+    const prefixes = ['themes', 'oneshots', 'defis', 'sorties', 'articles', 'photos', 'user-photos', 'expositions'];
     for (let i = 0; i < prefixes.length; i++) {
-      this.progress.set({ label: `Scan Storage — ${prefixes[i]}/…`, current: i, total: 5 });
+      this.progress.set({ label: `Scan Storage — ${prefixes[i]}/…`, current: i, total: 8 });
       storageFiles.push(...await this.listStorageFiles(prefixes[i]));
     }
 

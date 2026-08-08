@@ -118,14 +118,15 @@ export class ThemeService {
     const storageRef = ref(storage, path);
     await uploadBytes(storageRef, file);
     const url = await getDownloadURL(storageRef);
-    await updateDoc(doc(db, 'themes', id), { photoCouvertureUrl: url, photoCouverturePath: path });
+    await updateDoc(doc(db, 'themes', id), { photoCouvertureUrl: url, photoCouverturePath: path, photoCouvertureFileSize: file.size });
   }
 
   async removeCouverture(id: string, path: string): Promise<void> {
     await deleteObject(ref(storage, path)).catch(() => {});
     await updateDoc(doc(db, 'themes', id), {
-      photoCouvertureUrl:  deleteField(),
-      photoCouverturePath: deleteField(),
+      photoCouvertureUrl:       deleteField(),
+      photoCouverturePath:      deleteField(),
+      photoCouvertureFileSize:  deleteField(),
     });
   }
 
@@ -141,9 +142,28 @@ export class ThemeService {
   }
 
   async supprimerTheme(id: string): Promise<void> {
-    const soumSnap = await getDocs(collection(db, 'themes', id, 'soumissions'));
+    const [themeSnap, soumSnap, votesSnap, commSnap] = await Promise.all([
+      getDoc(doc(db, 'themes', id)),
+      getDocs(collection(db, 'themes', id, 'soumissions')),
+      getDocs(collection(db, 'themes', id, 'votes')),
+      getDocs(collection(db, 'themes', id, 'commentaires')),
+    ]);
+
+    // Fetch commentaires of each soumission in parallel
+    const soumCommSnaps = await Promise.all(
+      soumSnap.docs.map(s => getDocs(collection(db, 'themes', id, 'soumissions', s.id, 'commentaires')))
+    );
+
+    const themeData = themeSnap.data() as { photoCouverturePath?: string } | undefined;
     const storageDels: Promise<void>[] = [];
     const sizeByUser: Record<string, number> = {};
+
+    // Cover photo
+    if (themeData?.photoCouverturePath) {
+      storageDels.push(deleteObject(ref(storage, themeData.photoCouverturePath)).catch(() => {}));
+    }
+
+    // Soumission files
     for (const s of soumSnap.docs) {
       const d = s.data() as { storagePath?: string; thumbnailPath?: string; membreUid?: string; fileSize?: number };
       if (d.storagePath)   storageDels.push(deleteObject(ref(storage, d.storagePath)).catch(() => {}));
@@ -152,9 +172,13 @@ export class ThemeService {
         sizeByUser[d.membreUid] = (sizeByUser[d.membreUid] ?? 0) + d.fileSize;
       }
     }
+
     await Promise.all([
       ...storageDels,
       ...soumSnap.docs.map(d => deleteDoc(d.ref)),
+      ...soumCommSnaps.flatMap(snap => snap.docs.map(d => deleteDoc(d.ref))),
+      ...votesSnap.docs.map(d => deleteDoc(d.ref)),
+      ...commSnap.docs.map(d => deleteDoc(d.ref)),
     ]);
     await deleteDoc(doc(db, 'themes', id));
     Object.entries(sizeByUser).forEach(([uid, size]) =>

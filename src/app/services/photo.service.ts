@@ -142,9 +142,11 @@ export class PhotoService {
   }
 
   async deletePhoto(photo: Photo): Promise<void> {
+    const commSnap = await getDocs(collection(db, 'photos', photo.id, 'commentaires'));
     const deletes: Promise<unknown>[] = [
       deleteObject(ref(storage, photo.storagePath)),
       deleteDoc(doc(db, 'photos', photo.id)),
+      ...commSnap.docs.map(d => deleteDoc(d.ref)),
     ];
     if (photo.thumbnailPath) deletes.push(deleteObject(ref(storage, photo.thumbnailPath)).catch(() => {}));
     await Promise.all(deletes);

@@ -136,14 +136,15 @@ export class SortieService {
     const storageRef = ref(storage, path);
     await uploadBytes(storageRef, file);
     const url = await getDownloadURL(storageRef);
-    await updateDoc(doc(db, 'sorties', sortieId), { imageEvenementUrl: url, imageEvenementPath: path });
+    await updateDoc(doc(db, 'sorties', sortieId), { imageEvenementUrl: url, imageEvenementPath: path, imageEvenementFileSize: file.size });
   }
 
   async removeImageEvenement(sortieId: string, path: string): Promise<void> {
     await deleteObject(ref(storage, path)).catch(() => {});
     await updateDoc(doc(db, 'sorties', sortieId), {
-      imageEvenementUrl: deleteField(),
-      imageEvenementPath: deleteField(),
+      imageEvenementUrl:      deleteField(),
+      imageEvenementPath:     deleteField(),
+      imageEvenementFileSize: deleteField(),
     });
   }
 
@@ -157,6 +158,11 @@ export class SortieService {
       getDocs(collection(db, `sorties/${sortieId}/inscriptions`)),
     ]);
     const sortieData = sortieSnap.data() as { imageEvenementPath?: string } | undefined;
+
+    // Fetch commentaires for each photo in parallel
+    const photoCommSnaps = await Promise.all(
+      photosSnap.docs.map(p => getDocs(collection(db, `sorties/${sortieId}/photos/${p.id}/commentaires`)))
+    );
 
     const storageDeletions: Promise<void>[] = [];
     const sizeByUser: Record<string, number> = {};
@@ -174,6 +180,7 @@ export class SortieService {
     await Promise.all([
       ...storageDeletions,
       ...photosSnap.docs.map(p  => deleteDoc(p.ref)),
+      ...photoCommSnaps.flatMap(snap => snap.docs.map(d => deleteDoc(d.ref))),
       ...inscritsSnap.docs.map(p => deleteDoc(p.ref)),
     ]);
     await deleteDoc(doc(db, 'sorties', sortieId));
@@ -278,9 +285,11 @@ export class SortieService {
   }
 
   async deletePhoto(sortieId: string, image: SortieImage, currentCoverUrl?: string): Promise<void> {
+    const commSnap = await getDocs(collection(db, `sorties/${sortieId}/photos/${image.id}/commentaires`));
     const deletes: Promise<unknown>[] = [
       deleteObject(ref(storage, image.storagePath)).catch(() => {}),
       deleteDoc(doc(db, `sorties/${sortieId}/photos`, image.id)),
+      ...commSnap.docs.map(d => deleteDoc(d.ref)),
     ];
     if (image.thumbnailPath) deletes.push(deleteObject(ref(storage, image.thumbnailPath)).catch(() => {}));
     await Promise.all(deletes);

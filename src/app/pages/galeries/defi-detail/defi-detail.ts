@@ -5,6 +5,7 @@ import {
   signal,
   HostListener,
   ChangeDetectionStrategy,
+  ElementRef,
 } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -50,6 +51,7 @@ export class DefiDetail {
   private defiService = inject(DefiService);
   private authService = inject(AuthService);
   private notifService = inject(NotificationService);
+  private elRef = inject(ElementRef);
 
   readonly id = this.route.snapshot.paramMap.get('id')!;
 
@@ -418,6 +420,13 @@ export class DefiDetail {
 
   async saveEdit() {
     if (this.saving()) return;
+    if (!this.editTitre.trim()) {
+      setTimeout(() => {
+        const el = this.elRef.nativeElement.querySelector('.edit-input') as HTMLElement | null;
+        el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 50);
+      return;
+    }
     const d = this.defi()!;
     const finChanged = this.editFin !== d.dateFinSoumission;
     const votesChanged = this.editVotes !== d.dateCloturVotes;
@@ -465,48 +474,43 @@ export class DefiDetail {
 
   // ── Cover (dans le formulaire d'édition) ─────────────────────────────
 
-  pendingCover = signal<File | null>(null);
-  coverPreview = signal<string | null>(null);
-  uploadingCover = signal(false);
+  coverUploading = signal(false);
+  coverDragOver = signal(false);
+
+  onCoverDrop(event: DragEvent) {
+    event.preventDefault();
+    this.coverDragOver.set(false);
+    const file = event.dataTransfer?.files?.[0];
+    if (file?.type.startsWith('image/')) this.uploadCoverFile(file);
+  }
 
   onCoverSelected(event: Event) {
     const f = (event.target as HTMLInputElement).files?.[0];
     (event.target as HTMLInputElement).value = '';
-    if (f) this.setCover(f);
+    if (f) this.uploadCoverFile(f);
   }
 
-  clearCoverPreview() {
-    const prev = this.coverPreview();
-    if (prev) URL.revokeObjectURL(prev);
-    this.pendingCover.set(null);
-    this.coverPreview.set(null);
-  }
-
-  private setCover(file: File) {
-    const prev = this.coverPreview();
-    if (prev) URL.revokeObjectURL(prev);
-    this.pendingCover.set(file);
-    this.coverPreview.set(URL.createObjectURL(file));
-  }
-
-  async uploadCover() {
-    const file = this.pendingCover();
-    if (!file || this.uploadingCover()) return;
-    this.uploadingCover.set(true);
+  private async uploadCoverFile(file: File) {
+    if (this.coverUploading()) return;
+    this.coverUploading.set(true);
     try {
       await this.defiService.setCouverture(this.id, file);
-      this.clearCoverPreview();
       this.refresh();
     } finally {
-      this.uploadingCover.set(false);
+      this.coverUploading.set(false);
     }
   }
 
   async removeCouverture() {
     const path = this.defi()?.photoCouverturePath;
-    if (!path) return;
-    await this.defiService.removeCouverture(this.id, path);
-    this.refresh();
+    if (!path || this.coverUploading()) return;
+    this.coverUploading.set(true);
+    try {
+      await this.defiService.removeCouverture(this.id, path);
+      this.refresh();
+    } finally {
+      this.coverUploading.set(false);
+    }
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────

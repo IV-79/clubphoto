@@ -131,8 +131,16 @@
       <!-- Edit panel -->
       @if (editMode() && canManage()) {
         <div class="edit-panel">
-          <h3 class="edit-panel-title">Modifier l'exposition</h3>
           <form [formGroup]="editForm" (ngSubmit)="saveEdit()">
+          <div class="edit-panel-header">
+            <h3 class="edit-panel-title">Modifier l'exposition</h3>
+            <div class="edit-header-actions">
+              <button type="button" class="btn-cancel" (click)="cancelEdit()">Annuler</button>
+              <button type="submit" class="btn-save" [disabled]="editForm.invalid || saving()">
+                {{ saving() ? 'Enregistrement…' : 'Enregistrer' }}
+              </button>
+            </div>
+          </div>
 
             <mat-form-field appearance="outline" class="field-full">
               <mat-label>Titre</mat-label>
@@ -210,22 +218,24 @@
             </div>
 
             <!-- Cover photo -->
-            <div class="cover-section">
-              <label class="field-label">Photo de couverture</label>
+            <div class="cover-field">
+              <label class="cover-label">Photo de couverture <span class="cover-optional">optionnel</span></label>
+              <p class="cover-hint">Format recommandé : 16/9 — redimensionné à 1280×720 px</p>
               <div class="cover-drop"
                    [class.drag-over]="coverDragOver()"
                    (dragover)="$event.preventDefault(); coverDragOver.set(true)"
                    (dragleave)="coverDragOver.set(false)"
                    (drop)="onCoverDrop($event)">
-                @if (coverPreviewUrl()) {
-                  <img [src]="coverPreviewUrl()!" class="cover-preview" alt="Aperçu" />
-                  <button type="button" class="cover-remove-btn" (click)="clearCover()">× Retirer</button>
-                } @else if (e.photoCouvertureUrl) {
-                  <img [src]="e.photoCouvertureUrl" class="cover-preview" alt="Couverture actuelle" />
-                  <button type="button" class="cover-remove-btn" (click)="coverInput.click()">Changer</button>
+                @if (coverPreviewUrl() || e.photoCouvertureUrl) {
+                  <img [src]="coverPreviewUrl() || e.photoCouvertureUrl" class="cover-preview" alt="Image actuelle" />
+                  <div class="cover-overlay">
+                    <button type="button" class="cover-change-btn" (click)="coverInput.click()">🔄 Changer</button>
+                    <button type="button" class="cover-remove-btn" (click)="removeCover()">× Retirer</button>
+                  </div>
                 } @else {
-                  <div class="cover-placeholder">
-                    <span>Glisser une image ou</span>
+                  <div class="cover-empty">
+                    <span class="cover-icon">🖼</span>
+                    <span>Glisser une image ici ou</span>
                     <button type="button" class="cover-browse-btn" (click)="coverInput.click()">parcourir</button>
                   </div>
                 }
@@ -233,12 +243,6 @@
               </div>
             </div>
 
-            <div class="edit-actions">
-              <button type="button" class="btn-cancel" (click)="cancelEdit()">Annuler</button>
-              <button type="submit" class="btn-save" [disabled]="editForm.invalid || saving()">
-                {{ saving() ? 'Enregistrement…' : 'Enregistrer' }}
-              </button>
-            </div>
           </form>
         </div>
       }
@@ -314,8 +318,8 @@
                            (input)="editingSuggTexte.set($any($event.target).value)"
                            (keydown.enter)="saveEditSugg()"
                            (keydown.escape)="cancelEditSugg()" />
-                    <button class="btn-icon" (click)="saveEditSugg()">✓</button>
-                    <button class="btn-icon" (click)="cancelEditSugg()">×</button>
+                    <button mat-icon-button color="primary" (click)="saveEditSugg()" title="Valider"><mat-icon>check</mat-icon></button>
+                    <button mat-icon-button (click)="cancelEditSugg()" title="Annuler"><mat-icon>close</mat-icon></button>
                   } @else {
                     <span class="sugg-texte">{{ sugg.texte }}</span>
                     @if (sugg.source === 'admin') {
@@ -324,8 +328,8 @@
                     @if (nbMembresVote() > 0) {
                       <span class="sugg-vote-count">{{ scoreParSuggestion()[sugg.id] ?? 0 }} vote{{ (scoreParSuggestion()[sugg.id] ?? 0) !== 1 ? 's' : '' }}</span>
                     }
-                    <button class="btn-icon" (click)="startEditSugg(sugg)" title="Modifier">✏</button>
-                    <button class="btn-icon btn-danger" (click)="supprimerSuggestion(sugg)" title="Supprimer">🗑</button>
+                    <button mat-icon-button (click)="startEditSugg(sugg)" title="Modifier"><mat-icon>edit</mat-icon></button>
+                    <button mat-icon-button color="warn" (click)="supprimerSuggestion(sugg)" title="Supprimer"><mat-icon>delete</mat-icon></button>
                   }
                 </div>
               }

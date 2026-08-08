@@ -78,38 +78,15 @@
         <!-- Formulaire d'édition -->
         @if (editMode()) {
           <div class="edit-panel">
-            <h2>Modifier l'événement</h2>
             <form [formGroup]="form" (ngSubmit)="saveEdit()" class="edit-form">
 
-              <!-- Photo de couverture -->
-              <div class="field-cover">
-                <label class="edit-cover-label">Photo de couverture <span class="field-opt">optionnel</span></label>
-                <p class="edit-cover-hint">Format recommandé : 16/9 — redimensionné à 1280×720 px</p>
-                <div class="cover-drop"
-                     [class.drag-over]="coverDragOver()"
-                     (dragover)="$event.preventDefault(); coverDragOver.set(true)"
-                     (dragleave)="coverDragOver.set(false)"
-                     (drop)="onCoverDrop($event)">
-                  @if (s.imageEvenementUrl) {
-                    <img [src]="s.imageEvenementUrl" class="cover-preview" alt="Image actuelle" />
-                    <div class="cover-overlay-actions">
-                      <button type="button" class="cover-browse-btn" (click)="coverInput.click()" [disabled]="coverUploading()">
-                        {{ coverUploading() ? 'Upload…' : '🔄 Changer' }}
-                      </button>
-                      <button type="button" class="cover-remove-btn" (click)="removeCover(s.imageEvenementPath!)" [disabled]="coverUploading()">
-                        × Retirer
-                      </button>
-                    </div>
-                  } @else {
-                    <div class="cover-placeholder">
-                      <span class="cover-icon">🖼</span>
-                      <span>Glisser une image ici ou</span>
-                      <button type="button" class="cover-browse-btn" (click)="coverInput.click()" [disabled]="coverUploading()">
-                        {{ coverUploading() ? 'Upload…' : 'parcourir' }}
-                      </button>
-                    </div>
-                  }
-                  <input #coverInput type="file" accept="image/*" class="hidden-input" (change)="onCoverSelected($event)" />
+              <div class="edit-panel-header">
+                <h2 class="edit-panel-title">Modifier l'événement</h2>
+                <div class="edit-header-actions">
+                  <button type="button" class="btn-cancel-edit" (click)="cancelEdit()">Annuler</button>
+                  <button type="submit" class="btn-save-edit" [disabled]="form.invalid || saving()">
+                    {{ saving() ? 'Sauvegarde…' : 'Sauvegarder' }}
+                  </button>
                 </div>
               </div>
 
@@ -160,11 +137,38 @@
                 </mat-select>
               </mat-form-field>
 
-              <div class="edit-actions">
-                <button type="submit" class="btn-save-edit" [disabled]="form.invalid || saving()">
-                  {{ saving() ? 'Sauvegarde…' : 'Sauvegarder' }}
-                </button>
-                <button type="button" class="btn-cancel-edit" (click)="cancelEdit()">Annuler</button>
+              <!-- Photo de couverture -->
+              <div class="cover-field">
+                <label class="cover-label">Photo de couverture <span class="cover-optional">optionnel</span></label>
+                <p class="cover-hint">Format recommandé : 16/9 — redimensionné à 1280×720 px</p>
+                <div class="cover-drop"
+                     [class.drag-over]="coverDragOver()"
+                     (dragover)="$event.preventDefault(); coverDragOver.set(true)"
+                     (dragleave)="coverDragOver.set(false)"
+                     (drop)="onCoverDrop($event)">
+                  @if (s.imageEvenementUrl) {
+                    <img [src]="s.imageEvenementUrl" class="cover-preview" alt="Image actuelle" />
+                    <div class="cover-overlay">
+                      <button type="button" class="cover-change-btn" (click)="coverInput.click()" [disabled]="coverUploading()">
+                        {{ coverUploading() ? 'Upload…' : '🔄 Changer' }}
+                      </button>
+                      <button type="button" class="cover-remove-btn" (click)="removeCover(s.imageEvenementPath!)" [disabled]="coverUploading()">
+                        × Retirer
+                      </button>
+                    </div>
+                  } @else {
+                    <div class="cover-empty">
+                      <span class="cover-icon">🖼</span>
+                      @if (coverUploading()) {
+                        <span>Upload en cours…</span>
+                      } @else {
+                        <span>Glisser une image ici ou</span>
+                        <button type="button" class="cover-browse-btn" (click)="coverInput.click()">parcourir</button>
+                      }
+                    </div>
+                  }
+                  <input #coverInput type="file" accept="image/*" class="hidden-input" (change)="onCoverSelected($event)" />
+                </div>
               </div>
 
             </form>

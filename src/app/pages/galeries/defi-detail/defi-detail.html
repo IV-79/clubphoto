@@ -104,29 +104,14 @@
         <!-- Formulaire d'édition -->
         @if (editMode()) {
           <div class="edit-panel">
-            <h2>Modifier le défi</h2>
-
-            <!-- Couverture -->
-            <div class="edit-cover-section">
-              <p class="edit-cover-label">Photo de couverture</p>
-              <p class="edit-cover-hint">Format recommandé : 16/9 — redimensionné à 1280×720 px</p>
-              @if (d.photoCouvertureUrl && !coverPreview()) {
-                <img [src]="d.photoCouvertureUrl" class="cover-preview-sm" alt="couverture actuelle" />
-                <button class="btn-sm btn-danger-sm" (click)="removeCouverture()">Supprimer la couverture</button>
-              }
-              @if (coverPreview()) {
-                <img [src]="coverPreview()!" class="cover-preview-sm" alt="aperçu" />
-                <button class="btn-sm" (click)="uploadCover()" [disabled]="uploadingCover()">
-                  {{ uploadingCover() ? 'Upload…' : 'Définir comme couverture' }}
+            <div class="edit-panel-header">
+              <h2 class="edit-panel-title">Modifier le défi</h2>
+              <div class="edit-header-actions">
+                <button class="btn-cancel" (click)="editMode.set(false)">Annuler</button>
+                <button class="btn-save" (click)="saveEdit()" [disabled]="saving()">
+                  {{ saving() ? 'Enregistrement…' : 'Enregistrer' }}
                 </button>
-                <button class="btn-sm" (click)="clearCoverPreview()">Annuler</button>
-              }
-              @if (!coverPreview()) {
-                <label class="btn-sm">
-                  {{ d.photoCouvertureUrl ? 'Changer la couverture' : 'Ajouter une couverture' }}
-                  <input type="file" accept="image/*" (change)="onCoverSelected($event)" style="display:none" />
-                </label>
-              }
+              </div>
             </div>
 
             <label class="edit-label">Titre
@@ -174,12 +159,40 @@
               <p class="lock-note-sm">Le mode de participation ne peut plus être modifié après l'ouverture.</p>
             }
 
-            <div class="edit-actions">
-              <button class="btn-save" (click)="saveEdit()" [disabled]="saving()">
-                {{ saving() ? 'Enregistrement…' : 'Enregistrer' }}
-              </button>
-              <button class="btn-cancel" (click)="editMode.set(false)">Annuler</button>
+            <!-- Couverture -->
+            <div class="cover-field">
+              <label class="cover-label">Photo de couverture <span class="cover-optional">optionnel</span></label>
+              <p class="cover-hint">Format recommandé : 16/9 — redimensionné à 1280×720 px</p>
+              <div class="cover-drop"
+                   [class.drag-over]="coverDragOver()"
+                   (dragover)="$event.preventDefault(); coverDragOver.set(true)"
+                   (dragleave)="coverDragOver.set(false)"
+                   (drop)="onCoverDrop($event)">
+                @if (d.photoCouvertureUrl) {
+                  <img [src]="d.photoCouvertureUrl" class="cover-preview" alt="Image actuelle" />
+                  <div class="cover-overlay">
+                    <button type="button" class="cover-change-btn" (click)="coverInputEl.click()" [disabled]="coverUploading()">
+                      {{ coverUploading() ? 'Upload…' : '🔄 Changer' }}
+                    </button>
+                    <button type="button" class="cover-remove-btn" (click)="removeCouverture()" [disabled]="coverUploading()">
+                      × Retirer
+                    </button>
+                  </div>
+                } @else {
+                  <div class="cover-empty">
+                    <span class="cover-icon">🖼</span>
+                    @if (coverUploading()) {
+                      <span>Upload en cours…</span>
+                    } @else {
+                      <span>Glisser une image ici ou</span>
+                      <button type="button" class="cover-browse-btn" (click)="coverInputEl.click()">parcourir</button>
+                    }
+                  </div>
+                }
+                <input #coverInputEl type="file" accept="image/*" class="hidden-input" (change)="onCoverSelected($event)" />
+              </div>
             </div>
+
           </div>
         }
 
