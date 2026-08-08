@@ -2,7 +2,15 @@
 
 ---
 
-## En cours (alpha)
+## v1.0.0-beta — En cours (2026-08-08)
+
+### Infrastructure dev/prod + corrections UI admin (2026-08-08)
+
+- **Branches git** : `develop` → site de test, `master` → prod. Deux workflows GitHub Actions séparés (`deploy-dev.yml` / `deploy-prod.yml`).
+- **Firebase prod** : projet `clubphototaintournon-prod`, hosting `clubphoto-taintournon.web.app`. Dev : hosting `clubphoto-taintournon-test.web.app`.
+- **`set-env.js`** : flag `PRODUCTION` lu depuis les secrets CI pour distinguer dev (`false`) et prod (`true`).
+- **Pages admin centrées** : `margin: 0 auto` ajouté sur tous les conteneurs admin (manquait partout).
+- **Pages admin — largeur** : `admin/config`, `admin/pages`, `admin/dossiers` élargis à 1200px pour être cohérents avec le reste du dashboard.
 
 ### Bannière site de test + suppression lien inscription (2026-08-08)
 

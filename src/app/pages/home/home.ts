@@ -163,7 +163,7 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
   membres = toSignal(
     this.membresOnce$.pipe(
       map((list) => {
-        const filtered = list.filter((m) => !m.isSuspended && m.photoProfilUrl);
+        const filtered = list.filter((m) => m.visibilite === 'public' && !m.isSuspended && m.photoProfilUrl);
         for (let i = filtered.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
           [filtered[i], filtered[j]] = [filtered[j], filtered[i]];
