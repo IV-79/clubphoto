@@ -1,6 +1,5 @@
 import { Component, inject, signal, HostListener, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { AuthService } from '../../services/auth.service';
@@ -9,7 +8,7 @@ import { SuspenduDialogComponent } from '../../shared/suspendu-dialog/suspendu-d
 
 @Component({
   selector: 'app-login-modal',
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule],
   templateUrl: './login-modal.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './login-modal.css',

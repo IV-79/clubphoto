@@ -46,6 +46,10 @@ jobs:
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_PROD }}
         run: |
+          if [ -z "$FIREBASE_SERVICE_ACCOUNT" ]; then
+            echo "⚠ FIREBASE_SERVICE_ACCOUNT_PROD non configuré — déploiement prod ignoré"
+            exit 0
+          fi
           echo "$FIREBASE_SERVICE_ACCOUNT" > /tmp/sa.json
           set +e
           GOOGLE_APPLICATION_CREDENTIALS=/tmp/sa.json npx firebase-tools@latest \

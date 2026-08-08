@@ -139,19 +139,3 @@
   padding: 8px 12px;
   margin: 0;
 }
-
-.register-hint {
-  text-align: center;
-  margin: 1.25rem 0 0;
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-}
-
-.register-hint a {
-  color: #cc0000;
-  text-decoration: none;
-}
-
-.register-hint a:hover {
-  text-decoration: underline;
-}
