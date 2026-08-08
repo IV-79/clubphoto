@@ -11,6 +11,7 @@ import { AsyncPipe } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { switchMap, map, of } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import { AuthService } from '../../services/auth.service';
 import { LoginModalService } from '../../services/login-modal.service';
 import { NotificationService } from '../../services/notification.service';
@@ -25,6 +26,7 @@ import { AppNotification, NOTIF_ICONS } from '../../models/notification.model';
   styleUrl: './header.css',
 })
 export class Header {
+  readonly isTestEnv = !environment.production;
   private authService = inject(AuthService);
   private notifService = inject(NotificationService);
   private router = inject(Router);

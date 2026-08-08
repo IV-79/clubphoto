@@ -1,5 +1,11 @@
 <header class="site-header">
 
+  @if (isTestEnv) {
+    <div class="test-banner">
+      SITE DE TEST — les données ne sont pas réelles
+    </div>
+  }
+
   <!-- Bande logo -->
   <div class="header-logo-bar">
     <a routerLink="/" class="logo-link">
