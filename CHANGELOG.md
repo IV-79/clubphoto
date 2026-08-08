@@ -22,6 +22,9 @@
 - **Modals scrollables** : les modals portfolio, login et changement de mot de passe peuvent maintenant scroller sur petits écrans quand le contenu dépasse la hauteur de l'écran.
 - **Dernière connexion** : mise à jour au démarrage de l'app (session restaurée ou login explicite), au plus une fois par jour pour limiter les writes Firestore.
 
+---
+
+
 ## v1.0.0-beta — En cours (2026-08-08)
 
 ### Infrastructure dev/prod + corrections UI admin (2026-08-08)
