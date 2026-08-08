@@ -48,6 +48,8 @@ jobs:
         run: |
           echo "$FIREBASE_SERVICE_ACCOUNT" > /tmp/sa.json
           set +e
+          # Quand tu libères l'URL clubphototaintournon.web.app pour la prod :
+          # ajoute --config firebase.dev.json ici (site cible → clubphotopj.web.app)
           GOOGLE_APPLICATION_CREDENTIALS=/tmp/sa.json npx firebase-tools@latest \
             deploy --only hosting --project clubphotopj --non-interactive \
             2>&1 | tee /tmp/firebase_deploy.log

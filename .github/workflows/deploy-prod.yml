@@ -1,4 +1,4 @@
-name: Deploy PROD (master → clubphoto-prod)
+name: Deploy PROD (master → clubphototaintournon)
 
 on:
   push:
@@ -49,7 +49,7 @@ jobs:
           echo "$FIREBASE_SERVICE_ACCOUNT" > /tmp/sa.json
           set +e
           GOOGLE_APPLICATION_CREDENTIALS=/tmp/sa.json npx firebase-tools@latest \
-            deploy --only hosting --project clubphoto-prod --non-interactive \
+            deploy --only hosting --project clubphototaintournon --non-interactive \
             2>&1 | tee /tmp/firebase_deploy.log
           EXIT=${PIPESTATUS[0]}
           set -e
