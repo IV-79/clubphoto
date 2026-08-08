@@ -1,8 +1,9 @@
-name: Deploy to Firebase Hosting on push
+name: Deploy DEV (develop → clubphotopj)
+
 on:
   push:
     branches:
-      - master
+      - develop
 
 permissions:
   contents: read
@@ -13,30 +14,27 @@ jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
     steps:
-      # Passé de v4 à v6 pour le support natif de Node 24
       - name: Checkout code
         uses: actions/checkout@v6
 
-      # Passé de v4 à v5 pour supprimer l'avertissement de runtime
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
           node-version: 24
           cache: 'npm'
 
-      # Le reste de votre pipeline Angular / Firebase reste identique et valide
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
 
-      - name: Generate Environment Files
+      - name: Generate Environment Files (DEV)
         env:
-          FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
-          FIREBASE_AUTH_DOMAIN: ${{ secrets.FIREBASE_AUTH_DOMAIN }}
-          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
-          FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
-          FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
-          FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
-          FIREBASE_MEASUREMENT_ID: ${{ secrets.FIREBASE_MEASUREMENT_ID }}
+          FIREBASE_API_KEY:              ${{ secrets.FIREBASE_API_KEY }}
+          FIREBASE_AUTH_DOMAIN:          ${{ secrets.FIREBASE_AUTH_DOMAIN }}
+          FIREBASE_PROJECT_ID:           ${{ secrets.FIREBASE_PROJECT_ID }}
+          FIREBASE_STORAGE_BUCKET:       ${{ secrets.FIREBASE_STORAGE_BUCKET }}
+          FIREBASE_MESSAGING_SENDER_ID:  ${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
+          FIREBASE_APP_ID:               ${{ secrets.FIREBASE_APP_ID }}
+          FIREBASE_MEASUREMENT_ID:       ${{ secrets.FIREBASE_MEASUREMENT_ID }}
         run: node set-env.js
 
       - name: Build Angular App
@@ -44,7 +42,7 @@ jobs:
           timeout 120 npm run build -- --no-progress || [ $? -eq 124 ]
           test -d dist/club-photo/browser
 
-      - name: Deploy to Firebase Hosting
+      - name: Deploy to Firebase Hosting (DEV)
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_CLUBPHOTOPJ }}
         run: |
@@ -57,7 +55,7 @@ jobs:
           set -e
           if [ $EXIT -ne 0 ]; then
             if grep -q "is the current active version" /tmp/firebase_deploy.log; then
-              echo "✓ Version already active — aucun changement depuis le dernier déploiement"
+              echo "Version already active — aucun changement depuis le dernier deploiement"
               exit 0
             fi
             cat /tmp/firebase_deploy.log

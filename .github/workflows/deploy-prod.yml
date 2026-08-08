@@ -1,0 +1,63 @@
+name: Deploy PROD (master → clubphoto-prod)
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: read
+  deployments: write
+  statuses: write
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Generate Environment Files (PROD)
+        env:
+          FIREBASE_API_KEY:              ${{ secrets.FIREBASE_API_KEY_PROD }}
+          FIREBASE_AUTH_DOMAIN:          ${{ secrets.FIREBASE_AUTH_DOMAIN_PROD }}
+          FIREBASE_PROJECT_ID:           ${{ secrets.FIREBASE_PROJECT_ID_PROD }}
+          FIREBASE_STORAGE_BUCKET:       ${{ secrets.FIREBASE_STORAGE_BUCKET_PROD }}
+          FIREBASE_MESSAGING_SENDER_ID:  ${{ secrets.FIREBASE_MESSAGING_SENDER_ID_PROD }}
+          FIREBASE_APP_ID:               ${{ secrets.FIREBASE_APP_ID_PROD }}
+          FIREBASE_MEASUREMENT_ID:       ${{ secrets.FIREBASE_MEASUREMENT_ID_PROD }}
+        run: node set-env.js
+
+      - name: Build Angular App
+        run: |
+          timeout 120 npm run build -- --no-progress || [ $? -eq 124 ]
+          test -d dist/club-photo/browser
+
+      - name: Deploy to Firebase Hosting (PROD)
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_PROD }}
+        run: |
+          echo "$FIREBASE_SERVICE_ACCOUNT" > /tmp/sa.json
+          set +e
+          GOOGLE_APPLICATION_CREDENTIALS=/tmp/sa.json npx firebase-tools@latest \
+            deploy --only hosting --project clubphoto-prod --non-interactive \
+            2>&1 | tee /tmp/firebase_deploy.log
+          EXIT=${PIPESTATUS[0]}
+          set -e
+          if [ $EXIT -ne 0 ]; then
+            if grep -q "is the current active version" /tmp/firebase_deploy.log; then
+              echo "Version already active — aucun changement depuis le dernier deploiement"
+              exit 0
+            fi
+            cat /tmp/firebase_deploy.log
+            exit $EXIT
+          fi

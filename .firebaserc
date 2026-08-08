@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "clubphotopj"
+    "default": "clubphotopj",
+    "dev":     "clubphotopj",
+    "prod":    "clubphototaintournon"
   }
 }
