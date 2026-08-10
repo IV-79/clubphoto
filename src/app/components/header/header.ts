@@ -70,6 +70,12 @@ export class Header {
 
   // Notifications
   private profile = toSignal(this.authService.currentUserProfile$);
+  protected readonly testBannerUser = computed(() => {
+    const p = this.profile();
+    if (!p) return 'non connecté';
+    const nom = `${p.prenom ?? ''} ${p.nom}`.trim();
+    return `${nom} · ${p.role}`;
+  });
   private readonly uid = computed(() => this.profile()?.uid ?? null);
   private readonly notifTrigger = computed(() => ({
     uid: this.uid(),
