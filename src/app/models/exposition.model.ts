@@ -1,3 +1,5 @@
+import { todayISO } from '../utils/date';
+
 export type ExpoStatut = 'ideation' | 'nettoyage' | 'votation' | 'soumission' | 'cloture';
 
 export const EXPO_STATUT_LABELS: Record<ExpoStatut, string> = {
@@ -13,7 +15,7 @@ export const EXPO_STATUT_LABELS: Record<ExpoStatut, string> = {
  * `nettoyage` et `votation` restent explicites (actions organisateur avec effets de bord).
  */
 export function getExpoStatut(expo: Exposition): ExpoStatut {
-  const today = new Date().toISOString().split('T')[0];
+  const today = todayISO();
   if (expo.dateFinSoumission && today > expo.dateFinSoumission) return 'cloture';
   if (expo.statut === 'cloture') return 'cloture';        // clôture manuelle avant deadline
   if (expo.themeChoisi && expo.dateFinSoumission) return 'soumission';

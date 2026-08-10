@@ -7,6 +7,7 @@ import { ref, uploadBytes, uploadBytesResumable, getDownloadURL, deleteObject } 
 import { Observable, from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { db, storage, collectionStream, docStream } from '../utils/firebase';
+import { todayISO } from '../utils/date';
 import {
   OneShot, OneShotTheme, OneShotInscription,
   OneShotPhoto, OneShotVote, OneShotStatut
@@ -210,7 +211,7 @@ export class OneShotService {
   ): Promise<void> {
     const update: Record<string, unknown> = { statut };
     if (statut === 'resultats') {
-      update['datePassageResultats'] = new Date().toISOString().slice(0, 10);
+      update['datePassageResultats'] = todayISO();
     }
     await updateDoc(doc(db, 'oneshots', id), update);
     if (notifCtx) {

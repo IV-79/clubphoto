@@ -69,7 +69,15 @@ export async function readExif(file: File): Promise<PhotoExif> {
     if (iso != null)    exif.iso = Array.isArray(iso) ? iso[0] : iso;
 
     const date = raw?.DateTimeOriginal ?? raw?.CreateDate ?? raw?.DateTime;
-    if (date)           exif.dateCapture = new Date(date).toISOString().split('T')[0];
+    if (date) {
+      const d = new Date(date);
+      if (!isNaN(d.getTime())) {
+        const y = d.getFullYear();
+        const mo = String(d.getMonth() + 1).padStart(2, '0');
+        const da = String(d.getDate()).padStart(2, '0');
+        exif.dateCapture = `${y}-${mo}-${da}`;
+      }
+    }
 
     if (gps?.latitude != null && gps?.longitude != null) {
       exif.gps = { lat: gps.latitude, lng: gps.longitude };

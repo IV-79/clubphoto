@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { isSignInWithEmailLink, signInWithEmailLink, updatePassword } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../../utils/firebase';
+import { todayISO } from '../../utils/date';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -111,7 +112,7 @@ export class CompleterProfilComponent implements OnInit {
         nom: this.nom,
         prenom: this.prenom || undefined,
         role: 'membre',
-        dateAdhesion: new Date().toISOString().split('T')[0],
+        dateAdhesion: todayISO(),
       };
       await setDoc(doc(db, 'users', user.uid), profile);
 

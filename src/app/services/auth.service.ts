@@ -12,6 +12,7 @@ import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebas
 import { Router } from '@angular/router';
 import { from, switchMap, of, Observable, map, shareReplay, pairwise, filter } from 'rxjs';
 import { db, auth, storage, collectionStream, docStream } from '../utils/firebase';
+import { todayISO } from '../utils/date';
 import { DocumentService } from './document.service';
 import { UserProfile } from '../models/user.model';
 
@@ -69,7 +70,7 @@ export class AuthService {
       email,
       nom,
       role: 'membre',
-      dateAdhesion: new Date().toISOString().split('T')[0]
+      dateAdhesion: todayISO()
     };
     await setDoc(doc(db, 'users', credential.user.uid), profile);
     return credential;
@@ -85,7 +86,7 @@ export class AuthService {
       email: user.email ?? '',
       nom: user.displayName ?? user.email ?? '',
       role: 'membre',
-      dateAdhesion: new Date().toISOString().split('T')[0]
+      dateAdhesion: todayISO()
     };
     await setDoc(doc(db, 'users', user.uid), profile);
     return profile;

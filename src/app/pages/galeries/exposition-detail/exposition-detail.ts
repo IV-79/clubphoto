@@ -35,6 +35,7 @@ import { EventHero, HeroBadge } from '../../../components/event-hero/event-hero'
 import { PhotoLightbox } from '../../../components/photo-lightbox/photo-lightbox';
 import { compressImage, COMPRESS_EVENT } from '../../../utils/image-compress';
 import { readExifWithConsent } from '../../../utils/exif-reader';
+import { localDateISO } from '../../../utils/date';
 import { GpsConsentService } from '../../../services/gps-consent.service';
 import { NotificationService } from '../../../services/notification.service';
 
@@ -687,7 +688,7 @@ export class ExpositionDetail {
     if (!ok) return;
     this.savingTransition.set(true);
     // Mettre hier pour que today > dateFinIdeation soit vrai immédiatement
-    const hier = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+    const hier = localDateISO(new Date(Date.now() - 86400000));
     await this.expoService.update(this.expoId, { dateFinIdeation: hier });
     this.expo.update(e => e ? { ...e, dateFinIdeation: hier } : e);
     this.savingTransition.set(false);
