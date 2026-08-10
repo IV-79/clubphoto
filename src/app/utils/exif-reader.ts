@@ -1,4 +1,4 @@
-import exifr from 'exifr';
+import ExifReader from 'exifreader';
 import { PhotoExif } from '../models/photo.model';
 import { GpsConsentService } from '../services/gps-consent.service';
 
@@ -12,82 +12,94 @@ function getImageDimensions(file: File): Promise<{ largeur: number; hauteur: num
   });
 }
 
+type RawTag = { value: unknown; description: string };
+
+function str(tag: RawTag | undefined): string | undefined {
+  const s = tag?.description?.trim();
+  return s || undefined;
+}
+
+// Lit un nombre depuis un tag EXIF : rationnel [num, den], number direct, ou description string
+function rational(tag: RawTag | undefined): number | undefined {
+  if (!tag) return undefined;
+  const v = tag.value;
+  if (Array.isArray(v) && v.length >= 2 && (v as number[])[1] !== 0) {
+    return (v as number[])[0] / (v as number[])[1];
+  }
+  if (typeof v === 'number') return v;
+  const n = parseFloat(tag.description);
+  return isNaN(n) ? undefined : n;
+}
+
 export async function readExif(file: File): Promise<PhotoExif> {
   try {
-    const [raw, gps, dims] = await Promise.all([
-      exifr.parse(file, {
-        // Lightroom 15.5+ écrit deux blocs APP11 (JPEG-XT) de ~127 Ko
-        // avant l'APP1 EXIF → le firstChunkSize par défaut (64 Ko) ne suffit pas
-        firstChunkSize: 204800,
-        pick: [
-          // Appareil
-          'Make', 'Model', 'CameraModelName',
-          // Objectif
-          'LensModel', 'Lens', 'LensID', 'LensInfo',
-          // Focale
-          'FocalLength', 'FocalLengthIn35mmFilm',
-          // Ouverture
-          'FNumber', 'ApertureValue',
-          // Vitesse
-          'ExposureTime',
-          // ISO — variantes EXIF 2.2 / 2.3 / XMP
-          'ISO', 'ISOSpeedRatings', 'PhotographicSensitivity',
-          // Date — variantes EXIF / XMP
-          'DateTimeOriginal', 'CreateDate', 'DateTime',
-        ],
-      }),
-      exifr.gps(file).catch(() => undefined),
+    const [result, dims] = await Promise.all([
+      // async: true = chunks à la demande, gère les grands offsets EXIF (ex. JPEG-XT Lightroom 15.5+)
+      // expanded: true = GPS décimal prêt à l'emploi, tags EXIF/XMP séparés
+      ExifReader.load(file, { async: true, expanded: true }),
       getImageDimensions(file),
     ]);
-    if (!raw && !gps) return {};
 
-    const exposureTime = raw?.ExposureTime;
-    let vitesse: string | undefined;
-    if (exposureTime) {
-      vitesse = exposureTime < 1
-        ? `1/${Math.round(1 / exposureTime)}`
-        : `${exposureTime}`;
+    const ex  = (result as { exif?: Record<string, RawTag> }).exif  ?? {};
+    const xmp = (result as { xmp?:  Record<string, RawTag> }).xmp   ?? {};
+    const gps = (result as { gps?:  { Latitude?: number; Longitude?: number } }).gps;
+
+    const out: PhotoExif = {};
+
+    const make  = str(ex['Make']);
+    const model = str(ex['Model']);
+    if (make || model) out.appareil = [make, model].filter(Boolean).join(' ');
+
+    // LensModel en EXIF, puis fallback XMP aux:Lens
+    const lens = str(ex['LensModel']) ?? str(xmp['Lens']) ?? str(ex['Lens']);
+    if (lens) out.objectif = lens;
+
+    // FocalLength : rationnel [num, den] → mm
+    const focal = rational(ex['FocalLength']);
+    if (focal != null) out.focale = Math.round(focal);
+
+    // FNumber en priorité (f-number direct), sinon ApertureValue APEX → f = 2^(apex/2)
+    const fnum = rational(ex['FNumber']);
+    if (fnum != null) {
+      out.ouverture = Math.round(fnum * 10) / 10;
+    } else {
+      const apex = rational(ex['ApertureValue']);
+      if (apex != null) out.ouverture = Math.round(Math.pow(2, apex / 2) * 10) / 10;
     }
 
-    const exif: PhotoExif = {};
-    const make  = raw?.Make;
-    const model = raw?.Model ?? raw?.CameraModelName;
-    if (make || model)  exif.appareil = [make, model].filter(Boolean).join(' ');
+    // ExposureTime : rationnel [1, 125] → "1/125" ou "2"
+    const et = rational(ex['ExposureTime']);
+    if (et != null && et > 0) {
+      out.vitesse = et < 1 ? `1/${Math.round(1 / et)}` : String(et);
+    }
 
-    const lens = raw?.LensModel ?? raw?.Lens ?? raw?.LensID ?? raw?.LensInfo;
-    if (lens)           exif.objectif = Array.isArray(lens) ? lens.join('-') : String(lens);
+    // ISO — plusieurs noms de tag selon version EXIF
+    const isoTag = ex['ISOSpeedRatings'] ?? ex['PhotographicSensitivity'];
+    if (isoTag) {
+      const v = isoTag.value;
+      out.iso = Array.isArray(v) ? (v as number[])[0] : Number(v);
+    }
 
-    const focal = raw?.FocalLength ?? raw?.FocalLengthIn35mmFilm;
-    if (focal != null)  exif.focale = Math.round(focal);
-
-    const fnum = raw?.FNumber ?? raw?.ApertureValue;
-    if (fnum != null)   exif.ouverture = fnum;
-
-    if (vitesse)        exif.vitesse = vitesse;
-
-    const iso = raw?.ISO ?? raw?.ISOSpeedRatings ?? raw?.PhotographicSensitivity;
-    if (iso != null)    exif.iso = Array.isArray(iso) ? iso[0] : iso;
-
-    const date = raw?.DateTimeOriginal ?? raw?.CreateDate ?? raw?.DateTime;
-    if (date) {
-      const d = new Date(date);
+    // Date EXIF format "YYYY:MM:DD HH:MM:SS" → normaliser pour Date()
+    const dateDesc = str(ex['DateTimeOriginal']) ?? str(ex['DateTimeDigitized']) ?? str(ex['DateTime']);
+    if (dateDesc) {
+      const normalized = dateDesc.replace(/^(\d{4}):(\d{2}):(\d{2})/, '$1-$2-$3');
+      const d = new Date(normalized);
       if (!isNaN(d.getTime())) {
-        const y = d.getFullYear();
-        const mo = String(d.getMonth() + 1).padStart(2, '0');
-        const da = String(d.getDate()).padStart(2, '0');
-        exif.dateCapture = `${y}-${mo}-${da}`;
+        out.dateCapture = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
       }
     }
 
-    if (gps?.latitude != null && gps?.longitude != null) {
-      exif.gps = { lat: gps.latitude, lng: gps.longitude };
-    }
-    if (dims?.largeur && dims?.hauteur) {
-      exif.largeur = dims.largeur;
-      exif.hauteur = dims.hauteur;
+    if (gps?.Latitude != null && gps?.Longitude != null) {
+      out.gps = { lat: gps.Latitude, lng: gps.Longitude };
     }
 
-    return exif;
+    if (dims?.largeur && dims?.hauteur) {
+      out.largeur = dims.largeur;
+      out.hauteur = dims.hauteur;
+    }
+
+    return out;
   } catch {
     return {};
   }
