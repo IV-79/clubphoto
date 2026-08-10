@@ -7,7 +7,7 @@ import {
   HostListener,
   ChangeDetectionStrategy,
 } from '@angular/core';
-import { toSignal, toObservable } from '@angular/core/rxjs-interop';
+import { toSignal, toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { combineLatest, switchMap, tap } from 'rxjs';
 import { AuthService } from '../../../services/auth.service';
@@ -48,17 +48,8 @@ export class MembreDetail {
 
   private visiblePhotosCount = signal(8);
 
-  photos = toSignal(
-    combineLatest([this.route.paramMap, toObservable(this.loggedIn)]).pipe(
-      tap(() => this.visiblePhotosCount.set(8)),
-      switchMap(([params, loggedIn]) =>
-        loggedIn
-          ? this.photoService.getPhotosMembreOnce(params.get('uid')!)
-          : this.photoService.getPhotosVisiteurOnce(params.get('uid')!),
-      ),
-    ),
-    { initialValue: [] as Photo[] },
-  );
+  private photosSignal = signal<Photo[]>([]);
+  photos = this.photosSignal.asReadonly();
 
   // Filters
   filterCategorie = signal<PhotoCategorie | null>(null);
@@ -152,6 +143,16 @@ export class MembreDetail {
   private lightboxAutoOpened = signal(false);
 
   constructor() {
+    combineLatest([this.route.paramMap, toObservable(this.loggedIn)]).pipe(
+      tap(() => this.visiblePhotosCount.set(8)),
+      switchMap(([params, loggedIn]) =>
+        loggedIn
+          ? this.photoService.getPhotosMembreOnce(params.get('uid')!)
+          : this.photoService.getPhotosVisiteurOnce(params.get('uid')!),
+      ),
+      takeUntilDestroyed(),
+    ).subscribe(photos => this.photosSignal.set(photos));
+
     effect(() => {
       const target = this.queryParams()?.get('photo');
       if (!target || this.lightboxAutoOpened()) return;
@@ -209,6 +210,7 @@ export class MembreDetail {
     return {
       toggleLike: (photoId, liked) => {
         const photo = this.photos().find((p) => p.id === photoId);
+        this.applyLikeLocally(photoId, uid, liked);
         return this.photoService.toggleLikePhoto(
           photoId,
           uid,
@@ -282,7 +284,18 @@ export class MembreDetail {
     event.stopPropagation();
     const uid = this.profile()?.uid;
     if (!uid) return;
-    await this.photoService.toggleLikePhoto(photo.id, uid, this.isLiked(photo));
+    const liked = this.isLiked(photo);
+    this.applyLikeLocally(photo.id, uid, liked);
+    await this.photoService.toggleLikePhoto(photo.id, uid, liked);
+  }
+
+  private applyLikeLocally(photoId: string, uid: string, wasLiked: boolean) {
+    this.photosSignal.update(list =>
+      list.map(p => p.id !== photoId ? p : {
+        ...p,
+        likes: wasLiked ? (p.likes ?? []).filter(l => l !== uid) : [...(p.likes ?? []), uid],
+      })
+    );
   }
 
   openLightbox(index: number) {
