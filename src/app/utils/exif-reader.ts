@@ -16,6 +16,9 @@ export async function readExif(file: File): Promise<PhotoExif> {
   try {
     const [raw, gps, dims] = await Promise.all([
       exifr.parse(file, {
+        // Lightroom 15.5+ écrit deux blocs APP11 (JPEG-XT) de ~127 Ko
+        // avant l'APP1 EXIF → le firstChunkSize par défaut (64 Ko) ne suffit pas
+        firstChunkSize: 204800,
         pick: [
           // Appareil
           'Make', 'Model', 'CameraModelName',
