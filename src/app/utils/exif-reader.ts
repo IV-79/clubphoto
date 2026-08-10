@@ -16,28 +16,58 @@ export async function readExif(file: File): Promise<PhotoExif> {
   try {
     const [raw, gps, dims] = await Promise.all([
       exifr.parse(file, {
-        pick: ['Make', 'Model', 'LensModel', 'FocalLength', 'FNumber', 'ExposureTime', 'ISO', 'DateTimeOriginal'],
+        pick: [
+          // Appareil
+          'Make', 'Model', 'CameraModelName',
+          // Objectif
+          'LensModel', 'Lens', 'LensID', 'LensInfo',
+          // Focale
+          'FocalLength', 'FocalLengthIn35mmFilm',
+          // Ouverture
+          'FNumber', 'ApertureValue',
+          // Vitesse
+          'ExposureTime',
+          // ISO — variantes EXIF 2.2 / 2.3 / XMP
+          'ISO', 'ISOSpeedRatings', 'PhotographicSensitivity',
+          // Date — variantes EXIF / XMP
+          'DateTimeOriginal', 'CreateDate', 'DateTime',
+        ],
       }),
       exifr.gps(file).catch(() => undefined),
       getImageDimensions(file),
     ]);
     if (!raw && !gps) return {};
 
+    const exposureTime = raw?.ExposureTime;
     let vitesse: string | undefined;
-    if (raw?.ExposureTime) {
-      vitesse = raw.ExposureTime < 1
-        ? `1/${Math.round(1 / raw.ExposureTime)}`
-        : `${raw.ExposureTime}`;
+    if (exposureTime) {
+      vitesse = exposureTime < 1
+        ? `1/${Math.round(1 / exposureTime)}`
+        : `${exposureTime}`;
     }
 
     const exif: PhotoExif = {};
-    if (raw?.Make || raw?.Model)       exif.appareil    = [raw.Make, raw.Model].filter(Boolean).join(' ');
-    if (raw?.LensModel)                exif.objectif    = raw.LensModel;
-    if (raw?.FocalLength != null)      exif.focale      = Math.round(raw.FocalLength);
-    if (raw?.FNumber != null)          exif.ouverture   = raw.FNumber;
-    if (vitesse)                       exif.vitesse     = vitesse;
-    if (raw?.ISO != null)              exif.iso         = raw.ISO;
-    if (raw?.DateTimeOriginal)         exif.dateCapture = new Date(raw.DateTimeOriginal).toISOString().split('T')[0];
+    const make  = raw?.Make;
+    const model = raw?.Model ?? raw?.CameraModelName;
+    if (make || model)  exif.appareil = [make, model].filter(Boolean).join(' ');
+
+    const lens = raw?.LensModel ?? raw?.Lens ?? raw?.LensID ?? raw?.LensInfo;
+    if (lens)           exif.objectif = Array.isArray(lens) ? lens.join('-') : String(lens);
+
+    const focal = raw?.FocalLength ?? raw?.FocalLengthIn35mmFilm;
+    if (focal != null)  exif.focale = Math.round(focal);
+
+    const fnum = raw?.FNumber ?? raw?.ApertureValue;
+    if (fnum != null)   exif.ouverture = fnum;
+
+    if (vitesse)        exif.vitesse = vitesse;
+
+    const iso = raw?.ISO ?? raw?.ISOSpeedRatings ?? raw?.PhotographicSensitivity;
+    if (iso != null)    exif.iso = Array.isArray(iso) ? iso[0] : iso;
+
+    const date = raw?.DateTimeOriginal ?? raw?.CreateDate ?? raw?.DateTime;
+    if (date)           exif.dateCapture = new Date(date).toISOString().split('T')[0];
+
     if (gps?.latitude != null && gps?.longitude != null) {
       exif.gps = { lat: gps.latitude, lng: gps.longitude };
     }
