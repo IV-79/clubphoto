@@ -6,6 +6,7 @@ import { ConfirmModal } from './components/confirm-modal/confirm-modal';
 import { GpsConsentModal } from './components/gps-consent-modal/gps-consent-modal';
 import { CharteModal } from './components/charte-modal/charte-modal';
 import { CharteService } from './services/charte.service';
+import { SessionNavService } from './services/session-nav.service';
 
 @Component({
   selector: 'app-root',
@@ -19,6 +20,7 @@ export class App {
 
   private charteService = inject(CharteService);
   mustAcceptCharte = toSignal(this.charteService.mustAccept$, { initialValue: false });
+  private sessionNav = inject(SessionNavService);
 
   @HostListener('document:contextmenu', ['$event'])
   onContextMenu(e: MouseEvent) {
