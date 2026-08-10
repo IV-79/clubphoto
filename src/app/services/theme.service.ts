@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import {
   collection, doc, addDoc, deleteDoc, setDoc, updateDoc, query, where, orderBy,
   arrayUnion, arrayRemove, increment, getDocs, getDoc, deleteField,
-  limit, startAfter, QueryDocumentSnapshot, DocumentData,
+  limit, startAfter, QueryDocumentSnapshot, DocumentData, writeBatch,
 } from 'firebase/firestore';
 import { ref, uploadBytesResumable, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { Observable, from } from 'rxjs';
@@ -220,16 +220,19 @@ export class ThemeService {
             ]);
             const thumbSnap = await uploadBytes(ref(storage, thumbPath), thumb);
             const thumbnailUrl = await getDownloadURL(thumbSnap.ref);
-            await addDoc(collection(db, 'themes', themeId, 'soumissions'), {
+            const batch = writeBatch(db);
+            const soumRef = doc(collection(db, 'themes', themeId, 'soumissions'));
+            batch.set(soumRef, {
               membreUid: uid, nomMembre, url, storagePath,
               fileSize: file.size + thumb.size, thumbnailUrl, thumbnailPath: thumbPath,
               uploadedAt: new Date().toISOString(),
               ...(hasExif(exif) ? { exif } : {}),
             });
-            updateDoc(doc(db, 'themes', themeId), {
+            batch.update(doc(db, 'themes', themeId), {
               nbSoumissions: increment(1),
               ...(isFirstSoumission ? { nbParticipants: increment(1) } : {}),
-            }).catch(() => {});
+            });
+            await batch.commit();
             updateDoc(doc(db, 'users', uid), {
               'storageUsed.themes': increment(file.size + thumb.size),
             }).catch(() => {});
@@ -253,17 +256,19 @@ export class ThemeService {
       isLastSoumission = snap.size === 1;
     }
 
-    const deletes: Promise<unknown>[] = [
+    const storageDeletes: Promise<unknown>[] = [
       deleteObject(ref(storage, storagePath)).catch(() => {}),
-      deleteDoc(doc(db, 'themes', themeId, 'soumissions', soumissionId)),
     ];
-    if (thumbnailPath) deletes.push(deleteObject(ref(storage, thumbnailPath)).catch(() => {}));
-    await Promise.all(deletes);
+    if (thumbnailPath) storageDeletes.push(deleteObject(ref(storage, thumbnailPath)).catch(() => {}));
+    await Promise.all(storageDeletes);
 
-    updateDoc(doc(db, 'themes', themeId), {
+    const batch = writeBatch(db);
+    batch.delete(doc(db, 'themes', themeId, 'soumissions', soumissionId));
+    batch.update(doc(db, 'themes', themeId), {
       nbSoumissions: increment(-1),
       ...(isLastSoumission ? { nbParticipants: increment(-1) } : {}),
-    }).catch(() => {});
+    });
+    await batch.commit();
 
     if (membreUid && fileSize) {
       updateDoc(doc(db, 'users', membreUid), {
