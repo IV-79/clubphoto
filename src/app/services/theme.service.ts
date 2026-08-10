@@ -232,7 +232,13 @@ export class ThemeService {
               nbSoumissions: increment(1),
               ...(isFirstSoumission ? { nbParticipants: increment(1) } : {}),
             });
-            await batch.commit();
+            try {
+              await batch.commit();
+            } catch (e) {
+              deleteObject(ref(storage, storagePath)).catch(() => {});
+              deleteObject(ref(storage, thumbPath)).catch(() => {});
+              throw e;
+            }
             updateDoc(doc(db, 'users', uid), {
               'storageUsed.themes': increment(file.size + thumb.size),
             }).catch(() => {});
@@ -256,12 +262,6 @@ export class ThemeService {
       isLastSoumission = snap.size === 1;
     }
 
-    const storageDeletes: Promise<unknown>[] = [
-      deleteObject(ref(storage, storagePath)).catch(() => {}),
-    ];
-    if (thumbnailPath) storageDeletes.push(deleteObject(ref(storage, thumbnailPath)).catch(() => {}));
-    await Promise.all(storageDeletes);
-
     const batch = writeBatch(db);
     batch.delete(doc(db, 'themes', themeId, 'soumissions', soumissionId));
     batch.update(doc(db, 'themes', themeId), {
@@ -269,6 +269,10 @@ export class ThemeService {
       ...(isLastSoumission ? { nbParticipants: increment(-1) } : {}),
     });
     await batch.commit();
+
+    // Storage après Firestore : si Storage échoue, le doc est déjà supprimé (pas de lien mort)
+    deleteObject(ref(storage, storagePath)).catch(() => {});
+    if (thumbnailPath) deleteObject(ref(storage, thumbnailPath)).catch(() => {});
 
     if (membreUid && fileSize) {
       updateDoc(doc(db, 'users', membreUid), {
