@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import {
   signInWithEmailAndPassword, signOut, onAuthStateChanged,
-  createUserWithEmailAndPassword, sendSignInLinkToEmail, sendPasswordResetEmail,
+  sendSignInLinkToEmail, sendPasswordResetEmail,
   reauthenticateWithCredential, updatePassword, EmailAuthProvider
 } from 'firebase/auth';
 import {
@@ -61,19 +61,6 @@ export class AuthService {
     const uid = auth.currentUser?.uid;
     if (!uid) return;
     await updateDoc(doc(db, 'users', uid), { cguAccepteeVersion: version });
-  }
-
-  async register(email: string, password: string, nom: string) {
-    const credential = await createUserWithEmailAndPassword(auth, email, password);
-    const profile: UserProfile = {
-      uid: credential.user.uid,
-      email,
-      nom,
-      role: 'membre',
-      dateAdhesion: todayISO()
-    };
-    await setDoc(doc(db, 'users', credential.user.uid), profile);
-    return credential;
   }
 
   async ensureUserDocument(): Promise<UserProfile | null> {

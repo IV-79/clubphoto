@@ -1,5 +1,4 @@
 import { Routes } from '@angular/router';
-import { RegisterComponent } from './pages/register/register.component';
 import { Overview } from './pages/admin-dashboard/overview/overview';
 import { Membres } from './pages/admin-dashboard/membres/membres';
 import { Reunions } from './pages/admin-dashboard/reunions/reunions';
@@ -7,7 +6,7 @@ import { AdminConfig } from './pages/admin-dashboard/config/config';
 import { AdminThemes } from './pages/admin-dashboard/themes/themes';
 import { AdminPages } from './pages/admin-dashboard/pages/admin-pages';
 import { Maintenance } from './pages/admin-dashboard/maintenance/maintenance';
-import { authGuard, memberGuard, loginGuard, editorGuard } from './guards/auth.guard';
+import { authGuard, memberGuard, editorGuard } from './guards/auth.guard';
 import { PublicLayout } from './layouts/public-layout/public-layout';
 import { MemberLayout } from './layouts/member-layout/member-layout';
 import { Home } from './pages/home/home';
@@ -111,7 +110,6 @@ export const routes: Routes = [
       { path: '', redirectTo: 'portfolio', pathMatch: 'full' }
     ]
   },
-  { path: 'register', component: RegisterComponent, canActivate: [loginGuard] },
   { path: 'completer-profil', component: CompleterProfilComponent },
   { path: '**', redirectTo: '' }
 ];

@@ -66,23 +66,3 @@ export const memberGuard: CanActivateFn = (route, state) => {
     })
   );
 };
-
-export const loginGuard: CanActivateFn = () => {
-  const authService = inject(AuthService);
-  const router = inject(Router);
-
-  return from(auth.authStateReady()).pipe(
-    switchMap(() => authService.user$.pipe(take(1))),
-    switchMap(user => {
-      if (!user) return of(true);
-      return from(authService.getUserRole()).pipe(
-        map(role => {
-          if (role === 'admin') router.navigate(['/admin']);
-          else if (role === 'contributeur') router.navigate(['/actualites']);
-          else router.navigate(['/membre/portfolio']);
-          return false;
-        })
-      );
-    })
-  );
-};
