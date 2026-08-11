@@ -58,6 +58,10 @@
   text-decoration: underline;
 }
 
+html[data-theme='dark'] .club-md-content a {
+  color: #ef9a9a;
+}
+
 .club-md-content hr {
   border: none;
   border-top: 1px solid var(--border-medium);
@@ -86,6 +90,10 @@
   font-weight: 600;
   text-align: left;
   padding: 10px 14px;
+}
+
+html[data-theme='dark'] .club-md-content th {
+  background: #283593;
 }
 
 .club-md-content td {
