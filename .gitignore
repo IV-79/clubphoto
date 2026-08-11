@@ -78,3 +78,5 @@ src/environments/environment.prod.ts
 /generate_tests.py
 /scan_metrics.py
 /tests_clubphoto.xlsx
+/ClubPhoto_Hebergement.xlsx
+/rapport_firebase_couts.docx
