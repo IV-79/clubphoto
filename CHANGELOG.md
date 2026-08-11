@@ -2,6 +2,18 @@
 
 ---
 
+## v1.0.0-beta — En cours (2026-08-11)
+
+### Nettoyage, corrections et améliorations (2026-08-11)
+
+- **Inscription supprimée** : la page `/register`, la route, le guard `loginGuard` et la méthode `register()` du service ont été supprimés. La seule façon de créer un compte est désormais l'invitation par un admin via lien email.
+- **Tests supprimés** : les fichiers `.spec.ts` inutiles et les dépendances `vitest` / `jsdom` retirés de `package.json`.
+- **Prettier appliqué** : 105 fichiers formatés pour uniformiser le style de code.
+- **Articles — permissions d'édition** : seul le créateur de l'article ou un admin peut désormais le modifier. Les contributeurs peuvent créer des articles mais plus éditer ceux des autres.
+- **Dark mode — pages Le Club** : les couleurs hardcodées du rendu Markdown (liens, en-têtes de tableau) corrigées pour le mode sombre. Overrides déplacés dans `styles.css` (ViewEncapsulation impose cette contrainte).
+- **Modals scrollables** : les modals portfolio, login et changement de mot de passe peuvent maintenant scroller sur petits écrans quand le contenu dépasse la hauteur de l'écran.
+- **Dernière connexion** : mise à jour au démarrage de l'app (session restaurée ou login explicite), au plus une fois par jour pour limiter les writes Firestore.
+
 ## v1.0.0-beta — En cours (2026-08-08)
 
 ### Infrastructure dev/prod + corrections UI admin (2026-08-08)
