@@ -50,8 +50,6 @@ export class LoginModalComponent {
       const cred = await this.authService.login(this.email, this.password);
       const profile = await this.authService.ensureUserDocument();
 
-      await this.authService.updateLastConnection(cred.user.uid).catch(() => {});
-
       if (profile?.isSuspended) {
         await this.authService.logoutSilent();
         this.modal.close();

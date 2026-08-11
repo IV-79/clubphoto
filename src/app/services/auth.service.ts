@@ -22,7 +22,7 @@ import {
 } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
 import { Router } from '@angular/router';
-import { from, switchMap, of, Observable, map, shareReplay, pairwise, filter } from 'rxjs';
+import { from, switchMap, of, Observable, map, shareReplay, pairwise, filter, skip } from 'rxjs';
 import { db, auth, storage, collectionStream, docStream } from '../utils/firebase';
 import { todayISO } from '../utils/date';
 import { DocumentService } from './document.service';
@@ -46,6 +46,11 @@ export class AuthService {
   );
 
   constructor() {
+    // Mise à jour derniereConnexion à chaque démarrage (session restaurée ou login explicite)
+    this.user$
+      .pipe(filter((user) => user !== null))
+      .subscribe((user) => this.updateLastConnection(user!.uid).catch(() => {}));
+
     // Force-logout si un admin suspend le membre pendant sa session active
     this.currentUserProfile$
       .pipe(
