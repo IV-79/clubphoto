@@ -361,6 +361,11 @@ export class ArticleForm implements OnInit {
       .subscribe((list) => {
         const a = list.find((x) => x.id === id);
         if (!a) return;
+        const profile = this.profile();
+        if (a.auteurUid !== profile?.uid && profile?.role !== 'admin') {
+          this.router.navigate(['/actualites']);
+          return;
+        }
         this.titre = a.titre;
         this.type = a.type;
         this.statut = a.statut;

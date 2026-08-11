@@ -256,10 +256,12 @@
   inset: 0;
   background: rgba(0,0,0,0.85);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   z-index: 1000;
   padding: 24px;
+  overflow-y: auto;
+  box-sizing: border-box;
 }
 
 .modal {
@@ -270,6 +272,7 @@
   width: 100%;
   max-width: 520px;
   position: relative;
+  margin: auto;
 }
 
 .modal-sm { max-width: 380px; }

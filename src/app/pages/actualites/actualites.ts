@@ -25,7 +25,7 @@ import { Article, ArticleType, ARTICLE_TYPES } from '../../models/article.model'
     <div class="page-wrap">
       <div class="page-header">
         <h1 class="page-title">Actualités</h1>
-        @if (canEdit()) {
+        @if (canCreate()) {
           <a routerLink="/membre/articles/creer" mat-raised-button color="primary">
             <mat-icon>add</mat-icon> Nouvel article
           </a>
@@ -55,7 +55,7 @@ import { Article, ArticleType, ARTICLE_TYPES } from '../../models/article.model'
           @for (a of filtered(); track a.id) {
             <app-article-card
               [article]="a"
-              [isEditor]="canEdit()"
+              [isEditor]="canEditArticle(a)"
               (clicked)="selected.set($event)"
             />
           }
@@ -173,8 +173,11 @@ export class Actualites {
 
   private profile = toSignal(this.authService.currentUserProfile$);
   private readonly role = computed(() => this.profile()?.role ?? null);
+  private readonly uid = computed(() => this.profile()?.uid ?? null);
+  private readonly isAdmin = computed(() => this.role() === 'admin');
 
-  canEdit = computed(() => this.role() === 'admin' || this.role() === 'contributeur');
+  canCreate = computed(() => this.role() === 'admin' || this.role() === 'contributeur');
+  canEditArticle = (a: Article) => a.auteurUid === this.uid() || this.isAdmin();
   articles = signal<Article[]>([]);
   hasMore = signal(false);
   loading = signal(false);
