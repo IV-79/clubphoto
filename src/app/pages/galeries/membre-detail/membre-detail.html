@@ -1,5 +1,4 @@
 <div class="membre-detail-page">
-
   <a routerLink="/galeries/membres" class="back-link">← Retour aux portfolios</a>
 
   @if (membre() === undefined) {
@@ -11,10 +10,9 @@
       <p>Ce portfolio est réservé aux membres connectés.</p>
     </div>
   } @else {
-
     @if (membre()!.photoBandeauUrl) {
       <div class="cover-hero">
-        <img [src]="membre()!.photoBandeauUrl" [alt]="membre()!.nom" class="cover-img">
+        <img [src]="membre()!.photoBandeauUrl" [alt]="membre()!.nom" class="cover-img" />
         <div class="cover-overlay"></div>
         <h1 class="membre-nom-hero">{{ nomComplet() }}</h1>
       </div>
@@ -49,51 +47,101 @@
       @if (m.instagram || m.facebook || m.px500 || m.flickr || m.siteWeb) {
         <div class="social-links">
           @if (m.instagram) {
-            <a [href]="'https://instagram.com/' + m.instagram" target="_blank" rel="noopener"
-               class="social-link social-link-instagram" title="Instagram">
-              <svg class="social-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                   stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="2" y="2" width="20" height="20" rx="5"/>
-                <circle cx="12" cy="12" r="4.5"/>
-                <circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none"/>
+            <a
+              [href]="'https://instagram.com/' + m.instagram"
+              target="_blank"
+              rel="noopener"
+              class="social-link social-link-instagram"
+              title="Instagram"
+            >
+              <svg
+                class="social-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="2" y="2" width="20" height="20" rx="5" />
+                <circle cx="12" cy="12" r="4.5" />
+                <circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none" />
               </svg>
             </a>
           }
           @if (m.facebook) {
-            <a [href]="'https://facebook.com/' + m.facebook" target="_blank" rel="noopener"
-               class="social-link social-link-facebook" title="Facebook">
+            <a
+              [href]="'https://facebook.com/' + m.facebook"
+              target="_blank"
+              rel="noopener"
+              class="social-link social-link-facebook"
+              title="Facebook"
+            >
               <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
               </svg>
             </a>
           }
           @if (m.px500) {
-            <a [href]="'https://500px.com/p/' + m.px500" target="_blank" rel="noopener"
-               class="social-link social-link-500px" title="500px">
-              <svg class="social-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                   stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-                <circle cx="12" cy="13" r="4"/>
+            <a
+              [href]="'https://500px.com/p/' + m.px500"
+              target="_blank"
+              rel="noopener"
+              class="social-link social-link-500px"
+              title="500px"
+            >
+              <svg
+                class="social-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
+                />
+                <circle cx="12" cy="13" r="4" />
               </svg>
             </a>
           }
           @if (m.flickr) {
-            <a [href]="'https://www.flickr.com/photos/' + m.flickr" target="_blank" rel="noopener"
-               class="social-link social-link-flickr" title="Flickr">
+            <a
+              [href]="'https://www.flickr.com/photos/' + m.flickr"
+              target="_blank"
+              rel="noopener"
+              class="social-link social-link-flickr"
+              title="Flickr"
+            >
               <svg class="social-icon flickr-icon" viewBox="0 0 28 14">
-                <circle cx="7" cy="7" r="7" fill="#0063DC"/>
-                <circle cx="21" cy="7" r="7" fill="#FF0084"/>
+                <circle cx="7" cy="7" r="7" fill="#0063DC" />
+                <circle cx="21" cy="7" r="7" fill="#FF0084" />
               </svg>
             </a>
           }
           @if (m.siteWeb) {
-            <a [href]="m.siteWeb" target="_blank" rel="noopener"
-               class="social-link social-link-web" title="Site web">
-              <svg class="social-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                   stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="2" y1="12" x2="22" y2="12"/>
-                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+            <a
+              [href]="m.siteWeb"
+              target="_blank"
+              rel="noopener"
+              class="social-link social-link-web"
+              title="Site web"
+            >
+              <svg
+                class="social-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <line x1="2" y1="12" x2="22" y2="12" />
+                <path
+                  d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
+                />
               </svg>
             </a>
           }
@@ -117,11 +165,21 @@
         <div class="filter-bar">
           @if (availableCategories().length) {
             <div class="filter-row">
-              <button class="f-chip" [class.active]="filterCategorie() === null"
-                (click)="filterCategorie.set(null)">Tous</button>
+              <button
+                class="f-chip"
+                [class.active]="filterCategorie() === null"
+                (click)="filterCategorie.set(null)"
+              >
+                Tous
+              </button>
               @for (cat of availableCategories(); track cat) {
-                <button class="f-chip" [class.active]="filterCategorie() === cat"
-                  (click)="filterCategorie.set(cat)">{{ getCategorieLabel(cat) }}</button>
+                <button
+                  class="f-chip"
+                  [class.active]="filterCategorie() === cat"
+                  (click)="filterCategorie.set(cat)"
+                >
+                  {{ getCategorieLabel(cat) }}
+                </button>
               }
             </div>
           }
@@ -129,8 +187,11 @@
             <div class="filter-row">
               @if (availableAppareils().length) {
                 <div class="f-dd-wrap" (click)="$event.stopPropagation()">
-                  <button class="f-dd-btn" [class.has-selection]="filterAppareils().length"
-                    (click)="openDropdown.set(openDropdown() === 'appareil' ? null : 'appareil')">
+                  <button
+                    class="f-dd-btn"
+                    [class.has-selection]="filterAppareils().length"
+                    (click)="openDropdown.set(openDropdown() === 'appareil' ? null : 'appareil')"
+                  >
                     Appareil
                     @if (filterAppareils().length) {
                       <span class="f-badge">{{ filterAppareils().length }}</span>
@@ -141,8 +202,11 @@
                     <div class="f-panel">
                       @for (app of availableAppareils(); track app) {
                         <label class="f-option">
-                          <input type="checkbox" [checked]="filterAppareils().includes(app)"
-                            (change)="toggleAppareil(app)">
+                          <input
+                            type="checkbox"
+                            [checked]="filterAppareils().includes(app)"
+                            (change)="toggleAppareil(app)"
+                          />
                           {{ app }}
                         </label>
                       }
@@ -152,8 +216,11 @@
               }
               @if (availableObjectifs().length) {
                 <div class="f-dd-wrap" (click)="$event.stopPropagation()">
-                  <button class="f-dd-btn" [class.has-selection]="filterObjectifs().length"
-                    (click)="openDropdown.set(openDropdown() === 'objectif' ? null : 'objectif')">
+                  <button
+                    class="f-dd-btn"
+                    [class.has-selection]="filterObjectifs().length"
+                    (click)="openDropdown.set(openDropdown() === 'objectif' ? null : 'objectif')"
+                  >
                     Objectif
                     @if (filterObjectifs().length) {
                       <span class="f-badge">{{ filterObjectifs().length }}</span>
@@ -164,8 +231,11 @@
                     <div class="f-panel">
                       @for (obj of availableObjectifs(); track obj) {
                         <label class="f-option">
-                          <input type="checkbox" [checked]="filterObjectifs().includes(obj)"
-                            (change)="toggleObjectif(obj)">
+                          <input
+                            type="checkbox"
+                            [checked]="filterObjectifs().includes(obj)"
+                            (change)="toggleObjectif(obj)"
+                          />
                           {{ obj }}
                         </label>
                       }
@@ -199,14 +269,25 @@
         <div class="photos-grid">
           @for (photo of photosVisible(); track photo.id; let i = $index) {
             <div class="photo-card" (click)="openLightbox(i)">
-              <img [src]="photo.thumbnailUrl ?? photo.url" [alt]="photo.titre" loading="lazy" class="photo-img">
+              <img
+                [src]="photo.thumbnailUrl ?? photo.url"
+                [alt]="photo.titre"
+                loading="lazy"
+                class="photo-img"
+              />
               @if (photo.categorie) {
                 <span class="card-cat">{{ getCategorieLabel(photo.categorie) }}</span>
               }
-              <button class="card-heart" [class.liked]="isLiked(photo)"
+              <button
+                class="card-heart"
+                [class.liked]="isLiked(photo)"
                 (click)="toggleLike(photo, $event)"
-                [title]="isLiked(photo) ? 'Retirer le like' : 'J\'aime'">
-                <span class="hi">♥</span> @if ((photo.likes?.length ?? 0) > 0) { {{ photo.likes!.length }} }
+                [title]="isLiked(photo) ? 'Retirer le like' : 'J\'aime'"
+              >
+                <span class="hi">♥</span>
+                @if ((photo.likes?.length ?? 0) > 0) {
+                  {{ photo.likes!.length }}
+                }
               </button>
               <div class="photo-overlay">
                 <div class="overlay-bottom">
@@ -223,9 +304,7 @@
         }
       }
     </div>
-
   }
-
 </div>
 
 <!-- Lightbox universelle -->

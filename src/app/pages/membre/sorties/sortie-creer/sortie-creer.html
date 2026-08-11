@@ -1,10 +1,19 @@
 <div class="creer-page">
   <div class="page-header">
-    <h1>{{ isDefi() ? 'Créer un défi' : isOneShot() ? 'Organiser un OneShot' : isExposition() ? 'Créer une exposition' : 'Organiser un événement' }}</h1>
+    <h1>
+      {{
+        isDefi()
+          ? 'Créer un défi'
+          : isOneShot()
+            ? 'Organiser un OneShot'
+            : isExposition()
+              ? 'Créer une exposition'
+              : 'Organiser un événement'
+      }}
+    </h1>
   </div>
 
   <form [formGroup]="form" (ngSubmit)="submit()" class="sortie-form">
-
     <!-- Type -->
     <mat-form-field appearance="outline" class="field-half">
       <mat-label>Type</mat-label>
@@ -20,14 +29,25 @@
 
     <mat-form-field appearance="outline" class="field-full">
       <mat-label>Titre</mat-label>
-      <input matInput formControlName="titre"
-        [placeholder]="isOneShot() ? 'Ex: Battle Automne 2026' : 'Ex: Sortie au bords du Rhône'" />
+      <input
+        matInput
+        formControlName="titre"
+        [placeholder]="isOneShot() ? 'Ex: Battle Automne 2026' : 'Ex: Sortie au bords du Rhône'"
+      />
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="field-full">
       <mat-label>Description</mat-label>
-      <textarea matInput formControlName="description" rows="3"
-        [placeholder]="isDefi() ? 'Décrivez le défi, les règles, les attentes…' : 'Décrivez l\'événement, le thème, les objectifs...'"></textarea>
+      <textarea
+        matInput
+        formControlName="description"
+        rows="3"
+        [placeholder]="
+          isDefi()
+            ? 'Décrivez le défi, les règles, les attentes…'
+            : 'Décrivez l\'événement, le thème, les objectifs...'
+        "
+      ></textarea>
     </mat-form-field>
 
     @if (!isDefi() && !isExposition()) {
@@ -37,7 +57,8 @@
           [required]="!isOneShot()"
           formControlName="date"
           [min]="isOneShot() ? '' : today"
-          class="field-half">
+          class="field-half"
+        >
         </app-date-picker>
 
         <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-half">
@@ -57,31 +78,51 @@
         @if (inscriptionObligatoire) {
           <mat-form-field appearance="outline" class="field-half">
             <mat-label>Nombre max de participants</mat-label>
-            <input matInput type="number" formControlName="maxParticipants" min="1" placeholder="Optionnel" />
+            <input
+              matInput
+              type="number"
+              formControlName="maxParticipants"
+              min="1"
+              placeholder="Optionnel"
+            />
           </mat-form-field>
         }
       }
 
       @if (isOneShot()) {
         <div class="field-themes">
-          <label class="field-label">Thèmes <span class="field-opt">optionnel — vous pourrez en ajouter plus tard</span></label>
+          <label class="field-label"
+            >Thèmes
+            <span class="field-opt">optionnel — vous pourrez en ajouter plus tard</span></label
+          >
           @if (pendingThemes().length > 0) {
             <div class="themes-list">
               @for (nom of pendingThemes(); track $index) {
                 <div class="theme-tag">
                   <span>{{ nom }}</span>
-                  <button type="button" class="btn-theme-del" (click)="removePendingTheme($index)">×</button>
+                  <button type="button" class="btn-theme-del" (click)="removePendingTheme($index)">
+                    ×
+                  </button>
                 </div>
               }
             </div>
           }
           <div class="add-theme-row">
-            <input class="theme-input-field"
-                   [value]="newThemeNom()"
-                   (input)="newThemeNom.set($any($event.target).value)"
-                   placeholder="Nom du thème…"
-                   (keydown.enter)="$event.preventDefault(); addPendingTheme()">
-            <button type="button" class="btn-add-theme" (click)="addPendingTheme()" [disabled]="!newThemeNom().trim()">+ Ajouter</button>
+            <input
+              class="theme-input-field"
+              [value]="newThemeNom()"
+              (input)="newThemeNom.set($any($event.target).value)"
+              placeholder="Nom du thème…"
+              (keydown.enter)="$event.preventDefault(); addPendingTheme()"
+            />
+            <button
+              type="button"
+              class="btn-add-theme"
+              (click)="addPendingTheme()"
+              [disabled]="!newThemeNom().trim()"
+            >
+              + Ajouter
+            </button>
           </div>
         </div>
       }
@@ -89,11 +130,27 @@
 
     @if (isExposition()) {
       <div class="form-row">
-        <app-date-picker label="Début de l'idéation" [required]="true" formControlName="dateDebutIdeation" [min]="today" class="field-half"></app-date-picker>
-        <app-date-picker label="Fin de l'idéation" [required]="true" formControlName="dateFinIdeation" [min]="today" class="field-half"></app-date-picker>
+        <app-date-picker
+          label="Début de l'idéation"
+          [required]="true"
+          formControlName="dateDebutIdeation"
+          [min]="today"
+          class="field-half"
+        ></app-date-picker>
+        <app-date-picker
+          label="Fin de l'idéation"
+          [required]="true"
+          formControlName="dateFinIdeation"
+          [min]="today"
+          class="field-half"
+        ></app-date-picker>
       </div>
       <div class="form-row">
-        <app-date-picker label="Date de l'exposition (informelle)" formControlName="dateExposition" class="field-half"></app-date-picker>
+        <app-date-picker
+          label="Date de l'exposition (informelle)"
+          formControlName="dateExposition"
+          class="field-half"
+        ></app-date-picker>
       </div>
       <div class="form-row">
         <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-half">
@@ -110,11 +167,27 @@
       </mat-form-field>
 
       <div class="form-row">
-        <app-date-picker label="Début des soumissions" [required]="true" formControlName="dateDebutSoumission" [min]="today" class="field-half"></app-date-picker>
-        <app-date-picker label="Fin des soumissions"   [required]="true" formControlName="dateFinSoumission"   class="field-half"></app-date-picker>
+        <app-date-picker
+          label="Début des soumissions"
+          [required]="true"
+          formControlName="dateDebutSoumission"
+          [min]="today"
+          class="field-half"
+        ></app-date-picker>
+        <app-date-picker
+          label="Fin des soumissions"
+          [required]="true"
+          formControlName="dateFinSoumission"
+          class="field-half"
+        ></app-date-picker>
       </div>
 
-      <app-date-picker label="Clôture des votes" [required]="true" formControlName="dateCloturVotes" class="field-half"></app-date-picker>
+      <app-date-picker
+        label="Clôture des votes"
+        [required]="true"
+        formControlName="dateCloturVotes"
+        class="field-half"
+      ></app-date-picker>
 
       @if (defiDateError) {
         <p class="date-error">{{ defiDateError }}</p>
@@ -136,7 +209,6 @@
           Inscription obligatoire avant de soumettre
         </mat-checkbox>
       </div>
-
     }
 
     <mat-form-field appearance="outline" class="field-half">
@@ -149,36 +221,63 @@
 
     <!-- Photo de couverture -->
     <div class="cover-field">
-      <label class="cover-label">Photo de couverture <span class="cover-optional">optionnel</span></label>
+      <label class="cover-label"
+        >Photo de couverture <span class="cover-optional">optionnel</span></label
+      >
       <p class="cover-hint">Format recommandé : 16/9 — redimensionné à 1280×720 px</p>
-      <div class="cover-drop"
-           [class.drag-over]="coverDragOver()"
-           (dragover)="$event.preventDefault(); coverDragOver.set(true)"
-           (dragleave)="coverDragOver.set(false)"
-           (drop)="onCoverDrop($event)">
+      <div
+        class="cover-drop"
+        [class.drag-over]="coverDragOver()"
+        (dragover)="$event.preventDefault(); coverDragOver.set(true)"
+        (dragleave)="coverDragOver.set(false)"
+        (drop)="onCoverDrop($event)"
+      >
         @if (coverPreviewUrl()) {
           <img [src]="coverPreviewUrl()!" class="cover-preview" alt="Aperçu" />
           <div class="cover-overlay">
-            <button type="button" class="cover-change-btn" (click)="coverInputEl.click()">🔄 Changer</button>
+            <button type="button" class="cover-change-btn" (click)="coverInputEl.click()">
+              🔄 Changer
+            </button>
             <button type="button" class="cover-remove-btn" (click)="clearCover()">× Retirer</button>
           </div>
         } @else {
           <div class="cover-empty">
             <span class="cover-icon">🖼</span>
             <span>Glisser une image ici ou</span>
-            <button type="button" class="cover-browse-btn" (click)="coverInputEl.click()">parcourir</button>
+            <button type="button" class="cover-browse-btn" (click)="coverInputEl.click()">
+              parcourir
+            </button>
           </div>
         }
-        <input #coverInputEl type="file" accept="image/*" class="hidden-input" (change)="onCoverSelected($event)" />
+        <input
+          #coverInputEl
+          type="file"
+          accept="image/*"
+          class="hidden-input"
+          (change)="onCoverSelected($event)"
+        />
       </div>
     </div>
 
     <div class="form-actions">
       <a routerLink="/galeries/sorties" class="btn-cancel">Annuler</a>
-      <button type="submit" class="btn-submit" [disabled]="form.invalid || saving() || (isDefi() && !!defiDateError)">
-        {{ saving() ? 'Création…' : (isDefi() ? 'Créer le défi' : isOneShot() ? 'Créer le OneShot' : isExposition() ? 'Créer l\'exposition' : 'Créer l\'événement') }}
+      <button
+        type="submit"
+        class="btn-submit"
+        [disabled]="form.invalid || saving() || (isDefi() && !!defiDateError)"
+      >
+        {{
+          saving()
+            ? 'Création…'
+            : isDefi()
+              ? 'Créer le défi'
+              : isOneShot()
+                ? 'Créer le OneShot'
+                : isExposition()
+                  ? "Créer l'exposition"
+                  : "Créer l'événement"
+        }}
       </button>
     </div>
-
   </form>
 </div>

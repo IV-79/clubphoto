@@ -1,9 +1,10 @@
 <div class="sorties-page">
-
   <div class="page-header">
     <div>
       <h1>Événements</h1>
-      <p class="subtitle">Événements et activités organisés par les contributeurs et administrateurs</p>
+      <p class="subtitle">
+        Événements et activités organisés par les contributeurs et administrateurs
+      </p>
     </div>
     @if (profile()) {
       <div class="create-btns">
@@ -14,35 +15,59 @@
 
   <!-- Filtres globaux -->
   <div class="filter-bar">
-    <input type="text" class="filter-text" placeholder="Rechercher par titre…"
-           [value]="filterTexte()"
-           (input)="filterTexte.set($any($event.target).value)" />
+    <input
+      type="text"
+      class="filter-text"
+      placeholder="Rechercher par titre…"
+      [value]="filterTexte()"
+      (input)="filterTexte.set($any($event.target).value)"
+    />
 
     <select class="filter-select" (change)="onTypeChange($any($event.target).value)">
       <option value="" [selected]="filterType() === null">Tous les types</option>
-      <option value="sortie_photo" [selected]="filterType() === 'sortie_photo'">📸 Sortie Photo</option>
-      <option value="sortie_club"  [selected]="filterType() === 'sortie_club'">🚶 Sortie Club</option>
-      <option value="defi"         [selected]="filterType() === 'defi'">🏅 Défi Photo</option>
-      <option value="atelier"      [selected]="filterType() === 'atelier'">🎨 Atelier</option>
-      <option value="oneshot"      [selected]="filterType() === 'oneshot'">🏆 OneShot</option>
-      <option value="exposition"   [selected]="filterType() === 'exposition'">🖼 Exposition</option>
+      <option value="sortie_photo" [selected]="filterType() === 'sortie_photo'">
+        📸 Sortie Photo
+      </option>
+      <option value="sortie_club" [selected]="filterType() === 'sortie_club'">
+        🚶 Sortie Club
+      </option>
+      <option value="defi" [selected]="filterType() === 'defi'">🏅 Défi Photo</option>
+      <option value="atelier" [selected]="filterType() === 'atelier'">🎨 Atelier</option>
+      <option value="oneshot" [selected]="filterType() === 'oneshot'">🏆 OneShot</option>
+      <option value="exposition" [selected]="filterType() === 'exposition'">🖼 Exposition</option>
     </select>
 
     <div class="filter-dates">
-      <app-date-picker [value]="filterDateDu()" (valueChange)="filterDateDu.set($event)" placeholder="Du…" class="filter-date-picker"></app-date-picker>
+      <app-date-picker
+        [value]="filterDateDu()"
+        (valueChange)="filterDateDu.set($event)"
+        placeholder="Du…"
+        class="filter-date-picker"
+      ></app-date-picker>
       <span class="date-sep">→</span>
-      <app-date-picker [value]="filterDateAu()" (valueChange)="filterDateAu.set($event)" placeholder="Au…" class="filter-date-picker"></app-date-picker>
+      <app-date-picker
+        [value]="filterDateAu()"
+        (valueChange)="filterDateAu.set($event)"
+        placeholder="Au…"
+        class="filter-date-picker"
+      ></app-date-picker>
     </div>
 
     @if (profile()) {
       @if (hasOrganisees()) {
-        <button class="filter-chip" [class.filter-chip-active]="filterOrganisees()"
-                (click)="filterOrganisees.set(!filterOrganisees())">
+        <button
+          class="filter-chip"
+          [class.filter-chip-active]="filterOrganisees()"
+          (click)="filterOrganisees.set(!filterOrganisees())"
+        >
           Mes événements
         </button>
       }
-      <button class="filter-chip" [class.filter-chip-active]="filterParticipe()"
-              (click)="filterParticipe.set(!filterParticipe())">
+      <button
+        class="filter-chip"
+        [class.filter-chip-active]="filterParticipe()"
+        (click)="filterParticipe.set(!filterParticipe())"
+      >
         Mes participations
       </button>
     }
@@ -59,7 +84,10 @@
         Mes OneShots en préparation
         <span class="count">{{ enPreparation().length }}</span>
       </h2>
-      <p class="section-hint">Visible uniquement par vous — passez le statut à "Inscriptions ouvertes" pour le rendre public.</p>
+      <p class="section-hint">
+        Visible uniquement par vous — passez le statut à "Inscriptions ouvertes" pour le rendre
+        public.
+      </p>
       <div class="sorties-grid">
         @for (item of enPreparation(); track item.data.id) {
           <app-activite-card [item]="item" [loggedIn]="true" [isPast]="false" />
@@ -72,11 +100,21 @@
   <section class="section">
     <h2 class="section-title">
       En ce moment
-      <span class="count">{{ enCoursFiltrees().length < enCours().length ? enCoursFiltrees().length + ' / ' + enCours().length : enCours().length }}</span>
+      <span class="count">{{
+        enCoursFiltrees().length < enCours().length
+          ? enCoursFiltrees().length + ' / ' + enCours().length
+          : enCours().length
+      }}</span>
     </h2>
 
     @if (enCoursFiltrees().length === 0) {
-      <p class="empty-msg">{{ enCours().length === 0 ? 'Aucun événement actif cette semaine.' : 'Aucun résultat pour ces filtres.' }}</p>
+      <p class="empty-msg">
+        {{
+          enCours().length === 0
+            ? 'Aucun événement actif cette semaine.'
+            : 'Aucun résultat pour ces filtres.'
+        }}
+      </p>
     } @else {
       <div class="sorties-grid">
         @for (item of enCoursFiltrees(); track item.kind + ':' + item.data.id) {
@@ -91,11 +129,21 @@
     <section class="section">
       <h2 class="section-title">
         À venir
-        <span class="count">{{ aVenirFiltrees().length < aVenir().length ? aVenirFiltrees().length + ' / ' + aVenir().length : aVenir().length }}</span>
+        <span class="count">{{
+          aVenirFiltrees().length < aVenir().length
+            ? aVenirFiltrees().length + ' / ' + aVenir().length
+            : aVenir().length
+        }}</span>
       </h2>
 
       @if (aVenirFiltrees().length === 0) {
-        <p class="empty-msg">{{ aVenir().length === 0 ? 'Aucun événement planifié prochainement.' : 'Aucun résultat pour ces filtres.' }}</p>
+        <p class="empty-msg">
+          {{
+            aVenir().length === 0
+              ? 'Aucun événement planifié prochainement.'
+              : 'Aucun résultat pour ces filtres.'
+          }}
+        </p>
       } @else {
         <div class="sorties-grid">
           @for (item of aVenirFiltrees(); track item.kind + ':' + item.data.id) {
@@ -111,7 +159,11 @@
     <section class="section">
       <h2 class="section-title">
         Terminés
-        <span class="count">{{ passeesFiltrees().length < passees().length ? passeesFiltrees().length + ' / ' + passees().length : passees().length }}</span>
+        <span class="count">{{
+          passeesFiltrees().length < passees().length
+            ? passeesFiltrees().length + ' / ' + passees().length
+            : passees().length
+        }}</span>
       </h2>
 
       @if (passeesFiltrees().length === 0) {
@@ -130,5 +182,4 @@
       }
     </section>
   }
-
 </div>

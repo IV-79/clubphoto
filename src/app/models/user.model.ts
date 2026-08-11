@@ -8,7 +8,15 @@ export interface UserProfile {
   role: 'admin' | 'contributeur' | 'membre';
   isSuspended?: boolean;
   derniereConnexion?: string;
-  storageUsed?: { portfolio: number; themes: number; oneshots: number; defis?: number; sorties?: number; expositions?: number; documents?: number };
+  storageUsed?: {
+    portfolio: number;
+    themes: number;
+    oneshots: number;
+    defis?: number;
+    sorties?: number;
+    expositions?: number;
+    documents?: number;
+  };
   subscriptions?: UserSubscriptions;
   dateAdhesion: string;
   bio?: string;
@@ -28,7 +36,14 @@ export interface UserProfile {
 }
 
 export const STYLES_PHOTO = [
-  'Portrait', 'Paysage', 'Nature / Faune', 'Architecture / Urbain',
-  'Rue / Street', 'Macro / Gros plan', 'Sport / Action',
-  'Voyage / Reportage', 'Noir & Blanc', 'Abstrait / Expérimental'
+  'Portrait',
+  'Paysage',
+  'Nature / Faune',
+  'Architecture / Urbain',
+  'Rue / Street',
+  'Macro / Gros plan',
+  'Sport / Action',
+  'Voyage / Reportage',
+  'Noir & Blanc',
+  'Abstrait / Expérimental',
 ];

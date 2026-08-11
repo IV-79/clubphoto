@@ -13,8 +13,13 @@ export class ConfirmService {
   private _state = signal<ConfirmState | null>(null);
   readonly state = this._state.asReadonly();
 
-  confirm(message: string, title = 'Confirmer la suppression', confirmLabel = 'Supprimer', danger = true): Promise<boolean> {
-    return new Promise(resolve => {
+  confirm(
+    message: string,
+    title = 'Confirmer la suppression',
+    confirmLabel = 'Supprimer',
+    danger = true,
+  ): Promise<boolean> {
+    return new Promise((resolve) => {
       this._state.set({ message, title, confirmLabel, danger, resolve });
     });
   }

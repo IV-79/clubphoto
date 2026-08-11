@@ -1,11 +1,11 @@
 import { Directive, ElementRef, HostListener, inject, OnDestroy } from '@angular/core';
 
-const MAX    = 3;
+const MAX = 3;
 const DELAYS = [1500, 3000, 6000]; // backoff : 1.5s → 3s → 6s
 
 @Directive({ selector: 'img', standalone: true })
 export class ImgRetryDirective implements OnDestroy {
-  private el      = inject(ElementRef<HTMLImageElement>);
+  private el = inject(ElementRef<HTMLImageElement>);
   private retries = 0;
   private timer: ReturnType<typeof setTimeout> | null = null;
 

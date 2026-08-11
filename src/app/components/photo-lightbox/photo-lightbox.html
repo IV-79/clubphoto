@@ -1,238 +1,332 @@
 <div class="lb-backdrop" (click)="closed.emit()">
   @if (!anonyme()) {
-  <div class="lb-container" (click)="$event.stopPropagation()">
+    <div class="lb-container" (click)="$event.stopPropagation()">
+      <button class="lb-close" (click)="closed.emit()" aria-label="Fermer">✕</button>
 
-    <button class="lb-close" (click)="closed.emit()" aria-label="Fermer">✕</button>
+      @if (currentPhoto(); as photo) {
+        <!-- Photo (gauche) -->
+        <div
+          class="lb-photo-side"
+          (touchstart)="onTouchStart($event)"
+          (touchend)="onTouchEnd($event)"
+        >
+          @if (photos().length > 1) {
+            <button class="lb-nav lb-nav-prev" (click)="prev()" aria-label="Précédent">‹</button>
+          }
+          @if (imgLoading()) {
+            <div class="lb-loading-overlay"><div class="lb-spinner"></div></div>
+          }
+          <img
+            [src]="photo.url"
+            [alt]="photo.titre || photo.nomAuteur"
+            class="lb-image"
+            (load)="imgLoading.set(false)"
+            (error)="imgLoading.set(false)"
+            (click)="openFullscreen()"
+            title="Cliquez pour agrandir"
+          />
+          @if (photos().length > 1) {
+            <button class="lb-nav lb-nav-next" (click)="next()" aria-label="Suivant">›</button>
+          }
+          @if (photos().length > 1) {
+            <div class="lb-counter">{{ currentIdx() + 1 }} / {{ photos().length }}</div>
+          }
+        </div>
 
-    @if (currentPhoto(); as photo) {
+        <!-- Colonne infos (droite) -->
+        <div class="lb-info-side">
+          <!-- Titre fixe -->
+          @if (photo.titre) {
+            <div class="lb-title-bar">{{ photo.titre }}</div>
+          }
 
-      <!-- Photo (gauche) -->
-      <div class="lb-photo-side" (touchstart)="onTouchStart($event)" (touchend)="onTouchEnd($event)">
-        @if (photos().length > 1) {
-          <button class="lb-nav lb-nav-prev" (click)="prev()" aria-label="Précédent">‹</button>
-        }
-        @if (imgLoading()) {
-          <div class="lb-loading-overlay"><div class="lb-spinner"></div></div>
-        }
-        <img [src]="photo.url" [alt]="photo.titre || photo.nomAuteur" class="lb-image"
-             (load)="imgLoading.set(false)" (error)="imgLoading.set(false)"
-             (click)="openFullscreen()" title="Cliquez pour agrandir" />
-        @if (photos().length > 1) {
-          <button class="lb-nav lb-nav-next" (click)="next()" aria-label="Suivant">›</button>
-        }
-        @if (photos().length > 1) {
-          <div class="lb-counter">{{ currentIdx() + 1 }} / {{ photos().length }}</div>
-        }
-      </div>
-
-      <!-- Colonne infos (droite) -->
-      <div class="lb-info-side">
-
-        <!-- Titre fixe -->
-        @if (photo.titre) {
-          <div class="lb-title-bar">{{ photo.titre }}</div>
-        }
-
-        <!-- Corps scrollable : auteur, EXIF, commentaires -->
-        <div class="lb-scroll-body">
-
-          @if (!anonyme()) {
-            <div class="lb-header">
-              @if (photo.nomAuteur) {
-                <div class="lb-author-row">
-                  <span class="lb-avatar-sm">{{ initiales(photo.nomAuteur) }}</span>
-                  <div>
-                    <span class="lb-uploader">{{ photo.nomAuteur }}</span>
-                    @if (photo.uploadedAt) {
-                      <span class="lb-time">{{ formatTime(photo.uploadedAt) }}</span>
-                    }
+          <!-- Corps scrollable : auteur, EXIF, commentaires -->
+          <div class="lb-scroll-body">
+            @if (!anonyme()) {
+              <div class="lb-header">
+                @if (photo.nomAuteur) {
+                  <div class="lb-author-row">
+                    <span class="lb-avatar-sm">{{ initiales(photo.nomAuteur) }}</span>
+                    <div>
+                      <span class="lb-uploader">{{ photo.nomAuteur }}</span>
+                      @if (photo.uploadedAt) {
+                        <span class="lb-time">{{ formatTime(photo.uploadedAt) }}</span>
+                      }
+                    </div>
+                  </div>
+                }
+                @if (photo.description) {
+                  <p class="lb-description">{{ photo.description }}</p>
+                }
+                <div class="lb-actions-row">
+                  @if (!hideLikes()) {
+                    <button
+                      class="lb-like-btn"
+                      [class.liked]="isLikedPhoto()"
+                      (click)="toggleLikePhoto()"
+                      [disabled]="!canInteract()"
+                    >
+                      <span class="like-icon">♥</span> {{ photo.likes.length }}
+                    </button>
+                  }
+                  @if (canDeletePhoto()) {
+                    <button
+                      class="lb-delete-photo"
+                      (click)="deleteCurrentPhoto()"
+                      title="Supprimer la photo"
+                    >
+                      🗑
+                    </button>
+                  }
+                </div>
+              </div>
+            } @else {
+              @if (canDeletePhoto()) {
+                <div class="lb-header">
+                  <div class="lb-actions-row">
+                    <button
+                      class="lb-delete-photo"
+                      (click)="deleteCurrentPhoto()"
+                      title="Supprimer la photo"
+                    >
+                      🗑
+                    </button>
                   </div>
                 </div>
               }
-              @if (photo.description) {
-                <p class="lb-description">{{ photo.description }}</p>
-              }
-              <div class="lb-actions-row">
-                @if (!hideLikes()) {
-                  <button class="lb-like-btn" [class.liked]="isLikedPhoto()"
-                    (click)="toggleLikePhoto()" [disabled]="!canInteract()">
-                    <span class="like-icon">♥</span> {{ photo.likes.length }}
-                  </button>
-                }
-                @if (canDeletePhoto()) {
-                  <button class="lb-delete-photo" (click)="deleteCurrentPhoto()" title="Supprimer la photo">
-                    🗑
-                  </button>
-                }
-              </div>
-            </div>
-          } @else {
-            @if (canDeletePhoto()) {
-              <div class="lb-header">
-                <div class="lb-actions-row">
-                  <button class="lb-delete-photo" (click)="deleteCurrentPhoto()" title="Supprimer la photo">
-                    🗑
-                  </button>
+            }
+
+            <!-- EXIF -->
+            @if (hasExifData()) {
+              <div class="lb-exif">
+                <div class="lb-exif-title">Infos EXIF</div>
+                <div class="lb-exif-grid">
+                  @if (photo.exif!.appareil) {
+                    <span class="lb-exif-lbl">Appareil</span
+                    ><span class="lb-exif-val">{{ photo.exif!.appareil }}</span>
+                  }
+                  @if (photo.exif!.objectif) {
+                    <span class="lb-exif-lbl">Objectif</span
+                    ><span class="lb-exif-val">{{ photo.exif!.objectif }}</span>
+                  }
+                  @if (photo.exif!.focale) {
+                    <span class="lb-exif-lbl">Focale</span
+                    ><span class="lb-exif-val">{{ photo.exif!.focale }} mm</span>
+                  }
+                  @if (photo.exif!.ouverture) {
+                    <span class="lb-exif-lbl">Ouverture</span
+                    ><span class="lb-exif-val">f/{{ photo.exif!.ouverture }}</span>
+                  }
+                  @if (photo.exif!.vitesse) {
+                    <span class="lb-exif-lbl">Vitesse</span
+                    ><span class="lb-exif-val">{{ photo.exif!.vitesse }}</span>
+                  }
+                  @if (photo.exif!.iso) {
+                    <span class="lb-exif-lbl">ISO</span
+                    ><span class="lb-exif-val">{{ photo.exif!.iso }}</span>
+                  }
+                  @if (photo.exif!.dateCapture) {
+                    <span class="lb-exif-lbl">Date</span
+                    ><span class="lb-exif-val">{{ formatDateExif(photo.exif!.dateCapture!) }}</span>
+                  }
+                  @if (photo.exif!.largeur && photo.exif!.hauteur) {
+                    <span class="lb-exif-lbl">Définition</span>
+                    <span class="lb-exif-val">{{
+                      formatDefinition(photo.exif!.largeur!, photo.exif!.hauteur!)
+                    }}</span>
+                  }
+                  @if (photo.exif!.gps) {
+                    <span class="lb-exif-lbl">Lieu</span>
+                    <span class="lb-exif-val">
+                      <a [href]="gpsMapUrl()" target="_blank" rel="noopener noreferrer"
+                        >Voir sur la carte</a
+                      >
+                      @if (photo.exif!.gps!.alt != null) {
+                        · {{ photo.exif!.gps!.alt }} m
+                      }
+                    </span>
+                  }
                 </div>
               </div>
             }
-          }
 
-          <!-- EXIF -->
-          @if (hasExifData()) {
-            <div class="lb-exif">
-              <div class="lb-exif-title">Infos EXIF</div>
-              <div class="lb-exif-grid">
-                @if (photo.exif!.appareil) {
-                  <span class="lb-exif-lbl">Appareil</span><span class="lb-exif-val">{{ photo.exif!.appareil }}</span>
-                }
-                @if (photo.exif!.objectif) {
-                  <span class="lb-exif-lbl">Objectif</span><span class="lb-exif-val">{{ photo.exif!.objectif }}</span>
-                }
-                @if (photo.exif!.focale) {
-                  <span class="lb-exif-lbl">Focale</span><span class="lb-exif-val">{{ photo.exif!.focale }} mm</span>
-                }
-                @if (photo.exif!.ouverture) {
-                  <span class="lb-exif-lbl">Ouverture</span><span class="lb-exif-val">f/{{ photo.exif!.ouverture }}</span>
-                }
-                @if (photo.exif!.vitesse) {
-                  <span class="lb-exif-lbl">Vitesse</span><span class="lb-exif-val">{{ photo.exif!.vitesse }}</span>
-                }
-                @if (photo.exif!.iso) {
-                  <span class="lb-exif-lbl">ISO</span><span class="lb-exif-val">{{ photo.exif!.iso }}</span>
-                }
-                @if (photo.exif!.dateCapture) {
-                  <span class="lb-exif-lbl">Date</span><span class="lb-exif-val">{{ formatDateExif(photo.exif!.dateCapture!) }}</span>
-                }
-                @if (photo.exif!.largeur && photo.exif!.hauteur) {
-                  <span class="lb-exif-lbl">Définition</span>
-                  <span class="lb-exif-val">{{ formatDefinition(photo.exif!.largeur!, photo.exif!.hauteur!) }}</span>
-                }
-                @if (photo.exif!.gps) {
-                  <span class="lb-exif-lbl">Lieu</span>
-                  <span class="lb-exif-val">
-                    <a [href]="gpsMapUrl()" target="_blank" rel="noopener noreferrer">Voir sur la carte</a>
-                    @if (photo.exif!.gps!.alt != null) { · {{ photo.exif!.gps!.alt }} m }
-                  </span>
-                }
+            <!-- Commentaires (masqués en mode anonyme et pour les visiteurs non connectés) -->
+            @if (!anonyme() && userUid()) {
+              <div class="lb-comments-header">
+                💬 {{ commentaires().length }} commentaire{{
+                  commentaires().length !== 1 ? 's' : ''
+                }}
               </div>
-            </div>
-          }
 
-          <!-- Commentaires (masqués en mode anonyme et pour les visiteurs non connectés) -->
-          @if (!anonyme() && userUid()) {
+              <div class="lb-comments-list">
+                @if (commentaires().length === 0) {
+                  <p class="no-comments">
+                    Aucun commentaire.
+                    @if (canInteract()) {
+                      Soyez le premier !
+                    }
+                  </p>
+                }
 
-            <div class="lb-comments-header">
-              💬 {{ commentaires().length }} commentaire{{ commentaires().length !== 1 ? 's' : '' }}
-            </div>
-
-            <div class="lb-comments-list">
-              @if (commentaires().length === 0) {
-                <p class="no-comments">Aucun commentaire.@if (canInteract()) { Soyez le premier ! }</p>
-              }
-
-              @for (c of commentaires(); track c.id) {
-                <div class="lb-comment">
-                  <div class="lb-avatar">{{ initiales(c.nomAuteur) }}</div>
-                  <div class="lb-comment-body">
-                    <div class="lb-comment-meta">
-                      <span class="lb-author">{{ c.nomAuteur }}</span>
-                      <span class="lb-time-small">{{ formatTime(c.createdAt) }}</span>
-                      @if (canDeleteComment(c.auteurUid)) {
-                        <button class="lb-action-delete" (click)="deleteComment(c.id)" title="Supprimer">✕</button>
-                      }
-                    </div>
-                    <p class="lb-comment-text">{{ c.texte }}</p>
-                    <div class="lb-comment-actions">
-                      <button class="lb-action-btn" [class.liked]="isLikedComment(c)"
-                        (click)="toggleLikeComment(c)" [disabled]="!canInteract()">
-                        👍 {{ c.likes.length }}
-                      </button>
-                      @if (canInteract()) {
-                        <button class="lb-action-btn" (click)="startReply(c.id)">Répondre</button>
-                      }
-                    </div>
-
-                    @if (c.replies.length > 0) {
-                      <div class="lb-replies">
-                        @for (r of c.replies; track r.id) {
-                          <div class="lb-reply">
-                            <div class="lb-avatar lb-avatar-sm">{{ initiales(r.nomAuteur) }}</div>
-                            <div class="lb-reply-body">
-                              <div class="lb-comment-meta">
-                                <span class="lb-author">{{ r.nomAuteur }}</span>
-                                <span class="lb-time-small">{{ formatTime(r.createdAt) }}</span>
-                                @if (canDeleteComment(r.auteurUid)) {
-                                  <button class="lb-action-delete" (click)="deleteReply(c, r.id)" title="Supprimer">✕</button>
-                                }
-                              </div>
-                              <p class="lb-comment-text">{{ r.texte }}</p>
-                            </div>
-                          </div>
+                @for (c of commentaires(); track c.id) {
+                  <div class="lb-comment">
+                    <div class="lb-avatar">{{ initiales(c.nomAuteur) }}</div>
+                    <div class="lb-comment-body">
+                      <div class="lb-comment-meta">
+                        <span class="lb-author">{{ c.nomAuteur }}</span>
+                        <span class="lb-time-small">{{ formatTime(c.createdAt) }}</span>
+                        @if (canDeleteComment(c.auteurUid)) {
+                          <button
+                            class="lb-action-delete"
+                            (click)="deleteComment(c.id)"
+                            title="Supprimer"
+                          >
+                            ✕
+                          </button>
                         }
                       </div>
-                    }
-
-                    @if (replyingTo() === c.id) {
-                      <div class="lb-reply-form">
-                        <textarea [(ngModel)]="newReply" rows="2"
-                          placeholder="Votre réponse…"
-                          (keydown.escape)="replyingTo.set(null)"></textarea>
-                        <div class="lb-reply-form-actions">
-                          <button class="btn-cancel-reply" (click)="replyingTo.set(null)">Annuler</button>
-                          <button class="btn-send" (click)="submitReply(c)"
-                            [disabled]="!newReply.trim()">Enregistrer</button>
-                        </div>
+                      <p class="lb-comment-text">{{ c.texte }}</p>
+                      <div class="lb-comment-actions">
+                        <button
+                          class="lb-action-btn"
+                          [class.liked]="isLikedComment(c)"
+                          (click)="toggleLikeComment(c)"
+                          [disabled]="!canInteract()"
+                        >
+                          👍 {{ c.likes.length }}
+                        </button>
+                        @if (canInteract()) {
+                          <button class="lb-action-btn" (click)="startReply(c.id)">Répondre</button>
+                        }
                       </div>
-                    }
 
+                      @if (c.replies.length > 0) {
+                        <div class="lb-replies">
+                          @for (r of c.replies; track r.id) {
+                            <div class="lb-reply">
+                              <div class="lb-avatar lb-avatar-sm">{{ initiales(r.nomAuteur) }}</div>
+                              <div class="lb-reply-body">
+                                <div class="lb-comment-meta">
+                                  <span class="lb-author">{{ r.nomAuteur }}</span>
+                                  <span class="lb-time-small">{{ formatTime(r.createdAt) }}</span>
+                                  @if (canDeleteComment(r.auteurUid)) {
+                                    <button
+                                      class="lb-action-delete"
+                                      (click)="deleteReply(c, r.id)"
+                                      title="Supprimer"
+                                    >
+                                      ✕
+                                    </button>
+                                  }
+                                </div>
+                                <p class="lb-comment-text">{{ r.texte }}</p>
+                              </div>
+                            </div>
+                          }
+                        </div>
+                      }
+
+                      @if (replyingTo() === c.id) {
+                        <div class="lb-reply-form">
+                          <textarea
+                            [(ngModel)]="newReply"
+                            rows="2"
+                            placeholder="Votre réponse…"
+                            (keydown.escape)="replyingTo.set(null)"
+                          ></textarea>
+                          <div class="lb-reply-form-actions">
+                            <button class="btn-cancel-reply" (click)="replyingTo.set(null)">
+                              Annuler
+                            </button>
+                            <button
+                              class="btn-send"
+                              (click)="submitReply(c)"
+                              [disabled]="!newReply.trim()"
+                            >
+                              Enregistrer
+                            </button>
+                          </div>
+                        </div>
+                      }
+                    </div>
                   </div>
-                </div>
-              }
-            </div>
-
-          }
-
-        </div>
-
-        <!-- Champ commentaire fixe en bas -->
-        @if (!anonyme() && userUid() && canInteract()) {
-          <div class="lb-add-comment">
-            <textarea [(ngModel)]="newComment" rows="2"
-              placeholder="Ajouter un commentaire…"
-              (keydown.escape)="newComment = ''"></textarea>
-            <button class="btn-send" (click)="submitComment()"
-              [disabled]="!newComment.trim() || submitting()">
-              {{ submitting() ? '…' : 'Enregistrer' }}
-            </button>
+                }
+              </div>
+            }
           </div>
-        }
 
-      </div>
-
-    }
-
-  </div>
-  } <!-- /!anonyme -->
+          <!-- Champ commentaire fixe en bas -->
+          @if (!anonyme() && userUid() && canInteract()) {
+            <div class="lb-add-comment">
+              <textarea
+                [(ngModel)]="newComment"
+                rows="2"
+                placeholder="Ajouter un commentaire…"
+                (keydown.escape)="newComment = ''"
+              ></textarea>
+              <button
+                class="btn-send"
+                (click)="submitComment()"
+                [disabled]="!newComment.trim() || submitting()"
+              >
+                {{ submitting() ? '…' : 'Enregistrer' }}
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+  <!-- /!anonyme -->
 
   <!-- Plein écran natif (par-dessus tout) -->
   @if (fullscreen() && currentPhoto()) {
-    <div class="lb-fullscreen" (click)="$event.stopPropagation(); closeFullscreen()" (touchstart)="onTouchStart($event)" (touchend)="onTouchEnd($event)">
-      <button class="lb-fs-close" (click)="$event.stopPropagation(); closed.emit()" aria-label="Fermer">×</button>
+    <div
+      class="lb-fullscreen"
+      (click)="$event.stopPropagation(); closeFullscreen()"
+      (touchstart)="onTouchStart($event)"
+      (touchend)="onTouchEnd($event)"
+    >
+      <button
+        class="lb-fs-close"
+        (click)="$event.stopPropagation(); closed.emit()"
+        aria-label="Fermer"
+      >
+        ×
+      </button>
       @if (photos().length > 1) {
-        <button class="lb-fs-nav lb-fs-prev" (click)="$event.stopPropagation(); prev()" aria-label="Précédent">‹</button>
+        <button
+          class="lb-fs-nav lb-fs-prev"
+          (click)="$event.stopPropagation(); prev()"
+          aria-label="Précédent"
+        >
+          ‹
+        </button>
       }
       @if (imgLoading()) {
         <div class="lb-loading-overlay"><div class="lb-spinner"></div></div>
       }
-      <img [src]="currentPhoto()!.url" [alt]="currentPhoto()!.titre || ''" class="lb-fs-img"
-           (load)="imgLoading.set(false)" (error)="imgLoading.set(false)"
-           (click)="closeFullscreen()" />
+      <img
+        [src]="currentPhoto()!.url"
+        [alt]="currentPhoto()!.titre || ''"
+        class="lb-fs-img"
+        (load)="imgLoading.set(false)"
+        (error)="imgLoading.set(false)"
+        (click)="closeFullscreen()"
+      />
       @if (photos().length > 1) {
-        <button class="lb-fs-nav lb-fs-next" (click)="$event.stopPropagation(); next()" aria-label="Suivant">›</button>
+        <button
+          class="lb-fs-nav lb-fs-next"
+          (click)="$event.stopPropagation(); next()"
+          aria-label="Suivant"
+        >
+          ›
+        </button>
       }
       @if (photos().length > 1) {
-        <div class="lb-fs-counter" (click)="$event.stopPropagation()">{{ currentIdx() + 1 }} / {{ photos().length }}</div>
+        <div class="lb-fs-counter" (click)="$event.stopPropagation()">
+          {{ currentIdx() + 1 }} / {{ photos().length }}
+        </div>
       }
     </div>
   }

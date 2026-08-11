@@ -1,33 +1,48 @@
 <div class="dp" [class.dp-disabled]="_disabled()">
-
   @if (label) {
-    <span class="dp-label">{{ label }}@if (required) {<span class="dp-req"> *</span>}</span>
+    <span class="dp-label"
+      >{{ label }}
+      @if (required) {
+        <span class="dp-req"> *</span>
+      }
+    </span>
   }
 
   <div class="dp-field" [class.dp-field-open]="_open()" (click)="toggle()">
     <span class="dp-text" [class.dp-empty]="!_val()">{{ displayValue || placeholder }}</span>
-    <svg class="dp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="3" y="4" width="18" height="18" rx="2"/>
-      <line x1="16" y1="2" x2="16" y2="6"/>
-      <line x1="8"  y1="2" x2="8"  y2="6"/>
-      <line x1="3"  y1="10" x2="21" y2="10"/>
+    <svg
+      class="dp-icon"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.8"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <rect x="3" y="4" width="18" height="18" rx="2" />
+      <line x1="16" y1="2" x2="16" y2="6" />
+      <line x1="8" y1="2" x2="8" y2="6" />
+      <line x1="3" y1="10" x2="21" y2="10" />
     </svg>
   </div>
 
   @if (_open()) {
     <div class="dp-popup" (click)="$event.stopPropagation()">
-
       <!-- Header navigation -->
       <div class="dp-header">
         <button class="dp-nav" type="button" (click)="prev()">&#8249;</button>
         <div class="dp-header-mid">
           @if (_view() === 'day') {
-            <button class="dp-nav-label" type="button" (click)="toMonths()">{{ monthLabel }}</button>
+            <button class="dp-nav-label" type="button" (click)="toMonths()">
+              {{ monthLabel }}
+            </button>
             <button class="dp-nav-label" type="button" (click)="toYears()">{{ _year() }}</button>
           } @else if (_view() === 'month') {
             <button class="dp-nav-label" type="button" (click)="toYears()">{{ _year() }}</button>
           } @else {
-            <span class="dp-nav-label dp-range-label">{{ yearRange[0] }} — {{ yearRange[11] }}</span>
+            <span class="dp-nav-label dp-range-label"
+              >{{ yearRange[0] }} — {{ yearRange[11] }}</span
+            >
           }
         </div>
         <button class="dp-nav" type="button" (click)="next()">&#8250;</button>
@@ -51,7 +66,9 @@
               [class.dp-sel]="d.selected"
               [disabled]="d.disabled"
               (click)="pick(d)"
-            >{{ d.n }}</button>
+            >
+              {{ d.n }}
+            </button>
           }
         </div>
       }
@@ -60,9 +77,14 @@
       @if (_view() === 'month') {
         <div class="dp-months-grid">
           @for (m of MOIS_COURT; track m; let i = $index) {
-            <button type="button" class="dp-month-cell"
+            <button
+              type="button"
+              class="dp-month-cell"
               [class.dp-cell-sel]="i === _month()"
-              (click)="pickMonth(i)">{{ m }}</button>
+              (click)="pickMonth(i)"
+            >
+              {{ m }}
+            </button>
           }
         </div>
       }
@@ -71,14 +93,17 @@
       @if (_view() === 'year') {
         <div class="dp-years-grid">
           @for (y of yearRange; track y) {
-            <button type="button" class="dp-year-cell"
+            <button
+              type="button"
+              class="dp-year-cell"
               [class.dp-cell-sel]="y === _year()"
-              (click)="pickYear(y)">{{ y }}</button>
+              (click)="pickYear(y)"
+            >
+              {{ y }}
+            </button>
           }
         </div>
       }
-
     </div>
   }
-
 </div>

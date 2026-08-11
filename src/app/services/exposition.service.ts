@@ -1,9 +1,26 @@
 import { Injectable, inject } from '@angular/core';
 import {
-  collection, doc, addDoc, updateDoc, deleteDoc, setDoc, getDocs, getDoc,
-  query, orderBy, where, deleteField, increment,
+  collection,
+  doc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  setDoc,
+  getDocs,
+  getDoc,
+  query,
+  orderBy,
+  where,
+  deleteField,
+  increment,
 } from 'firebase/firestore';
-import { ref, uploadBytesResumable, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import {
+  ref,
+  uploadBytesResumable,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject,
+} from 'firebase/storage';
 import { Observable, from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { db, storage } from '../utils/firebase';
@@ -36,37 +53,56 @@ export class ExpositionService {
     visibilite?: 'public' | 'membre';
   }): Promise<string> {
     const payload = Object.fromEntries(
-      Object.entries({ statut: 'ideation', visibilite: 'membre', ...data, dateCreation: new Date().toISOString() })
-        .filter(([, v]) => v !== undefined)
+      Object.entries({
+        statut: 'ideation',
+        visibilite: 'membre',
+        ...data,
+        dateCreation: new Date().toISOString(),
+      }).filter(([, v]) => v !== undefined),
     );
     const ref = await addDoc(collection(db, 'expositions'), payload);
-    this.notifService.broadcast('exposition',
-      `${data.nomOrganisateur} lance une nouvelle exposition « ${data.titre} »`,
-      { lien: `/galeries/expositions/${ref.id}`, sourceNom: data.nomOrganisateur, excludeUid: data.organisateurUid }
-    ).catch(() => {});
+    this.notifService
+      .broadcast(
+        'exposition',
+        `${data.nomOrganisateur} lance une nouvelle exposition « ${data.titre} »`,
+        {
+          lien: `/galeries/expositions/${ref.id}`,
+          sourceNom: data.nomOrganisateur,
+          excludeUid: data.organisateurUid,
+        },
+      )
+      .catch(() => {});
     return ref.id;
   }
 
   getExpositionOnce(id: string): Observable<Exposition | undefined> {
-    return from(getDoc(doc(db, 'expositions', id)))
-      .pipe(map(d => d.exists() ? { id: d.id, ...d.data() } as Exposition : undefined));
+    return from(getDoc(doc(db, 'expositions', id))).pipe(
+      map((d) => (d.exists() ? ({ id: d.id, ...d.data() } as Exposition) : undefined)),
+    );
   }
 
   getExpositionsOnce(): Observable<Exposition[]> {
-    return from(getDocs(query(collection(db, 'expositions'), orderBy('dateCreation', 'desc'))))
-      .pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as Exposition))));
+    return from(
+      getDocs(query(collection(db, 'expositions'), orderBy('dateCreation', 'desc'))),
+    ).pipe(map((snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Exposition)));
   }
 
   getPublicExpositionsOnce(): Observable<Exposition[]> {
-    return from(getDocs(query(collection(db, 'expositions'),
-      where('visibilite', '==', 'public'), orderBy('dateCreation', 'desc'))))
-      .pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as Exposition))));
+    return from(
+      getDocs(
+        query(
+          collection(db, 'expositions'),
+          where('visibilite', '==', 'public'),
+          orderBy('dateCreation', 'desc'),
+        ),
+      ),
+    ).pipe(map((snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Exposition)));
   }
 
   async update(id: string, data: Record<string, unknown>): Promise<void> {
     const clean: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(data)) {
-      clean[k] = (v === undefined || v === '') ? deleteField() : v;
+      clean[k] = v === undefined || v === '' ? deleteField() : v;
     }
     await updateDoc(doc(db, 'expositions', id), clean);
   }
@@ -76,15 +112,19 @@ export class ExpositionService {
     const storageRef = ref(storage, path);
     await uploadBytesResumable(storageRef, file).then();
     const url = await getDownloadURL(storageRef);
-    await updateDoc(doc(db, 'expositions', id), { photoCouvertureUrl: url, photoCouverturePath: path, photoCouvertureFileSize: file.size });
+    await updateDoc(doc(db, 'expositions', id), {
+      photoCouvertureUrl: url,
+      photoCouverturePath: path,
+      photoCouvertureFileSize: file.size,
+    });
     return { url, path };
   }
 
   async removeCouverture(id: string, path: string): Promise<void> {
     await deleteObject(ref(storage, path)).catch(() => {});
     await updateDoc(doc(db, 'expositions', id), {
-      photoCouvertureUrl:      deleteField(),
-      photoCouverturePath:     deleteField(),
+      photoCouvertureUrl: deleteField(),
+      photoCouverturePath: deleteField(),
       photoCouvertureFileSize: deleteField(),
     });
   }
@@ -100,22 +140,26 @@ export class ExpositionService {
     for (const p of photosSnap.docs) {
       const d = p.data() as ExpoPhoto;
       storageDels.push(deleteObject(ref(storage, d.storagePath)).catch(() => {}));
-      if (d.thumbnailPath) storageDels.push(deleteObject(ref(storage, d.thumbnailPath)).catch(() => {}));
+      if (d.thumbnailPath)
+        storageDels.push(deleteObject(ref(storage, d.thumbnailPath)).catch(() => {}));
       if (d.uid && d.fileSize) {
         sizeByUser[d.uid] = (sizeByUser[d.uid] ?? 0) + d.fileSize;
       }
     }
-    if (photoCouverturePath) storageDels.push(deleteObject(ref(storage, photoCouverturePath)).catch(() => {}));
+    if (photoCouverturePath)
+      storageDels.push(deleteObject(ref(storage, photoCouverturePath)).catch(() => {}));
 
     await Promise.all([
       ...storageDels,
-      ...photosSnap.docs.map(p => deleteDoc(p.ref)),
-      ...suggsSnap.docs.map(p => deleteDoc(p.ref)),
-      ...votesSnap.docs.map(p => deleteDoc(p.ref)),
+      ...photosSnap.docs.map((p) => deleteDoc(p.ref)),
+      ...suggsSnap.docs.map((p) => deleteDoc(p.ref)),
+      ...votesSnap.docs.map((p) => deleteDoc(p.ref)),
     ]);
     await deleteDoc(doc(db, 'expositions', id));
     Object.entries(sizeByUser).forEach(([uid, size]) =>
-      updateDoc(doc(db, 'users', uid), { 'storageUsed.expositions': increment(-size) }).catch(() => {})
+      updateDoc(doc(db, 'users', uid), { 'storageUsed.expositions': increment(-size) }).catch(
+        () => {},
+      ),
     );
   }
 
@@ -123,18 +167,27 @@ export class ExpositionService {
 
   async addSuggestion(expoId: string, texte: string, source: 'membre' | 'admin'): Promise<string> {
     const ref = await addDoc(collection(db, `expositions/${expoId}/suggestions`), {
-      texte: texte.trim(), actif: true, source,
+      texte: texte.trim(),
+      actif: true,
+      source,
     });
     return ref.id;
   }
 
   async getSuggestionsOnce(expoId: string): Promise<ExpoSuggestion[]> {
     const snap = await getDocs(collection(db, `expositions/${expoId}/suggestions`));
-    return snap.docs.map(d => ({ id: d.id, ...d.data() } as ExpoSuggestion));
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as ExpoSuggestion);
   }
 
-  async updateSuggestion(expoId: string, suggId: string, data: Partial<Pick<ExpoSuggestion, 'texte' | 'actif'>>): Promise<void> {
-    await updateDoc(doc(db, `expositions/${expoId}/suggestions`, suggId), data as Record<string, unknown>);
+  async updateSuggestion(
+    expoId: string,
+    suggId: string,
+    data: Partial<Pick<ExpoSuggestion, 'texte' | 'actif'>>,
+  ): Promise<void> {
+    await updateDoc(
+      doc(db, `expositions/${expoId}/suggestions`, suggId),
+      data as Record<string, unknown>,
+    );
   }
 
   async deleteSuggestion(expoId: string, suggId: string): Promise<void> {
@@ -145,12 +198,12 @@ export class ExpositionService {
 
   async getMonVoteOnce(expoId: string, uid: string): Promise<ExpoVoteDoc | null> {
     const d = await getDoc(doc(db, `expositions/${expoId}/votes`, uid));
-    return d.exists() ? d.data() as ExpoVoteDoc : null;
+    return d.exists() ? (d.data() as ExpoVoteDoc) : null;
   }
 
   async getTousVotesOnce(expoId: string): Promise<ExpoVoteDoc[]> {
     const snap = await getDocs(collection(db, `expositions/${expoId}/votes`));
-    return snap.docs.map(d => d.data() as ExpoVoteDoc);
+    return snap.docs.map((d) => d.data() as ExpoVoteDoc);
   }
 
   async voter(expoId: string, uid: string, themeIds: string[]): Promise<void> {
@@ -159,14 +212,20 @@ export class ExpositionService {
 
   private async supprimerTousVotes(expoId: string): Promise<void> {
     const snap = await getDocs(collection(db, `expositions/${expoId}/votes`));
-    await Promise.all(snap.docs.map(d => deleteDoc(d.ref)));
+    await Promise.all(snap.docs.map((d) => deleteDoc(d.ref)));
   }
 
   // ── Transitions ──────────────────────────────────────────────────────────────
 
-  async passerVotation(expoId: string, dateFinVote: string, nombreVotesParMembre: number): Promise<void> {
+  async passerVotation(
+    expoId: string,
+    dateFinVote: string,
+    nombreVotesParMembre: number,
+  ): Promise<void> {
     await updateDoc(doc(db, 'expositions', expoId), {
-      statut: 'votation', dateFinVote, nombreVotesParMembre,
+      statut: 'votation',
+      dateFinVote,
+      nombreVotesParMembre,
     });
   }
 
@@ -182,13 +241,12 @@ export class ExpositionService {
       for (const id of vote.themeIds) scores[id] = (scores[id] ?? 0) + 1;
     }
     const maxScore = Math.max(0, ...Object.values(scores));
-    const exaequoIds = maxScore > 0
-      ? Object.keys(scores).filter(id => scores[id] === maxScore)
-      : [];
+    const exaequoIds =
+      maxScore > 0 ? Object.keys(scores).filter((id) => scores[id] === maxScore) : [];
 
     await Promise.all([
-      ...suggsSnap.docs.map(s => updateDoc(s.ref, { actif: exaequoIds.includes(s.id) })),
-      ...votesSnap.docs.map(d => deleteDoc(d.ref)),
+      ...suggsSnap.docs.map((s) => updateDoc(s.ref, { actif: exaequoIds.includes(s.id) })),
+      ...votesSnap.docs.map((d) => deleteDoc(d.ref)),
     ]);
 
     await updateDoc(doc(db, 'expositions', expoId), {
@@ -198,9 +256,14 @@ export class ExpositionService {
     });
   }
 
-  async passerSoumission(expoId: string, themeChoisi: string, dateFinSoumission: string): Promise<void> {
+  async passerSoumission(
+    expoId: string,
+    themeChoisi: string,
+    dateFinSoumission: string,
+  ): Promise<void> {
     await updateDoc(doc(db, 'expositions', expoId), {
-      themeChoisi: themeChoisi.trim(), dateFinSoumission,
+      themeChoisi: themeChoisi.trim(),
+      dateFinSoumission,
     });
   }
 
@@ -220,21 +283,34 @@ export class ExpositionService {
 
   async getPhotosOnce(expoId: string): Promise<ExpoPhoto[]> {
     const snap = await getDocs(collection(db, `expositions/${expoId}/photos`));
-    return snap.docs.map(d => ({ id: d.id, ...d.data() } as ExpoPhoto));
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as ExpoPhoto);
   }
 
-  uploadPhoto(file: File, expoId: string, meta: { uid: string; nomAuteur: string; exif?: import('../models/photo.model').PhotoExif | null }): Observable<ExpoUploadState> {
-    return new Observable(observer => {
+  uploadPhoto(
+    file: File,
+    expoId: string,
+    meta: {
+      uid: string;
+      nomAuteur: string;
+      exif?: import('../models/photo.model').PhotoExif | null;
+    },
+  ): Observable<ExpoUploadState> {
+    return new Observable((observer) => {
       const id = generateId();
       const ext = file.name.split('.').pop() ?? 'jpg';
       const storagePath = `expositions/${expoId}/${id}.${ext}`;
-      const thumbPath   = `expositions/${expoId}/${id}_thumb.${ext}`;
+      const thumbPath = `expositions/${expoId}/${id}_thumb.${ext}`;
       const storageRef = ref(storage, storagePath);
       const task = uploadBytesResumable(storageRef, file);
 
-      task.on('state_changed',
-        snap => observer.next({ progress: Math.round(snap.bytesTransferred / snap.totalBytes * 100), done: false }),
-        err => observer.error(err),
+      task.on(
+        'state_changed',
+        (snap) =>
+          observer.next({
+            progress: Math.round((snap.bytesTransferred / snap.totalBytes) * 100),
+            done: false,
+          }),
+        (err) => observer.error(err),
         async () => {
           const [url, thumb] = await Promise.all([
             getDownloadURL(task.snapshot.ref),
@@ -244,8 +320,13 @@ export class ExpositionService {
           const thumbnailUrl = await getDownloadURL(thumbSnap.ref);
           const fileSize = file.size + thumb.size;
           const data: Omit<ExpoPhoto, 'id'> = {
-            url, storagePath, thumbnailUrl, thumbnailPath: thumbPath, fileSize,
-            uid: meta.uid, nomAuteur: meta.nomAuteur,
+            url,
+            storagePath,
+            thumbnailUrl,
+            thumbnailPath: thumbPath,
+            fileSize,
+            uid: meta.uid,
+            nomAuteur: meta.nomAuteur,
             uploadedAt: new Date().toISOString(),
             ...(meta.exif != null ? { exif: meta.exif } : {}),
           };
@@ -255,7 +336,7 @@ export class ExpositionService {
           }).catch(() => {});
           observer.next({ progress: 100, done: true, photo: { id: docRef.id, ...data } });
           observer.complete();
-        }
+        },
       );
     });
   }
@@ -263,7 +344,9 @@ export class ExpositionService {
   async deletePhoto(expoId: string, photo: ExpoPhoto): Promise<void> {
     await Promise.all([
       deleteObject(ref(storage, photo.storagePath)).catch(() => {}),
-      ...(photo.thumbnailPath ? [deleteObject(ref(storage, photo.thumbnailPath)).catch(() => {})] : []),
+      ...(photo.thumbnailPath
+        ? [deleteObject(ref(storage, photo.thumbnailPath)).catch(() => {})]
+        : []),
       deleteDoc(doc(db, `expositions/${expoId}/photos`, photo.id)),
     ]);
     updateDoc(doc(db, 'users', photo.uid), {

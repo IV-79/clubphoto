@@ -4,11 +4,11 @@ export type OneShotStatut =
   'preparation' | 'inscription' | 'fermeture_inscriptions' | 'vote' | 'resultats';
 
 export const ONESHOT_STATUT_LABELS: Record<OneShotStatut, string> = {
-  preparation:            'Préparation',
-  inscription:            'Inscriptions ouvertes',
+  preparation: 'Préparation',
+  inscription: 'Inscriptions ouvertes',
   fermeture_inscriptions: 'Inscriptions fermées',
-  vote:                   'Vote en cours',
-  resultats:              'Résultats publiés',
+  vote: 'Vote en cours',
+  resultats: 'Résultats publiés',
 };
 
 export interface OneShot {
@@ -19,10 +19,10 @@ export interface OneShot {
   nomCreateur: string;
   statut: OneShotStatut;
   dateCreation: string;
-  date?: string;        // YYYY-MM-DD, facultatif — si défini, apparaît dans le calendrier
+  date?: string; // YYYY-MM-DD, facultatif — si défini, apparaît dans le calendrier
   lieu?: string;
-  nbInscrits?: number;  // dénormalisé, mis à jour atomiquement
-  nbThemes?: number;    // dénormalisé, mis à jour atomiquement
+  nbInscrits?: number; // dénormalisé, mis à jour atomiquement
+  nbThemes?: number; // dénormalisé, mis à jour atomiquement
   photoCouvertureUrl?: string;
   photoCouverturePath?: string;
   visibilite?: 'public' | 'membre';
@@ -53,7 +53,7 @@ export interface OneShotPhoto {
   uploadedAt: string;
   likes?: string[];
   exif?: PhotoExif;
-  thumbnailUrl?:  string;
+  thumbnailUrl?: string;
   thumbnailPath?: string;
 }
 

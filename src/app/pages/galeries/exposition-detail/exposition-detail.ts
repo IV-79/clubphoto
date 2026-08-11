@@ -94,7 +94,7 @@ export class ExpositionDetail {
 
   // ── Statut calculé depuis les dates ─────────────────────────────────────────
 
-  expoStatut = computed((): ExpoStatut => this.expo() ? getExpoStatut(this.expo()!) : 'ideation');
+  expoStatut = computed((): ExpoStatut => (this.expo() ? getExpoStatut(this.expo()!) : 'ideation'));
 
   typeBadgeHero = computed((): HeroBadge => ({ text: '🖼 Exposition', css: 'badge-expo' }));
   statusHero = computed((): HeroBadge => {
@@ -148,7 +148,7 @@ export class ExpositionDetail {
       if (!this.editMode()) return;
       const locked = !!this.editThemeSignal()?.trim();
       untracked(() => {
-        ['dateDebutIdeation', 'dateFinIdeation', 'dateFinVote'].forEach(name => {
+        ['dateDebutIdeation', 'dateFinIdeation', 'dateFinVote'].forEach((name) => {
           const ctrl = this.editForm.get(name)!;
           locked ? ctrl.disable({ emitEvent: false }) : ctrl.enable({ emitEvent: false });
         });
@@ -164,7 +164,14 @@ export class ExpositionDetail {
       untracked(() =>
         this.expoService.retourNettoyageDepuisVotation(this.expoId).then(async () => {
           this.expo.update((ex) =>
-            ex ? { ...ex, statut: 'nettoyage', dateFinVote: undefined, nombreVotesParMembre: undefined } : ex,
+            ex
+              ? {
+                  ...ex,
+                  statut: 'nettoyage',
+                  dateFinVote: undefined,
+                  nombreVotesParMembre: undefined,
+                }
+              : ex,
           );
           this.localVoteMap.set({});
           this.sortMode.set('votes');
@@ -402,18 +409,16 @@ export class ExpositionDetail {
     const prenom = this.profile()?.prenom ?? 'Jean-Pierre';
     const ok = await this.confirmService.confirm(
       `Thème : « ${themeChoisi} » — soumissions ouvertes jusqu'au ${this.formatDate(dateFinSoumission)}. ` +
-      `Une fois confirmé, les dates d'idéation et de vote seront verrouillées. ` +
-      `C'est votre dernier mot, ${prenom} ? 😄`,
-      'Définir le thème de l\'expo',
+        `Une fois confirmé, les dates d'idéation et de vote seront verrouillées. ` +
+        `C'est votre dernier mot, ${prenom} ? 😄`,
+      "Définir le thème de l'expo",
       "C'est mon dernier mot !",
       false,
     );
     if (!ok) return;
     this.savingTransition.set(true);
     await this.expoService.passerSoumission(this.expoId, themeChoisi, dateFinSoumission);
-    this.expo.update((e) =>
-      e ? { ...e, themeChoisi: themeChoisi.trim(), dateFinSoumission } : e,
-    );
+    this.expo.update((e) => (e ? { ...e, themeChoisi: themeChoisi.trim(), dateFinSoumission } : e));
     this.tousVotes.set([]); // votes non nécessaires en soumission
     this.localVoteMap.set({});
     const photosData = await this.expoService.getPhotosOnce(this.expoId);
@@ -499,24 +504,22 @@ export class ExpositionDetail {
     })),
   );
 
-  lightboxCallbacks = computed(
-    (): PhotoLightboxCallbacks => ({
-      toggleLike: async () => {},
-      getComments: () => of([]),
-      addComment: async () => {},
-      deleteComment: async () => {},
-      toggleCommentLike: async () => {},
-      addReply: async () => {},
-      deleteReply: async () => {},
-      canDeletePhoto: (photo) => photo.uploaderUid === this.uid() || this.canManage(),
-      deletePhoto: async (photo) => {
-        const p = this.photos().find((x) => x.id === photo.id);
-        if (!p) return;
-        await this.supprimerPhoto(p);
-        if (this.photos().length === 0) this.lightboxIndex.set(null);
-      },
-    }),
-  );
+  lightboxCallbacks = computed((): PhotoLightboxCallbacks => ({
+    toggleLike: async () => {},
+    getComments: () => of([]),
+    addComment: async () => {},
+    deleteComment: async () => {},
+    toggleCommentLike: async () => {},
+    addReply: async () => {},
+    deleteReply: async () => {},
+    canDeletePhoto: (photo) => photo.uploaderUid === this.uid() || this.canManage(),
+    deletePhoto: async (photo) => {
+      const p = this.photos().find((x) => x.id === photo.id);
+      if (!p) return;
+      await this.supprimerPhoto(p);
+      if (this.photos().length === 0) this.lightboxIndex.set(null);
+    },
+  }));
 
   openLightbox(index: number) {
     this.lightboxIndex.set(index);
@@ -653,10 +656,9 @@ export class ExpositionDetail {
   });
 
   // Suit la valeur de themeChoisi dans le formulaire d'édition (pour l'effet de verrouillage)
-  private editThemeSignal = toSignal(
-    this.editForm.get('themeChoisi')!.valueChanges,
-    { initialValue: this.editForm.get('themeChoisi')!.value },
-  );
+  private editThemeSignal = toSignal(this.editForm.get('themeChoisi')!.valueChanges, {
+    initialValue: this.editForm.get('themeChoisi')!.value,
+  });
 
   get datesLocked(): boolean {
     return !!this.editForm.get('themeChoisi')!.value?.trim();
@@ -665,12 +667,12 @@ export class ExpositionDetail {
   get datesChronoError(): string | null {
     const v = this.editForm.getRawValue();
     const chain = [
-      { label: 'Début idéation',    val: v.dateDebutIdeation },
-      { label: 'Fin idéation',      val: v.dateFinIdeation },
-      { label: 'Fin vote',          val: v.dateFinVote },
-      { label: 'Fin soumission',    val: v.dateFinSoumission },
+      { label: 'Début idéation', val: v.dateDebutIdeation },
+      { label: 'Fin idéation', val: v.dateFinIdeation },
+      { label: 'Fin vote', val: v.dateFinVote },
+      { label: 'Fin soumission', val: v.dateFinSoumission },
       { label: "Date d'exposition", val: v.dateExposition },
-    ].filter(d => d.val);
+    ].filter((d) => d.val);
     for (let i = 1; i < chain.length; i++) {
       if (chain[i].val < chain[i - 1].val)
         return `« ${chain[i - 1].label} » doit être avant « ${chain[i].label} ».`;
@@ -690,7 +692,7 @@ export class ExpositionDetail {
     // Mettre hier pour que today > dateFinIdeation soit vrai immédiatement
     const hier = localDateISO(new Date(Date.now() - 86400000));
     await this.expoService.update(this.expoId, { dateFinIdeation: hier });
-    this.expo.update(e => e ? { ...e, dateFinIdeation: hier } : e);
+    this.expo.update((e) => (e ? { ...e, dateFinIdeation: hier } : e));
     this.savingTransition.set(false);
   }
 
@@ -722,7 +724,9 @@ export class ExpositionDetail {
     if (this.editForm.invalid) {
       this.editForm.markAllAsTouched();
       setTimeout(() => {
-        const el = this.elRef.nativeElement.querySelector('mat-form-field.ng-invalid, app-date-picker.ng-invalid') as HTMLElement | null;
+        const el = this.elRef.nativeElement.querySelector(
+          'mat-form-field.ng-invalid, app-date-picker.ng-invalid',
+        ) as HTMLElement | null;
         el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }, 50);
       return;
@@ -754,12 +758,18 @@ export class ExpositionDetail {
           visibilite: v.visibilite,
           dateFinIdeation: v.dateFinIdeation,
         };
-        if (v.description.trim()) updated.description = v.description.trim(); else delete updated.description;
-        if (themeChoisi) updated.themeChoisi = themeChoisi; else delete updated.themeChoisi;
-        if (v.dateDebutIdeation) updated.dateDebutIdeation = v.dateDebutIdeation; else delete updated.dateDebutIdeation;
-        if (v.dateFinVote) updated.dateFinVote = v.dateFinVote; else delete updated.dateFinVote;
-        if (v.dateFinSoumission) updated.dateFinSoumission = v.dateFinSoumission; else delete updated.dateFinSoumission;
-        if (v.dateExposition) updated.dateExposition = v.dateExposition; else delete updated.dateExposition;
+        if (v.description.trim()) updated.description = v.description.trim();
+        else delete updated.description;
+        if (themeChoisi) updated.themeChoisi = themeChoisi;
+        else delete updated.themeChoisi;
+        if (v.dateDebutIdeation) updated.dateDebutIdeation = v.dateDebutIdeation;
+        else delete updated.dateDebutIdeation;
+        if (v.dateFinVote) updated.dateFinVote = v.dateFinVote;
+        else delete updated.dateFinVote;
+        if (v.dateFinSoumission) updated.dateFinSoumission = v.dateFinSoumission;
+        else delete updated.dateFinSoumission;
+        if (v.dateExposition) updated.dateExposition = v.dateExposition;
+        else delete updated.dateExposition;
         return updated;
       });
 
@@ -821,7 +831,7 @@ export class ExpositionDetail {
     const expo = this.expo();
     if (expo?.photoCouverturePath) {
       await this.expoService.removeCouverture(this.expoId, expo.photoCouverturePath);
-      this.expo.update(ex =>
+      this.expo.update((ex) =>
         ex ? { ...ex, photoCouvertureUrl: undefined, photoCouverturePath: undefined } : ex,
       );
     }

@@ -1,19 +1,28 @@
 export type PhotoCategorie =
-  'portrait' | 'paysage' | 'nature' | 'architecture' |
-  'rue' | 'macro' | 'sport' | 'voyage' | 'noir-blanc' | 'abstrait' | 'autre';
+  | 'portrait'
+  | 'paysage'
+  | 'nature'
+  | 'architecture'
+  | 'rue'
+  | 'macro'
+  | 'sport'
+  | 'voyage'
+  | 'noir-blanc'
+  | 'abstrait'
+  | 'autre';
 
 export const PHOTO_CATEGORIES: { value: PhotoCategorie; label: string }[] = [
-  { value: 'portrait',      label: 'Portrait' },
-  { value: 'paysage',       label: 'Paysage' },
-  { value: 'nature',        label: 'Nature / Faune' },
-  { value: 'architecture',  label: 'Architecture / Urbain' },
-  { value: 'rue',           label: 'Rue / Street' },
-  { value: 'macro',         label: 'Macro / Gros plan' },
-  { value: 'sport',         label: 'Sport / Action' },
-  { value: 'voyage',        label: 'Voyage / Reportage' },
-  { value: 'noir-blanc',    label: 'Noir & Blanc' },
-  { value: 'abstrait',      label: 'Abstrait / Expérimental' },
-  { value: 'autre',         label: 'Autre' },
+  { value: 'portrait', label: 'Portrait' },
+  { value: 'paysage', label: 'Paysage' },
+  { value: 'nature', label: 'Nature / Faune' },
+  { value: 'architecture', label: 'Architecture / Urbain' },
+  { value: 'rue', label: 'Rue / Street' },
+  { value: 'macro', label: 'Macro / Gros plan' },
+  { value: 'sport', label: 'Sport / Action' },
+  { value: 'voyage', label: 'Voyage / Reportage' },
+  { value: 'noir-blanc', label: 'Noir & Blanc' },
+  { value: 'abstrait', label: 'Abstrait / Expérimental' },
+  { value: 'autre', label: 'Autre' },
 ];
 
 export type PhotoVisibilite = 'public' | 'membre';
@@ -51,7 +60,7 @@ export interface Photo {
   categorie?: PhotoCategorie;
   exif?: PhotoExif;
   likes?: string[];
-  thumbnailUrl?:  string;
+  thumbnailUrl?: string;
   thumbnailPath?: string;
 }
 

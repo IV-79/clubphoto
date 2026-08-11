@@ -1,8 +1,20 @@
 import { Injectable, inject } from '@angular/core';
 import {
-  collection, doc, addDoc, updateDoc, deleteDoc,
-  query, orderBy, where, deleteField, getDocs,
-  limit, startAfter, QueryDocumentSnapshot, DocumentData, QueryConstraint
+  collection,
+  doc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  query,
+  orderBy,
+  where,
+  deleteField,
+  getDocs,
+  limit,
+  startAfter,
+  QueryDocumentSnapshot,
+  DocumentData,
+  QueryConstraint,
 } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
 import { Observable, from } from 'rxjs';
@@ -17,15 +29,22 @@ export class ArticleService {
   private notifService = inject(NotificationService);
 
   getAllArticles(): Observable<Article[]> {
-    return from(getDocs(query(collection(db, 'articles'), orderBy('dateCreation', 'desc'))))
-      .pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as Article))));
+    return from(getDocs(query(collection(db, 'articles'), orderBy('dateCreation', 'desc')))).pipe(
+      map((snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Article)),
+    );
   }
 
   getPublicArticles(): Observable<Article[]> {
-    return from(getDocs(query(collection(db, 'articles'),
-      where('statut', '==', 'publie'), where('portee', '==', 'public'),
-      orderBy('dateCreation', 'desc'))))
-      .pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as Article))));
+    return from(
+      getDocs(
+        query(
+          collection(db, 'articles'),
+          where('statut', '==', 'publie'),
+          where('portee', '==', 'public'),
+          orderBy('dateCreation', 'desc'),
+        ),
+      ),
+    ).pipe(map((snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Article)));
   }
 
   getPublicArticlesOnce(): Observable<Article[]> {
@@ -35,8 +54,12 @@ export class ArticleService {
   async getArticlesPaged(
     role: string | null,
     pageSize: number,
-    after?: QueryDocumentSnapshot<DocumentData>
-  ): Promise<{ items: Article[]; cursor: QueryDocumentSnapshot<DocumentData> | null; hasMore: boolean }> {
+    after?: QueryDocumentSnapshot<DocumentData>,
+  ): Promise<{
+    items: Article[];
+    cursor: QueryDocumentSnapshot<DocumentData> | null;
+    hasMore: boolean;
+  }> {
     const constraints: QueryConstraint[] = [];
     if (role !== 'admin' && role !== 'contributeur') {
       constraints.push(where('statut', '==', 'publie'));
@@ -49,30 +72,37 @@ export class ArticleService {
 
     const snap = await getDocs(query(collection(db, 'articles'), ...constraints));
     const hasMore = snap.docs.length > pageSize;
-    const docs    = snap.docs.slice(0, pageSize);
+    const docs = snap.docs.slice(0, pageSize);
     return {
-      items:  docs.map(d => ({ id: d.id, ...d.data() } as Article)),
+      items: docs.map((d) => ({ id: d.id, ...d.data() }) as Article),
       cursor: docs[docs.length - 1] ?? null,
       hasMore,
     };
   }
 
   getPublishedArticles(): Observable<Article[]> {
-    return from(getDocs(query(collection(db, 'articles'),
-      where('statut', '==', 'publie'), orderBy('dateCreation', 'desc'))))
-      .pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as Article))));
+    return from(
+      getDocs(
+        query(
+          collection(db, 'articles'),
+          where('statut', '==', 'publie'),
+          orderBy('dateCreation', 'desc'),
+        ),
+      ),
+    ).pipe(map((snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Article)));
   }
 
   async addArticle(article: Omit<Article, 'id'>): Promise<string> {
-    const clean = Object.fromEntries(
-      Object.entries(article).filter(([, v]) => v !== undefined)
-    );
+    const clean = Object.fromEntries(Object.entries(article).filter(([, v]) => v !== undefined));
     const ref = await addDoc(collection(db, 'articles'), clean);
     if (article.statut === 'publie') {
-      this.notifService.broadcast('article',
-        `${article.auteurNom} a publié un nouvel article : « ${article.titre} »`,
-        { lien: '/actualites', sourceNom: article.auteurNom, excludeUid: article.auteurUid }
-      ).catch(() => {});
+      this.notifService
+        .broadcast(
+          'article',
+          `${article.auteurNom} a publié un nouvel article : « ${article.titre} »`,
+          { lien: '/actualites', sourceNom: article.auteurNom, excludeUid: article.auteurUid },
+        )
+        .catch(() => {});
     }
     return ref.id;
   }
@@ -80,20 +110,27 @@ export class ArticleService {
   async updateArticle(
     id: string,
     data: Partial<Omit<Article, 'id' | 'dateCreation' | 'auteurUid'>>,
-    publishNotif?: { titre: string; auteurNom: string; auteurUid: string }
+    publishNotif?: { titre: string; auteurNom: string; auteurUid: string },
   ): Promise<void> {
     const mapped = Object.fromEntries(
-      Object.entries(data).map(([k, v]) => [k, v === undefined ? deleteField() : v])
+      Object.entries(data).map(([k, v]) => [k, v === undefined ? deleteField() : v]),
     );
     await updateDoc(doc(db, 'articles', id), {
       ...mapped,
       dateMiseAJour: new Date().toISOString(),
     });
     if (publishNotif && data.statut === 'publie') {
-      this.notifService.broadcast('article',
-        `${publishNotif.auteurNom} a publié un article : « ${publishNotif.titre} »`,
-        { lien: '/actualites', sourceNom: publishNotif.auteurNom, excludeUid: publishNotif.auteurUid }
-      ).catch(() => {});
+      this.notifService
+        .broadcast(
+          'article',
+          `${publishNotif.auteurNom} a publié un article : « ${publishNotif.titre} »`,
+          {
+            lien: '/actualites',
+            sourceNom: publishNotif.auteurNom,
+            excludeUid: publishNotif.auteurUid,
+          },
+        )
+        .catch(() => {});
     }
   }
 
@@ -105,23 +142,28 @@ export class ArticleService {
   uploadCouverture(
     articleId: string,
     file: File,
-    onProgress?: (pct: number) => void
+    onProgress?: (pct: number) => void,
   ): Promise<{ url: string; storagePath: string }> {
-    return compressImage(file, COMPRESS_ACTUALITE).then(compressed => {
+    return compressImage(file, COMPRESS_ACTUALITE).then((compressed) => {
       const path = `articles/${articleId}/couverture.webp`;
       const storageRef = ref(storage, path);
       return new Promise((resolve, reject) => {
         const task = uploadBytesResumable(storageRef, compressed, { contentType: 'image/webp' });
-        task.on('state_changed',
-          snap => onProgress?.(Math.round(snap.bytesTransferred / snap.totalBytes * 100)),
+        task.on(
+          'state_changed',
+          (snap) => onProgress?.(Math.round((snap.bytesTransferred / snap.totalBytes) * 100)),
           reject,
-          async () => resolve({ url: await getDownloadURL(task.snapshot.ref), storagePath: path })
+          async () => resolve({ url: await getDownloadURL(task.snapshot.ref), storagePath: path }),
         );
       });
     });
   }
 
   async deleteCouverture(storagePath: string): Promise<void> {
-    try { await deleteObject(ref(storage, storagePath)); } catch { /* ignore */ }
+    try {
+      await deleteObject(ref(storage, storagePath));
+    } catch {
+      /* ignore */
+    }
   }
 }

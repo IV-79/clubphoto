@@ -19,7 +19,9 @@
 @if (suiteItems().length > 0) {
   @if (!suiteVisible()) {
     <button class="btn-suite" (click)="suiteVisible.set(true)">
-      Voir la suite du classement ({{ suiteItems().length }} photo{{ suiteItems().length > 1 ? 's' : '' }})
+      Voir la suite du classement ({{ suiteItems().length }} photo{{
+        suiteItems().length > 1 ? 's' : ''
+      }})
     </button>
   } @else {
     <div class="suite-grid">

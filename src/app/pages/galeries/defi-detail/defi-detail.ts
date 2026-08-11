@@ -135,9 +135,10 @@ export class DefiDetail {
   statut = computed((): DefiStatut => (this.defi() ? getDefiStatut(this.defi()!) : 'a_venir'));
   totalVotesDeposes = computed(() => this.votes().reduce((acc, v) => acc + v.photoIds.length, 0));
 
-  typeBadgeHero = computed(
-    (): HeroBadge => ({ text: '🏅 Défi Photo', css: 'event-type-badge badge-defi-type' }),
-  );
+  typeBadgeHero = computed((): HeroBadge => ({
+    text: '🏅 Défi Photo',
+    css: 'event-type-badge badge-defi-type',
+  }));
   statusHero = computed((): HeroBadge => {
     const s = this.statut();
     const css: Record<string, string> = {

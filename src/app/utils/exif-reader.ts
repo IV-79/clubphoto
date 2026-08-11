@@ -3,11 +3,17 @@ import { PhotoExif } from '../models/photo.model';
 import { GpsConsentService } from '../services/gps-consent.service';
 
 function getImageDimensions(file: File): Promise<{ largeur: number; hauteur: number } | undefined> {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     const url = URL.createObjectURL(file);
     const img = new Image();
-    img.onload = () => { resolve({ largeur: img.naturalWidth, hauteur: img.naturalHeight }); URL.revokeObjectURL(url); };
-    img.onerror = () => { resolve(undefined); URL.revokeObjectURL(url); };
+    img.onload = () => {
+      resolve({ largeur: img.naturalWidth, hauteur: img.naturalHeight });
+      URL.revokeObjectURL(url);
+    };
+    img.onerror = () => {
+      resolve(undefined);
+      URL.revokeObjectURL(url);
+    };
     img.src = url;
   });
 }
@@ -40,13 +46,13 @@ export async function readExif(file: File): Promise<PhotoExif> {
       getImageDimensions(file),
     ]);
 
-    const ex  = (result as { exif?: Record<string, RawTag> }).exif  ?? {};
-    const xmp = (result as { xmp?:  Record<string, RawTag> }).xmp   ?? {};
-    const gps = (result as { gps?:  { Latitude?: number; Longitude?: number } }).gps;
+    const ex = (result as { exif?: Record<string, RawTag> }).exif ?? {};
+    const xmp = (result as { xmp?: Record<string, RawTag> }).xmp ?? {};
+    const gps = (result as { gps?: { Latitude?: number; Longitude?: number } }).gps;
 
     const out: PhotoExif = {};
 
-    const make  = str(ex['Make']);
+    const make = str(ex['Make']);
     const model = str(ex['Model']);
     if (make || model) out.appareil = [make, model].filter(Boolean).join(' ');
 
@@ -81,7 +87,8 @@ export async function readExif(file: File): Promise<PhotoExif> {
     }
 
     // Date EXIF format "YYYY:MM:DD HH:MM:SS" → normaliser pour Date()
-    const dateDesc = str(ex['DateTimeOriginal']) ?? str(ex['DateTimeDigitized']) ?? str(ex['DateTime']);
+    const dateDesc =
+      str(ex['DateTimeOriginal']) ?? str(ex['DateTimeDigitized']) ?? str(ex['DateTime']);
     if (dateDesc) {
       const normalized = dateDesc.replace(/^(\d{4}):(\d{2}):(\d{2})/, '$1-$2-$3');
       const d = new Date(normalized);
@@ -105,7 +112,10 @@ export async function readExif(file: File): Promise<PhotoExif> {
   }
 }
 
-export async function readExifWithConsent(file: File, gpsService: GpsConsentService): Promise<PhotoExif> {
+export async function readExifWithConsent(
+  file: File,
+  gpsService: GpsConsentService,
+): Promise<PhotoExif> {
   const exif = await readExif(file);
   if (exif.gps) {
     const keep = await gpsService.requestConsent();
@@ -116,5 +126,5 @@ export async function readExifWithConsent(file: File, gpsService: GpsConsentServ
 
 export function hasExif(exif?: PhotoExif): boolean {
   if (!exif) return false;
-  return Object.values(exif).some(v => v != null && v !== '');
+  return Object.values(exif).some((v) => v != null && v !== '');
 }

@@ -1,5 +1,4 @@
 <div class="maint-page">
-
   <div class="page-header">
     <h2 class="page-title">Maintenance</h2>
   </div>
@@ -9,30 +8,34 @@
     <mat-icon class="info-icon">info_outline</mat-icon>
     <div class="info-text">
       <strong>Opérations à utiliser avec parcimonie.</strong>
-      Les actions marquées <span class="badge-inline">lecture approfondie</span> lisent un grand nombre de documents Firestore
-      et peuvent consommer rapidement le quota journalier. Ne les lancez pas sans raison.
+      Les actions marquées <span class="badge-inline">lecture approfondie</span> lisent un grand
+      nombre de documents Firestore et peuvent consommer rapidement le quota journalier. Ne les
+      lancez pas sans raison.
     </div>
   </div>
 
   <!-- ── Nettoyage photos ─────────────────────────────── -->
   <section class="maint-section">
     <h3 class="section-title">Nettoyage photos</h3>
-    <p class="section-desc">Conserve les 3 photos les mieux votées par événement (ex-aequo inclus). Les documents sont toujours conservés.</p>
+    <p class="section-desc">
+      Conserve les 3 photos les mieux votées par événement (ex-aequo inclus). Les documents sont
+      toujours conservés.
+    </p>
 
     <!-- Barre de progression -->
     @if (cleanupService.progress(); as prog) {
       <div class="cleanup-prog-wrap">
         <div class="cleanup-prog-label">{{ prog.label }} — {{ prog.current }}/{{ prog.total }}</div>
         <div class="cleanup-prog-track">
-          <div class="cleanup-prog-fill"
-               [style.width.%]="prog.total > 0 ? prog.current / prog.total * 100 : 0">
-          </div>
+          <div
+            class="cleanup-prog-fill"
+            [style.width.%]="prog.total > 0 ? (prog.current / prog.total) * 100 : 0"
+          ></div>
         </div>
       </div>
     }
 
     <div class="cleanup-grid">
-
       <!-- Thèmes du mois -->
       <div class="cleanup-block">
         <div class="cleanup-block-head">
@@ -41,13 +44,22 @@
         </div>
         <div class="cleanup-opts">
           <label class="cu-opt">
-            <input type="checkbox" [checked]="keepTop3Themes()" (change)="onTop3ThemesChange($event)">
+            <input
+              type="checkbox"
+              [checked]="keepTop3Themes()"
+              (change)="onTop3ThemesChange($event)"
+            />
             Conserver le top 3
           </label>
         </div>
         <div class="cleanup-date-row">
           <span class="cleanup-date-lbl">Avant le</span>
-          <app-date-picker class="cleanup-dp" label="Date" [value]="cleanupThemesDate()" (valueChange)="onThemesDateChange($event)"></app-date-picker>
+          <app-date-picker
+            class="cleanup-dp"
+            label="Date"
+            [value]="cleanupThemesDate()"
+            (valueChange)="onThemesDateChange($event)"
+          ></app-date-picker>
         </div>
         @if (cleanupThemesPreview(); as p) {
           <div class="cleanup-summary">
@@ -56,18 +68,35 @@
             } @else {
               <strong>{{ p.events }}</strong> thème(s) ·
               <span class="cu-del">{{ p.photosToDelete }}</span> à supprimer
-              @if (p.photosToKeep > 0) {, {{ p.photosToKeep }} conservée(s)}
-              @if (p.bytesToFree > 0) { · <em>{{ formatBytes(p.bytesToFree) }}</em>}
+              @if (p.photosToKeep > 0) {
+                , {{ p.photosToKeep }} conservée(s)
+              }
+              @if (p.bytesToFree > 0) {
+                · <em>{{ formatBytes(p.bytesToFree) }}</em>
+              }
             }
           </div>
         }
         @if (cleanupThemesResult(); as r) {
-          <div class="cleanup-result">✓ {{ r.photosDeleted }} supprimée(s)@if (r.bytesFreed > 0) {, {{ formatBytes(r.bytesFreed) }} libérés}</div>
+          <div class="cleanup-result">
+            ✓ {{ r.photosDeleted }} supprimée(s)
+            @if (r.bytesFreed > 0) {
+              , {{ formatBytes(r.bytesFreed) }} libérés
+            }
+          </div>
         }
         <div class="cleanup-btns">
-          <button class="btn-cu-preview" (click)="previewThemes()" [disabled]="cleanupRunning() || !cleanupThemesDate()">Analyser</button>
+          <button
+            class="btn-cu-preview"
+            (click)="previewThemes()"
+            [disabled]="cleanupRunning() || !cleanupThemesDate()"
+          >
+            Analyser
+          </button>
           @if ((cleanupThemesPreview()?.photosToDelete ?? 0) > 0) {
-            <button class="btn-cu-exec" (click)="executeThemes()" [disabled]="cleanupRunning()">Nettoyer</button>
+            <button class="btn-cu-exec" (click)="executeThemes()" [disabled]="cleanupRunning()">
+              Nettoyer
+            </button>
           }
         </div>
       </div>
@@ -80,13 +109,18 @@
         </div>
         <div class="cleanup-opts">
           <label class="cu-opt">
-            <input type="checkbox" [checked]="keepTop3Os()" (change)="onTop3OsChange($event)">
+            <input type="checkbox" [checked]="keepTop3Os()" (change)="onTop3OsChange($event)" />
             Conserver le top 3 par thème
           </label>
         </div>
         <div class="cleanup-date-row">
           <span class="cleanup-date-lbl">Avant le</span>
-          <app-date-picker class="cleanup-dp" label="Date" [value]="cleanupOsDate()" (valueChange)="onOsDateChange($event)"></app-date-picker>
+          <app-date-picker
+            class="cleanup-dp"
+            label="Date"
+            [value]="cleanupOsDate()"
+            (valueChange)="onOsDateChange($event)"
+          ></app-date-picker>
         </div>
         @if (cleanupOsPreview(); as p) {
           <div class="cleanup-summary">
@@ -95,18 +129,35 @@
             } @else {
               <strong>{{ p.events }}</strong> one-shot(s) ·
               <span class="cu-del">{{ p.photosToDelete }}</span> à supprimer
-              @if (p.photosToKeep > 0) {, {{ p.photosToKeep }} conservée(s)}
-              @if (p.bytesToFree > 0) { · <em>{{ formatBytes(p.bytesToFree) }}</em>}
+              @if (p.photosToKeep > 0) {
+                , {{ p.photosToKeep }} conservée(s)
+              }
+              @if (p.bytesToFree > 0) {
+                · <em>{{ formatBytes(p.bytesToFree) }}</em>
+              }
             }
           </div>
         }
         @if (cleanupOsResult(); as r) {
-          <div class="cleanup-result">✓ {{ r.photosDeleted }} supprimée(s)@if (r.bytesFreed > 0) {, {{ formatBytes(r.bytesFreed) }} libérés}</div>
+          <div class="cleanup-result">
+            ✓ {{ r.photosDeleted }} supprimée(s)
+            @if (r.bytesFreed > 0) {
+              , {{ formatBytes(r.bytesFreed) }} libérés
+            }
+          </div>
         }
         <div class="cleanup-btns">
-          <button class="btn-cu-preview" (click)="previewOs()" [disabled]="cleanupRunning() || !cleanupOsDate()">Analyser</button>
+          <button
+            class="btn-cu-preview"
+            (click)="previewOs()"
+            [disabled]="cleanupRunning() || !cleanupOsDate()"
+          >
+            Analyser
+          </button>
           @if ((cleanupOsPreview()?.photosToDelete ?? 0) > 0) {
-            <button class="btn-cu-exec" (click)="executeOs()" [disabled]="cleanupRunning()">Nettoyer</button>
+            <button class="btn-cu-exec" (click)="executeOs()" [disabled]="cleanupRunning()">
+              Nettoyer
+            </button>
           }
         </div>
       </div>
@@ -119,13 +170,22 @@
         </div>
         <div class="cleanup-opts">
           <label class="cu-opt">
-            <input type="checkbox" [checked]="keepTop3Defis()" (change)="onTop3DefiChange($event)">
+            <input
+              type="checkbox"
+              [checked]="keepTop3Defis()"
+              (change)="onTop3DefiChange($event)"
+            />
             Conserver le top 3 global
           </label>
         </div>
         <div class="cleanup-date-row">
           <span class="cleanup-date-lbl">Avant le</span>
-          <app-date-picker class="cleanup-dp" label="Date" [value]="cleanupDefiDate()" (valueChange)="onDefiDateChange($event)"></app-date-picker>
+          <app-date-picker
+            class="cleanup-dp"
+            label="Date"
+            [value]="cleanupDefiDate()"
+            (valueChange)="onDefiDateChange($event)"
+          ></app-date-picker>
         </div>
         @if (cleanupDefiPreview(); as p) {
           <div class="cleanup-summary">
@@ -134,18 +194,35 @@
             } @else {
               <strong>{{ p.events }}</strong> défi(s) ·
               <span class="cu-del">{{ p.photosToDelete }}</span> à supprimer
-              @if (p.photosToKeep > 0) {, {{ p.photosToKeep }} conservée(s)}
-              @if (p.bytesToFree > 0) { · <em>{{ formatBytes(p.bytesToFree) }}</em>}
+              @if (p.photosToKeep > 0) {
+                , {{ p.photosToKeep }} conservée(s)
+              }
+              @if (p.bytesToFree > 0) {
+                · <em>{{ formatBytes(p.bytesToFree) }}</em>
+              }
             }
           </div>
         }
         @if (cleanupDefiResult(); as r) {
-          <div class="cleanup-result">✓ {{ r.photosDeleted }} supprimée(s)@if (r.bytesFreed > 0) {, {{ formatBytes(r.bytesFreed) }} libérés}</div>
+          <div class="cleanup-result">
+            ✓ {{ r.photosDeleted }} supprimée(s)
+            @if (r.bytesFreed > 0) {
+              , {{ formatBytes(r.bytesFreed) }} libérés
+            }
+          </div>
         }
         <div class="cleanup-btns">
-          <button class="btn-cu-preview" (click)="previewDefis()" [disabled]="cleanupRunning() || !cleanupDefiDate()">Analyser</button>
+          <button
+            class="btn-cu-preview"
+            (click)="previewDefis()"
+            [disabled]="cleanupRunning() || !cleanupDefiDate()"
+          >
+            Analyser
+          </button>
           @if ((cleanupDefiPreview()?.photosToDelete ?? 0) > 0) {
-            <button class="btn-cu-exec" (click)="executeDefis()" [disabled]="cleanupRunning()">Nettoyer</button>
+            <button class="btn-cu-exec" (click)="executeDefis()" [disabled]="cleanupRunning()">
+              Nettoyer
+            </button>
           }
         </div>
       </div>
@@ -159,7 +236,12 @@
         <p class="cleanup-block-desc">Toutes les photos supprimées (pas de votes)</p>
         <div class="cleanup-date-row">
           <span class="cleanup-date-lbl">Avant le</span>
-          <app-date-picker class="cleanup-dp" label="Date" [value]="cleanupSortieDate()" (valueChange)="onSortieDate($event)"></app-date-picker>
+          <app-date-picker
+            class="cleanup-dp"
+            label="Date"
+            [value]="cleanupSortieDate()"
+            (valueChange)="onSortieDate($event)"
+          ></app-date-picker>
         </div>
         @if (cleanupSortiePreview(); as p) {
           <div class="cleanup-summary">
@@ -175,9 +257,21 @@
           <div class="cleanup-result">✓ {{ r.photosDeleted }} supprimée(s)</div>
         }
         <div class="cleanup-btns">
-          <button class="btn-cu-preview" (click)="previewSorties()" [disabled]="cleanupRunning() || !cleanupSortieDate()">Analyser</button>
+          <button
+            class="btn-cu-preview"
+            (click)="previewSorties()"
+            [disabled]="cleanupRunning() || !cleanupSortieDate()"
+          >
+            Analyser
+          </button>
           @if ((cleanupSortiePreview()?.photosToDelete ?? 0) > 0) {
-            <button class="btn-cu-exec btn-cu-exec--danger" (click)="executeSorties()" [disabled]="cleanupRunning()">Supprimer tout</button>
+            <button
+              class="btn-cu-exec btn-cu-exec--danger"
+              (click)="executeSorties()"
+              [disabled]="cleanupRunning()"
+            >
+              Supprimer tout
+            </button>
           }
         </div>
       </div>
@@ -191,13 +285,22 @@
         <p class="cleanup-block-desc">Supprime le doc article et son image de couverture.</p>
         <div class="cleanup-opts">
           <label class="cu-opt">
-            <input type="checkbox" [checked]="articleExpiredOnly()" (change)="onArticleExpiredOnlyChange($event)">
+            <input
+              type="checkbox"
+              [checked]="articleExpiredOnly()"
+              (change)="onArticleExpiredOnlyChange($event)"
+            />
             Expirés seulement
           </label>
         </div>
         <div class="cleanup-date-row">
           <span class="cleanup-date-lbl">Avant le</span>
-          <app-date-picker class="cleanup-dp" label="Date" [value]="cleanupArticleDate()" (valueChange)="onArticleDateChange($event)"></app-date-picker>
+          <app-date-picker
+            class="cleanup-dp"
+            label="Date"
+            [value]="cleanupArticleDate()"
+            (valueChange)="onArticleDateChange($event)"
+          ></app-date-picker>
         </div>
         @if (cleanupArticlePreview(); as p) {
           <div class="cleanup-summary">
@@ -205,7 +308,9 @@
               <span class="cu-empty">Aucun article à nettoyer.</span>
             } @else {
               <strong>{{ p.events }}</strong> article(s) à supprimer
-              @if (p.photosToDelete > 0) { · <span class="cu-del">{{ p.photosToDelete }}</span> image(s) de couverture}
+              @if (p.photosToDelete > 0) {
+                · <span class="cu-del">{{ p.photosToDelete }}</span> image(s) de couverture
+              }
             }
           </div>
         }
@@ -213,9 +318,21 @@
           <div class="cleanup-result">✓ {{ r.processed }} article(s) supprimé(s)</div>
         }
         <div class="cleanup-btns">
-          <button class="btn-cu-preview" (click)="previewArticles()" [disabled]="cleanupRunning() || !cleanupArticleDate()">Analyser</button>
+          <button
+            class="btn-cu-preview"
+            (click)="previewArticles()"
+            [disabled]="cleanupRunning() || !cleanupArticleDate()"
+          >
+            Analyser
+          </button>
           @if ((cleanupArticlePreview()?.events ?? 0) > 0) {
-            <button class="btn-cu-exec btn-cu-exec--danger" (click)="executeArticles()" [disabled]="cleanupRunning()">Supprimer</button>
+            <button
+              class="btn-cu-exec btn-cu-exec--danger"
+              (click)="executeArticles()"
+              [disabled]="cleanupRunning()"
+            >
+              Supprimer
+            </button>
           }
         </div>
       </div>
@@ -228,18 +345,24 @@
           <span class="cu-warn-badge">lecture approfondie</span>
         </div>
         <p class="cleanup-block-desc">
-          Fichiers présents dans Storage sans document Firestore correspondant.
-          Périmètre : thèmes, one-shots, défis, sorties, actualités (portfolio et profils exclus).
+          Fichiers présents dans Storage sans document Firestore correspondant. Périmètre : thèmes,
+          one-shots, défis, sorties, actualités (portfolio et profils exclus).
         </p>
         @if (orphanPreview(); as p) {
           <div class="cleanup-summary">
             @if (p.orphanCount === 0) {
-              <span class="cu-empty">Aucun orphelin détecté — {{ p.scanned }} fichier(s) scannés.</span>
+              <span class="cu-empty"
+                >Aucun orphelin détecté — {{ p.scanned }} fichier(s) scannés.</span
+              >
             } @else {
-              <span class="cu-del">{{ p.orphanCount }}</span> orphelin(s) sur {{ p.scanned }} fichier(s) scannés.
+              <span class="cu-del">{{ p.orphanCount }}</span> orphelin(s) sur
+              {{ p.scanned }} fichier(s) scannés.
               @if (p.orphanPaths.length > 0) {
                 <details class="cu-orphan-details">
-                  <summary>Chemins ({{ p.orphanPaths.length }}{{ p.orphanPaths.length < p.orphanCount ? ' premiers affichés' : '' }})</summary>
+                  <summary>
+                    Chemins ({{ p.orphanPaths.length
+                    }}{{ p.orphanPaths.length < p.orphanCount ? ' premiers affichés' : '' }})
+                  </summary>
                   <ul class="cu-orphan-list">
                     @for (path of p.orphanPaths; track path) {
                       <li>{{ path }}</li>
@@ -254,23 +377,31 @@
           <div class="cleanup-result">✓ {{ r.deleted }} fichier(s) supprimé(s)</div>
         }
         <div class="cleanup-btns">
-          <button class="btn-cu-preview" (click)="previewOrphans()" [disabled]="cleanupRunning()">Analyser</button>
+          <button class="btn-cu-preview" (click)="previewOrphans()" [disabled]="cleanupRunning()">
+            Analyser
+          </button>
           @if ((orphanPreview()?.orphanCount ?? 0) > 0) {
-            <button class="btn-cu-exec btn-cu-exec--danger" (click)="executeOrphans()" [disabled]="cleanupRunning()">Supprimer les orphelins</button>
+            <button
+              class="btn-cu-exec btn-cu-exec--danger"
+              (click)="executeOrphans()"
+              [disabled]="cleanupRunning()"
+            >
+              Supprimer les orphelins
+            </button>
           }
         </div>
       </div>
-
     </div>
   </section>
 
   <!-- ── Recalculs ─────────────────────────────────────── -->
   <section class="maint-section">
     <h3 class="section-title">Recalculs</h3>
-    <p class="section-desc">Resynchronise les compteurs dénormalisés en relisant toutes les sous-collections.</p>
+    <p class="section-desc">
+      Resynchronise les compteurs dénormalisés en relisant toutes les sous-collections.
+    </p>
 
     <div class="recalcul-grid">
-
       <!-- Compteurs thèmes -->
       <div class="recalcul-item">
         <div class="recalcul-item-head">
@@ -278,13 +409,18 @@
           <span class="ri-label">Compteurs thèmes du mois</span>
           <span class="cu-warn-badge">lecture approfondie</span>
         </div>
-        <p class="ri-desc">Recalcule <code>nbSoumissions</code> et <code>nbParticipants</code> pour tous les thèmes.</p>
+        <p class="ri-desc">
+          Recalcule <code>nbSoumissions</code> et <code>nbParticipants</code> pour tous les thèmes.
+        </p>
         @if (recalculThemesOk()) {
           <div class="recalcul-ok">✓ Compteurs mis à jour</div>
         }
         <div class="cleanup-btns">
-          <button class="btn-cu-preview" (click)="recalculerCompteursThemes()"
-                  [disabled]="recalculThemesRunning() || cleanupRunning() || recalculStorageRunning()">
+          <button
+            class="btn-cu-preview"
+            (click)="recalculerCompteursThemes()"
+            [disabled]="recalculThemesRunning() || cleanupRunning() || recalculStorageRunning()"
+          >
             {{ recalculThemesRunning() ? 'Recalcul… ' + recalculThemesProgress() : 'Recalculer' }}
           </button>
         </div>
@@ -297,19 +433,22 @@
           <span class="ri-label">Espace utilisé par membre</span>
           <span class="cu-warn-badge">lecture approfondie</span>
         </div>
-        <p class="ri-desc">Recalcule <code>storageUsed</code> pour chaque membre (portfolio, thèmes, one-shots…).</p>
+        <p class="ri-desc">
+          Recalcule <code>storageUsed</code> pour chaque membre (portfolio, thèmes, one-shots…).
+        </p>
         @if (recalculStorageOk()) {
           <div class="recalcul-ok">✓ Stockage mis à jour</div>
         }
         <div class="cleanup-btns">
-          <button class="btn-cu-preview" (click)="recalculerStockageMembres()"
-                  [disabled]="recalculStorageRunning() || cleanupRunning() || recalculThemesRunning()">
+          <button
+            class="btn-cu-preview"
+            (click)="recalculerStockageMembres()"
+            [disabled]="recalculStorageRunning() || cleanupRunning() || recalculThemesRunning()"
+          >
             {{ recalculStorageRunning() ? 'Recalcul… ' + recalculStorageProgress() : 'Recalculer' }}
           </button>
         </div>
       </div>
-
     </div>
   </section>
-
 </div>

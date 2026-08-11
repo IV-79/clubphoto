@@ -1,8 +1,26 @@
 import { Injectable, inject } from '@angular/core';
-import { ref, uploadBytesResumable, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import {
-  collection, doc, addDoc, deleteDoc, updateDoc, query, where, orderBy, limit,
-  deleteField, arrayUnion, arrayRemove, increment, getDocs
+  ref,
+  uploadBytesResumable,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject,
+} from 'firebase/storage';
+import {
+  collection,
+  doc,
+  addDoc,
+  deleteDoc,
+  updateDoc,
+  query,
+  where,
+  orderBy,
+  limit,
+  deleteField,
+  arrayUnion,
+  arrayRemove,
+  increment,
+  getDocs,
 } from 'firebase/firestore';
 import { Observable, from, map } from 'rxjs';
 import { db, storage, collectionStream } from '../utils/firebase';
@@ -22,23 +40,29 @@ export class PhotoService {
     file: File,
     uid: string,
     nomMembre: string,
-    meta: { titre: string; description?: string; visibilite: PhotoVisibilite; categorie?: string; exif?: PhotoExif }
+    meta: {
+      titre: string;
+      description?: string;
+      visibilite: PhotoVisibilite;
+      categorie?: string;
+      exif?: PhotoExif;
+    },
   ): Observable<UploadState> {
-    return new Observable(observer => {
+    return new Observable((observer) => {
       const id = generateId();
       const ext = file.name.split('.').pop() ?? 'webp';
       const storagePath = `photos/${uid}/${id}.${ext}`;
-      const thumbPath   = `photos/${uid}/${id}_thumb.${ext}`;
+      const thumbPath = `photos/${uid}/${id}_thumb.${ext}`;
       const storageRef = ref(storage, storagePath);
       const task = uploadBytesResumable(storageRef, file);
 
       task.on(
         'state_changed',
-        snapshot => {
+        (snapshot) => {
           const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
           observer.next({ state: 'uploading', progress });
         },
-        error => observer.error(error),
+        (error) => observer.error(error),
         async () => {
           try {
             const [url, thumb] = await Promise.all([
@@ -57,21 +81,22 @@ export class PhotoService {
               dateUpload: new Date().toISOString(),
               storagePath,
               fileSize: file.size + thumb.size,
-              thumbnailUrl, thumbnailPath: thumbPath,
+              thumbnailUrl,
+              thumbnailPath: thumbPath,
               ...(meta.categorie ? { categorie: meta.categorie as Photo['categorie'] } : {}),
               ...(hasExif(meta.exif) ? { exif: meta.exif } : {}),
             };
             const docRef = await addDoc(collection(db, 'photos'), data);
             updateDoc(doc(db, 'users', uid), {
               'storageUsed.portfolio': increment(file.size + thumb.size),
-              'photoCount': increment(1),
+              photoCount: increment(1),
             }).catch(() => {});
             observer.next({ state: 'done', progress: 100, photo: { id: docRef.id, ...data } });
             observer.complete();
           } catch (e) {
             observer.error(e);
           }
-        }
+        },
       );
     });
   }
@@ -80,37 +105,49 @@ export class PhotoService {
     const q = query(
       collection(db, 'photos'),
       where('uid', '==', uid),
-      orderBy('dateUpload', 'desc')
+      orderBy('dateUpload', 'desc'),
     );
     return collectionStream<Photo>(q, 'id');
   }
 
   getPhotosVisiteurOnce(uid: string): Observable<Photo[]> {
-    const q = query(collection(db, 'photos'),
-      where('uid', '==', uid), where('visibilite', '==', 'public'));
-    return from(getDocs(q)).pipe(map(snap => snap.docs
-      .map(d => ({ id: d.id, ...d.data() } as Photo))
-      .sort((a, b) => b.dateUpload.localeCompare(a.dateUpload))
-    ));
+    const q = query(
+      collection(db, 'photos'),
+      where('uid', '==', uid),
+      where('visibilite', '==', 'public'),
+    );
+    return from(getDocs(q)).pipe(
+      map((snap) =>
+        snap.docs
+          .map((d) => ({ id: d.id, ...d.data() }) as Photo)
+          .sort((a, b) => b.dateUpload.localeCompare(a.dateUpload)),
+      ),
+    );
   }
 
   getPhotosMembreOnce(uid: string): Observable<Photo[]> {
-    const q = query(collection(db, 'photos'),
-      where('uid', '==', uid), where('visibilite', 'in', ['public', 'membre']));
-    return from(getDocs(q)).pipe(map(snap => snap.docs
-      .map(d => ({ id: d.id, ...d.data() } as Photo))
-      .sort((a, b) => b.dateUpload.localeCompare(a.dateUpload))
-    ));
+    const q = query(
+      collection(db, 'photos'),
+      where('uid', '==', uid),
+      where('visibilite', 'in', ['public', 'membre']),
+    );
+    return from(getDocs(q)).pipe(
+      map((snap) =>
+        snap.docs
+          .map((d) => ({ id: d.id, ...d.data() }) as Photo)
+          .sort((a, b) => b.dateUpload.localeCompare(a.dateUpload)),
+      ),
+    );
   }
 
   getPhotosVisiteur(uid: string): Observable<Photo[]> {
     const q = query(
       collection(db, 'photos'),
       where('uid', '==', uid),
-      where('visibilite', '==', 'public')
+      where('visibilite', '==', 'public'),
     );
     return collectionStream<Photo>(q, 'id').pipe(
-      map(photos => [...photos].sort((a, b) => b.dateUpload.localeCompare(a.dateUpload)))
+      map((photos) => [...photos].sort((a, b) => b.dateUpload.localeCompare(a.dateUpload))),
     );
   }
 
@@ -118,10 +155,10 @@ export class PhotoService {
     const q = query(
       collection(db, 'photos'),
       where('uid', '==', uid),
-      where('visibilite', 'in', ['public', 'membre'])
+      where('visibilite', 'in', ['public', 'membre']),
     );
     return collectionStream<Photo>(q, 'id').pipe(
-      map(photos => [...photos].sort((a, b) => b.dateUpload.localeCompare(a.dateUpload)))
+      map((photos) => [...photos].sort((a, b) => b.dateUpload.localeCompare(a.dateUpload))),
     );
   }
 
@@ -130,15 +167,22 @@ export class PhotoService {
       collection(db, 'photos'),
       where('visibilite', '==', 'public'),
       orderBy('dateUpload', 'desc'),
-      limit(limitCount)
+      limit(limitCount),
     );
     return collectionStream<Photo>(q, 'id');
   }
 
   getRecentPublicPhotosOnce(limitCount = 8): Observable<Photo[]> {
-    return from(getDocs(query(collection(db, 'photos'),
-      where('visibilite', '==', 'public'), orderBy('dateUpload', 'desc'), limit(limitCount))))
-      .pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as Photo))));
+    return from(
+      getDocs(
+        query(
+          collection(db, 'photos'),
+          where('visibilite', '==', 'public'),
+          orderBy('dateUpload', 'desc'),
+          limit(limitCount),
+        ),
+      ),
+    ).pipe(map((snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Photo)));
   }
 
   async deletePhoto(photo: Photo): Promise<void> {
@@ -146,16 +190,20 @@ export class PhotoService {
     const deletes: Promise<unknown>[] = [
       deleteObject(ref(storage, photo.storagePath)),
       deleteDoc(doc(db, 'photos', photo.id)),
-      ...commSnap.docs.map(d => deleteDoc(d.ref)),
+      ...commSnap.docs.map((d) => deleteDoc(d.ref)),
     ];
-    if (photo.thumbnailPath) deletes.push(deleteObject(ref(storage, photo.thumbnailPath)).catch(() => {}));
+    if (photo.thumbnailPath)
+      deletes.push(deleteObject(ref(storage, photo.thumbnailPath)).catch(() => {}));
     await Promise.all(deletes);
-    const update: Record<string, unknown> = { 'photoCount': increment(-1) };
+    const update: Record<string, unknown> = { photoCount: increment(-1) };
     if (photo.fileSize) update['storageUsed.portfolio'] = increment(-photo.fileSize);
     updateDoc(doc(db, 'users', photo.uid), update).catch(() => {});
   }
 
-  async updatePhotoMeta(photoId: string, data: { titre: string; description: string; visibilite: PhotoVisibilite; categorie: string }): Promise<void> {
+  async updatePhotoMeta(
+    photoId: string,
+    data: { titre: string; description: string; visibilite: PhotoVisibilite; categorie: string },
+  ): Promise<void> {
     await updateDoc(doc(db, 'photos', photoId), {
       titre: data.titre,
       description: data.description.trim(),
@@ -175,7 +223,13 @@ export class PhotoService {
     photoId: string,
     uid: string,
     currentlyLiked: boolean,
-    notif?: { ownerUid: string; likerNom: string; lien: string; photoTitre?: string; ownerSubscriptions?: UserSubscriptions }
+    notif?: {
+      ownerUid: string;
+      likerNom: string;
+      lien: string;
+      photoTitre?: string;
+      ownerSubscriptions?: UserSubscriptions;
+    },
   ): Promise<void> {
     await updateDoc(doc(db, 'photos', photoId), {
       likes: currentlyLiked ? arrayRemove(uid) : arrayUnion(uid),
@@ -184,39 +238,50 @@ export class PhotoService {
       const msg = notif.photoTitre
         ? `${notif.likerNom} a aimé votre photo «${notif.photoTitre}»`
         : `${notif.likerNom} a aimé une de vos photos`;
-      await this.notifService.createPersonalNotif(notif.ownerUid, 'like', msg,
-        { lien: notif.lien, sourceNom: notif.likerNom, sourceUid: uid, toSubscriptions: notif.ownerSubscriptions }
-      );
+      await this.notifService.createPersonalNotif(notif.ownerUid, 'like', msg, {
+        lien: notif.lien,
+        sourceNom: notif.likerNom,
+        sourceUid: uid,
+        toSubscriptions: notif.ownerSubscriptions,
+      });
     }
   }
 
   // --- Commentaires ---
 
   getCommentaires(photoId: string): Observable<Commentaire[]> {
-    const q = query(
-      collection(db, `photos/${photoId}/commentaires`),
-      orderBy('createdAt', 'asc')
-    );
+    const q = query(collection(db, `photos/${photoId}/commentaires`), orderBy('createdAt', 'asc'));
     return from(getDocs(q)).pipe(
-      map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as Commentaire)))
+      map((snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Commentaire)),
     );
   }
 
   async addCommentaire(
     photoId: string,
     data: { texte: string; auteurUid: string; nomAuteur: string },
-    notif?: { ownerUid: string; lien: string; photoTitre?: string; ownerSubscriptions?: UserSubscriptions }
+    notif?: {
+      ownerUid: string;
+      lien: string;
+      photoTitre?: string;
+      ownerSubscriptions?: UserSubscriptions;
+    },
   ): Promise<void> {
     await addDoc(collection(db, `photos/${photoId}/commentaires`), {
-      ...data, likes: [], replies: [], createdAt: new Date().toISOString(),
+      ...data,
+      likes: [],
+      replies: [],
+      createdAt: new Date().toISOString(),
     });
     if (notif) {
       const msg = notif.photoTitre
         ? `${data.nomAuteur} a commenté votre photo «${notif.photoTitre}»`
         : `${data.nomAuteur} a commenté une de vos photos`;
-      await this.notifService.createPersonalNotif(notif.ownerUid, 'comment', msg,
-        { lien: notif.lien, sourceNom: data.nomAuteur, sourceUid: data.auteurUid, toSubscriptions: notif.ownerSubscriptions }
-      );
+      await this.notifService.createPersonalNotif(notif.ownerUid, 'comment', msg, {
+        lien: notif.lien,
+        sourceNom: data.nomAuteur,
+        sourceUid: data.auteurUid,
+        toSubscriptions: notif.ownerSubscriptions,
+      });
     }
   }
 
@@ -224,7 +289,12 @@ export class PhotoService {
     await deleteDoc(doc(db, `photos/${photoId}/commentaires`, commentId));
   }
 
-  async toggleLikeCommentaire(photoId: string, commentId: string, uid: string, currentlyLiked: boolean): Promise<void> {
+  async toggleLikeCommentaire(
+    photoId: string,
+    commentId: string,
+    uid: string,
+    currentlyLiked: boolean,
+  ): Promise<void> {
     await updateDoc(doc(db, `photos/${photoId}/commentaires`, commentId), {
       likes: currentlyLiked ? arrayRemove(uid) : arrayUnion(uid),
     });
@@ -237,9 +307,14 @@ export class PhotoService {
     });
   }
 
-  async deleteReply(photoId: string, commentId: string, replyId: string, allReplies: Reponse[]): Promise<void> {
+  async deleteReply(
+    photoId: string,
+    commentId: string,
+    replyId: string,
+    allReplies: Reponse[],
+  ): Promise<void> {
     await updateDoc(doc(db, `photos/${photoId}/commentaires`, commentId), {
-      replies: allReplies.filter(r => r.id !== replyId),
+      replies: allReplies.filter((r) => r.id !== replyId),
     });
   }
 }

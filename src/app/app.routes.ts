@@ -54,8 +54,8 @@ export const routes: Routes = [
           { path: 'histoire', component: Histoire },
           { path: 'bureau', component: Bureau },
           { path: 'adhesion', component: Adhesion },
-          { path: '', redirectTo: 'histoire', pathMatch: 'full' }
-        ]
+          { path: '', redirectTo: 'histoire', pathMatch: 'full' },
+        ],
       },
       { path: 'galeries', redirectTo: 'galeries/membres', pathMatch: 'full' },
       { path: 'galeries/membres', component: MembresGalerie },
@@ -88,9 +88,9 @@ export const routes: Routes = [
           { path: 'dossiers', component: DocumentDossiers },
           { path: 'pages', component: AdminPages },
           { path: 'maintenance', component: Maintenance },
-        ]
+        ],
       },
-    ]
+    ],
   },
   {
     path: 'membre',
@@ -107,9 +107,9 @@ export const routes: Routes = [
       { path: 'preferences', component: Preferences },
       { path: 'sorties/creer', component: SortieCreer, canActivate: [editorGuard] },
       { path: 'defis/creer', component: DefiCreer, canActivate: [editorGuard] },
-      { path: '', redirectTo: 'portfolio', pathMatch: 'full' }
-    ]
+      { path: '', redirectTo: 'portfolio', pathMatch: 'full' },
+    ],
   },
   { path: 'completer-profil', component: CompleterProfilComponent },
-  { path: '**', redirectTo: '' }
+  { path: '**', redirectTo: '' },
 ];

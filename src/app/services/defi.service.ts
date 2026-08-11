@@ -1,19 +1,44 @@
 import { Injectable, inject } from '@angular/core';
 import {
-  collection, collectionGroup, doc, addDoc, updateDoc, deleteDoc, setDoc,
-  query, orderBy, where, getDocs, getDoc, increment, limit, deleteField
+  collection,
+  collectionGroup,
+  doc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  setDoc,
+  query,
+  orderBy,
+  where,
+  getDocs,
+  getDoc,
+  increment,
+  limit,
+  deleteField,
 } from 'firebase/firestore';
-import { ref, uploadBytesResumable, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import {
+  ref,
+  uploadBytesResumable,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject,
+} from 'firebase/storage';
 import { Observable, from, map } from 'rxjs';
 import { db, storage, collectionStream, docStream } from '../utils/firebase';
 import { Defi, DefiInscription, DefiPhoto, DefiVote } from '../models/defi.model';
 import { UserProfile } from '../models/user.model';
 import { generateId } from '../utils/id';
 import { readExif } from '../utils/exif-reader';
-import { compressImage, COMPRESS_COUVERTURE, COMPRESS_EVENT, COMPRESS_THUMB } from '../utils/image-compress';
+import {
+  compressImage,
+  COMPRESS_COUVERTURE,
+  COMPRESS_EVENT,
+  COMPRESS_THUMB,
+} from '../utils/image-compress';
 import { NotificationService } from './notification.service';
 
-export type DefiUploadState = { progress: number; done: false } | { progress: 100; done: true; photo: DefiPhoto };
+export type DefiUploadState =
+  { progress: number; done: false } | { progress: 100; done: true; photo: DefiPhoto };
 
 @Injectable({ providedIn: 'root' })
 export class DefiService {
@@ -24,82 +49,106 @@ export class DefiService {
   getDefis(): Observable<Defi[]> {
     return collectionStream<Defi>(
       query(collection(db, 'defis'), orderBy('dateCreation', 'desc')),
-      'id'
+      'id',
     );
   }
 
   getPublicDefis(): Observable<Defi[]> {
     return collectionStream<Defi>(
-      query(collection(db, 'defis'), where('visibilite', '==', 'public'), orderBy('dateCreation', 'desc')),
-      'id'
+      query(
+        collection(db, 'defis'),
+        where('visibilite', '==', 'public'),
+        orderBy('dateCreation', 'desc'),
+      ),
+      'id',
     );
   }
 
   getDefisOnce(): Observable<Defi[]> {
-    return from(getDocs(query(collection(db, 'defis'), orderBy('dateCreation', 'desc'))))
-      .pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as Defi))));
+    return from(getDocs(query(collection(db, 'defis'), orderBy('dateCreation', 'desc')))).pipe(
+      map((snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Defi)),
+    );
   }
 
   getPublicDefisOnce(): Observable<Defi[]> {
-    return from(getDocs(query(collection(db, 'defis'),
-      where('visibilite', '==', 'public'), orderBy('dateCreation', 'desc'))))
-      .pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as Defi))));
+    return from(
+      getDocs(
+        query(
+          collection(db, 'defis'),
+          where('visibilite', '==', 'public'),
+          orderBy('dateCreation', 'desc'),
+        ),
+      ),
+    ).pipe(map((snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Defi)));
   }
 
   getMesDefisOnce(uid: string): Observable<Defi[]> {
-    return from(getDocs(query(collection(db, 'defis'), where('organisateurUid', '==', uid))))
-      .pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as Defi))));
+    return from(getDocs(query(collection(db, 'defis'), where('organisateurUid', '==', uid)))).pipe(
+      map((snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Defi)),
+    );
   }
 
   getDefiOnce(id: string): Observable<Defi | null> {
-    return from(getDoc(doc(db, 'defis', id)))
-      .pipe(map(d => d.exists() ? { id: d.id, ...d.data() } as Defi : null));
+    return from(getDoc(doc(db, 'defis', id))).pipe(
+      map((d) => (d.exists() ? ({ id: d.id, ...d.data() } as Defi) : null)),
+    );
   }
 
   getInscriptionsOnce(defiId: string): Observable<DefiInscription[]> {
-    return from(getDocs(collection(db, `defis/${defiId}/inscriptions`)))
-      .pipe(map(snap => snap.docs.map(d => ({ uid: d.id, ...d.data() } as DefiInscription))));
+    return from(getDocs(collection(db, `defis/${defiId}/inscriptions`))).pipe(
+      map((snap) => snap.docs.map((d) => ({ uid: d.id, ...d.data() }) as DefiInscription)),
+    );
   }
 
   getPhotosOnce(defiId: string): Observable<DefiPhoto[]> {
-    return from(getDocs(query(collection(db, `defis/${defiId}/photos`), orderBy('uploadedAt', 'asc'))))
-      .pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as DefiPhoto))));
+    return from(
+      getDocs(query(collection(db, `defis/${defiId}/photos`), orderBy('uploadedAt', 'asc'))),
+    ).pipe(map((snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }) as DefiPhoto)));
   }
 
   getMyPhotosOnce(defiId: string, uid: string): Observable<DefiPhoto[]> {
-    return from(getDocs(query(collection(db, `defis/${defiId}/photos`),
-      where('membreUid', '==', uid), orderBy('uploadedAt', 'asc'))))
-      .pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as DefiPhoto))));
+    return from(
+      getDocs(
+        query(
+          collection(db, `defis/${defiId}/photos`),
+          where('membreUid', '==', uid),
+          orderBy('uploadedAt', 'asc'),
+        ),
+      ),
+    ).pipe(map((snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }) as DefiPhoto)));
   }
 
   getVotesOnce(defiId: string): Observable<DefiVote[]> {
-    return from(getDocs(collection(db, `defis/${defiId}/votes`)))
-      .pipe(map(snap => snap.docs.map(d => ({ voterUid: d.id, ...d.data() } as DefiVote))));
+    return from(getDocs(collection(db, `defis/${defiId}/votes`))).pipe(
+      map((snap) => snap.docs.map((d) => ({ voterUid: d.id, ...d.data() }) as DefiVote)),
+    );
   }
 
   getMonVoteOnce(defiId: string, voterUid: string): Observable<DefiVote | null> {
-    return from(getDoc(doc(db, `defis/${defiId}/votes`, voterUid)))
-      .pipe(map(d => d.exists() ? { voterUid, ...d.data() } as DefiVote : null));
+    return from(getDoc(doc(db, `defis/${defiId}/votes`, voterUid))).pipe(
+      map((d) => (d.exists() ? ({ voterUid, ...d.data() } as DefiVote) : null)),
+    );
   }
 
   getDefi(id: string): Observable<Defi | null> {
-    return docStream<Defi>(doc(db, 'defis', id), 'id').pipe(map(d => d ?? null));
+    return docStream<Defi>(doc(db, 'defis', id), 'id').pipe(map((d) => d ?? null));
   }
 
   getMesDefis(uid: string): Observable<Defi[]> {
     return collectionStream<Defi>(
       query(collection(db, 'defis'), where('organisateurUid', '==', uid)),
-      'id'
+      'id',
     );
   }
 
   getMesDefisInscritsIds(uid: string): Observable<string[]> {
     const q = query(collectionGroup(db, 'inscriptions'), where('uid', '==', uid));
     return from(getDocs(q)).pipe(
-      map(snap => snap.docs
-        .filter(d => d.ref.parent.parent?.path.startsWith('defis/'))
-        .map(d => d.ref.parent.parent!.id)
-      )
+      map((snap) =>
+        snap.docs
+          .filter((d) => d.ref.parent.parent?.path.startsWith('defis/'))
+          .map((d) => d.ref.parent.parent!.id),
+      ),
     );
   }
 
@@ -112,10 +161,17 @@ export class DefiService {
       nbParticipants: 0,
       dateCreation: new Date().toISOString(),
     });
-    this.notifService.broadcast('defi',
-      `${data.organisateurNom} propose un nouveau défi photo « ${data.titre} » — Thème : ${data.theme}`,
-      { lien: `/galeries/defis/${docRef.id}`, sourceNom: data.organisateurNom, excludeUid: data.organisateurUid }
-    ).catch(() => {});
+    this.notifService
+      .broadcast(
+        'defi',
+        `${data.organisateurNom} propose un nouveau défi photo « ${data.titre} » — Thème : ${data.theme}`,
+        {
+          lien: `/galeries/defis/${docRef.id}`,
+          sourceNom: data.organisateurNom,
+          excludeUid: data.organisateurUid,
+        },
+      )
+      .catch(() => {});
     return docRef.id;
   }
 
@@ -136,9 +192,16 @@ export class DefiService {
     const storageDeletes: Promise<void>[] = [];
     const sizeByUser: Record<string, number> = {};
     for (const p of photosSnap.docs) {
-      const d = p.data() as { storagePath?: string; thumbnailPath?: string; membreUid?: string; fileSize?: number };
-      if (d.storagePath)   storageDeletes.push(deleteObject(ref(storage, d.storagePath)).catch(() => {}));
-      if (d.thumbnailPath) storageDeletes.push(deleteObject(ref(storage, d.thumbnailPath)).catch(() => {}));
+      const d = p.data() as {
+        storagePath?: string;
+        thumbnailPath?: string;
+        membreUid?: string;
+        fileSize?: number;
+      };
+      if (d.storagePath)
+        storageDeletes.push(deleteObject(ref(storage, d.storagePath)).catch(() => {}));
+      if (d.thumbnailPath)
+        storageDeletes.push(deleteObject(ref(storage, d.thumbnailPath)).catch(() => {}));
       if (d.membreUid && d.fileSize) {
         sizeByUser[d.membreUid] = (sizeByUser[d.membreUid] ?? 0) + d.fileSize;
       }
@@ -149,13 +212,13 @@ export class DefiService {
 
     await Promise.all([
       ...storageDeletes,
-      ...photosSnap.docs.map(p  => deleteDoc(p.ref)),
-      ...inscritsSnap.docs.map(p => deleteDoc(p.ref)),
-      ...votesSnap.docs.map(p   => deleteDoc(p.ref)),
+      ...photosSnap.docs.map((p) => deleteDoc(p.ref)),
+      ...inscritsSnap.docs.map((p) => deleteDoc(p.ref)),
+      ...votesSnap.docs.map((p) => deleteDoc(p.ref)),
     ]);
     await deleteDoc(doc(db, 'defis', id));
     Object.entries(sizeByUser).forEach(([uid, size]) =>
-      updateDoc(doc(db, 'users', uid), { 'storageUsed.defis': increment(-size) }).catch(() => {})
+      updateDoc(doc(db, 'users', uid), { 'storageUsed.defis': increment(-size) }).catch(() => {}),
     );
   }
 
@@ -167,14 +230,18 @@ export class DefiService {
     const compressed = await compressImage(file, COMPRESS_COUVERTURE);
     await uploadBytesResumable(storageRef, compressed);
     const url = await getDownloadURL(storageRef);
-    await updateDoc(doc(db, 'defis', id), { photoCouvertureUrl: url, photoCouverturePath: storagePath, photoCouvertureFileSize: compressed.size });
+    await updateDoc(doc(db, 'defis', id), {
+      photoCouvertureUrl: url,
+      photoCouverturePath: storagePath,
+      photoCouvertureFileSize: compressed.size,
+    });
   }
 
   async removeCouverture(id: string, storagePath: string): Promise<void> {
     await deleteObject(ref(storage, storagePath)).catch(() => {});
     await updateDoc(doc(db, 'defis', id), {
-      photoCouvertureUrl:      deleteField(),
-      photoCouverturePath:     deleteField(),
+      photoCouvertureUrl: deleteField(),
+      photoCouverturePath: deleteField(),
       photoCouvertureFileSize: deleteField(),
     });
   }
@@ -196,24 +263,30 @@ export class DefiService {
   }
 
   async desinscrire(defiId: string, uid: string): Promise<void> {
-    const photosSnap = await getDocs(query(collection(db, `defis/${defiId}/photos`), where('membreUid', '==', uid)));
+    const photosSnap = await getDocs(
+      query(collection(db, `defis/${defiId}/photos`), where('membreUid', '==', uid)),
+    );
     let totalSize = 0;
     const storageDels: Promise<void>[] = [];
     for (const photoDoc of photosSnap.docs) {
       const d = photoDoc.data() as DefiPhoto;
-      if (d.storagePath)   storageDels.push(deleteObject(ref(storage, d.storagePath)).catch(() => {}));
-      if (d.thumbnailPath) storageDels.push(deleteObject(ref(storage, d.thumbnailPath)).catch(() => {}));
+      if (d.storagePath)
+        storageDels.push(deleteObject(ref(storage, d.storagePath)).catch(() => {}));
+      if (d.thumbnailPath)
+        storageDels.push(deleteObject(ref(storage, d.thumbnailPath)).catch(() => {}));
       totalSize += d.fileSize ?? 0;
     }
     await Promise.all([
       ...storageDels,
-      ...photosSnap.docs.map(d => deleteDoc(d.ref)),
+      ...photosSnap.docs.map((d) => deleteDoc(d.ref)),
       deleteDoc(doc(db, `defis/${defiId}/votes`, uid)).catch(() => {}),
       deleteDoc(doc(db, `defis/${defiId}/inscriptions`, uid)),
       updateDoc(doc(db, 'defis', defiId), { nbInscrits: increment(-1) }),
     ]);
     if (totalSize > 0) {
-      updateDoc(doc(db, 'users', uid), { 'storageUsed.defis': increment(-totalSize) }).catch(() => {});
+      updateDoc(doc(db, 'users', uid), { 'storageUsed.defis': increment(-totalSize) }).catch(
+        () => {},
+      );
     }
   }
 
@@ -222,18 +295,18 @@ export class DefiService {
   getPhotos(defiId: string): Observable<DefiPhoto[]> {
     return collectionStream<DefiPhoto>(
       query(collection(db, `defis/${defiId}/photos`), orderBy('uploadedAt', 'asc')),
-      'id'
+      'id',
     );
   }
 
   uploadPhoto(defiId: string, file: File, user: UserProfile): Observable<DefiUploadState> {
-    return new Observable(observer => {
+    return new Observable((observer) => {
       (async () => {
         try {
           const exif = await readExif(file);
           const id = generateId();
           const storagePath = `defis/${defiId}/${user.uid}-${id}.webp`;
-          const thumbPath   = `defis/${defiId}/${user.uid}-${id}_thumb.webp`;
+          const thumbPath = `defis/${defiId}/${user.uid}-${id}_thumb.webp`;
           const [compressed, thumb] = await Promise.all([
             compressImage(file, COMPRESS_EVENT),
             compressImage(file, COMPRESS_THUMB),
@@ -242,9 +315,14 @@ export class DefiService {
           const storageRef = ref(storage, storagePath);
           const task = uploadBytesResumable(storageRef, compressed);
 
-          task.on('state_changed',
-            snap => observer.next({ progress: Math.round(snap.bytesTransferred / snap.totalBytes * 100), done: false }),
-            err => observer.error(err),
+          task.on(
+            'state_changed',
+            (snap) =>
+              observer.next({
+                progress: Math.round((snap.bytesTransferred / snap.totalBytes) * 100),
+                done: false,
+              }),
+            (err) => observer.error(err),
             async () => {
               const [url, thumbSnap] = await Promise.all([
                 getDownloadURL(task.snapshot.ref),
@@ -253,10 +331,14 @@ export class DefiService {
               const thumbnailUrl = await getDownloadURL(thumbSnap.ref);
               const membreNom = `${user.prenom ?? ''} ${user.nom}`.trim();
               const photoData: Omit<DefiPhoto, 'id'> = {
-                membreUid: user.uid, membreNom,
+                membreUid: user.uid,
+                membreNom,
                 ...(user.prenom ? { membrePrenom: user.prenom } : {}),
-                url, storagePath, fileSize,
-                thumbnailUrl, thumbnailPath: thumbPath,
+                url,
+                storagePath,
+                fileSize,
+                thumbnailUrl,
+                thumbnailPath: thumbPath,
                 uploadedAt: new Date().toISOString(),
                 ...(Object.keys(exif).length > 0 ? { exif } : {}),
               };
@@ -264,13 +346,23 @@ export class DefiService {
               updateDoc(doc(db, 'users', user.uid), {
                 'storageUsed.defis': increment(fileSize),
               }).catch(() => {});
-              const existingSnap = await getDocs(query(collection(db, `defis/${defiId}/photos`), where('membreUid', '==', user.uid), limit(2)));
+              const existingSnap = await getDocs(
+                query(
+                  collection(db, `defis/${defiId}/photos`),
+                  where('membreUid', '==', user.uid),
+                  limit(2),
+                ),
+              );
               if (existingSnap.size === 1) {
                 await updateDoc(doc(db, 'defis', defiId), { nbParticipants: increment(1) });
               }
-              observer.next({ progress: 100, done: true, photo: { id: docRef.id, ...photoData } as DefiPhoto });
+              observer.next({
+                progress: 100,
+                done: true,
+                photo: { id: docRef.id, ...photoData } as DefiPhoto,
+              });
               observer.complete();
-            }
+            },
           );
         } catch (err) {
           observer.error(err);
@@ -284,14 +376,21 @@ export class DefiService {
       deleteObject(ref(storage, photo.storagePath)).catch(() => {}),
       deleteDoc(doc(db, `defis/${defiId}/photos`, photo.id)),
     ];
-    if (photo.thumbnailPath) deletes.push(deleteObject(ref(storage, photo.thumbnailPath)).catch(() => {}));
+    if (photo.thumbnailPath)
+      deletes.push(deleteObject(ref(storage, photo.thumbnailPath)).catch(() => {}));
     await Promise.all(deletes);
     if (photo.fileSize && photo.membreUid) {
       updateDoc(doc(db, 'users', photo.membreUid), {
         'storageUsed.defis': increment(-photo.fileSize),
       }).catch(() => {});
     }
-    const remainingSnap = await getDocs(query(collection(db, `defis/${defiId}/photos`), where('membreUid', '==', photo.membreUid), limit(1)));
+    const remainingSnap = await getDocs(
+      query(
+        collection(db, `defis/${defiId}/photos`),
+        where('membreUid', '==', photo.membreUid),
+        limit(1),
+      ),
+    );
     if (remainingSnap.empty) {
       await updateDoc(doc(db, 'defis', defiId), { nbParticipants: increment(-1) });
     }
@@ -305,7 +404,7 @@ export class DefiService {
 
   getMonVote(defiId: string, voterUid: string): Observable<DefiVote | null> {
     return docStream<any>(doc(db, `defis/${defiId}/votes`, voterUid)).pipe(
-      map(d => d ? { voterUid, ...d } as DefiVote : null)
+      map((d) => (d ? ({ voterUid, ...d } as DefiVote) : null)),
     );
   }
 
@@ -321,7 +420,9 @@ export class DefiService {
     const voteRef = doc(db, `defis/${defiId}/votes`, voterUid);
     const snap = await getDoc(voteRef);
     if (!snap.exists()) return;
-    const photoIds = ((snap.data() as DefiVote).photoIds ?? []).filter((id: string) => id !== photoId);
+    const photoIds = ((snap.data() as DefiVote).photoIds ?? []).filter(
+      (id: string) => id !== photoId,
+    );
     await setDoc(voteRef, { voterUid, photoIds });
   }
 

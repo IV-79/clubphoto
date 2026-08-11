@@ -59,7 +59,9 @@ export class MembrePortfolio implements OnInit {
     ),
   );
 
-  private siteConfig = toSignal(this.configService.getSiteConfig(), { initialValue: {} as SiteConfig });
+  private siteConfig = toSignal(this.configService.getSiteConfig(), {
+    initialValue: {} as SiteConfig,
+  });
   maxPhotosPortfolio = computed(() => this.siteConfig().maxPhotosPortfolio ?? 20);
   atPortfolioLimit = computed(() => this.photoCount() >= this.maxPhotosPortfolio());
 

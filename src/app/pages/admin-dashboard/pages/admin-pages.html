@@ -1,5 +1,4 @@
 <div class="pages-editor">
-
   <div class="page-header">
     <h2 class="page-title">Pages du site</h2>
   </div>
@@ -22,7 +21,8 @@
       [ngModel]="editorValue"
       (ngModelChange)="onEditorChange($event)"
       placeholder="Rédigez le contenu en Markdown…"
-      spellcheck="false">
+      spellcheck="false"
+    >
     </textarea>
   }
 
@@ -55,11 +55,13 @@
         Charger le modèle
       </button>
     }
-    <a class="md-help-link"
-       href="https://www.markdownguide.org/cheat-sheet/"
-       target="_blank" rel="noopener">
+    <a
+      class="md-help-link"
+      href="https://www.markdownguide.org/cheat-sheet/"
+      target="_blank"
+      rel="noopener"
+    >
       Aide Markdown ↗
     </a>
   </div>
-
 </div>

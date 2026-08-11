@@ -3,10 +3,10 @@ import { PhotoExif } from './photo.model';
 export type DefiStatut = 'a_venir' | 'soumission' | 'vote' | 'resultats';
 
 export const DEFI_STATUT_LABELS: Record<DefiStatut, string> = {
-  a_venir:    'À venir',
+  a_venir: 'À venir',
   soumission: 'Soumissions',
-  vote:       'Vote en cours',
-  resultats:  'Résultats',
+  vote: 'Vote en cours',
+  resultats: 'Résultats',
 };
 
 export interface Defi {
@@ -33,8 +33,8 @@ export interface Defi {
 export function getDefiStatut(defi: Defi): DefiStatut {
   const now = new Date();
   if (now < new Date(defi.dateDebutSoumission + 'T00:00:00')) return 'a_venir';
-  if (now <= new Date(defi.dateFinSoumission + 'T23:59:59'))  return 'soumission';
-  if (now <= new Date(defi.dateCloturVotes + 'T23:59:59'))    return 'vote';
+  if (now <= new Date(defi.dateFinSoumission + 'T23:59:59')) return 'soumission';
+  if (now <= new Date(defi.dateCloturVotes + 'T23:59:59')) return 'vote';
   return 'resultats';
 }
 
@@ -55,7 +55,7 @@ export interface DefiPhoto {
   fileSize: number;
   exif?: PhotoExif;
   uploadedAt: string;
-  thumbnailUrl?:  string;
+  thumbnailUrl?: string;
   thumbnailPath?: string;
 }
 

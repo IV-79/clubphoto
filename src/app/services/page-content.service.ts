@@ -3,25 +3,32 @@ import { doc, setDoc } from 'firebase/firestore';
 import { Observable, map, catchError, of } from 'rxjs';
 import { db, docStream } from '../utils/firebase';
 
-export type PageId = 'histoire' | 'bureau' | 'adhesion' | 'charte' | 'contact' | 'mentions-legales' | 'cgv' | 'confidentialite';
+export type PageId =
+  | 'histoire'
+  | 'bureau'
+  | 'adhesion'
+  | 'charte'
+  | 'contact'
+  | 'mentions-legales'
+  | 'cgv'
+  | 'confidentialite';
 
 @Injectable({ providedIn: 'root' })
 export class PageContentService {
-
   getContent(pageId: PageId): Observable<string> {
     return docStream<any>(doc(db, 'pages', pageId)).pipe(
-      map(data => data?.contenu ?? ''),
-      catchError(() => of(''))
+      map((data) => data?.contenu ?? ''),
+      catchError(() => of('')),
     );
   }
 
   getCharteDoc(): Observable<{ contenu: string; charteVersion: number }> {
     return docStream<any>(doc(db, 'pages', 'charte')).pipe(
-      map(data => ({
-        contenu:        data?.contenu        ?? '',
-        charteVersion:  data?.charteVersion  ?? 0,
+      map((data) => ({
+        contenu: data?.contenu ?? '',
+        charteVersion: data?.charteVersion ?? 0,
       })),
-      catchError(() => of({ contenu: '', charteVersion: 0 }))
+      catchError(() => of({ contenu: '', charteVersion: 0 })),
     );
   }
 
@@ -31,11 +38,11 @@ export class PageContentService {
 
   getCguDoc(): Observable<{ contenu: string; cguVersion: number }> {
     return docStream<any>(doc(db, 'pages', 'cgv')).pipe(
-      map(data => ({
-        contenu:    data?.contenu    ?? '',
+      map((data) => ({
+        contenu: data?.contenu ?? '',
         cguVersion: data?.cguVersion ?? 0,
       })),
-      catchError(() => of({ contenu: '', cguVersion: 0 }))
+      catchError(() => of({ contenu: '', cguVersion: 0 })),
     );
   }
 
@@ -44,10 +51,14 @@ export class PageContentService {
   }
 
   async saveContent(pageId: PageId, contenu: string, uid: string): Promise<void> {
-    await setDoc(doc(db, 'pages', pageId), {
-      contenu,
-      updatedAt: new Date().toISOString(),
-      updatedBy: uid,
-    }, { merge: true });
+    await setDoc(
+      doc(db, 'pages', pageId),
+      {
+        contenu,
+        updatedAt: new Date().toISOString(),
+        updatedBy: uid,
+      },
+      { merge: true },
+    );
   }
 }

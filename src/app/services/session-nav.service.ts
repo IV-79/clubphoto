@@ -17,9 +17,7 @@ export class SessionNavService {
     const isFreshSession = !sessionStorage.getItem(SESSION_KEY);
     sessionStorage.setItem(SESSION_KEY, '1');
 
-    this.router.events.pipe(
-      filter(e => e instanceof NavigationEnd)
-    ).subscribe(e => {
+    this.router.events.pipe(filter((e) => e instanceof NavigationEnd)).subscribe((e) => {
       const url = (e as NavigationEnd).urlAfterRedirects;
       if (!SKIP.has(url)) {
         localStorage.setItem(LAST_ROUTE_KEY, url);
@@ -27,19 +25,21 @@ export class SessionNavService {
     });
 
     if (isFreshSession) {
-      this.router.events.pipe(
-        filter(e => e instanceof NavigationEnd),
-        take(1)
-      ).subscribe(e => {
-        if ((e as NavigationEnd).urlAfterRedirects === '/') {
-          this.auth.user$.pipe(take(1)).subscribe(user => {
-            if (user) {
-              const last = localStorage.getItem(LAST_ROUTE_KEY) ?? FALLBACK;
-              this.router.navigateByUrl(last, { replaceUrl: true });
-            }
-          });
-        }
-      });
+      this.router.events
+        .pipe(
+          filter((e) => e instanceof NavigationEnd),
+          take(1),
+        )
+        .subscribe((e) => {
+          if ((e as NavigationEnd).urlAfterRedirects === '/') {
+            this.auth.user$.pipe(take(1)).subscribe((user) => {
+              if (user) {
+                const last = localStorage.getItem(LAST_ROUTE_KEY) ?? FALLBACK;
+                this.router.navigateByUrl(last, { replaceUrl: true });
+              }
+            });
+          }
+        });
     }
   }
 }

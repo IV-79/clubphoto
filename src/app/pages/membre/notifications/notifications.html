@@ -1,5 +1,4 @@
 <div class="notifs-page">
-
   <div class="page-header">
     <h1 class="page-title">Mes notifications</h1>
     <div class="header-actions">
@@ -30,11 +29,12 @@
             <p class="notif-message">{{ n.message }}</p>
             <span class="notif-date">{{ formatDate(n.createdAt) }}</span>
           </div>
-          @if (!n.lu) { <span class="unread-dot"></span> }
+          @if (!n.lu) {
+            <span class="unread-dot"></span>
+          }
           <button class="btn-del" (click)="deleteNotif(n, $event)" title="Supprimer">🗑</button>
         </div>
       }
     </div>
   }
-
 </div>

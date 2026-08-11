@@ -134,11 +134,10 @@ export class SortieDetail {
     const badgeCss = type === 'sortie_club' ? 'badge-sortie-club' : 'badge-sortie';
     return { text: `${meta.emoji} ${meta.label}`, css: `event-type-badge ${badgeCss}` };
   });
-  statusHero = computed(
-    (): HeroBadge =>
-      this.isAVenir()
-        ? { text: 'À venir', css: 'hero-status status-avenir' }
-        : { text: 'Ouverte aux photos', css: 'hero-status status-photos' },
+  statusHero = computed((): HeroBadge =>
+    this.isAVenir()
+      ? { text: 'À venir', css: 'hero-status status-avenir' }
+      : { text: 'Ouverte aux photos', css: 'hero-status status-photos' },
   );
 
   private allMembres$ = toObservable(this.canManage).pipe(
@@ -291,7 +290,9 @@ export class SortieDetail {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       setTimeout(() => {
-        const el = this.elRef.nativeElement.querySelector('mat-form-field.ng-invalid, app-date-picker.ng-invalid') as HTMLElement | null;
+        const el = this.elRef.nativeElement.querySelector(
+          'mat-form-field.ng-invalid, app-date-picker.ng-invalid',
+        ) as HTMLElement | null;
         el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }, 50);
       return;

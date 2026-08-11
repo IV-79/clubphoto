@@ -54,7 +54,15 @@ export class Overview implements OnInit {
   totalDocuments = signal(0);
 
   storageTotal = signal(0);
-  storageByCat = signal({ portfolio: 0, sorties: 0, themes: 0, defis: 0, oneshots: 0, expositions: 0, documents: 0 });
+  storageByCat = signal({
+    portfolio: 0,
+    sorties: 0,
+    themes: 0,
+    defis: 0,
+    oneshots: 0,
+    expositions: 0,
+    documents: 0,
+  });
   topMembers = signal<MemberBar[]>([]);
 
   storageItems = computed<StorageItem[]>(() => {
@@ -134,13 +142,13 @@ export class Overview implements OnInit {
     cutoff.setDate(cutoff.getDate() - 30);
 
     forkJoin({
-      membres:     this.authService.getAllMembersOnce(),
-      sorties:     this.sortieService.getSortiesOnce(),
-      articles:    this.articleService.getAllArticles(),
-      documents:   this.documentService.getDocumentsOnce(),
-      themes:      from(getDocs(collection(db, 'themes'))),
-      oneshots:    from(getDocs(collection(db, 'oneshots'))),
-      defis:       from(getDocs(collection(db, 'defis'))),
+      membres: this.authService.getAllMembersOnce(),
+      sorties: this.sortieService.getSortiesOnce(),
+      articles: this.articleService.getAllArticles(),
+      documents: this.documentService.getDocumentsOnce(),
+      themes: from(getDocs(collection(db, 'themes'))),
+      oneshots: from(getDocs(collection(db, 'oneshots'))),
+      defis: from(getDocs(collection(db, 'defis'))),
       expositions: from(getDocs(collection(db, 'expositions'))),
     }).subscribe({
       next: ({ membres, sorties, articles, documents, themes, oneshots, defis, expositions }) => {
@@ -161,26 +169,48 @@ export class Overview implements OnInit {
         this.totalDocuments.set(documents.length);
 
         const coverSize = (snap: QuerySnapshot<DocumentData>, field: string) =>
-          snap.docs.reduce((s, d) => s + (((d.data() as Record<string, unknown>)[field] as number) ?? 0), 0);
+          snap.docs.reduce(
+            (s, d) => s + (((d.data() as Record<string, unknown>)[field] as number) ?? 0),
+            0,
+          );
 
-        const cat = { portfolio: 0, sorties: 0, themes: 0, defis: 0, oneshots: 0, expositions: 0, documents: 0 };
+        const cat = {
+          portfolio: 0,
+          sorties: 0,
+          themes: 0,
+          defis: 0,
+          oneshots: 0,
+          expositions: 0,
+          documents: 0,
+        };
         membres.forEach((m) => {
-          cat.portfolio   += m.storageUsed?.portfolio   ?? 0;
-          cat.sorties     += m.storageUsed?.sorties     ?? 0;
-          cat.themes      += m.storageUsed?.themes      ?? 0;
-          cat.defis       += m.storageUsed?.defis       ?? 0;
-          cat.oneshots    += m.storageUsed?.oneshots    ?? 0;
+          cat.portfolio += m.storageUsed?.portfolio ?? 0;
+          cat.sorties += m.storageUsed?.sorties ?? 0;
+          cat.themes += m.storageUsed?.themes ?? 0;
+          cat.defis += m.storageUsed?.defis ?? 0;
+          cat.oneshots += m.storageUsed?.oneshots ?? 0;
           cat.expositions += m.storageUsed?.expositions ?? 0;
-          cat.documents   += m.storageUsed?.documents   ?? 0;
+          cat.documents += m.storageUsed?.documents ?? 0;
         });
-        cat.sorties     += sorties.reduce((s, so) => s + (((so as unknown as Record<string, unknown>)['imageEvenementFileSize'] as number) ?? 0), 0);
-        cat.themes      += coverSize(themes,      'photoCouvertureFileSize');
-        cat.oneshots    += coverSize(oneshots,    'photoCouvertureFileSize');
-        cat.defis       += coverSize(defis,       'photoCouvertureFileSize');
+        cat.sorties += sorties.reduce(
+          (s, so) =>
+            s +
+            (((so as unknown as Record<string, unknown>)['imageEvenementFileSize'] as number) ?? 0),
+          0,
+        );
+        cat.themes += coverSize(themes, 'photoCouvertureFileSize');
+        cat.oneshots += coverSize(oneshots, 'photoCouvertureFileSize');
+        cat.defis += coverSize(defis, 'photoCouvertureFileSize');
         cat.expositions += coverSize(expositions, 'photoCouvertureFileSize');
         this.storageByCat.set(cat);
         this.storageTotal.set(
-          cat.portfolio + cat.sorties + cat.themes + cat.defis + cat.oneshots + cat.expositions + cat.documents,
+          cat.portfolio +
+            cat.sorties +
+            cat.themes +
+            cat.defis +
+            cat.oneshots +
+            cat.expositions +
+            cat.documents,
         );
         this.topMembers.set(
           membres

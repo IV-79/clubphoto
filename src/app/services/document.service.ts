@@ -1,8 +1,25 @@
 import { Injectable } from '@angular/core';
 import {
-  collection, doc, addDoc, updateDoc, deleteDoc, setDoc, query, orderBy, increment, getDocs, where, deleteField
+  collection,
+  doc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  setDoc,
+  query,
+  orderBy,
+  increment,
+  getDocs,
+  where,
+  deleteField,
 } from 'firebase/firestore';
-import { ref, uploadBytesResumable, getDownloadURL, deleteObject, updateMetadata } from 'firebase/storage';
+import {
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+  deleteObject,
+  updateMetadata,
+} from 'firebase/storage';
 import { Observable, from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { db, storage, collectionStream } from '../utils/firebase';
@@ -10,13 +27,12 @@ import { ClubDocument, DocumentDossier } from '../models/document.model';
 
 @Injectable({ providedIn: 'root' })
 export class DocumentService {
-
   // --- Dossiers ---
 
   getDossiers(): Observable<DocumentDossier[]> {
     return collectionStream<DocumentDossier>(
       query(collection(db, 'documentDossiers'), orderBy('ordre', 'asc')),
-      'id'
+      'id',
     );
   }
 
@@ -38,7 +54,7 @@ export class DocumentService {
   getDocuments(): Observable<ClubDocument[]> {
     return collectionStream<ClubDocument>(
       query(collection(db, 'documents'), orderBy('dateCreation', 'desc')),
-      'id'
+      'id',
     );
   }
 
@@ -52,7 +68,7 @@ export class DocumentService {
 
   async updateDocument(
     id: string,
-    data: Partial<Omit<ClubDocument, 'id' | 'uploadeurUid' | 'uploadeurNom' | 'dateCreation'>>
+    data: Partial<Omit<ClubDocument, 'id' | 'uploadeurUid' | 'uploadeurNom' | 'dateCreation'>>,
   ): Promise<void> {
     await updateDoc(doc(db, 'documents', id), {
       ...data,
@@ -66,13 +82,15 @@ export class DocumentService {
   }
 
   getDocumentsOnce(): Observable<ClubDocument[]> {
-    return from(getDocs(query(collection(db, 'documents'), orderBy('dateCreation', 'desc'))))
-      .pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as ClubDocument))));
+    return from(getDocs(query(collection(db, 'documents'), orderBy('dateCreation', 'desc')))).pipe(
+      map((snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }) as ClubDocument)),
+    );
   }
 
   getDocumentsByReunion(reunionId: string): Observable<ClubDocument[]> {
-    return from(getDocs(query(collection(db, 'documents'), where('reunionId', '==', reunionId))))
-      .pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as ClubDocument))));
+    return from(
+      getDocs(query(collection(db, 'documents'), where('reunionId', '==', reunionId))),
+    ).pipe(map((snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }) as ClubDocument)));
   }
 
   async lierAReunion(docId: string, reunionId: string): Promise<void> {
@@ -84,25 +102,29 @@ export class DocumentService {
   }
 
   async unlinkDocumentsByReunion(reunionId: string): Promise<void> {
-    const snap = await getDocs(query(collection(db, 'documents'), where('reunionId', '==', reunionId)));
-    await Promise.all(snap.docs.map(d => this.delierReunion(d.id)));
+    const snap = await getDocs(
+      query(collection(db, 'documents'), where('reunionId', '==', reunionId)),
+    );
+    await Promise.all(snap.docs.map((d) => this.delierReunion(d.id)));
   }
 
   async getDocumentsByUser(uid: string): Promise<ClubDocument[]> {
-    const snap = await getDocs(query(collection(db, 'documents'), where('uploadeurUid', '==', uid)));
-    return snap.docs.map(d => ({ id: d.id, ...d.data() } as ClubDocument));
+    const snap = await getDocs(
+      query(collection(db, 'documents'), where('uploadeurUid', '==', uid)),
+    );
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as ClubDocument);
   }
 
   async deleteAllDocumentsByUser(uid: string): Promise<void> {
     const docs = await this.getDocumentsByUser(uid);
-    await Promise.all(docs.map(d => this.deleteDocument(d.id!, d.storagePath)));
+    await Promise.all(docs.map((d) => this.deleteDocument(d.id!, d.storagePath)));
   }
 
   uploadFile(
     docId: string,
     file: File,
     filename: string,
-    onProgress?: (pct: number) => void
+    onProgress?: (pct: number) => void,
   ): Promise<{ url: string; storagePath: string }> {
     const path = `documents/${docId}/file`;
     const storageRef = ref(storage, path);
@@ -111,10 +133,11 @@ export class DocumentService {
     };
     return new Promise((resolve, reject) => {
       const task = uploadBytesResumable(storageRef, file, metadata);
-      task.on('state_changed',
-        snap => onProgress?.(Math.round(snap.bytesTransferred / snap.totalBytes * 100)),
+      task.on(
+        'state_changed',
+        (snap) => onProgress?.(Math.round((snap.bytesTransferred / snap.totalBytes) * 100)),
         reject,
-        async () => resolve({ url: await getDownloadURL(task.snapshot.ref), storagePath: path })
+        async () => resolve({ url: await getDownloadURL(task.snapshot.ref), storagePath: path }),
       );
     });
   }

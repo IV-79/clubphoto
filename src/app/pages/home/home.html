@@ -3,7 +3,7 @@
   <div class="hero-overlay">
     <div class="hero-content">
       <p class="hero-eyebrow">Depuis 2015</p>
-      <h1 class="hero-title">Club Photo<br><span class="hero-accent">Tain · Tournon</span></h1>
+      <h1 class="hero-title">Club Photo<br /><span class="hero-accent">Tain · Tournon</span></h1>
       <p class="hero-sub">Partageons notre passion pour la photographie</p>
     </div>
   </div>
@@ -26,11 +26,20 @@
         @for (article of articles(); track article.id) {
           <article class="actu-card">
             <div class="actu-top">
-              <span class="actu-type" [style.color]="articleColor(article.type)">{{ articleLabel(article.type) }}</span>
-              @if (article.epingle) { <span class="actu-pin">📌</span> }
+              <span class="actu-type" [style.color]="articleColor(article.type)">{{
+                articleLabel(article.type)
+              }}</span>
+              @if (article.epingle) {
+                <span class="actu-pin">📌</span>
+              }
             </div>
             @if (article.couvertureUrl) {
-              <img [src]="article.couvertureUrl" [alt]="article.titre" class="actu-img" loading="lazy">
+              <img
+                [src]="article.couvertureUrl"
+                [alt]="article.titre"
+                class="actu-img"
+                loading="lazy"
+              />
             } @else {
               <div class="actu-img-ph" [style.background]="articleColor(article.type)">
                 <span class="actu-ph-icon">{{ articleIcon(article.type) }}</span>
@@ -42,12 +51,21 @@
                 <p class="actu-desc">{{ article.description }}</p>
               }
               @if (article.date) {
-                <p class="actu-meta">📅 {{ article.date | date:'d MMMM yyyy':'':'fr' }}</p>
+                <p class="actu-meta">📅 {{ article.date | date: 'd MMMM yyyy' : '' : 'fr' }}</p>
               }
               @if (article.lieu) {
-                <a class="actu-meta lieu-lien" [href]="mapsUrl(article.lieu!)" target="_blank" rel="noopener" (click)="$event.stopPropagation()"><mat-icon class="lieu-icon">location_on</mat-icon> {{ article.lieu }}</a>
+                <a
+                  class="actu-meta lieu-lien"
+                  [href]="mapsUrl(article.lieu!)"
+                  target="_blank"
+                  rel="noopener"
+                  (click)="$event.stopPropagation()"
+                  ><mat-icon class="lieu-icon">location_on</mat-icon> {{ article.lieu }}</a
+                >
               }
-              <span class="actu-date">{{ article.dateCreation | date:'d MMMM yyyy':'':'fr' }}</span>
+              <span class="actu-date">{{
+                article.dateCreation | date: 'd MMMM yyyy' : '' : 'fr'
+              }}</span>
             </div>
           </article>
         }
@@ -63,19 +81,31 @@
     <div class="section-wrap">
       <p class="eyebrow eyebrow-light">Nos activités</p>
       <div class="act-duo">
-
         @if (derniereSortie(); as sortie) {
           <div class="act-card">
             @if (sortie.photoCouvertureUrl) {
-              <img [src]="sortie.photoCouvertureUrl" [alt]="sortie.titre" class="act-img" loading="lazy">
+              <img
+                [src]="sortie.photoCouvertureUrl"
+                [alt]="sortie.titre"
+                class="act-img"
+                loading="lazy"
+              />
             } @else {
               <div class="act-img-ph">📸</div>
             }
             <div class="act-info">
               <span class="act-label">Dernière sortie</span>
               <h2 class="act-titre">{{ sortie.titre }}</h2>
-              @if (sortie.lieu) { <a class="act-meta lieu-lien" [href]="mapsUrl(sortie.lieu)" target="_blank" rel="noopener"><mat-icon class="lieu-icon">location_on</mat-icon> {{ sortie.lieu }}</a> }
-              <p class="act-meta">{{ sortie.date | date:'d MMMM yyyy':'':'fr' }}</p>
+              @if (sortie.lieu) {
+                <a
+                  class="act-meta lieu-lien"
+                  [href]="mapsUrl(sortie.lieu)"
+                  target="_blank"
+                  rel="noopener"
+                  ><mat-icon class="lieu-icon">location_on</mat-icon> {{ sortie.lieu }}</a
+                >
+              }
+              <p class="act-meta">{{ sortie.date | date: 'd MMMM yyyy' : '' : 'fr' }}</p>
             </div>
           </div>
         }
@@ -96,7 +126,6 @@
             </div>
           </div>
         }
-
       </div>
     </div>
   </section>
@@ -111,7 +140,12 @@
       <div class="gallery-mosaic">
         @for (photo of recentPhotos(); track photo.id) {
           <div class="mosaic-cell">
-            <img [src]="photo.thumbnailUrl ?? photo.url" [alt]="photo.titre" class="mosaic-img" loading="lazy">
+            <img
+              [src]="photo.thumbnailUrl ?? photo.url"
+              [alt]="photo.titre"
+              class="mosaic-img"
+              loading="lazy"
+            />
           </div>
         }
       </div>
@@ -133,13 +167,20 @@
           <a [routerLink]="['/galeries/membres', m.uid]" class="membre-card">
             <div class="membre-visual">
               @if (m.photoProfilUrl) {
-                <img [src]="m.photoProfilUrl" [alt]="nomComplet(m)" class="membre-avatar" loading="lazy">
+                <img
+                  [src]="m.photoProfilUrl"
+                  [alt]="nomComplet(m)"
+                  class="membre-avatar"
+                  loading="lazy"
+                />
               } @else {
                 <div class="membre-initiales">{{ initiales(m) }}</div>
               }
             </div>
             <h3 class="membre-nom">{{ nomComplet(m) }}</h3>
-            @if (m.bio) { <p class="membre-bio">{{ m.bio }}</p> }
+            @if (m.bio) {
+              <p class="membre-bio">{{ m.bio }}</p>
+            }
             @if (m.stylesPhoto?.length) {
               <div class="membre-themes">
                 @for (style of m.stylesPhoto!.slice(0, 2); track style) {
@@ -160,9 +201,12 @@
   <nav class="section-nav" aria-label="Navigation sections">
     <div class="section-nav-track"></div>
     @for (item of navItems(); track item.id) {
-      <button class="section-nav-item" [class.active]="activeNav() === item.id"
+      <button
+        class="section-nav-item"
+        [class.active]="activeNav() === item.id"
         (click)="scrollToSection(item.target)"
-        [title]="item.label">
+        [title]="item.label"
+      >
         <span class="section-nav-tooltip">{{ item.label }}</span>
         <div class="section-nav-dot"></div>
       </button>
@@ -175,7 +219,9 @@
 <section class="cta-section">
   <div class="cta-inner reveal-fade" style="--rs: 0%; --re: 60%">
     <h2 class="cta-titre">Rejoignez-nous</h2>
-    <p class="cta-sub">Partagez votre passion, développez votre regard et participez à toutes nos activités.</p>
+    <p class="cta-sub">
+      Partagez votre passion, développez votre regard et participez à toutes nos activités.
+    </p>
     <a routerLink="/le-club/adhesion" class="btn-cta">Adhérer au club</a>
   </div>
 </section>

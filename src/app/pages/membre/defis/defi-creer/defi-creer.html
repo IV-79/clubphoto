@@ -1,5 +1,4 @@
 <div class="creer-page">
-
   <div class="page-header">
     <a routerLink="/galeries/sorties" class="back-link">
       <mat-icon>arrow_back</mat-icon> Événements
@@ -8,7 +7,6 @@
   </div>
 
   <form [formGroup]="form" (ngSubmit)="submit()" class="creer-form">
-
     <!-- Informations principales -->
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Titre du défi</mat-label>
@@ -29,17 +27,36 @@
 
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Description (optionnel)</mat-label>
-      <textarea matInput formControlName="description" rows="3"
-                placeholder="Contexte, règles spécifiques, conseils…"></textarea>
+      <textarea
+        matInput
+        formControlName="description"
+        rows="3"
+        placeholder="Contexte, règles spécifiques, conseils…"
+      ></textarea>
     </mat-form-field>
 
     <!-- Dates -->
     <div class="dates-section">
       <h3 class="dates-title">Calendrier</h3>
       <div class="dates-grid">
-        <app-date-picker label="Début des soumissions" [required]="true" formControlName="dateDebutSoumission" [min]="today"></app-date-picker>
-        <app-date-picker label="Fin des soumissions"   [required]="true" formControlName="dateFinSoumission"   [min]="today"></app-date-picker>
-        <app-date-picker label="Clôture des votes"     [required]="true" formControlName="dateCloturVotes"     [min]="today"></app-date-picker>
+        <app-date-picker
+          label="Début des soumissions"
+          [required]="true"
+          formControlName="dateDebutSoumission"
+          [min]="today"
+        ></app-date-picker>
+        <app-date-picker
+          label="Fin des soumissions"
+          [required]="true"
+          formControlName="dateFinSoumission"
+          [min]="today"
+        ></app-date-picker>
+        <app-date-picker
+          label="Clôture des votes"
+          [required]="true"
+          formControlName="dateCloturVotes"
+          [min]="today"
+        ></app-date-picker>
       </div>
       @if (form.touched && dateErrors) {
         <p class="date-error">{{ dateErrors }}</p>
@@ -76,44 +93,57 @@
     <label class="field-toggle">
       <input type="checkbox" formControlName="inscriptionObligatoire" />
       <span class="toggle-label">Inscription obligatoire avant de soumettre</span>
-      <span class="toggle-hint">Décoché = tout membre connecté peut soumettre directement, sans s'inscrire.</span>
+      <span class="toggle-hint"
+        >Décoché = tout membre connecté peut soumettre directement, sans s'inscrire.</span
+      >
     </label>
 
     <!-- Photo de couverture -->
     <div class="cover-field">
-      <label class="cover-label">Photo de couverture <span class="cover-optional">optionnel</span></label>
+      <label class="cover-label"
+        >Photo de couverture <span class="cover-optional">optionnel</span></label
+      >
       <p class="cover-hint">Format recommandé : 16/9 — redimensionné à 1280×720 px</p>
-      <div class="cover-drop"
-           [class.drag-over]="coverDragOver()"
-           (dragover)="$event.preventDefault(); coverDragOver.set(true)"
-           (dragleave)="coverDragOver.set(false)"
-           (drop)="onCoverDrop($event)">
+      <div
+        class="cover-drop"
+        [class.drag-over]="coverDragOver()"
+        (dragover)="$event.preventDefault(); coverDragOver.set(true)"
+        (dragleave)="coverDragOver.set(false)"
+        (drop)="onCoverDrop($event)"
+      >
         @if (coverPreviewUrl()) {
           <img [src]="coverPreviewUrl()!" class="cover-preview" alt="Aperçu" />
           <div class="cover-overlay">
-            <button type="button" class="cover-change-btn" (click)="coverInputEl.click()">🔄 Changer</button>
+            <button type="button" class="cover-change-btn" (click)="coverInputEl.click()">
+              🔄 Changer
+            </button>
             <button type="button" class="cover-remove-btn" (click)="clearCover()">× Retirer</button>
           </div>
         } @else {
           <div class="cover-empty">
             <span class="cover-icon">🖼</span>
             <span>Glisser une image ici ou</span>
-            <button type="button" class="cover-browse-btn" (click)="coverInputEl.click()">parcourir</button>
+            <button type="button" class="cover-browse-btn" (click)="coverInputEl.click()">
+              parcourir
+            </button>
           </div>
         }
-        <input #coverInputEl type="file" accept="image/*" class="hidden-input" (change)="onCoverSelected($event)" />
+        <input
+          #coverInputEl
+          type="file"
+          accept="image/*"
+          class="hidden-input"
+          (change)="onCoverSelected($event)"
+        />
       </div>
     </div>
 
     <!-- Actions -->
     <div class="form-actions">
-      <button type="submit" mat-raised-button color="primary"
-              [disabled]="form.invalid || saving()">
+      <button type="submit" mat-raised-button color="primary" [disabled]="form.invalid || saving()">
         {{ saving() ? 'Création…' : 'Créer le défi' }}
       </button>
       <a routerLink="/galeries/sorties" mat-button>Annuler</a>
     </div>
-
   </form>
-
 </div>

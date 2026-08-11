@@ -16,7 +16,9 @@ export class DarkModeService {
     });
   }
 
-  toggle() { this.isDark.update(v => !v); }
+  toggle() {
+    this.isDark.update((v) => !v);
+  }
 
   private initialValue(): boolean {
     if (typeof window === 'undefined') return true;

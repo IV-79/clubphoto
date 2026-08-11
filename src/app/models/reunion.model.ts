@@ -8,6 +8,4 @@ export interface Reunion {
   dateCreation: string;
 }
 
-export const REUNION_TYPES = [
-  { value: 'reunion' as const, label: 'Réunion' },
-];
+export const REUNION_TYPES = [{ value: 'reunion' as const, label: 'Réunion' }];

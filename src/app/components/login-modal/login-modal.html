@@ -1,13 +1,11 @@
 @if (modal.isOpen()) {
   <div class="modal-backdrop" (click)="close()">
     <div class="modal-card" (click)="$event.stopPropagation()">
-
       <button class="modal-close" (click)="close()" aria-label="Fermer">×</button>
 
       <h2 class="modal-title">Espace Club Photo</h2>
 
       <form (ngSubmit)="submit()" #loginForm="ngForm" class="modal-form">
-
         <label class="field-label">
           <span>Adresse email</span>
           <input
@@ -17,7 +15,8 @@
             required
             email
             autocomplete="email"
-            placeholder="votre@email.com">
+            placeholder="votre@email.com"
+          />
         </label>
 
         <label class="field-label">
@@ -28,13 +27,17 @@
             [(ngModel)]="password"
             required
             autocomplete="current-password"
-            placeholder="••••••••">
+            placeholder="••••••••"
+          />
         </label>
 
         <div class="forgot-link">
-          <button type="button" class="btn-forgot"
+          <button
+            type="button"
+            class="btn-forgot"
             [disabled]="resetLoading()"
-            (click)="onResetPassword()">
+            (click)="onResetPassword()"
+          >
             {{ resetLoading() ? 'Envoi…' : 'Mot de passe oublié ?' }}
           </button>
         </div>
@@ -52,9 +55,7 @@
         <button type="submit" class="btn-submit" [disabled]="!loginForm.form.valid || loading()">
           {{ loading() ? 'Connexion…' : 'Se connecter' }}
         </button>
-
       </form>
-
     </div>
   </div>
 }

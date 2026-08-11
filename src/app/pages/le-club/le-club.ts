@@ -41,8 +41,8 @@ export class Histoire {
 
   raw = toSignal(this.pageService.getContent('histoire'), { initialValue: null as any });
   loading = computed(() => this.raw() === null);
-  safeHtml = computed(
-    (): SafeHtml => this.sanitizer.bypassSecurityTrustHtml(renderMarkdown(this.raw() ?? '')),
+  safeHtml = computed((): SafeHtml =>
+    this.sanitizer.bypassSecurityTrustHtml(renderMarkdown(this.raw() ?? '')),
   );
 }
 
@@ -70,8 +70,8 @@ export class Bureau {
 
   raw = toSignal(this.pageService.getContent('bureau'), { initialValue: null as any });
   loading = computed(() => this.raw() === null);
-  safeHtml = computed(
-    (): SafeHtml => this.sanitizer.bypassSecurityTrustHtml(renderMarkdown(this.raw() ?? '')),
+  safeHtml = computed((): SafeHtml =>
+    this.sanitizer.bypassSecurityTrustHtml(renderMarkdown(this.raw() ?? '')),
   );
 }
 
@@ -99,7 +99,7 @@ export class Adhesion {
 
   raw = toSignal(this.pageService.getContent('adhesion'), { initialValue: null as any });
   loading = computed(() => this.raw() === null);
-  safeHtml = computed(
-    (): SafeHtml => this.sanitizer.bypassSecurityTrustHtml(renderMarkdown(this.raw() ?? '')),
+  safeHtml = computed((): SafeHtml =>
+    this.sanitizer.bypassSecurityTrustHtml(renderMarkdown(this.raw() ?? '')),
   );
 }

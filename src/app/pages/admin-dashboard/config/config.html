@@ -1,5 +1,4 @@
 <div class="config-page">
-
   <div class="page-header">
     <h2 class="page-title">Configuration du site</h2>
   </div>
@@ -9,7 +8,9 @@
     <div class="section-header">
       <div>
         <h3 class="section-title">Image de la page d'accueil</h3>
-        <p class="section-sub">Photo affichée en fond sur la page d'accueil. Format recommandé : paysage, max 1920 px.</p>
+        <p class="section-sub">
+          Photo affichée en fond sur la page d'accueil. Format recommandé : paysage, max 1920 px.
+        </p>
       </div>
     </div>
 
@@ -17,10 +18,18 @@
     <div class="source-row">
       <span class="source-label">Source</span>
       <div class="source-segmented">
-        <button class="seg-btn" [class.active]="heroSource() === 'manuel'" (click)="setHeroSource('manuel')">
+        <button
+          class="seg-btn"
+          [class.active]="heroSource() === 'manuel'"
+          (click)="setHeroSource('manuel')"
+        >
           Image manuelle
         </button>
-        <button class="seg-btn" [class.active]="heroSource() === 'theme_du_mois'" (click)="setHeroSource('theme_du_mois')">
+        <button
+          class="seg-btn"
+          [class.active]="heroSource() === 'theme_du_mois'"
+          (click)="setHeroSource('theme_du_mois')"
+        >
           Vainqueur Thème du mois
         </button>
       </div>
@@ -28,27 +37,30 @@
 
     @if (heroSource() === 'theme_du_mois') {
       <p class="source-auto-note">
-        La page d'accueil affiche automatiquement la photo gagnante du dernier Thème du mois terminé.
-        En cas d'égalité à la première place, la soumission la plus ancienne est utilisée.
+        La page d'accueil affiche automatiquement la photo gagnante du dernier Thème du mois
+        terminé. En cas d'égalité à la première place, la soumission la plus ancienne est utilisée.
       </p>
     } @else {
       <!-- Zone drag & drop -->
-      <div class="hero-preview-wrap"
-           [class.dragging]="isDragging()"
-           (dragover)="onDragOver($event)"
-           (dragleave)="onDragLeave($event)"
-           (drop)="onDrop($event)">
-
+      <div
+        class="hero-preview-wrap"
+        [class.dragging]="isDragging()"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="onDrop($event)"
+      >
         @if (heroPreview()) {
-          <img [src]="heroPreview()!" class="hero-preview" alt="Aperçu">
+          <img [src]="heroPreview()!" class="hero-preview" alt="Aperçu" />
           <div class="hero-preview-actions">
-            <button class="btn-cancel" (click)="cancelHero()" [disabled]="heroUploading()">Annuler</button>
+            <button class="btn-cancel" (click)="cancelHero()" [disabled]="heroUploading()">
+              Annuler
+            </button>
             <button class="btn-add" (click)="saveHero()" [disabled]="heroUploading()">
               {{ heroUploading() ? 'Upload…' : 'Sauvegarder' }}
             </button>
           </div>
         } @else if (heroCurrentUrl()) {
-          <img [src]="heroCurrentUrl()" class="hero-preview" alt="Image actuelle">
+          <img [src]="heroCurrentUrl()" class="hero-preview" alt="Image actuelle" />
           <div class="hero-preview-actions">
             <button class="btn-reset" (click)="heroInput.click()">Changer</button>
             <button class="btn-delete" (click)="deleteHero()" title="Supprimer">× Supprimer</button>
@@ -57,10 +69,12 @@
           <div class="hero-empty">
             <span class="hero-empty-icon">🖼️</span>
             <span>Glissez une image ici ou</span>
-            <button class="btn-add hero-empty-btn" (click)="heroInput.click()">choisir un fichier</button>
+            <button class="btn-add hero-empty-btn" (click)="heroInput.click()">
+              choisir un fichier
+            </button>
           </div>
         }
-        <input #heroInput type="file" accept="image/*" hidden (change)="onHeroSelected($event)">
+        <input #heroInput type="file" accept="image/*" hidden (change)="onHeroSelected($event)" />
       </div>
     }
 
@@ -74,15 +88,27 @@
     <div class="section-header">
       <div>
         <h3 class="section-title">Limites du portfolio</h3>
-        <p class="section-sub">Nombre maximum de photos qu'un membre peut avoir dans son portfolio.</p>
+        <p class="section-sub">
+          Nombre maximum de photos qu'un membre peut avoir dans son portfolio.
+        </p>
       </div>
     </div>
     <div class="limit-row">
       <label class="limit-label" for="maxPhotos">Max photos par membre</label>
-      <input id="maxPhotos" type="number" class="input-limit" min="1" max="500"
-             [(ngModel)]="portfolioLimit" [ngModelOptions]="{standalone: true}" />
-      <button class="btn-add" (click)="savePortfolioLimit()"
-              [disabled]="portfolioLimitSaving() || portfolioLimit() < 1">
+      <input
+        id="maxPhotos"
+        type="number"
+        class="input-limit"
+        min="1"
+        max="500"
+        [(ngModel)]="portfolioLimit"
+        [ngModelOptions]="{ standalone: true }"
+      />
+      <button
+        class="btn-add"
+        (click)="savePortfolioLimit()"
+        [disabled]="portfolioLimitSaving() || portfolioLimit() < 1"
+      >
         {{ portfolioLimitSaving() ? 'Sauvegarde…' : 'Enregistrer' }}
       </button>
     </div>
@@ -93,7 +119,9 @@
     <div class="section-header">
       <div>
         <h3 class="section-title">Catégories de photos</h3>
-        <p class="section-sub">Ces catégories apparaissent dans le formulaire d'upload des membres.</p>
+        <p class="section-sub">
+          Ces catégories apparaissent dans le formulaire d'upload des membres.
+        </p>
       </div>
       <span class="badge">{{ categories().length }}</span>
     </div>
@@ -103,9 +131,13 @@
       @for (cat of sortedCategories(); track cat.value) {
         <div class="category-row">
           @if (editingCatValue() === cat.value) {
-            <input class="input-edit-cat" [(ngModel)]="editCatLabel"
-                   (keydown.enter)="saveEditCat(cat)" (keydown.escape)="cancelEditCat()"
-                   autofocus />
+            <input
+              class="input-edit-cat"
+              [(ngModel)]="editCatLabel"
+              (keydown.enter)="saveEditCat(cat)"
+              (keydown.escape)="cancelEditCat()"
+              autofocus
+            />
             <button class="btn-edit-ok" (click)="saveEditCat(cat)" title="Enregistrer">✓</button>
             <button class="btn-edit-cancel" (click)="cancelEditCat()" title="Annuler">×</button>
           } @else {
@@ -127,7 +159,8 @@
         [(ngModel)]="newLabel"
         placeholder="Nom de la catégorie (ex: Portrait)"
         (keydown.enter)="addCategorie()"
-        class="input-label">
+        class="input-label"
+      />
       <button class="btn-add" (click)="addCategorie()" [disabled]="!newLabel.trim()">
         + Ajouter
       </button>
@@ -139,11 +172,11 @@
     <!-- Réinitialiser -->
     <div class="reset-zone">
       @if (!confirmReset()) {
-        <button class="btn-reset" (click)="confirmReset.set(true)">
-          Réinitialiser par défaut
-        </button>
+        <button class="btn-reset" (click)="confirmReset.set(true)">Réinitialiser par défaut</button>
       } @else {
-        <span class="reset-confirm-msg">Remettre la liste d'origine ? Cette action écrase la liste actuelle.</span>
+        <span class="reset-confirm-msg"
+          >Remettre la liste d'origine ? Cette action écrase la liste actuelle.</span
+        >
         <button class="btn-reset-ok" (click)="resetDefaut()">Confirmer</button>
         <button class="btn-cancel" (click)="confirmReset.set(false)">Annuler</button>
       }
@@ -153,5 +186,4 @@
   @if (saving()) {
     <p class="saving-msg">Sauvegarde…</p>
   }
-
 </div>

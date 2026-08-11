@@ -1,5 +1,4 @@
 <div class="admin-page">
-
   <!-- En-tête -->
   <div class="db-header">
     <h2 class="admin-title">Tableau de bord</h2>
@@ -26,10 +25,8 @@
   }
 
   @if (!loading() && !hasError()) {
-
     <!-- ── KPI ─────────────────────────────────────────── -->
     <div class="kpi-grid">
-
       <mat-card class="db-card kpi-card">
         <mat-card-content class="kpi-body">
           <div class="kpi-icon-wrap members"><mat-icon>group</mat-icon></div>
@@ -43,7 +40,9 @@
               <span class="chip chip-contrib">{{ roleBreakdown().contributeur }} contrib.</span>
             }
             @if (suspendus() > 0) {
-              <span class="chip chip-sus">{{ suspendus() }} suspendu{{ suspendus() > 1 ? 's' : '' }}</span>
+              <span class="chip chip-sus"
+                >{{ suspendus() }} suspendu{{ suspendus() > 1 ? 's' : '' }}</span
+              >
             }
           </div>
         </mat-card-content>
@@ -89,12 +88,10 @@
           <div class="kpi-sub"><span class="kpi-hint">bibliothèque du club</span></div>
         </mat-card-content>
       </mat-card>
-
     </div>
 
     <!-- ── Stockage ────────────────────────────────────── -->
     <div class="storage-section">
-
       <mat-card class="db-card">
         <mat-card-content>
           <div class="section-lbl">Stockage utilisé</div>
@@ -107,7 +104,11 @@
                   {{ item.label }}
                 </div>
                 <div class="s-track">
-                  <div class="s-fill" [style.width.%]="item.pct" [style.background]="item.color"></div>
+                  <div
+                    class="s-fill"
+                    [style.width.%]="item.pct"
+                    [style.background]="item.color"
+                  ></div>
                 </div>
                 <span class="s-bytes">{{ formatBytes(item.bytes) }}</span>
                 <span class="s-pct">{{ item.pct }}%</span>
@@ -139,7 +140,6 @@
           </div>
         </mat-card-content>
       </mat-card>
-
     </div>
 
     <!-- ── Top membres ─────────────────────────────────── -->
@@ -161,7 +161,5 @@
         </mat-card-content>
       </mat-card>
     }
-
   }
-
 </div>

@@ -1,5 +1,4 @@
 <header class="site-header">
-
   @if (isTestEnv) {
     <div class="test-banner">
       SITE DE TEST — les données ne sont pas réelles &nbsp;·&nbsp; {{ testBannerUser() }}
@@ -14,11 +13,12 @@
   <!-- Barre de navigation -->
   <nav class="header-nav">
     <div class="nav-inner">
-
       <!-- Nav desktop -->
       <ul class="nav-links">
         <li>
-          <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">Accueil</a>
+          <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
+            >Accueil</a
+          >
         </li>
 
         <li class="has-dropdown">
@@ -31,9 +31,15 @@
                 <mat-icon>people</mat-icon>Portfolios des membres
               </a>
               <div class="nav-panel-divider"></div>
-              <a routerLink="/le-club/histoire" class="nav-panel-item" (click)="openMenu.set(null)">Histoire</a>
-              <a routerLink="/le-club/bureau" class="nav-panel-item" (click)="openMenu.set(null)">Le Bureau</a>
-              <a routerLink="/le-club/adhesion" class="nav-panel-item" (click)="openMenu.set(null)">Adhésion</a>
+              <a routerLink="/le-club/histoire" class="nav-panel-item" (click)="openMenu.set(null)"
+                >Histoire</a
+              >
+              <a routerLink="/le-club/bureau" class="nav-panel-item" (click)="openMenu.set(null)"
+                >Le Bureau</a
+              >
+              <a routerLink="/le-club/adhesion" class="nav-panel-item" (click)="openMenu.set(null)"
+                >Adhésion</a
+              >
             </div>
           }
         </li>
@@ -55,7 +61,11 @@
               <a routerLink="/galeries/sorties" class="nav-panel-item" (click)="openMenu.set(null)">
                 <mat-icon>directions_walk</mat-icon>Événements
               </a>
-              <a routerLink="/galeries/themesdumois" class="nav-panel-item" (click)="openMenu.set(null)">
+              <a
+                routerLink="/galeries/themesdumois"
+                class="nav-panel-item"
+                (click)="openMenu.set(null)"
+              >
                 <mat-icon>photo_camera</mat-icon>Thèmes du mois
               </a>
             </div>
@@ -63,44 +73,55 @@
         </li>
 
         @if (isLoggedIn$ | async) {
-        <li class="has-dropdown">
-          <button class="nav-dropdown-btn" (click)="toggleMenu('membres', $event)">
-            Membres <mat-icon class="arrow-icon">expand_more</mat-icon>
-          </button>
-          @if (openMenu() === 'membres') {
-            <div class="nav-panel">
-              <a routerLink="/membre/documents" class="nav-panel-item" (click)="openMenu.set(null)">
-                <mat-icon>folder_shared</mat-icon>Documents
-              </a>
-              <a routerLink="/membres/guide" class="nav-panel-item" (click)="openMenu.set(null)">
-                <mat-icon>menu_book</mat-icon>Guide du site
-              </a>
-              <a routerLink="/membres/charte" class="nav-panel-item" (click)="openMenu.set(null)">
-                <mat-icon>gavel</mat-icon>Charte du site
-              </a>
-            </div>
-          }
-        </li>
+          <li class="has-dropdown">
+            <button class="nav-dropdown-btn" (click)="toggleMenu('membres', $event)">
+              Membres <mat-icon class="arrow-icon">expand_more</mat-icon>
+            </button>
+            @if (openMenu() === 'membres') {
+              <div class="nav-panel">
+                <a
+                  routerLink="/membre/documents"
+                  class="nav-panel-item"
+                  (click)="openMenu.set(null)"
+                >
+                  <mat-icon>folder_shared</mat-icon>Documents
+                </a>
+                <a routerLink="/membres/guide" class="nav-panel-item" (click)="openMenu.set(null)">
+                  <mat-icon>menu_book</mat-icon>Guide du site
+                </a>
+                <a routerLink="/membres/charte" class="nav-panel-item" (click)="openMenu.set(null)">
+                  <mat-icon>gavel</mat-icon>Charte du site
+                </a>
+              </div>
+            }
+          </li>
         }
 
         <li>
           <a routerLink="/contact" routerLinkActive="active">Contact</a>
         </li>
-
       </ul>
 
       <!-- Actions droite -->
       <div class="nav-actions">
         <!-- Toggle dark/light — toujours visible -->
-        <button class="theme-toggle-btn" (click)="darkMode.toggle()" [title]="darkMode.isDark() ? 'Mode clair' : 'Mode sombre'">
+        <button
+          class="theme-toggle-btn"
+          (click)="darkMode.toggle()"
+          [title]="darkMode.isDark() ? 'Mode clair' : 'Mode sombre'"
+        >
           <mat-icon>{{ darkMode.isDark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
         </button>
 
         @if (isLoggedIn$ | async) {
-
           <!-- Cloche notifications -->
           <div class="has-dropdown">
-            <button class="notif-bell" (click)="toggleMenu('notifs', $event)" [class.has-unread]="unreadCount() > 0" title="Notifications">
+            <button
+              class="notif-bell"
+              (click)="toggleMenu('notifs', $event)"
+              [class.has-unread]="unreadCount() > 0"
+              title="Notifications"
+            >
               <mat-icon>notifications</mat-icon>
               @if (unreadCount() > 0) {
                 <span class="notif-badge">{{ unreadCount() > 9 ? '9+' : unreadCount() }}</span>
@@ -118,18 +139,29 @@
                   <p class="notif-panel-empty">Aucune notification</p>
                 } @else {
                   @for (n of recentNotifs(); track n.id) {
-                    <button class="notif-panel-item" [class.unread]="!n.lu" (click)="navigateFromNotif(n)">
+                    <button
+                      class="notif-panel-item"
+                      [class.unread]="!n.lu"
+                      (click)="navigateFromNotif(n)"
+                    >
                       <span class="notif-item-icon">{{ notifIcon(n.type) }}</span>
                       <div class="notif-item-body">
                         <p class="notif-item-msg">{{ n.message }}</p>
                         <span class="notif-item-date">{{ formatNotifDate(n.createdAt) }}</span>
                       </div>
-                      @if (!n.lu) { <span class="notif-unread-dot"></span> }
+                      @if (!n.lu) {
+                        <span class="notif-unread-dot"></span>
+                      }
                     </button>
                   }
                 }
                 <div class="notif-panel-footer">
-                  <a routerLink="/membre/notifications" class="notif-voir-tout" (click)="openMenu.set(null)">Toutes les notifications →</a>
+                  <a
+                    routerLink="/membre/notifications"
+                    class="notif-voir-tout"
+                    (click)="openMenu.set(null)"
+                    >Toutes les notifications →</a
+                  >
                 </div>
               </div>
             }
@@ -144,20 +176,32 @@
             </button>
             @if (openMenu() === 'monespace') {
               <div class="nav-panel nav-panel-right">
-                <a routerLink="/membre/portfolio" class="nav-panel-item" (click)="openMenu.set(null)">
+                <a
+                  routerLink="/membre/portfolio"
+                  class="nav-panel-item"
+                  (click)="openMenu.set(null)"
+                >
                   <mat-icon>photo_library</mat-icon>Mon Portfolio
                 </a>
                 <a routerLink="/membre/profil" class="nav-panel-item" (click)="openMenu.set(null)">
                   <mat-icon>person</mat-icon>Mon Profil
                 </a>
                 <div class="nav-panel-divider"></div>
-                <a routerLink="/membre/notifications" class="nav-panel-item" (click)="openMenu.set(null)">
+                <a
+                  routerLink="/membre/notifications"
+                  class="nav-panel-item"
+                  (click)="openMenu.set(null)"
+                >
                   <mat-icon>notifications</mat-icon>Mes notifications
                   @if (unreadCount() > 0) {
                     <span class="notif-count-chip">{{ unreadCount() }}</span>
                   }
                 </a>
-                <a routerLink="/membre/preferences" class="nav-panel-item" (click)="openMenu.set(null)">
+                <a
+                  routerLink="/membre/preferences"
+                  class="nav-panel-item"
+                  (click)="openMenu.set(null)"
+                >
                   <mat-icon>tune</mat-icon>Préférences
                 </a>
                 <div class="nav-panel-divider"></div>
@@ -180,7 +224,11 @@
                 <a routerLink="/admin" class="nav-panel-item" (click)="openMenu.set(null)">
                   <mat-icon>dashboard</mat-icon>Tableau de bord
                 </a>
-                <a routerLink="/admin/maintenance" class="nav-panel-item" (click)="openMenu.set(null)">
+                <a
+                  routerLink="/admin/maintenance"
+                  class="nav-panel-item"
+                  (click)="openMenu.set(null)"
+                >
                   <mat-icon>build</mat-icon>Maintenance
                 </a>
                 <div class="nav-panel-divider"></div>
@@ -213,12 +261,21 @@
 
       <!-- Groupe cloche + burger (mobile) -->
       <div class="mobile-right">
-        <button class="theme-toggle-btn" (click)="darkMode.toggle()" [title]="darkMode.isDark() ? 'Mode clair' : 'Mode sombre'">
+        <button
+          class="theme-toggle-btn"
+          (click)="darkMode.toggle()"
+          [title]="darkMode.isDark() ? 'Mode clair' : 'Mode sombre'"
+        >
           <mat-icon>{{ darkMode.isDark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
         </button>
         @if (isLoggedIn$ | async) {
           <div class="has-dropdown">
-            <button class="mobile-notif-btn" (click)="toggleMenu('notifs', $event)" [class.has-unread]="unreadCount() > 0" title="Notifications">
+            <button
+              class="mobile-notif-btn"
+              (click)="toggleMenu('notifs', $event)"
+              [class.has-unread]="unreadCount() > 0"
+              title="Notifications"
+            >
               <mat-icon>notifications</mat-icon>
               @if (unreadCount() > 0) {
                 <span class="notif-badge">{{ unreadCount() > 9 ? '9+' : unreadCount() }}</span>
@@ -236,24 +293,38 @@
                   <p class="notif-panel-empty">Aucune notification</p>
                 } @else {
                   @for (n of recentNotifs(); track n.id) {
-                    <button class="notif-panel-item" [class.unread]="!n.lu" (click)="navigateFromNotif(n)">
+                    <button
+                      class="notif-panel-item"
+                      [class.unread]="!n.lu"
+                      (click)="navigateFromNotif(n)"
+                    >
                       <span class="notif-item-icon">{{ notifIcon(n.type) }}</span>
                       <div class="notif-item-body">
                         <p class="notif-item-msg">{{ n.message }}</p>
                         <span class="notif-item-date">{{ formatNotifDate(n.createdAt) }}</span>
                       </div>
-                      @if (!n.lu) { <span class="notif-unread-dot"></span> }
+                      @if (!n.lu) {
+                        <span class="notif-unread-dot"></span>
+                      }
                     </button>
                   }
                 }
                 <div class="notif-panel-footer">
-                  <a routerLink="/membre/notifications" class="notif-voir-tout" (click)="openMenu.set(null)">Toutes les notifications →</a>
+                  <a
+                    routerLink="/membre/notifications"
+                    class="notif-voir-tout"
+                    (click)="openMenu.set(null)"
+                    >Toutes les notifications →</a
+                  >
                 </div>
               </div>
             }
           </div>
         }
-        <button class="mobile-menu-btn" (click)="mobileMenuOpen.set(!mobileMenuOpen()); mobileOpenSection.set(null)">
+        <button
+          class="mobile-menu-btn"
+          (click)="mobileMenuOpen.set(!mobileMenuOpen()); mobileOpenSection.set(null)"
+        >
           <mat-icon>{{ mobileMenuOpen() ? 'close' : 'menu' }}</mat-icon>
         </button>
       </div>
@@ -261,105 +332,150 @@
 
     <!-- Menu mobile (inchangé) -->
     @if (mobileMenuOpen()) {
-    <ul class="mobile-nav">
+      <ul class="mobile-nav">
+        <li><a routerLink="/" (click)="closeMobileMenu()">Accueil</a></li>
 
-      <li><a routerLink="/" (click)="closeMobileMenu()">Accueil</a></li>
+        <li class="mobile-has-sub">
+          <button class="mobile-sub-toggle" (click)="toggleMobileSection('club')">
+            Le Club
+            <mat-icon class="toggle-arrow">{{
+              mobileOpenSection() === 'club' ? 'expand_less' : 'expand_more'
+            }}</mat-icon>
+          </button>
+          @if (mobileOpenSection() === 'club') {
+            <ul class="mobile-sub">
+              <li>
+                <a routerLink="/galeries/membres" (click)="closeMobileMenu()"
+                  >Portfolios des membres</a
+                >
+              </li>
+              <li><a routerLink="/le-club/histoire" (click)="closeMobileMenu()">Histoire</a></li>
+              <li><a routerLink="/le-club/bureau" (click)="closeMobileMenu()">Le Bureau</a></li>
+              <li><a routerLink="/le-club/adhesion" (click)="closeMobileMenu()">Adhésion</a></li>
+            </ul>
+          }
+        </li>
 
-      <li class="mobile-has-sub">
-        <button class="mobile-sub-toggle" (click)="toggleMobileSection('club')">
-          Le Club
-          <mat-icon class="toggle-arrow">{{ mobileOpenSection() === 'club' ? 'expand_less' : 'expand_more' }}</mat-icon>
-        </button>
-        @if (mobileOpenSection() === 'club') {
-          <ul class="mobile-sub">
-            <li><a routerLink="/galeries/membres" (click)="closeMobileMenu()">Portfolios des membres</a></li>
-            <li><a routerLink="/le-club/histoire" (click)="closeMobileMenu()">Histoire</a></li>
-            <li><a routerLink="/le-club/bureau" (click)="closeMobileMenu()">Le Bureau</a></li>
-            <li><a routerLink="/le-club/adhesion" (click)="closeMobileMenu()">Adhésion</a></li>
-          </ul>
+        <li><a routerLink="/actualites" (click)="closeMobileMenu()">Actualités</a></li>
+
+        <li class="mobile-has-sub">
+          <button class="mobile-sub-toggle" (click)="toggleMobileSection('galeries')">
+            Activités
+            <mat-icon class="toggle-arrow">{{
+              mobileOpenSection() === 'galeries' ? 'expand_less' : 'expand_more'
+            }}</mat-icon>
+          </button>
+          @if (mobileOpenSection() === 'galeries') {
+            <ul class="mobile-sub">
+              <li><a routerLink="/calendrier" (click)="closeMobileMenu()">Calendrier</a></li>
+              <li><a routerLink="/galeries/sorties" (click)="closeMobileMenu()">Événements</a></li>
+              <li>
+                <a routerLink="/galeries/themesdumois" (click)="closeMobileMenu()"
+                  >Thèmes du mois</a
+                >
+              </li>
+            </ul>
+          }
+        </li>
+
+        @if (isLoggedIn$ | async) {
+          <li class="mobile-has-sub">
+            <button class="mobile-sub-toggle" (click)="toggleMobileSection('membres')">
+              Membres
+              <mat-icon class="toggle-arrow">{{
+                mobileOpenSection() === 'membres' ? 'expand_less' : 'expand_more'
+              }}</mat-icon>
+            </button>
+            @if (mobileOpenSection() === 'membres') {
+              <ul class="mobile-sub">
+                <li><a routerLink="/membre/documents" (click)="closeMobileMenu()">Documents</a></li>
+                <li>
+                  <a routerLink="/membres/guide" (click)="closeMobileMenu()">Guide du site</a>
+                </li>
+                <li>
+                  <a routerLink="/membres/charte" (click)="closeMobileMenu()">Charte du site</a>
+                </li>
+              </ul>
+            }
+          </li>
         }
-      </li>
 
-      <li><a routerLink="/actualites" (click)="closeMobileMenu()">Actualités</a></li>
+        <li><a routerLink="/contact" (click)="closeMobileMenu()">Contact</a></li>
 
-      <li class="mobile-has-sub">
-        <button class="mobile-sub-toggle" (click)="toggleMobileSection('galeries')">
-          Activités
-          <mat-icon class="toggle-arrow">{{ mobileOpenSection() === 'galeries' ? 'expand_less' : 'expand_more' }}</mat-icon>
-        </button>
-        @if (mobileOpenSection() === 'galeries') {
-        <ul class="mobile-sub">
-          <li><a routerLink="/calendrier" (click)="closeMobileMenu()">Calendrier</a></li>
-          <li><a routerLink="/galeries/sorties" (click)="closeMobileMenu()">Événements</a></li>
-          <li><a routerLink="/galeries/themesdumois" (click)="closeMobileMenu()">Thèmes du mois</a></li>
-        </ul>
+        @if (isLoggedIn$ | async) {
+          <li class="mobile-has-sub">
+            <button class="mobile-sub-toggle" (click)="toggleMobileSection('monespace')">
+              Mon espace
+              @if (unreadCount() > 0) {
+                <span class="mobile-notif-badge">{{ unreadCount() }}</span>
+              }
+              <mat-icon class="toggle-arrow">{{
+                mobileOpenSection() === 'monespace' ? 'expand_less' : 'expand_more'
+              }}</mat-icon>
+            </button>
+            @if (mobileOpenSection() === 'monespace') {
+              <ul class="mobile-sub">
+                <li>
+                  <a routerLink="/membre/portfolio" (click)="closeMobileMenu()">Mon Portfolio</a>
+                </li>
+                <li><a routerLink="/membre/profil" (click)="closeMobileMenu()">Mon Profil</a></li>
+                <li>
+                  <a routerLink="/membre/notifications" (click)="closeMobileMenu()"
+                    >Mes notifications
+                    @if (unreadCount() > 0) {
+                      ({{ unreadCount() }})
+                    }
+                  </a>
+                </li>
+                <li>
+                  <a routerLink="/membre/preferences" (click)="closeMobileMenu()">Préférences</a>
+                </li>
+                <li><button class="mobile-sub-logout" (click)="logout()">Déconnexion</button></li>
+              </ul>
+            }
+          </li>
         }
-      </li>
 
-      @if (isLoggedIn$ | async) {
-        <li class="mobile-has-sub">
-          <button class="mobile-sub-toggle" (click)="toggleMobileSection('membres')">
-            Membres
-            <mat-icon class="toggle-arrow">{{ mobileOpenSection() === 'membres' ? 'expand_less' : 'expand_more' }}</mat-icon>
-          </button>
-          @if (mobileOpenSection() === 'membres') {
-            <ul class="mobile-sub">
-              <li><a routerLink="/membre/documents" (click)="closeMobileMenu()">Documents</a></li>
-              <li><a routerLink="/membres/guide" (click)="closeMobileMenu()">Guide du site</a></li>
-              <li><a routerLink="/membres/charte" (click)="closeMobileMenu()">Charte du site</a></li>
-            </ul>
-          }
-        </li>
-      }
+        @if (isAdmin$ | async) {
+          <li class="mobile-has-sub">
+            <button
+              class="mobile-sub-toggle mobile-sub-toggle-admin"
+              (click)="toggleMobileSection('admin')"
+            >
+              Administration
+              <mat-icon class="toggle-arrow">{{
+                mobileOpenSection() === 'admin' ? 'expand_less' : 'expand_more'
+              }}</mat-icon>
+            </button>
+            @if (mobileOpenSection() === 'admin') {
+              <ul class="mobile-sub">
+                <li><a routerLink="/admin" (click)="closeMobileMenu()">Tableau de bord</a></li>
+                <li>
+                  <a routerLink="/admin/maintenance" (click)="closeMobileMenu()">Maintenance</a>
+                </li>
+                <li><a routerLink="/admin/reunions" (click)="closeMobileMenu()">Réunions</a></li>
+                <li>
+                  <a routerLink="/admin/themes" (click)="closeMobileMenu()">Thèmes du mois</a>
+                </li>
+                <li><a routerLink="/admin/membres" (click)="closeMobileMenu()">Membres</a></li>
+                <li>
+                  <a routerLink="/admin/dossiers" (click)="closeMobileMenu()">Dossiers documents</a>
+                </li>
+                <li><a routerLink="/admin/pages" (click)="closeMobileMenu()">Pages du site</a></li>
+                <li>
+                  <a routerLink="/admin/config" (click)="closeMobileMenu()"
+                    >Configuration du site</a
+                  >
+                </li>
+              </ul>
+            }
+          </li>
+        }
 
-      <li><a routerLink="/contact" (click)="closeMobileMenu()">Contact</a></li>
-
-      @if (isLoggedIn$ | async) {
-        <li class="mobile-has-sub">
-          <button class="mobile-sub-toggle" (click)="toggleMobileSection('monespace')">
-            Mon espace
-            @if (unreadCount() > 0) { <span class="mobile-notif-badge">{{ unreadCount() }}</span> }
-            <mat-icon class="toggle-arrow">{{ mobileOpenSection() === 'monespace' ? 'expand_less' : 'expand_more' }}</mat-icon>
-          </button>
-          @if (mobileOpenSection() === 'monespace') {
-            <ul class="mobile-sub">
-              <li><a routerLink="/membre/portfolio" (click)="closeMobileMenu()">Mon Portfolio</a></li>
-              <li><a routerLink="/membre/profil" (click)="closeMobileMenu()">Mon Profil</a></li>
-              <li><a routerLink="/membre/notifications" (click)="closeMobileMenu()">Mes notifications@if (unreadCount() > 0) { ({{ unreadCount() }}) }</a></li>
-              <li><a routerLink="/membre/preferences" (click)="closeMobileMenu()">Préférences</a></li>
-              <li><button class="mobile-sub-logout" (click)="logout()">Déconnexion</button></li>
-            </ul>
-          }
-        </li>
-      }
-
-      @if (isAdmin$ | async) {
-        <li class="mobile-has-sub">
-          <button class="mobile-sub-toggle mobile-sub-toggle-admin" (click)="toggleMobileSection('admin')">
-            Administration
-            <mat-icon class="toggle-arrow">{{ mobileOpenSection() === 'admin' ? 'expand_less' : 'expand_more' }}</mat-icon>
-          </button>
-          @if (mobileOpenSection() === 'admin') {
-            <ul class="mobile-sub">
-              <li><a routerLink="/admin" (click)="closeMobileMenu()">Tableau de bord</a></li>
-              <li><a routerLink="/admin/maintenance" (click)="closeMobileMenu()">Maintenance</a></li>
-              <li><a routerLink="/admin/reunions" (click)="closeMobileMenu()">Réunions</a></li>
-              <li><a routerLink="/admin/themes" (click)="closeMobileMenu()">Thèmes du mois</a></li>
-              <li><a routerLink="/admin/membres" (click)="closeMobileMenu()">Membres</a></li>
-              <li><a routerLink="/admin/dossiers" (click)="closeMobileMenu()">Dossiers documents</a></li>
-              <li><a routerLink="/admin/pages" (click)="closeMobileMenu()">Pages du site</a></li>
-              <li><a routerLink="/admin/config" (click)="closeMobileMenu()">Configuration du site</a></li>
-            </ul>
-          }
-        </li>
-      }
-
-      @if (!(isLoggedIn$ | async)) {
-        <li><button class="mobile-connexion" (click)="openLogin()">Connexion</button></li>
-      }
-
-    </ul>
+        @if (!(isLoggedIn$ | async)) {
+          <li><button class="mobile-connexion" (click)="openLogin()">Connexion</button></li>
+        }
+      </ul>
     }
   </nav>
-
 </header>

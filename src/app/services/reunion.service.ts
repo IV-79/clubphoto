@@ -1,5 +1,15 @@
 import { Injectable, inject } from '@angular/core';
-import { collection, doc, addDoc, deleteDoc, updateDoc, query, orderBy, deleteField, getDocs } from 'firebase/firestore';
+import {
+  collection,
+  doc,
+  addDoc,
+  deleteDoc,
+  updateDoc,
+  query,
+  orderBy,
+  deleteField,
+  getDocs,
+} from 'firebase/firestore';
 import { Observable, firstValueFrom, from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { db } from '../utils/firebase';
@@ -11,13 +21,13 @@ import { DocumentService } from './document.service';
 @Injectable({ providedIn: 'root' })
 export class ReunionService {
   private notifService = inject(NotificationService);
-  private authService  = inject(AuthService);
-  private docService   = inject(DocumentService);
+  private authService = inject(AuthService);
+  private docService = inject(DocumentService);
 
   getReunions(): Observable<Reunion[]> {
     const q = query(collection(db, 'reunions'), orderBy('date', 'asc'));
     return from(getDocs(q)).pipe(
-      map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as Reunion)))
+      map((snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Reunion)),
     );
   }
 
@@ -42,22 +52,26 @@ export class ReunionService {
   async modifier(
     id: string,
     data: Partial<Omit<Reunion, 'id' | 'dateCreation' | 'type'>>,
-    notifCtx?: { oldDate: string; titre: string }
+    notifCtx?: { oldDate: string; titre: string },
   ): Promise<void> {
     const update: Record<string, unknown> = {};
     for (const [key, val] of Object.entries(data as Record<string, unknown>)) {
-      update[key] = (typeof val === 'string' && val === '') ? deleteField() : val;
+      update[key] = typeof val === 'string' && val === '' ? deleteField() : val;
     }
     await updateDoc(doc(db, 'reunions', id), update);
     if (notifCtx && data.date && data.date !== notifCtx.oldDate) {
       const profile = await firstValueFrom(this.authService.currentUserProfile$);
       const adminNom = profile ? `${profile.prenom ?? ''} ${profile.nom}`.trim() : 'Admin';
       const dateStr = new Date(data.date + 'T00:00:00').toLocaleDateString('fr-FR', {
-        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
       });
-      await this.notifService.broadcast('reunion',
+      await this.notifService.broadcast(
+        'reunion',
         `La date de la réunion « ${notifCtx.titre} » a changé : ${dateStr}`,
-        { lien: `/calendrier?reunion=${id}`, sourceNom: adminNom, excludeUid: profile?.uid }
+        { lien: `/calendrier?reunion=${id}`, sourceNom: adminNom, excludeUid: profile?.uid },
       );
     }
   }

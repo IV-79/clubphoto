@@ -1,16 +1,43 @@
 import { Injectable, inject } from '@angular/core';
 import { NotificationService } from './notification.service';
 import {
-  collection, collectionGroup, doc, addDoc, updateDoc, deleteDoc, setDoc, getDocs, getDoc,
-  query, where, orderBy, arrayUnion, arrayRemove, increment, deleteField,
-  limit, startAfter, QueryDocumentSnapshot, DocumentData
+  collection,
+  collectionGroup,
+  doc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  setDoc,
+  getDocs,
+  getDoc,
+  query,
+  where,
+  orderBy,
+  arrayUnion,
+  arrayRemove,
+  increment,
+  deleteField,
+  limit,
+  startAfter,
+  QueryDocumentSnapshot,
+  DocumentData,
 } from 'firebase/firestore';
-import { ref, uploadBytes, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
+import {
+  ref,
+  uploadBytes,
+  uploadBytesResumable,
+  getDownloadURL,
+  deleteObject,
+} from 'firebase/storage';
 import { Observable, from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { db, storage, collectionStream, docStream } from '../utils/firebase';
 import {
-  Sortie, SortieInscription, SortieImage, SortieCommentaire, SortieReply
+  Sortie,
+  SortieInscription,
+  SortieImage,
+  SortieCommentaire,
+  SortieReply,
 } from '../models/sortie.model';
 import { PhotoExif } from '../models/photo.model';
 import { compressImage, COMPRESS_THUMB } from '../utils/image-compress';
@@ -33,55 +60,84 @@ export class SortieService {
   }
 
   getSortiesOnce(): Observable<Sortie[]> {
-    return from(getDocs(query(collection(db, 'sorties'), orderBy('date', 'desc'))))
-      .pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as Sortie))));
+    return from(getDocs(query(collection(db, 'sorties'), orderBy('date', 'desc')))).pipe(
+      map((snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Sortie)),
+    );
   }
 
   getSortiesActivesOnce(): Observable<Sortie[]> {
-    const d = new Date(); d.setDate(d.getDate() - 7);
-    const windowStart = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    return from(getDocs(query(collection(db, 'sorties'),
-      where('date', '>=', windowStart), orderBy('date', 'asc'))))
-      .pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as Sortie))));
+    const d = new Date();
+    d.setDate(d.getDate() - 7);
+    const windowStart = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    return from(
+      getDocs(
+        query(collection(db, 'sorties'), where('date', '>=', windowStart), orderBy('date', 'asc')),
+      ),
+    ).pipe(map((snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Sortie)));
   }
 
   getSortiesTermineesPage(
     cursor: QueryDocumentSnapshot<DocumentData> | null,
-    pageSize: number
-  ): Observable<{ items: Sortie[]; cursor: QueryDocumentSnapshot<DocumentData> | null; hasMore: boolean }> {
-    const d = new Date(); d.setDate(d.getDate() - 7);
-    const windowStart = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    pageSize: number,
+  ): Observable<{
+    items: Sortie[];
+    cursor: QueryDocumentSnapshot<DocumentData> | null;
+    hasMore: boolean;
+  }> {
+    const d = new Date();
+    d.setDate(d.getDate() - 7);
+    const windowStart = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     const q = cursor
-      ? query(collection(db, 'sorties'),
-          where('date', '<', windowStart), orderBy('date', 'desc'), startAfter(cursor), limit(pageSize))
-      : query(collection(db, 'sorties'),
-          where('date', '<', windowStart), orderBy('date', 'desc'), limit(pageSize));
-    return from(getDocs(q)).pipe(map(snap => ({
-      items:   snap.docs.map(d => ({ id: d.id, ...d.data() } as Sortie)),
-      cursor:  snap.docs.length > 0 ? snap.docs[snap.docs.length - 1] : null,
-      hasMore: snap.docs.length === pageSize,
-    })));
+      ? query(
+          collection(db, 'sorties'),
+          where('date', '<', windowStart),
+          orderBy('date', 'desc'),
+          startAfter(cursor),
+          limit(pageSize),
+        )
+      : query(
+          collection(db, 'sorties'),
+          where('date', '<', windowStart),
+          orderBy('date', 'desc'),
+          limit(pageSize),
+        );
+    return from(getDocs(q)).pipe(
+      map((snap) => ({
+        items: snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Sortie),
+        cursor: snap.docs.length > 0 ? snap.docs[snap.docs.length - 1] : null,
+        hasMore: snap.docs.length === pageSize,
+      })),
+    );
   }
 
   getMesSortiesOnce(uid: string): Observable<Sortie[]> {
-    return from(getDocs(query(collection(db, 'sorties'),
-      where('organisateurUid', '==', uid), orderBy('date', 'desc'))))
-      .pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as Sortie))));
+    return from(
+      getDocs(
+        query(
+          collection(db, 'sorties'),
+          where('organisateurUid', '==', uid),
+          orderBy('date', 'desc'),
+        ),
+      ),
+    ).pipe(map((snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Sortie)));
   }
 
   getSortieOnce(id: string): Observable<Sortie | null> {
-    return from(getDoc(doc(db, 'sorties', id)))
-      .pipe(map(d => d.exists() ? { id: d.id, ...d.data() } as Sortie : null));
+    return from(getDoc(doc(db, 'sorties', id))).pipe(
+      map((d) => (d.exists() ? ({ id: d.id, ...d.data() } as Sortie) : null)),
+    );
   }
 
   getPhotosOnce(sortieId: string): Observable<SortieImage[]> {
-    return from(getDocs(query(collection(db, `sorties/${sortieId}/photos`), orderBy('uploadedAt', 'asc'))))
-      .pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as SortieImage))));
+    return from(
+      getDocs(query(collection(db, `sorties/${sortieId}/photos`), orderBy('uploadedAt', 'asc'))),
+    ).pipe(map((snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }) as SortieImage)));
   }
 
   getInscriptionsOnce(sortieId: string): Observable<SortieInscription[]> {
-    return from(getDocs(collection(db, `sorties/${sortieId}/inscriptions`)))
-      .pipe(map(snap => snap.docs.map(d => d.data() as SortieInscription)));
+    return from(getDocs(collection(db, `sorties/${sortieId}/inscriptions`))).pipe(
+      map((snap) => snap.docs.map((d) => d.data() as SortieInscription)),
+    );
   }
 
   getSortie(id: string): Observable<Sortie> {
@@ -89,11 +145,17 @@ export class SortieService {
   }
 
   getMesSorties(uid: string): Observable<Sortie[]> {
-    const q = query(collection(db, 'sorties'), where('organisateurUid', '==', uid), orderBy('date', 'desc'));
+    const q = query(
+      collection(db, 'sorties'),
+      where('organisateurUid', '==', uid),
+      orderBy('date', 'desc'),
+    );
     return collectionStream<Sortie>(q, 'id');
   }
 
-  async createSortie(data: Omit<Sortie, 'id' | 'dateCreation' | 'photoCouvertureUrl'>): Promise<string> {
+  async createSortie(
+    data: Omit<Sortie, 'id' | 'dateCreation' | 'photoCouvertureUrl'>,
+  ): Promise<string> {
     const docRef = await addDoc(collection(db, 'sorties'), {
       ...data,
       nbInscrits: data.nbInscrits ?? 0,
@@ -101,33 +163,46 @@ export class SortieService {
     });
     const { getSortieTypeLabel } = await import('../models/sortie.model');
     const typeLabel = getSortieTypeLabel(data.type);
-    this.notifService.broadcast('sortie',
-      `${data.nomOrganisateur} a organisé un nouvel événement « ${data.titre} » (${typeLabel})`,
-      { lien: `/galeries/sorties/${docRef.id}`, sourceNom: data.nomOrganisateur, excludeUid: data.organisateurUid }
-    ).catch(() => {});
+    this.notifService
+      .broadcast(
+        'sortie',
+        `${data.nomOrganisateur} a organisé un nouvel événement « ${data.titre} » (${typeLabel})`,
+        {
+          lien: `/galeries/sorties/${docRef.id}`,
+          sourceNom: data.nomOrganisateur,
+          excludeUid: data.organisateurUid,
+        },
+      )
+      .catch(() => {});
     return docRef.id;
   }
 
   async updateSortie(
     id: string,
     data: Partial<Omit<Sortie, 'id' | 'dateCreation' | 'organisateurUid' | 'nomOrganisateur'>>,
-    notifCtx?: { oldDate: string; titre: string; nomOrganisateur: string; organisateurUid: string }
+    notifCtx?: { oldDate: string; titre: string; nomOrganisateur: string; organisateurUid: string },
   ): Promise<void> {
     const clean: Record<string, unknown> = {};
     for (const [key, val] of Object.entries(data as Record<string, unknown>)) {
       if (val !== undefined) {
-        clean[key] = (typeof val === 'string' && val === '') ? deleteField() : val;
+        clean[key] = typeof val === 'string' && val === '' ? deleteField() : val;
       }
     }
     await updateDoc(doc(db, 'sorties', id), clean);
     if (notifCtx && data.date && data.date !== notifCtx.oldDate) {
       const dateStr = new Date(data.date + 'T00:00:00').toLocaleDateString('fr-FR', {
-        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
       });
-      this.notifService.broadcast('sortie',
-        `La date de l'événement « ${notifCtx.titre} » a changé : ${dateStr}`,
-        { lien: `/galeries/sorties/${id}`, sourceNom: notifCtx.nomOrganisateur, excludeUid: notifCtx.organisateurUid }
-      ).catch(() => {});
+      this.notifService
+        .broadcast('sortie', `La date de l'événement « ${notifCtx.titre} » a changé : ${dateStr}`, {
+          lien: `/galeries/sorties/${id}`,
+          sourceNom: notifCtx.nomOrganisateur,
+          excludeUid: notifCtx.organisateurUid,
+        })
+        .catch(() => {});
     }
   }
 
@@ -136,21 +211,30 @@ export class SortieService {
     const storageRef = ref(storage, path);
     await uploadBytes(storageRef, file);
     const url = await getDownloadURL(storageRef);
-    await updateDoc(doc(db, 'sorties', sortieId), { imageEvenementUrl: url, imageEvenementPath: path, imageEvenementFileSize: file.size });
+    await updateDoc(doc(db, 'sorties', sortieId), {
+      imageEvenementUrl: url,
+      imageEvenementPath: path,
+      imageEvenementFileSize: file.size,
+    });
   }
 
   async removeImageEvenement(sortieId: string, path: string): Promise<void> {
     await deleteObject(ref(storage, path)).catch(() => {});
     await updateDoc(doc(db, 'sorties', sortieId), {
-      imageEvenementUrl:      deleteField(),
-      imageEvenementPath:     deleteField(),
+      imageEvenementUrl: deleteField(),
+      imageEvenementPath: deleteField(),
       imageEvenementFileSize: deleteField(),
     });
   }
 
   async deleteSortie(
     sortieId: string,
-    notifCtx?: { titre: string; nomOrganisateur: string; organisateurUid: string; imageEvenementPath?: string }
+    notifCtx?: {
+      titre: string;
+      nomOrganisateur: string;
+      organisateurUid: string;
+      imageEvenementPath?: string;
+    },
   ): Promise<void> {
     const [sortieSnap, photosSnap, inscritsSnap] = await Promise.all([
       getDoc(doc(db, 'sorties', sortieId)),
@@ -161,15 +245,19 @@ export class SortieService {
 
     // Fetch commentaires for each photo in parallel
     const photoCommSnaps = await Promise.all(
-      photosSnap.docs.map(p => getDocs(collection(db, `sorties/${sortieId}/photos/${p.id}/commentaires`)))
+      photosSnap.docs.map((p) =>
+        getDocs(collection(db, `sorties/${sortieId}/photos/${p.id}/commentaires`)),
+      ),
     );
 
     const storageDeletions: Promise<void>[] = [];
     const sizeByUser: Record<string, number> = {};
     for (const p of photosSnap.docs) {
       const d = p.data();
-      if (d['storagePath'])   storageDeletions.push(deleteObject(ref(storage, d['storagePath'])).catch(() => {}));
-      if (d['thumbnailPath']) storageDeletions.push(deleteObject(ref(storage, d['thumbnailPath'])).catch(() => {}));
+      if (d['storagePath'])
+        storageDeletions.push(deleteObject(ref(storage, d['storagePath'])).catch(() => {}));
+      if (d['thumbnailPath'])
+        storageDeletions.push(deleteObject(ref(storage, d['thumbnailPath'])).catch(() => {}));
       if (d['uploaderUid'] && d['fileSize']) {
         sizeByUser[d['uploaderUid']] = (sizeByUser[d['uploaderUid']] ?? 0) + d['fileSize'];
       }
@@ -179,23 +267,25 @@ export class SortieService {
 
     await Promise.all([
       ...storageDeletions,
-      ...photosSnap.docs.map(p  => deleteDoc(p.ref)),
-      ...photoCommSnaps.flatMap(snap => snap.docs.map(d => deleteDoc(d.ref))),
-      ...inscritsSnap.docs.map(p => deleteDoc(p.ref)),
+      ...photosSnap.docs.map((p) => deleteDoc(p.ref)),
+      ...photoCommSnaps.flatMap((snap) => snap.docs.map((d) => deleteDoc(d.ref))),
+      ...inscritsSnap.docs.map((p) => deleteDoc(p.ref)),
     ]);
     await deleteDoc(doc(db, 'sorties', sortieId));
     Object.entries(sizeByUser).forEach(([uid, size]) =>
-      updateDoc(doc(db, 'users', uid), { 'storageUsed.sorties': increment(-size) }).catch(() => {})
+      updateDoc(doc(db, 'users', uid), { 'storageUsed.sorties': increment(-size) }).catch(() => {}),
     );
     if (notifCtx && inscritsSnap.docs.length > 0) {
       const msg = `L'événement « ${notifCtx.titre} » auquel vous étiez inscrit(e) a été annulé.`;
       Promise.all(
         inscritsSnap.docs
-          .map(d => (d.data() as SortieInscription).uid)
-          .filter(uid => uid !== notifCtx.organisateurUid)
-          .map(uid => this.notifService.sendToUser(uid, 'sortie', msg, {
-            sourceNom: notifCtx.nomOrganisateur
-          }))
+          .map((d) => (d.data() as SortieInscription).uid)
+          .filter((uid) => uid !== notifCtx.organisateurUid)
+          .map((uid) =>
+            this.notifService.sendToUser(uid, 'sortie', msg, {
+              sourceNom: notifCtx.nomOrganisateur,
+            }),
+          ),
       ).catch(() => {});
     }
   }
@@ -205,10 +295,11 @@ export class SortieService {
   getMesSortiesInscritesIds(uid: string): Observable<string[]> {
     const q = query(collectionGroup(db, 'inscriptions'), where('uid', '==', uid));
     return from(getDocs(q)).pipe(
-      map(snap => snap.docs
-        .filter(d => d.ref.parent.parent?.path.startsWith('sorties/'))
-        .map(d => d.ref.parent.parent!.id)
-      )
+      map((snap) =>
+        snap.docs
+          .filter((d) => d.ref.parent.parent?.path.startsWith('sorties/'))
+          .map((d) => d.ref.parent.parent!.id),
+      ),
     );
   }
 
@@ -219,7 +310,9 @@ export class SortieService {
   async inscrire(sortieId: string, uid: string, nomMembre: string): Promise<void> {
     await Promise.all([
       setDoc(doc(db, `sorties/${sortieId}/inscriptions`, uid), {
-        uid, nomMembre, dateInscription: new Date().toISOString(),
+        uid,
+        nomMembre,
+        dateInscription: new Date().toISOString(),
       }),
       updateDoc(doc(db, 'sorties', sortieId), { nbInscrits: increment(1) }),
     ]);
@@ -242,19 +335,24 @@ export class SortieService {
   uploadPhoto(
     file: File,
     sortieId: string,
-    meta: { uploaderUid: string; nomUploader: string; exif?: PhotoExif }
+    meta: { uploaderUid: string; nomUploader: string; exif?: PhotoExif },
   ): Observable<SortieUploadState> {
-    return new Observable(observer => {
+    return new Observable((observer) => {
       const id = generateId();
       const ext = file.name.split('.').pop() ?? 'webp';
       const storagePath = `sorties/${sortieId}/${id}.${ext}`;
-      const thumbPath   = `sorties/${sortieId}/${id}_thumb.${ext}`;
+      const thumbPath = `sorties/${sortieId}/${id}_thumb.${ext}`;
       const storageRef = ref(storage, storagePath);
       const task = uploadBytesResumable(storageRef, file);
 
-      task.on('state_changed',
-        snap => observer.next({ progress: Math.round(snap.bytesTransferred / snap.totalBytes * 100), done: false }),
-        err => observer.error(err),
+      task.on(
+        'state_changed',
+        (snap) =>
+          observer.next({
+            progress: Math.round((snap.bytesTransferred / snap.totalBytes) * 100),
+            done: false,
+          }),
+        (err) => observer.error(err),
         async () => {
           const [url, thumb] = await Promise.all([
             getDownloadURL(task.snapshot.ref),
@@ -264,9 +362,15 @@ export class SortieService {
           const thumbnailUrl = await getDownloadURL(thumbSnap.ref);
           const fileSize = file.size + thumb.size;
           const imageData: Omit<SortieImage, 'id'> = {
-            url, storagePath, fileSize, likes: [], uploadedAt: new Date().toISOString(),
-            uploaderUid: meta.uploaderUid, nomUploader: meta.nomUploader,
-            thumbnailUrl, thumbnailPath: thumbPath,
+            url,
+            storagePath,
+            fileSize,
+            likes: [],
+            uploadedAt: new Date().toISOString(),
+            uploaderUid: meta.uploaderUid,
+            nomUploader: meta.nomUploader,
+            thumbnailUrl,
+            thumbnailPath: thumbPath,
             ...(hasExif(meta.exif) ? { exif: meta.exif } : {}),
           };
           const docRef = await addDoc(collection(db, `sorties/${sortieId}/photos`), imageData);
@@ -279,19 +383,22 @@ export class SortieService {
           }
           observer.next({ progress: 100, done: true, image: { id: docRef.id, ...imageData } });
           observer.complete();
-        }
+        },
       );
     });
   }
 
   async deletePhoto(sortieId: string, image: SortieImage, currentCoverUrl?: string): Promise<void> {
-    const commSnap = await getDocs(collection(db, `sorties/${sortieId}/photos/${image.id}/commentaires`));
+    const commSnap = await getDocs(
+      collection(db, `sorties/${sortieId}/photos/${image.id}/commentaires`),
+    );
     const deletes: Promise<unknown>[] = [
       deleteObject(ref(storage, image.storagePath)).catch(() => {}),
       deleteDoc(doc(db, `sorties/${sortieId}/photos`, image.id)),
-      ...commSnap.docs.map(d => deleteDoc(d.ref)),
+      ...commSnap.docs.map((d) => deleteDoc(d.ref)),
     ];
-    if (image.thumbnailPath) deletes.push(deleteObject(ref(storage, image.thumbnailPath)).catch(() => {}));
+    if (image.thumbnailPath)
+      deletes.push(deleteObject(ref(storage, image.thumbnailPath)).catch(() => {}));
     await Promise.all(deletes);
     if (image.fileSize) {
       updateDoc(doc(db, 'users', image.uploaderUid), {
@@ -299,7 +406,9 @@ export class SortieService {
       }).catch(() => {});
     }
     if (currentCoverUrl === image.url) {
-      const photosSnap = await getDocs(query(collection(db, `sorties/${sortieId}/photos`), orderBy('uploadedAt', 'asc')));
+      const photosSnap = await getDocs(
+        query(collection(db, `sorties/${sortieId}/photos`), orderBy('uploadedAt', 'asc')),
+      );
       const first = photosSnap.docs[0];
       await updateDoc(doc(db, 'sorties', sortieId), {
         photoCouvertureUrl: first ? first.data()['url'] : null,
@@ -307,7 +416,12 @@ export class SortieService {
     }
   }
 
-  async toggleLikePhoto(sortieId: string, photoId: string, uid: string, currentlyLiked: boolean): Promise<void> {
+  async toggleLikePhoto(
+    sortieId: string,
+    photoId: string,
+    uid: string,
+    currentlyLiked: boolean,
+  ): Promise<void> {
     await updateDoc(doc(db, `sorties/${sortieId}/photos`, photoId), {
       likes: currentlyLiked ? arrayRemove(uid) : arrayUnion(uid),
     });
@@ -315,7 +429,9 @@ export class SortieService {
   }
 
   private async updateBestCover(sortieId: string): Promise<void> {
-    const photosSnap = await getDocs(query(collection(db, `sorties/${sortieId}/photos`), orderBy('uploadedAt', 'asc')));
+    const photosSnap = await getDocs(
+      query(collection(db, `sorties/${sortieId}/photos`), orderBy('uploadedAt', 'asc')),
+    );
     if (photosSnap.empty) return;
     const best = photosSnap.docs.reduce((acc, d) => {
       const dLikes = (d.data()['likes'] as string[] | undefined)?.length ?? 0;
@@ -330,20 +446,23 @@ export class SortieService {
   getCommentaires(sortieId: string, photoId: string): Observable<SortieCommentaire[]> {
     const q = query(
       collection(db, `sorties/${sortieId}/photos/${photoId}/commentaires`),
-      orderBy('createdAt', 'asc')
+      orderBy('createdAt', 'asc'),
     );
     return from(getDocs(q)).pipe(
-      map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as SortieCommentaire)))
+      map((snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }) as SortieCommentaire)),
     );
   }
 
   async addCommentaire(
     sortieId: string,
     photoId: string,
-    data: { texte: string; auteurUid: string; nomAuteur: string }
+    data: { texte: string; auteurUid: string; nomAuteur: string },
   ): Promise<void> {
     await addDoc(collection(db, `sorties/${sortieId}/photos/${photoId}/commentaires`), {
-      ...data, likes: [], replies: [], createdAt: new Date().toISOString(),
+      ...data,
+      likes: [],
+      replies: [],
+      createdAt: new Date().toISOString(),
     });
   }
 
@@ -352,7 +471,11 @@ export class SortieService {
   }
 
   async toggleLikeCommentaire(
-    sortieId: string, photoId: string, commentaireId: string, uid: string, currentlyLiked: boolean
+    sortieId: string,
+    photoId: string,
+    commentaireId: string,
+    uid: string,
+    currentlyLiked: boolean,
   ): Promise<void> {
     await updateDoc(doc(db, `sorties/${sortieId}/photos/${photoId}/commentaires`, commentaireId), {
       likes: currentlyLiked ? arrayRemove(uid) : arrayUnion(uid),
@@ -360,7 +483,10 @@ export class SortieService {
   }
 
   async addReply(
-    sortieId: string, photoId: string, commentaireId: string, reply: Omit<SortieReply, 'id'>
+    sortieId: string,
+    photoId: string,
+    commentaireId: string,
+    reply: Omit<SortieReply, 'id'>,
   ): Promise<void> {
     const replyWithId: SortieReply = { ...reply, id: generateId() };
     await updateDoc(doc(db, `sorties/${sortieId}/photos/${photoId}/commentaires`, commentaireId), {
@@ -369,11 +495,14 @@ export class SortieService {
   }
 
   async deleteReply(
-    sortieId: string, photoId: string, commentaireId: string,
-    replyId: string, allReplies: SortieReply[]
+    sortieId: string,
+    photoId: string,
+    commentaireId: string,
+    replyId: string,
+    allReplies: SortieReply[],
   ): Promise<void> {
     await updateDoc(doc(db, `sorties/${sortieId}/photos/${photoId}/commentaires`, commentaireId), {
-      replies: allReplies.filter(r => r.id !== replyId),
+      replies: allReplies.filter((r) => r.id !== replyId),
     });
   }
 }

@@ -143,15 +143,17 @@ export class MembreDetail {
   private lightboxAutoOpened = signal(false);
 
   constructor() {
-    combineLatest([this.route.paramMap, toObservable(this.loggedIn)]).pipe(
-      tap(() => this.visiblePhotosCount.set(8)),
-      switchMap(([params, loggedIn]) =>
-        loggedIn
-          ? this.photoService.getPhotosMembreOnce(params.get('uid')!)
-          : this.photoService.getPhotosVisiteurOnce(params.get('uid')!),
-      ),
-      takeUntilDestroyed(),
-    ).subscribe(photos => this.photosSignal.set(photos));
+    combineLatest([this.route.paramMap, toObservable(this.loggedIn)])
+      .pipe(
+        tap(() => this.visiblePhotosCount.set(8)),
+        switchMap(([params, loggedIn]) =>
+          loggedIn
+            ? this.photoService.getPhotosMembreOnce(params.get('uid')!)
+            : this.photoService.getPhotosVisiteurOnce(params.get('uid')!),
+        ),
+        takeUntilDestroyed(),
+      )
+      .subscribe((photos) => this.photosSignal.set(photos));
 
     effect(() => {
       const target = this.queryParams()?.get('photo');
@@ -290,11 +292,17 @@ export class MembreDetail {
   }
 
   private applyLikeLocally(photoId: string, uid: string, wasLiked: boolean) {
-    this.photosSignal.update(list =>
-      list.map(p => p.id !== photoId ? p : {
-        ...p,
-        likes: wasLiked ? (p.likes ?? []).filter(l => l !== uid) : [...(p.likes ?? []), uid],
-      })
+    this.photosSignal.update((list) =>
+      list.map((p) =>
+        p.id !== photoId
+          ? p
+          : {
+              ...p,
+              likes: wasLiked
+                ? (p.likes ?? []).filter((l) => l !== uid)
+                : [...(p.likes ?? []), uid],
+            },
+      ),
     );
   }
 

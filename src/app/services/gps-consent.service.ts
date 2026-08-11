@@ -10,7 +10,7 @@ export class GpsConsentService {
   readonly state = this._state.asReadonly();
 
   requestConsent(): Promise<boolean> {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       this._state.set({ resolve });
     });
   }

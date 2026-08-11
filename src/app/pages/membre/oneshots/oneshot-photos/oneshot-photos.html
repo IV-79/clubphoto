@@ -1,19 +1,28 @@
 <div class="photos-page">
-
   <div class="page-nav">
     <a [routerLink]="['/galeries/oneshots', id]" class="back-link">← Retour à l'événement</a>
-    @if (event()) { <span class="event-titre">{{ event()!.titre }}</span> }
+    @if (event()) {
+      <span class="event-titre">{{ event()!.titre }}</span>
+    }
   </div>
 
-  <h1>Photos <span class="total-count">{{ photos().length }}</span></h1>
+  <h1>
+    Photos <span class="total-count">{{ photos().length }}</span>
+  </h1>
 
   @if (nonAssigneesCount() > 0 || dupeCount() > 0) {
     <div class="warning-banner">
       @if (nonAssigneesCount() > 0) {
-        <span>⚠ {{ nonAssigneesCount() }} photo{{ nonAssigneesCount() > 1 ? 's' : '' }} sans assignation complète</span>
+        <span
+          >⚠ {{ nonAssigneesCount() }} photo{{ nonAssigneesCount() > 1 ? 's' : '' }} sans
+          assignation complète</span
+        >
       }
       @if (dupeCount() > 0) {
-        <span>⚠ {{ dupeCount() }} doublon{{ dupeCount() > 1 ? 's' : '' }} — un membre a plusieurs photos dans un même thème</span>
+        <span
+          >⚠ {{ dupeCount() }} doublon{{ dupeCount() > 1 ? 's' : '' }} — un membre a plusieurs
+          photos dans un même thème</span
+        >
       }
     </div>
   }
@@ -21,8 +30,11 @@
   <!-- Zone d'upload -->
   @if (!peutGerer()) {
     <div class="upload-closed">
-      @if (event()?.statut === 'vote') { Les votes sont ouverts — la gestion des photos est clôturée. }
-      @else { L'événement est terminé — la gestion des photos est clôturée. }
+      @if (event()?.statut === 'vote') {
+        Les votes sont ouverts — la gestion des photos est clôturée.
+      } @else {
+        L'événement est terminé — la gestion des photos est clôturée.
+      }
     </div>
   }
   <section class="panel upload-panel" [class.panel-disabled]="!peutUploader() || !peutGerer()">
@@ -34,16 +46,28 @@
         (dragover)="$event.preventDefault()"
         (dragleave)="$event.preventDefault()"
         (drop)="onFileDrop($event)"
-        (click)="fileInput.click()">
+        (click)="fileInput.click()"
+      >
         <p class="drop-label">Glissez plusieurs photos ici</p>
         <p class="drop-sub">ou cliquez pour parcourir</p>
-        <p class="drop-sub">Envoyez votre photo en pleine résolution · compressé automatiquement pour le site</p>
+        <p class="drop-sub">
+          Envoyez votre photo en pleine résolution · compressé automatiquement pour le site
+        </p>
       </div>
-      <input #fileInput type="file" accept="image/*" multiple hidden (change)="onFilesSelected($event)">
+      <input
+        #fileInput
+        type="file"
+        accept="image/*"
+        multiple
+        hidden
+        (change)="onFilesSelected($event)"
+      />
     } @else {
       <!-- Pré-assignation -->
       <div class="preassign">
-        <span class="preassign-label">Pré-assignation <span class="optional">(optionnel)</span></span>
+        <span class="preassign-label"
+          >Pré-assignation <span class="optional">(optionnel)</span></span
+        >
         <div class="preassign-selects">
           <select [(ngModel)]="preassignMembreUid">
             <option value="">— Membre —</option>
@@ -63,21 +87,38 @@
       <!-- Liste des fichiers -->
       <ul class="file-list">
         @for (f of selectedFiles(); track f.name) {
-          <li><span class="file-name">{{ f.name }}</span><span class="file-size">{{ f.sizeMb }} Mo</span></li>
+          <li>
+            <span class="file-name">{{ f.name }}</span
+            ><span class="file-size">{{ f.sizeMb }} Mo</span>
+          </li>
         }
       </ul>
 
       @if (uploading()) {
         <div class="progress-bar">
-          <div class="progress-fill" [style.width.%]="uploadDone() / uploadTotal() * 100"></div>
+          <div class="progress-fill" [style.width.%]="(uploadDone() / uploadTotal()) * 100"></div>
         </div>
-        <p class="progress-text">{{ uploadDone() }} / {{ uploadTotal() }} photo{{ uploadTotal() > 1 ? 's' : '' }} uploadée{{ uploadTotal() > 1 ? 's' : '' }}</p>
+        <p class="progress-text">
+          {{ uploadDone() }} / {{ uploadTotal() }} photo{{
+            uploadTotal() > 1 ? 's' : ''
+          }}
+          uploadée{{ uploadTotal() > 1 ? 's' : '' }}
+        </p>
       }
 
       <div class="upload-actions">
-        <button class="btn-secondary" (click)="clearFiles()" [disabled]="uploading()">Changer</button>
+        <button class="btn-secondary" (click)="clearFiles()" [disabled]="uploading()">
+          Changer
+        </button>
         <button class="btn-primary" (click)="uploadAll()" [disabled]="uploading()">
-          {{ uploading() ? 'Upload en cours…' : 'Uploader ' + selectedFiles().length + ' photo' + (selectedFiles().length > 1 ? 's' : '') }}
+          {{
+            uploading()
+              ? 'Upload en cours…'
+              : 'Uploader ' +
+                selectedFiles().length +
+                ' photo' +
+                (selectedFiles().length > 1 ? 's' : '')
+          }}
         </button>
       </div>
     }
@@ -89,8 +130,11 @@
       <div class="prog-global">
         <span class="prog-label">Soumissions</span>
         <div class="prog-track">
-          <div class="prog-fill" [style.width.%]="prog.pct"
-               [class.prog-complete]="prog.covered === prog.total"></div>
+          <div
+            class="prog-fill"
+            [style.width.%]="prog.pct"
+            [class.prog-complete]="prog.covered === prog.total"
+          ></div>
         </div>
         <span class="prog-ratio" [class.prog-complete]="prog.covered === prog.total">
           {{ prog.covered }}&thinsp;/&thinsp;{{ prog.total }}
@@ -98,23 +142,31 @@
       </div>
       <div class="prog-themes">
         @for (item of prog.byTheme; track item.theme.id) {
-          @let pct = prog.nbMembers ? item.submitted / prog.nbMembers * 100 : 0;
+          @let pct = prog.nbMembers ? (item.submitted / prog.nbMembers) * 100 : 0;
           @let overflow = item.submitted > prog.nbMembers;
           <div class="prog-theme">
             <span class="prog-theme-name" [title]="item.theme.nom">{{ item.theme.nom }}</span>
             <div class="prog-theme-track">
-              <div class="prog-theme-fill"
-                   [style.width.%]="pct"
-                   [class.prog-overflow]="overflow"
-                   [class.prog-complete]="!overflow && item.submitted === prog.nbMembers"
-                   [class.prog-partial]="!overflow && item.submitted > 0 && item.submitted < prog.nbMembers"
-                   [class.prog-empty]="item.submitted === 0"></div>
+              <div
+                class="prog-theme-fill"
+                [style.width.%]="pct"
+                [class.prog-overflow]="overflow"
+                [class.prog-complete]="!overflow && item.submitted === prog.nbMembers"
+                [class.prog-partial]="
+                  !overflow && item.submitted > 0 && item.submitted < prog.nbMembers
+                "
+                [class.prog-empty]="item.submitted === 0"
+              ></div>
             </div>
-            <span class="prog-theme-ratio"
-                  [class.prog-overflow]="overflow"
-                  [class.prog-complete]="!overflow && item.submitted === prog.nbMembers"
-                  [class.prog-partial]="!overflow && item.submitted > 0 && item.submitted < prog.nbMembers"
-                  [class.prog-empty]="item.submitted === 0">
+            <span
+              class="prog-theme-ratio"
+              [class.prog-overflow]="overflow"
+              [class.prog-complete]="!overflow && item.submitted === prog.nbMembers"
+              [class.prog-partial]="
+                !overflow && item.submitted > 0 && item.submitted < prog.nbMembers
+              "
+              [class.prog-empty]="item.submitted === 0"
+            >
               {{ item.submitted }}/{{ prog.nbMembers }}
             </span>
           </div>
@@ -125,7 +177,9 @@
 
   <!-- Sections par thème -->
   @if (photos().length > 0) {
-    <p class="drag-hint-global">Glissez une photo d'une section à l'autre pour changer son thème.</p>
+    <p class="drag-hint-global">
+      Glissez une photo d'une section à l'autre pour changer son thème.
+    </p>
 
     <div cdkDropListGroup>
       @for (section of allSections(); track section.id + ':' + section.isUnassigned) {
@@ -135,20 +189,29 @@
             <span class="count">{{ section.photos.length }}</span>
           </h2>
 
-          <div class="photos-grid"
-               cdkDropList
-               [cdkDropListData]="section.id"
-               (cdkDropListDropped)="onDrop($event)">
-
+          <div
+            class="photos-grid"
+            cdkDropList
+            [cdkDropListData]="section.id"
+            (cdkDropListDropped)="onDrop($event)"
+          >
             @for (photo of section.photos; track photo.id) {
-              <div cdkDrag [cdkDragData]="photo" [cdkDragDisabled]="!peutGerer()"
-                   class="photo-card"
-                   [class.no-membre]="!photo.membreUid"
-                   [class.is-saving]="isSaving(photo.id)">
-
+              <div
+                cdkDrag
+                [cdkDragData]="photo"
+                [cdkDragDisabled]="!peutGerer()"
+                class="photo-card"
+                [class.no-membre]="!photo.membreUid"
+                [class.is-saving]="isSaving(photo.id)"
+              >
                 <!-- Zone draggable = image -->
                 <div class="photo-img-wrap" cdkDragHandle>
-                  <img [src]="photo.thumbnailUrl ?? photo.url" loading="lazy" class="photo-thumb" draggable="false">
+                  <img
+                    [src]="photo.thumbnailUrl ?? photo.url"
+                    loading="lazy"
+                    class="photo-thumb"
+                    draggable="false"
+                  />
                   <span class="drag-grip" aria-hidden="true">⠿</span>
                   @if (isSaving(photo.id)) {
                     <div class="saving-overlay"></div>
@@ -160,43 +223,53 @@
                   @if (photo.titre) {
                     <span class="info-titre" [title]="photo.titre">{{ photo.titre }}</span>
                   }
-                  <select class="card-select"
-                          [class.unset]="!photo.membreUid"
-                          [ngModel]="photo.membreUid"
-                          (ngModelChange)="onMembreChange(photo, $event)"
-                          [disabled]="isSaving(photo.id) || !peutGerer()">
+                  <select
+                    class="card-select"
+                    [class.unset]="!photo.membreUid"
+                    [ngModel]="photo.membreUid"
+                    (ngModelChange)="onMembreChange(photo, $event)"
+                    [disabled]="isSaving(photo.id) || !peutGerer()"
+                  >
                     <option value="">— Membre —</option>
                     @for (ins of inscriptions(); track ins.uid) {
                       <option [value]="ins.uid">{{ ins.nomMembre }}</option>
                     }
                   </select>
-                  <select class="card-select"
-                          [class.unset]="!photo.themeId"
-                          [ngModel]="photo.themeId"
-                          (ngModelChange)="onThemeChange(photo, $event)"
-                          [disabled]="isSaving(photo.id) || !peutGerer()">
+                  <select
+                    class="card-select"
+                    [class.unset]="!photo.themeId"
+                    [ngModel]="photo.themeId"
+                    (ngModelChange)="onThemeChange(photo, $event)"
+                    [disabled]="isSaving(photo.id) || !peutGerer()"
+                  >
                     <option value="">— Thème —</option>
                     @for (t of themes(); track t.id) {
                       <option [value]="t.id">{{ t.nom }}</option>
                     }
                   </select>
                   @if (!section.isUnassigned && photo.membreUid) {
-                    @let dupeCount = (section.memberCounts.get(photo.membreUid) ?? 0);
+                    @let dupeCount = section.memberCounts.get(photo.membreUid) ?? 0;
                     @if (dupeCount > 1) {
-                      <span class="dupe-warning">⚠ {{ photo.nomMembre }} — {{ dupeCount }} photos</span>
+                      <span class="dupe-warning"
+                        >⚠ {{ photo.nomMembre }} — {{ dupeCount }} photos</span
+                      >
                     }
                   }
                   <div class="card-footer">
-                    <button class="btn-del-photo"
-                            title="Supprimer"
-                            (click)="deletePhoto(photo)"
-                            [disabled]="isSaving(photo.id) || !peutGerer()">🗑</button>
+                    <button
+                      class="btn-del-photo"
+                      title="Supprimer"
+                      (click)="deletePhoto(photo)"
+                      [disabled]="isSaving(photo.id) || !peutGerer()"
+                    >
+                      🗑
+                    </button>
                   </div>
                 </div>
 
                 <!-- Preview CDK pendant le drag -->
                 <div *cdkDragPreview class="drag-preview">
-                  <img [src]="photo.url" class="drag-preview-img">
+                  <img [src]="photo.url" class="drag-preview-img" />
                 </div>
               </div>
             }
@@ -209,5 +282,4 @@
       }
     </div>
   }
-
 </div>

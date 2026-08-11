@@ -19,15 +19,14 @@ export interface SiteConfig {
 }
 
 const CONFIG_CATEGORIES = 'config/photoCategories';
-const CONFIG_SITE       = 'config/siteConfig';
+const CONFIG_SITE = 'config/siteConfig';
 
 @Injectable({ providedIn: 'root' })
 export class ConfigService {
-
   getCategories(): Observable<CategorieConfig[]> {
     return docStream<any>(doc(db, CONFIG_CATEGORIES)).pipe(
       map((data: any) => data?.items ?? (PHOTO_CATEGORIES as CategorieConfig[])),
-      catchError(() => of(PHOTO_CATEGORIES as CategorieConfig[]))
+      catchError(() => of(PHOTO_CATEGORIES as CategorieConfig[])),
     );
   }
 
@@ -38,14 +37,14 @@ export class ConfigService {
   getSiteConfig(): Observable<SiteConfig> {
     return docStream<any>(doc(db, CONFIG_SITE)).pipe(
       map((data: any) => (data ?? {}) as SiteConfig),
-      catchError(() => of({} as SiteConfig))
+      catchError(() => of({} as SiteConfig)),
     );
   }
 
   getSiteConfigOnce(): Observable<SiteConfig> {
     return from(getDoc(doc(db, CONFIG_SITE))).pipe(
       map((d: any) => (d.exists() ? d.data() : {}) as SiteConfig),
-      catchError(() => of({} as SiteConfig))
+      catchError(() => of({} as SiteConfig)),
     );
   }
 

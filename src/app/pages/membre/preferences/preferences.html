@@ -1,7 +1,8 @@
 <div class="prefs-page">
-
   <h1 class="page-title">Préférences de notifications</h1>
-  <p class="page-subtitle">Choisissez les événements pour lesquels vous souhaitez recevoir une notification.</p>
+  <p class="page-subtitle">
+    Choisissez les événements pour lesquels vous souhaitez recevoir une notification.
+  </p>
 
   <!-- Activités du club (broadcasts) -->
   <section class="pref-section">
@@ -17,7 +18,12 @@
             <p class="pref-hint">Annonce d'une nouvelle sortie ou d'un atelier</p>
           </div>
         </div>
-        <button class="toggle" [class.on]="subs().sorties" (click)="toggle('sorties')" [disabled]="saving()">
+        <button
+          class="toggle"
+          [class.on]="subs().sorties"
+          (click)="toggle('sorties')"
+          [disabled]="saving()"
+        >
           <span class="toggle-thumb"></span>
         </button>
       </div>
@@ -30,7 +36,12 @@
             <p class="pref-hint">Annonce d'un nouveau défi ouvert aux membres</p>
           </div>
         </div>
-        <button class="toggle" [class.on]="subs().defis" (click)="toggle('defis')" [disabled]="saving()">
+        <button
+          class="toggle"
+          [class.on]="subs().defis"
+          (click)="toggle('defis')"
+          [disabled]="saving()"
+        >
           <span class="toggle-thumb"></span>
         </button>
       </div>
@@ -43,7 +54,12 @@
             <p class="pref-hint">Ouverture des inscriptions, passage au vote, résultats</p>
           </div>
         </div>
-        <button class="toggle" [class.on]="subs().oneshots" (click)="toggle('oneshots')" [disabled]="saving()">
+        <button
+          class="toggle"
+          [class.on]="subs().oneshots"
+          (click)="toggle('oneshots')"
+          [disabled]="saving()"
+        >
           <span class="toggle-thumb"></span>
         </button>
       </div>
@@ -56,7 +72,12 @@
             <p class="pref-hint">Lancement d'une nouvelle exposition photo</p>
           </div>
         </div>
-        <button class="toggle" [class.on]="subs().expositions" (click)="toggle('expositions')" [disabled]="saving()">
+        <button
+          class="toggle"
+          [class.on]="subs().expositions"
+          (click)="toggle('expositions')"
+          [disabled]="saving()"
+        >
           <span class="toggle-thumb"></span>
         </button>
       </div>
@@ -69,7 +90,12 @@
             <p class="pref-hint">Publication d'un nouvel article</p>
           </div>
         </div>
-        <button class="toggle" [class.on]="subs().articles" (click)="toggle('articles')" [disabled]="saving()">
+        <button
+          class="toggle"
+          [class.on]="subs().articles"
+          (click)="toggle('articles')"
+          [disabled]="saving()"
+        >
           <span class="toggle-thumb"></span>
         </button>
       </div>
@@ -82,7 +108,12 @@
             <p class="pref-hint">Annonce d'une nouvelle réunion du club</p>
           </div>
         </div>
-        <button class="toggle" [class.on]="subs().reunions" (click)="toggle('reunions')" [disabled]="saving()">
+        <button
+          class="toggle"
+          [class.on]="subs().reunions"
+          (click)="toggle('reunions')"
+          [disabled]="saving()"
+        >
           <span class="toggle-thumb"></span>
         </button>
       </div>
@@ -95,7 +126,12 @@
             <p class="pref-hint">Nouveau document ou mise à jour d'un fichier existant</p>
           </div>
         </div>
-        <button class="toggle" [class.on]="subs().documents" (click)="toggle('documents')" [disabled]="saving()">
+        <button
+          class="toggle"
+          [class.on]="subs().documents"
+          (click)="toggle('documents')"
+          [disabled]="saving()"
+        >
           <span class="toggle-thumb"></span>
         </button>
       </div>
@@ -105,7 +141,9 @@
   <!-- Interactions sur mes photos -->
   <section class="pref-section">
     <h2 class="section-title">Interactions sur mes photos</h2>
-    <p class="section-desc">Notifications personnelles quand quelqu'un interagit avec vos photos.</p>
+    <p class="section-desc">
+      Notifications personnelles quand quelqu'un interagit avec vos photos.
+    </p>
 
     <div class="pref-list">
       <div class="pref-item">
@@ -116,7 +154,12 @@
             <p class="pref-hint">Quelqu'un like une de vos photos de portfolio</p>
           </div>
         </div>
-        <button class="toggle" [class.on]="subs().likes" (click)="toggle('likes')" [disabled]="saving()">
+        <button
+          class="toggle"
+          [class.on]="subs().likes"
+          (click)="toggle('likes')"
+          [disabled]="saving()"
+        >
           <span class="toggle-thumb"></span>
         </button>
       </div>
@@ -129,7 +172,12 @@
             <p class="pref-hint">Quelqu'un commente une de vos photos de portfolio</p>
           </div>
         </div>
-        <button class="toggle" [class.on]="subs().comments" (click)="toggle('comments')" [disabled]="saving()">
+        <button
+          class="toggle"
+          [class.on]="subs().comments"
+          (click)="toggle('comments')"
+          [disabled]="saving()"
+        >
           <span class="toggle-thumb"></span>
         </button>
       </div>
@@ -139,5 +187,4 @@
   @if (saving()) {
     <p class="saving-hint">Enregistrement…</p>
   }
-
 </div>

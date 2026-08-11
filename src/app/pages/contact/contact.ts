@@ -28,10 +28,9 @@ export class Contact {
 
   raw = toSignal(this.pageService.getContent('contact'), { initialValue: null as any });
   loading = computed(() => this.raw() === null);
-  safeHtml = computed(
-    (): SafeHtml =>
-      this.sanitizer.bypassSecurityTrustHtml(
-        marked.parse(this.raw() ?? '', { async: false }) as string,
-      ),
+  safeHtml = computed((): SafeHtml =>
+    this.sanitizer.bypassSecurityTrustHtml(
+      marked.parse(this.raw() ?? '', { async: false }) as string,
+    ),
   );
 }

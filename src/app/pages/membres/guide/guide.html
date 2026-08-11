@@ -1,706 +1,1175 @@
 <div class="guide-page">
-
   <header class="guide-hero">
     <h1>Guide du site</h1>
-    <p class="guide-intro">Tout ce qu'il faut savoir pour utiliser le site du Club Photo Tain-Tournon.</p>
+    <p class="guide-intro">
+      Tout ce qu'il faut savoir pour utiliser le site du Club Photo Tain-Tournon.
+    </p>
   </header>
 
   <!-- Onglets -->
   <div class="guide-tabs">
-    <button class="guide-tab" [class.active]="activeTab() === 'general'"       (click)="setTab('general')">
+    <button
+      class="guide-tab"
+      [class.active]="activeTab() === 'general'"
+      (click)="setTab('general')"
+    >
       <mat-icon>info</mat-icon> Informations générales
     </button>
-    <button class="guide-tab" [class.active]="activeTab() === 'membres'"       (click)="setTab('membres')">
+    <button
+      class="guide-tab"
+      [class.active]="activeTab() === 'membres'"
+      (click)="setTab('membres')"
+    >
       <mat-icon>people</mat-icon> Pour les membres
     </button>
-    <button class="guide-tab" [class.active]="activeTab() === 'contributeurs'" (click)="setTab('contributeurs')">
+    <button
+      class="guide-tab"
+      [class.active]="activeTab() === 'contributeurs'"
+      (click)="setTab('contributeurs')"
+    >
       <mat-icon>edit</mat-icon> Pour les contributeurs
     </button>
-    <button class="guide-tab" [class.active]="activeTab() === 'admins'"        (click)="setTab('admins')">
+    <button class="guide-tab" [class.active]="activeTab() === 'admins'" (click)="setTab('admins')">
       <mat-icon>admin_panel_settings</mat-icon> Pour les admins
     </button>
   </div>
-
 
   <!-- ══════════════════════════════════════════════════
        ONGLET 1 — INFORMATIONS GÉNÉRALES
   ══════════════════════════════════════════════════ -->
   @if (activeTab() === 'general') {
-  <div class="tab-content">
+    <div class="tab-content">
+      <!-- À quoi sert ce site -->
+      <section class="guide-section">
+        <div class="section-header">
+          <h2>À quoi sert ce site ?</h2>
+          <p class="section-subtitle">
+            Un espace numérique pour la vie du club, de la photo partagée aux activités organisées.
+          </p>
+        </div>
 
-    <!-- À quoi sert ce site -->
-    <section class="guide-section">
-      <div class="section-header">
-        <h2>À quoi sert ce site ?</h2>
-        <p class="section-subtitle">Un espace numérique pour la vie du club, de la photo partagée aux activités organisées.</p>
-      </div>
+        <div class="guide-card">
+          <h3>Le club en ligne</h3>
+          <p>
+            Le site du Club Photo Tain-Tournon centralise tout ce dont les membres ont besoin au
+            quotidien : suivre les actualités, consulter le calendrier des activités, partager et
+            découvrir des photos, participer aux compétitions et retrouver les documents du club.
+          </p>
+          <p>
+            Une partie du site est accessible sans connexion — actualités publiques, portfolios des
+            membres, galeries. Les fonctions interactives (voter, commenter, s'inscrire à une
+            activité, uploader des photos) nécessitent d'être
+            <strong>connecté avec son compte membre</strong>.
+          </p>
+        </div>
 
-      <div class="guide-card">
-        <h3>Le club en ligne</h3>
-        <p>
-          Le site du Club Photo Tain-Tournon centralise tout ce dont les membres ont besoin au quotidien :
-          suivre les actualités, consulter le calendrier des activités, partager et découvrir des photos,
-          participer aux compétitions et retrouver les documents du club.
-        </p>
-        <p>
-          Une partie du site est accessible sans connexion — actualités publiques, portfolios des membres, galeries.
-          Les fonctions interactives (voter, commenter, s'inscrire à une activité, uploader des photos)
-          nécessitent d'être <strong>connecté avec son compte membre</strong>.
-        </p>
-      </div>
-
-      <div class="guide-card">
-        <h3>Ce qui est géré sur le site</h3>
-        <div class="admin-fields">
-          <div class="admin-field-row">
-            <span class="field-label">📰 Actualités</span>
-            <span class="field-desc">Les nouvelles du club : infos, annonces, comptes-rendus publiés par les contributeurs et admins.</span>
-          </div>
-          <div class="admin-field-row">
-            <span class="field-label">📅 Calendrier</span>
-            <span class="field-desc">Toutes les dates importantes : réunions, sorties, ateliers, défis — une vue centralisée pour ne rien manquer.</span>
-          </div>
-          <div class="admin-field-row">
-            <span class="field-label">🖼 Portfolios</span>
-            <span class="field-desc">Chaque membre dispose d'un espace photo personnel. Les visiteurs peuvent parcourir les portfolios publics.</span>
-          </div>
-          <div class="admin-field-row">
-            <span class="field-label">📁 Documents</span>
-            <span class="field-desc">Statuts, comptes-rendus, formulaires — un espace de partage de fichiers réservé aux membres connectés.</span>
-          </div>
-          <div class="admin-field-row">
-            <span class="field-label">🗓 Thème du mois</span>
-            <span class="field-desc">La compétition mensuelle du club : soumission de photos sur un thème imposé, puis vote.</span>
-          </div>
-          <div class="admin-field-row">
-            <span class="field-label">🎯 Activités</span>
-            <span class="field-desc">Sorties, ateliers, défis photo, OneShots et expositions — organisés par les contributeurs et admins, ouverts aux membres.</span>
+        <div class="guide-card">
+          <h3>Ce qui est géré sur le site</h3>
+          <div class="admin-fields">
+            <div class="admin-field-row">
+              <span class="field-label">📰 Actualités</span>
+              <span class="field-desc"
+                >Les nouvelles du club : infos, annonces, comptes-rendus publiés par les
+                contributeurs et admins.</span
+              >
+            </div>
+            <div class="admin-field-row">
+              <span class="field-label">📅 Calendrier</span>
+              <span class="field-desc"
+                >Toutes les dates importantes : réunions, sorties, ateliers, défis — une vue
+                centralisée pour ne rien manquer.</span
+              >
+            </div>
+            <div class="admin-field-row">
+              <span class="field-label">🖼 Portfolios</span>
+              <span class="field-desc"
+                >Chaque membre dispose d'un espace photo personnel. Les visiteurs peuvent parcourir
+                les portfolios publics.</span
+              >
+            </div>
+            <div class="admin-field-row">
+              <span class="field-label">📁 Documents</span>
+              <span class="field-desc"
+                >Statuts, comptes-rendus, formulaires — un espace de partage de fichiers réservé aux
+                membres connectés.</span
+              >
+            </div>
+            <div class="admin-field-row">
+              <span class="field-label">🗓 Thème du mois</span>
+              <span class="field-desc"
+                >La compétition mensuelle du club : soumission de photos sur un thème imposé, puis
+                vote.</span
+              >
+            </div>
+            <div class="admin-field-row">
+              <span class="field-label">🎯 Activités</span>
+              <span class="field-desc"
+                >Sorties, ateliers, défis photo, OneShots et expositions — organisés par les
+                contributeurs et admins, ouverts aux membres.</span
+              >
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="guide-card">
-        <h3>Les types d'activités</h3>
-        <p>Le site gère six types d'activités, chacun avec son propre fonctionnement. Chaque type a une <strong>couleur identifiante</strong> utilisée partout sur le site — dans le calendrier, les cartes et les badges.</p>
-        <div class="activity-type-rows">
-          <div class="activity-type-row">
-            <span class="activity-chip chip-teal">📸 Sortie photo</span>
-            <span class="activity-chip-desc">On se retrouve à un endroit pour photographier ensemble. Inscription optionnelle, chacun uploade ses propres photos après la sortie.</span>
-          </div>
-          <div class="activity-type-row">
-            <span class="activity-chip chip-green">🚶 Sortie club</span>
-            <span class="activity-chip-desc">Balade, visite de musée, sortie culturelle — pas forcément centrée sur la photo. Même fonctionnement que la sortie photo.</span>
-          </div>
-          <div class="activity-type-row">
-            <span class="activity-chip chip-teal">🎨 Atelier</span>
-            <span class="activity-chip-desc">Session d'apprentissage ou de travail en groupe (retouche, technique, partage d'expérience). Pas de vote, pas de compétition.</span>
-          </div>
-          <div class="activity-type-row">
-            <span class="activity-chip chip-red">🏅 Défi photo</span>
-            <span class="activity-chip-desc">Compétition thématique sur un sujet à photographier. Les membres s'inscrivent, uploadent leurs photos pendant la période de soumission, puis votent anonymement. Les phases changent <em>automatiquement</em> selon les dates.</span>
-          </div>
-          <div class="activity-type-row">
-            <span class="activity-chip chip-amber">🏆 OneShot</span>
-            <span class="activity-chip-desc">Événement photo compétitif avec thèmes multiples géré manuellement par l'organisateur. C'est l'organisateur qui uploade les photos des participants, puis ouvre le vote quand tout est prêt.</span>
-          </div>
-          <div class="activity-type-row">
-            <span class="activity-chip chip-violet">🖼 Exposition</span>
-            <span class="activity-chip-desc">Projet d'exposition photo en plusieurs phases : idéation collective des thèmes, vote, soumission des photos, puis clôture.</span>
+        <div class="guide-card">
+          <h3>Les types d'activités</h3>
+          <p>
+            Le site gère six types d'activités, chacun avec son propre fonctionnement. Chaque type a
+            une <strong>couleur identifiante</strong> utilisée partout sur le site — dans le
+            calendrier, les cartes et les badges.
+          </p>
+          <div class="activity-type-rows">
+            <div class="activity-type-row">
+              <span class="activity-chip chip-teal">📸 Sortie photo</span>
+              <span class="activity-chip-desc"
+                >On se retrouve à un endroit pour photographier ensemble. Inscription optionnelle,
+                chacun uploade ses propres photos après la sortie.</span
+              >
+            </div>
+            <div class="activity-type-row">
+              <span class="activity-chip chip-green">🚶 Sortie club</span>
+              <span class="activity-chip-desc"
+                >Balade, visite de musée, sortie culturelle — pas forcément centrée sur la photo.
+                Même fonctionnement que la sortie photo.</span
+              >
+            </div>
+            <div class="activity-type-row">
+              <span class="activity-chip chip-teal">🎨 Atelier</span>
+              <span class="activity-chip-desc"
+                >Session d'apprentissage ou de travail en groupe (retouche, technique, partage
+                d'expérience). Pas de vote, pas de compétition.</span
+              >
+            </div>
+            <div class="activity-type-row">
+              <span class="activity-chip chip-red">🏅 Défi photo</span>
+              <span class="activity-chip-desc"
+                >Compétition thématique sur un sujet à photographier. Les membres s'inscrivent,
+                uploadent leurs photos pendant la période de soumission, puis votent anonymement.
+                Les phases changent <em>automatiquement</em> selon les dates.</span
+              >
+            </div>
+            <div class="activity-type-row">
+              <span class="activity-chip chip-amber">🏆 OneShot</span>
+              <span class="activity-chip-desc"
+                >Événement photo compétitif avec thèmes multiples géré manuellement par
+                l'organisateur. C'est l'organisateur qui uploade les photos des participants, puis
+                ouvre le vote quand tout est prêt.</span
+              >
+            </div>
+            <div class="activity-type-row">
+              <span class="activity-chip chip-violet">🖼 Exposition</span>
+              <span class="activity-chip-desc"
+                >Projet d'exposition photo en plusieurs phases : idéation collective des thèmes,
+                vote, soumission des photos, puis clôture.</span
+              >
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- Navigation -->
-    <section class="guide-section">
-      <div class="section-header">
-        <h2>Informations générales</h2>
-        <p class="section-subtitle">Fonctionnalités communes à toutes les sections du site.</p>
-      </div>
-
-      <div class="guide-card">
-        <h3>Comment naviguer dans le site</h3>
-        <div class="nav-flow">
-          <div class="flow-node">
-            <span class="flow-emoji">📄</span>
-            <strong>Page liste</strong>
-            <span class="flow-sub">grille de cartes</span>
-          </div>
-          <div class="flow-conn"><span class="flow-act">clic sur une carte</span><span>→</span></div>
-          <div class="flow-node flow-node-hl">
-            <span class="flow-emoji">ℹ️</span>
-            <strong>Fiche info</strong>
-            <span class="flow-sub">détails complets</span>
-          </div>
-          <div class="flow-conn"><span class="flow-act">clic sur la photo</span><span>→</span></div>
-          <div class="flow-node">
-            <span class="flow-emoji">🖼️</span>
-            <strong>Plein écran</strong>
-            <span class="flow-sub">photos uniquement</span>
-          </div>
+      <!-- Navigation -->
+      <section class="guide-section">
+        <div class="section-header">
+          <h2>Informations générales</h2>
+          <p class="section-subtitle">Fonctionnalités communes à toutes les sections du site.</p>
         </div>
-        <p class="guide-note">Dans la fiche info, naviguez entre les éléments avec les <strong>flèches à l'écran</strong> ou les touches <kbd>←</kbd> <kbd>→</kbd> du clavier. Sur mobile, glissez horizontalement sur la photo.</p>
-        <p class="guide-note">Pendant les votes (Thème du mois, OneShot, Défi), la fiche info complète n'est pas disponible — un clic ouvre directement le plein écran sans nom d'auteur ni commentaires (soumissions anonymes).</p>
-      </div>
 
-      <div class="guide-card">
-        <h3>Uploader une photo</h3>
-        <p>Le site accepte les fichiers <strong>JPEG et PNG</strong>. Chaque photo est automatiquement compressée côté client avant l'envoi pour limiter le poids en stockage.</p>
-        <p class="guide-note">
-          Uploadez toujours le fichier <strong>original sorti de l'appareil ou du logiciel de retouche</strong>
-          — pas une capture d'écran, pas une photo re-enregistrée depuis une messagerie.
-          Les réseaux sociaux et les applications de messagerie suppriment les métadonnées EXIF : un fichier passé par WhatsApp ou Facebook arrivera sans aucune info technique.
-        </p>
-      </div>
-
-      <div class="guide-card">
-        <h3>Métadonnées EXIF</h3>
-        <p>Quand vous uploadez une photo, le site lit automatiquement les métadonnées EXIF intégrées dans le fichier. Ces informations sont ensuite affichées dans la fiche info.</p>
-        <div class="admin-fields">
-          <div class="admin-field-row"><span class="field-label">Appareil</span><span class="field-desc">Marque et modèle (ex : Sony A7 IV).</span></div>
-          <div class="admin-field-row"><span class="field-label">Objectif</span><span class="field-desc">Objectif utilisé (ex : 85mm f/1.8).</span></div>
-          <div class="admin-field-row"><span class="field-label">Focale</span><span class="field-desc">Focale effective en millimètres.</span></div>
-          <div class="admin-field-row"><span class="field-label">Ouverture</span><span class="field-desc">Valeur f/ utilisée (ex : f/2.8).</span></div>
-          <div class="admin-field-row"><span class="field-label">Vitesse</span><span class="field-desc">Temps d'exposition (ex : 1/500 s).</span></div>
-          <div class="admin-field-row"><span class="field-label">ISO</span><span class="field-desc">Sensibilité ISO au moment de la prise de vue.</span></div>
-          <div class="admin-field-row"><span class="field-label">Date de prise de vue</span><span class="field-desc">Date enregistrée par l'appareil, pas la date d'upload.</span></div>
-          <div class="admin-field-row"><span class="field-label">Définition</span><span class="field-desc">Résolution de l'image en pixels et en mégapixels (ex : 6 000 × 4 000 px — 24 Mpx). Calculée à partir de l'image elle-même, pas du fichier EXIF.</span></div>
-          <div class="admin-field-row"><span class="field-label">Coordonnées GPS</span><span class="field-desc">Lieu de prise de vue. Affiché comme lien "Voir sur la carte" dans la fiche info.</span></div>
+        <div class="guide-card">
+          <h3>Comment naviguer dans le site</h3>
+          <div class="nav-flow">
+            <div class="flow-node">
+              <span class="flow-emoji">📄</span>
+              <strong>Page liste</strong>
+              <span class="flow-sub">grille de cartes</span>
+            </div>
+            <div class="flow-conn">
+              <span class="flow-act">clic sur une carte</span><span>→</span>
+            </div>
+            <div class="flow-node flow-node-hl">
+              <span class="flow-emoji">ℹ️</span>
+              <strong>Fiche info</strong>
+              <span class="flow-sub">détails complets</span>
+            </div>
+            <div class="flow-conn">
+              <span class="flow-act">clic sur la photo</span><span>→</span>
+            </div>
+            <div class="flow-node">
+              <span class="flow-emoji">🖼️</span>
+              <strong>Plein écran</strong>
+              <span class="flow-sub">photos uniquement</span>
+            </div>
+          </div>
+          <p class="guide-note">
+            Dans la fiche info, naviguez entre les éléments avec les
+            <strong>flèches à l'écran</strong> ou les touches <kbd>←</kbd> <kbd>→</kbd> du clavier.
+            Sur mobile, glissez horizontalement sur la photo.
+          </p>
+          <p class="guide-note">
+            Pendant les votes (Thème du mois, OneShot, Défi), la fiche info complète n'est pas
+            disponible — un clic ouvre directement le plein écran sans nom d'auteur ni commentaires
+            (soumissions anonymes).
+          </p>
         </div>
-        <p class="guide-note"><strong>Vie privée GPS :</strong> si votre photo contient des coordonnées GPS, une fenêtre vous demande si vous souhaitez les conserver. Par défaut <em>Oui</em> — utile pour les paysages. Répondez <em>Non</em> pour une photo prise chez vous.</p>
-        <p class="guide-note">Si aucun EXIF n'est détecté (screenshot, photo reçue par messagerie), la section EXIF n'apparaît pas.</p>
-      </div>
 
-      <div class="guide-card">
-        <h3>Likes ♥ et commentaires</h3>
-        <p>
-          Chaque photo peut être likée depuis la carte ou la fiche info. Un cœur rouge signifie que <strong>vous avez liké</strong> cette photo. Cliquez à nouveau pour retirer votre like.
-          Les commentaires et réponses sont accessibles depuis la <strong>fiche info</strong> uniquement.
-        </p>
-        <p class="guide-note">Connexion requise pour liker ou commenter.</p>
-      </div>
-    </section>
+        <div class="guide-card">
+          <h3>Uploader une photo</h3>
+          <p>
+            Le site accepte les fichiers <strong>JPEG et PNG</strong>. Chaque photo est
+            automatiquement compressée côté client avant l'envoi pour limiter le poids en stockage.
+          </p>
+          <p class="guide-note">
+            Uploadez toujours le fichier
+            <strong>original sorti de l'appareil ou du logiciel de retouche</strong>
+            — pas une capture d'écran, pas une photo re-enregistrée depuis une messagerie. Les
+            réseaux sociaux et les applications de messagerie suppriment les métadonnées EXIF : un
+            fichier passé par WhatsApp ou Facebook arrivera sans aucune info technique.
+          </p>
+        </div>
 
-  </div>
+        <div class="guide-card">
+          <h3>Métadonnées EXIF</h3>
+          <p>
+            Quand vous uploadez une photo, le site lit automatiquement les métadonnées EXIF
+            intégrées dans le fichier. Ces informations sont ensuite affichées dans la fiche info.
+          </p>
+          <div class="admin-fields">
+            <div class="admin-field-row">
+              <span class="field-label">Appareil</span
+              ><span class="field-desc">Marque et modèle (ex : Sony A7 IV).</span>
+            </div>
+            <div class="admin-field-row">
+              <span class="field-label">Objectif</span
+              ><span class="field-desc">Objectif utilisé (ex : 85mm f/1.8).</span>
+            </div>
+            <div class="admin-field-row">
+              <span class="field-label">Focale</span
+              ><span class="field-desc">Focale effective en millimètres.</span>
+            </div>
+            <div class="admin-field-row">
+              <span class="field-label">Ouverture</span
+              ><span class="field-desc">Valeur f/ utilisée (ex : f/2.8).</span>
+            </div>
+            <div class="admin-field-row">
+              <span class="field-label">Vitesse</span
+              ><span class="field-desc">Temps d'exposition (ex : 1/500 s).</span>
+            </div>
+            <div class="admin-field-row">
+              <span class="field-label">ISO</span
+              ><span class="field-desc">Sensibilité ISO au moment de la prise de vue.</span>
+            </div>
+            <div class="admin-field-row">
+              <span class="field-label">Date de prise de vue</span
+              ><span class="field-desc"
+                >Date enregistrée par l'appareil, pas la date d'upload.</span
+              >
+            </div>
+            <div class="admin-field-row">
+              <span class="field-label">Définition</span
+              ><span class="field-desc"
+                >Résolution de l'image en pixels et en mégapixels (ex : 6 000 × 4 000 px — 24 Mpx).
+                Calculée à partir de l'image elle-même, pas du fichier EXIF.</span
+              >
+            </div>
+            <div class="admin-field-row">
+              <span class="field-label">Coordonnées GPS</span
+              ><span class="field-desc"
+                >Lieu de prise de vue. Affiché comme lien "Voir sur la carte" dans la fiche
+                info.</span
+              >
+            </div>
+          </div>
+          <p class="guide-note">
+            <strong>Vie privée GPS :</strong> si votre photo contient des coordonnées GPS, une
+            fenêtre vous demande si vous souhaitez les conserver. Par défaut <em>Oui</em> — utile
+            pour les paysages. Répondez <em>Non</em> pour une photo prise chez vous.
+          </p>
+          <p class="guide-note">
+            Si aucun EXIF n'est détecté (screenshot, photo reçue par messagerie), la section EXIF
+            n'apparaît pas.
+          </p>
+        </div>
+
+        <div class="guide-card">
+          <h3>Likes ♥ et commentaires</h3>
+          <p>
+            Chaque photo peut être likée depuis la carte ou la fiche info. Un cœur rouge signifie
+            que <strong>vous avez liké</strong> cette photo. Cliquez à nouveau pour retirer votre
+            like. Les commentaires et réponses sont accessibles depuis la
+            <strong>fiche info</strong> uniquement.
+          </p>
+          <p class="guide-note">Connexion requise pour liker ou commenter.</p>
+        </div>
+      </section>
+    </div>
   }
-
 
   <!-- ══════════════════════════════════════════════════
        ONGLET 2 — POUR LES MEMBRES
   ══════════════════════════════════════════════════ -->
   @if (activeTab() === 'membres') {
-  <div class="tab-content">
-
-    <!-- Actualités -->
-    <section class="guide-section">
-      <div class="section-header">
-        <h2>📰 Actualités</h2>
-        <p class="section-subtitle">Les nouvelles du club.</p>
-      </div>
-      <div class="guide-card">
-        <p>La page <a routerLink="/actualites" class="inline-link">Actualités</a> affiche toutes les publications sous forme de cartes. Les articles épinglés apparaissent en tête. Filtrez par type (Info, Encart, Exposition…) avec les boutons en haut de page. Cliquez sur une carte pour lire l'article complet.</p>
-      </div>
-    </section>
-
-    <!-- Calendrier -->
-    <section class="guide-section">
-      <div class="section-header">
-        <h2>📅 Calendrier</h2>
-        <p class="section-subtitle">Toutes les dates du club au même endroit.</p>
-      </div>
-      <div class="guide-card">
-        <p>Le <a routerLink="/calendrier" class="inline-link">Calendrier</a> regroupe les réunions, les événements et les activités à venir. Cliquez sur un élément pour voir les détails. Des filtres permettent d'afficher un seul type à la fois.</p>
-        <p class="guide-note">Accessible sans connexion, mais certains éléments sont réservés aux membres : les réunions du club et les activités à visibilité "Membres seulement" n'apparaissent pas pour les visiteurs non connectés.</p>
-      </div>
-    </section>
-
-    <!-- Documents -->
-    <section class="guide-section">
-      <div class="section-header">
-        <h2>📁 Documents</h2>
-        <p class="section-subtitle">Statuts, comptes-rendus, formulaires et ressources partagées.</p>
-      </div>
-      <div class="guide-card">
-        <h3>Consulter et télécharger</h3>
-        <p>Accessible via <strong>Membres → Documents</strong>. Les fichiers sont classés par dossiers. Filtrez par dossier avec les boutons en haut, puis cliquez <strong>⬇</strong> pour ouvrir ou télécharger un fichier.</p>
-        <p class="guide-note">Connexion requise.</p>
-      </div>
-      <div class="guide-card">
-        <h3>Déposer un document</h3>
-        <ol class="guide-steps">
-          <li>Cliquez <strong>Nouveau document</strong>.</li>
-          <li>Renseignez le nom et choisissez le dossier de destination.</li>
-          <li>Glissez votre fichier ou cliquez pour le sélectionner, puis <strong>Uploader</strong>.</li>
-        </ol>
-        <p>Vous pouvez <strong>remplacer</strong> (icône crayon) ou <strong>supprimer</strong> (icône poubelle) les documents que vous avez déposés.</p>
-      </div>
-    </section>
-
-    <!-- Portfolio -->
-    <section class="guide-section">
-      <div class="section-header">
-        <h2>🖼 Mon portfolio</h2>
-        <p class="section-subtitle">Votre espace photo personnel.</p>
-      </div>
-      <div class="guide-card">
-        <p>Depuis <strong>Mon espace → Mon Portfolio</strong>, uploadez vos photos, organisez-les par catégories et choisissez leur visibilité (<em>Public</em> ou <em>Membres uniquement</em>). Votre portfolio apparaît dans la <a routerLink="/galeries/membres" class="inline-link">galerie des membres</a> dès que vous avez au moins une photo publique.</p>
-      </div>
-    </section>
-
-    <!-- Thème du mois -->
-    <section class="guide-section">
-      <div class="section-header">
-        <h2>🗓 Thème du mois</h2>
-        <p class="section-subtitle">La compétition mensuelle du club.</p>
-      </div>
-
-      <div class="guide-card">
-        <h3>Le principe</h3>
-        <p>Chaque mois, le club propose un thème photo. Les membres soumettent leurs photos, puis votent pour leurs préférées. Les phases changent <strong>automatiquement selon les dates</strong> — aucun bouton à actionner.</p>
-        <div class="admin-timeline">
-          <div class="tl-segment tl-attente"><span class="tl-label">En attente</span><span class="tl-hint">avant le 1ᵉʳ du mois</span></div>
-          <div class="tl-arrow">→</div>
-          <div class="tl-segment tl-ouvert"><span class="tl-label">Ouvert</span><span class="tl-hint">tout le mois</span></div>
-          <div class="tl-arrow">→</div>
-          <div class="tl-segment tl-vote"><span class="tl-label">Vote</span><span class="tl-hint">après la clôture</span></div>
-          <div class="tl-arrow">→</div>
-          <div class="tl-segment tl-resultats"><span class="tl-label">Résultats</span><span class="tl-hint">après la fin du vote</span></div>
+    <div class="tab-content">
+      <!-- Actualités -->
+      <section class="guide-section">
+        <div class="section-header">
+          <h2>📰 Actualités</h2>
+          <p class="section-subtitle">Les nouvelles du club.</p>
         </div>
-      </div>
-
-      <div class="guide-card">
-        <h3>Soumettre une photo</h3>
-        <ol class="guide-steps">
-          <li>Ouvrez le thème dont le statut est <span class="badge-inline step-ouvert">Ouvert</span>.</li>
-          <li>Glissez votre photo dans la zone d'upload ou cliquez pour choisir un fichier.</li>
-          <li>Pour retirer votre soumission, cliquez 🗑 sur votre photo avant la clôture.</li>
-        </ol>
-        <p class="guide-note">Vous ne pouvez soumettre qu'une photo par thème (sauf indication contraire).</p>
-      </div>
-
-      <div class="guide-card">
-        <h3>Voter</h3>
-        <ol class="guide-steps">
-          <li>Pendant la phase <span class="badge-inline step-vote">Vote</span>, les photos sont anonymes.</li>
-          <li>Cliquez <strong>Voter</strong> sous les photos que vous préférez. Vous avez un nombre limité de votes.</li>
-          <li>Cliquez <strong>✓ Retirer</strong> pour reprendre un vote et le déposer ailleurs.</li>
-        </ol>
-        <p class="guide-note">Vous ne pouvez pas voter pour votre propre photo.</p>
-      </div>
-    </section>
-
-    <!-- Sorties -->
-    <section class="guide-section">
-      <div class="section-header">
-        <h2>📸 Sorties photo & Sorties club & Ateliers</h2>
-        <p class="section-subtitle">Se retrouver et partager ses photos.</p>
-      </div>
-      <div class="guide-card">
-        <h3>Participer</h3>
-        <ol class="guide-steps">
-          <li>Ouvrez l'événement depuis <a routerLink="/galeries/sorties" class="inline-link">Activités → Événements</a>.</li>
-          <li>Cliquez <strong>Je participe</strong> pour vous inscrire.</li>
-          <li>Après l'événement, revenez sur la page et uploadez vos photos. Plusieurs fichiers acceptés en une fois.</li>
-        </ol>
-        <p class="guide-note">La photo la plus likée devient automatiquement la photo de couverture de l'événement.</p>
-      </div>
-    </section>
-
-    <!-- Défi photo -->
-    <section class="guide-section">
-      <div class="section-header">
-        <h2>🏅 Défi Photo</h2>
-        <p class="section-subtitle">Une compétition thématique avec photos et vote anonyme.</p>
-      </div>
-      <div class="guide-card">
-        <h3>Le principe</h3>
-        <p>Un organisateur lance un défi sur un thème précis. Les membres s'inscrivent, uploadent leurs propres photos pendant la période de soumission, puis votent pour leurs préférées. Les phases changent <strong>automatiquement selon les dates</strong>.</p>
-        <div class="steps-list">
-          <div class="step"><span class="step-badge step-attente">À venir</span><div class="step-body">Annoncé, inscriptions ouvertes.</div></div>
-          <div class="step"><span class="step-badge step-ouvert">En cours</span><div class="step-body">Uploadez vos photos. Vous ne voyez que les vôtres (anonymat).</div></div>
-          <div class="step"><span class="step-badge step-vote">Vote</span><div class="step-body">Toutes les photos révélées, noms masqués. Votez pour vos préférées.</div></div>
-          <div class="step"><span class="step-badge step-resultats">Résultats</span><div class="step-body">Classement et podium avec révélation des auteurs.</div></div>
+        <div class="guide-card">
+          <p>
+            La page <a routerLink="/actualites" class="inline-link">Actualités</a> affiche toutes
+            les publications sous forme de cartes. Les articles épinglés apparaissent en tête.
+            Filtrez par type (Info, Encart, Exposition…) avec les boutons en haut de page. Cliquez
+            sur une carte pour lire l'article complet.
+          </p>
         </div>
-      </div>
-      <div class="guide-card">
-        <h3>Participer</h3>
-        <ol class="guide-steps">
-          <li>Ouvrez un défi et cliquez <strong>S'inscrire</strong> (phases À venir ou En cours).</li>
-          <li>Pendant la phase <span class="badge-inline step-ouvert">En cours</span>, uploadez vos photos dans la zone prévue.</li>
-          <li>Pendant le <span class="badge-inline step-vote">Vote</span>, parcourez toutes les photos et votez.</li>
-        </ol>
-        <p class="guide-note">Seuls les membres inscrits peuvent soumettre des photos et voter.</p>
-      </div>
-    </section>
+      </section>
 
-    <!-- OneShot -->
-    <section class="guide-section">
-      <div class="section-header">
-        <h2>🏆 OneShot</h2>
-        <p class="section-subtitle">Compétition photo avec thèmes multiples, gérée par l'organisateur.</p>
-      </div>
-      <div class="guide-card">
-        <h3>Le principe</h3>
-        <p>Un OneShot est organisé sur un ou plusieurs thèmes. Vous vous inscrivez, l'organisateur uploade vos photos à votre place, puis ouvre le vote quand tout est prêt.</p>
-        <div class="steps-list">
-          <div class="step"><span class="step-badge step-inscription">Inscriptions ouvertes</span><div class="step-body">Inscrivez-vous librement.</div></div>
-          <div class="step"><span class="step-badge step-fermeture">Inscriptions fermées</span><div class="step-body">Plus d'inscription possible, l'organisateur finalise les photos.</div></div>
-          <div class="step"><span class="step-badge step-vote">Vote</span><div class="step-body">Thèmes et photos révélés. Votez pour une photo par thème, pas la vôtre.</div></div>
-          <div class="step"><span class="step-badge step-resultats">Résultats</span><div class="step-body">Classement publié avec révélation des auteurs.</div></div>
+      <!-- Calendrier -->
+      <section class="guide-section">
+        <div class="section-header">
+          <h2>📅 Calendrier</h2>
+          <p class="section-subtitle">Toutes les dates du club au même endroit.</p>
         </div>
-      </div>
-      <div class="guide-card">
-        <h3>Participer</h3>
-        <ol class="guide-steps">
-          <li>Cliquez <strong>Je participe</strong> pendant la phase inscriptions.</li>
-          <li>L'organisateur s'occupe d'uploader vos photos.</li>
-          <li>Pendant le <span class="badge-inline vote">Vote</span>, votez pour une photo par thème (pas la vôtre). Les noms sont masqués.</li>
-        </ol>
-      </div>
-    </section>
-
-    <!-- Exposition -->
-    <section class="guide-section">
-      <div class="section-header">
-        <h2>🖼 Exposition</h2>
-        <p class="section-subtitle">Un projet d'exposition photo collectif, de l'idée à la réalisation.</p>
-      </div>
-      <div class="guide-card">
-        <h3>Le principe</h3>
-        <p>Une exposition se déroule en plusieurs phases. Les membres participent à la définition du thème, puis soumettent leurs photos pour l'exposition.</p>
-        <div class="steps-list">
-          <div class="step"><span class="step-badge step-ideation">Idéation</span><div class="step-body">Proposez des idées de thèmes pour l'exposition.</div></div>
-          <div class="step"><span class="step-badge step-vote">Vote</span><div class="step-body">Votez pour les thèmes qui vous inspirent le plus.</div></div>
-          <div class="step"><span class="step-badge step-ouvert">Soumission</span><div class="step-body">Le thème est choisi. Uploadez vos photos pour l'exposition.</div></div>
-          <div class="step"><span class="step-badge step-resultats">En exposition</span><div class="step-body">La galerie des photos de l'exposition est accessible.</div></div>
+        <div class="guide-card">
+          <p>
+            Le <a routerLink="/calendrier" class="inline-link">Calendrier</a> regroupe les réunions,
+            les événements et les activités à venir. Cliquez sur un élément pour voir les détails.
+            Des filtres permettent d'afficher un seul type à la fois.
+          </p>
+          <p class="guide-note">
+            Accessible sans connexion, mais certains éléments sont réservés aux membres : les
+            réunions du club et les activités à visibilité "Membres seulement" n'apparaissent pas
+            pour les visiteurs non connectés.
+          </p>
         </div>
-      </div>
-      <div class="guide-card">
-        <h3>Participer</h3>
-        <ul class="guide-steps">
-          <li><strong>Idéation :</strong> proposez un ou plusieurs thèmes dans la zone prévue.</li>
-          <li><strong>Vote :</strong> utilisez vos jetons de vote pour soutenir les thèmes qui vous plaisent. Vous pouvez répartir vos votes sur plusieurs thèmes.</li>
-          <li><strong>Soumission :</strong> uploadez vos photos dans la zone dédiée (dans la limite du nombre de photos par membre fixé par l'organisateur).</li>
-        </ul>
-      </div>
-    </section>
+      </section>
 
-  </div>
+      <!-- Documents -->
+      <section class="guide-section">
+        <div class="section-header">
+          <h2>📁 Documents</h2>
+          <p class="section-subtitle">
+            Statuts, comptes-rendus, formulaires et ressources partagées.
+          </p>
+        </div>
+        <div class="guide-card">
+          <h3>Consulter et télécharger</h3>
+          <p>
+            Accessible via <strong>Membres → Documents</strong>. Les fichiers sont classés par
+            dossiers. Filtrez par dossier avec les boutons en haut, puis cliquez
+            <strong>⬇</strong> pour ouvrir ou télécharger un fichier.
+          </p>
+          <p class="guide-note">Connexion requise.</p>
+        </div>
+        <div class="guide-card">
+          <h3>Déposer un document</h3>
+          <ol class="guide-steps">
+            <li>Cliquez <strong>Nouveau document</strong>.</li>
+            <li>Renseignez le nom et choisissez le dossier de destination.</li>
+            <li>
+              Glissez votre fichier ou cliquez pour le sélectionner, puis <strong>Uploader</strong>.
+            </li>
+          </ol>
+          <p>
+            Vous pouvez <strong>remplacer</strong> (icône crayon) ou
+            <strong>supprimer</strong> (icône poubelle) les documents que vous avez déposés.
+          </p>
+        </div>
+      </section>
+
+      <!-- Portfolio -->
+      <section class="guide-section">
+        <div class="section-header">
+          <h2>🖼 Mon portfolio</h2>
+          <p class="section-subtitle">Votre espace photo personnel.</p>
+        </div>
+        <div class="guide-card">
+          <p>
+            Depuis <strong>Mon espace → Mon Portfolio</strong>, uploadez vos photos, organisez-les
+            par catégories et choisissez leur visibilité (<em>Public</em> ou
+            <em>Membres uniquement</em>). Votre portfolio apparaît dans la
+            <a routerLink="/galeries/membres" class="inline-link">galerie des membres</a> dès que
+            vous avez au moins une photo publique.
+          </p>
+        </div>
+      </section>
+
+      <!-- Thème du mois -->
+      <section class="guide-section">
+        <div class="section-header">
+          <h2>🗓 Thème du mois</h2>
+          <p class="section-subtitle">La compétition mensuelle du club.</p>
+        </div>
+
+        <div class="guide-card">
+          <h3>Le principe</h3>
+          <p>
+            Chaque mois, le club propose un thème photo. Les membres soumettent leurs photos, puis
+            votent pour leurs préférées. Les phases changent
+            <strong>automatiquement selon les dates</strong> — aucun bouton à actionner.
+          </p>
+          <div class="admin-timeline">
+            <div class="tl-segment tl-attente">
+              <span class="tl-label">En attente</span
+              ><span class="tl-hint">avant le 1ᵉʳ du mois</span>
+            </div>
+            <div class="tl-arrow">→</div>
+            <div class="tl-segment tl-ouvert">
+              <span class="tl-label">Ouvert</span><span class="tl-hint">tout le mois</span>
+            </div>
+            <div class="tl-arrow">→</div>
+            <div class="tl-segment tl-vote">
+              <span class="tl-label">Vote</span><span class="tl-hint">après la clôture</span>
+            </div>
+            <div class="tl-arrow">→</div>
+            <div class="tl-segment tl-resultats">
+              <span class="tl-label">Résultats</span
+              ><span class="tl-hint">après la fin du vote</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="guide-card">
+          <h3>Soumettre une photo</h3>
+          <ol class="guide-steps">
+            <li>
+              Ouvrez le thème dont le statut est
+              <span class="badge-inline step-ouvert">Ouvert</span>.
+            </li>
+            <li>Glissez votre photo dans la zone d'upload ou cliquez pour choisir un fichier.</li>
+            <li>Pour retirer votre soumission, cliquez 🗑 sur votre photo avant la clôture.</li>
+          </ol>
+          <p class="guide-note">
+            Vous ne pouvez soumettre qu'une photo par thème (sauf indication contraire).
+          </p>
+        </div>
+
+        <div class="guide-card">
+          <h3>Voter</h3>
+          <ol class="guide-steps">
+            <li>
+              Pendant la phase <span class="badge-inline step-vote">Vote</span>, les photos sont
+              anonymes.
+            </li>
+            <li>
+              Cliquez <strong>Voter</strong> sous les photos que vous préférez. Vous avez un nombre
+              limité de votes.
+            </li>
+            <li>
+              Cliquez <strong>✓ Retirer</strong> pour reprendre un vote et le déposer ailleurs.
+            </li>
+          </ol>
+          <p class="guide-note">Vous ne pouvez pas voter pour votre propre photo.</p>
+        </div>
+      </section>
+
+      <!-- Sorties -->
+      <section class="guide-section">
+        <div class="section-header">
+          <h2>📸 Sorties photo & Sorties club & Ateliers</h2>
+          <p class="section-subtitle">Se retrouver et partager ses photos.</p>
+        </div>
+        <div class="guide-card">
+          <h3>Participer</h3>
+          <ol class="guide-steps">
+            <li>
+              Ouvrez l'événement depuis
+              <a routerLink="/galeries/sorties" class="inline-link">Activités → Événements</a>.
+            </li>
+            <li>Cliquez <strong>Je participe</strong> pour vous inscrire.</li>
+            <li>
+              Après l'événement, revenez sur la page et uploadez vos photos. Plusieurs fichiers
+              acceptés en une fois.
+            </li>
+          </ol>
+          <p class="guide-note">
+            La photo la plus likée devient automatiquement la photo de couverture de l'événement.
+          </p>
+        </div>
+      </section>
+
+      <!-- Défi photo -->
+      <section class="guide-section">
+        <div class="section-header">
+          <h2>🏅 Défi Photo</h2>
+          <p class="section-subtitle">Une compétition thématique avec photos et vote anonyme.</p>
+        </div>
+        <div class="guide-card">
+          <h3>Le principe</h3>
+          <p>
+            Un organisateur lance un défi sur un thème précis. Les membres s'inscrivent, uploadent
+            leurs propres photos pendant la période de soumission, puis votent pour leurs préférées.
+            Les phases changent <strong>automatiquement selon les dates</strong>.
+          </p>
+          <div class="steps-list">
+            <div class="step">
+              <span class="step-badge step-attente">À venir</span>
+              <div class="step-body">Annoncé, inscriptions ouvertes.</div>
+            </div>
+            <div class="step">
+              <span class="step-badge step-ouvert">En cours</span>
+              <div class="step-body">
+                Uploadez vos photos. Vous ne voyez que les vôtres (anonymat).
+              </div>
+            </div>
+            <div class="step">
+              <span class="step-badge step-vote">Vote</span>
+              <div class="step-body">
+                Toutes les photos révélées, noms masqués. Votez pour vos préférées.
+              </div>
+            </div>
+            <div class="step">
+              <span class="step-badge step-resultats">Résultats</span>
+              <div class="step-body">Classement et podium avec révélation des auteurs.</div>
+            </div>
+          </div>
+        </div>
+        <div class="guide-card">
+          <h3>Participer</h3>
+          <ol class="guide-steps">
+            <li>
+              Ouvrez un défi et cliquez <strong>S'inscrire</strong> (phases À venir ou En cours).
+            </li>
+            <li>
+              Pendant la phase <span class="badge-inline step-ouvert">En cours</span>, uploadez vos
+              photos dans la zone prévue.
+            </li>
+            <li>
+              Pendant le <span class="badge-inline step-vote">Vote</span>, parcourez toutes les
+              photos et votez.
+            </li>
+          </ol>
+          <p class="guide-note">
+            Seuls les membres inscrits peuvent soumettre des photos et voter.
+          </p>
+        </div>
+      </section>
+
+      <!-- OneShot -->
+      <section class="guide-section">
+        <div class="section-header">
+          <h2>🏆 OneShot</h2>
+          <p class="section-subtitle">
+            Compétition photo avec thèmes multiples, gérée par l'organisateur.
+          </p>
+        </div>
+        <div class="guide-card">
+          <h3>Le principe</h3>
+          <p>
+            Un OneShot est organisé sur un ou plusieurs thèmes. Vous vous inscrivez, l'organisateur
+            uploade vos photos à votre place, puis ouvre le vote quand tout est prêt.
+          </p>
+          <div class="steps-list">
+            <div class="step">
+              <span class="step-badge step-inscription">Inscriptions ouvertes</span>
+              <div class="step-body">Inscrivez-vous librement.</div>
+            </div>
+            <div class="step">
+              <span class="step-badge step-fermeture">Inscriptions fermées</span>
+              <div class="step-body">
+                Plus d'inscription possible, l'organisateur finalise les photos.
+              </div>
+            </div>
+            <div class="step">
+              <span class="step-badge step-vote">Vote</span>
+              <div class="step-body">
+                Thèmes et photos révélés. Votez pour une photo par thème, pas la vôtre.
+              </div>
+            </div>
+            <div class="step">
+              <span class="step-badge step-resultats">Résultats</span>
+              <div class="step-body">Classement publié avec révélation des auteurs.</div>
+            </div>
+          </div>
+        </div>
+        <div class="guide-card">
+          <h3>Participer</h3>
+          <ol class="guide-steps">
+            <li>Cliquez <strong>Je participe</strong> pendant la phase inscriptions.</li>
+            <li>L'organisateur s'occupe d'uploader vos photos.</li>
+            <li>
+              Pendant le <span class="badge-inline vote">Vote</span>, votez pour une photo par thème
+              (pas la vôtre). Les noms sont masqués.
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- Exposition -->
+      <section class="guide-section">
+        <div class="section-header">
+          <h2>🖼 Exposition</h2>
+          <p class="section-subtitle">
+            Un projet d'exposition photo collectif, de l'idée à la réalisation.
+          </p>
+        </div>
+        <div class="guide-card">
+          <h3>Le principe</h3>
+          <p>
+            Une exposition se déroule en plusieurs phases. Les membres participent à la définition
+            du thème, puis soumettent leurs photos pour l'exposition.
+          </p>
+          <div class="steps-list">
+            <div class="step">
+              <span class="step-badge step-ideation">Idéation</span>
+              <div class="step-body">Proposez des idées de thèmes pour l'exposition.</div>
+            </div>
+            <div class="step">
+              <span class="step-badge step-vote">Vote</span>
+              <div class="step-body">Votez pour les thèmes qui vous inspirent le plus.</div>
+            </div>
+            <div class="step">
+              <span class="step-badge step-ouvert">Soumission</span>
+              <div class="step-body">
+                Le thème est choisi. Uploadez vos photos pour l'exposition.
+              </div>
+            </div>
+            <div class="step">
+              <span class="step-badge step-resultats">En exposition</span>
+              <div class="step-body">La galerie des photos de l'exposition est accessible.</div>
+            </div>
+          </div>
+        </div>
+        <div class="guide-card">
+          <h3>Participer</h3>
+          <ul class="guide-steps">
+            <li>
+              <strong>Idéation :</strong> proposez un ou plusieurs thèmes dans la zone prévue.
+            </li>
+            <li>
+              <strong>Vote :</strong> utilisez vos jetons de vote pour soutenir les thèmes qui vous
+              plaisent. Vous pouvez répartir vos votes sur plusieurs thèmes.
+            </li>
+            <li>
+              <strong>Soumission :</strong> uploadez vos photos dans la zone dédiée (dans la limite
+              du nombre de photos par membre fixé par l'organisateur).
+            </li>
+          </ul>
+        </div>
+      </section>
+    </div>
   }
-
 
   <!-- ══════════════════════════════════════════════════
        ONGLET 3 — POUR LES CONTRIBUTEURS
   ══════════════════════════════════════════════════ -->
   @if (activeTab() === 'contributeurs') {
-  <div class="tab-content">
-
-    <section class="guide-section">
-      <div class="section-header">
-        <h2>Rôle Contributeur</h2>
-        <p class="section-subtitle">Les contributeurs peuvent créer et gérer des activités, et publier des actualités.</p>
-      </div>
-      <div class="guide-card">
-        <p>
-          Un contributeur peut organiser toutes les activités du club (sorties, défis, ateliers, OneSH, expositions) et publier des articles.
-          Il gère ses propres créations depuis les pages de l'activité elle-même — pas besoin de passer par l'Admin.
-          Pour devenir contributeur, contactez un administrateur.
-        </p>
-      </div>
-    </section>
-
-    <!-- Thèmes du mois -->
-    <section class="guide-section">
-      <div class="section-header">
-        <h2>🗓 Thèmes du mois</h2>
-      </div>
-      <div class="guide-card">
-        <p>Accessible via le bouton <strong>Gérer les thèmes du mois</strong> en haut de la page <a routerLink="/galeries/themesdumois" class="inline-link">Thèmes du mois</a>.</p>
-        <div class="admin-fields">
-          <div class="admin-field-row"><span class="field-label">Titre + mois</span><span class="field-desc">Le mois détermine automatiquement les 3 dates : ouverture (1ᵉʳ du mois), clôture (dernier jour), fin du vote (clôture + N jours).</span></div>
-          <div class="admin-field-row"><span class="field-label">Jours de vote</span><span class="field-desc">Défaut : 15. Modifiable jusqu'au début du vote.</span></div>
-          <div class="admin-field-row"><span class="field-label">Photos / membre</span><span class="field-desc">Défaut : 1.</span></div>
-          <div class="admin-field-row"><span class="field-label">Votes / membre</span><span class="field-desc">Défaut : 3.</span></div>
+    <div class="tab-content">
+      <section class="guide-section">
+        <div class="section-header">
+          <h2>Rôle Contributeur</h2>
+          <p class="section-subtitle">
+            Les contributeurs peuvent créer et gérer des activités, et publier des actualités.
+          </p>
         </div>
-        <p class="guide-note">Il n'y a pas de bouton "passer à l'étape suivante" — le statut est calculé automatiquement. Pour changer le mois, supprimez et recréez le thème (possible tant qu'aucune soumission n'existe).</p>
-      </div>
-    </section>
-
-    <!-- Réunions -->
-    <section class="guide-section">
-      <div class="section-header">
-        <h2>📅 Réunions</h2>
-      </div>
-      <div class="guide-card">
-        <p>Accessible via le bouton <strong>Gérer les réunions</strong> en haut du <a routerLink="/calendrier" class="inline-link">Calendrier</a>.</p>
-        <p>Créez, modifiez et supprimez les réunions du club (assemblées, conseils d'administration, séances de travail). Une notification est envoyée aux membres à la création et si la date change.</p>
-      </div>
-    </section>
-
-    <!-- Actualités -->
-    <section class="guide-section">
-      <div class="section-header">
-        <h2>📰 Publier un article</h2>
-      </div>
-      <div class="guide-card">
-        <p>Le bouton <strong>+ Nouvel article</strong> est visible en haut de la page <a routerLink="/actualites" class="inline-link">Actualités</a>.</p>
-        <div class="admin-fields">
-          <div class="admin-field-row"><span class="field-label">Type</span><span class="field-desc">Info, Encart, Exposition, Événement, Annonce — détermine la couleur du badge.</span></div>
-          <div class="admin-field-row"><span class="field-label">Statut</span><span class="field-desc">Brouillon (non visible) ou Publié. Un article publié est immédiatement visible selon la portée choisie.</span></div>
-          <div class="admin-field-row"><span class="field-label">Portée</span><span class="field-desc">Public (tout le monde) ou Membres uniquement.</span></div>
-          <div class="admin-field-row"><span class="field-label">Épingler</span><span class="field-desc">L'article reste en tête de liste quelle que soit sa date.</span></div>
+        <div class="guide-card">
+          <p>
+            Un contributeur peut organiser toutes les activités du club (sorties, défis, ateliers,
+            OneSH, expositions) et publier des articles. Il gère ses propres créations depuis les
+            pages de l'activité elle-même — pas besoin de passer par l'Admin. Pour devenir
+            contributeur, contactez un administrateur.
+          </p>
         </div>
-        <p class="guide-note">Pour modifier un article depuis la page Actualités, cliquez sur l'icône crayon ✎ en haut à droite de sa carte.</p>
-      </div>
-    </section>
+      </section>
 
-    <!-- Créer une activité -->
-    <section class="guide-section">
-      <div class="section-header">
-        <h2>🎯 Créer une activité</h2>
-        <p class="section-subtitle">Toutes les activités se créent depuis le même formulaire.</p>
-      </div>
-      <div class="guide-card">
-        <h3>Accéder au formulaire</h3>
-        <p>Allez sur <a routerLink="/galeries/sorties" class="inline-link">Activités → Événements</a> et cliquez <strong>+ Organiser un événement</strong>. Choisissez ensuite le type d'activité.</p>
-      </div>
-    </section>
-
-    <!-- Sortie / Atelier -->
-    <section class="guide-section">
-      <div class="section-header">
-        <h2>📸 Sorties & Ateliers</h2>
-      </div>
-      <div class="guide-card">
-        <h3>Créer</h3>
-        <ol class="guide-steps">
-          <li>Choisissez le type : <strong>📸 Sortie Photo</strong>, <strong>🚶 Sortie Club</strong> ou <strong>🎨 Atelier</strong>.</li>
-          <li>Renseignez titre, date, lieu et description.</li>
-          <li>Choisissez la <strong>visibilité</strong> : Public ou Membres seulement.</li>
-          <li>Cochez <strong>Inscription obligatoire</strong> si vous souhaitez compter les participants.</li>
-          <li>L'événement est visible immédiatement après création.</li>
-        </ol>
-      </div>
-      <div class="guide-card">
-        <h3>Gérer</h3>
-        <ul class="guide-steps">
-          <li>Modifiez le titre, la date, le lieu et la description à tout moment via <strong>✏ Modifier</strong> en haut de la page.</li>
-          <li>Gérez la liste des participants (inscrire/désinscrire) dans la section Inscriptions.</li>
-          <li>Vous pouvez supprimer les photos uploadées par les participants.</li>
-          <li>Pour supprimer l'événement : bouton <strong>🗑 Supprimer</strong> en haut de la page.</li>
-        </ul>
-      </div>
-    </section>
-
-    <!-- Défi photo -->
-    <section class="guide-section">
-      <div class="section-header">
-        <h2>🏅 Défi Photo</h2>
-      </div>
-      <div class="guide-card">
-        <h3>Créer</h3>
-        <ol class="guide-steps">
-          <li>Sélectionnez le type <strong>🏅 Défi Photo</strong>.</li>
-          <li>Renseignez le titre et le <strong>thème à photographier</strong> (obligatoire).</li>
-          <li>Définissez les 3 dates : début des soumissions, fin des soumissions, clôture des votes.</li>
-          <li>Choisissez le max de photos par participant et le nombre de votes par membre.</li>
-          <li>Cliquez <strong>Créer le défi</strong> — une notification est envoyée aux membres.</li>
-        </ol>
-        <p class="guide-note">Les phases changent automatiquement selon les dates — aucune intervention manuelle nécessaire.</p>
-      </div>
-      <div class="guide-card">
-        <h3>Gérer</h3>
-        <ul class="guide-steps">
-          <li>Modifiez les dates, le titre et la description via <strong>✏ Modifier</strong> tant que le défi n'est pas en phase Vote.</li>
-          <li>Gérez les inscriptions et supprimez des photos si nécessaire.</li>
-          <li>Vous pouvez changer la visibilité (Public / Membres seulement) à tout moment.</li>
-        </ul>
-      </div>
-    </section>
-
-    <!-- OneShot -->
-    <section class="guide-section">
-      <div class="section-header">
-        <h2>🏆 OneShot</h2>
-      </div>
-      <div class="guide-card">
-        <h3>Créer</h3>
-        <ol class="guide-steps">
-          <li>Sélectionnez le type <strong>🏆 OneShot</strong>.</li>
-          <li>Renseignez le titre (obligatoire). Date et lieu sont optionnels.</li>
-          <li>Cliquez <strong>Créer</strong> — vous arrivez directement sur la page de l'événement en mode <strong>Préparation</strong> (invisible aux autres membres).</li>
-          <li>Dans la section <strong>Gestion</strong>, ajoutez vos <strong>thèmes</strong> (ex : "Paysage", "Portrait").</li>
-          <li>Quand tout est prêt, cliquez <strong>Ouvrir les inscriptions</strong>.</li>
-        </ol>
-      </div>
-      <div class="guide-card">
-        <h3>Gérer — cycle de vie</h3>
-        <div class="steps-list">
-          <div class="step"><span class="step-badge step-preparation">Préparation</span><div class="step-body">Configurez titre, description, thèmes. Invisible aux membres.</div></div>
-          <div class="step"><span class="step-badge step-inscription">Inscriptions ouvertes</span><div class="step-body">Visible. Les membres s'inscrivent. Gérez les photos via <strong>Gérer les photos →</strong>.</div></div>
-          <div class="step"><span class="step-badge step-fermeture">Inscriptions fermées</span><div class="step-body">Optionnel. Plus d'inscription/désinscription autonome. Finalisez les photos.</div></div>
-          <div class="step"><span class="step-badge step-vote">Vote</span><div class="step-body">Thèmes et photos révélés. La page photos est verrouillée. Attendez que les membres votent.</div></div>
-          <div class="step"><span class="step-badge step-resultats">Résultats</span><div class="step-body">Classement publié. Fermez le vote pour y passer.</div></div>
+      <!-- Thèmes du mois -->
+      <section class="guide-section">
+        <div class="section-header">
+          <h2>🗓 Thèmes du mois</h2>
         </div>
-        <p class="guide-note">Le passage en Vote est <strong>bloqué</strong> tant qu'il reste des photos sans membre ou sans thème assigné.</p>
-      </div>
-      <div class="guide-card">
-        <h3>Gérer les photos</h3>
-        <ul class="guide-steps">
-          <li>Accédez à la page <strong>Gérer les photos →</strong> depuis la section Gestion (phases Inscriptions et Inscriptions fermées uniquement).</li>
-          <li>Uploadez plusieurs fichiers en une fois. Pré-assignez membre et thème avant d'uploader.</li>
-          <li>Modifiez l'assignation membre/thème directement sous chaque vignette.</li>
-          <li>Glissez une photo d'une section à l'autre pour la réassigner à un autre thème.</li>
-          <li>La barre de progression indique combien de membres ont une photo par thème.</li>
-        </ul>
-      </div>
-    </section>
-
-    <!-- Exposition -->
-    <section class="guide-section">
-      <div class="section-header">
-        <h2>🖼 Exposition</h2>
-      </div>
-      <div class="guide-card">
-        <h3>Créer</h3>
-        <ol class="guide-steps">
-          <li>Sélectionnez le type <strong>🖼 Exposition</strong>.</li>
-          <li>Renseignez le titre et la description.</li>
-          <li>Définissez les dates d'idéation (début et fin, obligatoires).</li>
-          <li>Optionnel : date physique de l'exposition et date d'ouverture au public (visibilité non-membres).</li>
-          <li>Définissez le nombre max de photos par membre.</li>
-          <li>Cliquez <strong>Créer</strong> — l'exposition démarre en phase Idéation.</li>
-        </ol>
-      </div>
-      <div class="guide-card">
-        <h3>Gérer — cycle de vie</h3>
-        <div class="steps-list">
-          <div class="step"><span class="step-badge step-ideation">Idéation</span><div class="step-body">Les membres proposent des thèmes. Bouton <strong>Terminer l'idéation</strong> pour passer à l'étape suivante.</div></div>
-          <div class="step"><span class="step-badge step-nettoyage">Nettoyage</span><div class="step-body">Filtrez et éditez les thèmes. Configurez le vote (nombre de votes/membre) et cliquez <strong>Mettre en votation</strong>.</div></div>
-          <div class="step"><span class="step-badge step-vote">Votation</span><div class="step-body">Les membres votent. Bouton <strong>Terminer le vote</strong> quand c'est fait. Retour au nettoyage possible si ex-æquo.</div></div>
-          <div class="step"><span class="step-badge step-ouvert">Soumission</span><div class="step-body">Choisissez le thème définitif, les membres uploadent leurs photos. Bouton <strong>Clôturer</strong> pour fermer.</div></div>
-          <div class="step"><span class="step-badge step-resultats">En exposition</span><div class="step-body">Galerie des photos visible. Accès public selon la date d'ouverture au public.</div></div>
+        <div class="guide-card">
+          <p>
+            Accessible via le bouton <strong>Gérer les thèmes du mois</strong> en haut de la page
+            <a routerLink="/galeries/themesdumois" class="inline-link">Thèmes du mois</a>.
+          </p>
+          <div class="admin-fields">
+            <div class="admin-field-row">
+              <span class="field-label">Titre + mois</span
+              ><span class="field-desc"
+                >Le mois détermine automatiquement les 3 dates : ouverture (1ᵉʳ du mois), clôture
+                (dernier jour), fin du vote (clôture + N jours).</span
+              >
+            </div>
+            <div class="admin-field-row">
+              <span class="field-label">Jours de vote</span
+              ><span class="field-desc">Défaut : 15. Modifiable jusqu'au début du vote.</span>
+            </div>
+            <div class="admin-field-row">
+              <span class="field-label">Photos / membre</span
+              ><span class="field-desc">Défaut : 1.</span>
+            </div>
+            <div class="admin-field-row">
+              <span class="field-label">Votes / membre</span
+              ><span class="field-desc">Défaut : 3.</span>
+            </div>
+          </div>
+          <p class="guide-note">
+            Il n'y a pas de bouton "passer à l'étape suivante" — le statut est calculé
+            automatiquement. Pour changer le mois, supprimez et recréez le thème (possible tant
+            qu'aucune soumission n'existe).
+          </p>
         </div>
-        <p class="guide-note">Le titre, la description et les dates sont modifiables à tout moment via <strong>✏ Modifier</strong>.</p>
-      </div>
-    </section>
+      </section>
 
-  </div>
+      <!-- Réunions -->
+      <section class="guide-section">
+        <div class="section-header">
+          <h2>📅 Réunions</h2>
+        </div>
+        <div class="guide-card">
+          <p>
+            Accessible via le bouton <strong>Gérer les réunions</strong> en haut du
+            <a routerLink="/calendrier" class="inline-link">Calendrier</a>.
+          </p>
+          <p>
+            Créez, modifiez et supprimez les réunions du club (assemblées, conseils
+            d'administration, séances de travail). Une notification est envoyée aux membres à la
+            création et si la date change.
+          </p>
+        </div>
+      </section>
+
+      <!-- Actualités -->
+      <section class="guide-section">
+        <div class="section-header">
+          <h2>📰 Publier un article</h2>
+        </div>
+        <div class="guide-card">
+          <p>
+            Le bouton <strong>+ Nouvel article</strong> est visible en haut de la page
+            <a routerLink="/actualites" class="inline-link">Actualités</a>.
+          </p>
+          <div class="admin-fields">
+            <div class="admin-field-row">
+              <span class="field-label">Type</span
+              ><span class="field-desc"
+                >Info, Encart, Exposition, Événement, Annonce — détermine la couleur du badge.</span
+              >
+            </div>
+            <div class="admin-field-row">
+              <span class="field-label">Statut</span
+              ><span class="field-desc"
+                >Brouillon (non visible) ou Publié. Un article publié est immédiatement visible
+                selon la portée choisie.</span
+              >
+            </div>
+            <div class="admin-field-row">
+              <span class="field-label">Portée</span
+              ><span class="field-desc">Public (tout le monde) ou Membres uniquement.</span>
+            </div>
+            <div class="admin-field-row">
+              <span class="field-label">Épingler</span
+              ><span class="field-desc"
+                >L'article reste en tête de liste quelle que soit sa date.</span
+              >
+            </div>
+          </div>
+          <p class="guide-note">
+            Pour modifier un article depuis la page Actualités, cliquez sur l'icône crayon ✎ en haut
+            à droite de sa carte.
+          </p>
+        </div>
+      </section>
+
+      <!-- Créer une activité -->
+      <section class="guide-section">
+        <div class="section-header">
+          <h2>🎯 Créer une activité</h2>
+          <p class="section-subtitle">Toutes les activités se créent depuis le même formulaire.</p>
+        </div>
+        <div class="guide-card">
+          <h3>Accéder au formulaire</h3>
+          <p>
+            Allez sur
+            <a routerLink="/galeries/sorties" class="inline-link">Activités → Événements</a> et
+            cliquez <strong>+ Organiser un événement</strong>. Choisissez ensuite le type
+            d'activité.
+          </p>
+        </div>
+      </section>
+
+      <!-- Sortie / Atelier -->
+      <section class="guide-section">
+        <div class="section-header">
+          <h2>📸 Sorties & Ateliers</h2>
+        </div>
+        <div class="guide-card">
+          <h3>Créer</h3>
+          <ol class="guide-steps">
+            <li>
+              Choisissez le type : <strong>📸 Sortie Photo</strong>,
+              <strong>🚶 Sortie Club</strong> ou <strong>🎨 Atelier</strong>.
+            </li>
+            <li>Renseignez titre, date, lieu et description.</li>
+            <li>Choisissez la <strong>visibilité</strong> : Public ou Membres seulement.</li>
+            <li>
+              Cochez <strong>Inscription obligatoire</strong> si vous souhaitez compter les
+              participants.
+            </li>
+            <li>L'événement est visible immédiatement après création.</li>
+          </ol>
+        </div>
+        <div class="guide-card">
+          <h3>Gérer</h3>
+          <ul class="guide-steps">
+            <li>
+              Modifiez le titre, la date, le lieu et la description à tout moment via
+              <strong>✏ Modifier</strong> en haut de la page.
+            </li>
+            <li>
+              Gérez la liste des participants (inscrire/désinscrire) dans la section Inscriptions.
+            </li>
+            <li>Vous pouvez supprimer les photos uploadées par les participants.</li>
+            <li>
+              Pour supprimer l'événement : bouton <strong>🗑 Supprimer</strong> en haut de la page.
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Défi photo -->
+      <section class="guide-section">
+        <div class="section-header">
+          <h2>🏅 Défi Photo</h2>
+        </div>
+        <div class="guide-card">
+          <h3>Créer</h3>
+          <ol class="guide-steps">
+            <li>Sélectionnez le type <strong>🏅 Défi Photo</strong>.</li>
+            <li>Renseignez le titre et le <strong>thème à photographier</strong> (obligatoire).</li>
+            <li>
+              Définissez les 3 dates : début des soumissions, fin des soumissions, clôture des
+              votes.
+            </li>
+            <li>Choisissez le max de photos par participant et le nombre de votes par membre.</li>
+            <li>
+              Cliquez <strong>Créer le défi</strong> — une notification est envoyée aux membres.
+            </li>
+          </ol>
+          <p class="guide-note">
+            Les phases changent automatiquement selon les dates — aucune intervention manuelle
+            nécessaire.
+          </p>
+        </div>
+        <div class="guide-card">
+          <h3>Gérer</h3>
+          <ul class="guide-steps">
+            <li>
+              Modifiez les dates, le titre et la description via <strong>✏ Modifier</strong> tant
+              que le défi n'est pas en phase Vote.
+            </li>
+            <li>Gérez les inscriptions et supprimez des photos si nécessaire.</li>
+            <li>Vous pouvez changer la visibilité (Public / Membres seulement) à tout moment.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- OneShot -->
+      <section class="guide-section">
+        <div class="section-header">
+          <h2>🏆 OneShot</h2>
+        </div>
+        <div class="guide-card">
+          <h3>Créer</h3>
+          <ol class="guide-steps">
+            <li>Sélectionnez le type <strong>🏆 OneShot</strong>.</li>
+            <li>Renseignez le titre (obligatoire). Date et lieu sont optionnels.</li>
+            <li>
+              Cliquez <strong>Créer</strong> — vous arrivez directement sur la page de l'événement
+              en mode <strong>Préparation</strong> (invisible aux autres membres).
+            </li>
+            <li>
+              Dans la section <strong>Gestion</strong>, ajoutez vos <strong>thèmes</strong> (ex :
+              "Paysage", "Portrait").
+            </li>
+            <li>Quand tout est prêt, cliquez <strong>Ouvrir les inscriptions</strong>.</li>
+          </ol>
+        </div>
+        <div class="guide-card">
+          <h3>Gérer — cycle de vie</h3>
+          <div class="steps-list">
+            <div class="step">
+              <span class="step-badge step-preparation">Préparation</span>
+              <div class="step-body">
+                Configurez titre, description, thèmes. Invisible aux membres.
+              </div>
+            </div>
+            <div class="step">
+              <span class="step-badge step-inscription">Inscriptions ouvertes</span>
+              <div class="step-body">
+                Visible. Les membres s'inscrivent. Gérez les photos via
+                <strong>Gérer les photos →</strong>.
+              </div>
+            </div>
+            <div class="step">
+              <span class="step-badge step-fermeture">Inscriptions fermées</span>
+              <div class="step-body">
+                Optionnel. Plus d'inscription/désinscription autonome. Finalisez les photos.
+              </div>
+            </div>
+            <div class="step">
+              <span class="step-badge step-vote">Vote</span>
+              <div class="step-body">
+                Thèmes et photos révélés. La page photos est verrouillée. Attendez que les membres
+                votent.
+              </div>
+            </div>
+            <div class="step">
+              <span class="step-badge step-resultats">Résultats</span>
+              <div class="step-body">Classement publié. Fermez le vote pour y passer.</div>
+            </div>
+          </div>
+          <p class="guide-note">
+            Le passage en Vote est <strong>bloqué</strong> tant qu'il reste des photos sans membre
+            ou sans thème assigné.
+          </p>
+        </div>
+        <div class="guide-card">
+          <h3>Gérer les photos</h3>
+          <ul class="guide-steps">
+            <li>
+              Accédez à la page <strong>Gérer les photos →</strong> depuis la section Gestion
+              (phases Inscriptions et Inscriptions fermées uniquement).
+            </li>
+            <li>
+              Uploadez plusieurs fichiers en une fois. Pré-assignez membre et thème avant
+              d'uploader.
+            </li>
+            <li>Modifiez l'assignation membre/thème directement sous chaque vignette.</li>
+            <li>Glissez une photo d'une section à l'autre pour la réassigner à un autre thème.</li>
+            <li>La barre de progression indique combien de membres ont une photo par thème.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Exposition -->
+      <section class="guide-section">
+        <div class="section-header">
+          <h2>🖼 Exposition</h2>
+        </div>
+        <div class="guide-card">
+          <h3>Créer</h3>
+          <ol class="guide-steps">
+            <li>Sélectionnez le type <strong>🖼 Exposition</strong>.</li>
+            <li>Renseignez le titre et la description.</li>
+            <li>Définissez les dates d'idéation (début et fin, obligatoires).</li>
+            <li>
+              Optionnel : date physique de l'exposition et date d'ouverture au public (visibilité
+              non-membres).
+            </li>
+            <li>Définissez le nombre max de photos par membre.</li>
+            <li>Cliquez <strong>Créer</strong> — l'exposition démarre en phase Idéation.</li>
+          </ol>
+        </div>
+        <div class="guide-card">
+          <h3>Gérer — cycle de vie</h3>
+          <div class="steps-list">
+            <div class="step">
+              <span class="step-badge step-ideation">Idéation</span>
+              <div class="step-body">
+                Les membres proposent des thèmes. Bouton <strong>Terminer l'idéation</strong> pour
+                passer à l'étape suivante.
+              </div>
+            </div>
+            <div class="step">
+              <span class="step-badge step-nettoyage">Nettoyage</span>
+              <div class="step-body">
+                Filtrez et éditez les thèmes. Configurez le vote (nombre de votes/membre) et cliquez
+                <strong>Mettre en votation</strong>.
+              </div>
+            </div>
+            <div class="step">
+              <span class="step-badge step-vote">Votation</span>
+              <div class="step-body">
+                Les membres votent. Bouton <strong>Terminer le vote</strong> quand c'est fait.
+                Retour au nettoyage possible si ex-æquo.
+              </div>
+            </div>
+            <div class="step">
+              <span class="step-badge step-ouvert">Soumission</span>
+              <div class="step-body">
+                Choisissez le thème définitif, les membres uploadent leurs photos. Bouton
+                <strong>Clôturer</strong> pour fermer.
+              </div>
+            </div>
+            <div class="step">
+              <span class="step-badge step-resultats">En exposition</span>
+              <div class="step-body">
+                Galerie des photos visible. Accès public selon la date d'ouverture au public.
+              </div>
+            </div>
+          </div>
+          <p class="guide-note">
+            Le titre, la description et les dates sont modifiables à tout moment via
+            <strong>✏ Modifier</strong>.
+          </p>
+        </div>
+      </section>
+    </div>
   }
-
 
   <!-- ══════════════════════════════════════════════════
        ONGLET 4 — POUR LES ADMINS
   ══════════════════════════════════════════════════ -->
   @if (activeTab() === 'admins') {
-  <div class="tab-content">
-
-    <section class="guide-section">
-      <div class="section-header">
-        <h2>Rôle Admin</h2>
-        <p class="section-subtitle">Les admins ont accès à toutes les fonctions du site, y compris la gestion des membres et la configuration.</p>
-      </div>
-      <div class="guide-card">
-        <p>En plus de tout ce que peut faire un contributeur, l'admin accède au panneau d'administration via <strong>Admin</strong> dans la barre de navigation. Il gère les membres, configure le site, édite les pages statiques et peut intervenir sur toutes les activités et publications sans restriction.</p>
-      </div>
-    </section>
-
-    <!-- Membres -->
-    <section class="guide-section">
-      <div class="section-header">
-        <h2>👥 Gestion des membres</h2>
-      </div>
-      <div class="guide-card">
-        <p>Accessible via <strong>Admin → Membres</strong>. Pour chaque membre, vous pouvez :</p>
-        <ul class="guide-steps">
-          <li>Changer le <strong>rôle</strong> : Membre, Contributeur, Admin.</li>
-          <li><strong>Suspendre</strong> un compte (le membre ne peut plus se connecter).</li>
-          <li>Voir les statistiques de stockage utilisé.</li>
-          <li>Inviter un nouveau membre par email (lien d'invitation).</li>
-        </ul>
-      </div>
-    </section>
-
-    <!-- Tableau de bord -->
-    <section class="guide-section">
-      <div class="section-header">
-        <h2>📊 Tableau de bord</h2>
-      </div>
-      <div class="guide-card">
-        <p>Accessible via <strong>Admin → Tableau de bord</strong>. Vue synthétique de l'activité du site :</p>
-        <ul class="guide-steps">
-          <li>Nombre de membres, photos, activités en cours.</li>
-          <li>Répartition du stockage Firebase par catégorie (portfolio, thèmes, oneshots…).</li>
-          <li>Distribution des membres par rôle.</li>
-        </ul>
-        <p class="guide-note">Ces chiffres sont calculés en temps réel — ils reflètent l'état actuel de la base de données.</p>
-      </div>
-    </section>
-
-    <!-- Maintenance -->
-    <section class="guide-section">
-      <div class="section-header">
-        <h2>🔧 Maintenance</h2>
-      </div>
-      <div class="guide-card">
-        <p>Accessible via <strong>Admin → Maintenance</strong>. Outils techniques pour corriger des incohérences dans la base de données :</p>
-        <ul class="guide-steps">
-          <li><strong>Recalculer le stockage</strong> — resynchronise les compteurs de stockage de tous les membres (portfolio, thèmes, oneshots) en cas de valeurs erronées.</li>
-          <li><strong>Recalculer les compteurs</strong> — recalcule le nombre de photos par membre (photoCount) en cas de valeur incorrecte.</li>
-        </ul>
-        <p class="guide-note">
-          <strong>Ces opérations lisent toute la base de données et ne doivent être utilisées qu'en cas de problème avéré.</strong>
-          Elles ne modifient pas les photos ni les données des membres — elles corrigent uniquement les compteurs dérivés.
-          À n'utiliser qu'exceptionnellement.
-        </p>
-      </div>
-    </section>
-
-    <!-- Configuration -->
-    <section class="guide-section">
-      <div class="section-header">
-        <h2>⚙️ Configuration du site</h2>
-      </div>
-      <div class="guide-card">
-        <p>Accessible via <strong>Admin → Configuration</strong>.</p>
-        <div class="admin-fields">
-          <div class="admin-field-row"><span class="field-label">Image de la page d'accueil</span><span class="field-desc">Photo affichée en fond sur la page d'accueil. Peut être une image fixe choisie manuellement, ou automatiquement la photo gagnante du dernier thème du mois.</span></div>
-          <div class="admin-field-row"><span class="field-label">Catégories de photos</span><span class="field-desc">Les catégories disponibles lors de l'upload d'une photo dans un portfolio.</span></div>
+    <div class="tab-content">
+      <section class="guide-section">
+        <div class="section-header">
+          <h2>Rôle Admin</h2>
+          <p class="section-subtitle">
+            Les admins ont accès à toutes les fonctions du site, y compris la gestion des membres et
+            la configuration.
+          </p>
         </div>
-      </div>
-    </section>
+        <div class="guide-card">
+          <p>
+            En plus de tout ce que peut faire un contributeur, l'admin accède au panneau
+            d'administration via <strong>Admin</strong> dans la barre de navigation. Il gère les
+            membres, configure le site, édite les pages statiques et peut intervenir sur toutes les
+            activités et publications sans restriction.
+          </p>
+        </div>
+      </section>
 
-    <!-- Pages du site -->
-    <section class="guide-section">
-      <div class="section-header">
-        <h2>📄 Pages du site</h2>
-      </div>
-      <div class="guide-card">
-        <p>Accessible via <strong>Admin → Pages du site</strong>. Éditez le contenu des pages statiques :</p>
-        <ul class="guide-steps">
-          <li><strong>Histoire</strong> — page "Notre histoire" dans la section Le Club.</li>
-          <li><strong>Bureau</strong> — présentation des membres du bureau.</li>
-          <li><strong>Adhésion</strong> — informations et tarifs d'adhésion.</li>
-          <li><strong>Contact</strong> — texte de la page de contact.</li>
-          <li><strong>Charte</strong> — charte d'utilisation du site. Incrémenter la version oblige tous les membres à la relire et accepter.</li>
-          <li><strong>CGU</strong> — conditions générales d'utilisation. Même logique que la charte.</li>
-          <li><strong>Mentions légales / Confidentialité</strong> — pages légales obligatoires.</li>
-        </ul>
-        <p class="guide-note">Le contenu est en Markdown. Un aperçu en temps réel est disponible dans l'éditeur.</p>
-      </div>
-    </section>
+      <!-- Membres -->
+      <section class="guide-section">
+        <div class="section-header">
+          <h2>👥 Gestion des membres</h2>
+        </div>
+        <div class="guide-card">
+          <p>Accessible via <strong>Admin → Membres</strong>. Pour chaque membre, vous pouvez :</p>
+          <ul class="guide-steps">
+            <li>Changer le <strong>rôle</strong> : Membre, Contributeur, Admin.</li>
+            <li><strong>Suspendre</strong> un compte (le membre ne peut plus se connecter).</li>
+            <li>Voir les statistiques de stockage utilisé.</li>
+            <li>Inviter un nouveau membre par email (lien d'invitation).</li>
+          </ul>
+        </div>
+      </section>
 
-    <!-- Dossiers documents -->
-    <section class="guide-section">
-      <div class="section-header">
-        <h2>📁 Dossiers documents</h2>
-      </div>
-      <div class="guide-card">
-        <p>Accessible via <strong>Admin → Dossiers documents</strong>. Créez, renommez et réordonnez les dossiers de l'espace Documents. La suppression d'un dossier ne supprime pas les fichiers qu'il contenait.</p>
-      </div>
-    </section>
+      <!-- Tableau de bord -->
+      <section class="guide-section">
+        <div class="section-header">
+          <h2>📊 Tableau de bord</h2>
+        </div>
+        <div class="guide-card">
+          <p>
+            Accessible via <strong>Admin → Tableau de bord</strong>. Vue synthétique de l'activité
+            du site :
+          </p>
+          <ul class="guide-steps">
+            <li>Nombre de membres, photos, activités en cours.</li>
+            <li>Répartition du stockage Firebase par catégorie (portfolio, thèmes, oneshots…).</li>
+            <li>Distribution des membres par rôle.</li>
+          </ul>
+          <p class="guide-note">
+            Ces chiffres sont calculés en temps réel — ils reflètent l'état actuel de la base de
+            données.
+          </p>
+        </div>
+      </section>
 
-  </div>
+      <!-- Maintenance -->
+      <section class="guide-section">
+        <div class="section-header">
+          <h2>🔧 Maintenance</h2>
+        </div>
+        <div class="guide-card">
+          <p>
+            Accessible via <strong>Admin → Maintenance</strong>. Outils techniques pour corriger des
+            incohérences dans la base de données :
+          </p>
+          <ul class="guide-steps">
+            <li>
+              <strong>Recalculer le stockage</strong> — resynchronise les compteurs de stockage de
+              tous les membres (portfolio, thèmes, oneshots) en cas de valeurs erronées.
+            </li>
+            <li>
+              <strong>Recalculer les compteurs</strong> — recalcule le nombre de photos par membre
+              (photoCount) en cas de valeur incorrecte.
+            </li>
+          </ul>
+          <p class="guide-note">
+            <strong
+              >Ces opérations lisent toute la base de données et ne doivent être utilisées qu'en cas
+              de problème avéré.</strong
+            >
+            Elles ne modifient pas les photos ni les données des membres — elles corrigent
+            uniquement les compteurs dérivés. À n'utiliser qu'exceptionnellement.
+          </p>
+        </div>
+      </section>
+
+      <!-- Configuration -->
+      <section class="guide-section">
+        <div class="section-header">
+          <h2>⚙️ Configuration du site</h2>
+        </div>
+        <div class="guide-card">
+          <p>Accessible via <strong>Admin → Configuration</strong>.</p>
+          <div class="admin-fields">
+            <div class="admin-field-row">
+              <span class="field-label">Image de la page d'accueil</span
+              ><span class="field-desc"
+                >Photo affichée en fond sur la page d'accueil. Peut être une image fixe choisie
+                manuellement, ou automatiquement la photo gagnante du dernier thème du mois.</span
+              >
+            </div>
+            <div class="admin-field-row">
+              <span class="field-label">Catégories de photos</span
+              ><span class="field-desc"
+                >Les catégories disponibles lors de l'upload d'une photo dans un portfolio.</span
+              >
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Pages du site -->
+      <section class="guide-section">
+        <div class="section-header">
+          <h2>📄 Pages du site</h2>
+        </div>
+        <div class="guide-card">
+          <p>
+            Accessible via <strong>Admin → Pages du site</strong>. Éditez le contenu des pages
+            statiques :
+          </p>
+          <ul class="guide-steps">
+            <li><strong>Histoire</strong> — page "Notre histoire" dans la section Le Club.</li>
+            <li><strong>Bureau</strong> — présentation des membres du bureau.</li>
+            <li><strong>Adhésion</strong> — informations et tarifs d'adhésion.</li>
+            <li><strong>Contact</strong> — texte de la page de contact.</li>
+            <li>
+              <strong>Charte</strong> — charte d'utilisation du site. Incrémenter la version oblige
+              tous les membres à la relire et accepter.
+            </li>
+            <li>
+              <strong>CGU</strong> — conditions générales d'utilisation. Même logique que la charte.
+            </li>
+            <li>
+              <strong>Mentions légales / Confidentialité</strong> — pages légales obligatoires.
+            </li>
+          </ul>
+          <p class="guide-note">
+            Le contenu est en Markdown. Un aperçu en temps réel est disponible dans l'éditeur.
+          </p>
+        </div>
+      </section>
+
+      <!-- Dossiers documents -->
+      <section class="guide-section">
+        <div class="section-header">
+          <h2>📁 Dossiers documents</h2>
+        </div>
+        <div class="guide-card">
+          <p>
+            Accessible via <strong>Admin → Dossiers documents</strong>. Créez, renommez et
+            réordonnez les dossiers de l'espace Documents. La suppression d'un dossier ne supprime
+            pas les fichiers qu'il contenait.
+          </p>
+        </div>
+      </section>
+    </div>
   }
-
 </div>

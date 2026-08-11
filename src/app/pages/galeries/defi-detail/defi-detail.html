@@ -7,7 +7,6 @@
   @let s = statut();
 
   <div class="defi-page">
-
     <app-event-hero
       [coverUrl]="d.photoCouvertureUrl"
       [backLink]="['/galeries/sorties']"
@@ -24,10 +23,8 @@
     />
 
     <div class="defi-body">
-
       <!-- Panneau gauche : infos + actions -->
       <aside class="defi-aside">
-
         <!-- Dates clés -->
         <div class="info-card">
           <h3 class="info-card-title">Calendrier</h3>
@@ -72,7 +69,9 @@
           </div>
           <div class="stat-row">
             <span>{{ d.inscriptionObligatoire ? 'Inscrits' : 'Participants' }}</span>
-            <strong>{{ d.inscriptionObligatoire ? d.nbInscrits : uniqueSubmitters().length }}</strong>
+            <strong>{{
+              d.inscriptionObligatoire ? d.nbInscrits : uniqueSubmitters().length
+            }}</strong>
           </div>
           @if (s !== 'a_venir') {
             <div class="stat-row">
@@ -95,12 +94,10 @@
             <strong>{{ d.maxVotes }}</strong>
           </div>
         </div>
-
       </aside>
 
       <!-- Contenu principal -->
       <main class="defi-main">
-
         <!-- Formulaire d'édition -->
         @if (editMode()) {
           <div class="edit-panel">
@@ -114,37 +111,61 @@
               </div>
             </div>
 
-            <label class="edit-label">Titre
+            <label class="edit-label"
+              >Titre
               <input class="edit-input" [(ngModel)]="editTitre" />
             </label>
-            <label class="edit-label">Thème / sujet
+            <label class="edit-label"
+              >Thème / sujet
               <input class="edit-input" [(ngModel)]="editTheme" />
             </label>
-            <label class="edit-label">Description
+            <label class="edit-label"
+              >Description
               <textarea class="edit-textarea" [(ngModel)]="editDesc" rows="3"></textarea>
             </label>
             <div class="edit-dates">
-              <app-date-picker label="Début de soumission"
+              <app-date-picker
+                label="Début de soumission"
                 [(ngModel)]="editDebut"
-                [disabled]="s !== 'a_venir'"></app-date-picker>
-              <app-date-picker label="Fin de soumission"
+                [disabled]="s !== 'a_venir'"
+              ></app-date-picker>
+              <app-date-picker
+                label="Fin de soumission"
                 [(ngModel)]="editFin"
-                [disabled]="s === 'vote' || s === 'resultats'"></app-date-picker>
-              <app-date-picker label="Clôture des votes"
+                [disabled]="s === 'vote' || s === 'resultats'"
+              ></app-date-picker>
+              <app-date-picker
+                label="Clôture des votes"
                 [(ngModel)]="editVotes"
                 [disabled]="s === 'resultats'"
-                [min]="s === 'vote' ? d.dateCloturVotes : today"></app-date-picker>
+                [min]="s === 'vote' ? d.dateCloturVotes : today"
+              ></app-date-picker>
             </div>
             <div class="edit-params">
-              <label class="edit-label">Max photos / participant
-                <input type="number" class="edit-input edit-input-sm" [(ngModel)]="editMaxPhotos" min="1" max="10" />
+              <label class="edit-label"
+                >Max photos / participant
+                <input
+                  type="number"
+                  class="edit-input edit-input-sm"
+                  [(ngModel)]="editMaxPhotos"
+                  min="1"
+                  max="10"
+                />
               </label>
-              <label class="edit-label">Max votes / membre
-                <input type="number" class="edit-input edit-input-sm" [(ngModel)]="editMaxVotes" min="1" max="20" />
+              <label class="edit-label"
+                >Max votes / membre
+                <input
+                  type="number"
+                  class="edit-input edit-input-sm"
+                  [(ngModel)]="editMaxVotes"
+                  min="1"
+                  max="20"
+                />
               </label>
             </div>
 
-            <label class="edit-label">Visibilité
+            <label class="edit-label"
+              >Visibilité
               <select class="edit-select" [(ngModel)]="editVisibilite">
                 <option value="public">Public (tout le monde)</option>
                 <option value="membre">Membres seulement</option>
@@ -152,29 +173,49 @@
             </label>
 
             <label class="edit-toggle">
-              <input type="checkbox" [(ngModel)]="editInscriptionObligatoire" [disabled]="s !== 'a_venir'" />
+              <input
+                type="checkbox"
+                [(ngModel)]="editInscriptionObligatoire"
+                [disabled]="s !== 'a_venir'"
+              />
               <span class="edit-toggle-label">Inscription obligatoire avant de soumettre</span>
             </label>
             @if (s !== 'a_venir') {
-              <p class="lock-note-sm">Le mode de participation ne peut plus être modifié après l'ouverture.</p>
+              <p class="lock-note-sm">
+                Le mode de participation ne peut plus être modifié après l'ouverture.
+              </p>
             }
 
             <!-- Couverture -->
             <div class="cover-field">
-              <label class="cover-label">Photo de couverture <span class="cover-optional">optionnel</span></label>
+              <label class="cover-label"
+                >Photo de couverture <span class="cover-optional">optionnel</span></label
+              >
               <p class="cover-hint">Format recommandé : 16/9 — redimensionné à 1280×720 px</p>
-              <div class="cover-drop"
-                   [class.drag-over]="coverDragOver()"
-                   (dragover)="$event.preventDefault(); coverDragOver.set(true)"
-                   (dragleave)="coverDragOver.set(false)"
-                   (drop)="onCoverDrop($event)">
+              <div
+                class="cover-drop"
+                [class.drag-over]="coverDragOver()"
+                (dragover)="$event.preventDefault(); coverDragOver.set(true)"
+                (dragleave)="coverDragOver.set(false)"
+                (drop)="onCoverDrop($event)"
+              >
                 @if (d.photoCouvertureUrl) {
                   <img [src]="d.photoCouvertureUrl" class="cover-preview" alt="Image actuelle" />
                   <div class="cover-overlay">
-                    <button type="button" class="cover-change-btn" (click)="coverInputEl.click()" [disabled]="coverUploading()">
+                    <button
+                      type="button"
+                      class="cover-change-btn"
+                      (click)="coverInputEl.click()"
+                      [disabled]="coverUploading()"
+                    >
                       {{ coverUploading() ? 'Upload…' : '🔄 Changer' }}
                     </button>
-                    <button type="button" class="cover-remove-btn" (click)="removeCouverture()" [disabled]="coverUploading()">
+                    <button
+                      type="button"
+                      class="cover-remove-btn"
+                      (click)="removeCouverture()"
+                      [disabled]="coverUploading()"
+                    >
                       × Retirer
                     </button>
                   </div>
@@ -185,14 +226,21 @@
                       <span>Upload en cours…</span>
                     } @else {
                       <span>Glisser une image ici ou</span>
-                      <button type="button" class="cover-browse-btn" (click)="coverInputEl.click()">parcourir</button>
+                      <button type="button" class="cover-browse-btn" (click)="coverInputEl.click()">
+                        parcourir
+                      </button>
                     }
                   </div>
                 }
-                <input #coverInputEl type="file" accept="image/*" class="hidden-input" (change)="onCoverSelected($event)" />
+                <input
+                  #coverInputEl
+                  type="file"
+                  accept="image/*"
+                  class="hidden-input"
+                  (change)="onCoverSelected($event)"
+                />
               </div>
             </div>
-
           </div>
         }
 
@@ -216,15 +264,19 @@
             <div class="inscription-header">
               <h2>
                 Participants
-                @if (profile()) { <span class="count">{{ inscriptions().length }}</span> }
+                @if (profile()) {
+                  <span class="count">{{ inscriptions().length }}</span>
+                }
               </h2>
               @if (profile()) {
                 @if (!isInscrit() && s === 'soumission') {
                   <button class="btn-inscrire" (click)="inscrire()" [disabled]="inscribing()">
-                    {{ inscribing() ? 'Inscription…' : 'S\'inscrire au défi' }}
+                    {{ inscribing() ? 'Inscription…' : "S'inscrire au défi" }}
                   </button>
                 } @else if (isInscrit() && s === 'soumission') {
-                  <button class="btn-desinscrire" (click)="desinscrire()">✓ Inscrit — Se désinscrire</button>
+                  <button class="btn-desinscrire" (click)="desinscrire()">
+                    ✓ Inscrit — Se désinscrire
+                  </button>
                 } @else if (isInscrit()) {
                   <span class="inscrit-badge">✓ Inscrit</span>
                 }
@@ -248,7 +300,9 @@
         @if (!editMode() && !d.inscriptionObligatoire && s !== 'a_venir' && profile()) {
           <section class="inscription-section">
             <div class="inscription-header">
-              <h2>Participants <span class="count">{{ uniqueSubmitters().length }}</span></h2>
+              <h2>
+                Participants <span class="count">{{ uniqueSubmitters().length }}</span>
+              </h2>
             </div>
             @if (uniqueSubmitters().length > 0) {
               <div class="participants-row">
@@ -271,7 +325,9 @@
             <h2>Les soumissions n'ont pas encore commencé</h2>
             <p>Les soumissions ouvrent le {{ formatDate(d.dateDebutSoumission) }}.</p>
             @if (!d.inscriptionObligatoire) {
-              <p class="hint participation-libre">Participation libre — aucune inscription requise pour soumettre.</p>
+              <p class="hint participation-libre">
+                Participation libre — aucune inscription requise pour soumettre.
+              </p>
             } @else if (!profile()) {
               <p class="hint">Connectez-vous pour être notifié à l'ouverture des inscriptions.</p>
             }
@@ -282,7 +338,10 @@
         @if (s === 'soumission' && !editMode()) {
           <div class="phase-header">
             <h2>Phase de soumission</h2>
-            <p class="phase-subtitle">Les soumissions sont ouvertes jusqu'au {{ formatDate(d.dateFinSoumission) }}. — {{ photos().length }} photo(s) soumise(s) par les inscrits.</p>
+            <p class="phase-subtitle">
+              Les soumissions sont ouvertes jusqu'au {{ formatDate(d.dateFinSoumission) }}. —
+              {{ photos().length }} photo(s) soumise(s) par les inscrits.
+            </p>
           </div>
 
           @if (!profile()) {
@@ -296,17 +355,21 @@
           } @else {
             <!-- Upload zone -->
             @if (canUpload()) {
-              <div class="upload-zone"
-                   [class.drag-over]="photoDragOver()"
-                   (dragover)="$event.preventDefault(); photoDragOver.set(true)"
-                   (dragleave)="photoDragOver.set(false)"
-                   (drop)="onPhotoDrop($event)">
+              <div
+                class="upload-zone"
+                [class.drag-over]="photoDragOver()"
+                (dragover)="$event.preventDefault(); photoDragOver.set(true)"
+                (dragleave)="photoDragOver.set(false)"
+                (drop)="onPhotoDrop($event)"
+              >
                 @if (uploadProgress() !== null) {
                   <div class="upload-progress">
                     <div class="upload-bar" [style.width.%]="uploadProgress()!"></div>
                   </div>
                   <p>
-                    @if (uploadBatchSize() > 1) { Photo {{ uploadCurrent() }}/{{ uploadBatchSize() }} — }
+                    @if (uploadBatchSize() > 1) {
+                      Photo {{ uploadCurrent() }}/{{ uploadBatchSize() }} —
+                    }
                     {{ uploadProgress() }}%
                   </p>
                 } @else {
@@ -314,7 +377,13 @@
                   <p>Glissez vos photos ici ou</p>
                   <label class="btn-upload-photo">
                     Choisir {{ d.maxPhotos > 1 ? 'des photos' : 'une photo' }}
-                    <input type="file" accept="image/*" multiple (change)="onPhotoSelected($event)" style="display:none" />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      (change)="onPhotoSelected($event)"
+                      style="display: none"
+                    />
                   </label>
                   <p class="upload-hint">
                     {{ mesPhotos().length }} / {{ d.maxPhotos }} photo(s) soumise(s)
@@ -325,25 +394,31 @@
                 <p class="upload-error">{{ uploadError() }}</p>
               }
             } @else if (isInscrit() && mesPhotos().length >= d.maxPhotos) {
-              <div class="quota-atteint">
-                Quota atteint ({{ d.maxPhotos }} photo(s) maximum).
-              </div>
+              <div class="quota-atteint">Quota atteint ({{ d.maxPhotos }} photo(s) maximum).</div>
             }
 
             <!-- Photos soumises -->
             @if (photosVisibles().length > 0) {
-              <h3 class="photos-section-title">
-                Mes soumissions
-              </h3>
+              <h3 class="photos-section-title">Mes soumissions</h3>
               <div class="photos-grid">
                 @for (photo of photosVisibles(); track photo.id) {
                   <div class="photo-card">
-                    <img [src]="photo.thumbnailUrl ?? photo.url" [alt]="photo.membreNom" class="photo-img" />
+                    <img
+                      [src]="photo.thumbnailUrl ?? photo.url"
+                      [alt]="photo.membreNom"
+                      class="photo-img"
+                    />
                     @if (canManage()) {
                       <p class="photo-author">{{ photo.membreNom }}</p>
                     }
                     @if (photo.membreUid === profile()?.uid || canManage()) {
-                      <button class="btn-delete-photo" (click)="deletePhoto(photo)" title="Supprimer">✕</button>
+                      <button
+                        class="btn-delete-photo"
+                        (click)="deletePhoto(photo)"
+                        title="Supprimer"
+                      >
+                        ✕
+                      </button>
                     }
                   </div>
                 }
@@ -357,7 +432,8 @@
           <div class="phase-header">
             <h2>Phase de vote</h2>
             <p class="phase-subtitle">
-              Les soumissions sont closes. Votez pour vos photos préférées jusqu'au {{ formatDate(d.dateCloturVotes) }}.
+              Les soumissions sont closes. Votez pour vos photos préférées jusqu'au
+              {{ formatDate(d.dateCloturVotes) }}.
             </p>
           </div>
 
@@ -373,12 +449,26 @@
                 @for (photo of photosVisibles(); track photo.id) {
                   @let voted = mesVotesIds().includes(photo.id);
                   @let isOwn = photo.membreUid === profile()?.uid;
-                  <div class="vote-card" [class.voted]="voted" [class.own-card]="isOwn"
-                       (click)="openLightbox(photo)">
-                    <img [src]="photo.thumbnailUrl ?? photo.url" alt="photo" class="vote-thumb" loading="lazy" />
-                    <div class="vote-footer"
-                       [class.footer-votable]="!isOwn && (voted || votesRestants() > 0)"
-                       (click)="$event.stopPropagation(); !isOwn && (voted || votesRestants() > 0) && toggleVote(photo.id)">
+                  <div
+                    class="vote-card"
+                    [class.voted]="voted"
+                    [class.own-card]="isOwn"
+                    (click)="openLightbox(photo)"
+                  >
+                    <img
+                      [src]="photo.thumbnailUrl ?? photo.url"
+                      alt="photo"
+                      class="vote-thumb"
+                      loading="lazy"
+                    />
+                    <div
+                      class="vote-footer"
+                      [class.footer-votable]="!isOwn && (voted || votesRestants() > 0)"
+                      (click)="
+                        $event.stopPropagation();
+                        !isOwn && (voted || votesRestants() > 0) && toggleVote(photo.id)
+                      "
+                    >
                       @if (isOwn) {
                         <span class="footer-own">Ma photo</span>
                       } @else if (voted) {
@@ -393,7 +483,8 @@
                 }
               </div>
             }
-          } <!-- fin @if (profile()) -->
+          }
+          <!-- fin @if (profile()) -->
         }
 
         <!-- Phase : Résultats -->
@@ -406,13 +497,9 @@
           @if (photosRanked().length === 0) {
             <p class="empty-photos">Aucune photo soumise.</p>
           } @else {
-            <app-vote-ranking
-              [items]="rankingItems()"
-              (itemClicked)="onRankingClick($event)"
-            />
+            <app-vote-ranking [items]="rankingItems()" (itemClicked)="onRankingClick($event)" />
           }
         }
-
       </main>
     </div>
   </div>

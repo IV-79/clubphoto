@@ -1,5 +1,4 @@
 <a [routerLink]="routerLink()" [class]="cardClass()">
-
   <div class="card-cover">
     @if (coverUrl()) {
       <img [src]="coverUrl()" [alt]="item().data.titre" class="cover-img" />
@@ -33,7 +32,12 @@
           <span class="meta-date">📅 {{ dateStr() }}</span>
         }
         @if (loggedIn() && lieu()) {
-          <a class="meta-lieu" [href]="mapsUrl(lieu()!)" target="_blank" (click)="$event.stopPropagation()">
+          <a
+            class="meta-lieu"
+            [href]="mapsUrl(lieu()!)"
+            target="_blank"
+            (click)="$event.stopPropagation()"
+          >
             <mat-icon class="lieu-icon">location_on</mat-icon> {{ lieu() }}
           </a>
         }
@@ -45,7 +49,8 @@
             @let s = sortie()!;
             @if (!isPast() && s.inscriptionObligatoire) {
               <span class="badge badge-inscription">
-                {{ s.nbInscrits ?? 0 }}{{ s.maxParticipants ? ' / ' + s.maxParticipants : '' }} inscrit(s)
+                {{ s.nbInscrits ?? 0
+                }}{{ s.maxParticipants ? ' / ' + s.maxParticipants : '' }} inscrit(s)
               </span>
             }
           }
@@ -62,11 +67,9 @@
               <span class="badge badge-defi">{{ d.nbParticipants ?? 0 }} participant(s)</span>
             }
           }
-          @case ('exposition') {
-          }
+          @case ('exposition') {}
         }
       </div>
     </div>
   </div>
-
 </a>

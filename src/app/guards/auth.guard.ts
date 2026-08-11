@@ -12,19 +12,19 @@ export const authGuard: CanActivateFn = (route, state) => {
 
   return from(auth.authStateReady()).pipe(
     switchMap(() => authService.user$.pipe(take(1))),
-    switchMap(user => {
+    switchMap((user) => {
       if (!user) {
         loginModal.open(state.url);
         return of(false);
       }
       return from(authService.getUserRole()).pipe(
-        map(role => {
+        map((role) => {
           if (role === 'admin') return true;
           router.navigate(['/']);
           return false;
-        })
+        }),
       );
-    })
+    }),
   );
 };
 
@@ -35,19 +35,19 @@ export const editorGuard: CanActivateFn = (route, state) => {
 
   return from(auth.authStateReady()).pipe(
     switchMap(() => authService.user$.pipe(take(1))),
-    switchMap(user => {
+    switchMap((user) => {
       if (!user) {
         loginModal.open(state.url);
         return of(false);
       }
       return from(authService.getUserRole()).pipe(
-        map(role => {
+        map((role) => {
           if (role === 'admin' || role === 'contributeur') return true;
           router.navigate(['/']);
           return false;
-        })
+        }),
       );
-    })
+    }),
   );
 };
 
@@ -57,12 +57,12 @@ export const memberGuard: CanActivateFn = (route, state) => {
 
   return from(auth.authStateReady()).pipe(
     switchMap(() => authService.user$.pipe(take(1))),
-    map(user => {
+    map((user) => {
       if (!user) {
         loginModal.open(state.url);
         return false;
       }
       return true;
-    })
+    }),
   );
 };

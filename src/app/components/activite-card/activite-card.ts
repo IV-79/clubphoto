@@ -181,8 +181,21 @@ export class ActiviteCard {
     this.item().kind === 'exposition' ? (this.item().data as Exposition) : null,
   );
 
-  private static readonly JOURS = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
-  private static readonly MOIS  = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+  private static readonly JOURS = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+  private static readonly MOIS = [
+    'Jan',
+    'Fév',
+    'Mar',
+    'Avr',
+    'Mai',
+    'Jun',
+    'Jul',
+    'Aoû',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Déc',
+  ];
 
   protected formatDate(date: string): string {
     const d = new Date(date + 'T12:00:00');

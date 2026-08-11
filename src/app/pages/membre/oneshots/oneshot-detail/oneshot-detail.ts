@@ -1,4 +1,11 @@
-import { Component, inject, signal, computed, ChangeDetectionStrategy, ElementRef } from '@angular/core';
+import {
+  Component,
+  inject,
+  signal,
+  computed,
+  ChangeDetectionStrategy,
+  ElementRef,
+} from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
@@ -104,9 +111,10 @@ export class OneShotDetail {
   isLoggedIn = computed(() => !!this.profile());
   authReady = computed(() => this.profile() !== undefined);
 
-  typeBadgeHero = computed(
-    (): HeroBadge => ({ text: '🏆 OneShot', css: 'event-type-badge badge-oneshot-type' }),
-  );
+  typeBadgeHero = computed((): HeroBadge => ({
+    text: '🏆 OneShot',
+    css: 'event-type-badge badge-oneshot-type',
+  }));
   statusHero = computed((): HeroBadge => {
     const e = this.event();
     if (!e) return { text: '', css: 'hero-status' };
@@ -322,9 +330,8 @@ export class OneShotDetail {
     return counts;
   });
 
-  myVoteByTheme = computed(
-    (): Record<string, string> =>
-      Object.fromEntries(this.myVotes().map((v) => [v.themeId, v.photoId])),
+  myVoteByTheme = computed((): Record<string, string> =>
+    Object.fromEntries(this.myVotes().map((v) => [v.themeId, v.photoId])),
   );
 
   themesVoted = computed(() => new Set(this.myVotes().map((v) => v.themeId)));

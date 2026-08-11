@@ -1,23 +1,23 @@
 <div class="charte-backdrop">
   <div class="charte-dialog">
-
     <div class="charte-header">
       <h2 class="charte-title">Avant de continuer</h2>
-      <p class="charte-subtitle">Veuillez lire et accepter les documents suivants pour accéder au site.</p>
+      <p class="charte-subtitle">
+        Veuillez lire et accepter les documents suivants pour accéder au site.
+      </p>
     </div>
 
     <div class="charte-body">
-
       <!-- Section CGU + Confidentialité -->
       @if (mustAcceptCgu()) {
         <div class="accept-section">
           <h3 class="section-title">Documents légaux</h3>
-          <p class="section-text">
-            Veuillez lire les documents suivants avant d'accepter :
-          </p>
+          <p class="section-text">Veuillez lire les documents suivants avant d'accepter :</p>
           <ul class="doc-links">
             <li><a routerLink="/cgv" target="_blank">Conditions Générales d'Utilisation</a></li>
-            <li><a routerLink="/confidentialite" target="_blank">Politique de confidentialité</a></li>
+            <li>
+              <a routerLink="/confidentialite" target="_blank">Politique de confidentialité</a>
+            </li>
           </ul>
           <label class="accept-checkbox">
             <input type="checkbox" [(ngModel)]="cguChecked" />
@@ -42,7 +42,6 @@
           </label>
         </div>
       }
-
     </div>
 
     <div class="charte-footer">
@@ -51,6 +50,5 @@
         {{ accepting ? 'Enregistrement…' : 'Continuer' }}
       </button>
     </div>
-
   </div>
 </div>

@@ -1,5 +1,4 @@
 <div class="reunions-page">
-
   <!-- En-tête -->
   <div class="page-header-row">
     <div>
@@ -21,7 +20,12 @@
             <mat-label>Titre</mat-label>
             <input matInput formControlName="titre" />
           </mat-form-field>
-          <app-date-picker label="Date" [required]="true" formControlName="date" class="field-date"></app-date-picker>
+          <app-date-picker
+            label="Date"
+            [required]="true"
+            formControlName="date"
+            class="field-date"
+          ></app-date-picker>
         </div>
         <mat-form-field appearance="outline" class="field-full">
           <mat-label>Lieu</mat-label>
@@ -43,7 +47,11 @@
 
   <!-- Toggle passées -->
   <div class="filtres">
-    <button class="filtre-btn filtre-toggle" [class.actif]="showPasses()" (click)="showPasses.set(!showPasses())">
+    <button
+      class="filtre-btn filtre-toggle"
+      [class.actif]="showPasses()"
+      (click)="showPasses.set(!showPasses())"
+    >
       {{ showPasses() ? '✓ ' : '' }}Afficher les passées
     </button>
   </div>
@@ -51,15 +59,17 @@
   <!-- À venir -->
   @if (aVenirCount() > 0) {
     <section class="section">
-      <h2 class="section-title">À venir <span class="count">{{ aVenirCount() }}</span></h2>
+      <h2 class="section-title">
+        À venir <span class="count">{{ aVenirCount() }}</span>
+      </h2>
       <div class="events-list">
         @for (r of aVenir(); track r.id; let i = $index) {
-          @if (i === 0 || monthOf(r.date) !== monthOf(aVenir()[i-1].date)) {
+          @if (i === 0 || monthOf(r.date) !== monthOf(aVenir()[i - 1].date)) {
             <div class="month-sep">{{ formatMonth(r.date) }}</div>
           }
           <div class="event-card card-reunion" (click)="toggleExpand(r.id)">
             <div class="card-date-col">
-              <span class="card-day">{{ r.date | slice:8:10 }}</span>
+              <span class="card-day">{{ r.date | slice: 8 : 10 }}</span>
             </div>
             <div class="card-body">
               <div class="card-summary">
@@ -73,11 +83,20 @@
                     <div [class.form-flash]="flashEdit()">
                       <form [formGroup]="editForm" (ngSubmit)="sauvegarder(r.id)" class="r-form">
                         <div class="form-row">
-                          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-grow">
+                          <mat-form-field
+                            appearance="outline"
+                            subscriptSizing="dynamic"
+                            class="field-grow"
+                          >
                             <mat-label>Titre</mat-label>
                             <input matInput formControlName="titre" />
                           </mat-form-field>
-                          <app-date-picker label="Date" [required]="true" formControlName="date" class="field-date"></app-date-picker>
+                          <app-date-picker
+                            label="Date"
+                            [required]="true"
+                            formControlName="date"
+                            class="field-date"
+                          ></app-date-picker>
                         </div>
                         <mat-form-field appearance="outline" class="field-full">
                           <mat-label>Lieu</mat-label>
@@ -88,8 +107,14 @@
                           <textarea matInput formControlName="description" rows="2"></textarea>
                         </mat-form-field>
                         <div class="form-actions">
-                          <button type="button" class="btn-delete-sm" (click)="supprimer(r)">Supprimer</button>
-                          <button type="submit" class="btn-save" [disabled]="editForm.invalid || saving()">
+                          <button type="button" class="btn-delete-sm" (click)="supprimer(r)">
+                            Supprimer
+                          </button>
+                          <button
+                            type="submit"
+                            class="btn-save"
+                            [disabled]="editForm.invalid || saving()"
+                          >
                             {{ saving() ? 'Sauvegarde…' : 'Sauvegarder' }}
                           </button>
                         </div>
@@ -97,11 +122,19 @@
                     </div>
                   } @else {
                     @if (r.lieu) {
-                      <a class="card-lieu" [href]="mapsUrl(r.lieu)" target="_blank" rel="noopener" (click)="$event.stopPropagation()">
+                      <a
+                        class="card-lieu"
+                        [href]="mapsUrl(r.lieu)"
+                        target="_blank"
+                        rel="noopener"
+                        (click)="$event.stopPropagation()"
+                      >
                         <mat-icon class="lieu-icon">location_on</mat-icon> {{ r.lieu }}
                       </a>
                     }
-                    @if (r.description) { <p class="card-desc">{{ r.description }}</p> }
+                    @if (r.description) {
+                      <p class="card-desc">{{ r.description }}</p>
+                    }
                     <span class="card-date-full">{{ formatDateFull(r.date) }}</span>
 
                     <!-- Documents -->
@@ -112,23 +145,45 @@
                           <span class="doc-upload-progress">Envoi {{ uploadProgress() }}%…</span>
                         } @else {
                           <label class="btn-doc-add" [for]="'upload-' + r.id">+ Ajouter</label>
-                          <input [id]="'upload-' + r.id" type="file" class="file-input-hidden" (change)="onFileSelected($event, r)" />
-                          <button class="btn-doc-lier" (click)="openPicker(r.id)">Lier un existant</button>
+                          <input
+                            [id]="'upload-' + r.id"
+                            type="file"
+                            class="file-input-hidden"
+                            (change)="onFileSelected($event, r)"
+                          />
+                          <button class="btn-doc-lier" (click)="openPicker(r.id)">
+                            Lier un existant
+                          </button>
                         }
                       </div>
                       @for (d of reunionDocs(r.id); track d.id) {
                         <div class="doc-row">
-                          <mat-icon class="doc-icon" [style.color]="extMeta(d.extension).color">{{ extMeta(d.extension).icon }}</mat-icon>
+                          <mat-icon class="doc-icon" [style.color]="extMeta(d.extension).color">{{
+                            extMeta(d.extension).icon
+                          }}</mat-icon>
                           <span class="doc-nom">{{ d.nom }}.{{ d.extension }}</span>
                           @if (d.type === 'reunion') {
                             <span class="doc-badge-propre">Ajouté</span>
                           } @else {
                             <span class="doc-badge-lie">Lié</span>
                           }
-                          <a [href]="d.url" target="_blank" rel="noopener" class="btn-doc-dl" (click)="$event.stopPropagation()" title="Télécharger">
+                          <a
+                            [href]="d.url"
+                            target="_blank"
+                            rel="noopener"
+                            class="btn-doc-dl"
+                            (click)="$event.stopPropagation()"
+                            title="Télécharger"
+                          >
                             <mat-icon>download</mat-icon>
                           </a>
-                          <button class="btn-doc-retirer" (click)="retirerDoc(r.id, d)" title="{{ d.type === 'reunion' ? 'Supprimer' : 'Délier' }}">×</button>
+                          <button
+                            class="btn-doc-retirer"
+                            (click)="retirerDoc(r.id, d)"
+                            title="{{ d.type === 'reunion' ? 'Supprimer' : 'Délier' }}"
+                          >
+                            ×
+                          </button>
                         </div>
                       }
                       @if (reunionDocs(r.id).length === 0 && uploadingFor() !== r.id) {
@@ -136,19 +191,34 @@
                       }
                       @if (pickerOpenFor() === r.id) {
                         <div class="doc-picker" (click)="$event.stopPropagation()">
-                          <input class="doc-picker-search" type="text" placeholder="Rechercher…"
-                                 [value]="pickerSearch()"
-                                 (input)="pickerSearch.set($any($event.target).value)"
-                                 (click)="$event.stopPropagation()" />
+                          <input
+                            class="doc-picker-search"
+                            type="text"
+                            placeholder="Rechercher…"
+                            [value]="pickerSearch()"
+                            (input)="pickerSearch.set($any($event.target).value)"
+                            (click)="$event.stopPropagation()"
+                          />
                           @if (pickerLoading()) {
                             <p class="doc-picker-msg">Chargement…</p>
                           } @else if (filteredPickerDocs().length === 0) {
-                            <p class="doc-picker-msg">{{ pickerSearch() ? 'Aucun résultat.' : 'Aucun document disponible.' }}</p>
+                            <p class="doc-picker-msg">
+                              {{
+                                pickerSearch() ? 'Aucun résultat.' : 'Aucun document disponible.'
+                              }}
+                            </p>
                           } @else {
                             @for (d of filteredPickerDocs(); track d.id) {
-                              <button class="doc-picker-item" [disabled]="liaisonLoading()"
-                                      (click)="lierDoc($event, r.id, d)">
-                                <mat-icon class="doc-icon-sm" [style.color]="extMeta(d.extension).color">{{ extMeta(d.extension).icon }}</mat-icon>
+                              <button
+                                class="doc-picker-item"
+                                [disabled]="liaisonLoading()"
+                                (click)="lierDoc($event, r.id, d)"
+                              >
+                                <mat-icon
+                                  class="doc-icon-sm"
+                                  [style.color]="extMeta(d.extension).color"
+                                  >{{ extMeta(d.extension).icon }}</mat-icon
+                                >
                                 {{ d.nom }}.{{ d.extension }}
                               </button>
                             }
@@ -173,21 +243,25 @@
       }
     </section>
   } @else {
-    <div class="empty-state"><p>Aucune réunion à venir. Créez-en une avec le bouton ci-dessus.</p></div>
+    <div class="empty-state">
+      <p>Aucune réunion à venir. Créez-en une avec le bouton ci-dessus.</p>
+    </div>
   }
 
   <!-- Passées -->
   @if (showPasses() && passesCount() > 0) {
     <section class="section section-passes">
-      <h2 class="section-title">Passées <span class="count">{{ passesCount() }}</span></h2>
+      <h2 class="section-title">
+        Passées <span class="count">{{ passesCount() }}</span>
+      </h2>
       <div class="events-list">
         @for (r of passes(); track r.id; let i = $index) {
-          @if (i === 0 || monthOf(r.date) !== monthOf(passes()[i-1].date)) {
+          @if (i === 0 || monthOf(r.date) !== monthOf(passes()[i - 1].date)) {
             <div class="month-sep">{{ formatMonth(r.date) }}</div>
           }
           <div class="event-card card-passe" (click)="toggleExpand(r.id)">
             <div class="card-date-col">
-              <span class="card-day">{{ r.date | slice:8:10 }}</span>
+              <span class="card-day">{{ r.date | slice: 8 : 10 }}</span>
             </div>
             <div class="card-body">
               <div class="card-summary">
@@ -201,11 +275,20 @@
                     <div [class.form-flash]="flashEdit()">
                       <form [formGroup]="editForm" (ngSubmit)="sauvegarder(r.id)" class="r-form">
                         <div class="form-row">
-                          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-grow">
+                          <mat-form-field
+                            appearance="outline"
+                            subscriptSizing="dynamic"
+                            class="field-grow"
+                          >
                             <mat-label>Titre</mat-label>
                             <input matInput formControlName="titre" />
                           </mat-form-field>
-                          <app-date-picker label="Date" [required]="true" formControlName="date" class="field-date"></app-date-picker>
+                          <app-date-picker
+                            label="Date"
+                            [required]="true"
+                            formControlName="date"
+                            class="field-date"
+                          ></app-date-picker>
                         </div>
                         <mat-form-field appearance="outline" class="field-full">
                           <mat-label>Lieu</mat-label>
@@ -216,8 +299,14 @@
                           <textarea matInput formControlName="description" rows="2"></textarea>
                         </mat-form-field>
                         <div class="form-actions">
-                          <button type="button" class="btn-delete-sm" (click)="supprimer(r)">Supprimer</button>
-                          <button type="submit" class="btn-save" [disabled]="editForm.invalid || saving()">
+                          <button type="button" class="btn-delete-sm" (click)="supprimer(r)">
+                            Supprimer
+                          </button>
+                          <button
+                            type="submit"
+                            class="btn-save"
+                            [disabled]="editForm.invalid || saving()"
+                          >
                             {{ saving() ? 'Sauvegarde…' : 'Sauvegarder' }}
                           </button>
                         </div>
@@ -225,11 +314,19 @@
                     </div>
                   } @else {
                     @if (r.lieu) {
-                      <a class="card-lieu" [href]="mapsUrl(r.lieu)" target="_blank" rel="noopener" (click)="$event.stopPropagation()">
+                      <a
+                        class="card-lieu"
+                        [href]="mapsUrl(r.lieu)"
+                        target="_blank"
+                        rel="noopener"
+                        (click)="$event.stopPropagation()"
+                      >
                         <mat-icon class="lieu-icon">location_on</mat-icon> {{ r.lieu }}
                       </a>
                     }
-                    @if (r.description) { <p class="card-desc">{{ r.description }}</p> }
+                    @if (r.description) {
+                      <p class="card-desc">{{ r.description }}</p>
+                    }
                     <span class="card-date-full">{{ formatDateFull(r.date) }}</span>
 
                     <!-- Documents -->
@@ -240,23 +337,45 @@
                           <span class="doc-upload-progress">Envoi {{ uploadProgress() }}%…</span>
                         } @else {
                           <label class="btn-doc-add" [for]="'upload-p-' + r.id">+ Ajouter</label>
-                          <input [id]="'upload-p-' + r.id" type="file" class="file-input-hidden" (change)="onFileSelected($event, r)" />
-                          <button class="btn-doc-lier" (click)="openPicker(r.id)">Lier un existant</button>
+                          <input
+                            [id]="'upload-p-' + r.id"
+                            type="file"
+                            class="file-input-hidden"
+                            (change)="onFileSelected($event, r)"
+                          />
+                          <button class="btn-doc-lier" (click)="openPicker(r.id)">
+                            Lier un existant
+                          </button>
                         }
                       </div>
                       @for (d of reunionDocs(r.id); track d.id) {
                         <div class="doc-row">
-                          <mat-icon class="doc-icon" [style.color]="extMeta(d.extension).color">{{ extMeta(d.extension).icon }}</mat-icon>
+                          <mat-icon class="doc-icon" [style.color]="extMeta(d.extension).color">{{
+                            extMeta(d.extension).icon
+                          }}</mat-icon>
                           <span class="doc-nom">{{ d.nom }}.{{ d.extension }}</span>
                           @if (d.type === 'reunion') {
                             <span class="doc-badge-propre">Ajouté</span>
                           } @else {
                             <span class="doc-badge-lie">Lié</span>
                           }
-                          <a [href]="d.url" target="_blank" rel="noopener" class="btn-doc-dl" (click)="$event.stopPropagation()" title="Télécharger">
+                          <a
+                            [href]="d.url"
+                            target="_blank"
+                            rel="noopener"
+                            class="btn-doc-dl"
+                            (click)="$event.stopPropagation()"
+                            title="Télécharger"
+                          >
                             <mat-icon>download</mat-icon>
                           </a>
-                          <button class="btn-doc-retirer" (click)="retirerDoc(r.id, d)" title="{{ d.type === 'reunion' ? 'Supprimer' : 'Délier' }}">×</button>
+                          <button
+                            class="btn-doc-retirer"
+                            (click)="retirerDoc(r.id, d)"
+                            title="{{ d.type === 'reunion' ? 'Supprimer' : 'Délier' }}"
+                          >
+                            ×
+                          </button>
                         </div>
                       }
                       @if (reunionDocs(r.id).length === 0 && uploadingFor() !== r.id) {
@@ -264,19 +383,34 @@
                       }
                       @if (pickerOpenFor() === r.id) {
                         <div class="doc-picker" (click)="$event.stopPropagation()">
-                          <input class="doc-picker-search" type="text" placeholder="Rechercher…"
-                                 [value]="pickerSearch()"
-                                 (input)="pickerSearch.set($any($event.target).value)"
-                                 (click)="$event.stopPropagation()" />
+                          <input
+                            class="doc-picker-search"
+                            type="text"
+                            placeholder="Rechercher…"
+                            [value]="pickerSearch()"
+                            (input)="pickerSearch.set($any($event.target).value)"
+                            (click)="$event.stopPropagation()"
+                          />
                           @if (pickerLoading()) {
                             <p class="doc-picker-msg">Chargement…</p>
                           } @else if (filteredPickerDocs().length === 0) {
-                            <p class="doc-picker-msg">{{ pickerSearch() ? 'Aucun résultat.' : 'Aucun document disponible.' }}</p>
+                            <p class="doc-picker-msg">
+                              {{
+                                pickerSearch() ? 'Aucun résultat.' : 'Aucun document disponible.'
+                              }}
+                            </p>
                           } @else {
                             @for (d of filteredPickerDocs(); track d.id) {
-                              <button class="doc-picker-item" [disabled]="liaisonLoading()"
-                                      (click)="lierDoc($event, r.id, d)">
-                                <mat-icon class="doc-icon-sm" [style.color]="extMeta(d.extension).color">{{ extMeta(d.extension).icon }}</mat-icon>
+                              <button
+                                class="doc-picker-item"
+                                [disabled]="liaisonLoading()"
+                                (click)="lierDoc($event, r.id, d)"
+                              >
+                                <mat-icon
+                                  class="doc-icon-sm"
+                                  [style.color]="extMeta(d.extension).color"
+                                  >{{ extMeta(d.extension).icon }}</mat-icon
+                                >
                                 {{ d.nom }}.{{ d.extension }}
                               </button>
                             }
@@ -301,5 +435,4 @@
       }
     </section>
   }
-
 </div>

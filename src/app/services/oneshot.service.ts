@@ -1,16 +1,40 @@
 import { Injectable, inject } from '@angular/core';
 import {
-  collection, collectionGroup, doc, addDoc, updateDoc, deleteDoc, setDoc,
-  query, where, orderBy, arrayUnion, arrayRemove, increment, getDocs, getDoc, deleteField
+  collection,
+  collectionGroup,
+  doc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  setDoc,
+  query,
+  where,
+  orderBy,
+  arrayUnion,
+  arrayRemove,
+  increment,
+  getDocs,
+  getDoc,
+  deleteField,
 } from 'firebase/firestore';
-import { ref, uploadBytes, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
+import {
+  ref,
+  uploadBytes,
+  uploadBytesResumable,
+  getDownloadURL,
+  deleteObject,
+} from 'firebase/storage';
 import { Observable, from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { db, storage, collectionStream, docStream } from '../utils/firebase';
 import { todayISO } from '../utils/date';
 import {
-  OneShot, OneShotTheme, OneShotInscription,
-  OneShotPhoto, OneShotVote, OneShotStatut
+  OneShot,
+  OneShotTheme,
+  OneShotInscription,
+  OneShotPhoto,
+  OneShotVote,
+  OneShotStatut,
 } from '../models/oneshot.model';
 import { NotificationService } from './notification.service';
 import { PhotoExif } from '../models/photo.model';
@@ -31,7 +55,15 @@ export class OneShotService {
 
   // --- OneShot ---
 
-  async create(data: { titre: string; description?: string; lieu?: string; creatorUid: string; nomCreateur: string; date?: string; visibilite?: 'public' | 'membre' }): Promise<string> {
+  async create(data: {
+    titre: string;
+    description?: string;
+    lieu?: string;
+    creatorUid: string;
+    nomCreateur: string;
+    date?: string;
+    visibilite?: 'public' | 'membre';
+  }): Promise<string> {
     const ref = await addDoc(collection(db, 'oneshots'), {
       ...data,
       statut: 'preparation' as OneShotStatut,
@@ -45,72 +77,102 @@ export class OneShotService {
   }
 
   getMyOneShots(uid: string): Observable<OneShot[]> {
-    const q = query(collection(db, 'oneshots'), where('creatorUid', '==', uid), orderBy('dateCreation', 'desc'));
+    const q = query(
+      collection(db, 'oneshots'),
+      where('creatorUid', '==', uid),
+      orderBy('dateCreation', 'desc'),
+    );
     return collectionStream<OneShot>(q, 'id');
   }
 
   getPublicOneShots(): Observable<OneShot[]> {
-    const q = query(collection(db, 'oneshots'),
-      where('statut', 'in', ['inscription', 'fermeture_inscriptions', 'vote', 'resultats']));
+    const q = query(
+      collection(db, 'oneshots'),
+      where('statut', 'in', ['inscription', 'fermeture_inscriptions', 'vote', 'resultats']),
+    );
     return collectionStream<OneShot>(q, 'id');
   }
 
   getPublicOneShotsOnce(): Observable<OneShot[]> {
-    const q = query(collection(db, 'oneshots'),
-      where('statut', 'in', ['inscription', 'fermeture_inscriptions', 'vote', 'resultats']));
-    return from(getDocs(q)).pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as OneShot))));
+    const q = query(
+      collection(db, 'oneshots'),
+      where('statut', 'in', ['inscription', 'fermeture_inscriptions', 'vote', 'resultats']),
+    );
+    return from(getDocs(q)).pipe(
+      map((snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }) as OneShot)),
+    );
   }
 
   getMyOneShotsOnce(uid: string): Observable<OneShot[]> {
-    return from(getDocs(query(collection(db, 'oneshots'),
-      where('creatorUid', '==', uid), orderBy('dateCreation', 'desc'))))
-      .pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as OneShot))));
+    return from(
+      getDocs(
+        query(
+          collection(db, 'oneshots'),
+          where('creatorUid', '==', uid),
+          orderBy('dateCreation', 'desc'),
+        ),
+      ),
+    ).pipe(map((snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }) as OneShot)));
   }
 
   getOneShotOnce(id: string): Observable<OneShot | undefined> {
-    return from(getDoc(doc(db, 'oneshots', id)))
-      .pipe(map(d => d.exists() ? { id: d.id, ...d.data() } as OneShot : undefined));
+    return from(getDoc(doc(db, 'oneshots', id))).pipe(
+      map((d) => (d.exists() ? ({ id: d.id, ...d.data() } as OneShot) : undefined)),
+    );
   }
 
   getThemesOnce(oneShotId: string): Observable<OneShotTheme[]> {
-    return from(getDocs(query(collection(db, `oneshots/${oneShotId}/themes`), orderBy('ordre'))))
-      .pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as OneShotTheme))));
+    return from(
+      getDocs(query(collection(db, `oneshots/${oneShotId}/themes`), orderBy('ordre'))),
+    ).pipe(map((snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }) as OneShotTheme)));
   }
 
   getPhotosOnce(oneShotId: string): Observable<OneShotPhoto[]> {
-    return from(getDocs(collection(db, `oneshots/${oneShotId}/photos`)))
-      .pipe(map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as OneShotPhoto))));
+    return from(getDocs(collection(db, `oneshots/${oneShotId}/photos`))).pipe(
+      map((snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }) as OneShotPhoto)),
+    );
   }
 
   getInscriptionsOnce(oneShotId: string): Observable<OneShotInscription[]> {
-    return from(getDocs(collection(db, `oneshots/${oneShotId}/inscriptions`)))
-      .pipe(map(snap => snap.docs.map(d => d.data() as OneShotInscription)));
+    return from(getDocs(collection(db, `oneshots/${oneShotId}/inscriptions`))).pipe(
+      map((snap) => snap.docs.map((d) => d.data() as OneShotInscription)),
+    );
   }
 
   getMyVotesOnce(oneShotId: string, voterUid: string): Observable<OneShotVote[]> {
-    return from(getDocs(query(collection(db, `oneshots/${oneShotId}/votes`), where('voterUid', '==', voterUid))))
-      .pipe(map(snap => snap.docs.map(d => d.data() as OneShotVote)));
+    return from(
+      getDocs(
+        query(collection(db, `oneshots/${oneShotId}/votes`), where('voterUid', '==', voterUid)),
+      ),
+    ).pipe(map((snap) => snap.docs.map((d) => d.data() as OneShotVote)));
   }
 
   getAllVotesOnce(oneShotId: string): Observable<OneShotVote[]> {
-    return from(getDocs(collection(db, `oneshots/${oneShotId}/votes`)))
-      .pipe(map(snap => snap.docs.map(d => d.data() as OneShotVote)));
+    return from(getDocs(collection(db, `oneshots/${oneShotId}/votes`))).pipe(
+      map((snap) => snap.docs.map((d) => d.data() as OneShotVote)),
+    );
   }
 
   async updateDate(
     id: string,
     date: string,
-    notifCtx?: { oldDate: string; titre: string; nomCreateur: string; creatorUid: string }
+    notifCtx?: { oldDate: string; titre: string; nomCreateur: string; creatorUid: string },
   ): Promise<void> {
     await updateDoc(doc(db, 'oneshots', id), { date });
     if (notifCtx && date && date !== notifCtx.oldDate) {
       const dateStr = new Date(date + 'T00:00:00').toLocaleDateString('fr-FR', {
-        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
       });
-      this.notifService.broadcast('oneshot',
-        `La date du OneShot « ${notifCtx.titre} » a changé : ${dateStr}`,
-        { lien: `/galeries/oneshots/${id}`, sourceNom: notifCtx.nomCreateur, excludeUid: notifCtx.creatorUid }
-      ).catch(() => {});
+      this.notifService
+        .broadcast('oneshot', `La date du OneShot « ${notifCtx.titre} » a changé : ${dateStr}`, {
+          lien: `/galeries/oneshots/${id}`,
+          sourceNom: notifCtx.nomCreateur,
+          excludeUid: notifCtx.creatorUid,
+        })
+        .catch(() => {});
     }
   }
 
@@ -136,21 +198,30 @@ export class OneShotService {
     const storageRef = ref(storage, path);
     await uploadBytes(storageRef, file);
     const url = await getDownloadURL(storageRef);
-    await updateDoc(doc(db, 'oneshots', id), { photoCouvertureUrl: url, photoCouverturePath: path, photoCouvertureFileSize: file.size });
+    await updateDoc(doc(db, 'oneshots', id), {
+      photoCouvertureUrl: url,
+      photoCouverturePath: path,
+      photoCouvertureFileSize: file.size,
+    });
   }
 
   async removeCouverture(id: string, path: string): Promise<void> {
     await deleteObject(ref(storage, path)).catch(() => {});
     await updateDoc(doc(db, 'oneshots', id), {
-      photoCouvertureUrl:      deleteField(),
-      photoCouverturePath:     deleteField(),
+      photoCouvertureUrl: deleteField(),
+      photoCouverturePath: deleteField(),
       photoCouvertureFileSize: deleteField(),
     });
   }
 
   async deleteOneShot(
     id: string,
-    notifCtx?: { titre: string; nomCreateur: string; creatorUid: string; photoCouverturePath?: string }
+    notifCtx?: {
+      titre: string;
+      nomCreateur: string;
+      creatorUid: string;
+      photoCouverturePath?: string;
+    },
   ): Promise<void> {
     const [oneShotSnap, photosSnap, inscritsSnap, themesSnap, votesSnap] = await Promise.all([
       getDoc(doc(db, 'oneshots', id)),
@@ -163,15 +234,19 @@ export class OneShotService {
 
     // Fetch commentaires for each photo in parallel
     const photoCommSnaps = await Promise.all(
-      photosSnap.docs.map(p => getDocs(collection(db, `oneshots/${id}/photos/${p.id}/commentaires`)))
+      photosSnap.docs.map((p) =>
+        getDocs(collection(db, `oneshots/${id}/photos/${p.id}/commentaires`)),
+      ),
     );
 
     const storageDeletions: Promise<void>[] = [];
     const sizeByUser: Record<string, number> = {};
     for (const p of photosSnap.docs) {
       const d = p.data();
-      if (d['storagePath'])   storageDeletions.push(deleteObject(ref(storage, d['storagePath'])).catch(() => {}));
-      if (d['thumbnailPath']) storageDeletions.push(deleteObject(ref(storage, d['thumbnailPath'])).catch(() => {}));
+      if (d['storagePath'])
+        storageDeletions.push(deleteObject(ref(storage, d['storagePath'])).catch(() => {}));
+      if (d['thumbnailPath'])
+        storageDeletions.push(deleteObject(ref(storage, d['thumbnailPath'])).catch(() => {}));
       if (d['membreUid'] && d['fileSize']) {
         sizeByUser[d['membreUid']] = (sizeByUser[d['membreUid']] ?? 0) + d['fileSize'];
       }
@@ -181,25 +256,29 @@ export class OneShotService {
 
     await Promise.all([
       ...storageDeletions,
-      ...photosSnap.docs.map(p  => deleteDoc(p.ref)),
-      ...photoCommSnaps.flatMap(snap => snap.docs.map(d => deleteDoc(d.ref))),
-      ...inscritsSnap.docs.map(p => deleteDoc(p.ref)),
-      ...themesSnap.docs.map(p   => deleteDoc(p.ref)),
-      ...votesSnap.docs.map(p    => deleteDoc(p.ref)),
+      ...photosSnap.docs.map((p) => deleteDoc(p.ref)),
+      ...photoCommSnaps.flatMap((snap) => snap.docs.map((d) => deleteDoc(d.ref))),
+      ...inscritsSnap.docs.map((p) => deleteDoc(p.ref)),
+      ...themesSnap.docs.map((p) => deleteDoc(p.ref)),
+      ...votesSnap.docs.map((p) => deleteDoc(p.ref)),
     ]);
     await deleteDoc(doc(db, 'oneshots', id));
     Object.entries(sizeByUser).forEach(([uid, size]) =>
-      updateDoc(doc(db, 'users', uid), { 'storageUsed.oneshots': increment(-size) }).catch(() => {})
+      updateDoc(doc(db, 'users', uid), { 'storageUsed.oneshots': increment(-size) }).catch(
+        () => {},
+      ),
     );
     if (notifCtx && inscritsSnap.docs.length > 0) {
       const msg = `Le OneShot « ${notifCtx.titre} » auquel vous étiez inscrit(e) a été annulé.`;
       Promise.all(
         inscritsSnap.docs
-          .map(d => (d.data() as OneShotInscription).uid)
-          .filter(uid => uid !== notifCtx.creatorUid)
-          .map(uid => this.notifService.sendToUser(uid, 'oneshot', msg, {
-            sourceNom: notifCtx.nomCreateur
-          }))
+          .map((d) => (d.data() as OneShotInscription).uid)
+          .filter((uid) => uid !== notifCtx.creatorUid)
+          .map((uid) =>
+            this.notifService.sendToUser(uid, 'oneshot', msg, {
+              sourceNom: notifCtx.nomCreateur,
+            }),
+          ),
       ).catch(() => {});
     }
   }
@@ -207,7 +286,7 @@ export class OneShotService {
   async updateStatut(
     id: string,
     statut: OneShotStatut,
-    notifCtx?: { titre: string; nomCreateur: string; creatorUid: string }
+    notifCtx?: { titre: string; nomCreateur: string; creatorUid: string },
   ): Promise<void> {
     const update: Record<string, unknown> = { statut };
     if (statut === 'resultats') {
@@ -216,17 +295,19 @@ export class OneShotService {
     await updateDoc(doc(db, 'oneshots', id), update);
     if (notifCtx) {
       const msgs: Partial<Record<OneShotStatut, string>> = {
-        inscription:  `${notifCtx.nomCreateur} a ouvert les inscriptions pour le OneShot « ${notifCtx.titre} »`,
-        vote:         `Le vote est ouvert pour le OneShot « ${notifCtx.titre} »`,
-        resultats:    `Les résultats du OneShot « ${notifCtx.titre} » sont disponibles`,
+        inscription: `${notifCtx.nomCreateur} a ouvert les inscriptions pour le OneShot « ${notifCtx.titre} »`,
+        vote: `Le vote est ouvert pour le OneShot « ${notifCtx.titre} »`,
+        resultats: `Les résultats du OneShot « ${notifCtx.titre} » sont disponibles`,
       };
       const msg = msgs[statut];
       if (msg) {
-        this.notifService.broadcast('oneshot', msg, {
-          lien: `/galeries/oneshots/${id}`,
-          sourceNom: notifCtx.nomCreateur,
-          excludeUid: notifCtx.creatorUid,
-        }).catch(() => {});
+        this.notifService
+          .broadcast('oneshot', msg, {
+            lien: `/galeries/oneshots/${id}`,
+            sourceNom: notifCtx.nomCreateur,
+            excludeUid: notifCtx.creatorUid,
+          })
+          .catch(() => {});
       }
     }
   }
@@ -257,20 +338,25 @@ export class OneShotService {
   getMesOneShotsInscritsIds(uid: string): Observable<string[]> {
     const q = query(collectionGroup(db, 'inscriptions'), where('uid', '==', uid));
     return from(getDocs(q)).pipe(
-      map(snap => snap.docs
-        .filter(d => d.ref.parent.parent?.path.startsWith('oneshots/'))
-        .map(d => d.ref.parent.parent!.id)
-      )
+      map((snap) =>
+        snap.docs
+          .filter((d) => d.ref.parent.parent?.path.startsWith('oneshots/'))
+          .map((d) => d.ref.parent.parent!.id),
+      ),
     );
   }
 
   getInscriptions(oneShotId: string): Observable<OneShotInscription[]> {
-    return collectionStream<OneShotInscription>(collection(db, `oneshots/${oneShotId}/inscriptions`));
+    return collectionStream<OneShotInscription>(
+      collection(db, `oneshots/${oneShotId}/inscriptions`),
+    );
   }
 
   async inscrire(oneShotId: string, uid: string, nomMembre: string): Promise<void> {
     await setDoc(doc(db, `oneshots/${oneShotId}/inscriptions`, uid), {
-      uid, nomMembre, dateInscription: new Date().toISOString(),
+      uid,
+      nomMembre,
+      dateInscription: new Date().toISOString(),
     });
     updateDoc(doc(db, 'oneshots', oneShotId), { nbInscrits: increment(1) }).catch(() => {});
   }
@@ -289,19 +375,30 @@ export class OneShotService {
   uploadPhoto(
     file: File,
     oneShotId: string,
-    meta: { membreUid: string; nomMembre: string; themeId: string; titre?: string; exif?: PhotoExif }
+    meta: {
+      membreUid: string;
+      nomMembre: string;
+      themeId: string;
+      titre?: string;
+      exif?: PhotoExif;
+    },
   ): Observable<OneShotUploadState> {
-    return new Observable(observer => {
+    return new Observable((observer) => {
       const id = generateId();
       const ext = file.name.split('.').pop() ?? 'webp';
       const storagePath = `oneshots/${oneShotId}/${id}.${ext}`;
-      const thumbPath   = `oneshots/${oneShotId}/${id}_thumb.${ext}`;
+      const thumbPath = `oneshots/${oneShotId}/${id}_thumb.${ext}`;
       const storageRef = ref(storage, storagePath);
       const task = uploadBytesResumable(storageRef, file);
 
-      task.on('state_changed',
-        snap => observer.next({ progress: Math.round(snap.bytesTransferred / snap.totalBytes * 100), done: false }),
-        err => observer.error(err),
+      task.on(
+        'state_changed',
+        (snap) =>
+          observer.next({
+            progress: Math.round((snap.bytesTransferred / snap.totalBytes) * 100),
+            done: false,
+          }),
+        (err) => observer.error(err),
         async () => {
           const [url, thumb] = await Promise.all([
             getDownloadURL(task.snapshot.ref),
@@ -310,9 +407,15 @@ export class OneShotService {
           const thumbSnap = await uploadBytes(ref(storage, thumbPath), thumb);
           const thumbnailUrl = await getDownloadURL(thumbSnap.ref);
           const data: Omit<OneShotPhoto, 'id'> = {
-            url, storagePath, uploadedAt: new Date().toISOString(),
-            fileSize: file.size + thumb.size, thumbnailUrl, thumbnailPath: thumbPath,
-            membreUid: meta.membreUid, nomMembre: meta.nomMembre, themeId: meta.themeId,
+            url,
+            storagePath,
+            uploadedAt: new Date().toISOString(),
+            fileSize: file.size + thumb.size,
+            thumbnailUrl,
+            thumbnailPath: thumbPath,
+            membreUid: meta.membreUid,
+            nomMembre: meta.nomMembre,
+            themeId: meta.themeId,
             ...(meta.titre ? { titre: meta.titre } : {}),
             ...(hasExif(meta.exif) ? { exif: meta.exif } : {}),
           };
@@ -324,7 +427,7 @@ export class OneShotService {
           }
           observer.next({ progress: 100, done: true, photo: { id: docRef.id, ...data } });
           observer.complete();
-        }
+        },
       );
     });
   }
@@ -334,19 +437,22 @@ export class OneShotService {
     photoId: string,
     data: { membreUid: string; nomMembre: string; themeId: string },
     oldMembreUid?: string,
-    fileSize?: number
+    fileSize?: number,
   ): Promise<void> {
     await updateDoc(doc(db, `oneshots/${oneShotId}/photos`, photoId), data);
   }
 
   async deletePhoto(oneShotId: string, photo: OneShotPhoto): Promise<void> {
-    const commSnap = await getDocs(collection(db, `oneshots/${oneShotId}/photos/${photo.id}/commentaires`));
+    const commSnap = await getDocs(
+      collection(db, `oneshots/${oneShotId}/photos/${photo.id}/commentaires`),
+    );
     const deletes: Promise<unknown>[] = [
       deleteObject(ref(storage, photo.storagePath)),
       deleteDoc(doc(db, `oneshots/${oneShotId}/photos`, photo.id)),
-      ...commSnap.docs.map(d => deleteDoc(d.ref)),
+      ...commSnap.docs.map((d) => deleteDoc(d.ref)),
     ];
-    if (photo.thumbnailPath) deletes.push(deleteObject(ref(storage, photo.thumbnailPath)).catch(() => {}));
+    if (photo.thumbnailPath)
+      deletes.push(deleteObject(ref(storage, photo.thumbnailPath)).catch(() => {}));
     await Promise.all(deletes);
     if (photo.fileSize && photo.membreUid) {
       updateDoc(doc(db, 'users', photo.membreUid), {
@@ -358,7 +464,10 @@ export class OneShotService {
   // --- Votes ---
 
   getMyVotes(oneShotId: string, voterUid: string): Observable<OneShotVote[]> {
-    const q = query(collection(db, `oneshots/${oneShotId}/votes`), where('voterUid', '==', voterUid));
+    const q = query(
+      collection(db, `oneshots/${oneShotId}/votes`),
+      where('voterUid', '==', voterUid),
+    );
     return collectionStream<OneShotVote>(q);
   }
 
@@ -368,7 +477,10 @@ export class OneShotService {
 
   async vote(oneShotId: string, voterUid: string, themeId: string, photoId: string): Promise<void> {
     await setDoc(doc(db, `oneshots/${oneShotId}/votes`, `${voterUid}_${themeId}`), {
-      voterUid, themeId, photoId, votedAt: new Date().toISOString(),
+      voterUid,
+      themeId,
+      photoId,
+      votedAt: new Date().toISOString(),
     });
   }
 
@@ -378,7 +490,12 @@ export class OneShotService {
 
   // --- Likes ---
 
-  async toggleLikePhoto(oneShotId: string, photoId: string, uid: string, currentlyLiked: boolean): Promise<void> {
+  async toggleLikePhoto(
+    oneShotId: string,
+    photoId: string,
+    uid: string,
+    currentlyLiked: boolean,
+  ): Promise<void> {
     await updateDoc(doc(db, `oneshots/${oneShotId}/photos`, photoId), {
       likes: currentlyLiked ? arrayRemove(uid) : arrayUnion(uid),
     });
@@ -389,16 +506,23 @@ export class OneShotService {
   getCommentaires(oneShotId: string, photoId: string): Observable<Commentaire[]> {
     const q = query(
       collection(db, `oneshots/${oneShotId}/photos/${photoId}/commentaires`),
-      orderBy('createdAt', 'asc')
+      orderBy('createdAt', 'asc'),
     );
     return from(getDocs(q)).pipe(
-      map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as Commentaire)))
+      map((snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Commentaire)),
     );
   }
 
-  async addCommentaire(oneShotId: string, photoId: string, data: { texte: string; auteurUid: string; nomAuteur: string }): Promise<void> {
+  async addCommentaire(
+    oneShotId: string,
+    photoId: string,
+    data: { texte: string; auteurUid: string; nomAuteur: string },
+  ): Promise<void> {
     await addDoc(collection(db, `oneshots/${oneShotId}/photos/${photoId}/commentaires`), {
-      ...data, likes: [], replies: [], createdAt: new Date().toISOString(),
+      ...data,
+      likes: [],
+      replies: [],
+      createdAt: new Date().toISOString(),
     });
   }
 
@@ -406,22 +530,39 @@ export class OneShotService {
     await deleteDoc(doc(db, `oneshots/${oneShotId}/photos/${photoId}/commentaires`, commentId));
   }
 
-  async toggleLikeCommentaire(oneShotId: string, photoId: string, commentId: string, uid: string, currentlyLiked: boolean): Promise<void> {
+  async toggleLikeCommentaire(
+    oneShotId: string,
+    photoId: string,
+    commentId: string,
+    uid: string,
+    currentlyLiked: boolean,
+  ): Promise<void> {
     await updateDoc(doc(db, `oneshots/${oneShotId}/photos/${photoId}/commentaires`, commentId), {
       likes: currentlyLiked ? arrayRemove(uid) : arrayUnion(uid),
     });
   }
 
-  async addReply(oneShotId: string, photoId: string, commentId: string, reply: Omit<Reponse, 'id'>): Promise<void> {
+  async addReply(
+    oneShotId: string,
+    photoId: string,
+    commentId: string,
+    reply: Omit<Reponse, 'id'>,
+  ): Promise<void> {
     const replyWithId: Reponse = { ...reply, id: generateId() };
     await updateDoc(doc(db, `oneshots/${oneShotId}/photos/${photoId}/commentaires`, commentId), {
       replies: arrayUnion(replyWithId),
     });
   }
 
-  async deleteReply(oneShotId: string, photoId: string, commentId: string, replyId: string, allReplies: Reponse[]): Promise<void> {
+  async deleteReply(
+    oneShotId: string,
+    photoId: string,
+    commentId: string,
+    replyId: string,
+    allReplies: Reponse[],
+  ): Promise<void> {
     await updateDoc(doc(db, `oneshots/${oneShotId}/photos/${photoId}/commentaires`, commentId), {
-      replies: allReplies.filter(r => r.id !== replyId),
+      replies: allReplies.filter((r) => r.id !== replyId),
     });
   }
 }

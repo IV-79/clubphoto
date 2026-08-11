@@ -24,10 +24,8 @@
   </div>
 
   <div class="expo-page">
-
     <!-- ── Sidebar ──────────────────────────────────────────── -->
     <aside class="expo-aside">
-
       <div class="info-card">
         <h3 class="info-card-title">Calendrier</h3>
         @if (e.dateDebutIdeation) {
@@ -115,12 +113,10 @@
           </div>
         </div>
       }
-
     </aside>
 
     <!-- ── Main ─────────────────────────────────────────────── -->
     <main class="expo-main">
-
       @if (!editMode() && e.description) {
         <div class="event-description">
           <span class="event-description-label">Description</span>
@@ -132,15 +128,15 @@
       @if (editMode() && canManage()) {
         <div class="edit-panel">
           <form [formGroup]="editForm" (ngSubmit)="saveEdit()">
-          <div class="edit-panel-header">
-            <h3 class="edit-panel-title">Modifier l'exposition</h3>
-            <div class="edit-header-actions">
-              <button type="button" class="btn-cancel" (click)="cancelEdit()">Annuler</button>
-              <button type="submit" class="btn-save" [disabled]="editForm.invalid || saving()">
-                {{ saving() ? 'Enregistrement…' : 'Enregistrer' }}
-              </button>
+            <div class="edit-panel-header">
+              <h3 class="edit-panel-title">Modifier l'exposition</h3>
+              <div class="edit-header-actions">
+                <button type="button" class="btn-cancel" (click)="cancelEdit()">Annuler</button>
+                <button type="submit" class="btn-save" [disabled]="editForm.invalid || saving()">
+                  {{ saving() ? 'Enregistrement…' : 'Enregistrer' }}
+                </button>
+              </div>
             </div>
-          </div>
 
             <mat-form-field appearance="outline" class="field-full">
               <mat-label>Titre</mat-label>
@@ -157,7 +153,10 @@
               <input matInput formControlName="themeChoisi" />
             </mat-form-field>
             @if (expoStatut() === 'soumission' && !editForm.get('themeChoisi')!.value.trim()) {
-              <div class="dates-warning dates-info" style="margin-top:-0.5rem; margin-bottom:0.75rem">
+              <div
+                class="dates-warning dates-info"
+                style="margin-top: -0.5rem; margin-bottom: 0.75rem"
+              >
                 <mat-icon>info</mat-icon>
                 Vider le thème repasse l'expo en nettoyage — les photos soumises sont conservées.
               </div>
@@ -189,7 +188,8 @@
             @if (expoStatut() === 'soumission') {
               <div class="dates-warning dates-info">
                 <mat-icon>info</mat-icon>
-                L'expo est en phase soumission — vider la date de fin de soumission ferait repasser en nettoyage.
+                L'expo est en phase soumission — vider la date de fin de soumission ferait repasser
+                en nettoyage.
               </div>
             }
             @if (expoStatut() === 'nettoyage' || expoStatut() === 'votation') {
@@ -201,48 +201,89 @@
             @if (datesLocked) {
               <div class="dates-warning dates-info">
                 <mat-icon>lock</mat-icon>
-                Dates verrouillées — le thème est fixé. Videz le champ « Thème choisi » pour modifier.
+                Dates verrouillées — le thème est fixé. Videz le champ « Thème choisi » pour
+                modifier.
               </div>
             }
 
             <div class="form-row">
-              <app-date-picker label="Début de l'idéation" formControlName="dateDebutIdeation" class="field-half"></app-date-picker>
-              <app-date-picker label="Fin de l'idéation" formControlName="dateFinIdeation" [required]="true" class="field-half"></app-date-picker>
+              <app-date-picker
+                label="Début de l'idéation"
+                formControlName="dateDebutIdeation"
+                class="field-half"
+              ></app-date-picker>
+              <app-date-picker
+                label="Fin de l'idéation"
+                formControlName="dateFinIdeation"
+                [required]="true"
+                class="field-half"
+              ></app-date-picker>
             </div>
             <div class="form-row">
-              <app-date-picker label="Fin du vote" formControlName="dateFinVote" class="field-half"></app-date-picker>
-              <app-date-picker label="Fin de soumission" formControlName="dateFinSoumission" class="field-half"></app-date-picker>
+              <app-date-picker
+                label="Fin du vote"
+                formControlName="dateFinVote"
+                class="field-half"
+              ></app-date-picker>
+              <app-date-picker
+                label="Fin de soumission"
+                formControlName="dateFinSoumission"
+                class="field-half"
+              ></app-date-picker>
             </div>
             <div class="form-row">
-              <app-date-picker label="Date de l'exposition (informelle)" formControlName="dateExposition" class="field-half"></app-date-picker>
+              <app-date-picker
+                label="Date de l'exposition (informelle)"
+                formControlName="dateExposition"
+                class="field-half"
+              ></app-date-picker>
             </div>
 
             <!-- Cover photo -->
             <div class="cover-field">
-              <label class="cover-label">Photo de couverture <span class="cover-optional">optionnel</span></label>
+              <label class="cover-label"
+                >Photo de couverture <span class="cover-optional">optionnel</span></label
+              >
               <p class="cover-hint">Format recommandé : 16/9 — redimensionné à 1280×720 px</p>
-              <div class="cover-drop"
-                   [class.drag-over]="coverDragOver()"
-                   (dragover)="$event.preventDefault(); coverDragOver.set(true)"
-                   (dragleave)="coverDragOver.set(false)"
-                   (drop)="onCoverDrop($event)">
+              <div
+                class="cover-drop"
+                [class.drag-over]="coverDragOver()"
+                (dragover)="$event.preventDefault(); coverDragOver.set(true)"
+                (dragleave)="coverDragOver.set(false)"
+                (drop)="onCoverDrop($event)"
+              >
                 @if (coverPreviewUrl() || e.photoCouvertureUrl) {
-                  <img [src]="coverPreviewUrl() || e.photoCouvertureUrl" class="cover-preview" alt="Image actuelle" />
+                  <img
+                    [src]="coverPreviewUrl() || e.photoCouvertureUrl"
+                    class="cover-preview"
+                    alt="Image actuelle"
+                  />
                   <div class="cover-overlay">
-                    <button type="button" class="cover-change-btn" (click)="coverInput.click()">🔄 Changer</button>
-                    <button type="button" class="cover-remove-btn" (click)="removeCover()">× Retirer</button>
+                    <button type="button" class="cover-change-btn" (click)="coverInput.click()">
+                      🔄 Changer
+                    </button>
+                    <button type="button" class="cover-remove-btn" (click)="removeCover()">
+                      × Retirer
+                    </button>
                   </div>
                 } @else {
                   <div class="cover-empty">
                     <span class="cover-icon">🖼</span>
                     <span>Glisser une image ici ou</span>
-                    <button type="button" class="cover-browse-btn" (click)="coverInput.click()">parcourir</button>
+                    <button type="button" class="cover-browse-btn" (click)="coverInput.click()">
+                      parcourir
+                    </button>
                   </div>
                 }
-                <input #coverInput type="file" accept="image/*" class="hidden-input" (change)="onCoverSelected($event)" />
+                <input
+                  #coverInput
+                  type="file"
+                  accept="image/*"
+                  class="hidden-input"
+                  (change)="onCoverSelected($event)"
+                />
               </div>
             </div>
-
           </form>
         </div>
       }
@@ -251,18 +292,24 @@
       @if (s === 'ideation') {
         <section class="expo-section">
           <h2 class="section-title">Idéation — suggérez un thème</h2>
-          <p class="section-desc">Les suggestions sont anonymes. Chaque membre peut en soumettre plusieurs.</p>
+          <p class="section-desc">
+            Les suggestions sont anonymes. Chaque membre peut en soumettre plusieurs.
+          </p>
 
           @if (isMembre()) {
             <div class="suggestion-form">
-              <input class="suggestion-input"
-                     [value]="newSuggestion()"
-                     (input)="newSuggestion.set($any($event.target).value)"
-                     placeholder="Votre idée de thème…"
-                     (keydown.enter)="$event.preventDefault(); ajouterSuggestion('membre')" />
-              <button class="btn-ajouter"
-                      (click)="ajouterSuggestion('membre')"
-                      [disabled]="!newSuggestion().trim() || savingSugg()">
+              <input
+                class="suggestion-input"
+                [value]="newSuggestion()"
+                (input)="newSuggestion.set($any($event.target).value)"
+                placeholder="Votre idée de thème…"
+                (keydown.enter)="$event.preventDefault(); ajouterSuggestion('membre')"
+              />
+              <button
+                class="btn-ajouter"
+                (click)="ajouterSuggestion('membre')"
+                [disabled]="!newSuggestion().trim() || savingSugg()"
+              >
                 {{ savingSugg() ? '…' : 'Soumettre' }}
               </button>
             </div>
@@ -284,8 +331,12 @@
 
           @if (canManage()) {
             <div class="manage-actions">
-              <button class="btn-cloture" (click)="terminerIdeation()" [disabled]="savingTransition()">
-                {{ savingTransition() ? '…' : 'Terminer l\'idéation →' }}
+              <button
+                class="btn-cloture"
+                (click)="terminerIdeation()"
+                [disabled]="savingTransition()"
+              >
+                {{ savingTransition() ? '…' : "Terminer l'idéation →" }}
               </button>
             </div>
           }
@@ -297,39 +348,83 @@
         @if (canManage()) {
           <section class="expo-section">
             <h2 class="section-title">Nettoyage — sélection des thèmes</h2>
-            <p class="section-desc"><strong>Cochez les thèmes à retenir</strong>, modifiez les libellés, ajoutez un thème admin si besoin.</p>
+            <p class="section-desc">
+              <strong>Cochez les thèmes à retenir</strong>, modifiez les libellés, ajoutez un thème
+              admin si besoin.
+            </p>
 
             <!-- Tri -->
             <div class="sort-bar">
               <span class="sort-label">Tri :</span>
-              <button class="btn-sort" [class.btn-sort-active]="sortMode() === 'votes'" (click)="sortMode.set('votes')">↓ Votes</button>
-              <button class="btn-sort" [class.btn-sort-active]="sortMode() === 'alpha'" (click)="sortMode.set('alpha')">A → Z</button>
+              <button
+                class="btn-sort"
+                [class.btn-sort-active]="sortMode() === 'votes'"
+                (click)="sortMode.set('votes')"
+              >
+                ↓ Votes
+              </button>
+              <button
+                class="btn-sort"
+                [class.btn-sort-active]="sortMode() === 'alpha'"
+                (click)="sortMode.set('alpha')"
+              >
+                A → Z
+              </button>
             </div>
 
             <!-- Liste des suggestions -->
             <div class="sugg-curation-list">
               @for (sugg of suggestionsTriees(); track sugg.id) {
                 <div class="sugg-curation-item" [class.inactif]="!sugg.actif">
-                  <input type="checkbox" class="sugg-check" [checked]="sugg.actif" (change)="toggleActif(sugg)" />
+                  <input
+                    type="checkbox"
+                    class="sugg-check"
+                    [checked]="sugg.actif"
+                    (change)="toggleActif(sugg)"
+                  />
 
                   @if (editingSuggId() === sugg.id) {
-                    <input class="sugg-edit-input"
-                           [value]="editingSuggTexte()"
-                           (input)="editingSuggTexte.set($any($event.target).value)"
-                           (keydown.enter)="saveEditSugg()"
-                           (keydown.escape)="cancelEditSugg()" />
-                    <button mat-icon-button color="primary" (click)="saveEditSugg()" title="Valider"><mat-icon>check</mat-icon></button>
-                    <button mat-icon-button (click)="cancelEditSugg()" title="Annuler"><mat-icon>close</mat-icon></button>
+                    <input
+                      class="sugg-edit-input"
+                      [value]="editingSuggTexte()"
+                      (input)="editingSuggTexte.set($any($event.target).value)"
+                      (keydown.enter)="saveEditSugg()"
+                      (keydown.escape)="cancelEditSugg()"
+                    />
+                    <button
+                      mat-icon-button
+                      color="primary"
+                      (click)="saveEditSugg()"
+                      title="Valider"
+                    >
+                      <mat-icon>check</mat-icon>
+                    </button>
+                    <button mat-icon-button (click)="cancelEditSugg()" title="Annuler">
+                      <mat-icon>close</mat-icon>
+                    </button>
                   } @else {
                     <span class="sugg-texte">{{ sugg.texte }}</span>
                     @if (sugg.source === 'admin') {
                       <span class="badge-admin">admin</span>
                     }
                     @if (nbMembresVote() > 0) {
-                      <span class="sugg-vote-count">{{ scoreParSuggestion()[sugg.id] ?? 0 }} vote{{ (scoreParSuggestion()[sugg.id] ?? 0) !== 1 ? 's' : '' }}</span>
+                      <span class="sugg-vote-count"
+                        >{{ scoreParSuggestion()[sugg.id] ?? 0 }} vote{{
+                          (scoreParSuggestion()[sugg.id] ?? 0) !== 1 ? 's' : ''
+                        }}</span
+                      >
                     }
-                    <button mat-icon-button (click)="startEditSugg(sugg)" title="Modifier"><mat-icon>edit</mat-icon></button>
-                    <button mat-icon-button color="warn" (click)="supprimerSuggestion(sugg)" title="Supprimer"><mat-icon>delete</mat-icon></button>
+                    <button mat-icon-button (click)="startEditSugg(sugg)" title="Modifier">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button
+                      mat-icon-button
+                      color="warn"
+                      (click)="supprimerSuggestion(sugg)"
+                      title="Supprimer"
+                    >
+                      <mat-icon>delete</mat-icon>
+                    </button>
                   }
                 </div>
               }
@@ -337,29 +432,48 @@
 
             <!-- Ajouter un thème admin -->
             <div class="suggestion-form suggestion-form-admin">
-              <input class="suggestion-input"
-                     [value]="newSuggestionAdmin()"
-                     (input)="newSuggestionAdmin.set($any($event.target).value)"
-                     placeholder="Ajouter un thème (source admin)…"
-                     (keydown.enter)="$event.preventDefault(); ajouterSuggestion('admin')" />
-              <button class="btn-ajouter" (click)="ajouterSuggestion('admin')"
-                      [disabled]="!newSuggestionAdmin().trim() || savingSugg()">+ Ajouter</button>
+              <input
+                class="suggestion-input"
+                [value]="newSuggestionAdmin()"
+                (input)="newSuggestionAdmin.set($any($event.target).value)"
+                placeholder="Ajouter un thème (source admin)…"
+                (keydown.enter)="$event.preventDefault(); ajouterSuggestion('admin')"
+              />
+              <button
+                class="btn-ajouter"
+                (click)="ajouterSuggestion('admin')"
+                [disabled]="!newSuggestionAdmin().trim() || savingSugg()"
+              >
+                + Ajouter
+              </button>
             </div>
 
             <!-- Transitions -->
             <div class="transition-panels">
-
               <div class="transition-panel panel-a">
                 <h3 class="panel-title">Mise en votation</h3>
                 <p class="panel-desc">Les thèmes cochés seront soumis au vote des membres.</p>
                 <form [formGroup]="formVotation" (ngSubmit)="lancerVotation()">
-                  <app-date-picker label="Fin du vote" formControlName="dateFinVote" [required]="true" [min]="today" class="field-half"></app-date-picker>
+                  <app-date-picker
+                    label="Fin du vote"
+                    formControlName="dateFinVote"
+                    [required]="true"
+                    [min]="today"
+                    class="field-half"
+                  ></app-date-picker>
                   <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-half">
                     <mat-label>Votes par membre</mat-label>
                     <input matInput type="number" formControlName="nombreVotesParMembre" min="1" />
                   </mat-form-field>
-                  <button type="submit" class="btn-transition btn-votation"
-                          [disabled]="formVotation.invalid || savingTransition() || suggestionsActives().length === 0">
+                  <button
+                    type="submit"
+                    class="btn-transition btn-votation"
+                    [disabled]="
+                      formVotation.invalid ||
+                      savingTransition() ||
+                      suggestionsActives().length === 0
+                    "
+                  >
                     {{ savingTransition() ? '…' : 'Lancer le vote' }}
                   </button>
                   @if (suggestionsActives().length === 0) {
@@ -370,35 +484,57 @@
 
               <div class="transition-panel panel-b">
                 <h3 class="panel-title">Sélection du thème définitif</h3>
-                <p class="panel-desc">Choisir et figer définitivement le thème de l'exposition, puis ouvrir la soumission de photos.</p>
+                <p class="panel-desc">
+                  Choisir et figer définitivement le thème de l'exposition, puis ouvrir la
+                  soumission de photos.
+                </p>
                 <form [formGroup]="formSoumission" (ngSubmit)="lancerSoumission()">
                   <mat-form-field appearance="outline" class="field-full">
                     <mat-label>Thème retenu</mat-label>
                     <mat-select formControlName="themeChoisi">
                       @for (sugg of suggestionsPourSelection(); track sugg.id) {
                         <mat-option [value]="sugg.texte">
-                          @if (maxScoreVote() > 0 && (scoreParSuggestion()[sugg.id] ?? 0) === maxScoreVote()) { ★ }
+                          @if (
+                            maxScoreVote() > 0 &&
+                            (scoreParSuggestion()[sugg.id] ?? 0) === maxScoreVote()
+                          ) {
+                            ★
+                          }
                           {{ sugg.texte }}
                         </mat-option>
                       }
                     </mat-select>
                   </mat-form-field>
-                  <app-date-picker label="Fin de soumission de photos" formControlName="dateFinSoumission" [required]="true" [min]="today" class="field-half"></app-date-picker>
-                  <button type="submit" class="btn-transition btn-soumission"
-                          [disabled]="formSoumission.invalid || savingTransition() || suggestions().length === 0">
-                    {{ savingTransition() ? '…' : 'Définir le thème de l\'expo' }}
+                  <app-date-picker
+                    label="Fin de soumission de photos"
+                    formControlName="dateFinSoumission"
+                    [required]="true"
+                    [min]="today"
+                    class="field-half"
+                  ></app-date-picker>
+                  <button
+                    type="submit"
+                    class="btn-transition btn-soumission"
+                    [disabled]="
+                      formSoumission.invalid || savingTransition() || suggestions().length === 0
+                    "
+                  >
+                    {{ savingTransition() ? '…' : "Définir le thème de l'expo" }}
                   </button>
                   @if (suggestions().length === 0) {
                     <p class="panel-warn">Aucun thème disponible.</p>
                   }
                 </form>
               </div>
-
             </div>
           </section>
         } @else {
           <section class="expo-section">
-            <p class="info-attente">L'organisateur est en train de passer en revue les suggestions soumises — il peut en modifier le libellé, en retirer certaines, puis lancer un vote ou choisir directement le thème retenu.</p>
+            <p class="info-attente">
+              L'organisateur est en train de passer en revue les suggestions soumises — il peut en
+              modifier le libellé, en retirer certaines, puis lancer un vote ou choisir directement
+              le thème retenu.
+            </p>
           </section>
         }
       }
@@ -408,19 +544,35 @@
         <section class="expo-section">
           <h2 class="section-title">Vote</h2>
           @if (e.nombreVotesParMembre) {
-            <p class="section-desc">Votez pour jusqu'à <strong>{{ e.nombreVotesParMembre }}</strong> thème(s). Un vote par thème maximum.</p>
+            <p class="section-desc">
+              Votez pour jusqu'à <strong>{{ e.nombreVotesParMembre }}</strong> thème(s). Un vote par
+              thème maximum.
+            </p>
           }
 
           @if (isMembre()) {
             <p class="jetons-restants">
-              Votes restants : <strong>{{ jetonsRestants() }}</strong> / {{ e.nombreVotesParMembre }}
+              Votes restants : <strong>{{ jetonsRestants() }}</strong> /
+              {{ e.nombreVotesParMembre }}
             </p>
           }
 
           <div class="sort-bar">
             <span class="sort-label">Tri :</span>
-            <button class="btn-sort" [class.btn-sort-active]="sortMode() === 'alpha'" (click)="sortMode.set('alpha')">A → Z</button>
-            <button class="btn-sort" [class.btn-sort-active]="sortMode() === 'votes'" (click)="sortMode.set('votes')">↓ Votes</button>
+            <button
+              class="btn-sort"
+              [class.btn-sort-active]="sortMode() === 'alpha'"
+              (click)="sortMode.set('alpha')"
+            >
+              A → Z
+            </button>
+            <button
+              class="btn-sort"
+              [class.btn-sort-active]="sortMode() === 'votes'"
+              (click)="sortMode.set('votes')"
+            >
+              ↓ Votes
+            </button>
           </div>
 
           <div class="vote-list">
@@ -431,10 +583,12 @@
                   <span class="vote-score">{{ scoreParSuggestion()[sugg.id] || 0 }} vote(s)</span>
                 </div>
                 @if (isMembre()) {
-                  <button class="btn-vote-toggle"
-                          [class.voted]="(localVoteMap()[sugg.id] || 0) > 0"
-                          (click)="toggleVote(sugg.id)"
-                          [disabled]="jetonsRestants() === 0 && (localVoteMap()[sugg.id] || 0) === 0">
+                  <button
+                    class="btn-vote-toggle"
+                    [class.voted]="(localVoteMap()[sugg.id] || 0) > 0"
+                    (click)="toggleVote(sugg.id)"
+                    [disabled]="jetonsRestants() === 0 && (localVoteMap()[sugg.id] || 0) === 0"
+                  >
                     {{ (localVoteMap()[sugg.id] || 0) > 0 ? '✓ Voté' : 'Voter' }}
                   </button>
                 }
@@ -449,7 +603,6 @@
               </button>
             </div>
           }
-
         </section>
       }
 
@@ -458,17 +611,21 @@
         <section class="expo-section">
           <h2 class="section-title">Soumission de photos</h2>
           @if (e.themeChoisi) {
-            <p class="theme-choisi">Thème : <strong>{{ e.themeChoisi }}</strong></p>
+            <p class="theme-choisi">
+              Thème : <strong>{{ e.themeChoisi }}</strong>
+            </p>
           }
 
           @if (isMembre()) {
             @if (canUploadMore()) {
-              <div class="upload-zone"
-                   [class.drag-over]="dragOver()"
-                   (dragover)="$event.preventDefault(); dragOver.set(true)"
-                   (dragleave)="dragOver.set(false)"
-                   (drop)="onDrop($event)"
-                   (click)="photoFileInput.click()">
+              <div
+                class="upload-zone"
+                [class.drag-over]="dragOver()"
+                (dragover)="$event.preventDefault(); dragOver.set(true)"
+                (dragleave)="dragOver.set(false)"
+                (drop)="onDrop($event)"
+                (click)="photoFileInput.click()"
+              >
                 @if (uploading()) {
                   <div class="progress-bar-wrap">
                     <div class="progress-bar-fill" [style.width.%]="uploadProgress()"></div>
@@ -477,15 +634,26 @@
                 } @else {
                   <div class="upload-plus">+</div>
                   <span class="upload-label">Soumettre une photo — glissez ici ou cliquez</span>
-                  <span class="upload-hint">{{ monPhotos().length }} / {{ e.maxPhotosParMembre }} · Compressé automatiquement</span>
+                  <span class="upload-hint"
+                    >{{ monPhotos().length }} / {{ e.maxPhotosParMembre }} · Compressé
+                    automatiquement</span
+                  >
                 }
               </div>
-              <input #photoFileInput type="file" accept="image/*" style="display:none" (change)="onFileSelected($event)" />
+              <input
+                #photoFileInput
+                type="file"
+                accept="image/*"
+                style="display: none"
+                (change)="onFileSelected($event)"
+              />
               @if (uploadError()) {
                 <p class="upload-error">{{ uploadError() }}</p>
               }
             } @else {
-              <p class="upload-quota">Quota atteint — {{ e.maxPhotosParMembre }} photo(s) soumise(s).</p>
+              <p class="upload-quota">
+                Quota atteint — {{ e.maxPhotosParMembre }} photo(s) soumise(s).
+              </p>
             }
           } @else {
             <p class="info-connexion">Connectez-vous pour soumettre des photos.</p>
@@ -495,14 +663,22 @@
           @if (photos().length > 0) {
             <div class="photos-grid">
               @for (photo of photos(); track photo.id; let i = $index) {
-                <div class="photo-item" (click)="openLightbox(i)" style="cursor:pointer">
-                  <img [src]="photo.thumbnailUrl || photo.url" [alt]="photo.nomAuteur" loading="lazy" />
+                <div class="photo-item" (click)="openLightbox(i)" style="cursor: pointer">
+                  <img
+                    [src]="photo.thumbnailUrl || photo.url"
+                    [alt]="photo.nomAuteur"
+                    loading="lazy"
+                  />
                   <div class="photo-overlay">
                     <span class="photo-auteur">{{ photo.nomAuteur }}</span>
                     @if (photo.uid === uid() || canManage()) {
-                      <button class="btn-del-photo"
-                              (click)="$event.stopPropagation(); supprimerPhoto(photo)"
-                              [disabled]="deletingPhoto() === photo.id">×</button>
+                      <button
+                        class="btn-del-photo"
+                        (click)="$event.stopPropagation(); supprimerPhoto(photo)"
+                        [disabled]="deletingPhoto() === photo.id"
+                      >
+                        ×
+                      </button>
                     }
                   </div>
                 </div>
@@ -512,7 +688,11 @@
 
           @if (canManage()) {
             <div class="manage-actions">
-              <button class="btn-cloture" (click)="cloturerManuellement()" [disabled]="savingTransition()">
+              <button
+                class="btn-cloture"
+                (click)="cloturerManuellement()"
+                [disabled]="savingTransition()"
+              >
                 {{ savingTransition() ? '…' : 'Clôturer la soumission →' }}
               </button>
             </div>
@@ -526,7 +706,11 @@
           @if (canManage() && visibilitePublique()) {
             <div class="vis-actions">
               <button class="btn-publier-photos" (click)="togglePhotosPubliques()">
-                {{ photosPubliques() ? '🔒 Réserver les photos aux membres' : '🌐 Publier les photos — visibles par tous' }}
+                {{
+                  photosPubliques()
+                    ? '🔒 Réserver les photos aux membres'
+                    : '🌐 Publier les photos — visibles par tous'
+                }}
               </button>
             </div>
           }
@@ -534,15 +718,22 @@
             <p class="info-attente">L'exposition est en cours de finalisation. Revenez bientôt !</p>
           } @else {
             <h2 class="section-title">
-              @if (e.themeChoisi) { Photos — {{ e.themeChoisi }} }
-              @else { Photos de l'exposition }
+              @if (e.themeChoisi) {
+                Photos — {{ e.themeChoisi }}
+              } @else {
+                Photos de l'exposition
+              }
             </h2>
 
             @if (photos().length > 0) {
               <div class="photos-grid">
                 @for (photo of photos(); track photo.id; let i = $index) {
-                  <div class="photo-item" (click)="openLightbox(i)" style="cursor:pointer">
-                    <img [src]="photo.thumbnailUrl || photo.url" [alt]="photo.nomAuteur" loading="lazy" />
+                  <div class="photo-item" (click)="openLightbox(i)" style="cursor: pointer">
+                    <img
+                      [src]="photo.thumbnailUrl || photo.url"
+                      [alt]="photo.nomAuteur"
+                      loading="lazy"
+                    />
                     <div class="photo-overlay">
                       <span class="photo-auteur">{{ photo.nomAuteur }}</span>
                     </div>
@@ -555,7 +746,6 @@
           }
         </section>
       }
-
     </main>
   </div>
 }

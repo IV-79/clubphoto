@@ -1,12 +1,24 @@
 import { Injectable, inject } from '@angular/core';
 import {
-  signInWithEmailAndPassword, signOut, onAuthStateChanged,
-  sendSignInLinkToEmail, sendPasswordResetEmail,
-  reauthenticateWithCredential, updatePassword, EmailAuthProvider
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  sendSignInLinkToEmail,
+  sendPasswordResetEmail,
+  reauthenticateWithCredential,
+  updatePassword,
+  EmailAuthProvider,
 } from 'firebase/auth';
 import {
-  doc, setDoc, getDoc, updateDoc, deleteDoc,
-  collection, getDocs, query, where
+  doc,
+  setDoc,
+  getDoc,
+  updateDoc,
+  deleteDoc,
+  collection,
+  getDocs,
+  query,
+  where,
 } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
 import { Router } from '@angular/router';
@@ -21,26 +33,26 @@ export class AuthService {
   private router = inject(Router);
   private documentService = inject(DocumentService);
 
-  user$ = new Observable<import('firebase/auth').User | null>(sub =>
-    onAuthStateChanged(auth, user => sub.next(user))
+  user$ = new Observable<import('firebase/auth').User | null>((sub) =>
+    onAuthStateChanged(auth, (user) => sub.next(user)),
   ).pipe(shareReplay(1));
 
   currentUserProfile$: Observable<UserProfile | null> = this.user$.pipe(
-    switchMap(user => {
+    switchMap((user) => {
       if (!user) return of(null);
-      return docStream<UserProfile>(doc(db, 'users', user.uid)).pipe(
-        map(data => data ?? null)
-      );
+      return docStream<UserProfile>(doc(db, 'users', user.uid)).pipe(map((data) => data ?? null));
     }),
-    shareReplay(1)
+    shareReplay(1),
   );
 
   constructor() {
     // Force-logout si un admin suspend le membre pendant sa session active
-    this.currentUserProfile$.pipe(
-      pairwise(),
-      filter(([prev, curr]) => prev !== null && !prev?.isSuspended && !!curr?.isSuspended)
-    ).subscribe(() => this.logout());
+    this.currentUserProfile$
+      .pipe(
+        pairwise(),
+        filter(([prev, curr]) => prev !== null && !prev?.isSuspended && !!curr?.isSuspended),
+      )
+      .subscribe(() => this.logout());
   }
 
   login(email: string, password: string) {
@@ -73,7 +85,7 @@ export class AuthService {
       email: user.email ?? '',
       nom: user.displayName ?? user.email ?? '',
       role: 'membre',
-      dateAdhesion: todayISO()
+      dateAdhesion: todayISO(),
     };
     await setDoc(doc(db, 'users', user.uid), profile);
     return profile;
@@ -92,17 +104,21 @@ export class AuthService {
   }
 
   getAllMembersOnce(): Observable<UserProfile[]> {
-    return from(getDocs(collection(db, 'users')))
-      .pipe(map(snap => snap.docs.map(d => ({ uid: d.id, ...d.data() } as UserProfile))));
+    return from(getDocs(collection(db, 'users'))).pipe(
+      map((snap) => snap.docs.map((d) => ({ uid: d.id, ...d.data() }) as UserProfile)),
+    );
   }
 
   getMemberProfile(uid: string): Observable<UserProfile | null> {
     return from(getDoc(doc(db, 'users', uid))).pipe(
-      map(snap => snap.exists() ? (snap.data() as UserProfile) : null)
+      map((snap) => (snap.exists() ? (snap.data() as UserProfile) : null)),
     );
   }
 
-  async updateProfile(uid: string, data: Partial<Omit<UserProfile, 'uid' | 'email' | 'role' | 'dateAdhesion'>>): Promise<void> {
+  async updateProfile(
+    uid: string,
+    data: Partial<Omit<UserProfile, 'uid' | 'email' | 'role' | 'dateAdhesion'>>,
+  ): Promise<void> {
     await updateDoc(doc(db, 'users', uid), data as Record<string, unknown>);
   }
 
@@ -157,10 +173,9 @@ export class AuthService {
 
     const themesSnap = await getDocs(collection(db, 'themes'));
     for (const themeDoc of themesSnap.docs) {
-      const soumSnap = await getDocs(query(
-        collection(db, 'themes', themeDoc.id, 'soumissions'),
-        where('membreUid', '==', uid)
-      ));
+      const soumSnap = await getDocs(
+        query(collection(db, 'themes', themeDoc.id, 'soumissions'), where('membreUid', '==', uid)),
+      );
       for (const d of soumSnap.docs) {
         themes += (d.data() as { fileSize?: number }).fileSize ?? 0;
       }
@@ -168,10 +183,9 @@ export class AuthService {
 
     const oneshotsSnap = await getDocs(collection(db, 'oneshots'));
     for (const osDoc of oneshotsSnap.docs) {
-      const osPhotosSnap = await getDocs(query(
-        collection(db, 'oneshots', osDoc.id, 'photos'),
-        where('membreUid', '==', uid)
-      ));
+      const osPhotosSnap = await getDocs(
+        query(collection(db, 'oneshots', osDoc.id, 'photos'), where('membreUid', '==', uid)),
+      );
       for (const pd of osPhotosSnap.docs) {
         oneshots += (pd.data() as { fileSize?: number }).fileSize ?? 0;
       }
@@ -179,10 +193,9 @@ export class AuthService {
 
     const defisSnap = await getDocs(collection(db, 'defis'));
     for (const defiDoc of defisSnap.docs) {
-      const defiPhotosSnap = await getDocs(query(
-        collection(db, 'defis', defiDoc.id, 'photos'),
-        where('membreUid', '==', uid)
-      ));
+      const defiPhotosSnap = await getDocs(
+        query(collection(db, 'defis', defiDoc.id, 'photos'), where('membreUid', '==', uid)),
+      );
       for (const pd of defiPhotosSnap.docs) {
         defis += (pd.data() as { fileSize?: number }).fileSize ?? 0;
       }
@@ -190,10 +203,9 @@ export class AuthService {
 
     const sortiesSnap = await getDocs(collection(db, 'sorties'));
     for (const sortieDoc of sortiesSnap.docs) {
-      const sortiePhotosSnap = await getDocs(query(
-        collection(db, 'sorties', sortieDoc.id, 'photos'),
-        where('uploaderUid', '==', uid)
-      ));
+      const sortiePhotosSnap = await getDocs(
+        query(collection(db, 'sorties', sortieDoc.id, 'photos'), where('uploaderUid', '==', uid)),
+      );
       for (const pd of sortiePhotosSnap.docs) {
         sorties += (pd.data() as { fileSize?: number }).fileSize ?? 0;
       }
@@ -201,17 +213,18 @@ export class AuthService {
 
     const expositionsSnap = await getDocs(collection(db, 'expositions'));
     for (const expoDoc of expositionsSnap.docs) {
-      const expoPhotosSnap = await getDocs(query(
-        collection(db, 'expositions', expoDoc.id, 'photos'),
-        where('uid', '==', uid)
-      ));
+      const expoPhotosSnap = await getDocs(
+        query(collection(db, 'expositions', expoDoc.id, 'photos'), where('uid', '==', uid)),
+      );
       for (const pd of expoPhotosSnap.docs) {
         expositions += (pd.data() as { fileSize?: number }).fileSize ?? 0;
       }
     }
 
     let documents = 0;
-    const docsSnap = await getDocs(query(collection(db, 'documents'), where('uploadeurUid', '==', uid)));
+    const docsSnap = await getDocs(
+      query(collection(db, 'documents'), where('uploadeurUid', '==', uid)),
+    );
     for (const d of docsSnap.docs) {
       documents += (d.data() as { taille?: number }).taille ?? 0;
     }
@@ -229,22 +242,25 @@ export class AuthService {
     const photosSnap = await getDocs(query(collection(db, 'photos'), where('uid', '==', uid)));
     for (const d of photosSnap.docs) {
       const data = d.data() as { storagePath?: string; thumbnailPath?: string };
-      if (data.storagePath)   deletes.push(deleteObject(ref(storage, data.storagePath)).catch(() => {}));
-      if (data.thumbnailPath) deletes.push(deleteObject(ref(storage, data.thumbnailPath)).catch(() => {}));
+      if (data.storagePath)
+        deletes.push(deleteObject(ref(storage, data.storagePath)).catch(() => {}));
+      if (data.thumbnailPath)
+        deletes.push(deleteObject(ref(storage, data.thumbnailPath)).catch(() => {}));
       deletes.push(deleteDoc(d.ref));
     }
 
     // 2. Soumissions thèmes
     const themesSnap = await getDocs(collection(db, 'themes'));
     for (const themeDoc of themesSnap.docs) {
-      const soumSnap = await getDocs(query(
-        collection(db, 'themes', themeDoc.id, 'soumissions'),
-        where('membreUid', '==', uid)
-      ));
+      const soumSnap = await getDocs(
+        query(collection(db, 'themes', themeDoc.id, 'soumissions'), where('membreUid', '==', uid)),
+      );
       for (const d of soumSnap.docs) {
         const data = d.data() as { storagePath?: string; thumbnailPath?: string };
-        if (data.storagePath)   deletes.push(deleteObject(ref(storage, data.storagePath)).catch(() => {}));
-        if (data.thumbnailPath) deletes.push(deleteObject(ref(storage, data.thumbnailPath)).catch(() => {}));
+        if (data.storagePath)
+          deletes.push(deleteObject(ref(storage, data.storagePath)).catch(() => {}));
+        if (data.thumbnailPath)
+          deletes.push(deleteObject(ref(storage, data.thumbnailPath)).catch(() => {}));
         deletes.push(deleteDoc(d.ref));
       }
     }
@@ -253,15 +269,18 @@ export class AuthService {
     const oneshotsSnap = await getDocs(collection(db, 'oneshots'));
     for (const osDoc of oneshotsSnap.docs) {
       const osId = osDoc.id;
-      deletes.push(deleteDoc(doc(db, 'oneshots', osId, 'inscriptions', uid)).catch(() => {}) as Promise<void>);
-      const osPhotosSnap = await getDocs(query(
-        collection(db, 'oneshots', osId, 'photos'),
-        where('membreUid', '==', uid)
-      ));
+      deletes.push(
+        deleteDoc(doc(db, 'oneshots', osId, 'inscriptions', uid)).catch(() => {}) as Promise<void>,
+      );
+      const osPhotosSnap = await getDocs(
+        query(collection(db, 'oneshots', osId, 'photos'), where('membreUid', '==', uid)),
+      );
       for (const pd of osPhotosSnap.docs) {
         const data = pd.data() as { storagePath?: string; thumbnailPath?: string };
-        if (data.storagePath)   deletes.push(deleteObject(ref(storage, data.storagePath)).catch(() => {}));
-        if (data.thumbnailPath) deletes.push(deleteObject(ref(storage, data.thumbnailPath)).catch(() => {}));
+        if (data.storagePath)
+          deletes.push(deleteObject(ref(storage, data.storagePath)).catch(() => {}));
+        if (data.thumbnailPath)
+          deletes.push(deleteObject(ref(storage, data.thumbnailPath)).catch(() => {}));
         deletes.push(deleteDoc(pd.ref));
       }
     }
@@ -269,14 +288,15 @@ export class AuthService {
     // 4. Défis : photos
     const defisSnap = await getDocs(collection(db, 'defis'));
     for (const defiDoc of defisSnap.docs) {
-      const defiPhotosSnap = await getDocs(query(
-        collection(db, 'defis', defiDoc.id, 'photos'),
-        where('membreUid', '==', uid)
-      ));
+      const defiPhotosSnap = await getDocs(
+        query(collection(db, 'defis', defiDoc.id, 'photos'), where('membreUid', '==', uid)),
+      );
       for (const pd of defiPhotosSnap.docs) {
         const data = pd.data() as { storagePath?: string; thumbnailPath?: string };
-        if (data.storagePath)   deletes.push(deleteObject(ref(storage, data.storagePath)).catch(() => {}));
-        if (data.thumbnailPath) deletes.push(deleteObject(ref(storage, data.thumbnailPath)).catch(() => {}));
+        if (data.storagePath)
+          deletes.push(deleteObject(ref(storage, data.storagePath)).catch(() => {}));
+        if (data.thumbnailPath)
+          deletes.push(deleteObject(ref(storage, data.thumbnailPath)).catch(() => {}));
         deletes.push(deleteDoc(pd.ref));
       }
     }
@@ -284,7 +304,11 @@ export class AuthService {
     // 5. Sorties : inscriptions
     const sortiesSnap = await getDocs(collection(db, 'sorties'));
     for (const sortieDoc of sortiesSnap.docs) {
-      deletes.push(deleteDoc(doc(db, 'sorties', sortieDoc.id, 'inscriptions', uid)).catch(() => {}) as Promise<void>);
+      deletes.push(
+        deleteDoc(doc(db, 'sorties', sortieDoc.id, 'inscriptions', uid)).catch(
+          () => {},
+        ) as Promise<void>,
+      );
     }
 
     // 6. Documents partagés
@@ -300,20 +324,28 @@ export class AuthService {
     await Promise.all(deletes);
   }
 
-  uploadUserPhoto(uid: string, file: File, type: 'profil' | 'bandeau'): Observable<{ state: 'uploading' | 'done'; progress: number; url?: string }> {
-    return new Observable(observer => {
+  uploadUserPhoto(
+    uid: string,
+    file: File,
+    type: 'profil' | 'bandeau',
+  ): Observable<{ state: 'uploading' | 'done'; progress: number; url?: string }> {
+    return new Observable((observer) => {
       const storagePath = `user-photos/${uid}/${type}.webp`;
       const storageRef = ref(storage, storagePath);
       const task = uploadBytesResumable(storageRef, file);
       task.on(
         'state_changed',
-        snap => observer.next({ state: 'uploading', progress: Math.round(snap.bytesTransferred / snap.totalBytes * 100) }),
-        err => observer.error(err),
+        (snap) =>
+          observer.next({
+            state: 'uploading',
+            progress: Math.round((snap.bytesTransferred / snap.totalBytes) * 100),
+          }),
+        (err) => observer.error(err),
         async () => {
           const url = await getDownloadURL(task.snapshot.ref);
           observer.next({ state: 'done', progress: 100, url });
           observer.complete();
-        }
+        },
       );
     });
   }

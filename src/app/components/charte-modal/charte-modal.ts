@@ -30,11 +30,10 @@ export class CharteModal {
   charteChecked = false;
   cguChecked = false;
 
-  safeCharteHtml = computed(
-    (): SafeHtml =>
-      this.sanitizer.bypassSecurityTrustHtml(
-        marked.parse(this.charteDoc().contenu, { async: false }) as string,
-      ),
+  safeCharteHtml = computed((): SafeHtml =>
+    this.sanitizer.bypassSecurityTrustHtml(
+      marked.parse(this.charteDoc().contenu, { async: false }) as string,
+    ),
   );
 
   get canAccept(): boolean {

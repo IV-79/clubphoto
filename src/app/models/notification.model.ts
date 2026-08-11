@@ -1,4 +1,14 @@
-export type NotifType = 'oneshot' | 'sortie' | 'article' | 'reunion' | 'document' | 'defi' | 'exposition' | 'like' | 'comment' | 'admin';
+export type NotifType =
+  | 'oneshot'
+  | 'sortie'
+  | 'article'
+  | 'reunion'
+  | 'document'
+  | 'defi'
+  | 'exposition'
+  | 'like'
+  | 'comment'
+  | 'admin';
 
 export interface AppNotification {
   id: string;
@@ -25,49 +35,51 @@ export interface UserSubscriptions {
 }
 
 const TYPE_TO_SUB: Record<NotifType, keyof UserSubscriptions> = {
-  oneshot:  'oneshots',
-  sortie:   'sorties',
-  article:  'articles',
-  reunion:  'reunions',
+  oneshot: 'oneshots',
+  sortie: 'sorties',
+  article: 'articles',
+  reunion: 'reunions',
   document: 'documents',
-  defi:        'defis',
-  exposition:  'expositions',
-  like:        'likes',
-  comment:  'comments',
-  admin:    'admin',
+  defi: 'defis',
+  exposition: 'expositions',
+  like: 'likes',
+  comment: 'comments',
+  admin: 'admin',
 };
 
 export function isSubscribed(
   subs: UserSubscriptions | undefined,
-  type: NotifType | keyof UserSubscriptions
+  type: NotifType | keyof UserSubscriptions,
 ): boolean {
-  const key = (type in TYPE_TO_SUB ? TYPE_TO_SUB[type as NotifType] : type) as keyof UserSubscriptions;
+  const key = (
+    type in TYPE_TO_SUB ? TYPE_TO_SUB[type as NotifType] : type
+  ) as keyof UserSubscriptions;
   if (!subs || subs[key] === undefined) return true;
   return !!subs[key];
 }
 
 export const NOTIF_ICONS: Record<NotifType, string> = {
-  oneshot:  '📸',
-  sortie:   '🚶',
-  article:  '📰',
-  reunion:  '📅',
+  oneshot: '📸',
+  sortie: '🚶',
+  article: '📰',
+  reunion: '📅',
   document: '📁',
-  defi:       '🏅',
+  defi: '🏅',
   exposition: '🖼️',
-  like:       '♥',
-  comment:  '💬',
-  admin:    '🛡️',
+  like: '♥',
+  comment: '💬',
+  admin: '🛡️',
 };
 
 export const NOTIF_LABELS: Record<NotifType, string> = {
-  oneshot:  'OneShot',
-  sortie:   'Sortie photo',
-  article:  'Actualité',
-  reunion:  'Réunion',
+  oneshot: 'OneShot',
+  sortie: 'Sortie photo',
+  article: 'Actualité',
+  reunion: 'Réunion',
   document: 'Documents',
-  defi:       'Défi',
+  defi: 'Défi',
   exposition: 'Exposition',
-  like:       'J\'aime',
-  comment:  'Commentaire',
-  admin:    'Administration',
+  like: "J'aime",
+  comment: 'Commentaire',
+  admin: 'Administration',
 };

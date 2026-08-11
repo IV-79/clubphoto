@@ -1,29 +1,47 @@
 import { Injectable, signal } from '@angular/core';
 import {
-  collection, doc, addDoc, updateDoc, deleteDoc,
-  getDocs, query, orderBy, limit, writeBatch, where
+  collection,
+  doc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  getDocs,
+  query,
+  orderBy,
+  limit,
+  writeBatch,
+  where,
 } from 'firebase/firestore';
 import { Observable, from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { db } from '../utils/firebase';
-import { AppNotification, NotifType, UserSubscriptions, isSubscribed } from '../models/notification.model';
+import {
+  AppNotification,
+  NotifType,
+  UserSubscriptions,
+  isSubscribed,
+} from '../models/notification.model';
 import { UserProfile } from '../models/user.model';
 
 @Injectable({ providedIn: 'root' })
 export class NotificationService {
   readonly refresh = signal(0);
-  private bump() { this.refresh.update(v => v + 1); }
+  private bump() {
+    this.refresh.update((v) => v + 1);
+  }
 
   // ── Lecture ─────────────────────────────────────────────────
 
   getNotifications(uid: string): Observable<AppNotification[]> {
-    return from(getDocs(query(
-      collection(db, `notifications/${uid}/items`),
-      orderBy('createdAt', 'desc'),
-      limit(50)
-    ))).pipe(
-      map(snap => snap.docs.map(d => ({ id: d.id, ...d.data() } as AppNotification)))
-    );
+    return from(
+      getDocs(
+        query(
+          collection(db, `notifications/${uid}/items`),
+          orderBy('createdAt', 'desc'),
+          limit(50),
+        ),
+      ),
+    ).pipe(map((snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }) as AppNotification)));
   }
 
   // ── Notification personnelle (like / commentaire) ────────────
@@ -37,7 +55,7 @@ export class NotificationService {
       sourceNom: string;
       sourceUid: string;
       toSubscriptions?: UserSubscriptions;
-    }
+    },
   ): Promise<void> {
     if (toUid === options.sourceUid) return; // pas d'auto-notif
     if (!isSubscribed(options.toSubscriptions, type)) return;
@@ -58,7 +76,7 @@ export class NotificationService {
     toUid: string,
     type: NotifType,
     message: string,
-    options: { lien?: string; sourceNom: string; sourceUid?: string }
+    options: { lien?: string; sourceNom: string; sourceUid?: string },
   ): Promise<void> {
     await addDoc(collection(db, `notifications/${toUid}/items`), {
       type,
@@ -76,7 +94,7 @@ export class NotificationService {
   async broadcast(
     type: 'oneshot' | 'sortie' | 'article' | 'reunion' | 'document' | 'defi' | 'exposition',
     message: string,
-    options: { lien?: string; sourceNom: string; excludeUid?: string }
+    options: { lien?: string; sourceNom: string; excludeUid?: string },
   ): Promise<void> {
     const usersSnap = await getDocs(collection(db, 'users'));
     const batch = writeBatch(db);
@@ -112,10 +130,9 @@ export class NotificationService {
   }
 
   async markAllAsRead(uid: string): Promise<void> {
-    const snap = await getDocs(query(
-      collection(db, `notifications/${uid}/items`),
-      where('lu', '==', false)
-    ));
+    const snap = await getDocs(
+      query(collection(db, `notifications/${uid}/items`), where('lu', '==', false)),
+    );
     if (!snap.docs.length) return;
     const batch = writeBatch(db);
     for (const d of snap.docs) batch.update(d.ref, { lu: true });

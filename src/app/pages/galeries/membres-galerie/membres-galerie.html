@@ -1,5 +1,4 @@
 <div class="galerie-page">
-
   <div class="page-header">
     <h1>Portfolios des membres</h1>
     <p class="subtitle">{{ membres().length }} membre{{ membres().length !== 1 ? 's' : '' }}</p>
@@ -25,7 +24,7 @@
         <a [routerLink]="['/galeries/membres', membre.uid]" class="membre-card">
           <div class="cover-wrap">
             @if (membre.photoProfilUrl) {
-              <img [src]="membre.photoProfilUrl" [alt]="nomComplet(membre)" class="cover-img">
+              <img [src]="membre.photoProfilUrl" [alt]="nomComplet(membre)" class="cover-img" />
             } @else {
               <div class="cover-placeholder">
                 <span class="placeholder-initiales">{{ initiales(membre) }}</span>
@@ -42,5 +41,4 @@
       }
     </div>
   }
-
 </div>
