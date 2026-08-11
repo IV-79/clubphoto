@@ -58,8 +58,8 @@
   text-decoration: underline;
 }
 
-html[data-theme='dark'] .club-md-content a {
-  color: #ef9a9a;
+.club-md-content a:visited {
+  color: #880000;
 }
 
 .club-md-content hr {
@@ -90,10 +90,6 @@ html[data-theme='dark'] .club-md-content a {
   font-weight: 600;
   text-align: left;
   padding: 10px 14px;
-}
-
-html[data-theme='dark'] .club-md-content th {
-  background: #283593;
 }
 
 .club-md-content td {

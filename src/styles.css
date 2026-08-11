@@ -247,6 +247,19 @@ html[data-theme="dark"] .event-hero.has-cover .hero-status {
    ─────────────────────────────────────────────────────────────────────────── */
 html[data-theme="dark"] .role-select-membre { background: rgba(255,255,255,0.08); color: var(--text-secondary); }
 
+/* ── Pages Le Club — markdown dark mode ─────────────────────────────────────
+   Doit être dans styles.css : ViewEncapsulation empêche html[data-theme]
+   de matcher depuis un fichier CSS de composant.
+   ─────────────────────────────────────────────────────────────────────────── */
+html[data-theme="dark"] .club-md-content a,
+html[data-theme="dark"] .club-md-content a:visited {
+  color: #ef9a9a;
+}
+
+html[data-theme="dark"] .club-md-content th {
+  background: #283593;
+}
+
 /* ── Guide du site — impression toujours en mode clair ──────────────────────
    Même spécificité que html[data-theme="dark"] mais déclaré après → gagne.
    Réinitialise les tokens de couleur et les règles hardcodées du guide.
