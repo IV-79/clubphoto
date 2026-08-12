@@ -287,8 +287,18 @@ export class MembreDetail {
     const uid = this.profile()?.uid;
     if (!uid) return;
     const liked = this.isLiked(photo);
+    const ownerUid = this.membre()?.uid ?? '';
     this.applyLikeLocally(photo.id, uid, liked);
-    await this.photoService.toggleLikePhoto(photo.id, uid, liked);
+    await this.photoService.toggleLikePhoto(photo.id, uid, liked, uid
+      ? {
+          ownerUid,
+          likerNom: `${this.profile()?.prenom ?? ''} ${this.profile()?.nom ?? ''}`.trim(),
+          lien: `/galeries/membres/${ownerUid}?photo=${photo.id}`,
+          photoTitre: photo.titre,
+          ownerSubscriptions: this.membre()?.subscriptions,
+        }
+      : undefined,
+    );
   }
 
   private applyLikeLocally(photoId: string, uid: string, wasLiked: boolean) {
