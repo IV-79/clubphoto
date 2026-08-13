@@ -2,6 +2,14 @@
 
 ---
 
+## v1.0.0-beta — En cours (2026-08-12)
+
+### Corrections (2026-08-12)
+
+- **Fix notification like portfolio** : le bouton ♥ sur les cartes de la galerie membre ne déclenchait pas de notification ; corrigé en passant le paramètre `notif` manquant à `toggleLikePhoto` dans `membre-detail.ts`.
+
+---
+
 ## v1.0.0-beta — En cours (2026-08-11)
 
 ### Nettoyage, corrections et améliorations (2026-08-11)
