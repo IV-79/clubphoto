@@ -59,6 +59,8 @@ The instructions below are provided for reference, for anyone who has obtained p
    - **Storage** → start in production mode
    - **Hosting** → register a web app and note the SDK config values
 
+> **Billing notice** — Firebase Storage requires the **Blaze (pay-as-you-go)** plan; Firebase will prompt you to upgrade when you enable it. The free quota is generous and this app is designed to minimize reads and storage costs (local refresh after mutations, no live listeners except portfolio, photo sizes tracked to avoid redundant fetches), so charges for a small club should remain negligible.
+
 ### 2. Configure environment files
 
 Copy the example file and fill in your Firebase project values:
