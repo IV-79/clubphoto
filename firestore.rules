@@ -61,6 +61,9 @@ service cloud.firestore {
     match /themes/{themeId} {
       allow read: if true;
       allow write: if isAdmin();
+      // Tout membre connecté peut incrémenter nbSoumissions / nbParticipants (soumission photo)
+      allow update: if isLoggedIn() &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nbSoumissions', 'nbParticipants']);
     }
 
     match /themes/{themeId}/soumissions/{soumId} {
