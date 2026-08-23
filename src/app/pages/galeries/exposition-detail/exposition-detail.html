@@ -28,71 +28,87 @@
     <aside class="expo-aside">
       <div class="info-card">
         <h3 class="info-card-title">Calendrier</h3>
-        @if (e.dateDebutIdeation) {
+        @if (profile()) {
+          @if (e.dateDebutIdeation) {
+            <div class="stat-row">
+              <span>Début idéation</span>
+              <strong>{{ formatDate(e.dateDebutIdeation) }}</strong>
+            </div>
+          }
           <div class="stat-row">
-            <span>Début idéation</span>
-            <strong>{{ formatDate(e.dateDebutIdeation) }}</strong>
+            <span>Fin d'idéation</span>
+            <strong>{{ formatDate(e.dateFinIdeation) }}</strong>
           </div>
-        }
-        <div class="stat-row">
-          <span>Fin d'idéation</span>
-          <strong>{{ formatDate(e.dateFinIdeation) }}</strong>
-        </div>
-        @if (e.dateFinVote) {
-          <div class="stat-row">
-            <span>Fin du vote</span>
-            <strong>{{ formatDate(e.dateFinVote) }}</strong>
-          </div>
-        }
-        @if (e.dateFinSoumission) {
-          <div class="stat-row">
-            <span>Fin de soumission de photos</span>
-            <strong>{{ formatDate(e.dateFinSoumission) }}</strong>
-          </div>
+          @if (e.dateFinVote) {
+            <div class="stat-row">
+              <span>Fin du vote</span>
+              <strong>{{ formatDate(e.dateFinVote) }}</strong>
+            </div>
+          }
+          @if (e.dateFinSoumission) {
+            <div class="stat-row">
+              <span>Fin de soumission de photos</span>
+              <strong>{{ formatDate(e.dateFinSoumission) }}</strong>
+            </div>
+          }
         }
         @if (e.dateExposition) {
           <div class="stat-row">
-            <span>Date de l'exposition</span>
+            <span>Début de l'exposition</span>
             <strong>{{ formatDate(e.dateExposition) }}</strong>
           </div>
         }
-      </div>
-
-      <div class="info-card">
-        <h3 class="info-card-title">Participation</h3>
-        @if (e.themeChoisi) {
+        @if (e.dateFinExposition) {
           <div class="stat-row">
-            <span>Thème</span>
-            <strong>{{ e.themeChoisi }}</strong>
-          </div>
-        }
-        <div class="stat-row">
-          <span>Max photos / membre</span>
-          <strong>{{ e.maxPhotosParMembre }}</strong>
-        </div>
-        <div class="stat-row">
-          <span>Thèmes proposés</span>
-          <strong>{{ suggestions().length }}</strong>
-        </div>
-        @if (s === 'soumission' || s === 'cloture') {
-          <div class="stat-row">
-            <span>Photos soumises</span>
-            <strong>{{ photos().length }}</strong>
+            <span>Fin de l'exposition</span>
+            <strong>{{ formatDate(e.dateFinExposition) }}</strong>
           </div>
         }
       </div>
 
-      <div class="info-card">
-        <h3 class="info-card-title">Visibilité</h3>
-        <div class="stat-row">
-          <span>Exposition</span>
-          <strong>{{ visibilitePublique() ? 'Publique' : 'Membres' }}</strong>
+      @if (!profile() && e.themeChoisi) {
+        <div class="info-card">
+          <h3 class="info-card-title">Thème</h3>
+          <p class="theme-guest-text">{{ e.themeChoisi }}</p>
         </div>
-        <div class="stat-row">
-          <span>Photos</span>
-          <strong>{{ photosPubliques() ? 'Publiques' : 'Membres' }}</strong>
+      }
+      @if (profile()) {
+        <div class="info-card">
+          <h3 class="info-card-title">Participation</h3>
+          @if (e.themeChoisi) {
+            <div class="stat-row">
+              <span>Thème</span>
+              <strong>{{ e.themeChoisi }}</strong>
+            </div>
+          }
+          <div class="stat-row">
+            <span>Max photos / membre</span>
+            <strong>{{ e.maxPhotosParMembre }}</strong>
+          </div>
+          <div class="stat-row">
+            <span>Thèmes proposés</span>
+            <strong>{{ suggestions().length }}</strong>
+          </div>
+          @if (s === 'soumission' || s === 'cloture') {
+            <div class="stat-row">
+              <span>Photos soumises</span>
+              <strong>{{ photos().length }}</strong>
+            </div>
+          }
         </div>
-      </div>
+
+        <div class="info-card">
+          <h3 class="info-card-title">Visibilité</h3>
+          <div class="stat-row">
+            <span>Exposition</span>
+            <strong>{{ visibilitePublique() ? 'Publique' : 'Membres' }}</strong>
+          </div>
+          <div class="stat-row">
+            <span>Photos</span>
+            <strong>{{ photosPubliques() ? 'Publiques' : 'Membres' }}</strong>
+          </div>
+        </div>
+      }
 
       @if (s === 'votation' || (s === 'nettoyage' && nbMembresVote() > 0)) {
         <div class="info-card">
@@ -185,24 +201,10 @@
                 {{ datesChronoError }}
               </div>
             }
-            @if (expoStatut() === 'soumission') {
-              <div class="dates-warning dates-info">
-                <mat-icon>info</mat-icon>
-                L'expo est en phase soumission — vider la date de fin de soumission ferait repasser
-                en nettoyage.
-              </div>
-            }
-            @if (expoStatut() === 'nettoyage' || expoStatut() === 'votation') {
-              <div class="dates-warning dates-info">
-                <mat-icon>info</mat-icon>
-                Avancer la fin d'idéation dans le futur ferait repasser l'expo en idéation.
-              </div>
-            }
             @if (datesLocked) {
               <div class="dates-warning dates-info">
                 <mat-icon>lock</mat-icon>
-                Dates verrouillées — le thème est fixé. Videz le champ « Thème choisi » pour
-                modifier.
+                Les dates d'idéation et de vote sont verrouillées — le thème est fixé définitivement.
               </div>
             }
 
@@ -233,8 +235,13 @@
             </div>
             <div class="form-row">
               <app-date-picker
-                label="Date de l'exposition (informelle)"
+                label="Début de l'exposition"
                 formControlName="dateExposition"
+                class="field-half"
+              ></app-date-picker>
+              <app-date-picker
+                label="Fin de l'exposition"
+                formControlName="dateFinExposition"
                 class="field-half"
               ></app-date-picker>
             </div>
@@ -313,8 +320,6 @@
                 {{ savingSugg() ? '…' : 'Soumettre' }}
               </button>
             </div>
-          } @else {
-            <p class="info-connexion">Connectez-vous pour soumettre un thème.</p>
           }
 
           @if (suggestions().length > 0) {
@@ -655,8 +660,6 @@
                 Quota atteint — {{ e.maxPhotosParMembre }} photo(s) soumise(s).
               </p>
             }
-          } @else {
-            <p class="info-connexion">Connectez-vous pour soumettre des photos.</p>
           }
 
           <!-- Galerie membres -->

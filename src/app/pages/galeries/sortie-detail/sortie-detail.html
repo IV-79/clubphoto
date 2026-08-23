@@ -32,7 +32,13 @@
             <span>Date</span>
             <strong>{{ formatDate(s.date) }}</strong>
           </div>
-          @if (s.lieu) {
+          @if (s.dateFinSoumission && profile()) {
+            <div class="stat-row">
+              <span>Photos jusqu'au</span>
+              <strong [class.stat-cloture]="uploadVerrouille()">{{ formatDate(s.dateFinSoumission) }}</strong>
+            </div>
+          }
+          @if (s.lieu && profile()) {
             <div class="stat-row">
               <span>Lieu</span>
               <a class="stat-lieu" [href]="mapsUrl(s.lieu)" target="_blank" rel="noopener">
@@ -40,14 +46,16 @@
               </a>
             </div>
           }
-          <div class="stat-row">
-            <span>Type</span>
-            <strong>{{ typeMeta().emoji }} {{ typeMeta().label }}</strong>
-          </div>
-          <div class="stat-row">
-            <span>Participation</span>
-            <strong>{{ s.inscriptionObligatoire ? 'Inscription requise' : 'Libre' }}</strong>
-          </div>
+          @if (profile()) {
+            <div class="stat-row">
+              <span>Type</span>
+              <strong>{{ typeMeta().emoji }} {{ typeMeta().label }}</strong>
+            </div>
+            <div class="stat-row">
+              <span>Participation</span>
+              <strong>{{ s.inscriptionObligatoire ? 'Inscription requise' : 'Libre' }}</strong>
+            </div>
+          }
           @if (s.inscriptionObligatoire && profile()) {
             <div class="stat-row">
               <span>Inscrits</span>
@@ -59,14 +67,16 @@
               </strong>
             </div>
           }
-          <div class="stat-row">
-            <span>Photos</span>
-            <strong>{{ photos().length }}</strong>
-          </div>
-          <div class="stat-row">
-            <span>Visibilité</span>
-            <strong>{{ s.visibilite === 'membre' ? 'Membres' : 'Publique' }}</strong>
-          </div>
+          @if (profile()) {
+            <div class="stat-row">
+              <span>Photos</span>
+              <strong>{{ photos().length }}</strong>
+            </div>
+            <div class="stat-row">
+              <span>Visibilité</span>
+              <strong>{{ s.visibilite === 'membre' ? 'Membres' : 'Publique' }}</strong>
+            </div>
+          }
         </div>
       </aside>
 
@@ -120,6 +130,12 @@
                   <mat-icon matSuffix>place</mat-icon>
                 </mat-form-field>
               </div>
+
+              <app-date-picker
+                label="Date limite de soumission de photos"
+                formControlName="dateFinSoumission"
+                class="field-half"
+              ></app-date-picker>
 
               <mat-form-field appearance="outline" class="field-half">
                 <mat-label>Max participants</mat-label>
@@ -214,7 +230,7 @@
         }
 
         <!-- Inscription -->
-        @if (s.inscriptionObligatoire && !editMode()) {
+        @if (s.inscriptionObligatoire && !editMode() && profile()) {
           <section class="inscription-section">
             <div class="inscription-header">
               <h2>
@@ -359,8 +375,12 @@
               </div>
             }
           </section>
-        } @else if (!isAVenir() && profile() && !canUpload()) {
-          <p class="upload-locked">🔒 Upload réservé aux participants inscrits.</p>
+        } @else if (!isAVenir() && profile()) {
+          @if (uploadVerrouille()) {
+            <p class="upload-locked">🔒 Soumissions de photos clôturées le {{ formatDate(sortie()!.dateFinSoumission!) }}.</p>
+          } @else {
+            <p class="upload-locked">🔒 Upload réservé aux participants inscrits.</p>
+          }
         }
 
         <!-- Galerie de photos -->

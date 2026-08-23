@@ -23,7 +23,7 @@ import {
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
 import { Router } from '@angular/router';
 import { from, switchMap, of, Observable, map, shareReplay, pairwise, filter, take } from 'rxjs';
-import { db, auth, storage, collectionStream, docStream } from '../utils/firebase';
+import { db, auth, storage, docStream } from '../utils/firebase';
 import { todayISO } from '../utils/date';
 import { DocumentService } from './document.service';
 import { UserProfile } from '../models/user.model';
@@ -109,10 +109,6 @@ export class AuthService {
     const snap = await getDoc(doc(db, 'users', user.uid));
     if (!snap.exists()) return null;
     return (snap.data() as UserProfile).role;
-  }
-
-  getAllMembers(): Observable<UserProfile[]> {
-    return collectionStream<UserProfile>(collection(db, 'users'), 'uid');
   }
 
   getAllMembersOnce(): Observable<UserProfile[]> {

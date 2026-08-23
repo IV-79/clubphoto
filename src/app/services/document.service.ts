@@ -22,17 +22,16 @@ import {
 } from 'firebase/storage';
 import { Observable, from } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { db, storage, collectionStream } from '../utils/firebase';
+import { db, storage } from '../utils/firebase';
 import { ClubDocument, DocumentDossier } from '../models/document.model';
 
 @Injectable({ providedIn: 'root' })
 export class DocumentService {
   // --- Dossiers ---
 
-  getDossiers(): Observable<DocumentDossier[]> {
-    return collectionStream<DocumentDossier>(
-      query(collection(db, 'documentDossiers'), orderBy('ordre', 'asc')),
-      'id',
+  getDossiersOnce(): Observable<DocumentDossier[]> {
+    return from(getDocs(query(collection(db, 'documentDossiers'), orderBy('ordre', 'asc')))).pipe(
+      map((snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }) as DocumentDossier)),
     );
   }
 
@@ -50,13 +49,6 @@ export class DocumentService {
   }
 
   // --- Documents ---
-
-  getDocuments(): Observable<ClubDocument[]> {
-    return collectionStream<ClubDocument>(
-      query(collection(db, 'documents'), orderBy('dateCreation', 'desc')),
-      'id',
-    );
-  }
 
   generateDocId(): string {
     return doc(collection(db, 'documents')).id;

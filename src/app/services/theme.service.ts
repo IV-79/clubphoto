@@ -30,7 +30,7 @@ import {
 } from 'firebase/storage';
 import { Observable, from } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { db, storage, collectionStream, docStream } from '../utils/firebase';
+import { db, storage } from '../utils/firebase';
 import { ThemeMensuel, ThemeSoumission, ThemeVote } from '../models/theme.model';
 import { PhotoExif } from '../models/photo.model';
 import { Commentaire, Reponse } from '../models/commentaire.model';
@@ -40,11 +40,6 @@ import { compressImage, COMPRESS_THUMB } from '../utils/image-compress';
 
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
-  getThemes(): Observable<ThemeMensuel[]> {
-    const q = query(collection(db, 'themes'), orderBy('mois', 'desc'));
-    return collectionStream<ThemeMensuel>(q, 'id');
-  }
-
   getThemeOnce(id: string): Observable<ThemeMensuel | undefined> {
     return from(getDoc(doc(db, 'themes', id))).pipe(
       map((snap) =>
@@ -110,29 +105,11 @@ export class ThemeService {
     );
   }
 
-  getTheme(id: string): Observable<ThemeMensuel | null> {
-    return docStream<ThemeMensuel>(doc(db, 'themes', id), 'id');
-  }
-
-  getSoumissions(themeId: string): Observable<ThemeSoumission[]> {
-    const q = query(collection(db, 'themes', themeId, 'soumissions'), orderBy('uploadedAt', 'asc'));
-    return collectionStream<ThemeSoumission>(q, 'id');
-  }
-
   getMesVotesOnce(themeId: string, uid: string): Observable<ThemeVote[]> {
     const q = query(collection(db, 'themes', themeId, 'votes'), where('voterUid', '==', uid));
     return from(getDocs(q)).pipe(
       map((snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }) as ThemeVote)),
     );
-  }
-
-  getMesVotes(themeId: string, uid: string): Observable<ThemeVote[]> {
-    const q = query(collection(db, 'themes', themeId, 'votes'), where('voterUid', '==', uid));
-    return collectionStream<ThemeVote>(q, 'id');
-  }
-
-  getTousVotes(themeId: string): Observable<ThemeVote[]> {
-    return collectionStream<ThemeVote>(collection(db, 'themes', themeId, 'votes'), 'id');
   }
 
   async creerTheme(data: {

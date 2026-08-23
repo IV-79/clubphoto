@@ -24,7 +24,7 @@ import {
   deleteObject,
 } from 'firebase/storage';
 import { Observable, from, map } from 'rxjs';
-import { db, storage, collectionStream, docStream } from '../utils/firebase';
+import { db, storage } from '../utils/firebase';
 import { Defi, DefiInscription, DefiPhoto, DefiVote } from '../models/defi.model';
 import { UserProfile } from '../models/user.model';
 import { generateId } from '../utils/id';
@@ -45,24 +45,6 @@ export class DefiService {
   private notifService = inject(NotificationService);
 
   // ── Lecture ──────────────────────────────────────────────────────────
-
-  getDefis(): Observable<Defi[]> {
-    return collectionStream<Defi>(
-      query(collection(db, 'defis'), orderBy('dateCreation', 'desc')),
-      'id',
-    );
-  }
-
-  getPublicDefis(): Observable<Defi[]> {
-    return collectionStream<Defi>(
-      query(
-        collection(db, 'defis'),
-        where('visibilite', '==', 'public'),
-        orderBy('dateCreation', 'desc'),
-      ),
-      'id',
-    );
-  }
 
   getDefisOnce(): Observable<Defi[]> {
     return from(getDocs(query(collection(db, 'defis'), orderBy('dateCreation', 'desc')))).pipe(
@@ -127,17 +109,6 @@ export class DefiService {
   getMonVoteOnce(defiId: string, voterUid: string): Observable<DefiVote | null> {
     return from(getDoc(doc(db, `defis/${defiId}/votes`, voterUid))).pipe(
       map((d) => (d.exists() ? ({ voterUid, ...d.data() } as DefiVote) : null)),
-    );
-  }
-
-  getDefi(id: string): Observable<Defi | null> {
-    return docStream<Defi>(doc(db, 'defis', id), 'id').pipe(map((d) => d ?? null));
-  }
-
-  getMesDefis(uid: string): Observable<Defi[]> {
-    return collectionStream<Defi>(
-      query(collection(db, 'defis'), where('organisateurUid', '==', uid)),
-      'id',
     );
   }
 
@@ -248,10 +219,6 @@ export class DefiService {
 
   // ── Inscriptions ─────────────────────────────────────────────────────
 
-  getInscriptions(defiId: string): Observable<DefiInscription[]> {
-    return collectionStream<DefiInscription>(collection(db, `defis/${defiId}/inscriptions`), 'uid');
-  }
-
   async inscrire(defiId: string, user: UserProfile): Promise<void> {
     await setDoc(doc(db, `defis/${defiId}/inscriptions`, user.uid), {
       uid: user.uid,
@@ -291,13 +258,6 @@ export class DefiService {
   }
 
   // ── Photos ───────────────────────────────────────────────────────────
-
-  getPhotos(defiId: string): Observable<DefiPhoto[]> {
-    return collectionStream<DefiPhoto>(
-      query(collection(db, `defis/${defiId}/photos`), orderBy('uploadedAt', 'asc')),
-      'id',
-    );
-  }
 
   uploadPhoto(defiId: string, file: File, user: UserProfile): Observable<DefiUploadState> {
     return new Observable((observer) => {
@@ -397,16 +357,6 @@ export class DefiService {
   }
 
   // ── Votes ─────────────────────────────────────────────────────────────
-
-  getVotes(defiId: string): Observable<DefiVote[]> {
-    return collectionStream<DefiVote>(collection(db, `defis/${defiId}/votes`), 'voterUid');
-  }
-
-  getMonVote(defiId: string, voterUid: string): Observable<DefiVote | null> {
-    return docStream<any>(doc(db, `defis/${defiId}/votes`, voterUid)).pipe(
-      map((d) => (d ? ({ voterUid, ...d } as DefiVote) : null)),
-    );
-  }
 
   async voter(defiId: string, voterUid: string, photoId: string): Promise<void> {
     const voteRef = doc(db, `defis/${defiId}/votes`, voterUid);

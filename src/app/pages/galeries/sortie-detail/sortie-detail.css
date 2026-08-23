@@ -56,6 +56,7 @@
 .stat-row:last-child { border-bottom: none; }
 .stat-row > span { font-size: 0.72rem; color: var(--text-secondary); }
 .stat-row > strong { font-size: 0.85rem; color: var(--text-primary); }
+.stat-cloture { color: #6b7280 !important; }
 .stat-lieu { display: flex; align-items: center; gap: 2px; font-size: 0.85rem; color: var(--c-blue); text-decoration: none; }
 .stat-lieu:hover { text-decoration: underline; }
 
@@ -559,8 +560,8 @@
     padding: 1rem 1rem 2rem;
     gap: 1rem;
   }
-  .sortie-aside { order: 2; }
-  .sortie-main  { order: 1; }
+  .sortie-aside { order: 1; }
+  .sortie-main  { order: 2; }
   .photos-grid { grid-template-columns: repeat(2, 1fr); }
   .inscription-header { flex-direction: column; align-items: flex-start; }
 }

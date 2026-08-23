@@ -1,5 +1,5 @@
-import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -53,15 +53,24 @@ const MOIS_FR = [
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './themes.css',
 })
-export class AdminThemes {
+export class AdminThemes implements OnInit {
   private themeService = inject(ThemeService);
   private authService = inject(AuthService);
   private confirmService = inject(ConfirmService);
 
   private readonly todayStr = new Date().toISOString().slice(0, 10);
 
-  themes = toSignal(this.themeService.getThemes(), { initialValue: [] as ThemeMensuel[] });
-  profile = toSignal(this.authService.currentUserProfile$);
+  themes = signal<ThemeMensuel[]>([]);
+  profile = signal<import('../../../models/user.model').UserProfile | undefined>(undefined);
+
+  async ngOnInit() {
+    this.authService.currentUserProfile$.subscribe((p) => this.profile.set(p ?? undefined));
+    await this.charger();
+  }
+
+  private async charger() {
+    this.themes.set(await firstValueFrom(this.themeService.getThemesOnce()));
+  }
 
   showCreateForm = signal(false);
   showPasses = signal(false);
@@ -176,6 +185,7 @@ export class AdminThemes {
         const compressed = await compressImage(pendingFile, COMPRESS_ACTUALITE);
         await this.themeService.setCouverture(id, compressed);
       }
+      await this.charger();
       this.showCreateForm.set(false);
       this.createForm.reset({ maxPhotos: 1, maxVotes: 3 });
       this.createError.set('');
@@ -233,6 +243,9 @@ export class AdminThemes {
     this.editCoverUploading.set(true);
     try {
       await this.themeService.removeCouverture(themeId, storagePath);
+      this.themes.update((list) =>
+        list.map((t) => (t.id === themeId ? { ...t, photoCouvertureUrl: undefined, photoCouverturePath: undefined } : t)),
+      );
     } finally {
       this.editCoverUploading.set(false);
     }
@@ -243,6 +256,7 @@ export class AdminThemes {
     try {
       const compressed = await compressImage(file, COMPRESS_ACTUALITE);
       await this.themeService.setCouverture(themeId, compressed);
+      await this.charger();
     } finally {
       this.editCoverUploading.set(false);
     }
@@ -331,6 +345,13 @@ export class AdminThemes {
         maxPhotos: Number(v.maxPhotos),
         maxVotes: Number(v.maxVotes),
       });
+      this.themes.update((list) =>
+        list.map((t) =>
+          t.id === id
+            ? { ...t, titre: v.titre.trim(), description: v.description.trim(), mois, dateFinVote: v.dateFinVote, maxPhotos: Number(v.maxPhotos), maxVotes: Number(v.maxVotes) }
+            : t,
+        ),
+      );
       this.editingId.set(null);
       this.editError.set('');
     } finally {
@@ -344,6 +365,7 @@ export class AdminThemes {
     );
     if (!ok) return;
     await this.themeService.supprimerTheme(theme.id);
+    this.themes.update((list) => list.filter((t) => t.id !== theme.id));
     if (this.editingId() === theme.id) this.editingId.set(null);
     if (this.expandedId() === theme.id) this.expandedId.set(null);
   }

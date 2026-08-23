@@ -1,4 +1,5 @@
-import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -15,7 +16,7 @@ import { DocumentService } from '../../../services/document.service';
 import { AuthService } from '../../../services/auth.service';
 import { ConfirmService } from '../../../services/confirm.service';
 import { NotificationService } from '../../../services/notification.service';
-import { ClubDocument, getExtensionMeta, extractExtension } from '../../../models/document.model';
+import { ClubDocument, DocumentDossier, getExtensionMeta, extractExtension } from '../../../models/document.model';
 
 @Component({
   selector: 'app-documents',
@@ -665,7 +666,7 @@ import { ClubDocument, getExtensionMeta, extractExtension } from '../../../model
     `,
   ],
 })
-export class Documents {
+export class Documents implements OnInit {
   private documentService = inject(DocumentService);
   private authService = inject(AuthService);
   private confirmService = inject(ConfirmService);
@@ -675,8 +676,17 @@ export class Documents {
   currentUid = signal(auth.currentUser?.uid ?? '');
   private profile = toSignal(this.authService.currentUserProfile$);
 
-  dossiers = toSignal(this.documentService.getDossiers(), { initialValue: [] });
-  documents = toSignal(this.documentService.getDocuments(), { initialValue: [] });
+  dossiers = signal<DocumentDossier[]>([]);
+  documents = signal<ClubDocument[]>([]);
+
+  async ngOnInit() {
+    const [dossiers, documents] = await Promise.all([
+      firstValueFrom(this.documentService.getDossiersOnce()),
+      firstValueFrom(this.documentService.getDocumentsOnce()),
+    ]);
+    this.dossiers.set(dossiers);
+    this.documents.set(documents);
+  }
 
   selectedDossier = signal<string | null>(null);
   showMine = signal(false);
@@ -823,6 +833,21 @@ export class Documents {
           sourceNom: `${profile.prenom ?? ''} ${profile.nom}`.trim(),
         })
         .catch(() => {});
+      this.documents.update((list) => [
+        ...list,
+        {
+          id: docId,
+          nom: this.uploadNomBase.trim(),
+          extension,
+          taille: file.size,
+          dossier: this.uploadDossier,
+          storagePath,
+          url,
+          uploadeurUid: profile.uid,
+          uploadeurNom: `${profile.prenom ?? ''} ${profile.nom}`.trim(),
+          dateCreation: new Date().toISOString(),
+        },
+      ]);
       this.resetUploadForm();
       this.snackBar.open('Document uploadé', '', { duration: 3000 });
     } catch (e) {
@@ -900,6 +925,13 @@ export class Documents {
             sourceNom: `${profile.prenom ?? ''} ${profile.nom}`.trim(),
           })
           .catch(() => {});
+        this.documents.update((list) =>
+          list.map((d) =>
+            d.id === doc.id
+              ? { ...d, nom: this.replaceNom.trim(), dossier: this.replaceDossier, extension, taille: file.size, url, storagePath, dateMiseAJour: new Date().toISOString() }
+              : d,
+          ),
+        );
       } else {
         const filename = doc.extension
           ? `${this.replaceNom.trim()}.${doc.extension}`
@@ -909,6 +941,13 @@ export class Documents {
           dossier: this.replaceDossier,
         });
         await this.documentService.updateFileMetadata(doc.storagePath, filename);
+        this.documents.update((list) =>
+          list.map((d) =>
+            d.id === doc.id
+              ? { ...d, nom: this.replaceNom.trim(), dossier: this.replaceDossier, dateMiseAJour: new Date().toISOString() }
+              : d,
+          ),
+        );
       }
       this.expandedDocId.set(null);
       this.snackBar.open('Document mis à jour', '', { duration: 3000 });
@@ -929,6 +968,7 @@ export class Documents {
       if (profile?.uid === doc.uploadeurUid) {
         await this.documentService.decrementStorage(profile.uid, doc.taille);
       }
+      this.documents.update((list) => list.filter((d) => d.id !== doc.id));
       this.snackBar.open('Document supprimé', '', { duration: 3000 });
     } catch {
       this.snackBar.open('Erreur lors de la suppression', '', { duration: 4000 });

@@ -30,6 +30,7 @@ export interface Sortie {
   imageEvenementPath?: string;
   dateCreation: string;
   visibilite?: 'public' | 'membre';
+  dateFinSoumission?: string; // YYYY-MM-DD — si défini, bloque l'upload après cette date
 }
 
 export interface SortieInscription {

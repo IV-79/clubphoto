@@ -44,6 +44,14 @@
   margin: 0 0 0.75rem;
 }
 
+.theme-guest-text {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
 .stat-row {
   display: flex;
   justify-content: space-between;
@@ -611,6 +619,6 @@
 
 @media (max-width: 768px) {
   .expo-page { grid-template-columns: 1fr; }
-  .expo-aside { order: 2; }
-  .expo-main  { order: 1; }
+  .expo-aside { order: 1; }
+  .expo-main  { order: 2; }
 }

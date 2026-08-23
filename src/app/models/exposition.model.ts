@@ -40,7 +40,8 @@ export interface Exposition {
   nombreVotesParMembre?: number;
   themeChoisi?: string;
   dateFinSoumission?: string; // YYYY-MM-DD
-  dateExposition?: string; // YYYY-MM-DD
+  dateExposition?: string; // YYYY-MM-DD — début de l'exposition physique
+  dateFinExposition?: string; // YYYY-MM-DD — fin de l'exposition physique (purement factuel)
   photoCouvertureUrl?: string;
   photoCouverturePath?: string;
   dateCreation: string;

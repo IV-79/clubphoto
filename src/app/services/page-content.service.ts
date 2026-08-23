@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { doc, setDoc } from 'firebase/firestore';
-import { Observable, map, catchError, of } from 'rxjs';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { Observable, from, map, catchError, of } from 'rxjs';
 import { db, docStream } from '../utils/firebase';
 
 export type PageId =
@@ -18,6 +18,13 @@ export class PageContentService {
   getContent(pageId: PageId): Observable<string> {
     return docStream<any>(doc(db, 'pages', pageId)).pipe(
       map((data) => data?.contenu ?? ''),
+      catchError(() => of('')),
+    );
+  }
+
+  getContentOnce(pageId: PageId): Observable<string> {
+    return from(getDoc(doc(db, 'pages', pageId))).pipe(
+      map((snap) => (snap.exists() ? (snap.data() as any)?.contenu ?? '' : '')),
       catchError(() => of('')),
     );
   }

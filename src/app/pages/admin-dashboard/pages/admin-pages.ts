@@ -6,9 +6,8 @@ import {
   effect,
   ChangeDetectionStrategy,
 } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 import { FormsModule } from '@angular/forms';
-import { toSignal, toObservable } from '@angular/core/rxjs-interop';
-import { switchMap } from 'rxjs/operators';
 import { auth } from '../../../utils/firebase';
 import { PageContentService, PageId } from '../../../services/page-content.service';
 
@@ -235,19 +234,17 @@ export class AdminPages {
     (['charte', 'cgv', 'confidentialite'] as PageId[]).includes(this.currentPage()),
   );
 
-  loaded = toSignal(
-    toObservable(this.currentPage).pipe(switchMap((id) => this.pageService.getContent(id))),
-    { initialValue: null as any },
-  );
+  loaded = signal<string | null>(null);
 
   constructor() {
     effect(() => {
-      const c = this.loaded() as string | null;
-      if (c !== null) {
+      const id = this.currentPage();
+      firstValueFrom(this.pageService.getContentOnce(id)).then((c) => {
+        this.loaded.set(c);
         this.editorValue = c;
         this.originalContent = c;
         this.forceReaccept = false;
-      }
+      });
     });
   }
 

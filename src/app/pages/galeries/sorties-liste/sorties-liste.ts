@@ -211,9 +211,9 @@ export class SortiesListe {
   }
 
   enCours = computed((): ActiviteItem[] => {
-    // Sorties : today-7 ≤ date ≤ today+7 (query démarre à today-7, on coupe à today+7)
+    // Sorties : date ≤ today+7 ET (dateFinSoumission ?? date) ≥ today-7
     const sorties: ActiviteItem[] = this.sorties()
-      .filter((s) => !this.isAfterWindow(s.date))
+      .filter((s) => !this.isAfterWindow(s.date) && !this.isBeforeWindow(s.dateFinSoumission ?? s.date))
       .map((data) => ({ kind: 'sortie' as const, data }));
 
     // OneShots : actifs (inscription/fermeture/vote) OU en résultats depuis ≤ 7 jours
@@ -277,11 +277,15 @@ export class SortiesListe {
   });
 
   passees = computed((): ActiviteItem[] => {
-    // Sorties : tout ce qui est en Firestore (date < today-7 garanti par la query)
-    const sorties: ActiviteItem[] = this.sortiesTerminees().map((data) => ({
-      kind: 'sortie' as const,
-      data,
-    }));
+    // Sorties : exclure les events déjà en "en ce moment" (dateFinSoumission encore active)
+    const enCoursIds = new Set(
+      this.sorties()
+        .filter((s) => !this.isAfterWindow(s.date) && !this.isBeforeWindow(s.dateFinSoumission ?? s.date))
+        .map((s) => s.id),
+    );
+    const sorties: ActiviteItem[] = this.sortiesTerminees()
+      .filter((s) => !enCoursIds.has(s.id))
+      .map((data) => ({ kind: 'sortie' as const, data }));
 
     // OneShots : resultats ET grace period expirée (pas de datePassageResultats = ancien doc, traité comme passé)
     const oneshots: ActiviteItem[] = this.oneshots()

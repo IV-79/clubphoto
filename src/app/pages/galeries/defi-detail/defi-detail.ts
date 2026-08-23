@@ -15,6 +15,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { DefiService } from '../../../services/defi.service';
 import { AuthService } from '../../../services/auth.service';
 import { NotificationService } from '../../../services/notification.service';
+import { ConfirmService } from '../../../services/confirm.service';
 import { DatePickerComponent } from '../../../components/date-picker/date-picker';
 import { PhotoLightbox } from '../../../components/photo-lightbox/photo-lightbox';
 import { VoteRankingComponent, RankingItem } from '../../../components/vote-ranking/vote-ranking';
@@ -51,6 +52,7 @@ export class DefiDetail {
   private defiService = inject(DefiService);
   private authService = inject(AuthService);
   private notifService = inject(NotificationService);
+  private confirmService = inject(ConfirmService);
   private elRef = inject(ElementRef);
 
   readonly id = this.route.snapshot.paramMap.get('id')!;
@@ -383,7 +385,9 @@ export class DefiDetail {
 
   async desinscrire() {
     const uid = this.profile()?.uid;
-    if (!uid || !confirm('Se désinscrire ? Vos photos soumises seront supprimées.')) return;
+    if (!uid) return;
+    const ok = await this.confirmService.confirm('Se désinscrire ? Vos photos soumises seront supprimées.');
+    if (!ok) return;
     await this.defiService.desinscrire(this.id, uid);
     this.refresh();
   }
@@ -468,7 +472,8 @@ export class DefiDetail {
   }
 
   async deleteDefi() {
-    if (!confirm('Supprimer ce défi définitivement ? Toutes les photos seront perdues.')) return;
+    const ok = await this.confirmService.confirm('Supprimer ce défi définitivement ? Toutes les photos seront perdues.');
+    if (!ok) return;
     await this.defiService.deleteDefi(this.id);
     this.router.navigate(['/galeries/sorties']);
   }

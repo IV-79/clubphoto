@@ -1,4 +1,5 @@
-import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -12,7 +13,6 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSortModule, Sort } from '@angular/material/sort';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { auth } from '../../../utils/firebase';
 import { AuthService } from '../../../services/auth.service';
 import { ConfirmService } from '../../../services/confirm.service';
@@ -38,7 +38,7 @@ import { UserProfile } from '../../../models/user.model';
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './membres.css',
 })
-export class Membres {
+export class Membres implements OnInit {
   private authService = inject(AuthService);
   private confirmService = inject(ConfirmService);
   private snackBar = inject(MatSnackBar);
@@ -47,7 +47,11 @@ export class Membres {
 
   readonly roles = ['admin', 'contributeur', 'membre'];
 
-  membres = toSignal(this.authService.getAllMembers(), { initialValue: [] as UserProfile[] });
+  membres = signal<UserProfile[]>([]);
+
+  async ngOnInit() {
+    this.membres.set(await firstValueFrom(this.authService.getAllMembersOnce()));
+  }
   filterText = signal('');
   loadingUid = signal<string | null>(null);
   recalcUid = signal<string | null>(null);
@@ -146,6 +150,8 @@ export class Membres {
     this.recalcUid.set(membre.uid);
     try {
       await this.authService.recalculateStorage(membre.uid);
+      // Reload pour récupérer les nouvelles valeurs de stockage
+      this.membres.set(await firstValueFrom(this.authService.getAllMembersOnce()));
       this.snackBar.open('Stockage recalculé', '', { duration: 2500 });
     } catch {
       this.snackBar.open('Erreur lors du recalcul', '', { duration: 3000 });
@@ -159,6 +165,9 @@ export class Membres {
     this.loadingUid.set(membre.uid);
     try {
       await this.authService.changeMemberRole(membre.uid, newRole);
+      this.membres.update((list) =>
+        list.map((m) => (m.uid === membre.uid ? { ...m, role: newRole as UserProfile['role'] } : m)),
+      );
       this.snackBar.open(`Rôle changé → ${newRole}`, '', { duration: 3000 });
     } catch {
       this.snackBar.open('Erreur lors du changement de rôle', '', { duration: 3000 });
@@ -171,6 +180,9 @@ export class Membres {
     this.loadingUid.set(membre.uid);
     try {
       await this.authService.suspendMember(membre.uid, !membre.isSuspended);
+      this.membres.update((list) =>
+        list.map((m) => (m.uid === membre.uid ? { ...m, isSuspended: !m.isSuspended } : m)),
+      );
       this.snackBar.open(membre.isSuspended ? 'Compte réactivé' : 'Compte suspendu', '', {
         duration: 3000,
       });
@@ -206,6 +218,7 @@ export class Membres {
     this.loadingUid.set(membre.uid);
     try {
       await this.authService.deleteMemberData(membre.uid);
+      this.membres.update((list) => list.filter((m) => m.uid !== membre.uid));
       this.snackBar.open('Membre supprimé', '', { duration: 3000 });
     } catch (e) {
       console.error('deleteMemberData error:', e);

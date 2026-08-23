@@ -8,8 +8,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { ConfigService, CategorieConfig } from '../../../services/config.service';
+import { ConfigService, CategorieConfig, SiteConfig } from '../../../services/config.service';
 import { ConfirmService } from '../../../services/confirm.service';
 import { PHOTO_CATEGORIES } from '../../../models/photo.model';
 
@@ -53,10 +52,10 @@ export class AdminConfig implements OnInit {
   portfolioLimitSaving = signal(false);
 
   // Image page d'accueil
-  siteConfig = toSignal(this.configService.getSiteConfig(), { initialValue: {} as any });
-  heroCurrentUrl = computed(() => ((this.siteConfig() as any)?.heroImageUrl as string) ?? '');
+  private siteConfigSignal = signal<SiteConfig>({});
+  heroCurrentUrl = computed(() => this.siteConfigSignal().heroImageUrl ?? '');
   heroSource = computed<'manuel' | 'theme_du_mois'>(
-    () => (this.siteConfig() as any)?.heroSource ?? 'manuel',
+    () => this.siteConfigSignal().heroSource ?? 'manuel',
   );
   heroPreview = signal<string | null>(null);
   heroFile = signal<File | null>(null);
@@ -65,9 +64,13 @@ export class AdminConfig implements OnInit {
   isDragging = signal(false);
 
   async ngOnInit() {
-    this.configService.getCategories().subscribe((cats) => this.categories.set(cats));
-    const cfg = await firstValueFrom(this.configService.getSiteConfigOnce());
+    const [cfg, cats] = await Promise.all([
+      firstValueFrom(this.configService.getSiteConfigOnce()),
+      firstValueFrom(this.configService.getCategoriesOnce()),
+    ]);
+    this.siteConfigSignal.set(cfg);
     this.portfolioLimit.set(cfg.maxPhotosPortfolio ?? 20);
+    this.categories.set(cats);
   }
 
   // ---- Limites ----
@@ -139,6 +142,7 @@ export class AdminConfig implements OnInit {
   // ---- Source hero ----
   async setHeroSource(source: 'manuel' | 'theme_du_mois') {
     await this.configService.saveSiteConfig({ heroSource: source });
+    this.siteConfigSignal.update((c) => ({ ...c, heroSource: source }));
   }
 
   // ---- Image hero (mode manuel) ----
@@ -190,6 +194,7 @@ export class AdminConfig implements OnInit {
         heroImageUrl: url,
         heroImageStoragePath: storagePath,
       });
+      this.siteConfigSignal.update((c) => ({ ...c, heroImageUrl: url, heroImageStoragePath: storagePath }));
       this.heroFile.set(null);
       this.heroPreview.set(null);
     } catch {
@@ -202,10 +207,11 @@ export class AdminConfig implements OnInit {
   async deleteHero() {
     const ok = await this.confirmService.confirm("Supprimer l'image de la page d'accueil ?");
     if (!ok) return;
-    const cfg = this.siteConfig() as any;
+    const cfg = this.siteConfigSignal();
     if (cfg?.heroImageStoragePath) {
       await this.configService.deleteHeroImage(cfg.heroImageStoragePath).catch(() => {});
     }
     await this.configService.saveSiteConfig({ heroImageUrl: '', heroImageStoragePath: '' });
+    this.siteConfigSignal.update((c) => ({ ...c, heroImageUrl: undefined, heroImageStoragePath: undefined }));
   }
 }

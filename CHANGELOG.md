@@ -2,6 +2,25 @@
 
 ---
 
+## v1.0.0-beta — En cours (2026-08-23)
+
+### Visibilité invité et sidebar mobile (2026-08-23)
+
+- **Épuration vue invité** : suppression de tous les textes "Connectez-vous pour…" sur les pages d'événements publics (défi, exposition) ; sections participants et stats membres (inscrits, votes) masquées pour les visiteurs non connectés — le contenu riche (description, photos, dates) reste visible.
+- **Sidebar allégée pour invités** : chaque page événement n'affiche que l'essentiel à un visiteur non connecté — date de sortie uniquement pour sorties, clôture des votes pour les défis, dates d'exposition + thème (box dédiée) pour les expositions, date pour les one shots. Les box vides ou inutiles (participants, stats membres, visibilité) sont masquées.
+- **Sidebar mobile en haut** : sur mobile, la sidebar des pages événement (sortie, défi, exposition) passe désormais au-dessus du contenu principal pour un accès immédiat aux informations clés.
+
+### Algorithme "En ce moment" — date de fin effective (2026-08-23)
+
+- **Prise en compte de `dateFinSoumission`** : une sortie reste dans la section "En ce moment" jusqu'à 7 jours après sa date de fin de soumission (et non plus 7 jours après sa date d'événement). La requête Firestore est étendue à 30 jours pour capturer les sorties récentes dont la fenêtre de soumission est encore ouverte ; les doublons éventuels dans la section "Terminés" sont dédupliqués côté client.
+
+### Nettoyage Firestore (2026-08-23)
+
+- **Suppression des listeners live orphelins** : 23 méthodes de service retournant des streams Firestore en continu (`collectionStream`/`docStream`) supprimées — elles avaient toutes un équivalent `Once` et n'étaient plus consommées par aucune page. Services nettoyés : `ThemeService`, `SortieService`, `OneShotService`, `DefiService`, `PhotoService`, `DocumentService`, `AuthService`.
+- **Migration `documents.ts` (page membre)** : la page documents membres passe en lecture one-shot (chargement à l'ouverture + mises à jour locales après upload/modification/suppression), alignée sur le pattern de toutes les pages admin.
+
+---
+
 ## v1.0.0-beta — En cours (2026-08-12)
 
 ### Corrections (2026-08-12)

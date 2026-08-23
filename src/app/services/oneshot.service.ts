@@ -76,23 +76,6 @@ export class OneShotService {
     return docStream<OneShot>(doc(db, 'oneshots', id), 'id') as Observable<OneShot>;
   }
 
-  getMyOneShots(uid: string): Observable<OneShot[]> {
-    const q = query(
-      collection(db, 'oneshots'),
-      where('creatorUid', '==', uid),
-      orderBy('dateCreation', 'desc'),
-    );
-    return collectionStream<OneShot>(q, 'id');
-  }
-
-  getPublicOneShots(): Observable<OneShot[]> {
-    const q = query(
-      collection(db, 'oneshots'),
-      where('statut', 'in', ['inscription', 'fermeture_inscriptions', 'vote', 'resultats']),
-    );
-    return collectionStream<OneShot>(q, 'id');
-  }
-
   getPublicOneShotsOnce(): Observable<OneShot[]> {
     const q = query(
       collection(db, 'oneshots'),
@@ -462,18 +445,6 @@ export class OneShotService {
   }
 
   // --- Votes ---
-
-  getMyVotes(oneShotId: string, voterUid: string): Observable<OneShotVote[]> {
-    const q = query(
-      collection(db, `oneshots/${oneShotId}/votes`),
-      where('voterUid', '==', voterUid),
-    );
-    return collectionStream<OneShotVote>(q);
-  }
-
-  getAllVotes(oneShotId: string): Observable<OneShotVote[]> {
-    return collectionStream<OneShotVote>(collection(db, `oneshots/${oneShotId}/votes`));
-  }
 
   async vote(oneShotId: string, voterUid: string, themeId: string, photoId: string): Promise<void> {
     await setDoc(doc(db, `oneshots/${oneShotId}/votes`, `${voterUid}_${themeId}`), {

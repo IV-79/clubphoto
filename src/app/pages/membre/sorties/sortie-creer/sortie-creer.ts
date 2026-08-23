@@ -98,6 +98,7 @@ export class SortieCreer {
     dateDebutIdeation: new FormControl('', { nonNullable: true }),
     dateFinIdeation: new FormControl('', { nonNullable: true }),
     dateExposition: new FormControl('', { nonNullable: true }),
+    dateFinExposition: new FormControl('', { nonNullable: true }),
   });
 
   isOneShot = toSignal(
@@ -254,6 +255,7 @@ export class SortieCreer {
           dateDebutIdeation: v.dateDebutIdeation || undefined,
           dateFinIdeation: v.dateFinIdeation,
           dateExposition: v.dateExposition || undefined,
+          dateFinExposition: v.dateFinExposition || undefined,
           visibilite: v.visibilite,
           organisateurUid: profile.uid,
           nomOrganisateur: nom,
@@ -280,6 +282,7 @@ export class SortieCreer {
           ...(inscriptionObligatoire && v.maxParticipants != null
             ? { maxParticipants: v.maxParticipants }
             : {}),
+          ...(v.dateFinSoumission ? { dateFinSoumission: v.dateFinSoumission } : {}),
         });
         if (inscriptionObligatoire) {
           await this.sortieService.inscrire(id, profile.uid, nom);

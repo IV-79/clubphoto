@@ -156,6 +156,7 @@ html[data-theme="dark"] .btn-action-danger:hover {
 .status-avenir              { background: rgba(76,175,80,0.12);  color: #2e7d32; }
 .status-passee              { background: rgba(0,0,0,0.10);       color: var(--text-muted); }
 .status-photos              { background: rgba(21,101,192,0.1);   color: #1565c0; }
+.status-cloture             { background: rgba(107,114,128,0.12); color: #6b7280; }
 .status-oneshot-inscription { background: rgba(76,175,80,0.12);  color: #2e7d32; }
 .status-oneshot-fermee      { background: rgba(255,152,0,0.14);  color: #e65100; }
 .status-oneshot-vote        { background: rgba(103,58,183,0.12); color: #4527a0; }

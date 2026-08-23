@@ -50,6 +50,7 @@ export class ExpositionService {
     dateDebutIdeation?: string;
     dateFinIdeation: string;
     dateExposition?: string;
+    dateFinExposition?: string;
     visibilite?: 'public' | 'membre';
   }): Promise<string> {
     const payload = Object.fromEntries(

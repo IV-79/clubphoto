@@ -653,15 +653,15 @@ export class ExpositionDetail {
     dateFinVote: new FormControl('', { nonNullable: true }),
     dateFinSoumission: new FormControl('', { nonNullable: true }),
     dateExposition: new FormControl('', { nonNullable: true }),
+    dateFinExposition: new FormControl('', { nonNullable: true }),
   });
 
-  // Suit la valeur de themeChoisi dans le formulaire d'édition (pour l'effet de verrouillage)
   private editThemeSignal = toSignal(this.editForm.get('themeChoisi')!.valueChanges, {
     initialValue: this.editForm.get('themeChoisi')!.value,
   });
 
   get datesLocked(): boolean {
-    return !!this.editForm.get('themeChoisi')!.value?.trim();
+    return !!this.editThemeSignal()?.trim();
   }
 
   get datesChronoError(): string | null {
@@ -672,6 +672,7 @@ export class ExpositionDetail {
       { label: 'Fin vote', val: v.dateFinVote },
       { label: 'Fin soumission', val: v.dateFinSoumission },
       { label: "Date d'exposition", val: v.dateExposition },
+      { label: "Fin d'exposition", val: v.dateFinExposition },
     ].filter((d) => d.val);
     for (let i = 1; i < chain.length; i++) {
       if (chain[i].val < chain[i - 1].val)
@@ -710,11 +711,16 @@ export class ExpositionDetail {
       dateFinVote: e.dateFinVote ?? '',
       dateFinSoumission: e.dateFinSoumission ?? '',
       dateExposition: e.dateExposition ?? '',
+      dateFinExposition: e.dateFinExposition ?? '',
     });
+    if (e.themeChoisi) {
+      this.editForm.get('themeChoisi')!.disable({ emitEvent: false });
+    }
     this.editMode.set(true);
   }
 
   cancelEdit() {
+    this.editForm.get('themeChoisi')!.enable({ emitEvent: false });
     this.editMode.set(false);
     this.clearCover();
   }
@@ -747,6 +753,7 @@ export class ExpositionDetail {
         dateFinVote: v.dateFinVote || undefined,
         dateFinSoumission: v.dateFinSoumission || undefined,
         dateExposition: v.dateExposition || undefined,
+        dateFinExposition: v.dateFinExposition || undefined,
       });
 
       this.expo.update((ex) => {
@@ -770,6 +777,8 @@ export class ExpositionDetail {
         else delete updated.dateFinSoumission;
         if (v.dateExposition) updated.dateExposition = v.dateExposition;
         else delete updated.dateExposition;
+        if (v.dateFinExposition) updated.dateFinExposition = v.dateFinExposition;
+        else delete updated.dateFinExposition;
         return updated;
       });
 
@@ -786,6 +795,7 @@ export class ExpositionDetail {
         );
         this.clearCover();
       }
+      this.editForm.get('themeChoisi')!.enable({ emitEvent: false });
       this.editMode.set(false);
     } finally {
       this.saving.set(false);

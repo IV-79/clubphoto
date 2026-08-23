@@ -140,38 +140,6 @@ export class PhotoService {
     );
   }
 
-  getPhotosVisiteur(uid: string): Observable<Photo[]> {
-    const q = query(
-      collection(db, 'photos'),
-      where('uid', '==', uid),
-      where('visibilite', '==', 'public'),
-    );
-    return collectionStream<Photo>(q, 'id').pipe(
-      map((photos) => [...photos].sort((a, b) => b.dateUpload.localeCompare(a.dateUpload))),
-    );
-  }
-
-  getPhotosMembre(uid: string): Observable<Photo[]> {
-    const q = query(
-      collection(db, 'photos'),
-      where('uid', '==', uid),
-      where('visibilite', 'in', ['public', 'membre']),
-    );
-    return collectionStream<Photo>(q, 'id').pipe(
-      map((photos) => [...photos].sort((a, b) => b.dateUpload.localeCompare(a.dateUpload))),
-    );
-  }
-
-  getRecentPublicPhotos(limitCount = 8): Observable<Photo[]> {
-    const q = query(
-      collection(db, 'photos'),
-      where('visibilite', '==', 'public'),
-      orderBy('dateUpload', 'desc'),
-      limit(limitCount),
-    );
-    return collectionStream<Photo>(q, 'id');
-  }
-
   getRecentPublicPhotosOnce(limitCount = 8): Observable<Photo[]> {
     return from(
       getDocs(

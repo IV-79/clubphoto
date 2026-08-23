@@ -28,21 +28,23 @@
         <!-- Dates clés -->
         <div class="info-card">
           <h3 class="info-card-title">Calendrier</h3>
-          <div class="date-row">
-            <span class="date-label">Début de soumission</span>
-            <span class="date-val">{{ formatDate(d.dateDebutSoumission) }}</span>
-          </div>
-          <div class="date-row">
-            <span class="date-label">Fin de soumission</span>
-            <span class="date-val">{{ formatDate(d.dateFinSoumission) }}</span>
-          </div>
+          @if (profile()) {
+            <div class="date-row">
+              <span class="date-label">Début de soumission</span>
+              <span class="date-val">{{ formatDate(d.dateDebutSoumission) }}</span>
+            </div>
+            <div class="date-row">
+              <span class="date-label">Fin de soumission</span>
+              <span class="date-val">{{ formatDate(d.dateFinSoumission) }}</span>
+            </div>
+          }
           <div class="date-row">
             <span class="date-label">Clôture des votes</span>
             <span class="date-val">{{ formatDate(d.dateCloturVotes) }}</span>
           </div>
         </div>
 
-        @if (d.theme) {
+        @if (d.theme && profile()) {
           <div class="info-card info-card-theme">
             <h3 class="info-card-title">Thème</h3>
             <p class="theme-text">{{ d.theme }}</p>
@@ -56,44 +58,44 @@
         }
 
         <!-- Stats -->
-        <div class="info-card">
-          @if (profile()) {
+        @if (profile()) {
+          <div class="info-card">
             <div class="stat-row">
               <span>Organisateur</span>
               <strong>{{ d.organisateurNom }}</strong>
             </div>
-          }
-          <div class="stat-row">
-            <span>Participation</span>
-            <strong>{{ d.inscriptionObligatoire ? 'Inscription requise' : 'Libre' }}</strong>
-          </div>
-          <div class="stat-row">
-            <span>{{ d.inscriptionObligatoire ? 'Inscrits' : 'Participants' }}</span>
-            <strong>{{
-              d.inscriptionObligatoire ? d.nbInscrits : uniqueSubmitters().length
-            }}</strong>
-          </div>
-          @if (s !== 'a_venir') {
             <div class="stat-row">
-              <span>Photos soumises</span>
-              <strong>{{ photos().length }}</strong>
+              <span>Participation</span>
+              <strong>{{ d.inscriptionObligatoire ? 'Inscription requise' : 'Libre' }}</strong>
             </div>
-          }
-          @if (s === 'vote' || s === 'resultats') {
             <div class="stat-row">
-              <span>Votes</span>
-              <strong>{{ votes().length }} votant(s) · {{ totalVotesDeposes() }} au total</strong>
+              <span>{{ d.inscriptionObligatoire ? 'Inscrits' : 'Participants' }}</span>
+              <strong>{{
+                d.inscriptionObligatoire ? d.nbInscrits : uniqueSubmitters().length
+              }}</strong>
             </div>
-          }
-          <div class="stat-row">
-            <span>Max photos / participant</span>
-            <strong>{{ d.maxPhotos }}</strong>
+            @if (s !== 'a_venir') {
+              <div class="stat-row">
+                <span>Photos soumises</span>
+                <strong>{{ photos().length }}</strong>
+              </div>
+            }
+            @if (s === 'vote' || s === 'resultats') {
+              <div class="stat-row">
+                <span>Votes</span>
+                <strong>{{ votes().length }} votant(s) · {{ totalVotesDeposes() }} au total</strong>
+              </div>
+            }
+            <div class="stat-row">
+              <span>Max photos / participant</span>
+              <strong>{{ d.maxPhotos }}</strong>
+            </div>
+            <div class="stat-row">
+              <span>Max votes / membre</span>
+              <strong>{{ d.maxVotes }}</strong>
+            </div>
           </div>
-          <div class="stat-row">
-            <span>Max votes / membre</span>
-            <strong>{{ d.maxVotes }}</strong>
-          </div>
-        </div>
+        }
       </aside>
 
       <!-- Contenu principal -->
@@ -259,7 +261,7 @@
         }
 
         <!-- Participants -->
-        @if (!editMode() && d.inscriptionObligatoire) {
+        @if (!editMode() && d.inscriptionObligatoire && profile()) {
           <section class="inscription-section">
             <div class="inscription-header">
               <h2>
@@ -328,8 +330,6 @@
               <p class="hint participation-libre">
                 Participation libre — aucune inscription requise pour soumettre.
               </p>
-            } @else if (!profile()) {
-              <p class="hint">Connectez-vous pour être notifié à l'ouverture des inscriptions.</p>
             }
           </div>
         }
@@ -344,11 +344,7 @@
             </p>
           </div>
 
-          @if (!profile()) {
-            <div class="phase-card">
-              <p>Connectez-vous pour participer au défi.</p>
-            </div>
-          } @else if (d.inscriptionObligatoire && !isInscrit()) {
+          @if (profile() && d.inscriptionObligatoire && !isInscrit()) {
             <div class="phase-card">
               <p>Inscrivez-vous au défi pour soumettre vos photos.</p>
             </div>

@@ -30,6 +30,13 @@ export class ConfigService {
     );
   }
 
+  getCategoriesOnce(): Observable<CategorieConfig[]> {
+    return from(getDoc(doc(db, CONFIG_CATEGORIES))).pipe(
+      map((snap) => (snap.exists() ? (snap.data() as any)?.items : null) ?? (PHOTO_CATEGORIES as CategorieConfig[])),
+      catchError(() => of(PHOTO_CATEGORIES as CategorieConfig[])),
+    );
+  }
+
   async saveCategories(items: CategorieConfig[]): Promise<void> {
     await setDoc(doc(db, CONFIG_CATEGORIES), { items });
   }

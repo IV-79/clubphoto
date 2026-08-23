@@ -666,8 +666,8 @@
 
 @media (max-width: 768px) {
   .defi-body { grid-template-columns: 1fr; }
-  .defi-aside { order: 2; }
-  .defi-main { order: 1; }
+  .defi-aside { order: 1; }
+  .defi-main { order: 2; }
   .podium { grid-template-columns: 1fr; }
   .photos-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
 }

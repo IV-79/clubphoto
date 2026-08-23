@@ -267,7 +267,7 @@ export class Reunions {
   private async getOrCreateReunionDossier(): Promise<string> {
     if (this.reunionDossierId) return this.reunionDossierId;
     const nom = 'Réunions';
-    const dossiers = await firstValueFrom(this.docService.getDossiers());
+    const dossiers = await firstValueFrom(this.docService.getDossiersOnce());
     if (!dossiers.find((d) => d.nom === nom)) {
       await this.docService.addDossier(nom, dossiers.length);
     }

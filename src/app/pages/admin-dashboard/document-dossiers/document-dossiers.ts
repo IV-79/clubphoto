@@ -1,6 +1,6 @@
-import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 import { FormsModule } from '@angular/forms';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -158,14 +158,16 @@ import { DocumentDossier } from '../../../models/document.model';
     `,
   ],
 })
-export class DocumentDossiers {
+export class DocumentDossiers implements OnInit {
   private documentService = inject(DocumentService);
   private confirmService = inject(ConfirmService);
   private snackBar = inject(MatSnackBar);
 
-  dossiers = toSignal(this.documentService.getDossiers(), {
-    initialValue: [] as DocumentDossier[],
-  });
+  dossiers = signal<DocumentDossier[]>([]);
+
+  async ngOnInit() {
+    this.dossiers.set(await firstValueFrom(this.documentService.getDossiersOnce()));
+  }
 
   newNom = '';
   adding = signal(false);
@@ -186,6 +188,8 @@ export class DocumentDossiers {
       const ordre =
         (this.dossiers().length > 0 ? Math.max(...this.dossiers().map((d) => d.ordre)) : 0) + 1;
       await this.documentService.addDossier(this.newNom.trim(), ordre);
+      // Reload pour récupérer l'ID généré par Firestore
+      this.dossiers.set(await firstValueFrom(this.documentService.getDossiersOnce()));
       this.newNom = '';
       this.snackBar.open('Dossier créé', '', { duration: 2500 });
     } catch {
@@ -203,7 +207,9 @@ export class DocumentDossiers {
   async saveEdit(d: DocumentDossier) {
     if (!this.editNom.trim()) return;
     try {
-      await this.documentService.updateDossier(d.id!, this.editNom.trim(), d.ordre);
+      const nom = this.editNom.trim();
+      await this.documentService.updateDossier(d.id!, nom, d.ordre);
+      this.dossiers.update((list) => list.map((x) => (x.id === d.id ? { ...x, nom } : x)));
       this.editId.set(null);
       this.snackBar.open('Dossier mis à jour', '', { duration: 2500 });
     } catch {
@@ -220,6 +226,11 @@ export class DocumentDossiers {
       this.documentService.updateDossier(d.id!, d.nom, prev.ordre),
       this.documentService.updateDossier(prev.id!, prev.nom, d.ordre),
     ]);
+    this.dossiers.update((l) =>
+      l.map((x) =>
+        x.id === d.id ? { ...x, ordre: prev.ordre } : x.id === prev.id ? { ...x, ordre: d.ordre } : x,
+      ).sort((a, b) => a.ordre - b.ordre),
+    );
   }
 
   async moveDown(d: DocumentDossier) {
@@ -231,6 +242,11 @@ export class DocumentDossiers {
       this.documentService.updateDossier(d.id!, d.nom, next.ordre),
       this.documentService.updateDossier(next.id!, next.nom, d.ordre),
     ]);
+    this.dossiers.update((l) =>
+      l.map((x) =>
+        x.id === d.id ? { ...x, ordre: next.ordre } : x.id === next.id ? { ...x, ordre: d.ordre } : x,
+      ).sort((a, b) => a.ordre - b.ordre),
+    );
   }
 
   async deleteDossier(d: DocumentDossier) {
@@ -241,6 +257,7 @@ export class DocumentDossiers {
     if (!ok) return;
     try {
       await this.documentService.deleteDossier(d.id!);
+      this.dossiers.update((list) => list.filter((x) => x.id !== d.id));
       this.snackBar.open('Dossier supprimé', '', { duration: 2500 });
     } catch {
       this.snackBar.open('Erreur lors de la suppression', '', { duration: 3000 });

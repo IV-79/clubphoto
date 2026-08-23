@@ -31,7 +31,7 @@ import {
 } from 'firebase/storage';
 import { Observable, from } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { db, storage, collectionStream, docStream } from '../utils/firebase';
+import { db, storage } from '../utils/firebase';
 import {
   Sortie,
   SortieInscription,
@@ -54,11 +54,6 @@ export interface SortieUploadState {
 export class SortieService {
   private notifService = inject(NotificationService);
 
-  getSorties(): Observable<Sortie[]> {
-    const q = query(collection(db, 'sorties'), orderBy('date', 'desc'));
-    return collectionStream<Sortie>(q, 'id');
-  }
-
   getSortiesOnce(): Observable<Sortie[]> {
     return from(getDocs(query(collection(db, 'sorties'), orderBy('date', 'desc')))).pipe(
       map((snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Sortie)),
@@ -67,7 +62,7 @@ export class SortieService {
 
   getSortiesActivesOnce(): Observable<Sortie[]> {
     const d = new Date();
-    d.setDate(d.getDate() - 7);
+    d.setDate(d.getDate() - 30);
     const windowStart = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     return from(
       getDocs(
@@ -138,19 +133,6 @@ export class SortieService {
     return from(getDocs(collection(db, `sorties/${sortieId}/inscriptions`))).pipe(
       map((snap) => snap.docs.map((d) => d.data() as SortieInscription)),
     );
-  }
-
-  getSortie(id: string): Observable<Sortie> {
-    return docStream<Sortie>(doc(db, 'sorties', id), 'id') as Observable<Sortie>;
-  }
-
-  getMesSorties(uid: string): Observable<Sortie[]> {
-    const q = query(
-      collection(db, 'sorties'),
-      where('organisateurUid', '==', uid),
-      orderBy('date', 'desc'),
-    );
-    return collectionStream<Sortie>(q, 'id');
   }
 
   async createSortie(
@@ -303,10 +285,6 @@ export class SortieService {
     );
   }
 
-  getInscriptions(sortieId: string): Observable<SortieInscription[]> {
-    return collectionStream<SortieInscription>(collection(db, `sorties/${sortieId}/inscriptions`));
-  }
-
   async inscrire(sortieId: string, uid: string, nomMembre: string): Promise<void> {
     await Promise.all([
       setDoc(doc(db, `sorties/${sortieId}/inscriptions`, uid), {
@@ -326,11 +304,6 @@ export class SortieService {
   }
 
   // --- Photos ---
-
-  getPhotos(sortieId: string): Observable<SortieImage[]> {
-    const q = query(collection(db, `sorties/${sortieId}/photos`), orderBy('uploadedAt', 'asc'));
-    return collectionStream<SortieImage>(q, 'id');
-  }
 
   uploadPhoto(
     file: File,

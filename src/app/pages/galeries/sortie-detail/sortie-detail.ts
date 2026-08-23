@@ -134,11 +134,17 @@ export class SortieDetail {
     const badgeCss = type === 'sortie_club' ? 'badge-sortie-club' : 'badge-sortie';
     return { text: `${meta.emoji} ${meta.label}`, css: `event-type-badge ${badgeCss}` };
   });
-  statusHero = computed((): HeroBadge =>
-    this.isAVenir()
-      ? { text: 'À venir', css: 'hero-status status-avenir' }
-      : { text: 'Ouverte aux photos', css: 'hero-status status-photos' },
-  );
+  uploadVerrouille = computed(() => {
+    const s = this.sortie();
+    if (!s?.dateFinSoumission) return false;
+    return new Date().toISOString().slice(0, 10) > s.dateFinSoumission;
+  });
+
+  statusHero = computed((): HeroBadge => {
+    if (this.isAVenir()) return { text: 'À venir', css: 'hero-status status-avenir' };
+    if (this.uploadVerrouille()) return { text: 'Photos clôturées', css: 'hero-status status-cloture' };
+    return { text: 'Ouverte aux photos', css: 'hero-status status-photos' };
+  });
 
   private allMembres$ = toObservable(this.canManage).pipe(
     switchMap((can) => (can ? this.authService.getAllMembersOnce() : of([] as UserProfile[]))),
@@ -157,6 +163,7 @@ export class SortieDetail {
     maxParticipants: new FormControl<number | null>(null),
     inscriptionObligatoire: new FormControl(true, { nonNullable: true }),
     visibilite: new FormControl<'public' | 'membre'>('public', { nonNullable: true }),
+    dateFinSoumission: new FormControl('', { nonNullable: true }),
   });
 
   accessDenied = computed(() => {
@@ -193,6 +200,7 @@ export class SortieDetail {
     const s = this.sortie();
     const p = this.profile();
     if (!s || !p || this.isAVenir()) return false;
+    if (this.uploadVerrouille()) return false;
     if (!s.inscriptionObligatoire) return true;
     return this.isInscrit() || this.isOrganisateur() || this.isAdmin();
   });
@@ -277,6 +285,7 @@ export class SortieDetail {
       maxParticipants: s.maxParticipants ?? null,
       inscriptionObligatoire: s.inscriptionObligatoire,
       visibilite: s.visibilite ?? 'public',
+      dateFinSoumission: s.dateFinSoumission ?? '',
     });
     this.editMode.set(true);
   }
@@ -312,6 +321,7 @@ export class SortieDetail {
           maxParticipants: v.maxParticipants ?? undefined,
           inscriptionObligatoire: v.inscriptionObligatoire,
           visibilite: v.visibilite,
+          dateFinSoumission: v.dateFinSoumission,
         },
         {
           oldDate: s.date,

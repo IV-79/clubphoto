@@ -28,17 +28,19 @@
       <aside class="oneshot-aside">
         <div class="info-card">
           <h3 class="info-card-title">Événement</h3>
-          <div class="stat-row">
-            <span>Statut</span>
-            <strong>{{ statutLabel() }}</strong>
-          </div>
+          @if (isLoggedIn()) {
+            <div class="stat-row">
+              <span>Statut</span>
+              <strong>{{ statutLabel() }}</strong>
+            </div>
+          }
           @if (e.date) {
             <div class="stat-row">
               <span>Date</span>
               <strong>{{ formatDate(e.date) }}</strong>
             </div>
           }
-          @if (e.lieu) {
+          @if (e.lieu && isLoggedIn()) {
             <div class="stat-row">
               <span>Lieu</span>
               <strong>{{ e.lieu }}</strong>
@@ -58,10 +60,12 @@
               <strong>{{ photos().length }}</strong>
             </div>
           }
-          <div class="stat-row">
-            <span>Visibilité</span>
-            <strong>{{ e.visibilite === 'membre' ? 'Membres' : 'Publique' }}</strong>
-          </div>
+          @if (isLoggedIn()) {
+            <div class="stat-row">
+              <span>Visibilité</span>
+              <strong>{{ e.visibilite === 'membre' ? 'Membres' : 'Publique' }}</strong>
+            </div>
+          }
         </div>
       </aside>
 
@@ -434,6 +438,7 @@
         }
 
         <!-- ── Inscription + Participants ───── -->
+        @if (isLoggedIn()) {
         <section class="inscription-section">
           <div class="inscription-header">
             <h2>
@@ -518,6 +523,7 @@
             </div>
           }
         </section>
+        }
 
         <!-- ── VOTE ──────────────────────────── -->
         @if (e.statut === 'vote' && profile()) {
