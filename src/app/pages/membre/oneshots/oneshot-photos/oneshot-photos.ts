@@ -81,6 +81,14 @@ export class OneShotPhotos {
       pending.has(p.id) ? { ...p, themeId: pending.get(p.id)! } : p,
     );
 
+    const sortByMembre = (list: OneShotPhoto[]) =>
+      [...list].sort((a, b) => {
+        if (!a.membreUid && !b.membreUid) return 0;
+        if (!a.membreUid) return -1;
+        if (!b.membreUid) return 1;
+        return (a.nomMembre ?? '').localeCompare(b.nomMembre ?? '', 'fr');
+      });
+
     const buildCounts = (list: OneShotPhoto[]) => {
       const map = new Map<string, number>();
       for (const p of list) {
@@ -93,12 +101,12 @@ export class OneShotPhotos {
       {
         id: '',
         nom: 'Non assignées',
-        photos: photos.filter((p) => !p.themeId),
+        photos: sortByMembre(photos.filter((p) => !p.themeId)),
         isUnassigned: true,
         memberCounts: new Map(),
       },
       ...this.themes().map((t) => {
-        const tp = photos.filter((p) => p.themeId === t.id);
+        const tp = sortByMembre(photos.filter((p) => p.themeId === t.id));
         return {
           id: t.id,
           nom: t.nom,

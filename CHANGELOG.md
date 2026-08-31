@@ -2,6 +2,24 @@
 
 ---
 
+## v1.0.0-beta — En cours (2026-08-31)
+
+### Gestion des photos OneShot — UX (2026-08-31)
+
+- **Suppression de la zone "Déposez des photos ici"** : le hint CDK dans les sections thème était trompeur (ressemblait à une zone d'upload alors que l'upload se fait uniquement en haut de page). Supprimé ; le drag-and-drop entre sections reste fonctionnel.
+- **Masquage des sections vides hors gestion** : quand la gestion des photos est clôturée (phase vote/résultats), les sections thème sans photos n'apparaissent plus.
+- **Tri des photos par membre** : dans chaque section, les photos sans membre assigné apparaissent en premier, puis les autres triées alphabétiquement par nom de membre.
+
+### Configuration de la fenêtre "En ce moment" (2026-08-31)
+
+- **Paramétrage admin** : deux nouveaux champs dans Admin → Config → "Fenêtre des événements" : *Jours avant* et *Jours après* l'événement. Remplace les valeurs fixes de ±7 jours. Défaut : 7 / 7.
+
+### Badges de statut des cartes événement (2026-08-31)
+
+- **Fix badge sortie** : une sortie dont la date est passée mais encore visible en "En ce moment" (via `dateFinSoumission`) affichait incorrectement "À venir". Nouveau comportement : "Soumission en cours" (vert) si la soumission est encore ouverte, "Terminé" (gris) si elle est clôturée.
+
+---
+
 ## v1.0.0-beta — En cours (2026-08-23)
 
 ### Visibilité invité et sidebar mobile (2026-08-23)

@@ -50,6 +50,9 @@ export class AdminConfig implements OnInit {
   // Limites
   portfolioLimit = signal(20);
   portfolioLimitSaving = signal(false);
+  joursAvantEvent = signal(7);
+  joursApresEvent = signal(7);
+  eventWindowSaving = signal(false);
 
   // Image page d'accueil
   private siteConfigSignal = signal<SiteConfig>({});
@@ -70,6 +73,8 @@ export class AdminConfig implements OnInit {
     ]);
     this.siteConfigSignal.set(cfg);
     this.portfolioLimit.set(cfg.maxPhotosPortfolio ?? 20);
+    this.joursAvantEvent.set(cfg.joursAvantEvenement ?? 7);
+    this.joursApresEvent.set(cfg.joursApresEvenement ?? 7);
     this.categories.set(cats);
   }
 
@@ -80,6 +85,15 @@ export class AdminConfig implements OnInit {
     this.portfolioLimitSaving.set(true);
     await this.configService.saveSiteConfig({ maxPhotosPortfolio: val });
     this.portfolioLimitSaving.set(false);
+  }
+
+  async saveEventWindow() {
+    const avant = this.joursAvantEvent();
+    const apres = this.joursApresEvent();
+    if (avant < 0 || avant > 365 || apres < 0 || apres > 365) return;
+    this.eventWindowSaving.set(true);
+    await this.configService.saveSiteConfig({ joursAvantEvenement: avant, joursApresEvenement: apres });
+    this.eventWindowSaving.set(false);
   }
 
   // ---- Catégories ----

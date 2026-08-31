@@ -54,7 +54,6 @@ select:focus { border-color: var(--border-strong); }
 .btn-secondary:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .photos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 10px; min-height: 80px; }
-.empty-drop-hint { grid-column: 1 / -1; display: flex; align-items: center; justify-content: center; height: 72px; border: 2px dashed var(--border); border-radius: 5px; color: var(--text-hint); font-size: 0.8rem; font-style: italic; }
 
 .photo-card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 5px; overflow: hidden; display: flex; flex-direction: column; transition: box-shadow 0.15s; }
 .photo-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }

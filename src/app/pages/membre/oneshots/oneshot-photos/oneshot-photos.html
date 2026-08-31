@@ -183,6 +183,7 @@
 
     <div cdkDropListGroup>
       @for (section of allSections(); track section.id + ':' + section.isUnassigned) {
+        @if (section.photos.length > 0 || peutGerer()) {
         <section class="panel" [class.panel-unassigned]="section.isUnassigned">
           <h2 class="panel-title" [class.unassigned-title]="section.isUnassigned">
             {{ section.nom }}
@@ -274,11 +275,9 @@
               </div>
             }
 
-            @if (section.photos.length === 0) {
-              <div class="empty-drop-hint">Déposez des photos ici</div>
-            }
           </div>
         </section>
+        }
       }
     </div>
   }

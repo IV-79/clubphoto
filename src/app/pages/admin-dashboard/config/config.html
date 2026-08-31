@@ -112,6 +112,44 @@
         {{ portfolioLimitSaving() ? 'Sauvegarde…' : 'Enregistrer' }}
       </button>
     </div>
+
+    <div class="section-header" style="margin-top: 20px">
+      <div>
+        <h3 class="section-title">Fenêtre des événements</h3>
+        <p class="section-sub">
+          Nombre de jours avant et après la date d'un événement pour qu'il apparaisse dans "En ce moment".
+        </p>
+      </div>
+    </div>
+    <div class="limit-row">
+      <label class="limit-label" for="joursAvant">Jours avant</label>
+      <input
+        id="joursAvant"
+        type="number"
+        class="input-limit"
+        min="0"
+        max="365"
+        [(ngModel)]="joursAvantEvent"
+        [ngModelOptions]="{ standalone: true }"
+      />
+      <label class="limit-label" for="joursApres" style="margin-left: 16px">Jours après</label>
+      <input
+        id="joursApres"
+        type="number"
+        class="input-limit"
+        min="0"
+        max="365"
+        [(ngModel)]="joursApresEvent"
+        [ngModelOptions]="{ standalone: true }"
+      />
+      <button
+        class="btn-add"
+        (click)="saveEventWindow()"
+        [disabled]="eventWindowSaving() || joursAvantEvent() < 0 || joursApresEvent() < 0"
+      >
+        {{ eventWindowSaving() ? 'Sauvegarde…' : 'Enregistrer' }}
+      </button>
+    </div>
   </section>
 
   <!-- Section catégories -->

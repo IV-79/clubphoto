@@ -16,6 +16,7 @@ import { AuthService } from '../../../services/auth.service';
 import { OneShotService } from '../../../services/oneshot.service';
 import { DefiService } from '../../../services/defi.service';
 import { ExpositionService } from '../../../services/exposition.service';
+import { ConfigService, SiteConfig } from '../../../services/config.service';
 import { Sortie, SORTIE_TYPE_META, SortieType } from '../../../models/sortie.model';
 import { OneShot } from '../../../models/oneshot.model';
 import { Defi } from '../../../models/defi.model';
@@ -38,6 +39,11 @@ export class SortiesListe {
   private defiService = inject(DefiService);
   private expoService = inject(ExpositionService);
   private authService = inject(AuthService);
+  private configService = inject(ConfigService);
+
+  private siteConfig = toSignal(this.configService.getSiteConfigOnce(), { initialValue: {} as SiteConfig });
+  private joursAvant = computed(() => this.siteConfig().joursAvantEvenement ?? 7);
+  private joursApres = computed(() => this.siteConfig().joursApresEvenement ?? 7);
 
   profile = toSignal(this.authService.currentUserProfile$);
 
@@ -397,18 +403,14 @@ export class SortiesListe {
   private get today(): string {
     return this.dateOffset(0);
   }
-  private get windowStart(): string {
-    return this.dateOffset(-7);
-  }
-  private get windowEnd(): string {
-    return this.dateOffset(7);
-  }
+  private readonly windowStart = computed(() => this.dateOffset(-this.joursAvant()));
+  private readonly windowEnd = computed(() => this.dateOffset(this.joursApres()));
 
   private isBeforeWindow(date: string): boolean {
-    return date < this.windowStart;
+    return date < this.windowStart();
   }
   private isAfterWindow(date: string): boolean {
-    return date > this.windowEnd;
+    return date > this.windowEnd();
   }
 
   private isExpoAVenir(e: Exposition): boolean {

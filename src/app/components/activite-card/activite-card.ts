@@ -82,14 +82,22 @@ export class ActiviteCard {
     const { kind, data } = this.item();
     if (kind === 'sortie') {
       if (this.isPast()) return { text: 'Terminé', css: 'card-status status-passee' };
-      const date = (data as Sortie).date;
+      const s = data as Sortie;
       const n = new Date();
       const todayStr = `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}`;
+      const date = s.date;
 
+      if (date > todayStr) {
+        if (this.isDateWithin7Days(date)) return { text: 'Bientôt', css: 'card-status status-bientot' };
+        return { text: 'À venir', css: 'card-status status-avenir' };
+      }
       if (date === todayStr) return { text: 'En cours', css: 'card-status status-encours' };
-      if (this.isDateWithin7Days(date))
-        return { text: 'Bientôt', css: 'card-status status-bientot' };
-      return { text: 'À venir', css: 'card-status status-avenir' };
+
+      // date < today : événement passé, encore en "En ce moment" via dateFinSoumission
+      if (s.dateFinSoumission && s.dateFinSoumission < todayStr) {
+        return { text: 'Terminé', css: 'card-status status-passee' };
+      }
+      return { text: 'Soumission en cours', css: 'card-status status-defi-soumission' };
     }
     if (kind === 'oneshot') {
       const o = data as OneShot;
