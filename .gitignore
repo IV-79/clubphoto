@@ -76,3 +76,6 @@ src/environments/environment.prod.ts
 /tests_clubphoto.xlsx
 /ClubPhoto_Hebergement.xlsx
 /rapport_firebase_couts.docx
+
+# Dumps Firestore (données membres — ne jamais versionner)
+/scripts/data/
