@@ -426,6 +426,30 @@
         </div>
       </div>
 
+      <!-- Compteurs one-shots -->
+      <div class="recalcul-item">
+        <div class="recalcul-item-head">
+          <mat-icon class="cu-icon">photo_camera</mat-icon>
+          <span class="ri-label">Compteurs one-shots</span>
+          <span class="cu-warn-badge">lecture approfondie</span>
+        </div>
+        <p class="ri-desc">
+          Recalcule <code>nbInscrits</code> et <code>nbThemes</code> pour tous les one-shots.
+        </p>
+        @if (recalculOsOk()) {
+          <div class="recalcul-ok">✓ Compteurs mis à jour</div>
+        }
+        <div class="cleanup-btns">
+          <button
+            class="btn-cu-preview"
+            (click)="recalculerCompteursOneShots()"
+            [disabled]="recalculOsRunning() || cleanupRunning() || recalculStorageRunning() || recalculThemesRunning()"
+          >
+            {{ recalculOsRunning() ? 'Recalcul… ' + recalculOsProgress() : 'Recalculer' }}
+          </button>
+        </div>
+      </div>
+
       <!-- Stockage membres -->
       <div class="recalcul-item">
         <div class="recalcul-item-head">

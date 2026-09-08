@@ -2,6 +2,28 @@
 
 ---
 
+## v1.0.0-beta — En cours (2026-09-08)
+
+### Fix tri admin/membres (2026-09-08)
+
+- **Tri insensible à la casse et aux accents** : le tri par nom utilisait `localeCompare('fr')` brut qui produisait un ordre erroné sur Windows/Chrome (notamment `Y` trié avant `p`). Remplacé par une normalisation NFD + suppression diacritiques + `toLowerCase()` — résultat déterministe quel que soit le navigateur.
+- **Fallback prenom quand nom vide** : les membres sans champ `nom` (ex. Yves, dont seul le prénom est renseigné) remontaient en tête de liste car `''` précède toute lettre. Désormais, si `nom` est vide, le tri utilise `prenom` comme clé effective.
+- **Tri secondaire par prenom** : à `nom` égal (ex. deux Pralong), le tri se poursuit sur `prenom`.
+
+### Fix stockage affiché admin/membres (2026-09-08)
+
+- **totalStorage corrigé** : la colonne Stockage n'additionnait que `portfolio + themes + oneshots + documents`, ignorant `defis`, `sorties` et `expositions`. Tous les champs sont maintenant inclus.
+
+### Maintenance — recount compteurs OneShot (2026-09-08)
+
+- **Nouveau bouton "Compteurs one-shots"** dans Admin → Maintenance → Recalculs : recalcule `nbInscrits` et `nbThemes` pour tous les one-shots en lisant les sous-collections réelles (même pattern que le recount thèmes existant).
+
+### Script dump Firestore (2026-09-08)
+
+- **`scripts/dump-firestore.js`** : script Node.js pour exporter une ou plusieurs collections Firestore en JSON local (`scripts/data/`, gitignorés). Usage : `node scripts/dump-firestore.js [collections…]`. Utile pour diagnostic et debug des données.
+
+---
+
 ## v1.0.0-beta — En cours (2026-08-31)
 
 ### Gestion des photos OneShot — UX (2026-08-31)

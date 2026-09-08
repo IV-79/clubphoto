@@ -9,6 +9,7 @@ import {
 } from '../../../services/cleanup.service';
 import { ThemeService } from '../../../services/theme.service';
 import { AuthService } from '../../../services/auth.service';
+import { OneShotService } from '../../../services/oneshot.service';
 import { ConfirmService } from '../../../services/confirm.service';
 import { DatePickerComponent } from '../../../components/date-picker/date-picker';
 
@@ -23,6 +24,7 @@ export class Maintenance implements OnInit {
   cleanupService = inject(CleanupService);
   private themeService = inject(ThemeService);
   private authService = inject(AuthService);
+  private oneShotService = inject(OneShotService);
   private confirmService = inject(ConfirmService);
 
   // ── Cleanup ──────────────────────────────────────────────────────────────
@@ -62,6 +64,9 @@ export class Maintenance implements OnInit {
   recalculStorageRunning = signal(false);
   recalculStorageOk = signal(false);
   recalculStorageProgress = signal('');
+  recalculOsRunning = signal(false);
+  recalculOsOk = signal(false);
+  recalculOsProgress = signal('');
 
   private twoYearsAgo(): string {
     const d = new Date();
@@ -365,6 +370,28 @@ export class Maintenance implements OnInit {
       console.error(e);
     } finally {
       this.recalculThemesRunning.set(false);
+    }
+  }
+
+  async recalculerCompteursOneShots() {
+    if (this.recalculOsRunning()) return;
+    this.recalculOsRunning.set(true);
+    this.recalculOsOk.set(false);
+    try {
+      const oneshots = await firstValueFrom(this.oneShotService.getAllOneShotsOnce());
+      let i = 0;
+      for (const os of oneshots) {
+        i++;
+        this.recalculOsProgress.set(`${i}/${oneshots.length}`);
+        await this.oneShotService.recalculeCompteurs(os.id);
+      }
+      this.recalculOsProgress.set('');
+      this.recalculOsOk.set(true);
+      setTimeout(() => this.recalculOsOk.set(false), 4000);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      this.recalculOsRunning.set(false);
     }
   }
 

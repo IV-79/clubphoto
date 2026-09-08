@@ -76,6 +76,23 @@ export class OneShotService {
     return docStream<OneShot>(doc(db, 'oneshots', id), 'id') as Observable<OneShot>;
   }
 
+  getAllOneShotsOnce(): Observable<OneShot[]> {
+    return from(getDocs(collection(db, 'oneshots'))).pipe(
+      map((snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }) as OneShot)),
+    );
+  }
+
+  async recalculeCompteurs(oneShotId: string): Promise<void> {
+    const [inscritsSnap, themesSnap] = await Promise.all([
+      getDocs(collection(db, 'oneshots', oneShotId, 'inscriptions')),
+      getDocs(collection(db, 'oneshots', oneShotId, 'themes')),
+    ]);
+    await updateDoc(doc(db, 'oneshots', oneShotId), {
+      nbInscrits: inscritsSnap.size,
+      nbThemes: themesSnap.size,
+    });
+  }
+
   getPublicOneShotsOnce(): Observable<OneShot[]> {
     const q = query(
       collection(db, 'oneshots'),

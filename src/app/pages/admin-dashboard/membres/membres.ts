@@ -127,7 +127,13 @@ export class Membres implements OnInit {
     if (!s) return 0;
     return Math.max(
       0,
-      (s.portfolio ?? 0) + (s.themes ?? 0) + (s.oneshots ?? 0) + (s.documents ?? 0),
+      (s.portfolio ?? 0) +
+        (s.themes ?? 0) +
+        (s.oneshots ?? 0) +
+        (s.documents ?? 0) +
+        (s.defis ?? 0) +
+        (s.sorties ?? 0) +
+        (s.expositions ?? 0),
     );
   }
 
