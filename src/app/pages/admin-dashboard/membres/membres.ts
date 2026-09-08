@@ -83,6 +83,16 @@ export class Membres implements OnInit {
     );
   });
 
+  private normalizeForSort(s: string): string {
+    return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  }
+
+  private cmpStr(a: string, b: string): number {
+    const na = this.normalizeForSort(a);
+    const nb = this.normalizeForSort(b);
+    return na < nb ? -1 : na > nb ? 1 : 0;
+  }
+
   sortedMembres = computed(() => {
     const col = this.sortCol();
     const dir = this.sortDir();
@@ -92,9 +102,17 @@ export class Membres implements OnInit {
         const diff = this.totalStorage(a) - this.totalStorage(b);
         return dir === 'asc' ? diff : -diff;
       }
-      const va = String((a as unknown as Record<string, unknown>)[col] ?? '');
-      const vb = String((b as unknown as Record<string, unknown>)[col] ?? '');
-      const cmp = va.localeCompare(vb, 'fr');
+      // Pour la colonne "nom", fallback sur prenom si nom est vide
+      const raw = (m: UserProfile) =>
+        col === 'nom'
+          ? (m.nom || m.prenom || '')
+          : String((m as unknown as Record<string, unknown>)[col] ?? '');
+      const va = raw(a);
+      const vb = raw(b);
+      let cmp = this.cmpStr(va, vb);
+      if (cmp === 0 && col === 'nom') {
+        cmp = this.cmpStr(a.prenom ?? '', b.prenom ?? '');
+      }
       return dir === 'asc' ? cmp : -cmp;
     });
   });
