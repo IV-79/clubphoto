@@ -76,11 +76,14 @@ export class Membres implements OnInit {
   ];
 
   filteredMembres = computed(() => {
-    const q = this.filterText().toLowerCase().trim();
+    const q = this.normalizeForSort(this.filterText().trim());
     if (!q) return this.membres();
-    return this.membres().filter(
-      (m) => m.nom.toLowerCase().includes(q) || m.email.toLowerCase().includes(q),
-    );
+    return this.membres().filter((m) => {
+      const nom = this.normalizeForSort(m.nom ?? '');
+      const prenom = this.normalizeForSort(m.prenom ?? '');
+      const email = this.normalizeForSort(m.email ?? '');
+      return nom.includes(q) || prenom.includes(q) || email.includes(q);
+    });
   });
 
   private normalizeForSort(s: string): string {
