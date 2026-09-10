@@ -69,7 +69,7 @@ export class DocumentService {
   }
 
   async deleteDocument(id: string, storagePath: string): Promise<void> {
-    await deleteObject(ref(storage, storagePath)).catch(() => {});
+    if (storagePath) await deleteObject(ref(storage, storagePath)).catch(() => {});
     await deleteDoc(doc(db, 'documents', id));
   }
 

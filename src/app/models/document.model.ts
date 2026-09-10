@@ -14,6 +14,7 @@ export interface ClubDocument {
   dossier: string;
   storagePath: string;
   url: string;
+  lien?: string; // défini si le document est un lien web (pas un upload)
   uploadeurUid: string;
   uploadeurNom: string;
   dateCreation: string;
@@ -29,6 +30,7 @@ interface ExtensionMeta {
 }
 
 const EXT_MAP: Record<string, ExtensionMeta> = {
+  lien: { icon: 'link', color: '#0277bd', label: 'Lien' },
   pdf: { icon: 'picture_as_pdf', color: '#e53935', label: 'PDF' },
   doc: { icon: 'description', color: '#1565c0', label: 'Word' },
   docx: { icon: 'description', color: '#1565c0', label: 'Word' },
@@ -59,4 +61,17 @@ export function getExtensionMeta(extension: string): ExtensionMeta {
 export function extractExtension(filename: string): string {
   const parts = filename.split('.');
   return parts.length > 1 ? parts[parts.length - 1].toLowerCase() : '';
+}
+
+export function extractExtFromUrl(url: string): string {
+  try {
+    const pathname = new URL(url).pathname;
+    const lastSegment = pathname.split('/').pop() ?? '';
+    const dotIdx = lastSegment.lastIndexOf('.');
+    if (dotIdx > 0) {
+      const ext = lastSegment.slice(dotIdx + 1).toLowerCase();
+      if (EXT_MAP[ext]) return ext;
+    }
+  } catch {}
+  return 'lien';
 }
