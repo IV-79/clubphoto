@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /membre/
+Disallow: /completer-profil
+
+Sitemap: https://clubphototournontain.fr/sitemap.xml

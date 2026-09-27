@@ -18,38 +18,21 @@
       {
         "source": "/index.html",
         "headers": [
-          {
-            "key": "Cache-Control",
-            "value": "no-cache"
-          }
+          { "key": "Cache-Control", "value": "no-cache" },
+          { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
         ]
       },
       {
         "source": "**/*.@(js|css)",
-        "headers": [
-          {
-            "key": "Cache-Control",
-            "value": "public, max-age=31536000, immutable"
-          }
-        ]
+        "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
       },
       {
         "source": "/media/**",
-        "headers": [
-          {
-            "key": "Cache-Control",
-            "value": "public, max-age=31536000, immutable"
-          }
-        ]
+        "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
       },
       {
         "source": "**/*.@(jpg|jpeg|png|gif|svg|ico|webp)",
-        "headers": [
-          {
-            "key": "Cache-Control",
-            "value": "public, max-age=86400"
-          }
-        ]
+        "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400" }]
       }
     ],
     "rewrites": [
