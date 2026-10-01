@@ -16,10 +16,15 @@
     ],
     "headers": [
       {
+        "source": "**",
+        "headers": [
+          { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive" }
+        ]
+      },
+      {
         "source": "/index.html",
         "headers": [
-          { "key": "Cache-Control", "value": "no-cache" },
-          { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
+          { "key": "Cache-Control", "value": "no-cache" }
         ]
       },
       {
