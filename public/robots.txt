@@ -4,4 +4,4 @@ Disallow: /admin/
 Disallow: /membre/
 Disallow: /completer-profil
 
-Sitemap: https://clubphototournontain.fr/sitemap.xml
+Sitemap: https://www.clubphototournontain.fr/sitemap.xml
