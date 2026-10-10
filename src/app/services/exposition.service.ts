@@ -13,6 +13,8 @@ import {
   where,
   deleteField,
   increment,
+  arrayUnion,
+  arrayRemove,
 } from 'firebase/firestore';
 import {
   ref,
@@ -24,7 +26,14 @@ import {
 import { Observable, from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { db, storage } from '../utils/firebase';
-import { Exposition, ExpoSuggestion, ExpoVoteDoc, ExpoPhoto } from '../models/exposition.model';
+import {
+  Exposition,
+  ExpoSuggestion,
+  ExpoVoteDoc,
+  ExpoPhoto,
+  ExpoParticipant,
+  ExpoEvaluation,
+} from '../models/exposition.model';
 import { generateId } from '../utils/id';
 import { compressImage, COMPRESS_THUMB } from '../utils/image-compress';
 import { NotificationService } from './notification.service';
@@ -131,10 +140,11 @@ export class ExpositionService {
   }
 
   async deleteExposition(id: string, photoCouverturePath?: string): Promise<void> {
-    const [photosSnap, suggsSnap, votesSnap] = await Promise.all([
+    const [photosSnap, suggsSnap, votesSnap, participantsSnap] = await Promise.all([
       getDocs(collection(db, `expositions/${id}/photos`)),
       getDocs(collection(db, `expositions/${id}/suggestions`)),
       getDocs(collection(db, `expositions/${id}/votes`)),
+      getDocs(collection(db, `expositions/${id}/participants`)),
     ]);
     const storageDels: Promise<void>[] = [];
     const sizeByUser: Record<string, number> = {};
@@ -150,11 +160,20 @@ export class ExpositionService {
     if (photoCouverturePath)
       storageDels.push(deleteObject(ref(storage, photoCouverturePath)).catch(() => {}));
 
+    // Clean up evaluations subcollections inside participants
+    const participantDels: Promise<void>[] = participantsSnap.docs.map((pDoc) =>
+      getDocs(collection(db, `expositions/${id}/participants/${pDoc.id}/evaluations`))
+        .then((evalsSnap) => Promise.all(evalsSnap.docs.map((e) => deleteDoc(e.ref))) as Promise<unknown>)
+        .then(() => deleteDoc(pDoc.ref))
+        .catch(() => {}),
+    );
+
     await Promise.all([
       ...storageDels,
       ...photosSnap.docs.map((p) => deleteDoc(p.ref)),
       ...suggsSnap.docs.map((p) => deleteDoc(p.ref)),
       ...votesSnap.docs.map((p) => deleteDoc(p.ref)),
+      ...participantDels,
     ]);
     await deleteDoc(doc(db, 'expositions', id));
     Object.entries(sizeByUser).forEach(([uid, size]) =>
@@ -335,6 +354,7 @@ export class ExpositionService {
           updateDoc(doc(db, 'users', meta.uid), {
             'storageUsed.expositions': increment(fileSize),
           }).catch(() => {});
+          await this.upsertParticipantNbPhotos(expoId, meta.uid, meta.nomAuteur, 1).catch(() => {});
           observer.next({ progress: 100, done: true, photo: { id: docRef.id, ...data } });
           observer.complete();
         },
@@ -353,5 +373,151 @@ export class ExpositionService {
     updateDoc(doc(db, 'users', photo.uid), {
       'storageUsed.expositions': increment(-photo.fileSize),
     }).catch(() => {});
+    this.upsertParticipantNbPhotos(expoId, photo.uid, '', -1).catch(() => {});
+  }
+
+  // ── Participants & Comité ────────────────────────────────────────────────────
+
+  async getParticipantsOnce(expoId: string): Promise<ExpoParticipant[]> {
+    const snap = await getDocs(collection(db, `expositions/${expoId}/participants`));
+    return snap.docs.map((d) => ({ uid: d.id, ...d.data() }) as ExpoParticipant);
+  }
+
+  async getPhotosParMembre(expoId: string, uid: string): Promise<ExpoPhoto[]> {
+    const snap = await getDocs(
+      query(collection(db, `expositions/${expoId}/photos`), where('uid', '==', uid)),
+    );
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as ExpoPhoto);
+  }
+
+  private async upsertParticipantNbPhotos(
+    expoId: string,
+    uid: string,
+    nom: string,
+    delta: 1 | -1,
+  ): Promise<void> {
+    const pRef = doc(db, `expositions/${expoId}/participants`, uid);
+    const snap = await getDoc(pRef);
+    if (!snap.exists()) {
+      if (delta === 1) {
+        await setDoc(pRef, { uid, nom, nbPhotos: 1, statut: 'soumission' });
+      }
+    } else {
+      await updateDoc(pRef, { nbPhotos: increment(delta) });
+    }
+  }
+
+  async soumettreAuComite(expoId: string, uid: string): Promise<void> {
+    await updateDoc(doc(db, `expositions/${expoId}/participants`, uid), {
+      statut: 'evaluation',
+      soumisAt: new Date().toISOString(),
+    });
+  }
+
+  async getEvaluationsOnce(expoId: string, participantUid: string): Promise<ExpoEvaluation[]> {
+    const snap = await getDocs(
+      collection(db, `expositions/${expoId}/participants/${participantUid}/evaluations`),
+    );
+    return snap.docs.map((d) => d.data() as ExpoEvaluation);
+  }
+
+  async getMonEvaluation(
+    expoId: string,
+    participantUid: string,
+    comiteUid: string,
+  ): Promise<ExpoEvaluation | null> {
+    const d = await getDoc(
+      doc(db, `expositions/${expoId}/participants/${participantUid}/evaluations`, comiteUid),
+    );
+    return d.exists() ? (d.data() as ExpoEvaluation) : null;
+  }
+
+  async saveEvaluation(
+    expoId: string,
+    participantUid: string,
+    comiteUid: string,
+    orderedPhotoIds: string[],
+  ): Promise<void> {
+    const evalRef = doc(
+      db,
+      `expositions/${expoId}/participants/${participantUid}/evaluations`,
+      comiteUid,
+    );
+    await setDoc(evalRef, { comiteUid, orderedPhotoIds, updatedAt: new Date().toISOString() });
+    await updateDoc(doc(db, `expositions/${expoId}/participants`, participantUid), {
+      comiteUidsEvalues: arrayUnion(comiteUid),
+    });
+  }
+
+  async sauvegarderSelectionMembre(
+    expoId: string,
+    participantUid: string,
+    selectedPhotoIds: string[],
+  ): Promise<void> {
+    await updateDoc(doc(db, `expositions/${expoId}/participants`, participantUid), {
+      selectedPhotoIds,
+    });
+  }
+
+  async cloturerMembre(
+    expoId: string,
+    participantUid: string,
+    selectedPhotoIds: string[],
+  ): Promise<void> {
+    await updateDoc(doc(db, `expositions/${expoId}/participants`, participantUid), {
+      statut: 'clos',
+      closAt: new Date().toISOString(),
+      selectedPhotoIds,
+    });
+  }
+
+  async rouvrirMembre(expoId: string, participantUid: string): Promise<void> {
+    await updateDoc(doc(db, `expositions/${expoId}/participants`, participantUid), {
+      statut: 'evaluation',
+      closAt: deleteField(),
+      selectedPhotoIds: deleteField(),
+      comiteUidsEvalues: deleteField(),
+    });
+  }
+
+  async rouvrirMembreASoumission(expoId: string, participantUid: string): Promise<void> {
+    await updateDoc(doc(db, `expositions/${expoId}/participants`, participantUid), {
+      statut: 'soumission',
+      soumisAt: deleteField(),
+      closAt: deleteField(),
+      selectedPhotoIds: deleteField(),
+      comiteUidsEvalues: deleteField(),
+    });
+  }
+
+  async updateComite(
+    expoId: string,
+    responsableComiteUid: string | null,
+    comiteUids: string[],
+    responsableComiteNom?: string,
+  ): Promise<void> {
+    await updateDoc(doc(db, 'expositions', expoId), {
+      responsableComiteUid: responsableComiteUid ?? deleteField(),
+      responsableComiteNom: responsableComiteNom ?? deleteField(),
+      comiteUids,
+    });
+  }
+
+  async removeComiteMembreEvaluations(expoId: string, comiteUid: string): Promise<void> {
+    const participantsSnap = await getDocs(collection(db, `expositions/${expoId}/participants`));
+    await Promise.all(
+      participantsSnap.docs.map(async (pDoc) => {
+        const evalRef = doc(
+          db,
+          `expositions/${expoId}/participants/${pDoc.id}/evaluations`,
+          comiteUid,
+        );
+        const evalSnap = await getDoc(evalRef);
+        if (evalSnap.exists()) {
+          await deleteDoc(evalRef);
+          await updateDoc(pDoc.ref, { comiteUidsEvalues: arrayRemove(comiteUid) });
+        }
+      }),
+    );
   }
 }

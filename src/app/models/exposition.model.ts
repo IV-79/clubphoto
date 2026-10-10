@@ -29,23 +29,53 @@ export interface Exposition {
   titre: string;
   description?: string;
   statut: ExpoStatut;
-  visibilite?: 'public' | 'membre'; // qui voit l'expo dans la liste
-  photosPubliques?: boolean; // photos accessibles aux non-membres (toggle manuel)
+  visibilite?: 'public' | 'membre';
+  photosPubliques?: boolean;
   organisateurUid: string;
   nomOrganisateur: string;
   maxPhotosParMembre: number;
+  nbPhotosExposition?: number;
   dateDebutIdeation?: string; // YYYY-MM-DD
   dateFinIdeation: string; // YYYY-MM-DD
   dateFinVote?: string;
   nombreVotesParMembre?: number;
   themeChoisi?: string;
   dateFinSoumission?: string; // YYYY-MM-DD
-  dateExposition?: string; // YYYY-MM-DD — début de l'exposition physique
-  dateFinExposition?: string; // YYYY-MM-DD — fin de l'exposition physique (purement factuel)
+  dateExposition?: string; // YYYY-MM-DD
+  dateFinExposition?: string; // YYYY-MM-DD
   photoCouvertureUrl?: string;
   photoCouverturePath?: string;
   dateCreation: string;
+  // Comité d'évaluation
+  responsableComiteUid?: string;
+  responsableComiteNom?: string;
+  comiteUids?: string[];
 }
+
+export type ExpoParticipantStatut = 'soumission' | 'evaluation' | 'clos';
+
+export interface ExpoParticipant {
+  uid: string;
+  nom: string;
+  nbPhotos: number;
+  statut: ExpoParticipantStatut;
+  soumisAt?: string;
+  closAt?: string;
+  selectedPhotoIds?: string[];    // photos choisies par le responsable à la clôture
+  comiteUidsEvalues?: string[];   // membres du comité ayant classifié ce participant
+}
+
+export interface ExpoEvaluation {
+  comiteUid: string;
+  orderedPhotoIds: string[];
+  updatedAt: string;
+}
+
+export const EXPO_PARTICIPANT_STATUT_LABELS: Record<ExpoParticipantStatut, string> = {
+  soumission: 'Soumission',
+  evaluation: 'En évaluation',
+  clos: 'Clôturé',
+};
 
 export interface ExpoSuggestion {
   id: string;

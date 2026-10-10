@@ -7,6 +7,7 @@ import {
   untracked,
   ViewChild,
   ElementRef,
+  HostListener,
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -21,15 +22,19 @@ import { MatIconModule } from '@angular/material/icon';
 import { DatePickerComponent } from '../../../components/date-picker/date-picker';
 import { ExpositionService } from '../../../services/exposition.service';
 import { AuthService } from '../../../services/auth.service';
-import { ConfirmService } from '../../../services/confirm.service';
+import { ConfirmService, TripleChoice } from '../../../services/confirm.service';
 import {
   Exposition,
   ExpoSuggestion,
   ExpoVoteDoc,
   ExpoPhoto,
   ExpoStatut,
+  ExpoParticipant,
+  ExpoEvaluation,
+  EXPO_PARTICIPANT_STATUT_LABELS,
   getExpoStatut,
 } from '../../../models/exposition.model';
+import { UserProfile } from '../../../models/user.model';
 import { LightboxPhoto, PhotoLightboxCallbacks } from '../../../models/commentaire.model';
 import { EventHero, HeroBadge } from '../../../components/event-hero/event-hero';
 import { PhotoLightbox } from '../../../components/photo-lightbox/photo-lightbox';
@@ -69,17 +74,65 @@ export class ExpositionDetail {
   private elRef = inject(ElementRef);
 
   readonly expoId = this.route.snapshot.paramMap.get('id')!;
+  readonly participantStatutLabels = EXPO_PARTICIPANT_STATUT_LABELS;
 
   profile = toSignal(this.authService.currentUserProfile$);
   uid = computed(() => this.profile()?.uid ?? null);
 
-  // ── Data signals (one-shot, mis à jour localement après mutations) ───────────
+  // ── Data signals ─────────────────────────────────────────────────────────────
 
-  expo = signal<Exposition | null>(null); // null = chargement en cours
+  expo = signal<Exposition | null>(null);
   notFound = signal(false);
   suggestions = signal<ExpoSuggestion[]>([]);
   tousVotes = signal<ExpoVoteDoc[]>([]);
-  photos = signal<ExpoPhoto[]>([]);
+  photos = signal<ExpoPhoto[]>([]); // cloture phase (all photos)
+
+  // Soumission phase — participants dashboard
+  participants = signal<ExpoParticipant[]>([]);
+  mesPhotos = signal<ExpoPhoto[]>([]); // current user's photos (soumission phase)
+  mesEvaluations = signal<ExpoEvaluation[]>([]); // evaluations received for current user's dossier
+
+  // Per-participant drill-down (lazy loaded)
+  selectedParticipantUid = signal<string | null>(null);
+  photosParMembre = signal<ExpoPhoto[]>([]);
+  loadingParticipant = signal(false);
+  evaluations = signal<ExpoEvaluation[]>([]); // all evaluations (responsable view)
+  monEvaluation = signal<ExpoEvaluation | null>(null); // my evaluation as committee member
+  evaluationDraft = signal<string[]>([]); // working ordered list
+  viewModeEval = signal<'perso' | 'general'>('perso');
+
+  // Unsaved evaluation tracking — signal + getter for CanDeactivate guard
+  private _evaluationDraftDirty = signal(false);
+  readonly evaluationDraftDirty = this._evaluationDraftDirty.asReadonly();
+
+  // Unsaved selection tracking (photo selection for clôture)
+  private _selectionDirty = signal(false);
+  readonly selectionDirty = this._selectionDirty.asReadonly();
+  savingSelection = signal(false);
+
+  /** Called by CanDeactivate guard */
+  readonly evaluationDraftDirtyFn = () =>
+    this._evaluationDraftDirty() || this._selectionDirty();
+
+  @HostListener('window:beforeunload', ['$event'])
+  onBeforeUnload(event: BeforeUnloadEvent) {
+    if (this._evaluationDraftDirty() || this._selectionDirty()) {
+      event.preventDefault();
+    }
+  }
+
+  // Committee close-member flow
+  showClotureMembre = signal<string | null>(null); // participantUid being closed
+  selectedPourCloture = signal<Set<string>>(new Set());
+  evaluationSaving = signal(false);
+  closingMembre = signal(false);
+
+  // Comité management
+  allMembres = signal<UserProfile[]>([]);
+  editComite = signal(false);
+  comiteSaving = signal(false);
+  draftResponsableUid = signal('');
+  draftComiteUids = signal<string[]>([]);
 
   private loaded = signal(false);
 
@@ -91,8 +144,16 @@ export class ExpositionDetail {
   isMembre = computed(() => !!this.profile());
   photosPubliques = computed(() => !!this.expo()?.photosPubliques);
   visibilitePublique = computed(() => this.expo()?.visibilite === 'public');
+  isResponsableComite = computed(
+    () => !!this.uid() && this.uid() === this.expo()?.responsableComiteUid,
+  );
+  isMembreComite = computed(() => {
+    const uid = this.uid();
+    const comiteUids = this.expo()?.comiteUids ?? [];
+    return !!uid && comiteUids.includes(uid);
+  });
 
-  // ── Statut calculé depuis les dates ─────────────────────────────────────────
+  // ── Statut calculé ───────────────────────────────────────────────────────────
 
   expoStatut = computed((): ExpoStatut => (this.expo() ? getExpoStatut(this.expo()!) : 'ideation'));
 
@@ -108,8 +169,106 @@ export class ExpositionDetail {
     return labels[this.expoStatut()] ?? labels['ideation'];
   });
 
+  // ── Soumission phase computed ─────────────────────────────────────────────────
+
+  monParticipant = computed(() => this.participants().find((p) => p.uid === this.uid()) ?? null);
+  monStatutSoumission = computed(() => this.monParticipant()?.statut ?? null);
+  canUploadEnSoumission = computed(() => {
+    const s = this.monStatutSoumission();
+    if (s !== null && s !== 'soumission') return false;
+    return this.mesPhotos().length < (this.expo()?.maxPhotosParMembre ?? 0);
+  });
+
+  totalPhotosSelectionnees = computed(() =>
+    this.participants().reduce((sum, p) => sum + (p.selectedPhotoIds?.length ?? 0), 0),
+  );
+
+  // Filtres tableau de bord
+  filtreNonEvalues = signal(false);   // comité : participants pas encore classés par moi
+  filtreNonClotures = signal(false);  // responsable : participants pas encore clôturés
+
+  participantsFiltres = computed(() => {
+    let list = this.participants();
+    const uid = this.uid();
+    if (this.filtreNonEvalues() && uid) {
+      list = list.filter(
+        (p) => p.statut === 'evaluation' && !(p.comiteUidsEvalues ?? []).includes(uid),
+      );
+    }
+    if (this.filtreNonClotures()) {
+      list = list.filter((p) => p.statut !== 'clos');
+    }
+    return list;
+  });
+
+  photosRetenuesIds = computed((): Set<string> => {
+    const ids = this.participants().flatMap((p) => p.selectedPhotoIds ?? []);
+    return new Set(ids);
+  });
+
+  photosAfficheesCloture = computed(() => {
+    const all = this.photos();
+    const retenues = all.filter((p) => this.photosRetenuesIds().has(p.id));
+    const source = retenues.length ? retenues : all;
+    return [...source].sort((a, b) => {
+      const ka = a.nomAuteur.normalize('NFD').replace(/\p{Mn}/gu, '').toLowerCase();
+      const kb = b.nomAuteur.normalize('NFD').replace(/\p{Mn}/gu, '').toLowerCase();
+      return ka.localeCompare(kb);
+    });
+  });
+
+  // Photos sélectionnées du membre courant (pour affichage étoile dans son propre dossier)
+  mesPhotosSelectionnees = computed((): Set<string> =>
+    new Set(this.monParticipant()?.selectedPhotoIds ?? []),
+  );
+
+  depasseObjectifExpo = computed(() => {
+    const target = this.expo()?.nbPhotosExposition;
+    if (!target) return false;
+    return this.totalPhotosSelectionnees() > target;
+  });
+
+  // Aggregate score per photo from all evaluations (lower = better, starts at 1)
+  aggregateScores = computed(() => {
+    const evals = this.evaluations();
+    if (!evals.length) return {} as Record<string, number>;
+    const scores: Record<string, number> = {};
+    for (const ev of evals) {
+      ev.orderedPhotoIds.forEach((id, idx) => {
+        scores[id] = (scores[id] ?? 0) + idx + 1;
+      });
+    }
+    return scores;
+  });
+
+  photosParMembreTriees = computed(() => {
+    const photos = [...this.photosParMembre()];
+    const scores = this.aggregateScores();
+    if (!Object.keys(scores).length) return photos;
+    return photos.sort((a, b) => (scores[a.id] ?? 999) - (scores[b.id] ?? 999));
+  });
+
+  // Scores reçus sur le propre dossier du membre courant
+  mesAggregateScores = computed(() => {
+    const evals = this.mesEvaluations();
+    if (!evals.length) return {} as Record<string, number>;
+    const scores: Record<string, number> = {};
+    for (const ev of evals) {
+      ev.orderedPhotoIds.forEach((id, idx) => {
+        scores[id] = (scores[id] ?? 0) + idx + 1;
+      });
+    }
+    return scores;
+  });
+
+  mesPhotosAffichees = computed(() => {
+    const photos = this.mesPhotos();
+    const scores = this.mesAggregateScores();
+    if (!Object.keys(scores).length) return photos;
+    return [...photos].sort((a, b) => (scores[a.id] ?? 999) - (scores[b.id] ?? 999));
+  });
+
   constructor() {
-    // Charge les données une seule fois quand l'état d'auth est connu
     effect(() => {
       const p = this.profile();
       if (p === undefined) return;
@@ -120,7 +279,6 @@ export class ExpositionDetail {
       });
     });
 
-    // Pré-remplir nombreVotesParMembre : 3 au 1er passage, 1 aux suivants
     effect(() => {
       if (this.expoStatut() !== 'nettoyage') return;
       const secondPasse = this.suggestions().some((s) => !s.actif);
@@ -131,7 +289,6 @@ export class ExpositionDetail {
       });
     });
 
-    // Pré-remplir themeChoisi avec le vainqueur clair (si pas ex-aequo)
     effect(() => {
       if (this.expoStatut() !== 'nettoyage') return;
       const winner = this.themeVainqueur();
@@ -143,7 +300,6 @@ export class ExpositionDetail {
       });
     });
 
-    // Verrouille les dates pré-soumission quand un thème est saisi dans le formulaire d'édition
     effect(() => {
       if (!this.editMode()) return;
       const locked = !!this.editThemeSignal()?.trim();
@@ -155,7 +311,6 @@ export class ExpositionDetail {
       });
     });
 
-    // Auto-transition votation→nettoyage uniquement (effets de bord sur suggestions/votes)
     effect(() => {
       const e = this.expo();
       if (!e || !this.canManage()) return;
@@ -216,15 +371,36 @@ export class ExpositionDetail {
       );
     }
 
-    if (s === 'soumission' && uid) {
-      loads.push(this.expoService.getPhotosOnce(this.expoId).then((p) => this.photos.set(p)));
+    if (s === 'soumission') {
+      loads.push(
+        this.expoService.getParticipantsOnce(this.expoId).then((p) => this.participants.set(p)),
+      );
+      if (uid) {
+        loads.push(
+          this.expoService
+            .getPhotosParMembre(this.expoId, uid)
+            .then((p) => this.mesPhotos.set(p)),
+        );
+      }
     }
 
     if (s === 'cloture') {
       loads.push(this.expoService.getPhotosOnce(this.expoId).then((p) => this.photos.set(p)));
+      loads.push(
+        this.expoService.getParticipantsOnce(this.expoId).then((p) => this.participants.set(p)),
+      );
     }
 
     await Promise.all(loads);
+
+    // Load evaluations received on the current user's own dossier (once submitted)
+    if (s === 'soumission' && uid) {
+      const me = this.participants().find((p) => p.uid === uid);
+      if (me && (me.statut === 'evaluation' || me.statut === 'clos')) {
+        const evals = await this.expoService.getEvaluationsOnce(this.expoId, uid);
+        this.mesEvaluations.set(evals);
+      }
+    }
   }
 
   // ── Suggestions ──────────────────────────────────────────────────────────────
@@ -239,7 +415,6 @@ export class ExpositionDetail {
 
   sortMode = signal<'alpha' | 'votes'>('alpha');
 
-  // Vainqueur clair = 1 seul avec le max parmi tous (null si ex-aequo ou aucun vote)
   themeVainqueur = computed(() => {
     const all = this.suggestions();
     if (all.length === 0) return null;
@@ -250,7 +425,6 @@ export class ExpositionDetail {
     return winners.length === 1 ? winners[0] : null;
   });
 
-  // Score max parmi toutes les suggestions (0 si aucun vote)
   maxScoreVote = computed(() => {
     const all = this.suggestions();
     if (all.length === 0) return 0;
@@ -258,7 +432,6 @@ export class ExpositionDetail {
     return Math.max(0, ...all.map((s) => scores[s.id] ?? 0));
   });
 
-  // Liste triée pour le sélecteur : gagnants (ex-aequo) en premier en alpha, puis le reste en alpha
   suggestionsPourSelection = computed(() => {
     const all = [...this.suggestions()];
     const scores = this.scoreParSuggestion();
@@ -386,7 +559,6 @@ export class ExpositionDetail {
       e ? { ...e, statut: 'votation', dateFinVote, nombreVotesParMembre } : e,
     );
     this.sortMode.set('alpha');
-    // Charge les votes pour la nouvelle phase
     const uid = this.uid();
     if (uid) {
       const [votes, monVote] = await Promise.all([
@@ -419,17 +591,37 @@ export class ExpositionDetail {
     this.savingTransition.set(true);
     await this.expoService.passerSoumission(this.expoId, themeChoisi, dateFinSoumission);
     this.expo.update((e) => (e ? { ...e, themeChoisi: themeChoisi.trim(), dateFinSoumission } : e));
-    this.tousVotes.set([]); // votes non nécessaires en soumission
+    this.tousVotes.set([]);
     this.localVoteMap.set({});
-    const photosData = await this.expoService.getPhotosOnce(this.expoId);
-    this.photos.set(photosData);
+    const moi = `${this.profile()?.prenom ?? ''} ${this.profile()?.nom ?? ''}`.trim();
+    this.notifService
+      .broadcast(
+        'exposition',
+        `Le thème « ${themeChoisi.trim()} » est choisi — les soumissions sont ouvertes pour l'exposition « ${this.expo()?.titre ?? '' } » !`,
+        { lien: `/galeries/expositions/${this.expoId}`, sourceNom: moi, excludeUid: this.uid() ?? undefined },
+      )
+      .catch(() => {});
+    // Load initial state for soumission
+    const uid = this.uid();
+    const [participantsData, mesPhotosData] = await Promise.all([
+      this.expoService.getParticipantsOnce(this.expoId),
+      uid ? this.expoService.getPhotosParMembre(this.expoId, uid) : Promise.resolve([]),
+    ]);
+    this.participants.set(participantsData);
+    this.mesPhotos.set(mesPhotosData);
     this.savingTransition.set(false);
   }
 
   async cloturerManuellement() {
+    const total = this.totalPhotosSelectionnees();
+    const target = this.expo()?.nbPhotosExposition;
+    const warningTxt =
+      target && total !== target
+        ? ` ⚠️ Attention : ${total} photo(s) sélectionnée(s) pour un objectif de ${target}.`
+        : '';
     const ok = await this.confirmService.confirm(
-      "Plus aucune photo ne pourra être soumise. L'exposition passera en phase « En exposition ».",
-      'Clôturer la soumission',
+      `La sélection sera figée et l'exposition passera en phase « En exposition ». Les photos retenues seront visibles par les membres.${warningTxt}`,
+      'Clôturer la sélection',
       'Clôturer',
       false,
     );
@@ -437,6 +629,15 @@ export class ExpositionDetail {
     this.savingTransition.set(true);
     await this.expoService.cloture(this.expoId);
     this.expo.update((e) => (e ? { ...e, statut: 'cloture' } : e));
+    const expo = this.expo();
+    const moi = `${this.profile()?.prenom ?? ''} ${this.profile()?.nom ?? ''}`.trim();
+    this.notifService
+      .broadcast(
+        'exposition',
+        `L'exposition « ${expo?.titre ?? ''} » est maintenant accessible — découvrez les photos sélectionnées !`,
+        { lien: `/galeries/expositions/${this.expoId}`, sourceNom: moi, excludeUid: this.uid() ?? undefined },
+      )
+      .catch(() => {});
     this.savingTransition.set(false);
   }
 
@@ -483,17 +684,42 @@ export class ExpositionDetail {
       for (let i = 0; i < count; i++) themeIds.push(id);
     }
     await this.expoService.voter(this.expoId, uid, themeIds);
-    // Re-fetch scores pour refléter le vote enregistré
     const votes = await this.expoService.getTousVotesOnce(this.expoId);
     this.tousVotes.set(votes);
   }
 
-  // ── Photos soumission ────────────────────────────────────────────────────────
+  // ── Photos — lightbox (cloture phase) ───────────────────────────────────────
 
   lightboxIndex = signal<number | null>(null);
+  lightboxIndexMembre = signal<number | null>(null);
+  lightboxIndexMes = signal<number | null>(null);
 
   lightboxPhotos = computed((): LightboxPhoto[] =>
-    this.photos().map((p) => ({
+    this.photosAfficheesCloture().map((p) => ({
+      id: p.id,
+      url: p.url,
+      nomAuteur: p.nomAuteur,
+      uploaderUid: p.uid,
+      likes: [],
+      uploadedAt: p.uploadedAt,
+      exif: p.exif ?? undefined,
+    })),
+  );
+
+  lightboxPhotosMes = computed((): LightboxPhoto[] =>
+    this.mesPhotosAffichees().map((p) => ({
+      id: p.id,
+      url: p.url,
+      nomAuteur: p.nomAuteur,
+      uploaderUid: p.uid,
+      likes: [],
+      uploadedAt: p.uploadedAt,
+      exif: p.exif ?? undefined,
+    })),
+  );
+
+  lightboxPhotosMembre = computed((): LightboxPhoto[] =>
+    this.photosParMembreTriees().map((p) => ({
       id: p.id,
       url: p.url,
       nomAuteur: p.nomAuteur,
@@ -516,76 +742,151 @@ export class ExpositionDetail {
     deletePhoto: async (photo) => {
       const p = this.photos().find((x) => x.id === photo.id);
       if (!p) return;
-      await this.supprimerPhoto(p);
+      await this.supprimerPhotoClotureInternal(p);
       if (this.photos().length === 0) this.lightboxIndex.set(null);
     },
   }));
 
-  openLightbox(index: number) {
-    this.lightboxIndex.set(index);
-  }
-  closeLightbox() {
-    this.lightboxIndex.set(null);
-  }
+  lightboxCallbacksMes = computed((): PhotoLightboxCallbacks => ({
+    toggleLike: async () => {},
+    getComments: () => of([]),
+    addComment: async () => {},
+    deleteComment: async () => {},
+    toggleCommentLike: async () => {},
+    addReply: async () => {},
+    deleteReply: async () => {},
+    canDeletePhoto: (photo) =>
+      photo.uploaderUid === this.uid() && this.monStatutSoumission() === 'soumission',
+    deletePhoto: async (photo) => {
+      const p = this.mesPhotos().find((x) => x.id === photo.id);
+      if (!p) return;
+      await this.supprimerPhoto(p);
+      if (this.mesPhotos().length === 0) this.lightboxIndexMes.set(null);
+    },
+  }));
+
+  lightboxCallbacksMembre = computed((): PhotoLightboxCallbacks => ({
+    toggleLike: async () => {},
+    getComments: () => of([]),
+    addComment: async () => {},
+    deleteComment: async () => {},
+    toggleCommentLike: async () => {},
+    addReply: async () => {},
+    deleteReply: async () => {},
+    canDeletePhoto: () => false,
+    deletePhoto: async () => {},
+  }));
+
+  // ── Upload (soumission phase) ────────────────────────────────────────────────
 
   uploading = signal(false);
   uploadProgress = signal(0);
+  uploadCurrent = signal(0);
+  uploadTotal = signal(0);
   dragOver = signal(false);
   uploadError = signal('');
   deletingPhoto = signal<string | null>(null);
 
-  monPhotos = computed(() => {
-    const uid = this.uid();
-    return uid ? this.photos().filter((p) => p.uid === uid) : [];
-  });
-
-  canUploadMore = computed(() => {
-    const max = this.expo()?.maxPhotosParMembre ?? 0;
-    return this.monPhotos().length < max;
-  });
-
   onDrop(event: DragEvent) {
     event.preventDefault();
     this.dragOver.set(false);
-    const file = event.dataTransfer?.files?.[0];
-    if (file?.type.startsWith('image/')) this.uploadSingle(file);
+    const files = [...(event.dataTransfer?.files ?? [])].filter((f) =>
+      f.type.startsWith('image/'),
+    );
+    if (files.length) this.uploadMultiple(files);
   }
 
   onFileSelected(event: Event) {
-    const file = (event.target as HTMLInputElement).files?.[0];
+    const files = [...((event.target as HTMLInputElement).files ?? [])].filter((f) =>
+      f.type.startsWith('image/'),
+    );
     (event.target as HTMLInputElement).value = '';
-    if (file) this.uploadSingle(file);
+    if (files.length) this.uploadMultiple(files);
   }
 
-  private async uploadSingle(file: File) {
-    if (!this.canUploadMore() || this.uploading()) return;
-    const uid = this.uid()!;
-    const nom = `${this.profile()?.prenom ?? ''} ${this.profile()?.nom ?? ''}`.trim();
+  private async uploadMultiple(files: File[]) {
+    if (this.uploading()) return;
+    const maxPhotos = this.expo()?.maxPhotosParMembre ?? 0;
+    const toUpload = files.slice(0, Math.max(0, maxPhotos - this.mesPhotos().length));
+    if (!toUpload.length) return;
+
     this.uploading.set(true);
     this.uploadError.set('');
+    this.uploadTotal.set(toUpload.length);
 
-    const [exif, compressed] = await Promise.all([
-      readExifWithConsent(file, this.gpsConsentService),
-      compressImage(file, COMPRESS_EVENT),
-    ]);
+    for (let i = 0; i < toUpload.length; i++) {
+      if (!this.canUploadEnSoumission()) break;
+      this.uploadCurrent.set(i + 1);
+      await this.uploadOne(toUpload[i]);
+    }
 
-    this.expoService.uploadPhoto(compressed, this.expoId, { uid, nomAuteur: nom, exif }).subscribe({
-      next: (state) => {
-        this.uploadProgress.set(state.progress);
-        if (state.done && state.photo) this.photos.update((ps) => [...ps, state.photo!]);
-      },
-      error: () => {
-        this.uploadError.set("Erreur lors de l'envoi. Réessayez.");
-        this.uploading.set(false);
-      },
-      complete: () => {
-        this.uploadProgress.set(0);
-        this.uploading.set(false);
-      },
+    this.uploading.set(false);
+    this.uploadProgress.set(0);
+    this.uploadTotal.set(0);
+    this.uploadCurrent.set(0);
+  }
+
+  private uploadOne(file: File): Promise<void> {
+    return new Promise((resolve) => {
+      const uid = this.uid()!;
+      const nom = `${this.profile()?.prenom ?? ''} ${this.profile()?.nom ?? ''}`.trim();
+      Promise.all([
+        readExifWithConsent(file, this.gpsConsentService),
+        compressImage(file, COMPRESS_EVENT),
+      ]).then(([exif, compressed]) => {
+        this.expoService.uploadPhoto(compressed, this.expoId, { uid, nomAuteur: nom, exif }).subscribe({
+          next: (state) => {
+            this.uploadProgress.set(state.progress);
+            if (state.done && state.photo) {
+              this.mesPhotos.update((ps) => [...ps, state.photo!]);
+              this.participants.update((ps) => {
+                const exists = ps.some((p) => p.uid === uid);
+                if (exists) return ps.map((p) => (p.uid === uid ? { ...p, nbPhotos: p.nbPhotos + 1 } : p));
+                const newP: ExpoParticipant = { uid, nom, nbPhotos: 1, statut: 'soumission' };
+                return [...ps, newP];
+              });
+            }
+          },
+          error: () => {
+            this.uploadError.set("Erreur lors de l'envoi. Réessayez.");
+            resolve();
+          },
+          complete: () => resolve(),
+        });
+      });
     });
   }
 
   async supprimerPhoto(photo: ExpoPhoto) {
+    if (this.monStatutSoumission() !== 'soumission') return;
+    const ok = await this.confirmService.confirm('Supprimer cette photo ?');
+    if (!ok) return;
+    this.deletingPhoto.set(photo.id);
+    await this.expoService.deletePhoto(this.expoId, photo);
+    const uid = this.uid();
+    this.mesPhotos.update((ps) => ps.filter((p) => p.id !== photo.id));
+    this.participants.update((ps) =>
+      ps.map((p) =>
+        p.uid === photo.uid ? { ...p, nbPhotos: Math.max(0, p.nbPhotos - 1) } : p,
+      ),
+    );
+    this.deletingPhoto.set(null);
+
+    if (uid && photo.uid !== uid) {
+      const expo = this.expo();
+      const moi = `${this.profile()?.prenom ?? ''} ${this.profile()?.nom ?? ''}`.trim();
+      this.notifService
+        .sendToUser(
+          photo.uid,
+          'admin',
+          `Votre photo a été supprimée de l'exposition "${expo?.titre ?? ''}" par ${moi}.`,
+          { lien: `/galeries/expositions/${this.expoId}`, sourceNom: moi, sourceUid: uid },
+        )
+        .catch(() => {});
+    }
+  }
+
+  private async supprimerPhotoClotureInternal(photo: ExpoPhoto) {
     const ok = await this.confirmService.confirm('Supprimer cette photo ?');
     if (!ok) return;
     this.deletingPhoto.set(photo.id);
@@ -606,6 +907,447 @@ export class ExpositionDetail {
         )
         .catch(() => {});
     }
+  }
+
+  // ── Soumission au comité ──────────────────────────────────────────────────────
+
+  async soumettreAuComite() {
+    const uid = this.uid();
+    if (!uid) return;
+    if (this.mesPhotos().length === 0) return;
+    const ok = await this.confirmService.confirm(
+      'Vos photos seront soumises au comité d\'évaluation. Vous ne pourrez plus les modifier.',
+      'Soumettre au comité',
+      'Confirmer',
+      false,
+    );
+    if (!ok) return;
+    await this.expoService.soumettreAuComite(this.expoId, uid);
+    this.participants.update((ps) =>
+      ps.map((p) =>
+        p.uid === uid ? { ...p, statut: 'evaluation', soumisAt: new Date().toISOString() } : p,
+      ),
+    );
+
+    const expo = this.expo();
+    const nom = `${this.profile()?.prenom ?? ''} ${this.profile()?.nom ?? ''}`.trim();
+    const comiteUids = expo?.comiteUids ?? [];
+    comiteUids
+      .filter((cuid) => cuid !== uid)
+      .forEach((cuid) => {
+        const msg =
+          cuid === expo?.responsableComiteUid
+            ? `${nom} a soumis ses photos au comité pour l'exposition « ${expo?.titre ?? ''} ».`
+            : `${nom} a soumis son dossier — disponible pour évaluation dans l'exposition « ${expo?.titre ?? ''} ».`;
+        this.notifService
+          .sendToUser(cuid, 'admin', msg, {
+            lien: `/galeries/expositions/${this.expoId}`,
+            sourceNom: nom,
+            sourceUid: uid,
+          })
+          .catch(() => {});
+      });
+  }
+
+  // ── Drill-down participant ────────────────────────────────────────────────────
+
+  closeParticipantPanel() {
+    this._evaluationDraftDirty.set(false);
+    this._selectionDirty.set(false);
+    this.selectedParticipantUid.set(null);
+    this.photosParMembre.set([]);
+    this.evaluations.set([]);
+    this.monEvaluation.set(null);
+    this.evaluationDraft.set([]);
+    this.showClotureMembre.set(null);
+    this.selectedPourCloture.set(new Set());
+  }
+
+  private async checkUnsavedBeforeSwitch(): Promise<boolean> {
+    const evalDirty = this._evaluationDraftDirty();
+    const selDirty = this._selectionDirty();
+    if (!evalDirty && !selDirty) return true;
+
+    const participantUid = this.selectedParticipantUid();
+    const participant = participantUid
+      ? this.participants().find((p) => p.uid === participantUid)
+      : null;
+    const nom = participant?.nom ?? 'ce participant';
+    const whatDirty =
+      evalDirty && selDirty
+        ? 'le classement et la sélection de photos'
+        : evalDirty
+          ? 'le classement'
+          : 'la sélection de photos';
+
+    const choice = await this.confirmService.confirmTriple(
+      `Modification non sauvegardée : ${whatDirty} pour « ${nom} ». Que souhaitez-vous faire ?`,
+      'Modifications non sauvegardées',
+      'Sauvegarder',
+      'Ignorer les modifications',
+    );
+    if (choice === 'cancel') return false;
+    if (choice === 'primary') {
+      if (evalDirty) await this.sauvegarderEvaluation();
+      if (selDirty && participantUid) await this.sauvegarderSelectionLocale(participantUid);
+    }
+    return true;
+  }
+
+  async selectParticipant(participantUid: string) {
+    if (this.selectedParticipantUid() === participantUid) {
+      if (!(await this.checkUnsavedBeforeSwitch())) return;
+      this.closeParticipantPanel();
+      return;
+    }
+    if (!(await this.checkUnsavedBeforeSwitch())) return;
+    this._evaluationDraftDirty.set(false);
+    this._selectionDirty.set(false);
+    this.selectedParticipantUid.set(participantUid);
+    this.viewModeEval.set('perso');
+    setTimeout(() => {
+      document
+        .getElementById(`participant-row-${participantUid}`)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 30);
+    this.photosParMembre.set([]);
+    this.evaluations.set([]);
+    this.monEvaluation.set(null);
+    this.evaluationDraft.set([]);
+    this.showClotureMembre.set(null);
+    this.loadingParticipant.set(true);
+
+    const uid = this.uid();
+    const loads: Promise<void>[] = [
+      this.expoService
+        .getPhotosParMembre(this.expoId, participantUid)
+        .then((p) => this.photosParMembre.set(p)),
+    ];
+
+    // Charger les évaluations pour tous les membres dès que le dossier a été évalué
+    // (scores agrégats visibles par tous dans la grille)
+    const participantStatut = this.participants().find((p) => p.uid === participantUid)?.statut;
+    if (participantStatut === 'evaluation' || participantStatut === 'clos') {
+      loads.push(
+        this.expoService
+          .getEvaluationsOnce(this.expoId, participantUid)
+          .then((e) => this.evaluations.set(e)),
+      );
+    }
+
+    if (this.isMembreComite() && uid) {
+      loads.push(
+        this.expoService.getMonEvaluation(this.expoId, participantUid, uid).then((ev) => {
+          this.monEvaluation.set(ev);
+          // Draft initialisé après Promise.all (photosParMembre doit être chargé d'abord)
+        }),
+      );
+    }
+
+    await Promise.all(loads);
+
+    if (this.isMembreComite()) {
+      const allIds = this.photosParMembre().map((p) => p.id);
+      const ev = this.monEvaluation();
+      if (ev) {
+        // Garder l'ordre existant, filtrer les photos supprimées, ajouter les nouvelles en bas
+        const allSet = new Set(allIds);
+        const ordered = ev.orderedPhotoIds.filter((id) => allSet.has(id));
+        const newIds = allIds.filter((id) => !ordered.includes(id));
+        this.evaluationDraft.set([...ordered, ...newIds]);
+      } else {
+        this.evaluationDraft.set(allIds);
+      }
+    }
+
+    // Pour la vue membre sur sa propre ligne : si pas chargé en tant que responsable,
+    // alimenter evaluations depuis mesEvaluations pour afficher les scores
+    if (participantUid === uid && !this.evaluations().length && this.mesEvaluations().length) {
+      this.evaluations.set(this.mesEvaluations());
+    }
+
+    this.loadingParticipant.set(false);
+  }
+
+  // ── Evaluation (committee) ────────────────────────────────────────────────────
+
+  moveUp(index: number) {
+    if (index === 0) return;
+    this.evaluationDraft.update((ids) => {
+      const copy = [...ids];
+      [copy[index - 1], copy[index]] = [copy[index], copy[index - 1]];
+      return copy;
+    });
+    this._evaluationDraftDirty.set(true);
+  }
+
+  moveDown(index: number) {
+    const draft = this.evaluationDraft();
+    if (index >= draft.length - 1) return;
+    this.evaluationDraft.update((ids) => {
+      const copy = [...ids];
+      [copy[index], copy[index + 1]] = [copy[index + 1], copy[index]];
+      return copy;
+    });
+    this._evaluationDraftDirty.set(true);
+  }
+
+  async sauvegarderEvaluation() {
+    const uid = this.uid();
+    const participantUid = this.selectedParticipantUid();
+    if (!uid || !participantUid || this.evaluationSaving()) return;
+    this.evaluationSaving.set(true);
+    const orderedPhotoIds = this.evaluationDraft();
+    await this.expoService.saveEvaluation(this.expoId, participantUid, uid, orderedPhotoIds);
+    this._evaluationDraftDirty.set(false);
+    const updated: ExpoEvaluation = { comiteUid: uid, orderedPhotoIds, updatedAt: new Date().toISOString() };
+    this.monEvaluation.set(updated);
+    // Update comiteUidsEvalues in participant if first evaluation
+    this.participants.update((ps) =>
+      ps.map((p) => {
+        if (p.uid !== participantUid) return p;
+        const already = p.comiteUidsEvalues?.includes(uid);
+        if (already) return p;
+        return { ...p, comiteUidsEvalues: [...(p.comiteUidsEvalues ?? []), uid] };
+      }),
+    );
+    this.evaluationSaving.set(false);
+  }
+
+  getPhotoById(id: string): ExpoPhoto | undefined {
+    return this.photosParMembre().find((p) => p.id === id);
+  }
+
+  getPhotoIndexMembre(photoId: string): number {
+    return this.photosParMembreTriees().findIndex((p) => p.id === photoId);
+  }
+
+  // ── Clôture d'un membre (responsable) ────────────────────────────────────────
+
+  async openCloturePourMembre(participantUid: string) {
+    if (this.selectedParticipantUid() !== participantUid) {
+      this.selectedParticipantUid.set(participantUid);
+      this.photosParMembre.set([]);
+      this.evaluations.set([]);
+      this.monEvaluation.set(null);
+      this.evaluationDraft.set([]);
+      this.showClotureMembre.set(null);
+      this.loadingParticipant.set(true);
+      await Promise.all([
+        this.expoService
+          .getPhotosParMembre(this.expoId, participantUid)
+          .then((p) => this.photosParMembre.set(p)),
+        this.expoService
+          .getEvaluationsOnce(this.expoId, participantUid)
+          .then((e) => this.evaluations.set(e)),
+      ]);
+      this.loadingParticipant.set(false);
+    } else if (!this.evaluations().length) {
+      const evals = await this.expoService.getEvaluationsOnce(this.expoId, participantUid);
+      this.evaluations.set(evals);
+    }
+    this.ouvrirClotureMembre(participantUid);
+  }
+
+  ouvrirClotureMembre(participantUid: string) {
+    const participant = this.participants().find((p) => p.uid === participantUid);
+    if (!participant) return;
+    // Pre-select photos that were previously selected
+    const preselect = new Set(participant.selectedPhotoIds ?? []);
+    this.selectedPourCloture.set(preselect);
+    this.showClotureMembre.set(participantUid);
+  }
+
+  fermerClotureMembre() {
+    this._selectionDirty.set(false);
+    this.showClotureMembre.set(null);
+    this.selectedPourCloture.set(new Set());
+  }
+
+  toggleSelectPourCloture(photoId: string) {
+    this.selectedPourCloture.update((set) => {
+      const copy = new Set(set);
+      copy.has(photoId) ? copy.delete(photoId) : copy.add(photoId);
+      return copy;
+    });
+    this._selectionDirty.set(true);
+  }
+
+  isSelectedPourCloture(photoId: string): boolean {
+    return this.selectedPourCloture().has(photoId);
+  }
+
+  switchToGeneral(participantUid: string) {
+    const participant = this.participants().find((p) => p.uid === participantUid);
+    this.selectedPourCloture.set(new Set(participant?.selectedPhotoIds ?? []));
+    this._selectionDirty.set(false);
+    this.viewModeEval.set('general');
+  }
+
+  async sauvegarderSelectionLocale(participantUid: string) {
+    if (this.savingSelection()) return;
+    this.savingSelection.set(true);
+    const selectedIds = [...this.selectedPourCloture()];
+    await this.expoService.sauvegarderSelectionMembre(this.expoId, participantUid, selectedIds);
+    this.participants.update((ps) =>
+      ps.map((p) => (p.uid === participantUid ? { ...p, selectedPhotoIds: selectedIds } : p)),
+    );
+    this._selectionDirty.set(false);
+    this.savingSelection.set(false);
+  }
+
+  async confirmerClotureMembre(directUid?: string) {
+    const participantUid = directUid ?? this.showClotureMembre();
+    if (!participantUid || this.closingMembre()) return;
+    const selectedIds = [...this.selectedPourCloture()];
+    const ok = await this.confirmService.confirm(
+      `Clôturer le dossier avec ${selectedIds.length} photo(s) sélectionnée(s) ?`,
+      'Clôturer le dossier',
+      'Clôturer',
+      false,
+    );
+    if (!ok) return;
+    this.closingMembre.set(true);
+    await this.expoService.cloturerMembre(this.expoId, participantUid, selectedIds);
+    this.participants.update((ps) =>
+      ps.map((p) =>
+        p.uid === participantUid
+          ? { ...p, statut: 'clos', closAt: new Date().toISOString(), selectedPhotoIds: selectedIds }
+          : p,
+      ),
+    );
+    // Notify member
+    const expo = this.expo();
+    const moi = `${this.profile()?.prenom ?? ''} ${this.profile()?.nom ?? ''}`.trim();
+    this.notifService
+      .sendToUser(
+        participantUid,
+        'admin',
+        `Votre dossier pour l'exposition « ${expo?.titre ?? ''} » a été clôturé — ${selectedIds.length} photo(s) retenue(s).`,
+        { lien: `/galeries/expositions/${this.expoId}`, sourceNom: moi, sourceUid: this.uid()! },
+      )
+      .catch(() => {});
+    this.closingMembre.set(false);
+    this.fermerClotureMembre();
+  }
+
+  async doRouvrirMembre(participantUid: string) {
+    const ok = await this.confirmService.confirm(
+      'Ré-ouvrir en évaluation ? Le comité pourra à nouveau classer les photos, mais le membre ne peut plus modifier son dossier.',
+      'Ré-ouvrir pour évaluation',
+      'Ré-ouvrir',
+      false,
+    );
+    if (!ok) return;
+    await this.expoService.rouvrirMembre(this.expoId, participantUid);
+    this.participants.update((ps) =>
+      ps.map((p) =>
+        p.uid === participantUid
+          ? { ...p, statut: 'evaluation', closAt: undefined, selectedPhotoIds: undefined, comiteUidsEvalues: undefined }
+          : p,
+      ),
+    );
+  }
+
+  async doRouvrirMembreASoumission(participantUid: string) {
+    const ok = await this.confirmService.confirm(
+      'Ré-ouvrir en soumission ? Le membre pourra à nouveau modifier ses photos (ajout / suppression).',
+      'Ré-ouvrir pour soumission',
+      'Ré-ouvrir',
+      false,
+    );
+    if (!ok) return;
+    await this.expoService.rouvrirMembreASoumission(this.expoId, participantUid);
+    this.participants.update((ps) =>
+      ps.map((p) =>
+        p.uid === participantUid
+          ? { ...p, statut: 'soumission', soumisAt: undefined, closAt: undefined, selectedPhotoIds: undefined, comiteUidsEvalues: undefined }
+          : p,
+      ),
+    );
+    const expo = this.expo();
+    const moi = `${this.profile()?.prenom ?? ''} ${this.profile()?.nom ?? ''}`.trim();
+    this.notifService
+      .sendToUser(
+        participantUid,
+        'admin',
+        `Votre dossier pour l'exposition « ${expo?.titre ?? ''} » a été rouvert — vous pouvez à nouveau modifier vos photos et re-soumettre.`,
+        { lien: `/galeries/expositions/${this.expoId}`, sourceNom: moi, sourceUid: this.uid()! },
+      )
+      .catch(() => {});
+  }
+
+  // ── Comité management ────────────────────────────────────────────────────────
+
+  async openEditComite() {
+    const expo = this.expo();
+    this.draftResponsableUid.set(expo?.responsableComiteUid ?? '');
+    this.draftComiteUids.set([...(expo?.comiteUids ?? [])]);
+    if (!this.allMembres().length) {
+      const membres = await firstValueFrom(this.authService.getAllMembersOnce());
+      const sorted = membres
+        .filter((m) => !m.isSuspended)
+        .sort((a, b) => {
+          const na = `${a.nom} ${a.prenom ?? ''}`.normalize('NFD').toLowerCase();
+          const nb = `${b.nom} ${b.prenom ?? ''}`.normalize('NFD').toLowerCase();
+          return na < nb ? -1 : na > nb ? 1 : 0;
+        });
+      this.allMembres.set(sorted);
+    }
+    this.editComite.set(true);
+  }
+
+  cancelEditComite() {
+    this.editComite.set(false);
+  }
+
+  setResponsable(uid: string) {
+    this.draftResponsableUid.set(uid);
+  }
+
+  toggleDraftComiteMembre(uid: string) {
+    this.draftComiteUids.update((ids) =>
+      ids.includes(uid) ? ids.filter((x) => x !== uid) : [...ids, uid],
+    );
+  }
+
+  membreNom(uid: string): string {
+    const m = this.allMembres().find((x) => x.uid === uid);
+    if (!m) return uid;
+    return `${m.prenom ?? ''} ${m.nom}`.trim();
+  }
+
+  async saveComite() {
+    if (this.comiteSaving()) return;
+    this.comiteSaving.set(true);
+    const responsable = this.draftResponsableUid() || null;
+    const comiteUids = this.draftComiteUids();
+    const responsableNom = responsable ? this.membreNom(responsable) : undefined;
+
+    // Detect removed committee members and delete their evaluations
+    const oldComite = this.expo()?.comiteUids ?? [];
+    const removedUids = oldComite.filter((uid) => !comiteUids.includes(uid));
+    await Promise.all(
+      removedUids.map((uid) =>
+        this.expoService.removeComiteMembreEvaluations(this.expoId, uid).catch(() => {}),
+      ),
+    );
+
+    await this.expoService.updateComite(this.expoId, responsable, comiteUids, responsableNom);
+    this.expo.update((e) => {
+      if (!e) return e;
+      const updated = { ...e, comiteUids };
+      if (responsable) {
+        updated.responsableComiteUid = responsable;
+        updated.responsableComiteNom = responsableNom;
+      } else {
+        delete updated.responsableComiteUid;
+        delete updated.responsableComiteNom;
+      }
+      return updated;
+    });
+    this.comiteSaving.set(false);
+    this.editComite.set(false);
   }
 
   // ── Edit panel ───────────────────────────────────────────────────────────────
@@ -647,6 +1389,7 @@ export class ExpositionDetail {
       validators: [Validators.required, Validators.min(1)],
       nonNullable: true,
     }),
+    nbPhotosExposition: new FormControl<number | null>(null),
     visibilite: new FormControl<'public' | 'membre'>('membre', { nonNullable: true }),
     dateDebutIdeation: new FormControl('', { nonNullable: true }),
     dateFinIdeation: new FormControl('', { nonNullable: true }),
@@ -690,7 +1433,6 @@ export class ExpositionDetail {
     );
     if (!ok) return;
     this.savingTransition.set(true);
-    // Mettre hier pour que today > dateFinIdeation soit vrai immédiatement
     const hier = localDateISO(new Date(Date.now() - 86400000));
     await this.expoService.update(this.expoId, { dateFinIdeation: hier });
     this.expo.update((e) => (e ? { ...e, dateFinIdeation: hier } : e));
@@ -705,6 +1447,7 @@ export class ExpositionDetail {
       description: e.description ?? '',
       themeChoisi: e.themeChoisi ?? '',
       maxPhotosParMembre: e.maxPhotosParMembre,
+      nbPhotosExposition: e.nbPhotosExposition ?? null,
       visibilite: e.visibilite ?? 'membre',
       dateDebutIdeation: e.dateDebutIdeation ?? '',
       dateFinIdeation: e.dateFinIdeation,
@@ -747,6 +1490,7 @@ export class ExpositionDetail {
         description: v.description.trim() || undefined,
         themeChoisi,
         maxPhotosParMembre: v.maxPhotosParMembre,
+        nbPhotosExposition: v.nbPhotosExposition ?? undefined,
         visibilite: v.visibilite,
         dateDebutIdeation: v.dateDebutIdeation || undefined,
         dateFinIdeation: v.dateFinIdeation,
@@ -769,6 +1513,8 @@ export class ExpositionDetail {
         else delete updated.description;
         if (themeChoisi) updated.themeChoisi = themeChoisi;
         else delete updated.themeChoisi;
+        if (v.nbPhotosExposition) updated.nbPhotosExposition = v.nbPhotosExposition;
+        else delete updated.nbPhotosExposition;
         if (v.dateDebutIdeation) updated.dateDebutIdeation = v.dateDebutIdeation;
         else delete updated.dateDebutIdeation;
         if (v.dateFinVote) updated.dateFinVote = v.dateFinVote;
@@ -862,6 +1608,16 @@ export class ExpositionDetail {
       day: 'numeric',
       month: 'long',
       year: 'numeric',
+    });
+  }
+
+  formatDatetime(iso: string): string {
+    return new Date(iso).toLocaleDateString('fr-FR', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
     });
   }
 

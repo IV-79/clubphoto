@@ -99,6 +99,7 @@ export class SortieCreer {
     dateFinIdeation: new FormControl('', { nonNullable: true }),
     dateExposition: new FormControl('', { nonNullable: true }),
     dateFinExposition: new FormControl('', { nonNullable: true }),
+    nbPhotosExposition: new FormControl<number | null>(null),
   });
 
   isOneShot = toSignal(
@@ -252,6 +253,7 @@ export class SortieCreer {
         const id = await this.expositionService.create({
           titre: v.titre.trim(),
           maxPhotosParMembre: v.maxPhotos,
+          ...(v.nbPhotosExposition ? { nbPhotosExposition: v.nbPhotosExposition } : {}),
           dateDebutIdeation: v.dateDebutIdeation || undefined,
           dateFinIdeation: v.dateFinIdeation,
           dateExposition: v.dateExposition || undefined,

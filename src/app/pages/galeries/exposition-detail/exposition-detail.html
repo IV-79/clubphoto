@@ -89,13 +89,43 @@
             <span>Thèmes proposés</span>
             <strong>{{ suggestions().length }}</strong>
           </div>
-          @if (s === 'soumission' || s === 'cloture') {
+          @if (s === 'soumission') {
             <div class="stat-row">
-              <span>Photos soumises</span>
+              <span>Participants</span>
+              <strong>{{ participants().length }}</strong>
+            </div>
+            @if (e.nbPhotosExposition) {
+              <div class="stat-row" [class.stat-over-target]="depasseObjectifExpo()">
+                <span>Sélectionnées</span>
+                <strong>{{ totalPhotosSelectionnees() }} / {{ e.nbPhotosExposition }}</strong>
+              </div>
+            }
+          }
+          @if (s === 'cloture') {
+            <div class="stat-row">
+              <span>Photos exposées</span>
               <strong>{{ photos().length }}</strong>
             </div>
           }
         </div>
+
+        @if (s === 'soumission' && (e.responsableComiteUid || (e.comiteUids?.length ?? 0) > 0)) {
+          <div class="info-card">
+            <h3 class="info-card-title">Comité</h3>
+            @if (e.responsableComiteUid) {
+              <div class="stat-row">
+                <span>Responsable</span>
+                <strong>{{ e.responsableComiteNom ?? e.responsableComiteUid }}</strong>
+              </div>
+            }
+            @if ((e.comiteUids?.length ?? 0) > 0) {
+              <div class="stat-row">
+                <span>Membres</span>
+                <strong>{{ e.comiteUids!.length }}</strong>
+              </div>
+            }
+          </div>
+        }
 
         <div class="info-card">
           <h3 class="info-card-title">Visibilité</h3>
@@ -184,6 +214,13 @@
                 <input matInput type="number" formControlName="maxPhotosParMembre" min="1" />
               </mat-form-field>
 
+              <mat-form-field appearance="outline" class="field-half">
+                <mat-label>Nb photos expo (objectif final)</mat-label>
+                <input matInput type="number" formControlName="nbPhotosExposition" min="1" />
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
               <mat-form-field appearance="outline" class="field-half">
                 <mat-label>Visibilité</mat-label>
                 <mat-select formControlName="visibilite">
@@ -616,87 +653,469 @@
         <section class="expo-section">
           <h2 class="section-title">Soumission de photos</h2>
           @if (e.themeChoisi) {
-            <p class="theme-choisi">
-              Thème : <strong>{{ e.themeChoisi }}</strong>
-            </p>
+            <p class="theme-choisi">Thème : <strong>{{ e.themeChoisi }}</strong></p>
           }
 
-          @if (isMembre()) {
-            @if (canUploadMore()) {
-              <div
-                class="upload-zone"
-                [class.drag-over]="dragOver()"
-                (dragover)="$event.preventDefault(); dragOver.set(true)"
-                (dragleave)="dragOver.set(false)"
-                (drop)="onDrop($event)"
-                (click)="photoFileInput.click()"
-              >
-                @if (uploading()) {
-                  <div class="progress-bar-wrap">
-                    <div class="progress-bar-fill" [style.width.%]="uploadProgress()"></div>
-                  </div>
-                  <span class="upload-label">Envoi… {{ uploadProgress() }}%</span>
-                } @else {
-                  <div class="upload-plus">+</div>
-                  <span class="upload-label">Soumettre une photo — glissez ici ou cliquez</span>
-                  <span class="upload-hint"
-                    >{{ monPhotos().length }} / {{ e.maxPhotosParMembre }} · Compressé
-                    automatiquement</span
-                  >
+          <!-- ── Gestion du comité (organisateur / admin) ─────── -->
+          @if (canManage()) {
+            <div class="comite-config-panel">
+              <div class="comite-config-header">
+                <h3 class="comite-config-title">Comité d'évaluation</h3>
+                @if (!editComite()) {
+                  <button class="btn-config-comite" (click)="openEditComite()">Configurer</button>
                 }
               </div>
-              <input
-                #photoFileInput
-                type="file"
-                accept="image/*"
-                style="display: none"
-                (change)="onFileSelected($event)"
-              />
-              @if (uploadError()) {
-                <p class="upload-error">{{ uploadError() }}</p>
-              }
-            } @else {
-              <p class="upload-quota">
-                Quota atteint — {{ e.maxPhotosParMembre }} photo(s) soumise(s).
-              </p>
-            }
-          }
-
-          <!-- Galerie membres -->
-          @if (photos().length > 0) {
-            <div class="photos-grid">
-              @for (photo of photos(); track photo.id; let i = $index) {
-                <div class="photo-item" (click)="openLightbox(i)" style="cursor: pointer">
-                  <img
-                    [src]="photo.thumbnailUrl || photo.url"
-                    [alt]="photo.nomAuteur"
-                    loading="lazy"
-                  />
-                  <div class="photo-overlay">
-                    <span class="photo-auteur">{{ photo.nomAuteur }}</span>
-                    @if (photo.uid === uid() || canManage()) {
-                      <button
-                        class="btn-del-photo"
-                        (click)="$event.stopPropagation(); supprimerPhoto(photo)"
-                        [disabled]="deletingPhoto() === photo.id"
-                      >
-                        ×
-                      </button>
+              @if (!editComite()) {
+                @if (e.responsableComiteUid || (e.comiteUids?.length ?? 0) > 0) {
+                  <div class="comite-summary">
+                    @if (e.responsableComiteUid) {
+                      <span class="comite-role">Responsable : <strong>{{ e.responsableComiteNom ?? e.responsableComiteUid }}</strong></span>
                     }
+                    @if ((e.comiteUids?.length ?? 0) > 0) {
+                      <span class="comite-role">Membres du comité : {{ e.comiteUids!.map(uid => membreNom(uid)).join(', ') }}</span>
+                    }
+                  </div>
+                } @else {
+                  <p class="comite-empty">Aucun comité configuré.</p>
+                }
+              } @else {
+                <!-- Éditeur comité -->
+                <div class="comite-editor">
+                  <label class="comite-editor-label">Responsable (clôture les dossiers)</label>
+                  <select class="comite-select" [value]="draftResponsableUid()" (change)="setResponsable($any($event.target).value)">
+                    <option value="">— Aucun —</option>
+                    @for (m of allMembres(); track m.uid) {
+                      <option [value]="m.uid">{{ m.prenom ?? '' }} {{ m.nom }}</option>
+                    }
+                  </select>
+                  <label class="comite-editor-label" style="margin-top: 0.75rem">Membres du comité (évaluateurs)</label>
+                  <div class="comite-checkboxes">
+                    @for (m of allMembres(); track m.uid) {
+                      <label class="comite-checkbox-item">
+                        <input
+                          type="checkbox"
+                          [checked]="draftComiteUids().includes(m.uid)"
+                          (change)="toggleDraftComiteMembre(m.uid)"
+                        />
+                        {{ m.prenom ?? '' }} {{ m.nom }}
+                      </label>
+                    }
+                  </div>
+                  <div class="comite-editor-actions">
+                    <button class="btn-cancel" (click)="cancelEditComite()">Annuler</button>
+                    <button class="btn-save" (click)="saveComite()" [disabled]="comiteSaving()">
+                      {{ comiteSaving() ? '…' : 'Enregistrer' }}
+                    </button>
                   </div>
                 </div>
               }
             </div>
           }
 
+          <!-- ── Upload zone (si le membre est en soumission) ─── -->
+          @if (isMembre()) {
+            @if (monStatutSoumission() === null || monStatutSoumission() === 'soumission') {
+              @if (canUploadEnSoumission()) {
+                <div
+                  class="upload-zone"
+                  [class.drag-over]="dragOver()"
+                  (dragover)="$event.preventDefault(); dragOver.set(true)"
+                  (dragleave)="dragOver.set(false)"
+                  (drop)="onDrop($event)"
+                  (click)="photoFileInput.click()"
+                >
+                  @if (uploading()) {
+                    <div class="progress-bar-wrap">
+                      <div class="progress-bar-fill" [style.width.%]="uploadProgress()"></div>
+                    </div>
+                    @if (uploadTotal() > 1) {
+                      <span class="upload-label">Photo {{ uploadCurrent() }}/{{ uploadTotal() }} — {{ uploadProgress() }}%</span>
+                    } @else {
+                      <span class="upload-label">Envoi… {{ uploadProgress() }}%</span>
+                    }
+                  } @else {
+                    <div class="upload-plus">+</div>
+                    <span class="upload-label">Soumettre des photos — glissez ici ou cliquez</span>
+                    <span class="upload-hint">{{ mesPhotos().length }} / {{ e.maxPhotosParMembre }} · Sélection multiple possible</span>
+                  }
+                </div>
+                <input #photoFileInput type="file" accept="image/*" multiple style="display: none" (change)="onFileSelected($event)" />
+                @if (uploadError()) {
+                  <p class="upload-error">{{ uploadError() }}</p>
+                }
+              } @else if (mesPhotos().length >= e.maxPhotosParMembre) {
+                <p class="upload-quota">Quota atteint — {{ e.maxPhotosParMembre }} photo(s) soumise(s).</p>
+              }
+            }
+
+            <!-- Mes photos -->
+            @if (mesPhotos().length > 0) {
+              <div class="mes-photos-section">
+                <h3 class="mes-photos-title">Mes photos ({{ mesPhotos().length }} / {{ e.maxPhotosParMembre }})</h3>
+                @if (mesEvaluations().length > 0) {
+                  <p class="eval-hint-mes">Triées par score du comité · plus le score est bas, mieux c'est</p>
+                }
+                <div class="photos-grid">
+                  @for (photo of mesPhotosAffichees(); track photo.id; let i = $index) {
+                    <div class="photo-item" (click)="lightboxIndexMes.set(i)" style="cursor: pointer">
+                      <img [src]="photo.thumbnailUrl || photo.url" [alt]="photo.nomAuteur" loading="lazy" />
+                      @if (mesAggregateScores()[photo.id] !== undefined) {
+                        <div class="agg-score-badge">{{ mesAggregateScores()[photo.id] }}</div>
+                      }
+                      @if (mesPhotosSelectionnees().has(photo.id)) {
+                        <span class="photo-retenue-badge" title="Photo retenue pour l'exposition">★</span>
+                      }
+                      <div class="photo-overlay">
+                        @if (monStatutSoumission() === 'soumission') {
+                          <button
+                            class="btn-del-photo"
+                            (click)="$event.stopPropagation(); supprimerPhoto(photo)"
+                            [disabled]="deletingPhoto() === photo.id"
+                          >×</button>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+
+            <!-- Soumettre au comité -->
+            @if (monStatutSoumission() === 'soumission' && mesPhotos().length > 0) {
+              <div class="soumettre-section">
+                <button class="btn-soumettre-comite" (click)="soumettreAuComite()">
+                  Soumettre au comité →
+                </button>
+                <p class="soumettre-hint">Une fois soumis, vos photos ne pourront plus être modifiées.</p>
+              </div>
+            }
+            @if (monStatutSoumission() === 'evaluation') {
+              <div class="mon-statut-info statut-evaluation-info">
+                <mat-icon>hourglass_empty</mat-icon>
+                Vos photos sont soumises au comité — en attente d'évaluation.
+              </div>
+            }
+            @if (monStatutSoumission() === 'clos') {
+              <div class="mon-statut-info statut-clos-info">
+                <mat-icon>check_circle</mat-icon>
+                Votre dossier a été clôturé par le responsable.
+              </div>
+            }
+          }
+
+          <!-- ── Tableau de bord participants (accordéon inline) ── -->
+          @if (isMembre()) {
+            <div class="dashboard-section">
+              <h3 class="dashboard-title">Tableau de bord</h3>
+              @if (isMembreComite() || isResponsableComite()) {
+                <div class="dashboard-filters">
+                  @if (isMembreComite()) {
+                    <label class="filter-check">
+                      <input type="checkbox" [checked]="filtreNonEvalues()" (change)="filtreNonEvalues.set(!filtreNonEvalues())" />
+                      À évaluer
+                      @if (filtreNonEvalues()) {
+                        <span class="filter-count">({{ participantsFiltres().length }})</span>
+                      }
+                    </label>
+                  }
+                  @if (isResponsableComite()) {
+                    <label class="filter-check">
+                      <input type="checkbox" [checked]="filtreNonClotures()" (change)="filtreNonClotures.set(!filtreNonClotures())" />
+                      Non clôturés
+                      @if (filtreNonClotures()) {
+                        <span class="filter-count">({{ participantsFiltres().length }})</span>
+                      }
+                    </label>
+                  }
+                </div>
+              }
+              @if (participants().length > 0) {
+                <div class="participants-table-wrap">
+                  <table class="participants-table">
+                    <thead>
+                      <tr>
+                        <th>Membre</th>
+                        <th>Photos</th>
+                        @if ((e.comiteUids?.length ?? 0) > 0) {
+                          <th>Évaluations</th>
+                        }
+                        <th>Statut</th>
+                        <th title="Photos sélectionnées pour l'expo">★ Sél.</th>
+                        @if (isResponsableComite()) {
+                          <th></th>
+                        }
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (p of participantsFiltres(); track p.uid) {
+                        <tr
+                          [id]="'participant-row-' + p.uid"
+                          class="participant-row"
+                          [class.participant-row-active]="selectedParticipantUid() === p.uid"
+                          (click)="selectParticipant(p.uid)"
+                        >
+                          <td>
+                            <span class="participant-chevron">
+                              {{ selectedParticipantUid() === p.uid ? '▾' : '▸' }}
+                            </span>
+                            {{ p.nom }}
+                          </td>
+                          <td>{{ p.nbPhotos }}</td>
+                          @if ((e.comiteUids?.length ?? 0) > 0) {
+                            <td class="eval-count-cell">
+                              {{ p.comiteUidsEvalues?.length ?? 0 }} / {{ e.comiteUids!.length }}
+                            </td>
+                          }
+                          <td>
+                            <span class="statut-badge statut-{{ p.statut }}">
+                              {{ participantStatutLabels[p.statut] }}
+                            </span>
+                          </td>
+                          <td class="sel-count-cell">
+                            @if ((p.selectedPhotoIds?.length ?? 0) > 0) {
+                              <span class="sel-count-badge">★ {{ p.selectedPhotoIds!.length }}</span>
+                            } @else {
+                              <span class="sel-count-none">—</span>
+                            }
+                          </td>
+                          @if (isResponsableComite()) {
+                            <td class="actions-cell" (click)="$event.stopPropagation()">
+                              @if (p.statut === 'evaluation') {
+                                <button
+                                  class="btn-cloturer-membre"
+                                  (click)="openCloturePourMembre(p.uid)"
+                                >Clôturer</button>
+                              }
+                              @if (p.statut === 'clos') {
+                                <button
+                                  class="btn-rouvrir-membre"
+                                  (click)="doRouvrirMembre(p.uid)"
+                                  title="Ré-ouvrir pour évaluation"
+                                >↩ Éval.</button>
+                                <button
+                                  class="btn-rouvrir-membre btn-rouvrir-soumission"
+                                  (click)="doRouvrirMembreASoumission(p.uid)"
+                                  title="Ré-ouvrir pour soumission"
+                                >↩ Soum.</button>
+                              }
+                            </td>
+                          }
+                        </tr>
+
+                        <!-- Expansion inline -->
+                        @if (selectedParticipantUid() === p.uid) {
+                          <tr class="expansion-row">
+                            <td colspan="99" class="expansion-cell">
+                              @if (loadingParticipant()) {
+                                <p class="loading-text">Chargement des photos…</p>
+                              } @else if (photosParMembre().length === 0) {
+                                <p class="empty-sugg">Aucune photo soumise.</p>
+                              } @else {
+                                <!-- Mode évaluation comité -->
+                                @if (isMembreComite() && p.statut === 'evaluation' && showClotureMembre() !== p.uid) {
+                                  <div class="evaluation-panel">
+                                    <div class="eval-header">
+                                      <h4 class="eval-title">
+                                        Classez les photos par ordre de préférence
+                                        <span class="eval-hint">(1 = meilleur)</span>
+                                      </h4>
+                                      @if (evaluations().length > 0) {
+                                        <div class="eval-mode-toggle">
+                                          <button
+                                            class="btn-mode-toggle"
+                                            [class.active]="viewModeEval() === 'perso'"
+                                            (click)="viewModeEval.set('perso')"
+                                          >Mon ordre</button>
+                                          <button
+                                            class="btn-mode-toggle"
+                                            [class.active]="viewModeEval() === 'general'"
+                                            (click)="switchToGeneral(p.uid)"
+                                          >Ordre général</button>
+                                        </div>
+                                      }
+                                    </div>
+                                    @if (monEvaluation()) {
+                                      <p class="eval-saved">
+                                        Dernier enregistrement : {{ formatDatetime(monEvaluation()!.updatedAt) }}
+                                      </p>
+                                    }
+                                    @let rankList = viewModeEval() === 'general'
+                                      ? photosParMembreTriees().map(ph => ph.id)
+                                      : evaluationDraft();
+                                    <div class="rank-list">
+                                      @for (photoId of rankList; track photoId; let i = $index) {
+                                        @let rankPhoto = getPhotoById(photoId);
+                                        @if (rankPhoto) {
+                                          <div class="rank-item">
+                                            <span class="rank-number">{{ i + 1 }}</span>
+                                            <img
+                                              [src]="rankPhoto.thumbnailUrl || rankPhoto.url"
+                                              class="rank-thumb"
+                                              loading="lazy"
+                                              style="cursor: zoom-in"
+                                              (click)="lightboxIndexMembre.set(getPhotoIndexMembre(photoId))"
+                                            />
+                                            @if (aggregateScores()[photoId] !== undefined) {
+                                              <span class="rank-score">{{ aggregateScores()[photoId] }} pts</span>
+                                            }
+                                            @if (viewModeEval() === 'general' && isResponsableComite()) {
+                                              <input
+                                                type="checkbox"
+                                                class="rank-select-check"
+                                                [checked]="isSelectedPourCloture(photoId)"
+                                                (click)="$event.stopPropagation(); toggleSelectPourCloture(photoId)"
+                                              />
+                                            }
+                                            @if (viewModeEval() === 'perso') {
+                                              <div class="rank-actions">
+                                                <button class="btn-rank" [disabled]="i === 0" (click)="moveUp(i)" title="Monter">↑</button>
+                                                <button class="btn-rank" [disabled]="i === rankList.length - 1" (click)="moveDown(i)" title="Descendre">↓</button>
+                                              </div>
+                                            }
+                                          </div>
+                                        }
+                                      }
+                                    </div>
+                                    @if (viewModeEval() === 'perso') {
+                                      <div class="eval-actions">
+                                        <button class="btn-save-eval" (click)="sauvegarderEvaluation()" [disabled]="evaluationSaving()">
+                                          {{ evaluationSaving() ? '…' : 'Enregistrer le classement' }}
+                                        </button>
+                                      </div>
+                                    }
+                                    @if (viewModeEval() === 'general' && isResponsableComite()) {
+                                      <div class="eval-actions eval-general-footer">
+                                        <span class="cloture-count">
+                                          {{ selectedPourCloture().size }} photo(s) sélectionnée(s)
+                                          @if (selectionDirty()) {
+                                            <span class="dirty-dot" title="Sélection non sauvegardée">●</span>
+                                          }
+                                        </span>
+                                        <button
+                                          class="btn-save-selection"
+                                          (click)="sauvegarderSelectionLocale(p.uid)"
+                                          [disabled]="savingSelection() || !selectionDirty()"
+                                        >
+                                          {{ savingSelection() ? '…' : 'Sauvegarder' }}
+                                        </button>
+                                        <button
+                                          class="btn-confirmer-cloture"
+                                          (click)="confirmerClotureMembre(p.uid)"
+                                          [disabled]="closingMembre()"
+                                        >
+                                          {{ closingMembre() ? '…' : 'Clôturer le dossier' }}
+                                        </button>
+                                      </div>
+                                    }
+                                  </div>
+                                }
+
+                                <!-- Grille photos -->
+                                @if (!isMembreComite() || p.statut !== 'evaluation' || showClotureMembre() === p.uid) {
+                                  @if (showClotureMembre() !== p.uid) {
+                                    @if (evaluations().length > 0) {
+                                      <p class="eval-hint-member">Photos classées par le comité (score agrégat, plus bas = mieux).</p>
+                                    }
+                                    <div class="photos-grid membre-photos-grid">
+                                      @for (photo of photosParMembreTriees(); track photo.id; let i = $index) {
+                                        <div class="photo-item" (click)="lightboxIndexMembre.set(i)" style="cursor: pointer">
+                                          <img [src]="photo.thumbnailUrl || photo.url" [alt]="photo.nomAuteur" loading="lazy" />
+                                          @if (aggregateScores()[photo.id] !== undefined) {
+                                            <div class="agg-score-badge">{{ aggregateScores()[photo.id] }}</div>
+                                          }
+                                          @if (p.selectedPhotoIds?.includes(photo.id)) {
+                                            <span class="photo-retenue-badge" title="Photo retenue pour l'exposition">★</span>
+                                          }
+                                        </div>
+                                      }
+                                    </div>
+                                  }
+                                }
+
+                                <!-- Panel clôture (responsable) -->
+                                @if (showClotureMembre() === p.uid && isResponsableComite()) {
+                                  <div class="cloture-membre-panel">
+                                    <h4 class="cloture-titre">Sélectionnez les photos à retenir</h4>
+                                    @if (evaluations().length > 0) {
+                                      <p class="cloture-hint">Photos triées par score (plus bas = mieux).</p>
+                                    }
+                                    <div class="cloture-photos-grid">
+                                      @for (photo of photosParMembreTriees(); track photo.id) {
+                                        <div
+                                          class="cloture-photo-item"
+                                          [class.cloture-selected]="isSelectedPourCloture(photo.id)"
+                                          (click)="toggleSelectPourCloture(photo.id)"
+                                        >
+                                          <img [src]="photo.thumbnailUrl || photo.url" loading="lazy" />
+                                          <div class="cloture-check-overlay">
+                                            @if (isSelectedPourCloture(photo.id)) {
+                                              <span class="cloture-check">✓</span>
+                                            }
+                                          </div>
+                                          @if (evaluations().length > 0) {
+                                            <span class="agg-score-badge">{{ aggregateScores()[photo.id] }}</span>
+                                          }
+                                        </div>
+                                      }
+                                    </div>
+                                    <div class="cloture-actions">
+                                      <span class="cloture-count">
+                                        {{ selectedPourCloture().size }} photo(s) sélectionnée(s)
+                                        @if (selectionDirty()) {
+                                          <span class="dirty-dot" title="Sélection non sauvegardée">●</span>
+                                        }
+                                      </span>
+                                      <button class="btn-cancel" (click)="fermerClotureMembre()">Annuler</button>
+                                      <button
+                                        class="btn-save-selection"
+                                        (click)="sauvegarderSelectionLocale(p.uid)"
+                                        [disabled]="savingSelection() || !selectionDirty()"
+                                      >
+                                        {{ savingSelection() ? '…' : 'Sauvegarder' }}
+                                      </button>
+                                      <button class="btn-confirmer-cloture" (click)="confirmerClotureMembre()" [disabled]="closingMembre()">
+                                        {{ closingMembre() ? '…' : 'Clôturer le dossier' }}
+                                      </button>
+                                    </div>
+                                  </div>
+                                }
+                              }
+                            </td>
+                          </tr>
+                        }
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              } @else if (participants().length > 0) {
+                <p class="empty-sugg">Aucun participant ne correspond aux filtres actifs.</p>
+              } @else {
+                <p class="empty-sugg">Aucun participant n'a encore soumis de photos.</p>
+              }
+            </div>
+          }
+
           @if (canManage()) {
+            @let target = e.nbPhotosExposition;
+            @if (target) {
+              @let selected = totalPhotosSelectionnees();
+              @if (selected !== target) {
+                <p class="cloture-global-warning">
+                  ⚠️ {{ selected }} photo(s) sélectionnée(s) pour un objectif de {{ target }}.
+                </p>
+              } @else {
+                <p class="cloture-global-ok">
+                  ✓ {{ selected }} / {{ target }} photos — objectif atteint.
+                </p>
+              }
+            }
             <div class="manage-actions">
               <button
                 class="btn-cloture"
                 (click)="cloturerManuellement()"
                 [disabled]="savingTransition()"
               >
-                {{ savingTransition() ? '…' : 'Clôturer la soumission →' }}
+                {{ savingTransition() ? '…' : 'Clôturer la sélection — Prêt pour l\'expo →' }}
               </button>
             </div>
           }
@@ -728,10 +1147,10 @@
               }
             </h2>
 
-            @if (photos().length > 0) {
+            @if (photosAfficheesCloture().length > 0) {
               <div class="photos-grid">
-                @for (photo of photos(); track photo.id; let i = $index) {
-                  <div class="photo-item" (click)="openLightbox(i)" style="cursor: pointer">
+                @for (photo of photosAfficheesCloture(); track photo.id; let i = $index) {
+                  <div class="photo-item" (click)="lightboxIndex.set(i)" style="cursor: pointer">
                     <img
                       [src]="photo.thumbnailUrl || photo.url"
                       [alt]="photo.nomAuteur"
@@ -762,6 +1181,32 @@
     [userName]="(profile()?.prenom ?? '') + ' ' + (profile()?.nom ?? '')"
     [canInteract]="isMembre()"
     [hideLikes]="true"
-    (closed)="closeLightbox()"
+    (closed)="lightboxIndex.set(null)"
+  />
+}
+
+@if (lightboxIndexMes() !== null && mesPhotos().length > 0) {
+  <app-photo-lightbox
+    [photos]="lightboxPhotosMes()"
+    [callbacks]="lightboxCallbacksMes()"
+    [startIndex]="lightboxIndexMes()!"
+    [userUid]="uid()"
+    [userName]="(profile()?.prenom ?? '') + ' ' + (profile()?.nom ?? '')"
+    [canInteract]="isMembre()"
+    [hideLikes]="true"
+    (closed)="lightboxIndexMes.set(null)"
+  />
+}
+
+@if (lightboxIndexMembre() !== null && photosParMembre().length > 0) {
+  <app-photo-lightbox
+    [photos]="lightboxPhotosMembre()"
+    [callbacks]="lightboxCallbacksMembre()"
+    [startIndex]="lightboxIndexMembre()!"
+    [userUid]="uid()"
+    [userName]="(profile()?.prenom ?? '') + ' ' + (profile()?.nom ?? '')"
+    [canInteract]="false"
+    [hideLikes]="true"
+    (closed)="lightboxIndexMembre.set(null)"
   />
 }

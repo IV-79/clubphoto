@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 Genere guide_du_site.docx - Club Photo Tain-Tournon
 Usage : python generate_guide.py
@@ -478,19 +478,26 @@ numbered(u"L’organisateur s’occupe d’uploader vos photos.")
 numbered(u"Pendant le Vote, votez pour une photo par th\xe8me (pas la v\xf4tre). Les noms sont masqu\xe9s.")
 
 h2(u'2.9 Exposition')
-h3(u'Le principe')
-para(u"Une exposition se d\xe9roule en plusieurs phases. Les membres participent \xe0 la d\xe9finition du th\xe8me, puis soumettent leurs photos.")
+h3(u'Les phases principales')
+para(u"Une exposition se d\xe9roule en plusieurs phases. Les membres participent \xe0 la d\xe9finition du th\xe8me, puis soumettent leurs photos pour s\xe9lection par un comit\xe9.")
 statuts_table([
-    (u'Id\xe9ation',  u"Proposez des id\xe9es de th\xe8mes pour l’exposition.",          'ideation'),
-    (u'Vote',         u'Votez pour les th\xe8mes qui vous inspirent le plus.',                'vote'),
-    (u'Soumission',   u"Le th\xe8me est choisi. Uploadez vos photos pour l’exposition.",'soumission'),
-    (u'Cl\xf4tur\xe9',u"La galerie des photos de l’exposition est accessible.",          'cloture'),
+    (u'Id\xe9ation',   u"Proposez des id\xe9es de th\xe8mes pour l'exposition.",                     'ideation'),
+    (u'Vote',          u'Votez pour les th\xe8mes qui vous inspirent le plus.',                       'vote'),
+    (u'Soumission',    u"Le th\xe8me est choisi. Uploadez vos photos et soumettez-les au comit\xe9.", 'soumission'),
+    (u'En exposition', u"La galerie des photos retenues est accessible.",                             'cloture'),
 ])
 h3(u'Participer')
-bullet(u"Id\xe9ation : proposez un ou plusieurs th\xe8mes dans la zone pr\xe9vue.")
-bullet(u"Vote : utilisez vos jetons de vote pour soutenir les th\xe8mes. Vous pouvez r\xe9partir vos votes sur plusieurs th\xe8mes.")
-bullet(u"Soumission : uploadez vos photos dans la zone d\xe9di\xe9e, dans la limite fix\xe9e par l’organisateur.")
-
+bullet(u"Id\xe9ation : proposez un ou plusieurs th\xe8mes dans la zone pr\xe9vue.")
+bullet(u"Vote : utilisez vos jetons de vote pour soutenir les th\xe8mes. Vous pouvez r\xe9partir vos votes sur plusieurs th\xe8mes.")
+bullet(u"Soumission : uploadez vos photos, puis cliquez Soumettre au comit\xe9 quand vous \xeates satisfait. Apr\xe8s soumission, vous ne pouvez plus modifier vos photos.")
+h3(u'Votre dossier — statuts possibles')
+para(u"Une fois en phase Soumission, votre dossier passe par plusieurs \xe9tapes :")
+statuts_table([
+    (u'Soumission',       u"Vous pouvez uploader et supprimer vos photos librement.",                                                                                       'soumission'),
+    (u'En \xe9valuation', u"Vous avez soumis. Vos photos ne sont plus modifiables. Si le comit\xe9 a \xe9valu\xe9, des scores apparaissent sur vos photos.",              'inscription'),
+    (u'Cl\xf4tur\xe9',    u"Le responsable a fait la s\xe9lection finale. Les photos retenues sont marqu\xe9es d'une \xe9toile ★.",                                  'cloture'),
+])
+note(u"Si le responsable vous renvoie en soumission (pour ajouter une photo par exemple), vous retrouvez acc\xe8s \xe0 votre dossier et pouvez \xe0 nouveau modifier et re-soumettre.")
 page_break()
 
 
@@ -590,20 +597,44 @@ h2(u'3.8 Exposition')
 h3(u'Cr\xe9er')
 numbered(u"S\xe9lectionnez le type Exposition.")
 numbered(u"Renseignez le titre et la description.")
-numbered(u"D\xe9finissez les dates d’id\xe9ation (d\xe9but et fin, obligatoires).")
-numbered(u"Optionnel : date physique de l’exposition et date d’ouverture au public.")
+numbered(u"D\xe9finissez les dates d'id\xe9ation (d\xe9but et fin, obligatoires).")
+numbered(u"Optionnel : date physique de l'exposition et date d'ouverture au public.")
 numbered(u"D\xe9finissez le nombre max de photos par membre.")
-numbered(u"Cliquez Cr\xe9er — l’exposition d\xe9marre en phase Id\xe9ation.")
-h3(u'Cycle de vie')
+numbered(u"Cliquez Cr\xe9er — l'exposition d\xe9marre en phase Id\xe9ation.")
+h3(u'Cycle de vie global')
 statuts_table([
-    (u'Id\xe9ation',  u"Les membres proposent des th\xe8mes. Bouton Terminer l’id\xe9ation pour passer \xe0 la suite.",  'ideation'),
-    (u'Nettoyage',    u"Filtrez et \xe9ditez les th\xe8mes. Configurez le vote et cliquez Mettre en votation.",               'nettoyage'),
-    (u'Votation',     u"Les membres votent. Bouton Terminer le vote. Retour au nettoyage possible si ex-\xe6quo.",            'votation'),
-    (u'Soumission',   u"Choisissez le th\xe8me d\xe9finitif, les membres uploadent leurs photos. Bouton Cl\xf4turer.",       'soumission'),
-    (u'Cl\xf4tur\xe9',u"Galerie des photos visible. Acc\xe8s public selon la date d’ouverture au public.",              'cloture'),
+    (u'Id\xe9ation',    u"Les membres proposent des th\xe8mes. Bouton Terminer l'id\xe9ation pour passer \xe0 la suite.",    'ideation'),
+    (u'Nettoyage',      u"Filtrez et \xe9ditez les th\xe8mes. Configurez le vote et cliquez Mettre en votation.",             'nettoyage'),
+    (u'Votation',       u"Les membres votent. Bouton Terminer le vote. Retour au nettoyage possible si ex-\xe6quo.",          'votation'),
+    (u'Soumission',     u"Th\xe8me d\xe9finitif choisi. Les membres uploadent et soumettent leurs photos au comit\xe9.",      'soumission'),
+    (u'En exposition',  u"S\xe9lection fig\xe9e. Galerie des photos retenues visible.",                                       'cloture'),
 ])
 note(u"Le titre, la description et les dates sont modifiables \xe0 tout moment via ✏ Modifier.")
-
+h3(u'Configurer le comit\xe9')
+para(u"Pendant la phase Soumission, d\xe9signez un responsable du comit\xe9 et les membres \xe9valuateurs via le bouton Comit\xe9.")
+bullet(u"Responsable du comit\xe9 : celui qui fait la s\xe9lection finale et cl\xf4ture les dossiers.")
+bullet(u"Membres du comit\xe9 : ceux qui classent les photos de chaque dossier.")
+note(u"Un membre retir\xe9 du comit\xe9 voit ses \xe9valuations automatiquement supprim\xe9es.")
+h3(u'Phase Soumission — tableau de bord')
+para(u"Le tableau de bord liste tous les participants avec leur statut de dossier et le nombre de photos. Cliquez sur une ligne pour ouvrir le dossier du participant.")
+statuts_table([
+    (u'Soumission',       u"Le membre peut encore modifier ses photos.",                                     'soumission'),
+    (u'En \xe9valuation', u"Le membre a soumis. Le comit\xe9 peut \xe9valuer.",                             'inscription'),
+    (u'Cl\xf4tur\xe9',    u"Le responsable a s\xe9lectionn\xe9 les photos retenues.",                       'cloture'),
+])
+h3(u'4a — Le comit\xe9 \xe9value')
+para(u"Chaque membre du comit\xe9 ouvre un dossier soumis et classe les photos du meilleur au moins bon. Il sauvegarde son classement quand c'est fait. Il peut \xe9valuer les dossiers dans l'ordre qu'il veut, \xe0 son rythme.")
+bullet(u"Le compteur (ex : 2/5) indique combien de membres du comit\xe9 ont d\xe9j\xe0 sauvegard\xe9 leur \xe9valuation.")
+bullet(u"Filtre « \xc0 \xe9valuer » : n'affiche que les dossiers que le membre connect\xe9 n'a pas encore \xe9valu\xe9s.")
+h3(u'4b — Le responsable s\xe9lectionne et cl\xf4ture')
+para(u"Sans attendre que tout le monde ait fini, le responsable peut ouvrir un dossier, voir les scores agr\xe9g\xe9s du comit\xe9, cocher les photos retenues, et cl\xf4turer le dossier.")
+bullet(u"Sauvegarder : enregistre la s\xe9lection sans cl\xf4turer. Permet de mettre de c\xf4t\xe9 un brouillon.")
+bullet(u"Cl\xf4turer le dossier : fige la s\xe9lection et passe le statut \xe0 Cl\xf4tur\xe9.")
+bullet(u"Filtre « Non cl\xf4tur\xe9s » : n'affiche que les dossiers encore ouverts.")
+h3(u'4c — Rouvrir un dossier')
+para(u"Si n\xe9cessaire, le responsable peut rouvrir un dossier cl\xf4tur\xe9 ou en cours d'\xe9valuation :")
+bullet(u"Rouvrir en \xe9valuation : le membre ne peut rien changer, mais le comit\xe9 peut reclasser les photos.")
+bullet(u"Rouvrir en soumission : le membre peut \xe0 nouveau uploader ou supprimer des photos, puis re-soumettre. Les anciens classements du comit\xe9 sont conserv\xe9s comme point de d\xe9part.")
 page_break()
 
 

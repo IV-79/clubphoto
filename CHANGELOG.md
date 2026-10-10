@@ -2,6 +2,85 @@
 
 ---
 
+## v1.0.0-beta — En cours (2026-10-10)
+
+### Exposition — notifications workflow (2026-10-10)
+
+- **Soumissions ouvertes** : broadcast à tous les membres quand le thème est choisi et la phase soumission lancée.
+- **Membre soumet au comité** : tous les membres du comité sont notifiés (le responsable reçoit le message habituel, les autres évaluateurs reçoivent un message "disponible pour évaluation"). Remplace la notification responsable-only.
+- **Renvoyé en soumission** : notification individuelle au membre concerné lui indiquant qu'il peut à nouveau modifier et re-soumettre.
+- **Exposition publiée** : broadcast à tous les membres quand la clôture globale passe l'exposition en « En exposition ».
+
+### Exposition — remise à zéro du compteur d'évaluation à la réouverture (2026-10-10)
+
+- **`comiteUidsEvalues` effacé à la réouverture** : quand un responsable ré-ouvre un dossier (vers évaluation ou vers soumission), la liste des évaluateurs est réinitialisée — le participant réapparaît automatiquement dans le filtre "Non évalués par moi" de chaque membre du comité. Les classements eux-mêmes (sous-collection `evaluations/{comiteUid}`) sont conservés et rechargés comme base de départ à la prochaine évaluation.
+
+### Exposition — filtres tableau de bord comité (2026-10-10)
+
+- **Filtre "Non évalués par moi"** (membres du comité) : affiche uniquement les participants dont le classement n'a pas encore été enregistré par le membre connecté. Personnel — chaque évaluateur voit sa propre liste de travail restant.
+- **Filtre "Non clôturés"** (responsable) : affiche uniquement les participants dont le dossier n'est pas encore en statut « Clôturé ». Permet de voir rapidement ce qu'il reste à traiter.
+- Les deux filtres sont indépendants et cumulables. Un compteur `(N)` s'affiche à côté du label quand le filtre est actif. Si tous les participants sont filtrés, un message "Aucun participant ne correspond aux filtres actifs" s'affiche.
+
+### Exposition — galerie finale et corrections audit (2026-10-10)
+
+- **Galerie d'exposition** : uniquement les photos retenues (filtrées sur `selectedPhotoIds`), triées par nom du membre. Aucun toggle — c'est l'exposition, pas le brouillon.
+- **Étoile ★ en phase exposition** : un membre connecté voit une étoile ★ sur ses propres photos dans la galerie finale (complète l'étoile déjà présente dans "Mes photos" en phase soumission).
+- **Audit de conformité** : revue systématique du code contre le workflow documenté — 100 % conforme après correction de l'écart étoile.
+
+### Exposition — étoile photos retenues + colonne sélection (2026-10-10)
+
+- **Étoile ★ sur les photos retenues** : dans la section "Mes photos" en haut de page ET dans la vue dashboard (propre ligne du membre), une étoile jaune ★ s'affiche sur chaque photo dont l'id est dans `selectedPhotoIds` du dossier — visible dès que le responsable sauvegarde une sélection, même sans clôturer.
+- **Colonne "★ Sél." dans le tableau** : pour le responsable du comité, une colonne supplémentaire affiche le nombre de photos sélectionnées par participant (`★ N` en jaune, ou `—` si aucune).
+
+### Exposition — sauvegarder la sélection + vue membre dashboard (2026-10-10)
+
+- **Sauvegarder la sélection sans clôturer** : dans les deux panneaux de sélection (grille cliquable et mode "Ordre général"), un bouton « Sauvegarder » permet de persister la sélection en cours dans Firestore sans passer le dossier en « Clôturé ». Un point orange ● apparaît tant que la sélection n'est pas sauvegardée.
+- **Warning sélection non sauvegardée** : le même mécanisme de warning "non sauvegardé" (dialog 3 boutons, `beforeunload`, `CanDeactivate`) s'applique maintenant aussi à la sélection de photos, en plus du classement d'évaluation. Le message précise ce qui est non sauvegardé (classement / sélection / les deux).
+- **Vue membre dans le dashboard** : un simple membre qui clique sur sa propre ligne dans le tableau de bord voit ses photos triées par score d'agrégat (si le comité a déjà évalué), avec les badges de score visibles — identique à la section "Mes photos" en haut de page.
+
+### Exposition — warning classement non sauvegardé (2026-10-10)
+
+- **Guard "classement non sauvegardé"** : si un membre du comité a modifié l'ordre d'évaluation (↑/↓) sans cliquer "Enregistrer", trois situations déclenchent un avertissement :
+  - **Changer de participant dans le tableau** → dialog 3 boutons : [Sauvegarder] [Ignorer] [Annuler].
+  - **Quitter la page via le router Angular** → même dialog via `CanDeactivate` guard.
+  - **Fermer l'onglet / F5 / navigation externe** → `window.beforeunload` déclenche l'alerte native du navigateur.
+- **ConfirmService étendu** : nouvelle méthode `confirmTriple()` retournant `'primary' | 'secondary' | 'cancel'` et rendu dans le modal existant avec trois boutons.
+
+### Exposition — workflow sélection, clôture et re-ouverture (2026-10-10)
+
+- **Ré-ouverture à deux niveaux** : le responsable peut ré-ouvrir un dossier clôturé soit en « Évaluation » (le comité reclasse, le membre ne touche plus ses photos), soit en « Soumission » (le membre peut à nouveau ajouter/supprimer des photos). Deux boutons distincts dans la colonne actions du tableau de bord.
+- **Clôture avec 0 photo autorisée** : le responsable peut clôturer un dossier sans retenir aucune photo (ex. abandon ou retrait).
+- **Compteur global sélectionné / objectif** : la sidebar affiche le total de photos retenues toutes sélections confondues sur l'objectif `nbPhotosExposition`. Le compteur passe en rouge si le total dépasse la cible.
+- **Warning avant clôture globale** : en phase soumission, un bandeau jaune/vert indique si le nombre de photos sélectionnées correspond ou non à l'objectif avant de valider la clôture générale.
+- **Bouton global renommé** : « Clôturer la soumission → » devient « Clôturer la sélection — Prêt pour l'expo → ».
+- **Étoile sur les photos retenues** : en phase clôture, une étoile ★ jaune s'affiche sur chaque photo qui a été retenue par le responsable, visible pour les membres connectés.
+- **Chargement des participants en phase clôture** : la liste des participants (et leur `selectedPhotoIds`) est désormais chargée en phase clôture pour alimenter l'affichage des étoiles.
+
+### Exposition — évaluation comité, améliorations UI (2026-10-10)
+
+- **Upload multiple** : la zone de dépôt accepte désormais plusieurs fichiers en une seule sélection ; les photos sont envoyées séquentiellement avec un indicateur de progression "Photo X/Y — Z%". Le quota `maxPhotosParMembre` est respecté (envois surnuméraires ignorés silencieusement). Correction d'un bug de comptage (`nbPhotos` dans le tableau de bord) causé par un appel fire-and-forget dans `upsertParticipantNbPhotos`.
+- **Lightbox dans le panel évaluation** : les miniatures de la liste de classement sont cliquables et ouvrent le lightbox standard (plein écran, navigation ←/→).
+- **Scores d'agrégat visibles** : les scores (somme des positions 1-based de tous les évaluateurs) s'affichent sur chaque photo du drill-down participant ET dans la section "Mes photos" du membre (triée du meilleur au moins bon score).
+- **Évaluation tableau de bord — accord ion** : chaque ligne participant se développe inline (un seul ouvert à la fois) avec auto-scroll doux vers la ligne sélectionnée. L'évaluation de sa propre série est autorisée pour les membres du comité.
+- **Toggle Mon ordre / Ordre général** : le panel d'évaluation propose deux modes — « Mon ordre » (modifiable, boutons ↑/↓) et « Ordre général » (lecture seule, trié par score agrégat, score affiché en ligne).
+- **Sélection photos pour clôture en mode Ordre général** : en mode « Ordre général », le responsable du comité voit une checkbox par photo pour sélectionner les photos retenues pour l'exposition. Un compteur et un bouton « Clôturer le dossier » s'affichent en pied de liste. L'action pré-charge la sélection existante du membre à la bascule vers ce mode.
+- **Règles Firestore** : ajout des règles manquantes pour les sous-collections `participants` et `evaluations` (les deletes remontaient une erreur de permission).
+
+### Phase de sélection exposition — comité d'évaluation (2026-10-10)
+
+- **Page "Créer une exposition"** : nouvelle route `/membre/expositions/creer` (guard éditeur) avec formulaire de création complet (titre, description, dates idéation/exposition, quota photos, objectif final, visibilité). Bouton ajouté dans la page Événements pour les admins/contributeurs.
+- **Comité d'évaluation** : l'organisateur peut désigner un *responsable de comité* et des *membres évaluateurs* depuis la phase soumission. La configuration est modifiable à tout moment.
+- **Dashboard participants** : en phase soumission, remplace la grille globale de toutes les photos par un tableau de bord listant chaque participant avec son nombre de photos, son avancement d'évaluation (X/Y membres du comité ont classifié) et son statut (`Soumission`, `En évaluation`, `Clôturé`).
+- **Soumission au comité** : chaque membre gère ses propres photos (upload/suppression) puis verrouille son dossier via « Soumettre au comité » — ses photos ne sont plus modifiables après soumission.
+- **Mode évaluation comité** : un membre du comité clique sur un participant en statut "Évaluation" → classement des photos par ordre de préférence (boutons ↑/↓), enregistrement atomique en Firestore (sous-collection `evaluations`). Score d'agrégat calculé côté client (somme des positions).
+- **Clôture d'un dossier** : le responsable du comité sélectionne les photos retenues pour un membre (visuellement, avec score d'agrégat affiché en surimpression), puis clôture le dossier. Notification envoyée au membre.
+- **Ré-ouverture d'un dossier** : le responsable peut ré-ouvrir un dossier clôturé (remet le statut à "Évaluation", conserve le classement des évaluateurs).
+- **Optimisation reads Firestore** : en phase soumission, seules les photos du membre courant et la liste des participants sont chargées au départ. Les photos d'un autre participant ne sont chargées qu'au clic (lazy). Les évaluations complètes ne sont chargées que par le responsable.
+- **Fix notifications** : correction d'un bug où certaines notifications naviguaient vers la page cible mais le contenu ne se chargeait pas (le `await markAsRead` avant `navigateByUrl` causait un conflit de timing). Navigation synchrone, `markAsRead` en fire-and-forget.
+- **Fix upload soumission** : un membre sans dossier participant (première connexion) ne voyait pas la zone de dépôt car `canUploadEnSoumission` rejetait le statut `null`. La condition accepte désormais `null` ou `'soumission'`.
+- **Nom du responsable en sidebar** : la sidebar affichait l'UID brut du responsable. Le nom est maintenant stocké en Firestore (`responsableComiteNom`) lors de la configuration du comité et affiché directement, sans lecture supplémentaire.
+- **Blocage temporaire indexation prod** : header `X-Robots-Tag: noindex, nofollow, noarchive` ajouté dans `firebase.json` jusqu'au 3 novembre.
+
 ## v1.0.0-beta — En cours (2026-09-08)
 
 ### Fix tri admin/membres (2026-09-08)

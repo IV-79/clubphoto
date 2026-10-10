@@ -107,11 +107,11 @@ export class Header {
     return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
   }
 
-  async navigateFromNotif(n: AppNotification) {
-    const uid = this.profile()?.uid;
-    if (uid && !n.lu) await this.notifService.markAsRead(uid, n.id);
+  navigateFromNotif(n: AppNotification) {
     this.openMenu.set(null);
     if (n.lien) this.router.navigateByUrl(n.lien);
+    const uid = this.profile()?.uid;
+    if (uid && !n.lu) this.notifService.markAsRead(uid, n.id).catch(() => {});
   }
 
   async markAllRead() {

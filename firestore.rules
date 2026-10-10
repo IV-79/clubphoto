@@ -288,6 +288,24 @@ service cloud.firestore {
       );
     }
 
+    match /expositions/{expoId}/participants/{participantId} {
+      allow read: if isLoggedIn();
+      allow create, update: if isLoggedIn();
+      allow delete: if isLoggedIn() && (
+        get(/databases/$(database)/documents/expositions/$(expoId)).data.organisateurUid == request.auth.uid ||
+        isAdmin()
+      );
+    }
+
+    match /expositions/{expoId}/participants/{participantId}/evaluations/{evaluationId} {
+      allow read: if isLoggedIn();
+      allow create, update: if isLoggedIn();
+      allow delete: if isLoggedIn() && (
+        get(/databases/$(database)/documents/expositions/$(expoId)).data.organisateurUid == request.auth.uid ||
+        isAdmin()
+      );
+    }
+
     match /expositions/{expoId}/photos/{photoId} {
       allow read: if isLoggedIn()
                   || get(/databases/$(database)/documents/expositions/$(expoId)).data.photosPubliques == true;

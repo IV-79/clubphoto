@@ -16,3 +16,21 @@
     </div>
   </div>
 }
+
+@if (confirmService.tripleState(); as t) {
+  <div class="confirm-backdrop" (click)="confirmService.respondTriple('cancel')">
+    <div class="confirm-dialog" (click)="$event.stopPropagation()">
+      <h3 class="confirm-title">{{ t.title }}</h3>
+      <p class="confirm-message">{{ t.message }}</p>
+      <div class="confirm-actions">
+        <button class="btn-cancel" (click)="confirmService.respondTriple('cancel')">Annuler</button>
+        <button class="btn-confirm btn-confirm-neutral" (click)="confirmService.respondTriple('secondary')">
+          {{ t.secondaryLabel }}
+        </button>
+        <button class="btn-confirm" (click)="confirmService.respondTriple('primary')">
+          {{ t.primaryLabel }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

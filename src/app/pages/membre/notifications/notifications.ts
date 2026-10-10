@@ -55,11 +55,10 @@ export class Notifications {
     return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
   }
 
-  async onNotifClick(n: AppNotification) {
-    const uid = this.profile()?.uid;
-    if (!uid) return;
-    if (!n.lu) await this.notifService.markAsRead(uid, n.id);
+  onNotifClick(n: AppNotification) {
     if (n.type !== 'admin' && n.lien) this.router.navigateByUrl(n.lien);
+    const uid = this.profile()?.uid;
+    if (uid && !n.lu) this.notifService.markAsRead(uid, n.id).catch(() => {});
   }
 
   async markAllRead() {

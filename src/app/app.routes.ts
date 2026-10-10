@@ -7,6 +7,7 @@ import { AdminThemes } from './pages/admin-dashboard/themes/themes';
 import { AdminPages } from './pages/admin-dashboard/pages/admin-pages';
 import { Maintenance } from './pages/admin-dashboard/maintenance/maintenance';
 import { authGuard, memberGuard, editorGuard } from './guards/auth.guard';
+import { unsavedEvalGuard } from './guards/unsaved-eval.guard';
 import { PublicLayout } from './layouts/public-layout/public-layout';
 import { MemberLayout } from './layouts/member-layout/member-layout';
 import { Home } from './pages/home/home';
@@ -102,7 +103,7 @@ export const routes: Routes = [
       },
       { path: 'galeries/sorties/:id', component: SortieDetail },
       { path: 'galeries/defis/:id', component: DefiDetail },
-      { path: 'galeries/expositions/:id', component: ExpositionDetail },
+      { path: 'galeries/expositions/:id', component: ExpositionDetail, canDeactivate: [unsavedEvalGuard] },
       { path: 'calendrier', component: Calendrier },
       { path: 'membres/guide', component: MembresGuide, canActivate: [memberGuard] },
       { path: 'membres/charte', component: Charte, canActivate: [memberGuard] },
