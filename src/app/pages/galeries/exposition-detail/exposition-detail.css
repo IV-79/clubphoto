@@ -181,22 +181,6 @@
   color: var(--c-violet);
 }
 
-.btn-publier-photos {
-  font-size: 0.85rem;
-  font-weight: 600;
-  padding: 0.45rem 1rem;
-  border-radius: 6px;
-  border: 1px solid var(--c-blue-bd);
-  background: var(--c-blue-bg);
-  color: var(--c-blue);
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
-}
-.btn-publier-photos:hover {
-  background: var(--c-blue);
-  color: #fff;
-  border-color: var(--c-blue);
-}
 
 .edit-section-header {
   font-size: 0.7rem;
@@ -978,28 +962,6 @@
   flex-wrap: wrap;
 }
 
-.eval-mode-toggle {
-  display: flex;
-  gap: 0;
-  border: 1px solid var(--c-violet);
-  border-radius: 6px;
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.btn-mode-toggle {
-  padding: 0.3rem 0.75rem;
-  font-size: 0.8rem;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  color: var(--c-violet);
-  transition: background 0.15s, color 0.15s;
-}
-.btn-mode-toggle.active {
-  background: var(--c-violet);
-  color: #fff;
-}
 
 .rank-score {
   font-size: 0.78rem;
@@ -1017,6 +979,8 @@
   cursor: pointer;
   flex-shrink: 0;
 }
+.rank-select-left { margin-left: 0; }
+.rank-clos-indicator { width: 1.25rem; text-align: center; font-size: 1rem; flex-shrink: 0; color: var(--text-secondary); }
 
 .eval-general-footer {
   justify-content: flex-end;
@@ -1223,6 +1187,107 @@
   transition: opacity 0.15s;
 }
 .btn-confirmer-cloture:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Tabs (soumission) ───────────────────────────────────────── */
+
+.comite-tabs { margin-top: 1.25rem; }
+
+.comite-tab-headers {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--border-medium);
+  margin-bottom: 1.25rem;
+}
+
+.comite-tab-btn {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  padding: 0.6rem 1.25rem;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.comite-tab-btn:hover { color: var(--text-primary); }
+.comite-tab-btn.active {
+  color: #1a237e;
+  border-bottom-color: #1a237e;
+  font-weight: 700;
+}
+
+
+.comite-tab-content { padding-top: 0.25rem; }
+
+.tab-intro {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0 0 1rem;
+  line-height: 1.5;
+}
+
+.cloture-tab3 { margin-top: 0; border-top: none; }
+
+.cloture-actions-split { flex-wrap: wrap; gap: 0.5rem 0.75rem; }
+
+.cloture-backward-group {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.cloture-actions-sep {
+  width: 1px;
+  align-self: stretch;
+  background: var(--border-medium);
+  margin: 0 0.25rem;
+  flex-shrink: 0;
+}
+
+.cloture-forward-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+/* ── Visibility toggle (cloture phase) ──────────────────────── */
+
+.vis-toggle-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.vis-toggle-label {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-right: 0.25rem;
+}
+
+.btn-vis {
+  background: var(--bg-surface);
+  border: 1.5px solid var(--border-medium);
+  border-radius: 6px;
+  padding: 0.45rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.btn-vis:hover { border-color: #1a237e; color: var(--text-primary); }
+.btn-vis.vis-active {
+  background: #1a237e;
+  border-color: #1a237e;
+  color: #fff;
+  cursor: default;
+}
 
 /* ── Responsive ─────────────────────────────────────────────── */
 

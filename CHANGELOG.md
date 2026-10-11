@@ -4,6 +4,22 @@
 
 ## v1.0.0-beta — En cours (2026-10-11)
 
+### Expositions — interface soumission par onglets (2026-10-11)
+
+- **3 onglets** dans la phase soumission selon le rôle : "Participer" (tous les membres), "Évaluer" (membres du comité), "Sélectionner" (responsable du comité).
+- **Tab Participer** : zone d'upload, mes photos avec statut, bouton "Soumettre au comité", tableau récapitulatif des participants (lecture seule).
+- **Tab Évaluer** : classement des photos par ordre de préférence (↑↓), enregistrement, filtre "À évaluer". Suppression des boutons "Mon ordre / Ordre général" (remplacés par la séparation en onglets).
+- **Tab Sélectionner** : sélection visuelle des photos à retenir (mode liste avec case à cocher), scores agrégés du comité, clôture individuelle par dossier, boutons ↩ pour ré-ouvrir.
+- **Dossier clôturé = sélection figée** : quand un dossier est clôturé, la sélection passe en lecture seule (★/· à la place de cases à cocher, boutons Sauvegarder/Clôturer masqués). L'évaluation et la sélection forment une seule étape ; une fois clôturé, le dossier ne change plus sans ré-ouverture explicite.
+- **Fix noms comité** : à l'ouverture de la page soumission, les membres du comité étaient affichés avec leur UID au lieu de leur nom — corrigé en chargeant la liste des membres dès le chargement initial.
+- **Bouton global** renommé en "Clôturer les sélections de photo — Ouvrir l'expo".
+- **Visibilité photos (phase clôture)** : le bouton bascule unique est remplacé par deux boutons actif/inactif (👥 Membres / 🌐 Public) avec état mis en évidence.
+
+### Guide du site — mise à jour exposition (2026-10-12)
+
+- **Page guide Angular** (`/membre/guide`, onglet Contributeurs) : tableau des 3 onglets Participer/Évaluer/Sélectionner ajouté ; sections 4a/4b mises à jour (libellés filtres exacts, clôture = sélection figée + cases disparaissent) ; nouvelle section 4c Clôture globale (action finale irréversible) ; 4d Rouvrir un dossier avec les deux boutons ↩.
+- **`guide_du_site.docx`** : même contenu, régénéré via `generate_guide.py`.
+
 ### Partenaires (2026-10-11)
 
 - **Page publique `/le-club/partenaires`** : grille de logos cliquables (ouvre le lien en nouvel onglet si défini) filtrés sur `actif=true`, classés par ordre défini en admin.
@@ -11,6 +27,8 @@
 - **Firestore `partenaires/`** : lecture publique, écriture admin uniquement.
 - **Storage `partenaires/`** : lecture publique, écriture admin uniquement.
 - Lien "Partenaires" ajouté dans le menu "Le Club" (desktop + mobile) et dans le menu Admin.
+- **Fix sécurité Storage `config/`** : l'image de la page d'accueil était modifiable par n'importe quel membre connecté — corrigé en `isAdmin()`, aligné avec la règle Firestore déjà en place.
+- **Zone drag & drop** sur les formulaires d'upload de logo (ajout et édition inline) : glisser-déposer directement sur la zone ou cliquer pour parcourir.
 
 ### Ateliers — mode groupes de travail (2026-10-11)
 

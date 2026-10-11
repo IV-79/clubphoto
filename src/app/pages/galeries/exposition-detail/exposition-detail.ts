@@ -99,7 +99,7 @@ export class ExpositionDetail {
   evaluations = signal<ExpoEvaluation[]>([]); // all evaluations (responsable view)
   monEvaluation = signal<ExpoEvaluation | null>(null); // my evaluation as committee member
   evaluationDraft = signal<string[]>([]); // working ordered list
-  viewModeEval = signal<'perso' | 'general'>('perso');
+  activeComiteTab = signal<'participants' | 'comite' | 'responsable'>('participants');
 
   // Unsaved evaluation tracking — signal + getter for CanDeactivate guard
   private _evaluationDraftDirty = signal(false);
@@ -380,6 +380,24 @@ export class ExpositionDetail {
           this.expoService
             .getPhotosParMembre(this.expoId, uid)
             .then((p) => this.mesPhotos.set(p)),
+        );
+      }
+      // Load allMembres only for old data that doesn't have comiteNoms stored yet
+      const needsMembresForDisplay =
+        ((expoData.comiteUids?.length ?? 0) > 0 && !expoData.comiteNoms?.length) ||
+        (!!expoData.responsableComiteUid && !expoData.responsableComiteNom);
+      if (needsMembresForDisplay) {
+        loads.push(
+          firstValueFrom(this.authService.getAllMembersOnce()).then((membres) => {
+            const sorted = membres
+              .filter((m) => !m.isSuspended)
+              .sort((a, b) => {
+                const na = `${a.nom} ${a.prenom ?? ''}`.normalize('NFD').toLowerCase();
+                const nb = `${b.nom} ${b.prenom ?? ''}`.normalize('NFD').toLowerCase();
+                return na < nb ? -1 : na > nb ? 1 : 0;
+              });
+            this.allMembres.set(sorted);
+          }),
         );
       }
     }
@@ -1004,10 +1022,9 @@ export class ExpositionDetail {
     this._evaluationDraftDirty.set(false);
     this._selectionDirty.set(false);
     this.selectedParticipantUid.set(participantUid);
-    this.viewModeEval.set('perso');
     setTimeout(() => {
       document
-        .getElementById(`participant-row-${participantUid}`)
+        .getElementById(`participant-row-eval-${participantUid}`)
         ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 30);
     this.photosParMembre.set([]);
@@ -1177,11 +1194,21 @@ export class ExpositionDetail {
     return this.selectedPourCloture().has(photoId);
   }
 
-  switchToGeneral(participantUid: string) {
-    const participant = this.participants().find((p) => p.uid === participantUid);
-    this.selectedPourCloture.set(new Set(participant?.selectedPhotoIds ?? []));
+  async toggleParticipantTab3(participantUid: string) {
+    if (this.selectedParticipantUid() === participantUid) {
+      if (!(await this.checkUnsavedBeforeSwitch())) return;
+      this.closeParticipantPanel();
+      return;
+    }
+    if (!(await this.checkUnsavedBeforeSwitch())) return;
+    this._evaluationDraftDirty.set(false);
     this._selectionDirty.set(false);
-    this.viewModeEval.set('general');
+    setTimeout(() => {
+      document
+        .getElementById(`participant-row-resp-${participantUid}`)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 30);
+    await this.openCloturePourMembre(participantUid);
   }
 
   async sauvegarderSelectionLocale(participantUid: string) {
@@ -1323,6 +1350,7 @@ export class ExpositionDetail {
     const responsable = this.draftResponsableUid() || null;
     const comiteUids = this.draftComiteUids();
     const responsableNom = responsable ? this.membreNom(responsable) : undefined;
+    const comiteNoms = comiteUids.map((uid) => this.membreNom(uid));
 
     // Detect removed committee members and delete their evaluations
     const oldComite = this.expo()?.comiteUids ?? [];
@@ -1333,10 +1361,10 @@ export class ExpositionDetail {
       ),
     );
 
-    await this.expoService.updateComite(this.expoId, responsable, comiteUids, responsableNom);
+    await this.expoService.updateComite(this.expoId, responsable, comiteUids, responsableNom, comiteNoms);
     this.expo.update((e) => {
       if (!e) return e;
-      const updated = { ...e, comiteUids };
+      const updated = { ...e, comiteUids, comiteNoms };
       if (responsable) {
         updated.responsableComiteUid = responsable;
         updated.responsableComiteNom = responsableNom;

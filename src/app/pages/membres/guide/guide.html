@@ -1049,7 +1049,25 @@
           </p>
         </div>
         <div class="guide-card">
-          <h3>4a — Le comité évalue</h3>
+          <h3>Interface par onglets en phase Soumission</h3>
+          <p>L'interface s'adapte au rôle de la personne connectée. Trois onglets sont disponibles :</p>
+          <div class="admin-fields">
+            <div class="admin-field-row">
+              <span class="field-label">Participer</span>
+              <span class="field-desc">Visible pour tous les membres. Upload, soumission au comité, consultation du statut de son dossier.</span>
+            </div>
+            <div class="admin-field-row">
+              <span class="field-label">Évaluer</span>
+              <span class="field-desc">Visible pour les membres du comité. Classement des photos de chaque dossier soumis.</span>
+            </div>
+            <div class="admin-field-row">
+              <span class="field-label">Sélectionner</span>
+              <span class="field-desc">Visible pour le responsable du comité uniquement. Sélection finale, clôture des dossiers.</span>
+            </div>
+          </div>
+        </div>
+        <div class="guide-card">
+          <h3>4a — Le comité évalue (onglet Évaluer)</h3>
           <p>
             Chaque membre du comité ouvre les dossiers soumis et classe les photos du meilleur au
             moins bon. Il sauvegarde son classement à son rythme, dans l'ordre qu'il veut.
@@ -1060,13 +1078,13 @@
               sauvegardé leur évaluation pour ce dossier.
             </li>
             <li>
-              Filtre <strong>« À évaluer »</strong> : n'affiche que les dossiers que le membre
-              connecté n'a pas encore évalués.
+              Filtre <strong>« Photos que je n'ai pas encore classées »</strong> : n'affiche que les dossiers
+              que le membre connecté n'a pas encore évalués.
             </li>
           </ul>
         </div>
         <div class="guide-card">
-          <h3>4b — Le responsable sélectionne et clôture</h3>
+          <h3>4b — Le responsable sélectionne et clôture (onglet Sélectionner)</h3>
           <p>
             Sans attendre que tout le comité ait fini, le responsable peut ouvrir un dossier, voir
             les scores agrégés, cocher les photos retenues et clôturer. <strong>C'est lui qui décide
@@ -1077,30 +1095,38 @@
               <strong>Sauvegarder</strong> : enregistre la sélection sans clôturer — brouillon.
             </li>
             <li>
-              <strong>Clôturer le dossier</strong> : fige la sélection. Le membre voit les étoiles ★
-              sur ses photos retenues.
+              <strong>Clôturer le dossier</strong> : fige définitivement la sélection. Les cases à cocher
+              disparaissent, plus aucune modification n'est possible sans ré-ouverture. Le membre voit
+              les étoiles ★ sur ses photos retenues.
             </li>
             <li>
-              Filtre <strong>« Non clôturés »</strong> : n'affiche que les dossiers encore ouverts.
-            </li>
-            <li>
-              Bouton <strong>Clôturer la sélection</strong> (global) : passe l'exposition en
-              <em>En exposition</em> quand tous les dossiers sont traités.
+              Filtre <strong>« Dossiers non encore clôturés par le responsable »</strong> : n'affiche que les dossiers encore ouverts.
             </li>
           </ul>
+          <p class="guide-note">
+            Évaluation et sélection forment une seule étape. Clôturer = évaluation terminée ET sélection validée.
+          </p>
         </div>
         <div class="guide-card">
-          <h3>4c — Rouvrir un dossier</h3>
-          <p>Le responsable peut rouvrir un dossier clôturé ou en cours d'évaluation :</p>
+          <h3>4c — Clôture globale</h3>
+          <p>
+            Le bouton <strong>« Clôturer les sélections de photo — Ouvrir l'expo »</strong> en bas de page
+            est l'action finale : elle clôture définitivement <em>tous</em> les dossiers en cours et fait
+            basculer l'exposition en mode final, <strong>sans retour en arrière possible</strong>. Cette
+            action engage l'ensemble des participants.
+          </p>
+        </div>
+        <div class="guide-card">
+          <h3>4d — Rouvrir un dossier</h3>
+          <p>Le responsable peut rouvrir un dossier depuis l'onglet Sélectionner :</p>
           <ul class="guide-steps">
             <li>
-              <strong>Rouvrir en évaluation</strong> : le membre ne peut rien changer, mais le comité
-              peut reclasser les photos.
+              <strong>↩ Ré-ouvrir — Évaluation</strong> : le dossier repasse en phase évaluation/sélection.
+              Le responsable peut ajuster sa sélection. Disponible depuis les statuts Évaluation et Clôturé.
             </li>
             <li>
-              <strong>Rouvrir en soumission</strong> : le membre peut à nouveau uploader ou supprimer
-              des photos, puis re-soumettre. Les anciens classements du comité sont conservés comme
-              point de départ.
+              <strong>↩ Ré-ouvrir — Soumission</strong> : le membre peut à nouveau uploader ou supprimer
+              des photos, puis re-soumettre. Disponible depuis tous les statuts avancés.
             </li>
           </ul>
         </div>

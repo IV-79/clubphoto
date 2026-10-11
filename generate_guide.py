@@ -615,26 +615,39 @@ para(u"Pendant la phase Soumission, d\xe9signez un responsable du comit\xe9 et l
 bullet(u"Responsable du comit\xe9 : celui qui fait la s\xe9lection finale et cl\xf4ture les dossiers.")
 bullet(u"Membres du comit\xe9 : ceux qui classent les photos de chaque dossier.")
 note(u"Un membre retir\xe9 du comit\xe9 voit ses \xe9valuations automatiquement supprim\xe9es.")
-h3(u'Phase Soumission — tableau de bord')
-para(u"Le tableau de bord liste tous les participants avec leur statut de dossier et le nombre de photos. Cliquez sur une ligne pour ouvrir le dossier du participant.")
+h3(u'Phase Soumission — interface par onglets')
+para(u"En phase Soumission, l'interface s'adapte automatiquement au r\xf4le de la personne connect\xe9e. Trois onglets sont disponibles pour les membres du comit\xe9 et le responsable :")
+fields_table([
+    (u'Participer',    u"Visible pour tous les membres. Upload des photos, soumission au comit\xe9, consultation du statut de son dossier."),
+    (u'\xc9valuer',    u"Visible pour les membres du comit\xe9 uniquement. Classement des photos de chaque dossier soumis."),
+    (u'S\xe9lectionner', u"Visible pour le responsable du comit\xe9 uniquement. S\xe9lection finale des photos, cl\xf4ture des dossiers."),
+])
+para(u"Le tableau de bord liste tous les participants avec leur statut de dossier et le nombre de photos. Cliquez sur une ligne pour ouvrir le dossier.")
 statuts_table([
     (u'Soumission',       u"Le membre peut encore modifier ses photos.",                                     'soumission'),
-    (u'En \xe9valuation', u"Le membre a soumis. Le comit\xe9 peut \xe9valuer.",                             'inscription'),
-    (u'Cl\xf4tur\xe9',    u"Le responsable a s\xe9lectionn\xe9 les photos retenues.",                       'cloture'),
+    (u'En \xe9valuation', u"Le membre a soumis. Le comit\xe9 peut \xe9valuer et le responsable peut s\xe9lectionner.", 'inscription'),
+    (u'Cl\xf4tur\xe9',    u"Le responsable a valid\xe9 la s\xe9lection finale. Dossier fig\xe9.",            'cloture'),
 ])
-h3(u'4a — Le comit\xe9 \xe9value')
+h3(u'4a — Le comit\xe9 \xe9value (onglet \xc9valuer)')
 para(u"Chaque membre du comit\xe9 ouvre un dossier soumis et classe les photos du meilleur au moins bon. Il sauvegarde son classement quand c'est fait. Il peut \xe9valuer les dossiers dans l'ordre qu'il veut, \xe0 son rythme.")
 bullet(u"Le compteur (ex : 2/5) indique combien de membres du comit\xe9 ont d\xe9j\xe0 sauvegard\xe9 leur \xe9valuation.")
-bullet(u"Filtre « \xc0 \xe9valuer » : n'affiche que les dossiers que le membre connect\xe9 n'a pas encore \xe9valu\xe9s.")
-h3(u'4b — Le responsable s\xe9lectionne et cl\xf4ture')
-para(u"Sans attendre que tout le monde ait fini, le responsable peut ouvrir un dossier, voir les scores agr\xe9g\xe9s du comit\xe9, cocher les photos retenues, et cl\xf4turer le dossier.")
-bullet(u"Sauvegarder : enregistre la s\xe9lection sans cl\xf4turer. Permet de mettre de c\xf4t\xe9 un brouillon.")
-bullet(u"Cl\xf4turer le dossier : fige la s\xe9lection et passe le statut \xe0 Cl\xf4tur\xe9.")
-bullet(u"Filtre « Non cl\xf4tur\xe9s » : n'affiche que les dossiers encore ouverts.")
-h3(u'4c — Rouvrir un dossier')
-para(u"Si n\xe9cessaire, le responsable peut rouvrir un dossier cl\xf4tur\xe9 ou en cours d'\xe9valuation :")
-bullet(u"Rouvrir en \xe9valuation : le membre ne peut rien changer, mais le comit\xe9 peut reclasser les photos.")
-bullet(u"Rouvrir en soumission : le membre peut \xe0 nouveau uploader ou supprimer des photos, puis re-soumettre. Les anciens classements du comit\xe9 sont conserv\xe9s comme point de d\xe9part.")
+bullet(u"Filtre « Photos que je n'ai pas encore class\xe9es » : n'affiche que les dossiers que le membre connect\xe9 n'a pas encore \xe9valu\xe9s.")
+h3(u'4b — Le responsable s\xe9lectionne et cl\xf4ture (onglet S\xe9lectionner)')
+para(u"Sans attendre que tout le monde ait fini, le responsable peut ouvrir un dossier, consulter les scores agr\xe9g\xe9s du comit\xe9, cocher les photos \xe0 retenir, puis cl\xf4turer.")
+bullet(u"Sauvegarder : enregistre la s\xe9lection sans cl\xf4turer — permet de garder un brouillon.")
+bullet(u"Cl\xf4turer le dossier : fige d\xe9finitivement la s\xe9lection. Une fois cl\xf4tur\xe9, les cases \xe0 cocher disparaissent et la s\xe9lection ne peut plus \xeatre modifi\xe9e sans ↩ Ré-ouvrir.")
+bullet(u"Filtre « Dossiers non encore cl\xf4tur\xe9s par le responsable » : n'affiche que les dossiers encore ouverts.")
+note(u"\xc9valuation et s\xe9lection forment une seule \xe9tape. Cl\xf4turer signifie : \xe9valuation termin\xe9e ET s\xe9lection valid\xe9e. Plus aucune modification possible sans r\xe9ouverture explicite.")
+h3(u'4c — Cl\xf4ture globale')
+para(
+    u"Le bouton \xab Cl\xf4turer les s\xe9lections de photo — Ouvrir l'expo \xbb en bas de page est l'action finale. "
+    u"Elle cl\xf4ture d\xe9finitivement tous les dossiers en cours et fait basculer l'exposition en mode final, "
+    u"sans retour en arri\xe8re possible. Cette action engage l'ensemble des participants."
+)
+h3(u'4d — Rouvrir un dossier')
+para(u"Si n\xe9cessaire, le responsable peut rouvrir un dossier depuis l'onglet S\xe9lectionner :")
+bullet(u"↩ R\xe9-ouvrir — \xc9valuation : le dossier repasse en phase \xe9valuation/s\xe9lection. Le responsable peut ajuster sa s\xe9lection. Disponible depuis les statuts \xc9valuation et Cl\xf4tur\xe9.")
+bullet(u"↩ R\xe9-ouvrir — Soumission : le membre peut \xe0 nouveau uploader ou supprimer des photos, puis re-soumettre. Disponible depuis tous les statuts avanc\xe9s.")
 page_break()
 
 

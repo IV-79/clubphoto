@@ -495,11 +495,13 @@ export class ExpositionService {
     responsableComiteUid: string | null,
     comiteUids: string[],
     responsableComiteNom?: string,
+    comiteNoms?: string[],
   ): Promise<void> {
     await updateDoc(doc(db, 'expositions', expoId), {
       responsableComiteUid: responsableComiteUid ?? deleteField(),
       responsableComiteNom: responsableComiteNom ?? deleteField(),
       comiteUids,
+      comiteNoms: comiteNoms?.length ? comiteNoms : deleteField(),
     });
   }
 

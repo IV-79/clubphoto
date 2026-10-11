@@ -260,6 +260,19 @@ html[data-theme="dark"] .club-md-content th {
   background: #283593;
 }
 
+/* ── Exposition — tabs & vis-toggle dark mode ───────────────────────────────
+   Dans exposition-detail.css avec encapsulation Emulated, html[data-theme]
+   serait scopé et ne matcherait pas. Doit rester ici.
+   ─────────────────────────────────────────────────────────────────────────── */
+html[data-theme="dark"] .comite-tab-btn.active {
+  color: #90caf9;
+  border-bottom-color: #90caf9;
+}
+html[data-theme="dark"] .btn-vis.vis-active {
+  background: #303f9f;
+  border-color: #303f9f;
+}
+
 /* ── Guide du site — impression toujours en mode clair ──────────────────────
    Même spécificité que html[data-theme="dark"] mais déclaré après → gagne.
    Réinitialise les tokens de couleur et les règles hardcodées du guide.

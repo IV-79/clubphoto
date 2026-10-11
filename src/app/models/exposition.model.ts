@@ -50,6 +50,7 @@ export interface Exposition {
   responsableComiteUid?: string;
   responsableComiteNom?: string;
   comiteUids?: string[];
+  comiteNoms?: string[]; // parallel to comiteUids, same indices
 }
 
 export type ExpoParticipantStatut = 'soumission' | 'evaluation' | 'clos';
