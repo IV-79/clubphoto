@@ -34,6 +34,7 @@ import { map } from 'rxjs/operators';
 import { db, storage } from '../utils/firebase';
 import {
   Sortie,
+  AtelierGroupe,
   SortieInscription,
   SortieImage,
   SortieCommentaire,
@@ -218,10 +219,11 @@ export class SortieService {
       imageEvenementPath?: string;
     },
   ): Promise<void> {
-    const [sortieSnap, photosSnap, inscritsSnap] = await Promise.all([
+    const [sortieSnap, photosSnap, inscritsSnap, groupesSnap] = await Promise.all([
       getDoc(doc(db, 'sorties', sortieId)),
       getDocs(collection(db, `sorties/${sortieId}/photos`)),
       getDocs(collection(db, `sorties/${sortieId}/inscriptions`)),
+      getDocs(collection(db, `sorties/${sortieId}/groupes`)),
     ]);
     const sortieData = sortieSnap.data() as { imageEvenementPath?: string } | undefined;
 
@@ -252,6 +254,7 @@ export class SortieService {
       ...photosSnap.docs.map((p) => deleteDoc(p.ref)),
       ...photoCommSnaps.flatMap((snap) => snap.docs.map((d) => deleteDoc(d.ref))),
       ...inscritsSnap.docs.map((p) => deleteDoc(p.ref)),
+      ...groupesSnap.docs.map((p) => deleteDoc(p.ref)),
     ]);
     await deleteDoc(doc(db, 'sorties', sortieId));
     Object.entries(sizeByUser).forEach(([uid, size]) =>
@@ -305,10 +308,99 @@ export class SortieService {
 
   // --- Photos ---
 
+  // --- Groupes (mode atelier) ---
+
+  getGroupesOnce(sortieId: string): Observable<AtelierGroupe[]> {
+    return from(
+      getDocs(query(collection(db, `sorties/${sortieId}/groupes`), orderBy('ordre', 'asc'))),
+    ).pipe(map((snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }) as AtelierGroupe)));
+  }
+
+  async createGroupe(sortieId: string, nom: string, ordre: number): Promise<string> {
+    const docRef = await addDoc(collection(db, `sorties/${sortieId}/groupes`), {
+      nom,
+      ordre,
+      membres: [],
+      nbMembres: 0,
+      nbPhotos: 0,
+    });
+    return docRef.id;
+  }
+
+  async updateGroupeNom(sortieId: string, groupeId: string, nom: string): Promise<void> {
+    await updateDoc(doc(db, `sorties/${sortieId}/groupes`, groupeId), { nom });
+  }
+
+  async deleteGroupe(sortieId: string, groupeId: string): Promise<void> {
+    await deleteDoc(doc(db, `sorties/${sortieId}/groupes`, groupeId));
+  }
+
+  async rejoindreGroupe(
+    sortieId: string,
+    newGroupeId: string,
+    uid: string,
+    nom: string,
+    ancienGroupeId?: string,
+  ): Promise<void> {
+    const ops: Promise<unknown>[] = [];
+    if (ancienGroupeId && ancienGroupeId !== newGroupeId) {
+      ops.push(
+        updateDoc(doc(db, `sorties/${sortieId}/groupes`, ancienGroupeId), {
+          membres: arrayRemove(uid),
+          nbMembres: increment(-1),
+        }),
+      );
+    }
+    ops.push(
+      updateDoc(doc(db, `sorties/${sortieId}/groupes`, newGroupeId), {
+        membres: arrayUnion(uid),
+        nbMembres: increment(1),
+      }),
+    );
+    if (!ancienGroupeId) {
+      ops.push(
+        setDoc(doc(db, `sorties/${sortieId}/inscriptions`, uid), {
+          uid,
+          nomMembre: nom,
+          dateInscription: new Date().toISOString(),
+        }),
+      );
+      ops.push(updateDoc(doc(db, 'sorties', sortieId), { nbInscrits: increment(1) }));
+    }
+    await Promise.all(ops);
+  }
+
+  async quitterGroupe(sortieId: string, groupeId: string, uid: string): Promise<void> {
+    await Promise.all([
+      updateDoc(doc(db, `sorties/${sortieId}/groupes`, groupeId), {
+        membres: arrayRemove(uid),
+        nbMembres: increment(-1),
+      }),
+      deleteDoc(doc(db, `sorties/${sortieId}/inscriptions`, uid)),
+      updateDoc(doc(db, 'sorties', sortieId), { nbInscrits: increment(-1) }),
+    ]);
+  }
+
+  async fermerSoumissions(sortieId: string): Promise<void> {
+    await updateDoc(doc(db, 'sorties', sortieId), { soumissionsFermees: true });
+  }
+
+  async rouvrirSoumissions(sortieId: string): Promise<void> {
+    await updateDoc(doc(db, 'sorties', sortieId), { soumissionsFermees: deleteField() });
+  }
+
+  async choisirPhotoGroupe(sortieId: string, groupeId: string, photoId: string | null): Promise<void> {
+    await updateDoc(doc(db, `sorties/${sortieId}/groupes`, groupeId), {
+      photoChoisieId: photoId ?? deleteField(),
+    });
+  }
+
+  // --- Photos ---
+
   uploadPhoto(
     file: File,
     sortieId: string,
-    meta: { uploaderUid: string; nomUploader: string; exif?: PhotoExif },
+    meta: { uploaderUid: string; nomUploader: string; exif?: PhotoExif; groupeId?: string },
   ): Observable<SortieUploadState> {
     return new Observable((observer) => {
       const id = generateId();
@@ -345,8 +437,14 @@ export class SortieService {
             thumbnailUrl,
             thumbnailPath: thumbPath,
             ...(hasExif(meta.exif) ? { exif: meta.exif } : {}),
+            ...(meta.groupeId ? { groupeId: meta.groupeId } : {}),
           };
           const docRef = await addDoc(collection(db, `sorties/${sortieId}/photos`), imageData);
+          if (meta.groupeId) {
+            updateDoc(doc(db, `sorties/${sortieId}/groupes`, meta.groupeId), {
+              nbPhotos: increment(1),
+            }).catch(() => {});
+          }
           updateDoc(doc(db, 'users', meta.uploaderUid), {
             'storageUsed.sorties': increment(fileSize),
           }).catch(() => {});
@@ -376,6 +474,11 @@ export class SortieService {
     if (image.fileSize) {
       updateDoc(doc(db, 'users', image.uploaderUid), {
         'storageUsed.sorties': increment(-image.fileSize),
+      }).catch(() => {});
+    }
+    if (image.groupeId) {
+      updateDoc(doc(db, `sorties/${sortieId}/groupes`, image.groupeId), {
+        nbPhotos: increment(-1),
       }).catch(() => {});
     }
     if (currentCoverUrl === image.url) {

@@ -51,6 +51,10 @@ export class SortiesListe {
   // pas sur chaque mise à jour de champ (ex. derniereConnexion après login).
   private readonly loggedIn = computed(() => !!this.profile());
   private readonly uid = computed(() => this.profile()?.uid ?? null);
+  readonly canOrganize = computed(() => {
+    const role = this.profile()?.role;
+    return role === 'admin' || role === 'contributeur';
+  });
 
   private sorties$ = toObservable(this.loggedIn).pipe(
     switchMap((loggedIn) =>

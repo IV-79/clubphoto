@@ -3,6 +3,16 @@ import { PhotoExif } from './photo.model';
 
 export type SortieType = 'sortie_photo' | 'sortie_club' | 'atelier';
 
+export interface AtelierGroupe {
+  id: string;
+  nom: string;
+  ordre: number;
+  membres: string[];  // UIDs
+  nbMembres: number;
+  nbPhotos: number;
+  photoChoisieId?: string; // photo sélectionnée explicitement par le groupe pour présentation
+}
+
 export const SORTIE_TYPE_META: Record<SortieType, { label: string; emoji: string }> = {
   sortie_photo: { label: 'Sortie Photo', emoji: '📸' },
   sortie_club: { label: 'Sortie Club', emoji: '🚶' },
@@ -30,7 +40,10 @@ export interface Sortie {
   imageEvenementPath?: string;
   dateCreation: string;
   visibilite?: 'public' | 'membre';
-  dateFinSoumission?: string; // YYYY-MM-DD — si défini, bloque l'upload après cette date
+  dateFinSoumission?: string;    // YYYY-MM-DD — si défini, bloque l'upload après cette date
+  soumissionsFermees?: boolean;  // fermeture manuelle immédiate
+  modeGroupes?: boolean;         // atelier en mode groupes de travail
+  maxPhotosParGroupe?: number;   // limite de photos par groupe (mode groupes)
 }
 
 export interface SortieInscription {
@@ -51,4 +64,5 @@ export interface SortieImage {
   exif?: PhotoExif;
   thumbnailUrl?: string;
   thumbnailPath?: string;
+  groupeId?: string;  // mode groupes atelier
 }

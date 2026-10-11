@@ -2,6 +2,25 @@
 
 ---
 
+## v1.0.0-beta — En cours (2026-10-11)
+
+### Ateliers — mode groupes de travail (2026-10-11)
+
+- **Mode groupes optionnel** sur les ateliers : l'organisateur active l'option "Mode groupes de travail" à la création ou en édition.
+- **Groupes créés par l'organisateur** (et admins) : nom libre, ordre défini par la création. Renommer ou supprimer un groupe vide.
+- **Inscription via groupe** : en mode groupes, les membres rejoignent directement un groupe (plus de bouton "S'inscrire" séparé). Un membre peut quitter son groupe ou en changer.
+- **Isolation des photos** : pendant la phase active, chaque membre ne voit que les photos de son propre groupe. Après clôture (date limite ou bouton "Fermer les soumissions"), toutes les photos sont visibles par tous.
+- **Max photos par groupe** (optionnel) : limite équitable entre groupes, définie à la création.
+- **Max participants par groupe** (optionnel) : réutilise le champ `maxParticipants` existant.
+- **Photo élue ⭐** : la photo avec le plus de likes dans un groupe est automatiquement mise en avant (badge étoile, bordure dorée). Aucune infrastructure supplémentaire — les likes servent de votes.
+- **Bouton "Fermer les soumissions"** : l'organisateur peut clore les soumissions immédiatement (nouveau champ `soumissionsFermees`). Bouton "Rouvrir" si clôture manuelle.
+- **Accordion groupes** : tous les groupes sont toujours dépliables pour voir la liste des membres. Les photos restent masquées hors de son propre groupe jusqu'à la clôture.
+- **Auto-inscription** : chaque membre s'inscrit lui-même dans le groupe de son choix. L'organisateur/admin peut retirer un membre, mais ne l'ajoute pas manuellement.
+- **Confirmation de changement de groupe** : si un membre est déjà dans un groupe et tente d'en rejoindre un autre, une modale de confirmation lui demande de valider le changement.
+- **Compteur de photos visible** pour tous dès le titre de la ligne (via `nbPhotos` dénormalisé).
+
+---
+
 ## v1.0.0-beta — En cours (2026-10-10)
 
 ### Exposition — notifications workflow (2026-10-10)

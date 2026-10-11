@@ -204,6 +204,28 @@ service cloud.firestore {
       );
     }
 
+    match /sorties/{sortieId}/groupes/{groupeId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn() && (
+        get(/databases/$(database)/documents/sorties/$(sortieId)).data.organisateurUid == request.auth.uid ||
+        isAdmin()
+      );
+      // Organisateur/admin : mise à jour complète (renommage…)
+      // Tout membre connecté : rejoindre/quitter (membres[], nbMembres) ou compteur photos (nbPhotos)
+      // Tout inscrit à la sortie : sélection de la photo à présenter (photoChoisieId)
+      allow update: if isLoggedIn() && (
+        get(/databases/$(database)/documents/sorties/$(sortieId)).data.organisateurUid == request.auth.uid ||
+        isAdmin() ||
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['membres', 'nbMembres', 'nbPhotos']) ||
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['photoChoisieId']) &&
+         exists(/databases/$(database)/documents/sorties/$(sortieId)/inscriptions/$(request.auth.uid)))
+      );
+      allow delete: if isLoggedIn() && (
+        get(/databases/$(database)/documents/sorties/$(sortieId)).data.organisateurUid == request.auth.uid ||
+        isAdmin()
+      );
+    }
+
     match /sorties/{sortieId}/photos/{photoId}/commentaires/{commentaireId} {
       allow read: if isLoggedIn();
       allow create: if isLoggedIn() && request.resource.data.auteurUid == request.auth.uid;

@@ -6,7 +6,7 @@
         Événements et activités organisés par les contributeurs et administrateurs
       </p>
     </div>
-    @if (profile()) {
+    @if (canOrganize()) {
       <div class="create-btns">
         <a routerLink="/membre/sorties/creer" class="btn-create">+ Organiser un événement</a>
       </div>

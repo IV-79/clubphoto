@@ -1,5 +1,5 @@
 /* La home remonte de 122px pour que le hero parte de y=0 derrière le header fixe */
-:host { display: block; margin-top: -122px; }
+:host { display: block; margin-top: -122px; overflow-x: hidden; }
 
 /* ═══════════════════════════════════════
    HERO
@@ -257,6 +257,7 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .act-img {
@@ -388,6 +389,9 @@
   align-items: center;
   color: var(--c-blue);
   text-decoration: none;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 .lieu-lien:hover { text-decoration: underline; }
 

@@ -86,6 +86,9 @@ export class SortieCreer {
     lieu: new FormControl('', { nonNullable: true }),
     maxParticipants: new FormControl<number | null>(null),
     inscriptionObligatoire: new FormControl(true, { nonNullable: true }),
+    // Atelier-specific
+    modeGroupes: new FormControl(false, { nonNullable: true }),
+    maxPhotosParGroupe: new FormControl<number | null>(null),
     // Défi-specific
     theme: new FormControl('', { nonNullable: true }),
     dateDebutSoumission: new FormControl('', { nonNullable: true }),
@@ -106,6 +109,14 @@ export class SortieCreer {
     this.form.get('type')!.valueChanges.pipe(
       startWith(this.form.get('type')!.value),
       map((v) => v === 'oneshot'),
+    ),
+    { initialValue: false },
+  );
+
+  isAtelier = toSignal(
+    this.form.get('type')!.valueChanges.pipe(
+      startWith(this.form.get('type')!.value),
+      map((v) => v === 'atelier'),
     ),
     { initialValue: false },
   );
@@ -269,7 +280,7 @@ export class SortieCreer {
         }
         this.router.navigate(['/galeries/expositions', id]);
       } else {
-        const inscriptionObligatoire = v.inscriptionObligatoire;
+        const inscriptionObligatoire = v.modeGroupes ? false : v.inscriptionObligatoire;
         const id = await this.sortieService.createSortie({
           type: v.type as SortieType,
           titre: v.titre.trim(),
@@ -281,10 +292,17 @@ export class SortieCreer {
           visibilite: v.visibilite,
           ...(v.lieu.trim() ? { lieu: v.lieu.trim() } : {}),
           ...(v.description.trim() ? { description: v.description.trim() } : {}),
-          ...(inscriptionObligatoire && v.maxParticipants != null
+          ...(!v.modeGroupes && inscriptionObligatoire && v.maxParticipants != null
             ? { maxParticipants: v.maxParticipants }
             : {}),
-          ...(v.dateFinSoumission ? { dateFinSoumission: v.dateFinSoumission } : {}),
+          ...(!v.modeGroupes && v.dateFinSoumission ? { dateFinSoumission: v.dateFinSoumission } : {}),
+          ...(v.type === 'atelier' && v.modeGroupes ? { modeGroupes: true } : {}),
+          ...(v.type === 'atelier' && v.modeGroupes && v.maxPhotosParGroupe != null
+            ? { maxPhotosParGroupe: v.maxPhotosParGroupe }
+            : {}),
+          ...(v.type === 'atelier' && v.modeGroupes && v.maxParticipants != null
+            ? { maxParticipants: v.maxParticipants }
+            : {}),
         });
         if (inscriptionObligatoire) {
           await this.sortieService.inscrire(id, profile.uid, nom);
