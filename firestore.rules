@@ -395,5 +395,11 @@ service cloud.firestore {
       );
     }
 
+    // Partenaires (lecture publique, écriture admin)
+    match /partenaires/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
   }
 }

@@ -1,0 +1,29 @@
+<div class="club-page-wrap">
+  <h1 class="club-page-title">Partenaires</h1>
+
+  @if (loading()) {
+    <p class="club-placeholder">Chargement…</p>
+  } @else if (partenaires().length === 0) {
+    <p class="club-placeholder">Aucun partenaire pour l'instant.</p>
+  } @else {
+    <div class="partenaires-grid">
+      @for (p of partenaires(); track p.id) {
+        @if (p.lien) {
+          <a
+            class="partenaire-card"
+            [href]="p.lien"
+            target="_blank"
+            rel="noopener noreferrer"
+            [title]="p.nom"
+          >
+            <img [src]="p.logoUrl" [alt]="p.nom" class="partenaire-logo" loading="lazy" />
+          </a>
+        } @else {
+          <div class="partenaire-card partenaire-card--static" [title]="p.nom">
+            <img [src]="p.logoUrl" [alt]="p.nom" class="partenaire-logo" loading="lazy" />
+          </div>
+        }
+      }
+    </div>
+  }
+</div>

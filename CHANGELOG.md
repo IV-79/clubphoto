@@ -4,6 +4,14 @@
 
 ## v1.0.0-beta — En cours (2026-10-11)
 
+### Partenaires (2026-10-11)
+
+- **Page publique `/le-club/partenaires`** : grille de logos cliquables (ouvre le lien en nouvel onglet si défini) filtrés sur `actif=true`, classés par ordre défini en admin.
+- **Admin `/admin/partenaires`** : CRUD complet — ajout avec upload logo (compressé à 400×200 px), nom, lien optionnel ; toggle actif/inactif ; réordonnancement ↑↓ ; édition inline (remplacement logo optionnel) ; suppression avec confirmation.
+- **Firestore `partenaires/`** : lecture publique, écriture admin uniquement.
+- **Storage `partenaires/`** : lecture publique, écriture admin uniquement.
+- Lien "Partenaires" ajouté dans le menu "Le Club" (desktop + mobile) et dans le menu Admin.
+
 ### Ateliers — mode groupes de travail (2026-10-11)
 
 - **Mode groupes optionnel** sur les ateliers : l'organisateur active l'option "Mode groupes de travail" à la création ou en édition.

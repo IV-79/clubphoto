@@ -1,0 +1,159 @@
+<div class="admin-partenaires">
+  <div class="admin-header">
+    <h1 class="admin-title">Partenaires</h1>
+    @if (!showAddForm()) {
+      <button class="btn-add" (click)="openAddForm()">+ Ajouter un partenaire</button>
+    }
+  </div>
+
+  <!-- Formulaire ajout -->
+  @if (showAddForm()) {
+    <div class="form-card">
+      <h2 class="form-title">Nouveau partenaire</h2>
+      <div class="form-row">
+        <label class="form-label">Nom <span class="required">*</span></label>
+        <input class="form-input" [(ngModel)]="addNom" placeholder="Nom du partenaire" maxlength="80" />
+      </div>
+      <div class="form-row">
+        <label class="form-label">Lien (optionnel)</label>
+        <input class="form-input" [(ngModel)]="addLien" placeholder="https://example.com" type="url" />
+      </div>
+      <div class="form-row">
+        <label class="form-label">Logo <span class="required">*</span></label>
+        <div
+          class="drop-zone"
+          [class.dragging]="addDragging()"
+          [class.has-file]="!!addFile"
+          (click)="addFileInput.click()"
+          (dragover)="onDragOver($event, 'add')"
+          (dragleave)="onDragLeave($event, 'add')"
+          (drop)="onDrop($event, 'add')"
+        >
+          <span class="drop-icon">🖼️</span>
+          @if (addFile) {
+            <span class="drop-filename">{{ addFile.name }}</span>
+            <span class="drop-hint">Cliquer ou déposer pour remplacer</span>
+          } @else {
+            <span class="drop-label">Glisser-déposer ou <span class="drop-browse">parcourir</span></span>
+            <span class="drop-hint">PNG, JPG, WebP — redimensionné à 400×200 px</span>
+          }
+          <input #addFileInput type="file" accept="image/*" hidden (change)="onAddFileSelected($event)" />
+        </div>
+        @if (addPreview()) {
+          <img [src]="addPreview()" class="logo-preview" alt="aperçu" />
+        }
+      </div>
+      @if (addUploading()) {
+        <div class="progress-wrap">
+          <div class="progress-bar" [style.width.%]="addProgress()"></div>
+        </div>
+        <p class="upload-hint">Upload en cours… {{ addProgress() }}%</p>
+      }
+      <div class="form-actions">
+        <button class="btn-save" (click)="ajouter()" [disabled]="!addNom.trim() || !addFile || addUploading()">
+          {{ addUploading() ? 'Enregistrement…' : 'Ajouter' }}
+        </button>
+        <button class="btn-cancel" (click)="cancelAdd()" [disabled]="addUploading()">Annuler</button>
+      </div>
+    </div>
+  }
+
+  <!-- Liste -->
+  @if (loading()) {
+    <p class="placeholder">Chargement…</p>
+  } @else if (partenaires().length === 0) {
+    <p class="placeholder">Aucun partenaire. Ajoutez le premier !</p>
+  } @else {
+    <div class="partenaires-list">
+      @for (p of partenaires(); track p.id; let i = $index) {
+        <div class="partenaire-item" [class.is-editing]="editingId() === p.id" [class.inactive]="!p.actif">
+          <!-- Ligne principale -->
+          <div class="item-main">
+            <div class="item-logo-wrap">
+              <img [src]="p.logoUrl" [alt]="p.nom" class="item-logo" />
+            </div>
+            <div class="item-info">
+              <span class="item-nom">{{ p.nom }}</span>
+              @if (p.lien) {
+                <a class="item-lien" [href]="p.lien" target="_blank" rel="noopener">{{ p.lien }}</a>
+              } @else {
+                <span class="item-lien-absent">Aucun lien</span>
+              }
+            </div>
+            <div class="item-actions">
+              <!-- Actif toggle -->
+              <button
+                class="btn-toggle"
+                [class.is-active]="p.actif"
+                (click)="toggleActif(p)"
+                [title]="p.actif ? 'Désactiver' : 'Activer'"
+              >{{ p.actif ? '✓ Actif' : '✗ Inactif' }}</button>
+              <!-- Ordre -->
+              <button class="btn-order" [disabled]="i === 0" (click)="monter(i)" title="Monter">↑</button>
+              <button class="btn-order" [disabled]="i === partenaires().length - 1" (click)="descendre(i)" title="Descendre">↓</button>
+              <!-- Édition -->
+              @if (editingId() !== p.id) {
+                <button class="btn-edit" (click)="startEdit(p)">✏️</button>
+              } @else {
+                <button class="btn-cancel-sm" (click)="cancelEdit()">✕</button>
+              }
+              <!-- Suppression -->
+              <button class="btn-del" (click)="supprimer(p)" title="Supprimer">🗑</button>
+            </div>
+          </div>
+
+          <!-- Formulaire édition inline -->
+          @if (editingId() === p.id) {
+            <div class="edit-form">
+              <div class="form-row">
+                <label class="form-label">Nom <span class="required">*</span></label>
+                <input class="form-input" [(ngModel)]="editNom" placeholder="Nom du partenaire" maxlength="80" />
+              </div>
+              <div class="form-row">
+                <label class="form-label">Lien (optionnel)</label>
+                <input class="form-input" [(ngModel)]="editLien" placeholder="https://example.com" type="url" />
+              </div>
+              <div class="form-row">
+                <label class="form-label">Remplacer le logo (optionnel)</label>
+                <div
+                  class="drop-zone"
+                  [class.dragging]="editDragging()"
+                  [class.has-file]="!!editFile"
+                  (click)="editFileInput.click()"
+                  (dragover)="onDragOver($event, 'edit')"
+                  (dragleave)="onDragLeave($event, 'edit')"
+                  (drop)="onDrop($event, 'edit')"
+                >
+                  <span class="drop-icon">🖼️</span>
+                  @if (editFile) {
+                    <span class="drop-filename">{{ editFile.name }}</span>
+                    <span class="drop-hint">Cliquer ou déposer pour remplacer</span>
+                  } @else {
+                    <span class="drop-label">Glisser-déposer ou <span class="drop-browse">parcourir</span></span>
+                    <span class="drop-hint">PNG, JPG, WebP — redimensionné à 400×200 px</span>
+                  }
+                  <input #editFileInput type="file" accept="image/*" hidden (change)="onEditFileSelected($event)" />
+                </div>
+                @if (editPreview()) {
+                  <img [src]="editPreview()" class="logo-preview" alt="aperçu" />
+                }
+              </div>
+              @if (editUploading()) {
+                <div class="progress-wrap">
+                  <div class="progress-bar" [style.width.%]="editProgress()"></div>
+                </div>
+                <p class="upload-hint">Upload en cours… {{ editProgress() }}%</p>
+              }
+              <div class="form-actions">
+                <button class="btn-save" (click)="sauvegarder(p)" [disabled]="!editNom.trim() || editUploading()">
+                  {{ editUploading() ? 'Enregistrement…' : 'Sauvegarder' }}
+                </button>
+                <button class="btn-cancel" (click)="cancelEdit()" [disabled]="editUploading()">Annuler</button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

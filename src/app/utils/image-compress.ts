@@ -15,6 +15,7 @@ export const COMPRESS_AVATAR: CompressOptions = { maxWidth: 512, maxHeight: 512 
 export const COMPRESS_BANDEAU: CompressOptions = { maxWidth: 1920, maxHeight: 480 }; // 1920×480 — bandeau membre
 export const COMPRESS_HERO: CompressOptions = { maxLong: 1920 }; // 1920px — image hero config site
 export const COMPRESS_THUMB: CompressOptions = { maxLong: 600 }; //  600px — miniature grilles de cartes
+export const COMPRESS_LOGO: CompressOptions = { maxWidth: 400, maxHeight: 200, quality: 0.92 }; // logo partenaire
 
 // ── Core ─────────────────────────────────────────────────────────────────────
 export function compressImage(

@@ -13,6 +13,8 @@ import { MemberLayout } from './layouts/member-layout/member-layout';
 import { Home } from './pages/home/home';
 import { Actualites } from './pages/actualites/actualites';
 import { LeClub, Histoire, Bureau, Adhesion } from './pages/le-club/le-club';
+import { Partenaires } from './pages/le-club/partenaires/partenaires';
+import { AdminPartenaires } from './pages/admin-dashboard/partenaires/admin-partenaires';
 import { MentionsLegales } from './pages/mentions-legales/mentions-legales';
 import { CGU } from './pages/mentions-legales/cgu/cgu';
 import { Confidentialite } from './pages/mentions-legales/confidentialite/confidentialite';
@@ -75,6 +77,12 @@ export const routes: Routes = [
             title: 'Adhésion',
             data: { description: "Rejoignez le Club Photo Tain-Tournon. Tarifs et modalités d'inscription." },
           },
+          {
+            path: 'partenaires',
+            component: Partenaires,
+            title: 'Partenaires',
+            data: { description: 'Les partenaires et sponsors du Club Photo Tain-Tournon.' },
+          },
           { path: '', redirectTo: 'histoire', pathMatch: 'full' },
         ],
       },
@@ -128,6 +136,7 @@ export const routes: Routes = [
           { path: 'config', component: AdminConfig },
           { path: 'dossiers', component: DocumentDossiers },
           { path: 'pages', component: AdminPages },
+          { path: 'partenaires', component: AdminPartenaires },
           { path: 'maintenance', component: Maintenance },
         ],
       },

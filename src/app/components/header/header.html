@@ -40,6 +40,9 @@
               <a routerLink="/le-club/adhesion" class="nav-panel-item" (click)="openMenu.set(null)"
                 >Adhésion</a
               >
+              <a routerLink="/le-club/partenaires" class="nav-panel-item" (click)="openMenu.set(null)"
+                >Partenaires</a
+              >
             </div>
           }
         </li>
@@ -245,6 +248,9 @@
                 <a routerLink="/admin/config" class="nav-panel-item" (click)="openMenu.set(null)">
                   <mat-icon>settings</mat-icon>Configuration du site
                 </a>
+                <a routerLink="/admin/partenaires" class="nav-panel-item" (click)="openMenu.set(null)">
+                  <mat-icon>handshake</mat-icon>Partenaires
+                </a>
                 <div class="nav-panel-divider"></div>
                 <button class="nav-panel-item nav-panel-btn" (click)="logout(); openMenu.set(null)">
                   <mat-icon>logout</mat-icon>Déconnexion
@@ -352,6 +358,7 @@
               <li><a routerLink="/le-club/histoire" (click)="closeMobileMenu()">Histoire</a></li>
               <li><a routerLink="/le-club/bureau" (click)="closeMobileMenu()">Le Bureau</a></li>
               <li><a routerLink="/le-club/adhesion" (click)="closeMobileMenu()">Adhésion</a></li>
+              <li><a routerLink="/le-club/partenaires" (click)="closeMobileMenu()">Partenaires</a></li>
             </ul>
           }
         </li>
@@ -466,6 +473,9 @@
                   <a routerLink="/admin/config" (click)="closeMobileMenu()"
                     >Configuration du site</a
                   >
+                </li>
+                <li>
+                  <a routerLink="/admin/partenaires" (click)="closeMobileMenu()">Partenaires</a>
                 </li>
               </ul>
             }
