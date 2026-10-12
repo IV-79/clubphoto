@@ -134,7 +134,8 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
   });
 
   // Shared one-time read — both recentPhotos and membres derive from it without double read
-  private membresOnce$ = this.authService.getAllMembersOnce().pipe(shareReplay(1));
+  // Server-side filter on visibilite === 'public' avoids loading all user docs
+  private membresOnce$ = this.authService.getPublicMembresOnce().pipe(shareReplay(1));
 
   recentPhotos = toSignal(
     combineLatest([
@@ -143,7 +144,7 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
         map(
           (members) =>
             new Set(
-              members.filter((m) => m.visibilite === 'public' && !m.isSuspended).map((m) => m.uid),
+              members.filter((m) => !m.isSuspended).map((m) => m.uid),
             ),
         ),
       ),
@@ -164,7 +165,7 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
     this.membresOnce$.pipe(
       map((list) => {
         const filtered = list.filter(
-          (m) => m.visibilite === 'public' && !m.isSuspended && m.photoProfilUrl,
+          (m) => !m.isSuspended && m.photoProfilUrl,
         );
         for (let i = filtered.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));

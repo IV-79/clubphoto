@@ -117,6 +117,12 @@ export class AuthService {
     );
   }
 
+  getPublicMembresOnce(): Observable<UserProfile[]> {
+    return from(getDocs(query(collection(db, 'users'), where('visibilite', '==', 'public')))).pipe(
+      map((snap) => snap.docs.map((d) => ({ uid: d.id, ...d.data() }) as UserProfile)),
+    );
+  }
+
   getMemberProfile(uid: string): Observable<UserProfile | null> {
     return from(getDoc(doc(db, 'users', uid))).pipe(
       map((snap) => (snap.exists() ? (snap.data() as UserProfile) : null)),

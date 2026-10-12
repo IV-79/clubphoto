@@ -8,8 +8,8 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { toSignal, toObservable } from '@angular/core/rxjs-interop';
-import { switchMap, of, map } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { firstValueFrom } from 'rxjs';
 import { QueryDocumentSnapshot, DocumentData } from 'firebase/firestore';
 import { SortieService } from '../../../services/sortie.service';
 import { AuthService } from '../../../services/auth.service';
@@ -21,6 +21,7 @@ import { Sortie, SORTIE_TYPE_META, SortieType } from '../../../models/sortie.mod
 import { OneShot } from '../../../models/oneshot.model';
 import { Defi } from '../../../models/defi.model';
 import { Exposition } from '../../../models/exposition.model';
+import { UserProfile } from '../../../models/user.model';
 import { DatePickerComponent } from '../../../components/date-picker/date-picker';
 import { ActiviteCard, ActiviteItem } from '../../../components/activite-card/activite-card';
 
@@ -47,122 +48,123 @@ export class SortiesListe {
 
   profile = toSignal(this.authService.currentUserProfile$);
 
-  // Computed stables sur valeurs primitives — ne se propagent que si login/uid change réellement,
-  // pas sur chaque mise à jour de champ (ex. derniereConnexion après login).
-  private readonly loggedIn = computed(() => !!this.profile());
-  private readonly uid = computed(() => this.profile()?.uid ?? null);
   readonly canOrganize = computed(() => {
     const role = this.profile()?.role;
     return role === 'admin' || role === 'contributeur';
   });
 
-  private sorties$ = toObservable(this.loggedIn).pipe(
-    switchMap((loggedIn) =>
-      this.sortieService
-        .getSortiesActivesOnce()
-        .pipe(
-          map((list) =>
-            loggedIn ? list : list.filter((s) => (s.visibilite ?? 'public') === 'public'),
-          ),
-        ),
-    ),
-  );
-  sorties = toSignal(this.sorties$, { initialValue: [] as Sortie[] });
+  private loaded = signal(false);
 
-  private readonly TERM_PAGE_SIZE = 4;
-  private readonly TERM_STEP = 4;
+  // ── Data signals ────────────────────────────────────────────────
+  sorties = signal<Sortie[]>([]);
   sortiesTerminees = signal<Sortie[]>([]);
+  oneshots = signal<OneShot[]>([]);
+  defis = signal<Defi[]>([]);
+  expositions = signal<Exposition[]>([]);
+  mesSorties = signal<Sortie[]>([]);
+  mesOneShots = signal<OneShot[]>([]);
+  mesDefis = signal<Defi[]>([]);
+  mesSortiesInscritesIds = signal<string[]>([]);
+  mesOneShotsInscritsIds = signal<string[]>([]);
+  mesDefisInscritsIds = signal<string[]>([]);
+
   private termCursor = signal<QueryDocumentSnapshot<DocumentData> | null>(null);
   private hasMoreFirestore = signal(false);
   private visibleTermCount = signal(4);
 
-  private oneshots$ = toObservable(this.loggedIn).pipe(
-    switchMap((loggedIn) =>
-      this.oneShotService
-        .getPublicOneShotsOnce()
-        .pipe(
-          map((list) =>
-            loggedIn ? list : list.filter((o) => (o.visibilite ?? 'public') === 'public'),
-          ),
-        ),
-    ),
-  );
-  oneshots = toSignal(this.oneshots$, { initialValue: [] as OneShot[] });
-
-  private defis$ = toObservable(this.loggedIn).pipe(
-    switchMap((loggedIn) =>
-      loggedIn ? this.defiService.getDefisOnce() : this.defiService.getPublicDefisOnce(),
-    ),
-  );
-  defis = toSignal(this.defis$, { initialValue: [] as Defi[] });
-
-  private expositions$ = toObservable(this.loggedIn).pipe(
-    switchMap((loggedIn) =>
-      loggedIn
-        ? this.expoService.getExpositionsOnce()
-        : this.expoService.getPublicExpositionsOnce(),
-    ),
-  );
-  expositions = toSignal(this.expositions$, { initialValue: [] as Exposition[] });
-
-  private mesSorties$ = toObservable(this.uid).pipe(
-    switchMap((uid) => (uid ? this.sortieService.getMesSortiesOnce(uid) : of([] as Sortie[]))),
-  );
-  mesSorties = toSignal(this.mesSorties$, { initialValue: [] as Sortie[] });
-
-  private mesOneShots$ = toObservable(this.uid).pipe(
-    switchMap((uid) => (uid ? this.oneShotService.getMyOneShotsOnce(uid) : of([] as OneShot[]))),
-  );
-  mesOneShots = toSignal(this.mesOneShots$, { initialValue: [] as OneShot[] });
-
-  private mesDefis$ = toObservable(this.uid).pipe(
-    switchMap((uid) => (uid ? this.defiService.getMesDefisOnce(uid) : of([] as Defi[]))),
-  );
-  mesDefis = toSignal(this.mesDefis$, { initialValue: [] as Defi[] });
-
-  private mesSortiesInscritesIds$ = toObservable(this.uid).pipe(
-    switchMap((uid) =>
-      uid ? this.sortieService.getMesSortiesInscritesIds(uid) : of([] as string[]),
-    ),
-  );
-  mesSortiesInscritesIds = toSignal(this.mesSortiesInscritesIds$, { initialValue: [] as string[] });
-
-  private mesOneShotsInscritsIds$ = toObservable(this.uid).pipe(
-    switchMap((uid) =>
-      uid ? this.oneShotService.getMesOneShotsInscritsIds(uid) : of([] as string[]),
-    ),
-  );
-  mesOneShotsInscritsIds = toSignal(this.mesOneShotsInscritsIds$, { initialValue: [] as string[] });
-
-  private mesDefisInscritsIds$ = toObservable(this.uid).pipe(
-    switchMap((uid) => (uid ? this.defiService.getMesDefisInscritsIds(uid) : of([] as string[]))),
-  );
-  mesDefisInscritsIds = toSignal(this.mesDefisInscritsIds$, { initialValue: [] as string[] });
-
-  mesExpositions = computed(() =>
-    this.expositions().filter((e) => e.organisateurUid === this.uid()),
-  );
-
-  hasOrganisees = computed(
-    () =>
-      this.mesSorties().length > 0 ||
-      this.mesOneShots().length > 0 ||
-      this.mesDefis().length > 0 ||
-      this.mesExpositions().length > 0,
-  );
+  private readonly TERM_PAGE_SIZE = 4;
+  private readonly TERM_STEP = 4;
 
   constructor() {
     effect(() => {
-      const loggedIn = this.loggedIn();
-      this.sortiesTerminees.set([]);
-      this.termCursor.set(null);
-      this.hasMoreFirestore.set(false);
-      this.visibleTermCount.set(this.TERM_STEP);
-      this.fetchTerminees(loggedIn);
+      const p = this.profile();
+      if (p === undefined) return;
+      if (this.loaded()) return;
+      untracked(() => {
+        this.loaded.set(true);
+        this.charger(p);
+      });
     });
   }
 
-  private fetchTerminees(loggedIn = this.loggedIn()): void {
+  private async charger(profile: UserProfile | null) {
+    const uid = profile?.uid ?? null;
+    const loggedIn = !!profile;
+
+    const loads: Promise<void>[] = [];
+
+    loads.push(
+      firstValueFrom(this.sortieService.getSortiesActivesOnce())
+        .then((list) =>
+          this.sorties.set(
+            loggedIn ? list : list.filter((s) => (s.visibilite ?? 'public') === 'public'),
+          ),
+        )
+        .catch(() => {}),
+    );
+
+    loads.push(
+      firstValueFrom(this.oneShotService.getPublicOneShotsOnce())
+        .then((list) =>
+          this.oneshots.set(
+            loggedIn ? list : list.filter((o) => (o.visibilite ?? 'public') === 'public'),
+          ),
+        )
+        .catch(() => {}),
+    );
+
+    loads.push(
+      firstValueFrom(loggedIn ? this.defiService.getDefisOnce() : this.defiService.getPublicDefisOnce())
+        .then((list) => this.defis.set(list))
+        .catch(() => {}),
+    );
+
+    loads.push(
+      firstValueFrom(
+        loggedIn ? this.expoService.getExpositionsOnce() : this.expoService.getPublicExpositionsOnce(),
+      )
+        .then((list) => this.expositions.set(list))
+        .catch(() => {}),
+    );
+
+    if (uid) {
+      loads.push(
+        firstValueFrom(this.sortieService.getMesSortiesOnce(uid))
+          .then((list) => this.mesSorties.set(list))
+          .catch(() => {}),
+      );
+      loads.push(
+        firstValueFrom(this.oneShotService.getMyOneShotsOnce(uid))
+          .then((list) => this.mesOneShots.set(list))
+          .catch(() => {}),
+      );
+      loads.push(
+        firstValueFrom(this.defiService.getMesDefisOnce(uid))
+          .then((list) => this.mesDefis.set(list))
+          .catch(() => {}),
+      );
+      loads.push(
+        firstValueFrom(this.sortieService.getMesSortiesInscritesIds(uid))
+          .then((ids) => this.mesSortiesInscritesIds.set(ids))
+          .catch(() => {}),
+      );
+      loads.push(
+        firstValueFrom(this.oneShotService.getMesOneShotsInscritsIds(uid))
+          .then((ids) => this.mesOneShotsInscritsIds.set(ids))
+          .catch(() => {}),
+      );
+      loads.push(
+        firstValueFrom(this.defiService.getMesDefisInscritsIds(uid))
+          .then((ids) => this.mesDefisInscritsIds.set(ids))
+          .catch(() => {}),
+      );
+    }
+
+    this.fetchTerminees(loggedIn);
+    await Promise.all(loads);
+  }
+
+  private fetchTerminees(loggedIn = !!this.profile()): void {
     const cursor = untracked(() => this.termCursor());
     this.sortieService
       .getSortiesTermineesPage(cursor, this.TERM_PAGE_SIZE)
@@ -179,7 +181,6 @@ export class SortiesListe {
   loadMoreTerminees(): void {
     const next = this.visibleTermCount() + this.TERM_STEP;
     this.visibleTermCount.set(next);
-    // Fetch Firestore si on arrive en fin de sorties chargées
     if (next >= this.sortiesTerminees().length && this.hasMoreFirestore()) {
       this.fetchTerminees();
     }
@@ -220,13 +221,23 @@ export class SortiesListe {
     this.filterParticipe.set(false);
   }
 
+  mesExpositions = computed(() =>
+    this.expositions().filter((e) => e.organisateurUid === this.profile()?.uid),
+  );
+
+  hasOrganisees = computed(
+    () =>
+      this.mesSorties().length > 0 ||
+      this.mesOneShots().length > 0 ||
+      this.mesDefis().length > 0 ||
+      this.mesExpositions().length > 0,
+  );
+
   enCours = computed((): ActiviteItem[] => {
-    // Sorties : date ≤ today+7 ET (dateFinSoumission ?? date) ≥ today-7
     const sorties: ActiviteItem[] = this.sorties()
       .filter((s) => !this.isAfterWindow(s.date) && !this.isBeforeWindow(s.dateFinSoumission ?? s.date))
       .map((data) => ({ kind: 'sortie' as const, data }));
 
-    // OneShots : actifs (inscription/fermeture/vote) OU en résultats depuis ≤ 7 jours
     const isOneShotEnCours = (o: OneShot) =>
       ['inscription', 'fermeture_inscriptions', 'vote'].includes(o.statut) ||
       (o.statut === 'resultats' &&
@@ -242,7 +253,6 @@ export class SortiesListe {
       data,
     }));
 
-    // Défis : overlap [dateDebutSoumission, dateCloturVotes] ∩ [today-7, today+7]
     const defis: ActiviteItem[] = this.defis()
       .filter(
         (d) =>
@@ -250,7 +260,6 @@ export class SortiesListe {
       )
       .map((data) => ({ kind: 'defi' as const, data }));
 
-    // Expositions : ni à venir (dateDebutIdeation futur) ni terminées (dateExposition > 7j passée)
     const expos: ActiviteItem[] = this.expositions()
       .filter((e) => !this.isExpoAVenir(e) && !this.isExpoPassee(e))
       .map((data) => ({ kind: 'exposition' as const, data }));
@@ -276,7 +285,6 @@ export class SortiesListe {
       .filter((d) => this.isAfterWindow(d.dateDebutSoumission))
       .map((data) => ({ kind: 'defi' as const, data }));
 
-    // Expositions dont l'idéation n'a pas encore commencé
     const expos: ActiviteItem[] = this.expositions()
       .filter((e) => this.isExpoAVenir(e))
       .map((data) => ({ kind: 'exposition' as const, data }));
@@ -287,7 +295,6 @@ export class SortiesListe {
   });
 
   passees = computed((): ActiviteItem[] => {
-    // Sorties : exclure les events déjà en "en ce moment" (dateFinSoumission encore active)
     const enCoursIds = new Set(
       this.sorties()
         .filter((s) => !this.isAfterWindow(s.date) && !this.isBeforeWindow(s.dateFinSoumission ?? s.date))
@@ -297,7 +304,6 @@ export class SortiesListe {
       .filter((s) => !enCoursIds.has(s.id))
       .map((data) => ({ kind: 'sortie' as const, data }));
 
-    // OneShots : resultats ET grace period expirée (pas de datePassageResultats = ancien doc, traité comme passé)
     const oneshots: ActiviteItem[] = this.oneshots()
       .filter(
         (o) =>
@@ -306,12 +312,10 @@ export class SortiesListe {
       )
       .map((data) => ({ kind: 'oneshot' as const, data }));
 
-    // Défis : dateCloturVotes < today-7
     const defis: ActiviteItem[] = this.defis()
       .filter((d) => this.isBeforeWindow(d.dateCloturVotes))
       .map((data) => ({ kind: 'defi' as const, data }));
 
-    // Expositions dont la date d'exposition est passée (> 7 jours)
     const expos: ActiviteItem[] = this.expositions()
       .filter((e) => this.isExpoPassee(e))
       .map((data) => ({ kind: 'exposition' as const, data }));
@@ -369,7 +373,7 @@ export class SortiesListe {
               ? inscritsOneShotIds.has(item.data.id!)
               : item.kind === 'defi'
                 ? inscritsDefiIds.has(item.data.id!)
-                : false; // les expositions n'ont pas d'inscriptions
+                : false;
         if (!((organisees && isOrganisateur) || (participe && isInscrit))) return false;
       }
 

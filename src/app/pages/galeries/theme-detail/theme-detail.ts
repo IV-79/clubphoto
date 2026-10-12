@@ -1,7 +1,15 @@
-import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  inject,
+  signal,
+  computed,
+  effect,
+  untracked,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { toSignal, toObservable } from '@angular/core/rxjs-interop';
-import { switchMap, of, combineLatest } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { firstValueFrom } from 'rxjs';
 import { ThemeService } from '../../../services/theme.service';
 import { AuthService } from '../../../services/auth.service';
 import { LoginModalService } from '../../../services/login-modal.service';
@@ -18,10 +26,12 @@ import {
   getThemeDates,
   THEME_STATUT_LABELS,
 } from '../../../models/theme.model';
+import { UserProfile } from '../../../models/user.model';
 import { LightboxPhoto, PhotoLightboxCallbacks } from '../../../models/commentaire.model';
 import { PhotoLightbox } from '../../../components/photo-lightbox/photo-lightbox';
 import { VoteRankingComponent, RankingItem } from '../../../components/vote-ranking/vote-ranking';
 import { ImgRetryDirective } from '../../../directives/img-retry.directive';
+import { of } from 'rxjs';
 
 @Component({
   selector: 'app-theme-detail',
@@ -41,15 +51,61 @@ export class ThemeDetail {
 
   readonly id = this.route.snapshot.paramMap.get('id')!;
 
-  private refreshTick = signal(0);
-  private refresh() {
-    this.refreshTick.update((n) => n + 1);
+  profile = toSignal(this.authService.currentUserProfile$);
+
+  private loaded = signal(false);
+
+  // ── Data signals ────────────────────────────────────────────────
+  theme = signal<ThemeMensuel | null>(null);
+  soumissions = signal<ThemeSoumission[]>([]);
+  mesVotes = signal<ThemeVote[]>([]);
+  tousVotes = signal<ThemeVote[]>([]);
+
+  constructor() {
+    effect(() => {
+      const p = this.profile();
+      if (p === undefined) return;
+      if (this.loaded()) return;
+      untracked(() => {
+        this.loaded.set(true);
+        this.charger(p);
+      });
+    });
   }
 
-  // One-shot — theme metadata changes rarely during a session
-  theme = toSignal(this.themeService.getThemeOnce(this.id));
-  profile = toSignal(this.authService.currentUserProfile$);
-  private readonly uid = computed(() => this.profile()?.uid ?? null);
+  private async charger(profile: UserProfile | null) {
+    const uid = profile?.uid ?? null;
+    const t = await firstValueFrom(this.themeService.getThemeOnce(this.id));
+    this.theme.set(t ?? null);
+    if (!t) return;
+
+    const s = computeThemeStatut(t);
+    const loads: Promise<void>[] = [];
+
+    loads.push(
+      firstValueFrom(this.themeService.getSoumissionsOnce(this.id))
+        .then((ss) => this.soumissions.set(ss))
+        .catch(() => {}),
+    );
+
+    if (uid && (s === 'vote' || s === 'resultats')) {
+      loads.push(
+        firstValueFrom(this.themeService.getMesVotesOnce(this.id, uid))
+          .then((mv) => this.mesVotes.set(mv))
+          .catch(() => {}),
+      );
+    }
+
+    if (s === 'resultats') {
+      loads.push(
+        firstValueFrom(this.themeService.getTousVotesOnce(this.id))
+          .then((tv) => this.tousVotes.set(tv))
+          .catch(() => {}),
+      );
+    }
+
+    await Promise.all(loads);
+  }
 
   statut = computed(() => {
     const t = this.theme();
@@ -59,14 +115,6 @@ export class ThemeDetail {
   authReady = computed(() => this.profile() !== undefined);
   isLoggedIn = computed(() => !!this.profile());
   isAdmin = computed(() => this.profile()?.role === 'admin');
-
-  // One-shot, refreshed after every mutation
-  soumissions = toSignal(
-    toObservable(this.refreshTick).pipe(
-      switchMap(() => this.themeService.getSoumissionsOnce(this.id)),
-    ),
-    { initialValue: [] as ThemeSoumission[] },
-  );
 
   mesSoumissions = computed(() =>
     this.soumissions().filter((s) => s.membreUid === this.profile()?.uid),
@@ -79,28 +127,8 @@ export class ThemeDetail {
       this.mesSoumissions().length < (this.theme()?.maxPhotos ?? 1),
   );
 
-  // One-shot, refreshed after vote/unvote or any mutation that touches soumissions
-  mesVotes = toSignal(
-    combineLatest([toObservable(this.uid), toObservable(this.refreshTick)]).pipe(
-      switchMap(([uid]) =>
-        uid ? this.themeService.getMesVotesOnce(this.id, uid) : of([] as ThemeVote[]),
-      ),
-    ),
-    { initialValue: [] as ThemeVote[] },
-  );
-
   mesVotesIds = computed(() => new Set(this.mesVotes().map((v) => v.soumissionId)));
   nbVotesRestants = computed(() => (this.theme()?.maxVotes ?? 3) - this.mesVotes().length);
-
-  // One-shot, loaded once when statut reaches 'resultats' (results never change after close)
-  tousVotes = toSignal(
-    toObservable(this.statut).pipe(
-      switchMap((s) =>
-        s === 'resultats' ? this.themeService.getTousVotesOnce(this.id) : of([] as ThemeVote[]),
-      ),
-    ),
-    { initialValue: [] as ThemeVote[] },
-  );
 
   votesParSoumission = computed((): Record<string, number | undefined> => {
     const counts: Record<string, number | undefined> = {};
@@ -134,7 +162,7 @@ export class ThemeDetail {
     return THEME_STATUT_LABELS[computeThemeStatut(theme)];
   }
 
-  // Lightbox
+  // ── Lightbox ──────────────────────────────────────────────────
   lightboxIndex = signal<number | null>(null);
 
   lightboxSoumissions = computed(() =>
@@ -161,7 +189,18 @@ export class ThemeDetail {
     return {
       toggleLike: async (soumId, liked) => {
         await this.themeService.toggleLikePhoto(themeId, soumId, uid, liked);
-        this.refresh();
+        this.soumissions.update((ss) =>
+          ss.map((s) =>
+            s.id === soumId
+              ? {
+                  ...s,
+                  likes: liked
+                    ? (s.likes ?? []).filter((l) => l !== uid)
+                    : [...(s.likes ?? []), uid],
+                }
+              : s,
+          ),
+        );
       },
       getComments: (soumId) => this.themeService.getCommentaires(themeId, soumId),
       addComment: (soumId, texte, auteurUid, nomAuteur) =>
@@ -190,7 +229,7 @@ export class ThemeDetail {
           soum.fileSize,
           soum.thumbnailPath,
         );
-        this.refresh();
+        this.soumissions.update((ss) => ss.filter((s) => s.id !== soum.id));
         const actor = this.profile();
         if (actor && soum.membreUid !== actor.uid) {
           const titre = lbPhoto.titre ? ` « ${lbPhoto.titre} »` : '';
@@ -222,8 +261,20 @@ export class ThemeDetail {
     event.stopPropagation();
     const uid = this.profile()?.uid;
     if (!uid) return;
-    await this.themeService.toggleLikePhoto(this.id, soum.id, uid, this.isLiked(soum));
-    this.refresh();
+    const liked = this.isLiked(soum);
+    await this.themeService.toggleLikePhoto(this.id, soum.id, uid, liked);
+    this.soumissions.update((ss) =>
+      ss.map((s) =>
+        s.id === soum.id
+          ? {
+              ...s,
+              likes: liked
+                ? (s.likes ?? []).filter((l) => l !== uid)
+                : [...(s.likes ?? []), uid],
+            }
+          : s,
+      ),
+    );
   }
 
   openLightbox(soum: ThemeSoumission, $event?: MouseEvent) {
@@ -236,7 +287,7 @@ export class ThemeDetail {
     this.lightboxIndex.set(null);
   }
 
-  // Upload
+  // ── Upload ────────────────────────────────────────────────────
   uploading = signal(false);
   uploadProgress = signal(0);
   dragOver = signal(false);
@@ -280,7 +331,10 @@ export class ThemeDetail {
         (pct) => this.uploadProgress.set(pct),
       );
       this.uploadProgress.set(0);
-      this.refresh();
+      // background sync — uploadSoumission ne retourne pas la soumission créée
+      firstValueFrom(this.themeService.getSoumissionsOnce(this.id))
+        .then((ss) => this.soumissions.set(ss))
+        .catch(() => {});
     } catch {
       this.uploadError.set("Erreur lors de l'envoi. Réessayez.");
     } finally {
@@ -299,10 +353,10 @@ export class ThemeDetail {
       soum.fileSize,
       soum.thumbnailPath,
     );
-    this.refresh();
+    this.soumissions.update((ss) => ss.filter((s) => s.id !== soum.id));
   }
 
-  // Vote
+  // ── Vote ──────────────────────────────────────────────────────
   voting = signal(false);
 
   async toggleVote(soumissionId: string) {
@@ -312,11 +366,15 @@ export class ThemeDetail {
     try {
       if (this.mesVotesIds().has(soumissionId)) {
         await this.themeService.deVoter(this.id, profile.uid, soumissionId);
+        this.mesVotes.update((mv) => mv.filter((v) => v.soumissionId !== soumissionId));
       } else {
         if (this.nbVotesRestants() <= 0) return;
         await this.themeService.voter(this.id, profile.uid, soumissionId);
+        this.mesVotes.update((mv) => [
+          ...mv,
+          { voterUid: profile.uid, soumissionId, votedAt: new Date().toISOString() },
+        ]);
       }
-      this.refresh();
     } finally {
       this.voting.set(false);
     }

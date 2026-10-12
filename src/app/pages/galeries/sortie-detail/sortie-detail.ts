@@ -11,8 +11,8 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
-import { toSignal, toObservable } from '@angular/core/rxjs-interop';
-import { switchMap, of } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { firstValueFrom } from 'rxjs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -26,6 +26,7 @@ import { NotificationService } from '../../../services/notification.service';
 import {
   Sortie,
   AtelierGroupe,
+  SortieInscription,
   SortieImage,
   SortieType,
   SORTIE_TYPE_META,
@@ -55,7 +56,7 @@ export interface GroupePhotos {
 
 export interface GalerieItem {
   gp: GroupePhotos;
-  lightboxIndex: number | null; // index dans photosChoisiesLightbox, null si pas de photo choisie
+  lightboxIndex: number | null;
 }
 
 @Component({
@@ -91,56 +92,56 @@ export class SortieDetail {
   sortieId = this.route.snapshot.paramMap.get('id')!;
   profile = toSignal(this.authService.currentUserProfile$);
 
-  private refreshTick = signal(0);
-  private refresh() {
-    this.refreshTick.update((n) => n + 1);
+  private loaded = signal(false);
+
+  // ── Data signals ────────────────────────────────────────────────
+  sortie = signal<Sortie | null>(null);
+  photos = signal<SortieImage[]>([]);
+  groupes = signal<AtelierGroupe[]>([]);
+  inscriptions = signal<SortieInscription[]>([]);
+  allMembres = signal<UserProfile[]>([]);
+
+  constructor() {
+    effect(() => {
+      const p = this.profile();
+      if (p === undefined) return;
+      if (this.loaded()) return;
+      untracked(() => {
+        this.loaded.set(true);
+        this.charger(p);
+      });
+    });
   }
 
-  private inscriptionsTrigger = computed(() => ({
-    profile: this.profile(),
-    tick: this.refreshTick(),
-  }));
+  private async charger(profile: UserProfile | null) {
+    const uid = profile?.uid ?? null;
+    const [s, photos] = await Promise.all([
+      firstValueFrom(this.sortieService.getSortieOnce(this.sortieId)),
+      firstValueFrom(this.sortieService.getPhotosOnce(this.sortieId)),
+    ]);
+    this.sortie.set(s);
+    this.photos.set(photos);
 
-  sortie = toSignal(
-    toObservable(this.refreshTick).pipe(
-      switchMap(() => this.sortieService.getSortieOnce(this.sortieId)),
-    ),
-    { initialValue: null as Sortie | null },
-  );
+    if (uid) {
+      firstValueFrom(this.sortieService.getInscriptionsOnce(this.sortieId))
+        .then((i) => this.inscriptions.set(i))
+        .catch(() => {});
+    }
 
-  photos = toSignal(
-    toObservable(this.refreshTick).pipe(
-      switchMap(() => this.sortieService.getPhotosOnce(this.sortieId)),
-    ),
-    { initialValue: [] as SortieImage[] },
-  );
+    if (s?.type === 'atelier' && s.modeGroupes) {
+      firstValueFrom(this.sortieService.getGroupesOnce(this.sortieId))
+        .then((g) => this.groupes.set(g))
+        .catch(() => {});
+    }
 
-  private groupesTrigger = computed(() => ({
-    tick: this.refreshTick(),
-    // Ne charge les groupes que si c'est un atelier en mode groupes
-    // (sortie() peut être null au premier tick, on attend qu'elle soit chargée)
-    load: this.sortie()?.type === 'atelier' && !!this.sortie()?.modeGroupes,
-  }));
-
-  groupes = toSignal(
-    toObservable(this.groupesTrigger).pipe(
-      switchMap(({ load }) =>
-        load
-          ? this.sortieService.getGroupesOnce(this.sortieId)
-          : of([] as AtelierGroupe[]),
-      ),
-    ),
-    { initialValue: [] as AtelierGroupe[] },
-  );
-
-  inscriptions = toSignal(
-    toObservable(this.inscriptionsTrigger).pipe(
-      switchMap(({ profile }) =>
-        !profile ? of([]) : this.sortieService.getInscriptionsOnce(this.sortieId),
-      ),
-    ),
-    { initialValue: [] },
-  );
+    const isOrg = !!(uid && s?.organisateurUid === uid);
+    const isAdmin = profile?.role === 'admin';
+    if (isOrg || isAdmin) {
+      firstValueFrom(this.authService.getAllMembersOnce())
+        .then((m) => this.allMembres.set(m))
+        .catch(() => {});
+    }
+  }
 
   // Photos optimistes : ajoutées immédiatement après upload, supprimées quand photos() les intègre
   private pendingPhotos = signal<SortieImage[]>([]);
@@ -184,7 +185,7 @@ export class SortieDetail {
   savingGroupe = signal(false);
   joiningGroupeId = signal<string | null>(null);
   closingSubmissions = signal(false);
-  uploadGroupeId = signal<string | null>(null); // groupe cible de l'upload courant
+  uploadGroupeId = signal<string | null>(null);
   galleryLightboxIndex = signal<number | null>(null);
 
   // ── Permissions ───────────────────────────────────────────────
@@ -220,7 +221,6 @@ export class SortieDetail {
   photosParGroupe = computed((): GroupePhotos[] => {
     if (!this.modeGroupes()) return [];
     const allPhotos = this.allPhotos();
-
     return this.groupes().map((g) => {
       const photos = this.arePhotosVisible(g.id) ? allPhotos.filter((p) => p.groupeId === g.id) : [];
       const photoChoisie = g.photoChoisieId
@@ -230,7 +230,6 @@ export class SortieDetail {
     });
   });
 
-  // Items de la galerie post-fermeture avec index lightbox pré-calculé
   galerieItems = computed((): GalerieItem[] => {
     let lbIdx = 0;
     return this.photosParGroupe().map((gp) => ({
@@ -239,7 +238,6 @@ export class SortieDetail {
     }));
   });
 
-  // Flat list des photos choisies pour la lightbox galerie
   photosChoisiesLightbox = computed((): LightboxPhoto[] =>
     this.photosParGroupe()
       .filter((gp) => gp.photoChoisie !== null)
@@ -258,12 +256,10 @@ export class SortieDetail {
     return this.openGroupIds().has(groupeId);
   }
 
-  // Les accordions sont toujours navigables — seules les photos sont restreintes
   isGroupeLocked(_groupeId: string): boolean {
     return false;
   }
 
-  // Photos visibles : propre groupe pendant la phase active, tout le monde après clôture
   arePhotosVisible(groupeId: string): boolean {
     if (this.estTermine() || this.canManage()) return true;
     return this.monGroupe()?.id === groupeId;
@@ -281,7 +277,6 @@ export class SortieDetail {
     });
   }
 
-  // Auto-ouvre le groupe du membre au chargement
   private autoOpenEffect = effect(() => {
     const monGroupe = this.monGroupe();
     if (monGroupe) {
@@ -316,11 +311,6 @@ export class SortieDetail {
     if (this.uploadVerrouille()) return { text: 'Photos clôturées', css: 'hero-status status-cloture' };
     return { text: 'Ouverte aux photos', css: 'hero-status status-photos' };
   });
-
-  private allMembres$ = toObservable(this.canManage).pipe(
-    switchMap((can) => (can ? this.authService.getAllMembersOnce() : of([] as UserProfile[]))),
-  );
-  allMembres = toSignal(this.allMembres$, { initialValue: [] as UserProfile[] });
 
   // ── Formulaire d'édition ──────────────────────────────────────
   form = new FormGroup({
@@ -367,7 +357,7 @@ export class SortieDetail {
     const s = this.sortie();
     const p = this.profile();
     if (!s || !p || !s.inscriptionObligatoire) return false;
-    if (this.modeGroupes()) return false; // inscription via groupe uniquement
+    if (this.modeGroupes()) return false;
     if (this.isInscrit()) return false;
     if (s.maxParticipants && this.inscriptions().length >= s.maxParticipants) return false;
     return true;
@@ -392,10 +382,7 @@ export class SortieDetail {
     return this.isInscrit() || this.isOrganisateur() || this.isAdmin();
   });
 
-  canUploadForGroupe = computed(() => {
-    // version pour le template groupe (indépendant du groupeId courant)
-    return this.canUpload();
-  });
+  canUploadForGroupe = computed(() => this.canUpload());
 
   userName = computed(() => {
     const p = this.profile();
@@ -410,7 +397,6 @@ export class SortieDetail {
       .sort((a, b) => `${a.prenom ?? ''} ${a.nom}`.localeCompare(`${b.prenom ?? ''} ${b.nom}`));
   });
 
-  // Membres non encore dans un groupe, disponibles pour ajout manuel (organisateur)
   membresDisponiblesPourGroupe = computed(() => {
     const dansUnGroupe = new Set(this.groupes().flatMap((g) => g.membres));
     return this.allMembres()
@@ -489,12 +475,18 @@ export class SortieDetail {
             )
             .catch(() => {});
         }
-        this.refresh();
+        const wascover = this.sortie()?.photoCouvertureUrl === img.url;
+        this.photos.update((ps) => ps.filter((p) => p.id !== img.id));
+        this.pendingPhotos.update((ps) => ps.filter((p) => p.id !== img.id));
+        if (wascover) {
+          firstValueFrom(this.sortieService.getSortieOnce(sortieId))
+            .then((s) => { if (s) this.sortie.set(s); })
+            .catch(() => {});
+        }
       },
     };
   }
 
-  // lightbox index par groupe (signaux séparés pour chaque groupe)
   private groupeLightboxIndex = signal<{ groupeId: string; index: number } | null>(null);
 
   openGroupeLightbox(groupeId: string, index: number) {
@@ -516,9 +508,10 @@ export class SortieDetail {
     this.savingGroupe.set(true);
     try {
       const ordre = this.groupes().length;
-      await this.sortieService.createGroupe(this.sortieId, nom, ordre);
+      const id = await this.sortieService.createGroupe(this.sortieId, nom, ordre);
+      const newGroupe: AtelierGroupe = { id, nom, ordre, membres: [], nbMembres: 0, nbPhotos: 0 };
+      this.groupes.update((gs) => [...gs, newGroupe]);
       this.newGroupeNom.set('');
-      this.refresh();
     } finally {
       this.savingGroupe.set(false);
     }
@@ -540,8 +533,8 @@ export class SortieDetail {
     this.savingGroupe.set(true);
     try {
       await this.sortieService.updateGroupeNom(this.sortieId, groupeId, nom);
+      this.groupes.update((gs) => gs.map((g) => (g.id === groupeId ? { ...g, nom } : g)));
       this.editingGroupeId.set(null);
-      this.refresh();
     } finally {
       this.savingGroupe.set(false);
     }
@@ -554,13 +547,12 @@ export class SortieDetail {
       );
       return;
     }
-    const ok = await this.confirmService.confirm(`Supprimer le groupe « ${g.nom } » ?`);
+    const ok = await this.confirmService.confirm(`Supprimer le groupe « ${g.nom} » ?`);
     if (!ok) return;
     await this.sortieService.deleteGroupe(this.sortieId, g.id);
-    this.refresh();
+    this.groupes.update((gs) => gs.filter((gr) => gr.id !== g.id));
   }
 
-  // Organisateur inscrit manuellement un membre dans un groupe
   async inscrireDansGroupe(groupeId: string, uid: string) {
     if (!uid) return;
     const membre = this.allMembres().find((m) => m.uid === uid);
@@ -568,17 +560,37 @@ export class SortieDetail {
     const nom = `${membre.prenom ?? ''} ${membre.nom}`.trim();
     const ancienGroupeId = this.groupes().find((g) => g.membres.includes(uid))?.id;
     await this.sortieService.rejoindreGroupe(this.sortieId, groupeId, uid, nom, ancienGroupeId);
-    this.refresh();
+    this.groupes.update((gs) =>
+      gs.map((g) => {
+        if (g.id === ancienGroupeId)
+          return { ...g, membres: g.membres.filter((m) => m !== uid), nbMembres: g.nbMembres - 1 };
+        if (g.id === groupeId)
+          return { ...g, membres: [...g.membres, uid], nbMembres: g.nbMembres + 1 };
+        return g;
+      }),
+    );
+    if (!ancienGroupeId) {
+      this.inscriptions.update((is) => [
+        ...is,
+        { uid, nomMembre: nom, dateInscription: new Date().toISOString() },
+      ]);
+      this.sortie.update((s) => (s ? { ...s, nbInscrits: (s.nbInscrits ?? 0) + 1 } : s));
+    }
   }
 
-  // Organisateur retire un membre d'un groupe
   async retirerDuGroupe(groupeId: string, uid: string, nomMembre: string) {
-    const ok = await this.confirmService.confirm(
-      `Retirer ${nomMembre} du groupe ?`,
-    );
+    const ok = await this.confirmService.confirm(`Retirer ${nomMembre} du groupe ?`);
     if (!ok) return;
     await this.sortieService.quitterGroupe(this.sortieId, groupeId, uid);
-    this.refresh();
+    this.groupes.update((gs) =>
+      gs.map((g) =>
+        g.id === groupeId
+          ? { ...g, membres: g.membres.filter((m) => m !== uid), nbMembres: g.nbMembres - 1 }
+          : g,
+      ),
+    );
+    this.inscriptions.update((is) => is.filter((i) => i.uid !== uid));
+    this.sortie.update((s) => (s ? { ...s, nbInscrits: Math.max(0, (s.nbInscrits ?? 0) - 1) } : s));
   }
 
   // ── Actions groupes (membre) ──────────────────────────────────
@@ -606,7 +618,22 @@ export class SortieDetail {
     try {
       const nom = this.userName();
       await this.sortieService.rejoindreGroupe(this.sortieId, groupeId, p.uid, nom, ancienGroupe?.id);
-      this.refresh();
+      this.groupes.update((gs) =>
+        gs.map((gr) => {
+          if (gr.id === ancienGroupe?.id)
+            return { ...gr, membres: gr.membres.filter((m) => m !== p.uid), nbMembres: gr.nbMembres - 1 };
+          if (gr.id === groupeId)
+            return { ...gr, membres: [...gr.membres, p.uid], nbMembres: gr.nbMembres + 1 };
+          return gr;
+        }),
+      );
+      if (!ancienGroupe) {
+        this.inscriptions.update((is) => [
+          ...is,
+          { uid: p.uid, nomMembre: nom, dateInscription: new Date().toISOString() },
+        ]);
+        this.sortie.update((ss) => (ss ? { ...ss, nbInscrits: (ss.nbInscrits ?? 0) + 1 } : ss));
+      }
     } finally {
       this.joiningGroupeId.set(null);
     }
@@ -616,17 +643,23 @@ export class SortieDetail {
     const p = this.profile();
     const mg = this.monGroupe();
     if (!p || !mg) return;
-    const ok = await this.confirmService.confirm(
-      `Quitter le groupe « ${mg.nom} » ?`,
-    );
+    const ok = await this.confirmService.confirm(`Quitter le groupe « ${mg.nom} » ?`);
     if (!ok) return;
     await this.sortieService.quitterGroupe(this.sortieId, mg.id, p.uid);
+    this.groupes.update((gs) =>
+      gs.map((g) =>
+        g.id === mg.id
+          ? { ...g, membres: g.membres.filter((m) => m !== p.uid), nbMembres: g.nbMembres - 1 }
+          : g,
+      ),
+    );
+    this.inscriptions.update((is) => is.filter((i) => i.uid !== p.uid));
+    this.sortie.update((s) => (s ? { ...s, nbInscrits: Math.max(0, (s.nbInscrits ?? 0) - 1) } : s));
     this.openGroupIds.update((ids) => {
       const next = new Set(ids);
       next.delete(mg.id);
       return next;
     });
-    this.refresh();
   }
 
   // ── Fermer / rouvrir soumissions ──────────────────────────────
@@ -653,7 +686,7 @@ export class SortieDetail {
     this.closingSubmissions.set(true);
     try {
       await this.sortieService.fermerSoumissions(this.sortieId);
-      this.refresh();
+      this.sortie.update((s) => (s ? { ...s, soumissionsFermees: true } : s));
     } finally {
       this.closingSubmissions.set(false);
     }
@@ -665,14 +698,18 @@ export class SortieDetail {
       groupeId,
       estDejaChoisie ? null : photoId,
     );
-    this.refresh();
+    this.groupes.update((gs) =>
+      gs.map((g) =>
+        g.id === groupeId ? { ...g, photoChoisieId: estDejaChoisie ? undefined : photoId } : g,
+      ),
+    );
   }
 
   async rouvrirSoumissions() {
     const ok = await this.confirmService.confirm('Rouvrir les soumissions de photos ?');
     if (!ok) return;
     await this.sortieService.rouvrirSoumissions(this.sortieId);
-    this.refresh();
+    this.sortie.update((s) => (s ? { ...s, soumissionsFermees: false } : s));
   }
 
   // ── Edit ──────────────────────────────────────────────────────
@@ -741,8 +778,29 @@ export class SortieDetail {
           organisateurUid: s.organisateurUid,
         },
       );
+      this.sortie.update((old) =>
+        old
+          ? {
+              ...old,
+              type: v.type,
+              titre: v.titre.trim(),
+              description: v.description.trim(),
+              date: v.date,
+              lieu: v.lieu.trim(),
+              maxParticipants: v.maxParticipants ?? undefined,
+              inscriptionObligatoire: v.inscriptionObligatoire,
+              visibilite: v.visibilite,
+              dateFinSoumission: v.dateFinSoumission,
+              ...(v.type === 'atelier'
+                ? {
+                    modeGroupes: v.modeGroupes,
+                    maxPhotosParGroupe: v.maxPhotosParGroupe ?? undefined,
+                  }
+                : {}),
+            }
+          : old,
+      );
       this.editMode.set(false);
-      this.refresh();
     } finally {
       this.saving.set(false);
     }
@@ -789,7 +847,10 @@ export class SortieDetail {
         )
         .catch(() => {});
     }
-    this.refresh();
+    this.inscriptions.update((is) => is.filter((i) => i.uid !== targetUid));
+    this.sortie.update((ss) =>
+      ss ? { ...ss, nbInscrits: Math.max(0, (ss.nbInscrits ?? 0) - 1) } : ss,
+    );
   }
 
   async inscrireSelected() {
@@ -814,9 +875,13 @@ export class SortieDetail {
         },
       )
       .catch(() => {});
+    this.inscriptions.update((is) => [
+      ...is,
+      { uid, nomMembre: nom, dateInscription: new Date().toISOString() },
+    ]);
+    this.sortie.update((ss) => (ss ? { ...ss, nbInscrits: (ss.nbInscrits ?? 0) + 1 } : ss));
     this.selectedMembreUid.set('');
     this.addingMembre.set(false);
-    this.refresh();
   }
 
   async toggleInscription() {
@@ -827,10 +892,19 @@ export class SortieDetail {
     try {
       if (this.isInscrit()) {
         await this.sortieService.desinscrire(this.sortieId, p.uid);
+        this.inscriptions.update((is) => is.filter((i) => i.uid !== p.uid));
+        this.sortie.update((ss) =>
+          ss ? { ...ss, nbInscrits: Math.max(0, (ss.nbInscrits ?? 0) - 1) } : ss,
+        );
       } else {
-        await this.sortieService.inscrire(this.sortieId, p.uid, this.userName());
+        const nom = this.userName();
+        await this.sortieService.inscrire(this.sortieId, p.uid, nom);
+        this.inscriptions.update((is) => [
+          ...is,
+          { uid: p.uid, nomMembre: nom, dateInscription: new Date().toISOString() },
+        ]);
+        this.sortie.update((ss) => (ss ? { ...ss, nbInscrits: (ss.nbInscrits ?? 0) + 1 } : ss));
       }
-      this.refresh();
     } finally {
       this.inscribing.set(false);
     }
@@ -866,7 +940,6 @@ export class SortieDetail {
           readExifWithConsent(file, this.gpsConsentService),
           compressImage(file, COMPRESS_EVENT),
         ]);
-        // Pas d'await ici → uploads parallèles en cas de multi-drop
         this.sortieService
           .uploadPhoto(compressed, this.sortieId, {
             uploaderUid: p.uid,
@@ -877,7 +950,6 @@ export class SortieDetail {
           .subscribe({
             next: (state) => {
               if (state.done && state.image) {
-                // Photo disponible : affichage immédiat + suppression du task d'upload
                 this.pendingPhotos.update((pp) => [...pp, state.image!]);
                 this.uploads.update((u) => u.filter((t) => t.id !== taskId));
               } else {
@@ -888,13 +960,13 @@ export class SortieDetail {
             },
             error: () => {
               this.uploads.update((u) =>
-                u.map((t) =>
-                  t.id === taskId ? { ...t, error: "Erreur lors de l'upload" } : t,
-                ),
+                u.map((t) => (t.id === taskId ? { ...t, error: "Erreur lors de l'upload" } : t)),
               );
             },
             complete: () => {
-              this.refresh(); // synchro Firestore en arrière-plan
+              firstValueFrom(this.sortieService.getPhotosOnce(this.sortieId))
+                .then((ps) => this.photos.set(ps))
+                .catch(() => {});
             },
           });
       } catch {
@@ -927,7 +999,14 @@ export class SortieDetail {
         )
         .catch(() => {});
     }
-    this.refresh();
+    const wascover = this.sortie()?.photoCouvertureUrl === photo.url;
+    this.photos.update((ps) => ps.filter((p) => p.id !== photo.id));
+    this.pendingPhotos.update((ps) => ps.filter((p) => p.id !== photo.id));
+    if (wascover) {
+      firstValueFrom(this.sortieService.getSortieOnce(this.sortieId))
+        .then((s) => { if (s) this.sortie.set(s); })
+        .catch(() => {});
+    }
   }
 
   // ── Lightbox (mode standard) ──────────────────────────────────
@@ -946,13 +1025,15 @@ export class SortieDetail {
     $event.stopPropagation();
     const uid = this.profile()?.uid;
     if (!uid) return;
-    await this.sortieService.toggleLikePhoto(
-      this.sortieId,
-      photo.id,
-      uid,
-      this.isLikedPhoto(photo),
+    const liked = this.isLikedPhoto(photo);
+    await this.sortieService.toggleLikePhoto(this.sortieId, photo.id, uid, liked);
+    this.photos.update((ps) =>
+      ps.map((p) =>
+        p.id === photo.id
+          ? { ...p, likes: liked ? (p.likes ?? []).filter((l) => l !== uid) : [...(p.likes ?? []), uid] }
+          : p,
+      ),
     );
-    this.refresh();
   }
 
   mapsUrl(lieu: string): string {
@@ -986,7 +1067,9 @@ export class SortieDetail {
     try {
       const compressed = await compressImage(file, COMPRESS_COUVERTURE);
       await this.sortieService.setImageEvenement(this.sortieId, compressed);
-      this.refresh();
+      firstValueFrom(this.sortieService.getSortieOnce(this.sortieId))
+        .then((s) => { if (s) this.sortie.set(s); })
+        .catch(() => {});
     } finally {
       this.coverUploading.set(false);
     }
@@ -996,18 +1079,19 @@ export class SortieDetail {
     this.coverUploading.set(true);
     try {
       await this.sortieService.removeImageEvenement(this.sortieId, path);
-      this.refresh();
+      this.sortie.update((s) =>
+        s
+          ? { ...s, imageEvenementUrl: undefined, imageEvenementPath: undefined, imageEvenementFileSize: undefined }
+          : s,
+      );
     } finally {
       this.coverUploading.set(false);
     }
   }
 
-  // helpers template
   getNomMembre(uid: string): string {
-    // inscriptions chargées pour tous les membres connectés (via règle Firestore isLoggedIn)
     const insc = this.inscriptions().find((i) => i.uid === uid);
     if (insc?.nomMembre) return insc.nomMembre;
-    // fallback pour l'organisateur (allMembres chargé pour canManage)
     const m = this.allMembres().find((mb) => mb.uid === uid);
     if (m) return `${m.prenom ?? ''} ${m.nom}`.trim();
     return uid;

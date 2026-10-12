@@ -2,6 +2,56 @@
 
 ---
 
+## v1.0.0-beta — En cours (2026-10-12)
+
+### Optimisation Firestore — home (2026-10-12)
+
+- Ajout de `getPublicMembresOnce()` dans `AuthService` : query Firestore avec `where('visibilite', '==', 'public')` au lieu de charger tous les docs `users/`.
+- `home.ts` utilise désormais cette méthode → seuls les membres publics sont lus (typiquement 15–20 docs au lieu de 40+), côté client ne filtre plus que `!isSuspended`.
+
+### Optimisation Firestore — exposition-detail (2026-10-12)
+
+- Cache `Map<uid, {photos, evaluations, monEvaluation}>` pour les dossiers participants.
+- `selectParticipant()` et `openCloturePourMembre()` : cache hit = 0 read (retour immédiat); cache miss = fetch + stockage en cache.
+- `sauvegarderEvaluation()` : met à jour le cache (monEvaluation + evaluations) sans re-fetch.
+- Invalidation du cache sur : `doRouvrirMembre`, `doRouvrirMembreASoumission` (statut change), `supprimerPhoto`, `supprimerPhotoClotureInternal` (photo supprimée), `uploadOne` (photo ajoutée).
+
+### Optimisation Firestore — sorties-liste (2026-10-12)
+
+- Suppression des 10 `toObservable().pipe(switchMap())` déclenchés par la cascade `profile` au démarrage (undefined → null → UserProfile).
+- Remplacement par le pattern `charger()` unique : tout chargé en parallèle une seule fois au montage.
+- Données publiques/membres : même méthode service, visibilité gérée côté client selon `profile` au moment du chargement.
+- Données personnelles (`mesSorties`, `mesOneShots`, `mesDefis`, IDs inscrits) : chargées uniquement si uid présent.
+- `sortiesTerminees` : `fetchTerminees()` appelée une fois dans `charger()`, la pagination `loadMoreTerminees()` continue de fonctionner.
+- Suppression des computed `loggedIn` et `uid` (devenus inutiles sans switchMap).
+
+### Optimisation Firestore — theme-detail (2026-10-12)
+
+- `charger()` conditionnel par statut : soumissions toujours, mesVotes seulement en phase vote/résultats, tousVotes seulement en résultats.
+- Suppression du `refreshTick` et de la cascade `uid` (combineLatest profile → mesVotes).
+- Like sur carte et en lightbox : `soumissions` signal mis à jour localement (± uid dans `likes[]`).
+- Suppression soumission (carte et lightbox) : filtre local.
+- Vote / désvote : `mesVotes` mis à jour localement (±entry).
+- Upload : `uploadSoumission` ne retournant pas la soumission créée, un re-fetch ciblé des soumissions est fait en arrière-plan (1 read).
+
+### Optimisation Firestore — defi-detail (2026-10-12)
+
+- Même pattern que `sortie-detail` : `charger()` unique conditionnel par statut (a_venir / soumission / vote / résultats), mutations locales sur tous les signaux.
+- Upload photo : photo retournée par l'observable `DefiUploadState.photo` ajoutée directement au signal sans re-fetch.
+- Vote / désvote : `monVote` mis à jour localement (±photoId).
+- Inscription / désinscription : signaux `inscriptions`, `photos`, `monVote`, `defi.nbInscrits` mis à jour sans re-lecture.
+- Édition : `defi` signal mis à jour avec les valeurs du formulaire.
+
+### Optimisation Firestore — sortie-detail (2026-10-12)
+
+- **Suppression du `refreshTick`** : chaque action déclenchait 4 re-lectures simultanées (doc sortie + photos + inscriptions + groupes). ~20 appels/session = ~80 reads inutiles.
+- **Pattern `charger()` unique** : chargement initial une seule fois au montage, conditionnel selon le profil (inscriptions) et le type (groupes atelier).
+- **`allMembres` chargé une fois** dans `charger()` au lieu de réagir au signal `canManage` (évite la cascade `profile undefined→null→UserProfile`).
+- **Mutations locales** : inscription/désinscription, like, groupe (rejoindre/quitter/créer/supprimer/renommer/choisir photo), fermer/rouvrir soumissions, édition — tous les signaux sont mis à jour en mémoire sans re-lire Firestore.
+- **Re-fetch ciblé** : 1 seule lecture (doc sortie) uniquement si la photo de couverture change après suppression ou upload cover.
+
+---
+
 ## v1.0.0-beta — En cours (2026-10-11)
 
 ### Expositions — interface soumission par onglets (2026-10-11)

@@ -136,6 +136,12 @@ export class ExpositionDetail {
 
   private loaded = signal(false);
 
+  private participantCache = new Map<string, {
+    photos: ExpoPhoto[];
+    evaluations: ExpoEvaluation[];
+    monEvaluation: ExpoEvaluation | null;
+  }>();
+
   // ── Permissions ──────────────────────────────────────────────────────────────
 
   isOrganisateur = computed(() => !!this.uid() && this.uid() === this.expo()?.organisateurUid);
@@ -857,6 +863,7 @@ export class ExpositionDetail {
             this.uploadProgress.set(state.progress);
             if (state.done && state.photo) {
               this.mesPhotos.update((ps) => [...ps, state.photo!]);
+              this.participantCache.delete(uid);
               this.participants.update((ps) => {
                 const exists = ps.some((p) => p.uid === uid);
                 if (exists) return ps.map((p) => (p.uid === uid ? { ...p, nbPhotos: p.nbPhotos + 1 } : p));
@@ -888,6 +895,7 @@ export class ExpositionDetail {
         p.uid === photo.uid ? { ...p, nbPhotos: Math.max(0, p.nbPhotos - 1) } : p,
       ),
     );
+    this.participantCache.delete(photo.uid);
     this.deletingPhoto.set(null);
 
     if (uid && photo.uid !== uid) {
@@ -910,6 +918,7 @@ export class ExpositionDetail {
     this.deletingPhoto.set(photo.id);
     await this.expoService.deletePhoto(this.expoId, photo);
     this.photos.update((ps) => ps.filter((p) => p.id !== photo.id));
+    this.participantCache.delete(photo.uid);
     this.deletingPhoto.set(null);
 
     const uid = this.uid();
@@ -1032,42 +1041,49 @@ export class ExpositionDetail {
     this.monEvaluation.set(null);
     this.evaluationDraft.set([]);
     this.showClotureMembre.set(null);
-    this.loadingParticipant.set(true);
 
     const uid = this.uid();
-    const loads: Promise<void>[] = [
-      this.expoService
-        .getPhotosParMembre(this.expoId, participantUid)
-        .then((p) => this.photosParMembre.set(p)),
-    ];
+    const cached = this.participantCache.get(participantUid);
 
-    // Charger les évaluations pour tous les membres dès que le dossier a été évalué
-    // (scores agrégats visibles par tous dans la grille)
-    const participantStatut = this.participants().find((p) => p.uid === participantUid)?.statut;
-    if (participantStatut === 'evaluation' || participantStatut === 'clos') {
-      loads.push(
+    if (cached) {
+      this.photosParMembre.set(cached.photos);
+      this.evaluations.set(cached.evaluations);
+      this.monEvaluation.set(cached.monEvaluation);
+    } else {
+      this.loadingParticipant.set(true);
+      const loads: Promise<void>[] = [
         this.expoService
-          .getEvaluationsOnce(this.expoId, participantUid)
-          .then((e) => this.evaluations.set(e)),
-      );
+          .getPhotosParMembre(this.expoId, participantUid)
+          .then((p) => this.photosParMembre.set(p)),
+      ];
+      const participantStatut = this.participants().find((p) => p.uid === participantUid)?.statut;
+      if (participantStatut === 'evaluation' || participantStatut === 'clos') {
+        loads.push(
+          this.expoService
+            .getEvaluationsOnce(this.expoId, participantUid)
+            .then((e) => this.evaluations.set(e)),
+        );
+      }
+      if (this.isMembreComite() && uid) {
+        loads.push(
+          this.expoService.getMonEvaluation(this.expoId, participantUid, uid).then((ev) => {
+            this.monEvaluation.set(ev);
+          }),
+        );
+      }
+      await Promise.all(loads);
+      this.participantCache.set(participantUid, {
+        photos: this.photosParMembre(),
+        evaluations: this.evaluations(),
+        monEvaluation: this.monEvaluation(),
+      });
+      this.loadingParticipant.set(false);
     }
-
-    if (this.isMembreComite() && uid) {
-      loads.push(
-        this.expoService.getMonEvaluation(this.expoId, participantUid, uid).then((ev) => {
-          this.monEvaluation.set(ev);
-          // Draft initialisé après Promise.all (photosParMembre doit être chargé d'abord)
-        }),
-      );
-    }
-
-    await Promise.all(loads);
 
     if (this.isMembreComite()) {
       const allIds = this.photosParMembre().map((p) => p.id);
       const ev = this.monEvaluation();
       if (ev) {
-        // Garder l'ordre existant, filtrer les photos supprimées, ajouter les nouvelles en bas
         const allSet = new Set(allIds);
         const ordered = ev.orderedPhotoIds.filter((id) => allSet.has(id));
         const newIds = allIds.filter((id) => !ordered.includes(id));
@@ -1077,13 +1093,9 @@ export class ExpositionDetail {
       }
     }
 
-    // Pour la vue membre sur sa propre ligne : si pas chargé en tant que responsable,
-    // alimenter evaluations depuis mesEvaluations pour afficher les scores
     if (participantUid === uid && !this.evaluations().length && this.mesEvaluations().length) {
       this.evaluations.set(this.mesEvaluations());
     }
-
-    this.loadingParticipant.set(false);
   }
 
   // ── Evaluation (committee) ────────────────────────────────────────────────────
@@ -1128,6 +1140,17 @@ export class ExpositionDetail {
         return { ...p, comiteUidsEvalues: [...(p.comiteUidsEvalues ?? []), uid] };
       }),
     );
+    const entry = this.participantCache.get(participantUid);
+    if (entry) {
+      const updatedEvals = entry.evaluations.some((e) => e.comiteUid === uid)
+        ? entry.evaluations.map((e) => (e.comiteUid === uid ? updated : e))
+        : [...entry.evaluations, updated];
+      this.participantCache.set(participantUid, {
+        ...entry,
+        evaluations: updatedEvals,
+        monEvaluation: updated,
+      });
+    }
     this.evaluationSaving.set(false);
   }
 
@@ -1149,19 +1172,38 @@ export class ExpositionDetail {
       this.monEvaluation.set(null);
       this.evaluationDraft.set([]);
       this.showClotureMembre.set(null);
-      this.loadingParticipant.set(true);
-      await Promise.all([
-        this.expoService
-          .getPhotosParMembre(this.expoId, participantUid)
-          .then((p) => this.photosParMembre.set(p)),
-        this.expoService
-          .getEvaluationsOnce(this.expoId, participantUid)
-          .then((e) => this.evaluations.set(e)),
-      ]);
-      this.loadingParticipant.set(false);
+      const cached = this.participantCache.get(participantUid);
+      if (cached) {
+        this.photosParMembre.set(cached.photos);
+        this.evaluations.set(cached.evaluations);
+        this.monEvaluation.set(cached.monEvaluation);
+      } else {
+        this.loadingParticipant.set(true);
+        await Promise.all([
+          this.expoService
+            .getPhotosParMembre(this.expoId, participantUid)
+            .then((p) => this.photosParMembre.set(p)),
+          this.expoService
+            .getEvaluationsOnce(this.expoId, participantUid)
+            .then((e) => this.evaluations.set(e)),
+        ]);
+        this.participantCache.set(participantUid, {
+          photos: this.photosParMembre(),
+          evaluations: this.evaluations(),
+          monEvaluation: null,
+        });
+        this.loadingParticipant.set(false);
+      }
     } else if (!this.evaluations().length) {
-      const evals = await this.expoService.getEvaluationsOnce(this.expoId, participantUid);
-      this.evaluations.set(evals);
+      const cached = this.participantCache.get(participantUid);
+      if (cached?.evaluations.length) {
+        this.evaluations.set(cached.evaluations);
+      } else {
+        const evals = await this.expoService.getEvaluationsOnce(this.expoId, participantUid);
+        this.evaluations.set(evals);
+        const entry = this.participantCache.get(participantUid);
+        if (entry) this.participantCache.set(participantUid, { ...entry, evaluations: evals });
+      }
     }
     this.ouvrirClotureMembre(participantUid);
   }
@@ -1274,6 +1316,7 @@ export class ExpositionDetail {
           : p,
       ),
     );
+    this.participantCache.delete(participantUid);
   }
 
   async doRouvrirMembreASoumission(participantUid: string) {
@@ -1292,6 +1335,7 @@ export class ExpositionDetail {
           : p,
       ),
     );
+    this.participantCache.delete(participantUid);
     const expo = this.expo();
     const moi = `${this.profile()?.prenom ?? ''} ${this.profile()?.nom ?? ''}`.trim();
     this.notifService
