@@ -98,6 +98,7 @@ export class AuthService {
       nom: user.displayName ?? user.email ?? '',
       role: 'membre',
       dateAdhesion: todayISO(),
+      queuePos: Date.now() / 1000 + Math.random(),
     };
     await setDoc(doc(db, 'users', user.uid), profile);
     return profile;
@@ -114,6 +115,13 @@ export class AuthService {
   getAllMembersOnce(): Observable<UserProfile[]> {
     return from(getDocs(collection(db, 'users'))).pipe(
       map((snap) => snap.docs.map((d) => ({ uid: d.id, ...d.data() }) as UserProfile)),
+    );
+  }
+
+  advanceMembresQueue(uids: string[]): void {
+    const now = Date.now() / 1000;
+    uids.forEach((uid) =>
+      updateDoc(doc(db, 'users', uid), { queuePos: now + Math.random() }).catch(() => {}),
     );
   }
 

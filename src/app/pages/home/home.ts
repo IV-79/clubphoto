@@ -139,7 +139,7 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
 
   recentPhotos = toSignal(
     combineLatest([
-      this.photoService.getRecentPublicPhotosOnce(60),
+      this.photoService.getNextPhotosQueue(20),
       this.membresOnce$.pipe(
         map(
           (members) =>
@@ -149,14 +149,9 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
         ),
       ),
     ]).pipe(
-      map(([photos, publicUids]) => {
-        const filtered = photos.filter((p) => publicUids.has(p.uid));
-        for (let i = filtered.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [filtered[i], filtered[j]] = [filtered[j], filtered[i]];
-        }
-        return filtered.slice(0, 8);
-      }),
+      map(([photos, publicUids]) =>
+        photos.filter((p) => publicUids.has(p.uid)).slice(0, 8),
+      ),
     ),
     { initialValue: [] },
   );
@@ -164,14 +159,12 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
   membres = toSignal(
     this.membresOnce$.pipe(
       map((list) => {
-        const filtered = list.filter(
-          (m) => !m.isSuspended && m.photoProfilUrl,
-        );
-        for (let i = filtered.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [filtered[i], filtered[j]] = [filtered[j], filtered[i]];
-        }
-        return filtered.slice(0, 3);
+        const eligible = list
+          .filter((m) => !m.isSuspended && m.photoProfilUrl)
+          .sort((a, b) => (a.queuePos ?? 0) - (b.queuePos ?? 0))
+          .slice(0, 6);
+        this.authService.advanceMembresQueue(eligible.map((m) => m.uid));
+        return eligible;
       }),
     ),
     { initialValue: [] as UserProfile[] },

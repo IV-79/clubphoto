@@ -62,6 +62,7 @@ export interface Photo {
   likes?: string[];
   thumbnailUrl?: string;
   thumbnailPath?: string;
+  queuePos?: number;
 }
 
 export interface UploadState {

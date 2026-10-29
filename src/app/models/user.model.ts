@@ -33,6 +33,7 @@ export interface UserProfile {
   cguAccepteeVersion?: number;
   photoProfilUrl?: string;
   photoBandeauUrl?: string;
+  queuePos?: number;
 }
 
 export const STYLES_PHOTO = [

@@ -7,52 +7,65 @@ service firebase.storage {
         firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
+    function isValidImage(maxMB) {
+      return request.resource.size < maxMB * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+
+    function isValidDoc() {
+      return request.resource.size < 50 * 1024 * 1024
+        && (request.resource.contentType.matches('image/.*')
+            || request.resource.contentType.matches('application/pdf'));
+    }
+
     // Photos de profil et bandeau
     match /user-photos/{uid}/{file} {
       allow read: if true;
-      allow write: if request.auth != null && (request.auth.uid == uid || isAdmin());
+      allow write: if request.auth != null && (request.auth.uid == uid || isAdmin())
+        && isValidImage(10);
     }
 
     // Photos OneShot
     match /oneshots/{oneShotId}/{file} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if request.auth != null && isValidImage(20);
     }
 
     // Photos Sorties Photo
     match /sorties/{sortieId}/{file} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if request.auth != null && isValidImage(20);
     }
 
     // Couvertures d'articles
     match /articles/{articleId}/{file} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if request.auth != null && isValidImage(10);
     }
 
     // Photos Défis photo
     match /defis/{defiId}/{file} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if request.auth != null && isValidImage(20);
     }
 
     // Photos portfolio membres
     match /photos/{uid}/{file} {
       allow read: if true;
-      allow write: if request.auth != null && (request.auth.uid == uid || isAdmin());
+      allow write: if request.auth != null && (request.auth.uid == uid || isAdmin())
+        && isValidImage(20);
     }
 
     // Photos soumissions thèmes du mois
     match /themes/{themeId}/{file} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if request.auth != null && isValidImage(20);
     }
 
     // Photos Expositions photo
     match /expositions/{expoId}/{file} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if request.auth != null && isValidImage(20);
     }
 
     // Listing récursif pour la maintenance admin (détection orphelins)
@@ -69,19 +82,19 @@ service firebase.storage {
     // Image hero (admin uniquement en écriture)
     match /config/{file} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAdmin() && isValidImage(10);
     }
 
     // Logos partenaires (lecture publique, écriture admin)
     match /partenaires/{file} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAdmin() && isValidImage(5);
     }
 
     // Documents partagés membres
     match /documents/{docId}/{file} {
       allow read: if request.auth != null;
-      allow write: if request.auth != null;
+      allow write: if request.auth != null && isValidDoc();
     }
 
   }

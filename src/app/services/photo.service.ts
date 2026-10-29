@@ -83,6 +83,7 @@ export class PhotoService {
               fileSize: file.size + thumb.size,
               thumbnailUrl,
               thumbnailPath: thumbPath,
+              queuePos: Date.now() / 1000 + Math.random(),
               ...(meta.categorie ? { categorie: meta.categorie as Photo['categorie'] } : {}),
               ...(hasExif(meta.exif) ? { exif: meta.exif } : {}),
             };
@@ -151,6 +152,28 @@ export class PhotoService {
         ),
       ),
     ).pipe(map((snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Photo)));
+  }
+
+  getNextPhotosQueue(n: number): Observable<Photo[]> {
+    return from(
+      getDocs(
+        query(
+          collection(db, 'photos'),
+          where('visibilite', '==', 'public'),
+          orderBy('queuePos', 'asc'),
+          limit(n),
+        ),
+      ),
+    ).pipe(
+      map((snap) => {
+        const photos = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Photo);
+        const now = Date.now() / 1000;
+        snap.docs.forEach((d) =>
+          updateDoc(d.ref, { queuePos: now + Math.random() }).catch(() => {}),
+        );
+        return photos;
+      }),
+    );
   }
 
   async deletePhoto(photo: Photo): Promise<void> {
