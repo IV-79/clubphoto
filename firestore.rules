@@ -21,11 +21,16 @@ service cloud.firestore {
     // Profils membres (lecture publique pour les galeries)
     match /users/{uid} {
       allow read: if true;
-      allow create: if isAdmin();
+      allow create: if (request.auth.uid == uid
+          && request.resource.data.role == 'membre'
+          && !('isSuspended' in request.resource.data))
+        || isAdmin();
       allow update: if (request.auth.uid == uid || isAdmin())
         && !request.resource.data.diff(resource.data)
             .affectedKeys().hasAny(['role', 'isSuspended']);
       allow update: if isAdmin();
+      allow update: if isLoggedIn() &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['queuePos']);
       allow delete: if isAdmin();
     }
 
@@ -49,6 +54,8 @@ service cloud.firestore {
       allow update: if isLoggedIn() && resource.data.uid == request.auth.uid;
       allow update: if isLoggedIn() &&
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes']);
+      allow update: if isLoggedIn() &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['queuePos']);
       allow delete: if isLoggedIn() && (resource.data.uid == request.auth.uid || isAdmin());
     }
 
