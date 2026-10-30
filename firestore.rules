@@ -166,6 +166,8 @@ service cloud.firestore {
       allow create: if isLoggedIn();
       allow update: if isLoggedIn() &&
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes']);
+      allow update: if isLoggedIn() &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['membreUid', 'nomMembre', 'themeId']);
       allow delete: if isLoggedIn() && (
         resource.data.membreUid == request.auth.uid ||
         get(/databases/$(database)/documents/oneshots/$(oneShotId)).data.creatorUid == request.auth.uid ||
