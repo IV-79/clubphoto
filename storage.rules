@@ -15,7 +15,8 @@ service firebase.storage {
     function isValidDoc() {
       return request.resource.size < 50 * 1024 * 1024
         && (request.resource.contentType.matches('image/.*')
-            || request.resource.contentType.matches('application/pdf'));
+            || request.resource.contentType.matches('application/.*')
+            || request.resource.contentType.matches('text/.*'));
     }
 
     // Photos de profil et bandeau

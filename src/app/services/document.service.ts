@@ -121,6 +121,7 @@ export class DocumentService {
     const path = `documents/${docId}/file`;
     const storageRef = ref(storage, path);
     const metadata = {
+      contentType: file.type || 'application/octet-stream',
       contentDisposition: `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`,
     };
     return new Promise((resolve, reject) => {
