@@ -15,7 +15,7 @@ import { AuthService } from '../../../services/auth.service';
 import { LoginModalService } from '../../../services/login-modal.service';
 import { ConfirmService } from '../../../services/confirm.service';
 import { NotificationService } from '../../../services/notification.service';
-import { compressImage, COMPRESS_THEME } from '../../../utils/image-compress';
+import { compressImage, COMPRESS_THEME, ImageDecodeError } from '../../../utils/image-compress';
 import { readExifWithConsent } from '../../../utils/exif-reader';
 import { GpsConsentService } from '../../../services/gps-consent.service';
 import {
@@ -335,8 +335,12 @@ export class ThemeDetail {
       firstValueFrom(this.themeService.getSoumissionsOnce(this.id))
         .then((ss) => this.soumissions.set(ss))
         .catch(() => {});
-    } catch {
-      this.uploadError.set("Erreur lors de l'envoi. Réessayez.");
+    } catch (e) {
+      this.uploadError.set(
+        e instanceof ImageDecodeError
+          ? 'Format non supporté. Exportez la photo en JPEG puis réessayez.'
+          : "Erreur lors de l'envoi. Réessayez.",
+      );
     } finally {
       this.uploading.set(false);
     }

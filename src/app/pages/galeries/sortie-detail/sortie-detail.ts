@@ -34,7 +34,7 @@ import {
 import { UserProfile } from '../../../models/user.model';
 import { LightboxPhoto, PhotoLightboxCallbacks } from '../../../models/commentaire.model';
 import { PhotoLightbox } from '../../../components/photo-lightbox/photo-lightbox';
-import { compressImage, COMPRESS_EVENT, COMPRESS_COUVERTURE } from '../../../utils/image-compress';
+import { compressImage, COMPRESS_EVENT, COMPRESS_COUVERTURE, ImageDecodeError } from '../../../utils/image-compress';
 import { readExifWithConsent } from '../../../utils/exif-reader';
 import { GpsConsentService } from '../../../services/gps-consent.service';
 import { ImgRetryDirective } from '../../../directives/img-retry.directive';
@@ -969,10 +969,17 @@ export class SortieDetail {
                 .catch(() => {});
             },
           });
-      } catch {
+      } catch (e) {
         this.uploads.update((u) =>
           u.map((item) =>
-            item.id === taskId ? { ...item, error: "Erreur lors de l'upload" } : item,
+            item.id === taskId
+              ? {
+                  ...item,
+                  error: e instanceof ImageDecodeError
+                    ? 'Format non supporté (exportez en JPEG)'
+                    : "Erreur lors de l'upload",
+                }
+              : item,
           ),
         );
       }

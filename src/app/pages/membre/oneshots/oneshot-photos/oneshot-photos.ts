@@ -20,7 +20,7 @@ import {
 import { OneShotService } from '../../../../services/oneshot.service';
 import { ConfirmService } from '../../../../services/confirm.service';
 import { OneShotPhoto, OneShotTheme, OneShotInscription } from '../../../../models/oneshot.model';
-import { compressImage, COMPRESS_EVENT } from '../../../../utils/image-compress';
+import { compressForUpload, COMPRESS_EVENT } from '../../../../utils/image-compress';
 import { readExif } from '../../../../utils/exif-reader';
 import { GpsConsentService } from '../../../../services/gps-consent.service';
 import { ImgRetryDirective } from '../../../../directives/img-retry.directive';
@@ -174,6 +174,7 @@ export class OneShotPhotos {
   uploading = signal(false);
   uploadDone = signal(0);
   uploadTotal = signal(0);
+  uploadError = signal('');
 
   onFilesSelected(event: Event) {
     const input = event.target as HTMLInputElement;
@@ -217,6 +218,7 @@ export class OneShotPhotos {
     this.uploading.set(true);
     this.uploadDone.set(0);
     this.uploadTotal.set(entries.length);
+    this.uploadError.set('');
 
     // Lire tous les EXIF en parallèle, puis demander le consentement GPS une seule fois pour le lot
     const exifResults = await Promise.all(entries.map((e) => readExif(e.file)));
@@ -226,7 +228,12 @@ export class OneShotPhotos {
     }
 
     for (let i = 0; i < entries.length; i++) {
-      const compressed = await compressImage(entries[i].file, COMPRESS_EVENT);
+      const compressed = await compressForUpload(
+        entries[i].file,
+        COMPRESS_EVENT,
+        (msg) => this.uploadError.set(msg),
+      );
+      if (!compressed) break;
       await new Promise<void>((resolve, reject) => {
         this.oneShotService
           .uploadPhoto(compressed, this.id, {

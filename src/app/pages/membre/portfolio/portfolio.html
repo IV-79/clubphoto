@@ -145,6 +145,9 @@
           </p>
         </div>
         <input #fileInput type="file" accept="image/*" hidden (change)="onFileSelected($event)" />
+        @if (uploadFileError()) {
+          <p class="field-error" style="margin-top:8px">{{ uploadFileError() }}</p>
+        }
       } @else {
         <div class="preview-wrap">
           <img [src]="previewUrl()" alt="Aperçu" class="preview-img" />

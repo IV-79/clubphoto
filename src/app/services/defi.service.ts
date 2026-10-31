@@ -37,6 +37,7 @@ import {
   COMPRESS_COUVERTURE,
   COMPRESS_EVENT,
   COMPRESS_THUMB,
+  ImageDecodeError,
 } from '../utils/image-compress';
 import { NotificationService } from './notification.service';
 

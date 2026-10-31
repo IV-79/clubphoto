@@ -75,6 +75,7 @@ select:focus { border-color: var(--border-strong); }
 .card-select:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .dupe-warning { font-size: 0.68rem; color: #cc0000; font-weight: 600; line-height: 1.2; }
+.upload-size-err { color: #cc0000; font-size: 0.82rem; margin: 8px 0 4px; }
 .card-footer { display: flex; justify-content: flex-end; margin-top: 1px; }
 .btn-del-photo { background: none; border: none; color: #b03030; font-size: 0.9rem; cursor: pointer; padding: 2px 4px; border-radius: 3px; transition: all 0.15s; line-height: 1; }
 .btn-del-photo:hover:not(:disabled) { color: #cc0000; background: rgba(204,0,0,0.06); }

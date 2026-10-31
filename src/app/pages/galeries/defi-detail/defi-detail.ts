@@ -14,6 +14,7 @@ import { FormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
 import { DefiService } from '../../../services/defi.service';
+import { ImageDecodeError } from '../../../utils/image-compress';
 import { AuthService } from '../../../services/auth.service';
 import { NotificationService } from '../../../services/notification.service';
 import { ConfirmService } from '../../../services/confirm.service';
@@ -367,8 +368,12 @@ export class DefiDetail {
         if (uploadedPhoto) {
           this.photos.update((ps) => [...ps, uploadedPhoto!]);
         }
-      } catch {
-        this.uploadError.set("Erreur lors de l'upload.");
+      } catch (e) {
+        this.uploadError.set(
+          e instanceof ImageDecodeError
+            ? 'Format non supporté. Exportez la photo en JPEG puis réessayez.'
+            : "Erreur lors de l'upload.",
+        );
         break;
       }
     }

@@ -18,7 +18,7 @@ import { ConfirmService } from '../../../services/confirm.service';
 import { Photo, PhotoExif, PhotoVisibilite } from '../../../models/photo.model';
 import { LightboxPhoto, PhotoLightboxCallbacks } from '../../../models/commentaire.model';
 import { PhotoLightbox } from '../../../components/photo-lightbox/photo-lightbox';
-import { compressImage, COMPRESS_PORTFOLIO } from '../../../utils/image-compress';
+import { compressForUpload, COMPRESS_PORTFOLIO } from '../../../utils/image-compress';
 import { readExifWithConsent } from '../../../utils/exif-reader';
 import { GpsConsentService } from '../../../services/gps-consent.service';
 import { switchMap, of } from 'rxjs';
@@ -74,6 +74,7 @@ export class MembrePortfolio implements OnInit {
   uploadVisibilite: PhotoVisibilite = 'public';
   uploadCategorie = '';
   uploadTitreError = signal(false);
+  uploadFileError = signal('');
   private pendingExif: PhotoExif = {};
   uploading = signal(false);
   uploadProgress = signal(0);
@@ -225,7 +226,13 @@ export class MembrePortfolio implements OnInit {
 
   private async setFile(file: File) {
     this.pendingExif = await readExifWithConsent(file, this.gpsConsentService);
-    const compressed = await compressImage(file, COMPRESS_PORTFOLIO);
+    const compressed = await compressForUpload(
+      file,
+      COMPRESS_PORTFOLIO,
+      (msg) => this.uploadFileError.set(msg),
+    );
+    if (!compressed) return;
+    this.uploadFileError.set('');
     this.selectedFile.set(compressed);
     this.uploadTitre = '';
     const reader = new FileReader();
@@ -241,6 +248,7 @@ export class MembrePortfolio implements OnInit {
     this.uploadVisibilite = 'public';
     this.uploadCategorie = '';
     this.uploadTitreError.set(false);
+    this.uploadFileError.set('');
     this.pendingExif = {};
     this.uploadProgress.set(0);
     if (this.fileInput?.nativeElement) this.fileInput.nativeElement.value = '';

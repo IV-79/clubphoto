@@ -38,7 +38,7 @@ import { UserProfile } from '../../../models/user.model';
 import { LightboxPhoto, PhotoLightboxCallbacks } from '../../../models/commentaire.model';
 import { EventHero, HeroBadge } from '../../../components/event-hero/event-hero';
 import { PhotoLightbox } from '../../../components/photo-lightbox/photo-lightbox';
-import { compressImage, COMPRESS_EVENT } from '../../../utils/image-compress';
+import { compressImage, COMPRESS_EVENT, ImageDecodeError } from '../../../utils/image-compress';
 import { readExifWithConsent } from '../../../utils/exif-reader';
 import { localDateISO } from '../../../utils/date';
 import { GpsConsentService } from '../../../services/gps-consent.service';
@@ -899,6 +899,13 @@ export class ExpositionDetail {
           },
           complete: () => resolve(),
         });
+      }).catch((e) => {
+        this.uploadError.set(
+          e instanceof ImageDecodeError
+            ? 'Format non supporté. Exportez la photo en JPEG puis réessayez.'
+            : "Erreur lors de l'envoi. Réessayez.",
+        );
+        resolve();
       });
     });
   }

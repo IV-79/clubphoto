@@ -1,3 +1,10 @@
+export class ImageDecodeError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ImageDecodeError';
+  }
+}
+
 export interface CompressOptions {
   maxLong?: number; // scale so longest side ≤ this
   maxWidth?: number; // then scale so width  ≤ this
@@ -22,7 +29,7 @@ export function compressImage(
   file: File,
   opts: CompressOptions = COMPRESS_PORTFOLIO,
 ): Promise<File> {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const img = new Image();
     const url = URL.createObjectURL(file);
     img.onload = () => {
@@ -64,13 +71,42 @@ export function compressImage(
           quality -= 0.15;
           blob = await toBlob(quality);
         }
-        resolve(blob ? new File([blob], name, { type: 'image/webp' }) : file);
-      })().catch(() => resolve(file));
+        if (!blob) {
+          reject(new ImageDecodeError(`Impossible d'encoder l'image : ${file.name}`));
+          return;
+        }
+        resolve(new File([blob], name, { type: 'image/webp' }));
+      })().catch((e) =>
+        reject(e instanceof ImageDecodeError ? e : new ImageDecodeError(`Erreur de compression : ${file.name}`)),
+      );
     };
     img.onerror = () => {
       URL.revokeObjectURL(url);
-      resolve(file);
+      reject(new ImageDecodeError(`Format non lisible : ${file.name}`));
     };
     img.src = url;
   });
+}
+
+export async function compressForUpload(
+  file: File,
+  opts: CompressOptions,
+  onError: (msg: string) => void,
+  maxMB = 20,
+): Promise<File | null> {
+  try {
+    const compressed = await compressImage(file, opts);
+    if (compressed.size > maxMB * 1024 * 1024) {
+      onError('Fichier trop volumineux après compression.');
+      return null;
+    }
+    return compressed;
+  } catch (e) {
+    onError(
+      e instanceof ImageDecodeError
+        ? 'Format non supporté. Exportez la photo en JPEG puis réessayez.'
+        : "Erreur lors du traitement de l'image.",
+    );
+    return null;
+  }
 }

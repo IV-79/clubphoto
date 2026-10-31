@@ -2,6 +2,15 @@
 
 ---
 
+## v1.0.0-beta — En cours (2026-10-31)
+
+### Upload images — détection de format non supporté (2026-10-31)
+
+- `image-compress.ts` : `compressImage` rejette maintenant avec `ImageDecodeError` au lieu de retourner silencieusement l'original non compressé quand le navigateur ne peut pas décoder le fichier (HEIC, TIFF, RAW, etc.). Ajout du helper `compressForUpload(file, opts, onError, maxMB)` pour centraliser la gestion d'erreur dans les composants.
+- Portfolio, profil (photo + bandeau), thème, sortie, exposition, défi, oneshot-photos : message d'erreur clair en français au lieu d'une erreur Firebase incompréhensible.
+
+---
+
 ## v1.0.0-beta — En cours (2026-10-12)
 
 ### Optimisation Firestore — home (2026-10-12)

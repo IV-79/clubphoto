@@ -11,7 +11,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../services/auth.service';
 import { STYLES_PHOTO, UserProfile } from '../../../models/user.model';
-import { compressImage, COMPRESS_AVATAR, COMPRESS_BANDEAU } from '../../../utils/image-compress';
+import { compressForUpload, COMPRESS_AVATAR, COMPRESS_BANDEAU } from '../../../utils/image-compress';
 
 @Component({
   selector: 'app-membre-profil',
@@ -56,10 +56,12 @@ export class MembreProfil implements OnInit {
 
   profilFile = signal<File | null>(null);
   profilPreviewUrl = signal('');
+  profilError = signal('');
   uploadingProfil = signal(false);
 
   bandeauFile = signal<File | null>(null);
   bandeauPreviewUrl = signal('');
+  bandeauError = signal('');
   uploadingBandeau = signal(false);
 
   ngOnInit() {
@@ -172,9 +174,17 @@ export class MembreProfil implements OnInit {
 
   // --- Photo de profil ---
   async onProfilSelected(event: Event) {
-    const file = (event.target as HTMLInputElement).files?.[0];
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
     if (!file) return;
-    const compressed = await compressImage(file, COMPRESS_AVATAR);
+    const compressed = await compressForUpload(
+      file,
+      COMPRESS_AVATAR,
+      (msg) => this.profilError.set(msg),
+      10,
+    );
+    if (!compressed) { input.value = ''; return; }
+    this.profilError.set('');
     this.profilFile.set(compressed);
     const reader = new FileReader();
     reader.onload = (e) => this.profilPreviewUrl.set(e.target?.result as string);
@@ -184,6 +194,7 @@ export class MembreProfil implements OnInit {
   cancelProfil() {
     this.profilFile.set(null);
     this.profilPreviewUrl.set('');
+    this.profilError.set('');
     if (this.profilInput?.nativeElement) this.profilInput.nativeElement.value = '';
   }
 
@@ -206,9 +217,17 @@ export class MembreProfil implements OnInit {
 
   // --- Photo bandeau ---
   async onBandeauSelected(event: Event) {
-    const file = (event.target as HTMLInputElement).files?.[0];
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
     if (!file) return;
-    const compressed = await compressImage(file, COMPRESS_BANDEAU);
+    const compressed = await compressForUpload(
+      file,
+      COMPRESS_BANDEAU,
+      (msg) => this.bandeauError.set(msg),
+      10,
+    );
+    if (!compressed) { input.value = ''; return; }
+    this.bandeauError.set('');
     this.bandeauFile.set(compressed);
     const reader = new FileReader();
     reader.onload = (e) => this.bandeauPreviewUrl.set(e.target?.result as string);
@@ -218,6 +237,7 @@ export class MembreProfil implements OnInit {
   cancelBandeau() {
     this.bandeauFile.set(null);
     this.bandeauPreviewUrl.set('');
+    this.bandeauError.set('');
     if (this.bandeauInput?.nativeElement) this.bandeauInput.nativeElement.value = '';
   }
 
