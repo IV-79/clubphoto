@@ -504,7 +504,7 @@
 @if (lightboxIndex() !== null && lightboxPhotos().length > 0) {
   <app-photo-lightbox
     [photos]="lightboxPhotos()"
-    [callbacks]="lightboxCallbacks"
+    [callbacks]="lightboxCallbacks()"
     [startIndex]="lightboxIndex()!"
     [userUid]="profile()?.uid ?? null"
     [userName]="userName()"

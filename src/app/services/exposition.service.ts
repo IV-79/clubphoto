@@ -35,6 +35,7 @@ import {
   ExpoEvaluation,
 } from '../models/exposition.model';
 import { generateId } from '../utils/id';
+import { Commentaire, Reponse } from '../models/commentaire.model';
 import { compressImage, COMPRESS_THUMB } from '../utils/image-compress';
 import { NotificationService } from './notification.service';
 
@@ -520,6 +521,77 @@ export class ExpositionService {
           await updateDoc(pDoc.ref, { comiteUidsEvalues: arrayRemove(comiteUid) });
         }
       }),
+    );
+  }
+
+  // ── Commentaires photos ───────────────────────────────────────────────
+
+  getCommentaires(expoId: string, photoId: string): Observable<Commentaire[]> {
+    return from(
+      getDocs(
+        query(
+          collection(db, `expositions/${expoId}/photos/${photoId}/commentaires`),
+          orderBy('createdAt', 'asc'),
+        ),
+      ),
+    ).pipe(map((snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Commentaire)));
+  }
+
+  async addCommentaire(
+    expoId: string,
+    photoId: string,
+    data: { texte: string; auteurUid: string; nomAuteur: string },
+  ): Promise<void> {
+    await addDoc(collection(db, `expositions/${expoId}/photos/${photoId}/commentaires`), {
+      ...data,
+      likes: [],
+      replies: [],
+      createdAt: new Date().toISOString(),
+    });
+  }
+
+  async deleteCommentaire(expoId: string, photoId: string, commentaireId: string): Promise<void> {
+    await deleteDoc(
+      doc(db, `expositions/${expoId}/photos/${photoId}/commentaires`, commentaireId),
+    );
+  }
+
+  async toggleLikeCommentaire(
+    expoId: string,
+    photoId: string,
+    commentaireId: string,
+    uid: string,
+    currentlyLiked: boolean,
+  ): Promise<void> {
+    await updateDoc(
+      doc(db, `expositions/${expoId}/photos/${photoId}/commentaires`, commentaireId),
+      { likes: currentlyLiked ? arrayRemove(uid) : arrayUnion(uid) },
+    );
+  }
+
+  async addReply(
+    expoId: string,
+    photoId: string,
+    commentaireId: string,
+    reply: Omit<Reponse, 'id'>,
+  ): Promise<void> {
+    const replyWithId: Reponse = { ...reply, id: generateId() };
+    await updateDoc(
+      doc(db, `expositions/${expoId}/photos/${photoId}/commentaires`, commentaireId),
+      { replies: arrayUnion(replyWithId) },
+    );
+  }
+
+  async deleteReply(
+    expoId: string,
+    photoId: string,
+    commentaireId: string,
+    replyId: string,
+    allReplies: Reponse[],
+  ): Promise<void> {
+    await updateDoc(
+      doc(db, `expositions/${expoId}/photos/${photoId}/commentaires`, commentaireId),
+      { replies: allReplies.filter((r) => r.id !== replyId) },
     );
   }
 }

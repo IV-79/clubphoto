@@ -188,15 +188,35 @@ export class DefiDetail {
     this.statut() === 'vote' ? this.votePhotosLb() : this.resultPhotosLb(),
   );
 
-  readonly lightboxCallbacks: PhotoLightboxCallbacks = {
-    toggleLike: async () => {},
-    getComments: () => of([]),
-    addComment: async () => {},
-    deleteComment: async () => {},
-    toggleCommentLike: async () => {},
-    addReply: async () => {},
-    deleteReply: async () => {},
-  };
+  lightboxCallbacks = computed((): PhotoLightboxCallbacks => {
+    const stubs: PhotoLightboxCallbacks = {
+      toggleLike: async () => {},
+      getComments: () => of([]),
+      addComment: async () => {},
+      deleteComment: async () => {},
+      toggleCommentLike: async () => {},
+      addReply: async () => {},
+      deleteReply: async () => {},
+    };
+    if (this.statut() !== 'resultats') return stubs;
+    const defiId = this.id;
+    return {
+      toggleLike: async () => {},
+      getComments: (photoId) => this.defiService.getCommentaires(defiId, photoId),
+      addComment: (photoId, texte, auteurUid, nomAuteur) =>
+        this.defiService.addCommentaire(defiId, photoId, { texte, auteurUid, nomAuteur }),
+      deleteComment: (photoId, commentId) =>
+        this.defiService.deleteCommentaire(defiId, photoId, commentId),
+      toggleCommentLike: (photoId, commentId, uid, currentlyLiked) =>
+        this.defiService.toggleLikeCommentaire(defiId, photoId, commentId, uid, currentlyLiked),
+      addReply: (photoId, commentId, texte, auteurUid, nomAuteur) =>
+        this.defiService.addReply(defiId, photoId, commentId, {
+          texte, auteurUid, nomAuteur, createdAt: new Date().toISOString(),
+        }),
+      deleteReply: (photoId, commentId, replyId, allReplies) =>
+        this.defiService.deleteReply(defiId, photoId, commentId, replyId, allReplies),
+    };
+  });
 
   openLightbox(photo: { id: string }): void {
     const idx = this.lightboxPhotos().findIndex((p) => p.id === photo.id);

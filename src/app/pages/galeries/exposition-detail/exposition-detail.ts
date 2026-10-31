@@ -756,12 +756,19 @@ export class ExpositionDetail {
 
   lightboxCallbacks = computed((): PhotoLightboxCallbacks => ({
     toggleLike: async () => {},
-    getComments: () => of([]),
-    addComment: async () => {},
-    deleteComment: async () => {},
-    toggleCommentLike: async () => {},
-    addReply: async () => {},
-    deleteReply: async () => {},
+    getComments: (photoId) => this.expoService.getCommentaires(this.expoId, photoId),
+    addComment: (photoId, texte, auteurUid, nomAuteur) =>
+      this.expoService.addCommentaire(this.expoId, photoId, { texte, auteurUid, nomAuteur }),
+    deleteComment: (photoId, commentId) =>
+      this.expoService.deleteCommentaire(this.expoId, photoId, commentId),
+    toggleCommentLike: (photoId, commentId, uid, currentlyLiked) =>
+      this.expoService.toggleLikeCommentaire(this.expoId, photoId, commentId, uid, currentlyLiked),
+    addReply: (photoId, commentId, texte, auteurUid, nomAuteur) =>
+      this.expoService.addReply(this.expoId, photoId, commentId, {
+        texte, auteurUid, nomAuteur, createdAt: new Date().toISOString(),
+      }),
+    deleteReply: (photoId, commentId, replyId, allReplies) =>
+      this.expoService.deleteReply(this.expoId, photoId, commentId, replyId, allReplies),
     canDeletePhoto: (photo) => photo.uploaderUid === this.uid() || this.canManage(),
     deletePhoto: async (photo) => {
       const p = this.photos().find((x) => x.id === photo.id);
@@ -773,12 +780,19 @@ export class ExpositionDetail {
 
   lightboxCallbacksMes = computed((): PhotoLightboxCallbacks => ({
     toggleLike: async () => {},
-    getComments: () => of([]),
-    addComment: async () => {},
-    deleteComment: async () => {},
-    toggleCommentLike: async () => {},
-    addReply: async () => {},
-    deleteReply: async () => {},
+    getComments: (photoId) => this.expoService.getCommentaires(this.expoId, photoId),
+    addComment: (photoId, texte, auteurUid, nomAuteur) =>
+      this.expoService.addCommentaire(this.expoId, photoId, { texte, auteurUid, nomAuteur }),
+    deleteComment: (photoId, commentId) =>
+      this.expoService.deleteCommentaire(this.expoId, photoId, commentId),
+    toggleCommentLike: (photoId, commentId, uid, currentlyLiked) =>
+      this.expoService.toggleLikeCommentaire(this.expoId, photoId, commentId, uid, currentlyLiked),
+    addReply: (photoId, commentId, texte, auteurUid, nomAuteur) =>
+      this.expoService.addReply(this.expoId, photoId, commentId, {
+        texte, auteurUid, nomAuteur, createdAt: new Date().toISOString(),
+      }),
+    deleteReply: (photoId, commentId, replyId, allReplies) =>
+      this.expoService.deleteReply(this.expoId, photoId, commentId, replyId, allReplies),
     canDeletePhoto: (photo) =>
       photo.uploaderUid === this.uid() && this.monStatutSoumission() === 'soumission',
     deletePhoto: async (photo) => {
@@ -791,12 +805,19 @@ export class ExpositionDetail {
 
   lightboxCallbacksMembre = computed((): PhotoLightboxCallbacks => ({
     toggleLike: async () => {},
-    getComments: () => of([]),
-    addComment: async () => {},
-    deleteComment: async () => {},
-    toggleCommentLike: async () => {},
-    addReply: async () => {},
-    deleteReply: async () => {},
+    getComments: (photoId) => this.expoService.getCommentaires(this.expoId, photoId),
+    addComment: (photoId, texte, auteurUid, nomAuteur) =>
+      this.expoService.addCommentaire(this.expoId, photoId, { texte, auteurUid, nomAuteur }),
+    deleteComment: (photoId, commentId) =>
+      this.expoService.deleteCommentaire(this.expoId, photoId, commentId),
+    toggleCommentLike: (photoId, commentId, uid, currentlyLiked) =>
+      this.expoService.toggleLikeCommentaire(this.expoId, photoId, commentId, uid, currentlyLiked),
+    addReply: (photoId, commentId, texte, auteurUid, nomAuteur) =>
+      this.expoService.addReply(this.expoId, photoId, commentId, {
+        texte, auteurUid, nomAuteur, createdAt: new Date().toISOString(),
+      }),
+    deleteReply: (photoId, commentId, replyId, allReplies) =>
+      this.expoService.deleteReply(this.expoId, photoId, commentId, replyId, allReplies),
     canDeletePhoto: () => false,
     deletePhoto: async () => {},
   }));

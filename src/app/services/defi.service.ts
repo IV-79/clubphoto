@@ -15,6 +15,8 @@ import {
   increment,
   limit,
   deleteField,
+  arrayUnion,
+  arrayRemove,
 } from 'firebase/firestore';
 import {
   ref,
@@ -26,6 +28,7 @@ import {
 import { Observable, from, map } from 'rxjs';
 import { db, storage } from '../utils/firebase';
 import { Defi, DefiInscription, DefiPhoto, DefiVote } from '../models/defi.model';
+import { Commentaire, Reponse } from '../models/commentaire.model';
 import { UserProfile } from '../models/user.model';
 import { generateId } from '../utils/id';
 import { readExif } from '../utils/exif-reader';
@@ -380,5 +383,71 @@ export class DefiService {
 
   async extendVotes(defiId: string, newDate: string): Promise<void> {
     await updateDoc(doc(db, 'defis', defiId), { dateCloturVotes: newDate });
+  }
+
+  // ── Commentaires photos ───────────────────────────────────────────────
+
+  getCommentaires(defiId: string, photoId: string): Observable<Commentaire[]> {
+    return from(
+      getDocs(
+        query(
+          collection(db, `defis/${defiId}/photos/${photoId}/commentaires`),
+          orderBy('createdAt', 'asc'),
+        ),
+      ),
+    ).pipe(map((snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Commentaire)));
+  }
+
+  async addCommentaire(
+    defiId: string,
+    photoId: string,
+    data: { texte: string; auteurUid: string; nomAuteur: string },
+  ): Promise<void> {
+    await addDoc(collection(db, `defis/${defiId}/photos/${photoId}/commentaires`), {
+      ...data,
+      likes: [],
+      replies: [],
+      createdAt: new Date().toISOString(),
+    });
+  }
+
+  async deleteCommentaire(defiId: string, photoId: string, commentaireId: string): Promise<void> {
+    await deleteDoc(doc(db, `defis/${defiId}/photos/${photoId}/commentaires`, commentaireId));
+  }
+
+  async toggleLikeCommentaire(
+    defiId: string,
+    photoId: string,
+    commentaireId: string,
+    uid: string,
+    currentlyLiked: boolean,
+  ): Promise<void> {
+    await updateDoc(doc(db, `defis/${defiId}/photos/${photoId}/commentaires`, commentaireId), {
+      likes: currentlyLiked ? arrayRemove(uid) : arrayUnion(uid),
+    });
+  }
+
+  async addReply(
+    defiId: string,
+    photoId: string,
+    commentaireId: string,
+    reply: Omit<Reponse, 'id'>,
+  ): Promise<void> {
+    const replyWithId: Reponse = { ...reply, id: generateId() };
+    await updateDoc(doc(db, `defis/${defiId}/photos/${photoId}/commentaires`, commentaireId), {
+      replies: arrayUnion(replyWithId),
+    });
+  }
+
+  async deleteReply(
+    defiId: string,
+    photoId: string,
+    commentaireId: string,
+    replyId: string,
+    allReplies: Reponse[],
+  ): Promise<void> {
+    await updateDoc(doc(db, `defis/${defiId}/photos/${photoId}/commentaires`, commentaireId), {
+      replies: allReplies.filter((r) => r.id !== replyId),
+    });
   }
 }
