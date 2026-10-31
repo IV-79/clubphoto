@@ -358,6 +358,18 @@
   padding-bottom: 48px;
 }
 
+/* Short viewports (small laptops, OS scaling, browser zoom): let pinned sections grow
+   instead of clipping their cards */
+@media (max-height: 820px) {
+  .actu-section,
+  .act-section,
+  .membres-section {
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+  }
+}
+
 .gallery-mosaic {
   columns: 4;
   column-gap: 8px;
