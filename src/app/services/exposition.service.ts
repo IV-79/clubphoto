@@ -16,16 +16,10 @@ import {
   arrayUnion,
   arrayRemove,
 } from 'firebase/firestore';
-import {
-  ref,
-  uploadBytesResumable,
-  uploadBytes,
-  getDownloadURL,
-  deleteObject,
-} from 'firebase/storage';
+import { ref, getDownloadURL, deleteObject } from 'firebase/storage';
 import { Observable, from } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { db, storage } from '../utils/firebase';
+import { db, storage, uploadResumable, uploadStatic } from '../utils/firebase';
 import {
   Exposition,
   ExpoSuggestion,
@@ -119,9 +113,9 @@ export class ExpositionService {
   }
 
   async setCouverture(id: string, file: File): Promise<{ url: string; path: string }> {
-    const path = `expositions/${id}/couverture`;
+    const path = `expositions/${id}/couverture_${Date.now()}`;
     const storageRef = ref(storage, path);
-    await uploadBytesResumable(storageRef, file).then();
+    await uploadResumable(storageRef, file);
     const url = await getDownloadURL(storageRef);
     await updateDoc(doc(db, 'expositions', id), {
       photoCouvertureUrl: url,
@@ -322,7 +316,7 @@ export class ExpositionService {
       const storagePath = `expositions/${expoId}/${id}.${ext}`;
       const thumbPath = `expositions/${expoId}/${id}_thumb.${ext}`;
       const storageRef = ref(storage, storagePath);
-      const task = uploadBytesResumable(storageRef, file);
+      const task = uploadResumable(storageRef, file);
 
       task.on(
         'state_changed',
@@ -337,7 +331,7 @@ export class ExpositionService {
             getDownloadURL(task.snapshot.ref),
             compressImage(file, COMPRESS_THUMB),
           ]);
-          const thumbSnap = await uploadBytes(ref(storage, thumbPath), thumb);
+          const thumbSnap = await uploadStatic(ref(storage, thumbPath), thumb);
           const thumbnailUrl = await getDownloadURL(thumbSnap.ref);
           const fileSize = file.size + thumb.size;
           const data: Omit<ExpoPhoto, 'id'> = {

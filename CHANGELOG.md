@@ -2,6 +2,18 @@
 
 ---
 
+## v1.0.0-beta — En cours (2026-11-12)
+
+### Cache Firebase Storage — 1 an sur toutes les images (2026-11-12)
+
+- `firebase.ts` : ajout de `uploadResumable()` et `uploadStatic()`, wrappers autour de `uploadBytesResumable` / `uploadBytes` qui injectent automatiquement `Cache-Control: public, max-age=31536000, immutable` sur tous les uploads.
+- Tous les services (`auth`, `photo`, `theme`, `oneshot`, `defi`, `sortie`, `exposition`, `article`, `config`, `partenaires`) migrent vers ces wrappers — le cache 1 an est centralisé.
+- **Cache-busting par timestamp** sur les fichiers remplaçables : profil, bandeau, couvertures events (sortie/oneshot/défi/expo/thème), couvertures articles, image héro, logos partenaires. Le nom du fichier inclut `Date.now()`, forçant un nouveau URL à chaque remplacement.
+- **Soft migration** : `deleteMemberData` lit `photoProfilPath` / `photoBandeauPath` depuis Firestore, avec fallback sur l'ancien chemin hardcodé `profil.webp` / `bandeau.webp` pour les comptes existants.
+- `user.model.ts` : ajout des champs `photoProfilPath` et `photoBandeauPath`.
+
+---
+
 ## v1.0.0-beta — En cours (2026-10-31)
 
 ### Upload images — détection de format non supporté (2026-10-31)

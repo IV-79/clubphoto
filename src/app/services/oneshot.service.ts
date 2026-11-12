@@ -17,16 +17,10 @@ import {
   getDoc,
   deleteField,
 } from 'firebase/firestore';
-import {
-  ref,
-  uploadBytes,
-  uploadBytesResumable,
-  getDownloadURL,
-  deleteObject,
-} from 'firebase/storage';
+import { ref, getDownloadURL, deleteObject } from 'firebase/storage';
 import { Observable, from } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { db, storage, collectionStream, docStream } from '../utils/firebase';
+import { db, storage, collectionStream, docStream, uploadResumable, uploadStatic } from '../utils/firebase';
 import { todayISO } from '../utils/date';
 import {
   OneShot,
@@ -194,9 +188,9 @@ export class OneShotService {
   }
 
   async setCouverture(id: string, file: File): Promise<void> {
-    const path = `oneshots/${id}/couverture`;
+    const path = `oneshots/${id}/couverture_${Date.now()}`;
     const storageRef = ref(storage, path);
-    await uploadBytes(storageRef, file);
+    await uploadStatic(storageRef, file);
     const url = await getDownloadURL(storageRef);
     await updateDoc(doc(db, 'oneshots', id), {
       photoCouvertureUrl: url,
@@ -389,7 +383,7 @@ export class OneShotService {
       const storagePath = `oneshots/${oneShotId}/${id}.${ext}`;
       const thumbPath = `oneshots/${oneShotId}/${id}_thumb.${ext}`;
       const storageRef = ref(storage, storagePath);
-      const task = uploadBytesResumable(storageRef, file);
+      const task = uploadResumable(storageRef, file);
 
       task.on(
         'state_changed',
@@ -404,7 +398,7 @@ export class OneShotService {
             getDownloadURL(task.snapshot.ref),
             compressImage(file, COMPRESS_THUMB),
           ]);
-          const thumbSnap = await uploadBytes(ref(storage, thumbPath), thumb);
+          const thumbSnap = await uploadStatic(ref(storage, thumbPath), thumb);
           const thumbnailUrl = await getDownloadURL(thumbSnap.ref);
           const data: Omit<OneShotPhoto, 'id'> = {
             url,

@@ -16,10 +16,10 @@ import {
   DocumentData,
   QueryConstraint,
 } from 'firebase/firestore';
-import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
+import { ref, getDownloadURL, deleteObject } from 'firebase/storage';
 import { Observable, from } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { db, storage } from '../utils/firebase';
+import { db, storage, uploadResumable } from '../utils/firebase';
 import { Article } from '../models/article.model';
 import { compressImage, COMPRESS_ACTUALITE } from '../utils/image-compress';
 import { NotificationService } from './notification.service';
@@ -145,10 +145,10 @@ export class ArticleService {
     onProgress?: (pct: number) => void,
   ): Promise<{ url: string; storagePath: string }> {
     return compressImage(file, COMPRESS_ACTUALITE).then((compressed) => {
-      const path = `articles/${articleId}/couverture.webp`;
+      const path = `articles/${articleId}/couverture_${Date.now()}.webp`;
       const storageRef = ref(storage, path);
       return new Promise((resolve, reject) => {
-        const task = uploadBytesResumable(storageRef, compressed, { contentType: 'image/webp' });
+        const task = uploadResumable(storageRef, compressed, { contentType: 'image/webp' });
         task.on(
           'state_changed',
           (snap) => onProgress?.(Math.round((snap.bytesTransferred / snap.totalBytes) * 100)),

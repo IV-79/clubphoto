@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
+import { ref, getDownloadURL, deleteObject } from 'firebase/storage';
 import { Observable, from, map, catchError, of } from 'rxjs';
-import { db, storage, docStream } from '../utils/firebase';
+import { db, storage, docStream, uploadResumable } from '../utils/firebase';
 import { PHOTO_CATEGORIES } from '../models/photo.model';
 import { compressImage, COMPRESS_HERO } from '../utils/image-compress';
 
@@ -63,9 +63,9 @@ export class ConfigService {
 
   async uploadHeroImage(file: File): Promise<{ url: string; storagePath: string }> {
     const compressed = await compressImage(file, COMPRESS_HERO);
-    const storagePath = 'config/hero.webp';
+    const storagePath = `config/hero_${Date.now()}.webp`;
     const storageRef = ref(storage, storagePath);
-    const task = uploadBytesResumable(storageRef, compressed);
+    const task = uploadResumable(storageRef, compressed, { contentType: 'image/webp' });
     await new Promise<void>((resolve, reject) => task.on('state_changed', null, reject, resolve));
     const url = await getDownloadURL(storageRef);
     return { url, storagePath };

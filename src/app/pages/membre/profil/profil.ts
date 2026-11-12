@@ -203,10 +203,10 @@ export class MembreProfil implements OnInit {
     const profile = this.profile();
     if (!file || !profile || this.uploadingProfil()) return;
     this.uploadingProfil.set(true);
-    this.authService.uploadUserPhoto(profile.uid, file, 'profil').subscribe({
+    this.authService.uploadUserPhoto(profile.uid, file, 'profil', profile.photoProfilPath).subscribe({
       next: async (state) => {
-        if (state.state === 'done' && state.url) {
-          await this.authService.updateProfile(profile.uid, { photoProfilUrl: state.url });
+        if (state.state === 'done' && state.url && state.storagePath) {
+          await this.authService.updateProfile(profile.uid, { photoProfilUrl: state.url, photoProfilPath: state.storagePath });
           this.cancelProfil();
           this.uploadingProfil.set(false);
         }
@@ -246,10 +246,10 @@ export class MembreProfil implements OnInit {
     const profile = this.profile();
     if (!file || !profile || this.uploadingBandeau()) return;
     this.uploadingBandeau.set(true);
-    this.authService.uploadUserPhoto(profile.uid, file, 'bandeau').subscribe({
+    this.authService.uploadUserPhoto(profile.uid, file, 'bandeau', profile.photoBandeauPath).subscribe({
       next: async (state) => {
-        if (state.state === 'done' && state.url) {
-          await this.authService.updateProfile(profile.uid, { photoBandeauUrl: state.url });
+        if (state.state === 'done' && state.url && state.storagePath) {
+          await this.authService.updateProfile(profile.uid, { photoBandeauUrl: state.url, photoBandeauPath: state.storagePath });
           this.cancelBandeau();
           this.uploadingBandeau.set(false);
         }

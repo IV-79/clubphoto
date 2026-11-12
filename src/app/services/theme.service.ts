@@ -21,16 +21,10 @@ import {
   DocumentData,
   writeBatch,
 } from 'firebase/firestore';
-import {
-  ref,
-  uploadBytesResumable,
-  uploadBytes,
-  getDownloadURL,
-  deleteObject,
-} from 'firebase/storage';
+import { ref, getDownloadURL, deleteObject } from 'firebase/storage';
 import { Observable, from } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { db, storage } from '../utils/firebase';
+import { db, storage, uploadResumable, uploadStatic } from '../utils/firebase';
 import { ThemeMensuel, ThemeSoumission, ThemeVote } from '../models/theme.model';
 import { PhotoExif } from '../models/photo.model';
 import { Commentaire, Reponse } from '../models/commentaire.model';
@@ -131,9 +125,9 @@ export class ThemeService {
   }
 
   async setCouverture(id: string, file: File): Promise<void> {
-    const path = `themes/${id}/couverture`;
+    const path = `themes/${id}/couverture_${Date.now()}`;
     const storageRef = ref(storage, path);
-    await uploadBytes(storageRef, file);
+    await uploadStatic(storageRef, file);
     const url = await getDownloadURL(storageRef);
     await updateDoc(doc(db, 'themes', id), {
       photoCouvertureUrl: url,
@@ -240,7 +234,7 @@ export class ThemeService {
     const storagePath = `themes/${themeId}/${uid}_${ts}.webp`;
     const thumbPath = `themes/${themeId}/${uid}_${ts}_thumb.webp`;
     const storageRef = ref(storage, storagePath);
-    const task = uploadBytesResumable(storageRef, file);
+    const task = uploadResumable(storageRef, file);
 
     await new Promise<void>((resolve, reject) => {
       task.on(
@@ -253,7 +247,7 @@ export class ThemeService {
               getDownloadURL(storageRef),
               compressImage(file, COMPRESS_THUMB),
             ]);
-            const thumbSnap = await uploadBytes(ref(storage, thumbPath), thumb);
+            const thumbSnap = await uploadStatic(ref(storage, thumbPath), thumb);
             const thumbnailUrl = await getDownloadURL(thumbSnap.ref);
             const batch = writeBatch(db);
             const soumRef = doc(collection(db, 'themes', themeId, 'soumissions'));

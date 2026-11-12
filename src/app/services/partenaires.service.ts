@@ -11,8 +11,8 @@ import {
   query,
   orderBy,
 } from 'firebase/firestore';
-import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
-import { db, storage } from '../utils/firebase';
+import { ref, getDownloadURL, deleteObject } from 'firebase/storage';
+import { db, storage, uploadResumable } from '../utils/firebase';
 import { Partenaire } from '../models/partenaire.model';
 import { generateId } from '../utils/id';
 
@@ -37,9 +37,9 @@ export class PartenairesService {
 
   uploadLogo(file: File, id: string): Observable<LogoUploadState> {
     return new Observable((observer) => {
-      const path = `partenaires/${id}.webp`;
+      const path = `partenaires/${id}_${Date.now()}.webp`;
       const storageRef = ref(storage, path);
-      const task = uploadBytesResumable(storageRef, file);
+      const task = uploadResumable(storageRef, file, { contentType: 'image/webp' });
       task.on(
         'state_changed',
         (snap) =>

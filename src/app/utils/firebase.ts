@@ -1,7 +1,13 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore, onSnapshot, Query, DocumentReference } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
-import { getStorage } from 'firebase/storage';
+import {
+  getStorage,
+  StorageReference,
+  UploadMetadata,
+  uploadBytesResumable,
+  uploadBytes,
+} from 'firebase/storage';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
@@ -9,6 +15,24 @@ const app = initializeApp(environment.firebase);
 export const db = getFirestore(app);
 export const auth = getAuth(app);
 export const storage = getStorage(app);
+
+const CACHE_1YEAR = 'public, max-age=31536000, immutable';
+
+export function uploadResumable(
+  storageRef: StorageReference,
+  data: Blob | Uint8Array | ArrayBuffer,
+  extraMeta?: UploadMetadata,
+) {
+  return uploadBytesResumable(storageRef, data, { cacheControl: CACHE_1YEAR, ...extraMeta });
+}
+
+export function uploadStatic(
+  storageRef: StorageReference,
+  data: Blob | Uint8Array | ArrayBuffer,
+  extraMeta?: UploadMetadata,
+) {
+  return uploadBytes(storageRef, data, { cacheControl: CACHE_1YEAR, ...extraMeta });
+}
 
 export function collectionStream<T>(q: Query<any>, idField?: string): Observable<T[]> {
   return new Observable((sub) =>

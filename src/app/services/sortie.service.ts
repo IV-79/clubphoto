@@ -22,16 +22,10 @@ import {
   QueryDocumentSnapshot,
   DocumentData,
 } from 'firebase/firestore';
-import {
-  ref,
-  uploadBytes,
-  uploadBytesResumable,
-  getDownloadURL,
-  deleteObject,
-} from 'firebase/storage';
+import { ref, getDownloadURL, deleteObject } from 'firebase/storage';
 import { Observable, from } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { db, storage } from '../utils/firebase';
+import { db, storage, uploadResumable, uploadStatic } from '../utils/firebase';
 import {
   Sortie,
   AtelierGroupe,
@@ -190,9 +184,9 @@ export class SortieService {
   }
 
   async setImageEvenement(sortieId: string, file: File): Promise<void> {
-    const path = `sorties/${sortieId}/evenement-cover`;
+    const path = `sorties/${sortieId}/evenement-cover_${Date.now()}`;
     const storageRef = ref(storage, path);
-    await uploadBytes(storageRef, file);
+    await uploadStatic(storageRef, file);
     const url = await getDownloadURL(storageRef);
     await updateDoc(doc(db, 'sorties', sortieId), {
       imageEvenementUrl: url,
@@ -408,7 +402,7 @@ export class SortieService {
       const storagePath = `sorties/${sortieId}/${id}.${ext}`;
       const thumbPath = `sorties/${sortieId}/${id}_thumb.${ext}`;
       const storageRef = ref(storage, storagePath);
-      const task = uploadBytesResumable(storageRef, file);
+      const task = uploadResumable(storageRef, file);
 
       task.on(
         'state_changed',
@@ -423,7 +417,7 @@ export class SortieService {
             getDownloadURL(task.snapshot.ref),
             compressImage(file, COMPRESS_THUMB),
           ]);
-          const thumbSnap = await uploadBytes(ref(storage, thumbPath), thumb);
+          const thumbSnap = await uploadStatic(ref(storage, thumbPath), thumb);
           const thumbnailUrl = await getDownloadURL(thumbSnap.ref);
           const fileSize = file.size + thumb.size;
           const imageData: Omit<SortieImage, 'id'> = {

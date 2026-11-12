@@ -18,15 +18,9 @@ import {
   arrayUnion,
   arrayRemove,
 } from 'firebase/firestore';
-import {
-  ref,
-  uploadBytesResumable,
-  uploadBytes,
-  getDownloadURL,
-  deleteObject,
-} from 'firebase/storage';
+import { ref, getDownloadURL, deleteObject } from 'firebase/storage';
 import { Observable, from, map } from 'rxjs';
-import { db, storage } from '../utils/firebase';
+import { db, storage, uploadResumable, uploadStatic } from '../utils/firebase';
 import { Defi, DefiInscription, DefiPhoto, DefiVote } from '../models/defi.model';
 import { Commentaire, Reponse } from '../models/commentaire.model';
 import { UserProfile } from '../models/user.model';
@@ -200,10 +194,10 @@ export class DefiService {
   // ── Couverture ───────────────────────────────────────────────────────
 
   async setCouverture(id: string, file: File): Promise<void> {
-    const storagePath = `defis/${id}/couverture.webp`;
+    const storagePath = `defis/${id}/couverture_${Date.now()}.webp`;
     const storageRef = ref(storage, storagePath);
     const compressed = await compressImage(file, COMPRESS_COUVERTURE);
-    await uploadBytesResumable(storageRef, compressed);
+    await uploadResumable(storageRef, compressed, { contentType: 'image/webp' });
     const url = await getDownloadURL(storageRef);
     await updateDoc(doc(db, 'defis', id), {
       photoCouvertureUrl: url,
@@ -277,7 +271,7 @@ export class DefiService {
           ]);
           const fileSize = compressed.size + thumb.size;
           const storageRef = ref(storage, storagePath);
-          const task = uploadBytesResumable(storageRef, compressed);
+          const task = uploadResumable(storageRef, compressed, { contentType: 'image/webp' });
 
           task.on(
             'state_changed',
@@ -290,7 +284,7 @@ export class DefiService {
             async () => {
               const [url, thumbSnap] = await Promise.all([
                 getDownloadURL(task.snapshot.ref),
-                uploadBytes(ref(storage, thumbPath), thumb),
+                uploadStatic(ref(storage, thumbPath), thumb, { contentType: 'image/webp' }),
               ]);
               const thumbnailUrl = await getDownloadURL(thumbSnap.ref);
               const membreNom = `${user.prenom ?? ''} ${user.nom}`.trim();

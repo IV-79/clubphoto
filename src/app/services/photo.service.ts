@@ -1,11 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import {
-  ref,
-  uploadBytesResumable,
-  uploadBytes,
-  getDownloadURL,
-  deleteObject,
-} from 'firebase/storage';
+import { ref, getDownloadURL, deleteObject } from 'firebase/storage';
 import {
   collection,
   doc,
@@ -23,7 +17,7 @@ import {
   getDocs,
 } from 'firebase/firestore';
 import { Observable, from, map } from 'rxjs';
-import { db, storage, collectionStream } from '../utils/firebase';
+import { db, storage, collectionStream, uploadResumable, uploadStatic } from '../utils/firebase';
 import { Photo, PhotoExif, PhotoVisibilite, UploadState } from '../models/photo.model';
 import { Commentaire, Reponse } from '../models/commentaire.model';
 import { hasExif } from '../utils/exif-reader';
@@ -54,7 +48,7 @@ export class PhotoService {
       const storagePath = `photos/${uid}/${id}.${ext}`;
       const thumbPath = `photos/${uid}/${id}_thumb.${ext}`;
       const storageRef = ref(storage, storagePath);
-      const task = uploadBytesResumable(storageRef, file);
+      const task = uploadResumable(storageRef, file);
 
       task.on(
         'state_changed',
@@ -69,7 +63,7 @@ export class PhotoService {
               getDownloadURL(task.snapshot.ref),
               compressImage(file, COMPRESS_THUMB),
             ]);
-            const thumbSnap = await uploadBytes(ref(storage, thumbPath), thumb);
+            const thumbSnap = await uploadStatic(ref(storage, thumbPath), thumb);
             const thumbnailUrl = await getDownloadURL(thumbSnap.ref);
             const data: Omit<Photo, 'id'> = {
               uid,

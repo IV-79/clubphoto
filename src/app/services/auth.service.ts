@@ -20,10 +20,10 @@ import {
   query,
   where,
 } from 'firebase/firestore';
-import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
+import { ref, getDownloadURL, deleteObject } from 'firebase/storage';
 import { Router } from '@angular/router';
 import { from, switchMap, of, Observable, map, shareReplay, pairwise, filter, take } from 'rxjs';
-import { db, auth, storage, docStream } from '../utils/firebase';
+import { db, auth, storage, docStream, uploadResumable } from '../utils/firebase';
 import { todayISO } from '../utils/date';
 import { DocumentService } from './document.service';
 import { UserProfile } from '../models/user.model';
@@ -337,8 +337,12 @@ export class AuthService {
     await this.documentService.deleteAllDocumentsByUser(uid);
 
     // 7. Photos profil et bandeau Storage
-    deletes.push(deleteObject(ref(storage, `user-photos/${uid}/profil.webp`)).catch(() => {}));
-    deletes.push(deleteObject(ref(storage, `user-photos/${uid}/bandeau.webp`)).catch(() => {}));
+    const userSnap = await getDoc(doc(db, 'users', uid));
+    const userData = userSnap.exists() ? (userSnap.data() as { photoProfilPath?: string; photoBandeauPath?: string }) : {};
+    const profilPath = userData.photoProfilPath ?? `user-photos/${uid}/profil.webp`;
+    const bandeauPath = userData.photoBandeauPath ?? `user-photos/${uid}/bandeau.webp`;
+    deletes.push(deleteObject(ref(storage, profilPath)).catch(() => {}));
+    deletes.push(deleteObject(ref(storage, bandeauPath)).catch(() => {}));
 
     // 8. Profil Firestore
     deletes.push(deleteDoc(doc(db, 'users', uid)));
@@ -350,11 +354,12 @@ export class AuthService {
     uid: string,
     file: File,
     type: 'profil' | 'bandeau',
-  ): Observable<{ state: 'uploading' | 'done'; progress: number; url?: string }> {
+    oldPath?: string,
+  ): Observable<{ state: 'uploading' | 'done'; progress: number; url?: string; storagePath?: string }> {
     return new Observable((observer) => {
-      const storagePath = `user-photos/${uid}/${type}.webp`;
+      const storagePath = `user-photos/${uid}/${type}_${Date.now()}.webp`;
       const storageRef = ref(storage, storagePath);
-      const task = uploadBytesResumable(storageRef, file);
+      const task = uploadResumable(storageRef, file, { contentType: 'image/webp' });
       task.on(
         'state_changed',
         (snap) =>
@@ -365,7 +370,8 @@ export class AuthService {
         (err) => observer.error(err),
         async () => {
           const url = await getDownloadURL(task.snapshot.ref);
-          observer.next({ state: 'done', progress: 100, url });
+          if (oldPath) deleteObject(ref(storage, oldPath)).catch(() => {});
+          observer.next({ state: 'done', progress: 100, url, storagePath });
           observer.complete();
         },
       );

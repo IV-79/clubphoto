@@ -32,7 +32,9 @@ export interface UserProfile {
   charteAccepteeVersion?: number;
   cguAccepteeVersion?: number;
   photoProfilUrl?: string;
+  photoProfilPath?: string;
   photoBandeauUrl?: string;
+  photoBandeauPath?: string;
   queuePos?: number;
 }
 
