@@ -338,6 +338,20 @@
 }
 .btn-add-cancel:hover { color: var(--text-primary); }
 
+.btn-add-sm {
+  background: none;
+  border: 1px solid var(--border-strong);
+  color: var(--text-secondary);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+  margin-left: auto;
+}
+.btn-add-sm:hover { border-color: #cc0000; color: #cc0000; }
+
 /* ── Upload ──────────────────────────────────────────────────── */
 
 .upload-section { margin-bottom: 1.5rem; }
@@ -836,116 +850,13 @@
   color: var(--text-secondary);
 }
 
-/* badges inline dans le label photos */
-.badge-choisie-label {
-  font-size: 0.72rem;
-  color: #b7791f;
-  background: rgba(236,201,75,0.15);
-  border: 1px solid rgba(184,160,70,0.4);
-  border-radius: 4px;
-  padding: 2px 8px;
-  font-weight: 600;
-}
-.badge-choisie-warning {
-  font-size: 0.72rem;
-  color: #c05621;
-  background: rgba(252,129,74,0.12);
-  border: 1px solid rgba(252,129,74,0.3);
-  border-radius: 4px;
-  padding: 2px 8px;
-  font-weight: 600;
-}
-
-/* badge ⭐ dans le titre de ligne */
-.badge-photo-selectionnee { font-size: 0.8rem; line-height: 1; }
-
-/* carte photo sélectionnée */
-.photo-choisie-card {
-  border-color: rgba(184,160,70,0.7) !important;
-  box-shadow: 0 0 0 2px rgba(184,160,70,0.25);
-}
-.photo-choisie-badge {
-  position: absolute;
-  top: 6px;
-  left: 6px;
-  z-index: 4;
-  font-size: 1rem;
-  line-height: 1;
-  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
-}
-
-/* footer actions dans les cartes (choisir + supprimer) */
+/* footer actions dans les cartes (supprimer) */
 .photo-footer-actions {
   display: flex;
   align-items: center;
   gap: 0.3rem;
   margin-left: auto;
 }
-
-/* bouton choisir */
-.btn-choisir {
-  background: none;
-  border: 1px solid var(--border-strong);
-  color: var(--text-secondary);
-  border-radius: 4px;
-  padding: 2px 6px;
-  font-size: 0.72rem;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.15s;
-}
-.btn-choisir:hover { border-color: #b7791f; color: #b7791f; }
-.btn-choisir-active {
-  background: rgba(236,201,75,0.15);
-  border-color: #b7791f;
-  color: #b7791f;
-  font-weight: 600;
-}
-
-/* ── Galerie post-fermeture ──────────────────────────────────── */
-
-.groupes-gallery {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 1.25rem;
-  margin-top: 0.25rem;
-}
-
-.gallery-card {
-  background: var(--bg-surface-raised);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  overflow: hidden;
-  cursor: pointer;
-  transition: box-shadow 0.2s, transform 0.15s;
-}
-.gallery-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.12); transform: translateY(-2px); }
-.gallery-card-empty { cursor: default; opacity: 0.6; }
-.gallery-card-empty:hover { box-shadow: none; transform: none; }
-
-.gallery-img-wrap { aspect-ratio: 4/3; overflow: hidden; }
-.gallery-img { width: 100%; height: 100%; object-fit: cover; display: block; }
-
-.gallery-no-photo {
-  aspect-ratio: 4/3;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--border);
-  color: var(--text-hint);
-  font-size: 0.85rem;
-  font-style: italic;
-}
-
-.gallery-card-footer {
-  padding: 0.6rem 0.85rem 0.75rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-}
-.gallery-group-nom { font-size: 0.95rem; font-weight: 700; }
-.gallery-auteur { font-size: 0.8rem; color: var(--text-secondary); }
-.gallery-nbmembres { font-size: 0.75rem; color: var(--text-hint); }
 
 /* ── Créer un groupe ─────────────────────────────────────────── */
 

@@ -10,7 +10,6 @@ export interface AtelierGroupe {
   membres: string[];  // UIDs
   nbMembres: number;
   nbPhotos: number;
-  photoChoisieId?: string; // photo sélectionnée explicitement par le groupe pour présentation
 }
 
 export const SORTIE_TYPE_META: Record<SortieType, { label: string; emoji: string }> = {

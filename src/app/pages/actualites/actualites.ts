@@ -167,8 +167,12 @@ export class Actualites {
   private articleService = inject(ArticleService);
   private authService = inject(AuthService);
 
+  private readonly FILTER_KEY = 'actualites_filter';
+
   types = ARTICLE_TYPES;
-  activeType = signal<ArticleType | null>(null);
+  activeType = signal<ArticleType | null>(
+    (sessionStorage.getItem('actualites_filter') as ArticleType) ?? null,
+  );
   selected = signal<Article | null>(null);
 
   private profile = toSignal(this.authService.currentUserProfile$);
@@ -184,6 +188,12 @@ export class Actualites {
   private cursor = signal<QueryDocumentSnapshot<DocumentData> | null>(null);
 
   constructor() {
+    effect(() => {
+      const type = this.activeType();
+      if (type) sessionStorage.setItem(this.FILTER_KEY, type);
+      else sessionStorage.removeItem(this.FILTER_KEY);
+    });
+
     effect(() => {
       const _role = this.role();
       untracked(() => {

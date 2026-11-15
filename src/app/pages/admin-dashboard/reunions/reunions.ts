@@ -307,11 +307,16 @@ export class Reunions {
   }
 
   async retirerDoc(reunionId: string, d: ClubDocument) {
-    const msg =
-      d.type === 'reunion'
-        ? `Supprimer définitivement « ${d.nom} » ?`
-        : `Retirer le lien vers « ${d.nom} » ? Le document restera dans la bibliothèque.`;
-    const ok = await this.confirmService.confirm(msg);
+    const isDelete = d.type === 'reunion';
+    const msg = isDelete
+      ? `Supprimer définitivement « ${d.nom} » ?`
+      : `Retirer le lien vers « ${d.nom} » ? Le document restera dans la bibliothèque.`;
+    const ok = await this.confirmService.confirm(
+      msg,
+      isDelete ? 'Supprimer le document' : 'Retirer le lien',
+      isDelete ? 'Supprimer' : 'Retirer',
+      isDelete,
+    );
     if (!ok) return;
     if (d.type === 'reunion') {
       await this.docService.deleteDocument(d.id!, d.storagePath);

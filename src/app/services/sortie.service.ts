@@ -383,12 +383,6 @@ export class SortieService {
     await updateDoc(doc(db, 'sorties', sortieId), { soumissionsFermees: deleteField() });
   }
 
-  async choisirPhotoGroupe(sortieId: string, groupeId: string, photoId: string | null): Promise<void> {
-    await updateDoc(doc(db, `sorties/${sortieId}/groupes`, groupeId), {
-      photoChoisieId: photoId ?? deleteField(),
-    });
-  }
-
   // --- Photos ---
 
   uploadPhoto(

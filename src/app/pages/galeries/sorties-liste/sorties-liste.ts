@@ -76,6 +76,25 @@ export class SortiesListe {
   private readonly TERM_STEP = 4;
 
   constructor() {
+    try {
+      const saved = JSON.parse(sessionStorage.getItem(this.FILTER_KEY) ?? '{}');
+      if (saved.type) this.filterType.set(saved.type);
+      if (saved.dateDu) this.filterDateDu.set(saved.dateDu);
+      if (saved.dateAu) this.filterDateAu.set(saved.dateAu);
+      if (saved.organisees) this.filterOrganisees.set(true);
+      if (saved.participe) this.filterParticipe.set(true);
+    } catch {}
+
+    effect(() => {
+      sessionStorage.setItem(this.FILTER_KEY, JSON.stringify({
+        type: this.filterType() ?? '',
+        dateDu: this.filterDateDu(),
+        dateAu: this.filterDateAu(),
+        organisees: this.filterOrganisees(),
+        participe: this.filterParticipe(),
+      }));
+    });
+
     effect(() => {
       const p = this.profile();
       if (p === undefined) return;
@@ -190,6 +209,8 @@ export class SortiesListe {
     SortieType,
     { label: string; emoji: string },
   ][];
+
+  private readonly FILTER_KEY = 'activites_filter';
 
   filterTexte = signal('');
   filterType = signal<SortieType | 'oneshot' | 'defi' | 'exposition' | null>(null);

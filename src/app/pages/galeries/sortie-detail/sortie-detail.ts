@@ -51,13 +51,8 @@ interface UploadTask {
 export interface GroupePhotos {
   groupe: AtelierGroupe;
   photos: SortieImage[];
-  photoChoisie: SortieImage | null;
 }
 
-export interface GalerieItem {
-  gp: GroupePhotos;
-  lightboxIndex: number | null;
-}
 
 @Component({
   selector: 'app-sortie-detail',
@@ -134,13 +129,15 @@ export class SortieDetail {
         .catch(() => {});
     }
 
-    const isOrg = !!(uid && s?.organisateurUid === uid);
-    const isAdmin = profile?.role === 'admin';
-    if (isOrg || isAdmin) {
-      firstValueFrom(this.authService.getAllMembersOnce())
-        .then((m) => this.allMembres.set(m))
-        .catch(() => {});
-    }
+  }
+
+  private membresLoaded = false;
+
+  private async loadMembresOnce() {
+    if (this.membresLoaded) return;
+    this.membresLoaded = true;
+    const m = await firstValueFrom(this.authService.getAllMembersOnce()).catch(() => []);
+    this.allMembres.set(m);
   }
 
   // Photos optimistes : ajoutées immédiatement après upload, supprimées quand photos() les intègre
@@ -186,7 +183,8 @@ export class SortieDetail {
   joiningGroupeId = signal<string | null>(null);
   closingSubmissions = signal(false);
   uploadGroupeId = signal<string | null>(null);
-  galleryLightboxIndex = signal<number | null>(null);
+  addingMembreGroupeId = signal<string | null>(null);
+  selectedAddMembreUid = signal('');
 
   // ── Permissions ───────────────────────────────────────────────
   isOrganisateur = computed(() => {
@@ -223,34 +221,9 @@ export class SortieDetail {
     const allPhotos = this.allPhotos();
     return this.groupes().map((g) => {
       const photos = this.arePhotosVisible(g.id) ? allPhotos.filter((p) => p.groupeId === g.id) : [];
-      const photoChoisie = g.photoChoisieId
-        ? (photos.find((p) => p.id === g.photoChoisieId) ?? null)
-        : null;
-      return { groupe: g, photos, photoChoisie };
+      return { groupe: g, photos };
     });
   });
-
-  galerieItems = computed((): GalerieItem[] => {
-    let lbIdx = 0;
-    return this.photosParGroupe().map((gp) => ({
-      gp,
-      lightboxIndex: gp.photoChoisie ? lbIdx++ : null,
-    }));
-  });
-
-  photosChoisiesLightbox = computed((): LightboxPhoto[] =>
-    this.photosParGroupe()
-      .filter((gp) => gp.photoChoisie !== null)
-      .map((gp) => ({
-        id: gp.photoChoisie!.id,
-        url: gp.photoChoisie!.url,
-        nomAuteur: `${gp.photoChoisie!.nomUploader} — ${gp.groupe.nom}`,
-        uploaderUid: gp.photoChoisie!.uploaderUid,
-        likes: gp.photoChoisie!.likes,
-        uploadedAt: gp.photoChoisie!.uploadedAt,
-        exif: gp.photoChoisie!.exif,
-      })),
-  );
 
   isGroupeOpen(groupeId: string): boolean {
     return this.openGroupIds().has(groupeId);
@@ -544,6 +517,9 @@ export class SortieDetail {
     if (g.nbMembres > 0) {
       await this.confirmService.confirm(
         `Impossible de supprimer « ${g.nom} » : ${g.nbMembres} membre(s) sont encore dans ce groupe. Retirez-les d'abord.`,
+        'Action impossible',
+        'OK',
+        false,
       );
       return;
     }
@@ -551,6 +527,37 @@ export class SortieDetail {
     if (!ok) return;
     await this.sortieService.deleteGroupe(this.sortieId, g.id);
     this.groupes.update((gs) => gs.filter((gr) => gr.id !== g.id));
+  }
+
+  async ouvrirAjoutMembre() {
+    await this.loadMembresOnce();
+    this.selectedMembreUid.set('');
+    this.addingMembre.set(true);
+  }
+
+  async ouvrirAjoutMembreGroupe(groupeId: string) {
+    await this.loadMembresOnce();
+    this.selectedAddMembreUid.set('');
+    this.addingMembreGroupeId.set(groupeId);
+  }
+
+  membresAjoutablesAuGroupe(groupeId: string): UserProfile[] {
+    const dansGroupe = new Set(this.groupes().find((g) => g.id === groupeId)?.membres ?? []);
+    return this.allMembres()
+      .filter((m) => !dansGroupe.has(m.uid) && !m.isSuspended)
+      .sort((a, b) => {
+        const na = `${a.nom ?? ''} ${a.prenom ?? ''}`.toLowerCase().normalize('NFD');
+        const nb = `${b.nom ?? ''} ${b.prenom ?? ''}`.toLowerCase().normalize('NFD');
+        return na < nb ? -1 : na > nb ? 1 : 0;
+      });
+  }
+
+  async confirmerAjoutMembreGroupe(groupeId: string) {
+    const uid = this.selectedAddMembreUid();
+    if (!uid) return;
+    await this.inscrireDansGroupe(groupeId, uid);
+    this.addingMembreGroupeId.set(null);
+    this.selectedAddMembreUid.set('');
   }
 
   async inscrireDansGroupe(groupeId: string, uid: string) {
@@ -579,7 +586,7 @@ export class SortieDetail {
   }
 
   async retirerDuGroupe(groupeId: string, uid: string, nomMembre: string) {
-    const ok = await this.confirmService.confirm(`Retirer ${nomMembre} du groupe ?`);
+    const ok = await this.confirmService.confirm(`Retirer ${nomMembre} du groupe ?`, 'Retirer du groupe', 'Retirer', false);
     if (!ok) return;
     await this.sortieService.quitterGroupe(this.sortieId, groupeId, uid);
     this.groupes.update((gs) =>
@@ -643,7 +650,7 @@ export class SortieDetail {
     const p = this.profile();
     const mg = this.monGroupe();
     if (!p || !mg) return;
-    const ok = await this.confirmService.confirm(`Quitter le groupe « ${mg.nom} » ?`);
+    const ok = await this.confirmService.confirm(`Quitter le groupe « ${mg.nom} » ?`, 'Quitter le groupe', 'Quitter', false);
     if (!ok) return;
     await this.sortieService.quitterGroupe(this.sortieId, mg.id, p.uid);
     this.groupes.update((gs) =>
@@ -664,24 +671,7 @@ export class SortieDetail {
 
   // ── Fermer / rouvrir soumissions ──────────────────────────────
   async fermerSoumissions() {
-    const groupesSansPhoto = this.groupes().filter((g) => !g.photoChoisieId);
-    let ok: boolean;
-    if (groupesSansPhoto.length > 0) {
-      const noms = groupesSansPhoto.map((g) => `« ${g.nom} »`).join(', ');
-      ok = await this.confirmService.confirm(
-        `${groupesSansPhoto.length} groupe(s) n'ont pas encore choisi de photo à présenter : ${noms}. Fermer quand même ?`,
-        'Fermer les soumissions',
-        'Fermer quand même',
-        true,
-      );
-    } else {
-      ok = await this.confirmService.confirm(
-        'Tous les groupes ont choisi leur photo. Fermer les soumissions ?',
-        'Fermer les soumissions',
-        'Fermer',
-        false,
-      );
-    }
+    const ok = await this.confirmService.confirm('Fermer les soumissions de photos ?', 'Fermer les soumissions', 'Fermer', false);
     if (!ok) return;
     this.closingSubmissions.set(true);
     try {
@@ -692,21 +682,8 @@ export class SortieDetail {
     }
   }
 
-  async choisirPhoto(groupeId: string, photoId: string, estDejaChoisie: boolean) {
-    await this.sortieService.choisirPhotoGroupe(
-      this.sortieId,
-      groupeId,
-      estDejaChoisie ? null : photoId,
-    );
-    this.groupes.update((gs) =>
-      gs.map((g) =>
-        g.id === groupeId ? { ...g, photoChoisieId: estDejaChoisie ? undefined : photoId } : g,
-      ),
-    );
-  }
-
   async rouvrirSoumissions() {
-    const ok = await this.confirmService.confirm('Rouvrir les soumissions de photos ?');
+    const ok = await this.confirmService.confirm('Rouvrir les soumissions de photos ?', 'Rouvrir les soumissions', 'Rouvrir', false);
     if (!ok) return;
     await this.sortieService.rouvrirSoumissions(this.sortieId);
     this.sortie.update((s) => (s ? { ...s, soumissionsFermees: false } : s));
@@ -830,7 +807,7 @@ export class SortieDetail {
     const s = this.sortie();
     const p = this.profile();
     if (!s || !p) return;
-    const ok = await this.confirmService.confirm(`Désinscrire ${targetNom} de cet événement ?`);
+    const ok = await this.confirmService.confirm(`Désinscrire ${targetNom} de cet événement ?`, 'Désinscrire', 'Désinscrire', false);
     if (!ok) return;
     await this.sortieService.desinscrire(this.sortieId, targetUid);
     if (targetUid !== p.uid) {

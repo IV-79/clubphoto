@@ -434,7 +434,7 @@ export class DefiDetail {
   async desinscrire() {
     const uid = this.profile()?.uid;
     if (!uid) return;
-    const ok = await this.confirmService.confirm('Se désinscrire ? Vos photos soumises seront supprimées.');
+    const ok = await this.confirmService.confirm('Se désinscrire ? Vos photos soumises seront supprimées.', 'Se désinscrire', 'Se désinscrire', true);
     if (!ok) return;
     await this.defiService.desinscrire(this.id, uid);
     this.inscriptions.update((is) => is.filter((i) => i.uid !== uid));

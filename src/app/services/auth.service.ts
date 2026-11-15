@@ -112,10 +112,22 @@ export class AuthService {
     return (snap.data() as UserProfile).role;
   }
 
+  private allMembresCache$: Observable<UserProfile[]> | null = null;
+  private publicMembresCache$: Observable<UserProfile[]> | null = null;
+
   getAllMembersOnce(): Observable<UserProfile[]> {
-    return from(getDocs(collection(db, 'users'))).pipe(
-      map((snap) => snap.docs.map((d) => ({ uid: d.id, ...d.data() }) as UserProfile)),
-    );
+    if (!this.allMembresCache$) {
+      this.allMembresCache$ = from(getDocs(collection(db, 'users'))).pipe(
+        map((snap) => snap.docs.map((d) => ({ uid: d.id, ...d.data() }) as UserProfile)),
+        shareReplay(1),
+      );
+    }
+    return this.allMembresCache$;
+  }
+
+  invalidateAllMembresCache(): void {
+    this.allMembresCache$ = null;
+    this.publicMembresCache$ = null;
   }
 
   advanceMembresQueue(uids: string[]): void {
@@ -126,9 +138,13 @@ export class AuthService {
   }
 
   getPublicMembresOnce(): Observable<UserProfile[]> {
-    return from(getDocs(query(collection(db, 'users'), where('visibilite', '==', 'public')))).pipe(
-      map((snap) => snap.docs.map((d) => ({ uid: d.id, ...d.data() }) as UserProfile)),
-    );
+    if (!this.publicMembresCache$) {
+      this.publicMembresCache$ = from(getDocs(query(collection(db, 'users'), where('visibilite', '==', 'public')))).pipe(
+        map((snap) => snap.docs.map((d) => ({ uid: d.id, ...d.data() }) as UserProfile)),
+        shareReplay(1),
+      );
+    }
+    return this.publicMembresCache$;
   }
 
   getMemberProfile(uid: string): Observable<UserProfile | null> {

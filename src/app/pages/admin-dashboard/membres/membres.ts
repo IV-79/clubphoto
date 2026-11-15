@@ -177,7 +177,7 @@ export class Membres implements OnInit {
     this.recalcUid.set(membre.uid);
     try {
       await this.authService.recalculateStorage(membre.uid);
-      // Reload pour récupérer les nouvelles valeurs de stockage
+      this.authService.invalidateAllMembresCache();
       this.membres.set(await firstValueFrom(this.authService.getAllMembersOnce()));
       this.snackBar.open('Stockage recalculé', '', { duration: 2500 });
     } catch {

@@ -325,63 +325,6 @@
               }
             </div>
 
-            <!-- ─── PHASE TERMINÉE : grille galerie 1 photo / groupe ─── -->
-            @if (estTermine()) {
-              @if (galerieItems().length === 0) {
-                <p class="empty-msg">Aucun groupe enregistré.</p>
-              } @else {
-                <div class="groupes-gallery">
-                  @for (item of galerieItems(); track item.gp.groupe.id) {
-                    @let g = item.gp.groupe;
-                    @let photo = item.gp.photoChoisie;
-                    <div
-                      class="gallery-card"
-                      [class.gallery-card-empty]="!photo"
-                      (click)="photo && galleryLightboxIndex.set(item.lightboxIndex)"
-                    >
-                      @if (photo) {
-                        <div class="gallery-img-wrap">
-                          <img
-                            [src]="photo.thumbnailUrl ?? photo.url"
-                            [alt]="g.nom"
-                            loading="lazy"
-                            class="gallery-img"
-                          />
-                        </div>
-                      } @else {
-                        <div class="gallery-no-photo">
-                          <span>Aucune photo présentée</span>
-                        </div>
-                      }
-                      <div class="gallery-card-footer">
-                        <strong class="gallery-group-nom">{{ g.nom }}</strong>
-                        @if (photo) {
-                          <span class="gallery-auteur">{{ photo.nomUploader }}</span>
-                        }
-                        <span class="gallery-nbmembres">👥 {{ g.nbMembres }}</span>
-                      </div>
-                    </div>
-                  }
-                </div>
-              }
-
-              <!-- Lightbox galerie -->
-              @if (galleryLightboxIndex() !== null && photosChoisiesLightbox().length > 0) {
-                <app-photo-lightbox
-                  [photos]="photosChoisiesLightbox()"
-                  [callbacks]="lightboxCallbacks()"
-                  [startIndex]="galleryLightboxIndex()!"
-                  [userUid]="profile()?.uid ?? null"
-                  [userName]="userName()"
-                  [canInteract]="!!profile()"
-                  [isAdmin]="isAdmin()"
-                  [hideLikes]="false"
-                  (closed)="galleryLightboxIndex.set(null)"
-                />
-              }
-
-            } @else {
-              <!-- ─── PHASE ACTIVE : accordion ─── -->
 
               @if (groupes().length === 0) {
                 @if (canManage()) {
@@ -432,7 +375,6 @@
                         <span class="groupe-nom">
                           {{ g.nom }}
                           @if (isMyGroup) { <span class="badge-mon-groupe">Mon groupe</span> }
-                          @if (g.photoChoisieId) { <span class="badge-photo-selectionnee" title="Photo à présenter sélectionnée">⭐</span> }
                         </span>
                       }
 
@@ -472,41 +414,71 @@
                     <!-- Contenu dépliable -->
                     @if (isOpen) {
                       <div class="groupe-content">
-                        <!-- Box Participants -->
-                        <div class="inscription-section groupe-participants-box">
-                          <div class="inscription-header">
-                            <h2>
-                              Participants
-                              <span class="count">{{ g.nbMembres }}</span>
-                              @if (s.maxParticipants) {
-                                <span class="max-count">/ {{ s.maxParticipants }}</span>
+                        <!-- Box Participants (connectés uniquement) -->
+                        @if (profile()) {
+                          <div class="inscription-section groupe-participants-box">
+                            <div class="inscription-header">
+                              <h2>
+                                Participants
+                                <span class="count">{{ g.nbMembres }}</span>
+                                @if (s.maxParticipants) {
+                                  <span class="max-count">/ {{ s.maxParticipants }}</span>
+                                }
+                              </h2>
+                              @if (isMyGroup) {
+                                <button class="btn-desinscrit" (click)="quitterGroupe()">
+                                  ✓ Inscrit — Quitter
+                                </button>
                               }
-                            </h2>
-                            @if (isMyGroup) {
-                              <button class="btn-desinscrit" (click)="quitterGroupe()">
-                                ✓ Inscrit — Quitter
-                              </button>
-                            }
-                          </div>
-                          @if (g.membres.length === 0) {
-                            <p class="empty-mini">Aucun membre dans ce groupe.</p>
-                          } @else {
-                            <div class="participants-row">
-                              @for (uid of g.membres; track uid) {
-                                <span class="participant-chip" [class.me]="uid === profile()?.uid">
-                                  {{ getNomMembre(uid) }}
-                                  @if (canManage()) {
-                                    <button
-                                      class="chip-remove"
-                                      title="Retirer du groupe"
-                                      (click)="retirerDuGroupe(g.id, uid, getNomMembre(uid))"
-                                    >×</button>
-                                  }
-                                </span>
+                              @if (canManage() && addingMembreGroupeId() !== g.id) {
+                                <button
+                                  class="btn-add-sm"
+                                  (click)="ouvrirAjoutMembreGroupe(g.id)"
+                                >+ Ajouter</button>
                               }
                             </div>
-                          }
-                        </div>
+                            @if (canManage() && addingMembreGroupeId() === g.id) {
+                              <div class="add-participant-row">
+                                <select
+                                  class="add-participant-select"
+                                  (change)="selectedAddMembreUid.set($any($event.target).value)"
+                                >
+                                  <option value="">— Choisir un membre —</option>
+                                  @for (m of membresAjoutablesAuGroupe(g.id); track m.uid) {
+                                    <option [value]="m.uid">{{ m.prenom }} {{ m.nom }}</option>
+                                  }
+                                </select>
+                                <button
+                                  class="btn-add-confirm"
+                                  [disabled]="!selectedAddMembreUid()"
+                                  (click)="confirmerAjoutMembreGroupe(g.id)"
+                                >Ajouter</button>
+                                <button
+                                  class="btn-add-cancel"
+                                  (click)="addingMembreGroupeId.set(null); selectedAddMembreUid.set('')"
+                                >Annuler</button>
+                              </div>
+                            }
+                            @if (g.membres.length === 0) {
+                              <p class="empty-mini">Aucun membre dans ce groupe.</p>
+                            } @else {
+                              <div class="participants-row">
+                                @for (uid of g.membres; track uid) {
+                                  <span class="participant-chip" [class.me]="uid === profile()?.uid">
+                                    {{ getNomMembre(uid) }}
+                                    @if (canManage()) {
+                                      <button
+                                        class="chip-remove"
+                                        title="Retirer du groupe"
+                                        (click)="retirerDuGroupe(g.id, uid, getNomMembre(uid))"
+                                      >×</button>
+                                    }
+                                  </span>
+                                }
+                              </div>
+                            }
+                          </div>
+                        }
 
                         <!-- Zone upload (membre du groupe, soumissions ouvertes) -->
                         @if (isMyGroup && !uploadVerrouille()) {
@@ -565,24 +537,12 @@
                             📷 Les photos sont visibles uniquement par les membres de ce groupe jusqu'à la clôture des soumissions.
                           </p>
                         } @else if (gp.photos.length > 0) {
-                          <div class="groupe-photos-header">
-                            <span class="groupe-photos-label">
-                              Photos
-                              @if (gp.photoChoisie) {
-                                <span class="badge-choisie-label">⭐ Photo à présenter sélectionnée</span>
-                              } @else if (isMyGroup) {
-                                <span class="badge-choisie-warning">Choisissez la photo à présenter</span>
-                              }
-                            </span>
-                          </div>
                           <div class="photos-grid">
                             @for (photo of gp.photos; track photo.id; let i = $index) {
                               @let isOwn = photo.uploaderUid === profile()?.uid;
-                              @let isChoisie = gp.photoChoisie?.id === photo.id;
                               <div
                                 class="photo-card"
                                 [class.own-card]="isOwn"
-                                [class.photo-choisie-card]="isChoisie"
                                 (click)="openGroupeLightbox(g.id, i)"
                               >
                                 <div class="photo-img-wrap">
@@ -592,9 +552,6 @@
                                     loading="lazy"
                                     class="photo-img"
                                   />
-                                  @if (isChoisie) {
-                                    <span class="photo-choisie-badge">⭐</span>
-                                  }
                                   @if (profile()) {
                                     <button
                                       class="card-heart"
@@ -613,26 +570,16 @@
                                   } @else {
                                     <span class="photo-name">{{ photo.nomUploader }}</span>
                                   }
-                                  <span class="photo-footer-actions" (click)="$event.stopPropagation()">
-                                    <!-- Bouton choisir (membres du groupe, phase active) -->
-                                    @if (isMyGroup) {
-                                      <button
-                                        class="btn-choisir"
-                                        [class.btn-choisir-active]="isChoisie"
-                                        (click)="choisirPhoto(g.id, photo.id, isChoisie)"
-                                        [title]="isChoisie ? 'Retirer la sélection' : 'Présenter cette photo'"
-                                      >{{ isChoisie ? '⭐ Choisie' : '☆ Choisir' }}</button>
-                                    }
-                                    <!-- Supprimer -->
-                                    @if (isOwn || canManage()) {
+                                  @if (isOwn || canManage()) {
+                                    <span class="photo-footer-actions" (click)="$event.stopPropagation()">
                                       <button
                                         class="btn-del-sm"
                                         [class.btn-del-admin]="!isOwn"
                                         title="Supprimer"
                                         (click)="supprimerPhoto(photo)"
                                       >🗑</button>
-                                    }
-                                  </span>
+                                    </span>
+                                  }
                                 </div>
                               </div>
                             }
@@ -682,7 +629,6 @@
                   />
                 }
               }
-            }
           </section>
         }
 
@@ -749,7 +695,7 @@
               @if (isOrganisateur() || isAdmin()) {
                 <div class="add-participant-zone">
                   @if (!addingMembre()) {
-                    <button class="btn-add-participant" (click)="addingMembre.set(true)">
+                    <button class="btn-add-participant" (click)="ouvrirAjoutMembre()">
                       + Inscrire un membre
                     </button>
                   } @else {

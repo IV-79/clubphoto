@@ -4,6 +4,32 @@
 
 ## v1.0.0-beta — En cours (2026-11-12)
 
+### Cache session liste des membres (2026-11-15)
+
+- `AuthService.getAllMembersOnce()` et `getPublicMembresOnce()` : première lecture Firestore mise en cache avec `shareReplay(1)`. Les appels suivants — quel que soit le composant — reçoivent le résultat en mémoire sans nouveau read.
+- 10 endroits consomment `getAllMembresOnce` dans l'app ; désormais seul le premier déclenche un read (40 docs) ; les 9 suivants coûtent 0 read.
+- `invalidateAllMembresCache()` : invalide les deux caches ; appelé uniquement dans `admin/membres` après `recalculateStorage` (cas où les données ont réellement changé côté serveur).
+
+### Atelier groupes — box participants masquée pour les non-connectés (2026-11-15)
+
+- En mode public, la box Participants est entièrement masquée pour les visiteurs non connectés (affichait les UID en clair faute de liste membres chargée).
+- Les photos des groupes restent visibles normalement.
+
+### Atelier groupes — ajout de membre par admin/organisateur (2026-11-15)
+
+- Dans la box Participants de chaque groupe, admin et organisateur voient un bouton « + Ajouter » qui ouvre un select pour choisir un membre (tous les membres non suspendus et pas encore dans ce groupe).
+- Confirmer ajoute le membre au groupe via `inscrireDansGroupe()` (gère inscription + transfert depuis un autre groupe si déjà dans un groupe).
+- Signals : `addingMembreGroupeId` (groupe en mode ajout) et `selectedAddMembreUid`.
+- Méthode `membresAjoutablesAuGroupe(groupeId)` : filtre `allMembres` sur non-suspendu + absent du groupe.
+
+### Atelier groupes — suppression de la sélection de photo à présenter (2026-11-15)
+
+- Workflow "photo choisie par le groupe" supprimé : bouton ⭐ Choisir, badge ⭐ sur les cartes et en-têtes de groupe, grille galerie post-fermeture (1 photo par groupe), avertissement à la fermeture si groupes sans photo choisie.
+- Après fermeture des soumissions, l'accordéon affiche toutes les photos de tous les groupes (comportement déjà couvert par `arePhotosVisible()` + `estTermine()`).
+- `sortie.model.ts` : suppression de `photoChoisieId` sur `AtelierGroupe`.
+- `SortieService` : suppression de `choisirPhotoGroupe()`.
+- `firestore.rules` : suppression de la règle spécifique `photoChoisieId` pour les inscrits.
+
 ### Suppression automatique de l'ancienne image lors du remplacement (2026-11-15)
 
 - Corrige une fuite Storage : remplacer une image via « Changer » laissait l'ancien fichier en Storage sans le supprimer.

@@ -519,7 +519,7 @@ export class OneShotDetail {
     const e = this.event();
     const p = this.profile();
     if (!e || !p) return;
-    const ok = await this.confirmService.confirm(`Désinscrire ${targetNom} de ce OneShot ?`);
+    const ok = await this.confirmService.confirm(`Désinscrire ${targetNom} de ce OneShot ?`, 'Désinscrire', 'Désinscrire', false);
     if (!ok) return;
     await this.oneShotService.desinscrire(this.id, targetUid);
     if (targetUid !== p.uid) {
