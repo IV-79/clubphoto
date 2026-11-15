@@ -138,6 +138,32 @@
     </div>
   </section>
 
+  <!-- Portfolios des membres -->
+  <section class="pref-section">
+    <h2 class="section-title">Portfolios des membres</h2>
+    <p class="section-desc">Envoyée à tous les membres abonnés quand un membre publie une photo.</p>
+
+    <div class="pref-list">
+      <div class="pref-item">
+        <div class="pref-info">
+          <span class="pref-icon">📷</span>
+          <div>
+            <p class="pref-label">Nouvelles photos de portfolio</p>
+            <p class="pref-hint">Un membre ajoute une nouvelle photo à son portfolio</p>
+          </div>
+        </div>
+        <button
+          class="toggle"
+          [class.on]="subs().portfolioPhotos"
+          (click)="toggle('portfolioPhotos')"
+          [disabled]="saving()"
+        >
+          <span class="toggle-thumb"></span>
+        </button>
+      </div>
+    </div>
+  </section>
+
   <!-- Interactions sur mes photos -->
   <section class="pref-section">
     <h2 class="section-title">Interactions sur mes photos</h2>

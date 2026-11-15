@@ -86,6 +86,13 @@ export class PhotoService {
               'storageUsed.portfolio': increment(file.size + thumb.size),
               photoCount: increment(1),
             }).catch(() => {});
+            this.notifService
+              .broadcast(
+                'newPhoto',
+                `${nomMembre} a ajouté une nouvelle photo à son portfolio`,
+                { lien: `/galeries/membres/${uid}`, sourceNom: nomMembre, excludeUid: uid },
+              )
+              .catch(() => {});
             observer.next({ state: 'done', progress: 100, photo: { id: docRef.id, ...data } });
             observer.complete();
           } catch (e) {

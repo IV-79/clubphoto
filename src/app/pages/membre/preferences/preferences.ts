@@ -27,6 +27,7 @@ export class Preferences {
       articles: isSubscribed(s, 'article'),
       reunions: isSubscribed(s, 'reunion'),
       documents: isSubscribed(s, 'document'),
+      portfolioPhotos: isSubscribed(s, 'newPhoto'),
       likes: isSubscribed(s, 'like'),
       comments: isSubscribed(s, 'comment'),
       admin: isSubscribed(s, 'admin'),

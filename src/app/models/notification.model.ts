@@ -6,6 +6,7 @@ export type NotifType =
   | 'document'
   | 'defi'
   | 'exposition'
+  | 'newPhoto'
   | 'like'
   | 'comment'
   | 'admin';
@@ -29,6 +30,7 @@ export interface UserSubscriptions {
   documents?: boolean;
   defis?: boolean;
   expositions?: boolean;
+  portfolioPhotos?: boolean;
   likes?: boolean;
   comments?: boolean;
   admin?: boolean; // undefined = toujours livré, pas d'opt-out exposé en UI
@@ -42,6 +44,7 @@ const TYPE_TO_SUB: Record<NotifType, keyof UserSubscriptions> = {
   document: 'documents',
   defi: 'defis',
   exposition: 'expositions',
+  newPhoto: 'portfolioPhotos',
   like: 'likes',
   comment: 'comments',
   admin: 'admin',
@@ -66,6 +69,7 @@ export const NOTIF_ICONS: Record<NotifType, string> = {
   document: '📁',
   defi: '🏅',
   exposition: '🖼️',
+  newPhoto: '📷',
   like: '♥',
   comment: '💬',
   admin: '🛡️',
@@ -79,6 +83,7 @@ export const NOTIF_LABELS: Record<NotifType, string> = {
   document: 'Documents',
   defi: 'Défi',
   exposition: 'Exposition',
+  newPhoto: 'Portfolio',
   like: "J'aime",
   comment: 'Commentaire',
   admin: 'Administration',
