@@ -102,28 +102,16 @@
             </mat-checkbox>
           </div>
           @if (form.get('modeGroupes')!.value) {
-            <div class="form-row">
-              <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-half">
-                <mat-label>Max photos par groupe</mat-label>
-                <input
-                  matInput
-                  type="number"
-                  formControlName="maxPhotosParGroupe"
-                  min="1"
-                />
-                <mat-error>Obligatoire, minimum 1</mat-error>
-              </mat-form-field>
-              <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-half">
-                <mat-label>Max participants par groupe</mat-label>
-                <input
-                  matInput
-                  type="number"
-                  formControlName="maxParticipants"
-                  min="1"
-                  placeholder="Optionnel"
-                />
-              </mat-form-field>
-            </div>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-half">
+              <mat-label>Max participants par groupe</mat-label>
+              <input
+                matInput
+                type="number"
+                formControlName="maxParticipants"
+                min="1"
+                placeholder="Optionnel"
+              />
+            </mat-form-field>
           } @else {
             <div class="checkboxes">
               <mat-checkbox formControlName="inscriptionObligatoire" color="primary">
@@ -151,9 +139,9 @@
         }
       }
 
-      @if (!isOneShot() && !(isAtelier() && form.get('modeGroupes')!.value)) {
+      @if (!isOneShot()) {
         <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-half">
-          <mat-label>Max photos par membre</mat-label>
+          <mat-label>{{ isAtelier() && form.get('modeGroupes')!.value ? 'Max photos par groupe' : 'Max photos par membre' }}</mat-label>
           <input matInput type="number" formControlName="sortieMaxPhotos" min="1" />
           <mat-error>Obligatoire, minimum 1</mat-error>
         </mat-form-field>

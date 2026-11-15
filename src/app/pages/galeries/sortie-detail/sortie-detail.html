@@ -84,13 +84,13 @@
               <span>Participants</span>
               <strong>{{ s.nbInscrits ?? 0 }}</strong>
             </div>
-            @if (s.maxPhotosParGroupe) {
+            @if (modeGroupes() && s.maxPhotos) {
               <div class="stat-row">
                 <span>Max photos / groupe</span>
-                <strong>{{ s.maxPhotosParGroupe }}</strong>
+                <strong>{{ s.maxPhotos }}</strong>
               </div>
             }
-            @if (s.maxPhotos && profile()) {
+            @if (!modeGroupes() && s.maxPhotos && profile()) {
               <div class="stat-row">
                 <span>Mes photos</span>
                 <strong>{{ allPhotos().filter(p => p.uploaderUid === profile()!.uid).length }} / {{ s.maxPhotos }}</strong>
@@ -218,16 +218,6 @@
                 @if (form.get('modeGroupes')!.value) {
                   <div class="form-row">
                     <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-half">
-                      <mat-label>Max photos par groupe</mat-label>
-                      <input
-                        matInput
-                        type="number"
-                        formControlName="maxPhotosParGroupe"
-                        min="1"
-                        placeholder="Optionnel"
-                      />
-                    </mat-form-field>
-                    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-half">
                       <mat-label>Max participants (par groupe)</mat-label>
                       <input
                         matInput
@@ -241,12 +231,11 @@
                 }
               }
 
-              @if (!(form.get('type')!.value === 'atelier' && form.get('modeGroupes')!.value)) {
-                <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-half">
-                  <mat-label>Max photos par membre</mat-label>
-                  <input matInput type="number" formControlName="maxPhotos" min="1" placeholder="Optionnel" />
-                </mat-form-field>
-              }
+              <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-half">
+                <mat-label>{{ form.get('modeGroupes')!.value ? 'Max photos par groupe' : 'Max photos par membre' }}</mat-label>
+                <input matInput type="number" formControlName="maxPhotos" min="1" />
+                <mat-error>Obligatoire, minimum 1</mat-error>
+              </mat-form-field>
 
               <mat-form-field appearance="outline" class="field-half">
                 <mat-label>Visibilité</mat-label>
@@ -353,7 +342,7 @@
                   @let isOpen = isGroupeOpen(g.id);
                   @let isMyGroup = monGroupe()?.id === g.id;
                   @let isPlein = !!s.maxParticipants && g.nbMembres >= s.maxParticipants;
-                  @let isAtMax = !!s.maxPhotosParGroupe && gp.photos.length >= s.maxPhotosParGroupe;
+                  @let isAtMax = !!s.maxPhotos && gp.photos.length >= s.maxPhotos;
 
                   <div class="groupe-row-wrap" [class.is-open]="isOpen">
                     <!-- Ligne du groupe -->
@@ -399,7 +388,7 @@
                         </span>
                         <span class="groupe-stat" title="Photos">
                           📷 {{ g.nbPhotos }}
-                          @if (s.maxPhotosParGroupe) { <span class="stat-max">/ {{ s.maxPhotosParGroupe }}</span> }
+                          @if (s.maxPhotos) { <span class="stat-max">/ {{ s.maxPhotos }}</span> }
                           @if (isAtMax) { <span class="badge-plein">Max</span> }
                         </span>
                       </span>
@@ -496,9 +485,9 @@
                         <!-- Zone upload (membre du groupe, soumissions ouvertes) -->
                         @if (isMyGroup && !uploadVerrouille()) {
                           <div class="groupe-upload">
-                            @if (!!s.maxPhotosParGroupe && gp.photos.length >= s.maxPhotosParGroupe) {
+                            @if (!!s.maxPhotos && gp.photos.length >= s.maxPhotos) {
                               <p class="upload-locked">
-                                🔒 Votre groupe a atteint le maximum de {{ s.maxPhotosParGroupe }} photos.
+                                🔒 Votre groupe a atteint le maximum de {{ s.maxPhotos }} photos.
                               </p>
                             } @else {
                               <div

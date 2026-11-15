@@ -35,7 +35,6 @@ import { UserProfile } from '../../../models/user.model';
 import { LightboxPhoto, PhotoLightboxCallbacks } from '../../../models/commentaire.model';
 import { PhotoLightbox } from '../../../components/photo-lightbox/photo-lightbox';
 import { compressImage, COMPRESS_EVENT, COMPRESS_COUVERTURE, ImageDecodeError } from '../../../utils/image-compress';
-import { deleteField } from 'firebase/firestore';
 import { deleteStoragePath } from '../../../utils/firebase';
 import { readExifWithConsent } from '../../../utils/exif-reader';
 import { GpsConsentService } from '../../../services/gps-consent.service';
@@ -302,8 +301,7 @@ export class SortieDetail {
     visibilite: new FormControl<'public' | 'membre'>('public', { nonNullable: true }),
     dateFinSoumission: new FormControl('', { nonNullable: true }),
     modeGroupes: new FormControl(false, { nonNullable: true }),
-    maxPhotosParGroupe: new FormControl<number | null>(null),
-    maxPhotos: new FormControl<number | null>(null, { validators: [Validators.min(1)] }),
+    maxPhotos: new FormControl<number | null>(null, { validators: [Validators.required, Validators.min(1)] }),
   });
 
   // ── Computed basiques ─────────────────────────────────────────
@@ -347,10 +345,9 @@ export class SortieDetail {
     if (this.modeGroupes()) {
       const mg = this.monGroupe();
       if (!mg) return false;
-      const max = s.maxPhotosParGroupe;
-      if (max != null) {
+      if (s.maxPhotos != null) {
         const groupePhotos = this.allPhotos().filter((ph) => ph.groupeId === mg.id);
-        if (groupePhotos.length >= max) return false;
+        if (groupePhotos.length >= s.maxPhotos) return false;
       }
       return true;
     }
@@ -719,7 +716,6 @@ export class SortieDetail {
       visibilite: s.visibilite ?? 'public',
       dateFinSoumission: s.dateFinSoumission ?? '',
       modeGroupes: s.modeGroupes ?? false,
-      maxPhotosParGroupe: s.maxPhotosParGroupe ?? null,
       maxPhotos: s.maxPhotos ?? null,
     });
     this.editMode.set(true);
@@ -757,13 +753,8 @@ export class SortieDetail {
           inscriptionObligatoire: v.inscriptionObligatoire,
           visibilite: v.visibilite,
           dateFinSoumission: v.dateFinSoumission,
-          maxPhotos: v.maxPhotos != null ? v.maxPhotos : (deleteField() as any),
-          ...(v.type === 'atelier'
-            ? {
-                modeGroupes: v.modeGroupes,
-                maxPhotosParGroupe: v.maxPhotosParGroupe ?? undefined,
-              }
-            : {}),
+          maxPhotos: v.maxPhotos ?? undefined,
+          ...(v.type === 'atelier' ? { modeGroupes: v.modeGroupes } : {}),
         },
         {
           oldDate: s.date,
@@ -786,12 +777,7 @@ export class SortieDetail {
               visibilite: v.visibilite,
               dateFinSoumission: v.dateFinSoumission,
               maxPhotos: v.maxPhotos ?? undefined,
-              ...(v.type === 'atelier'
-                ? {
-                    modeGroupes: v.modeGroupes,
-                    maxPhotosParGroupe: v.maxPhotosParGroupe ?? undefined,
-                  }
-                : {}),
+              ...(v.type === 'atelier' ? { modeGroupes: v.modeGroupes } : {}),
             }
           : old,
       );
@@ -930,17 +916,16 @@ export class SortieDetail {
     const inProgress = this.uploads().filter((t) => !t.done && !t.error).length;
 
     let restant = allFiles.length;
-    if (this.modeGroupes() && groupeId && s?.maxPhotosParGroupe != null) {
-      const groupePhotos = this.allPhotos().filter((ph) => ph.groupeId === groupeId).length;
-      restant = Math.max(0, s.maxPhotosParGroupe - groupePhotos - inProgress);
-    } else if (!this.modeGroupes() && s?.maxPhotos != null) {
-      const mesPhotos = this.allPhotos().filter((ph) => ph.uploaderUid === p.uid).length;
-      restant = Math.max(0, s.maxPhotos - mesPhotos - inProgress);
+    if (s?.maxPhotos != null) {
+      const count = this.modeGroupes() && groupeId
+        ? this.allPhotos().filter((ph) => ph.groupeId === groupeId).length
+        : this.allPhotos().filter((ph) => ph.uploaderUid === p.uid).length;
+      restant = Math.max(0, s.maxPhotos - count - inProgress);
     }
 
     const files = allFiles.slice(0, restant);
     const dropped = allFiles.slice(restant);
-    const maxLabel = this.modeGroupes() ? s?.maxPhotosParGroupe : s?.maxPhotos;
+    const maxLabel = s?.maxPhotos;
     for (const file of dropped) {
       const taskId = Math.random().toString(36).slice(2);
       this.uploads.update((u) => [

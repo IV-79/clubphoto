@@ -53,6 +53,13 @@
 
 - Composant `DefiCreer` (`/membre/defis/creer`) supprimé : route orpheline, aucun lien ne pointait dessus, la création des défis passe par `sortie-creer` (point d'entrée unifié pour tous les types d'événements).
 
+### Atelier — unification du champ max photos (2026-11-15)
+
+- `maxPhotosParGroupe` supprimé du modèle `Sortie` et de tous les formulaires ; `maxPhotos` couvre désormais les deux cas : limite par membre (sortie simple) et limite par groupe (atelier mode groupes).
+- Le label du champ bascule dynamiquement : "Max photos par groupe" quand le mode groupes est actif, "Max photos par membre" sinon.
+- `canUpload` et `processPhotoFiles` dans `sortie-detail` simplifiés : une seule branche `s.maxPhotos` pour les deux modes.
+- Validators du formulaire d'édition simplifiés : `required + min(1)` statique sur `maxPhotos`, plus d'effet dynamique conditionnel.
+
 ---
 
 ## v1.0.0-beta — En cours (2026-11-12)

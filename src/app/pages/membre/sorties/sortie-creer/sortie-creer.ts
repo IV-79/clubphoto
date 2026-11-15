@@ -88,7 +88,6 @@ export class SortieCreer {
     inscriptionObligatoire: new FormControl(true, { nonNullable: true }),
     // Atelier-specific
     modeGroupes: new FormControl(false, { nonNullable: true }),
-    maxPhotosParGroupe: new FormControl<number | null>(null),
     // Sortie-specific — validators set dynamically by effect
     sortieMaxPhotos: new FormControl<number | null>(null),
     // Défi-specific
@@ -135,13 +134,6 @@ export class SortieCreer {
     this.form.get('type')!.valueChanges.pipe(
       startWith(this.form.get('type')!.value),
       map((v) => v === 'exposition'),
-    ),
-    { initialValue: false },
-  );
-
-  isModeGroupes = toSignal(
-    this.form.get('modeGroupes')!.valueChanges.pipe(
-      startWith(this.form.get('modeGroupes')!.value),
     ),
     { initialValue: false },
   );
@@ -202,34 +194,23 @@ export class SortieCreer {
 
     // Max photos: required + min(1) pour tout sauf OneShot
     effect(() => {
-      const modeGroupes = this.isModeGroupes();
       const sortieCtrl = this.form.get('sortieMaxPhotos')!;
-      const groupeCtrl = this.form.get('maxPhotosParGroupe')!;
       const maxCtrl = this.form.get('maxPhotos')!;
 
       if (this.isDefi() || this.isExposition()) {
         maxCtrl.setValidators([Validators.required, Validators.min(1)]);
         sortieCtrl.clearValidators();
-        groupeCtrl.clearValidators();
-      } else if (this.isAtelier() && modeGroupes) {
-        if (groupeCtrl.value == null) groupeCtrl.setValue(10, { emitEvent: false });
-        groupeCtrl.setValidators([Validators.required, Validators.min(1)]);
-        sortieCtrl.clearValidators();
-        maxCtrl.clearValidators();
       } else if (!this.isOneShot()) {
         if (sortieCtrl.value == null) sortieCtrl.setValue(5, { emitEvent: false });
         sortieCtrl.setValidators([Validators.required, Validators.min(1)]);
-        groupeCtrl.clearValidators();
         maxCtrl.clearValidators();
       } else {
         sortieCtrl.clearValidators();
-        groupeCtrl.clearValidators();
         maxCtrl.clearValidators();
       }
 
       untracked(() => {
         sortieCtrl.updateValueAndValidity({ emitEvent: false });
-        groupeCtrl.updateValueAndValidity({ emitEvent: false });
         maxCtrl.updateValueAndValidity({ emitEvent: false });
       });
     });
@@ -340,13 +321,10 @@ export class SortieCreer {
             : {}),
           ...(!v.modeGroupes && v.dateFinSoumission ? { dateFinSoumission: v.dateFinSoumission } : {}),
           ...(v.type === 'atelier' && v.modeGroupes ? { modeGroupes: true } : {}),
-          ...(v.type === 'atelier' && v.modeGroupes && v.maxPhotosParGroupe != null
-            ? { maxPhotosParGroupe: v.maxPhotosParGroupe }
-            : {}),
           ...(v.type === 'atelier' && v.modeGroupes && v.maxParticipants != null
             ? { maxParticipants: v.maxParticipants }
             : {}),
-          ...(!v.modeGroupes && v.sortieMaxPhotos != null ? { maxPhotos: v.sortieMaxPhotos } : {}),
+          ...(v.sortieMaxPhotos != null ? { maxPhotos: v.sortieMaxPhotos } : {}),
         });
         if (inscriptionObligatoire) {
           await this.sortieService.inscrire(id, profile.uid, nom);

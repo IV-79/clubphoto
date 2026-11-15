@@ -42,8 +42,7 @@ export interface Sortie {
   dateFinSoumission?: string;    // YYYY-MM-DD — si défini, bloque l'upload après cette date
   soumissionsFermees?: boolean;  // fermeture manuelle immédiate
   modeGroupes?: boolean;         // atelier en mode groupes de travail
-  maxPhotosParGroupe?: number;   // limite de photos par groupe (mode groupes)
-  maxPhotos?: number;            // limite de photos par membre (hors mode groupes)
+  maxPhotos?: number;            // limite par membre (sortie simple) ou par groupe (atelier modeGroupes)
 }
 
 export interface SortieInscription {
