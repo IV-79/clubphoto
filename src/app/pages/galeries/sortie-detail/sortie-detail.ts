@@ -35,6 +35,7 @@ import { UserProfile } from '../../../models/user.model';
 import { LightboxPhoto, PhotoLightboxCallbacks } from '../../../models/commentaire.model';
 import { PhotoLightbox } from '../../../components/photo-lightbox/photo-lightbox';
 import { compressImage, COMPRESS_EVENT, COMPRESS_COUVERTURE, ImageDecodeError } from '../../../utils/image-compress';
+import { deleteField } from 'firebase/firestore';
 import { deleteStoragePath } from '../../../utils/firebase';
 import { readExifWithConsent } from '../../../utils/exif-reader';
 import { GpsConsentService } from '../../../services/gps-consent.service';
@@ -302,7 +303,7 @@ export class SortieDetail {
     dateFinSoumission: new FormControl('', { nonNullable: true }),
     modeGroupes: new FormControl(false, { nonNullable: true }),
     maxPhotosParGroupe: new FormControl<number | null>(null),
-    maxPhotos: new FormControl<number | null>(null),
+    maxPhotos: new FormControl<number | null>(null, { validators: [Validators.min(1)] }),
   });
 
   // ── Computed basiques ─────────────────────────────────────────
@@ -756,7 +757,7 @@ export class SortieDetail {
           inscriptionObligatoire: v.inscriptionObligatoire,
           visibilite: v.visibilite,
           dateFinSoumission: v.dateFinSoumission,
-          maxPhotos: v.maxPhotos ?? undefined,
+          maxPhotos: v.maxPhotos != null ? v.maxPhotos : (deleteField() as any),
           ...(v.type === 'atelier'
             ? {
                 modeGroupes: v.modeGroupes,
