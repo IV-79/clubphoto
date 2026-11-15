@@ -32,7 +32,6 @@ import { ThemeDetail } from './pages/galeries/theme-detail/theme-detail';
 import { SortiesListe } from './pages/galeries/sorties-liste/sorties-liste';
 import { SortieDetail } from './pages/galeries/sortie-detail/sortie-detail';
 import { SortieCreer } from './pages/membre/sorties/sortie-creer/sortie-creer';
-import { DefiCreer } from './pages/membre/defis/defi-creer/defi-creer';
 import { DefiDetail } from './pages/galeries/defi-detail/defi-detail';
 import { ExpositionDetail } from './pages/galeries/exposition-detail/exposition-detail';
 import { MembresGuide } from './pages/membres/guide/guide';
@@ -156,7 +155,6 @@ export const routes: Routes = [
       { path: 'notifications', component: Notifications },
       { path: 'preferences', component: Preferences },
       { path: 'sorties/creer', component: SortieCreer, canActivate: [editorGuard] },
-      { path: 'defis/creer', component: DefiCreer, canActivate: [editorGuard] },
       { path: '', redirectTo: 'portfolio', pathMatch: 'full' },
     ],
   },

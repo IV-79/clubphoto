@@ -270,7 +270,7 @@ export class DefiDetail {
     () =>
       this.statut() === 'soumission' &&
       !!this.profile() &&
-      this.mesPhotos().length < (this.defi()?.maxPhotos ?? 1) &&
+      this.mesPhotos().length < (this.defi()?.maxPhotos ?? Infinity) &&
       (!(this.defi()?.inscriptionObligatoire ?? true) || this.isInscrit()),
   );
 
@@ -333,7 +333,7 @@ export class DefiDetail {
     const profile = this.profile();
     if (!profile) return;
 
-    const maxPhotos = this.defi()?.maxPhotos ?? 1;
+    const maxPhotos = this.defi()?.maxPhotos ?? Infinity;
     const remaining = maxPhotos - this.mesPhotos().length;
     if (remaining <= 0) return;
 
@@ -477,6 +477,7 @@ export class DefiDetail {
 
   async saveEdit() {
     if (this.saving()) return;
+    if (!this.editMaxPhotos || this.editMaxPhotos < 1) return;
     if (!this.editTitre.trim()) {
       setTimeout(() => {
         const el = this.elRef.nativeElement.querySelector('.edit-input') as HTMLElement | null;

@@ -41,6 +41,18 @@
 
 - Accueil et page actualités : `aspect-ratio: 16/9` + `object-fit: contain` ; fin du recadrage dû à la hauteur fixe.
 
+### Validation quota photos — obligatoire à la création (2026-11-15)
+
+- `sortie-creer` : champ "Max photos" rendu obligatoire (required + min 1) pour tous les types sauf OneShot, via un effet dynamique qui pose/retire les validators selon le type et le mode groupes.
+- Valeurs par défaut : 5 pour sortie/atelier simple, 10 pour atelier mode groupes, 2 pour défi/exposition (inchangé).
+- `<mat-error>` ajouté sur les 4 champs max photos (sortie, atelier groupes, défi, exposition) ; placeholder "Optionnel" retiré.
+- `defi-detail` — édition : guard `editMaxPhotos < 1` dans `saveEdit()` ; bouton Enregistrer désactivé si valeur invalide.
+- Fallbacks incohérents corrigés : `defi ?? 1` → `?? Infinity` (un vieux défi sans limite = illimité, pas bloqué à 1) ; `exposition ?? 0` → `?? Infinity` (bug critique : bloquait tous les uploads si le champ était absent).
+
+### Nettoyage — suppression de DefiCreer (2026-11-15)
+
+- Composant `DefiCreer` (`/membre/defis/creer`) supprimé : route orpheline, aucun lien ne pointait dessus, la création des défis passe par `sortie-creer` (point d'entrée unifié pour tous les types d'événements).
+
 ---
 
 ## v1.0.0-beta — En cours (2026-11-12)

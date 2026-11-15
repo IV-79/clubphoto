@@ -89,8 +89,8 @@ export class SortieCreer {
     // Atelier-specific
     modeGroupes: new FormControl(false, { nonNullable: true }),
     maxPhotosParGroupe: new FormControl<number | null>(null),
-    // Sortie-specific (optionnel)
-    sortieMaxPhotos: new FormControl<number | null>(null, { validators: [Validators.min(1)] }),
+    // Sortie-specific — validators set dynamically by effect
+    sortieMaxPhotos: new FormControl<number | null>(null),
     // Défi-specific
     theme: new FormControl('', { nonNullable: true }),
     dateDebutSoumission: new FormControl('', { nonNullable: true }),
@@ -135,6 +135,13 @@ export class SortieCreer {
     this.form.get('type')!.valueChanges.pipe(
       startWith(this.form.get('type')!.value),
       map((v) => v === 'exposition'),
+    ),
+    { initialValue: false },
+  );
+
+  isModeGroupes = toSignal(
+    this.form.get('modeGroupes')!.valueChanges.pipe(
+      startWith(this.form.get('modeGroupes')!.value),
     ),
     { initialValue: false },
   );
@@ -190,6 +197,40 @@ export class SortieCreer {
       untracked(() => {
         debut.updateValueAndValidity({ emitEvent: false });
         fin.updateValueAndValidity({ emitEvent: false });
+      });
+    });
+
+    // Max photos: required + min(1) pour tout sauf OneShot
+    effect(() => {
+      const modeGroupes = this.isModeGroupes();
+      const sortieCtrl = this.form.get('sortieMaxPhotos')!;
+      const groupeCtrl = this.form.get('maxPhotosParGroupe')!;
+      const maxCtrl = this.form.get('maxPhotos')!;
+
+      if (this.isDefi() || this.isExposition()) {
+        maxCtrl.setValidators([Validators.required, Validators.min(1)]);
+        sortieCtrl.clearValidators();
+        groupeCtrl.clearValidators();
+      } else if (this.isAtelier() && modeGroupes) {
+        if (groupeCtrl.value == null) groupeCtrl.setValue(10, { emitEvent: false });
+        groupeCtrl.setValidators([Validators.required, Validators.min(1)]);
+        sortieCtrl.clearValidators();
+        maxCtrl.clearValidators();
+      } else if (!this.isOneShot()) {
+        if (sortieCtrl.value == null) sortieCtrl.setValue(5, { emitEvent: false });
+        sortieCtrl.setValidators([Validators.required, Validators.min(1)]);
+        groupeCtrl.clearValidators();
+        maxCtrl.clearValidators();
+      } else {
+        sortieCtrl.clearValidators();
+        groupeCtrl.clearValidators();
+        maxCtrl.clearValidators();
+      }
+
+      untracked(() => {
+        sortieCtrl.updateValueAndValidity({ emitEvent: false });
+        groupeCtrl.updateValueAndValidity({ emitEvent: false });
+        maxCtrl.updateValueAndValidity({ emitEvent: false });
       });
     });
 

@@ -107,7 +107,7 @@
               <h2 class="edit-panel-title">Modifier le défi</h2>
               <div class="edit-header-actions">
                 <button class="btn-cancel" (click)="editMode.set(false)">Annuler</button>
-                <button class="btn-save" (click)="saveEdit()" [disabled]="saving()">
+                <button class="btn-save" (click)="saveEdit()" [disabled]="saving() || !editMaxPhotos || editMaxPhotos < 1">
                   {{ saving() ? 'Enregistrement…' : 'Enregistrer' }}
                 </button>
               </div>

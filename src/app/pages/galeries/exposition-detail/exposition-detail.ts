@@ -183,7 +183,7 @@ export class ExpositionDetail {
   canUploadEnSoumission = computed(() => {
     const s = this.monStatutSoumission();
     if (s !== null && s !== 'soumission') return false;
-    return this.mesPhotos().length < (this.expo()?.maxPhotosParMembre ?? 0);
+    return this.mesPhotos().length < (this.expo()?.maxPhotosParMembre ?? Infinity);
   });
 
   totalPhotosSelectionnees = computed(() =>

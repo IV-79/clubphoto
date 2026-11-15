@@ -110,8 +110,8 @@
                   type="number"
                   formControlName="maxPhotosParGroupe"
                   min="1"
-                  placeholder="Optionnel"
                 />
+                <mat-error>Obligatoire, minimum 1</mat-error>
               </mat-form-field>
               <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-half">
                 <mat-label>Max participants par groupe</mat-label>
@@ -154,7 +154,8 @@
       @if (!isOneShot() && !(isAtelier() && form.get('modeGroupes')!.value)) {
         <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-half">
           <mat-label>Max photos par membre</mat-label>
-          <input matInput type="number" formControlName="sortieMaxPhotos" min="1" placeholder="Optionnel" />
+          <input matInput type="number" formControlName="sortieMaxPhotos" min="1" />
+          <mat-error>Obligatoire, minimum 1</mat-error>
         </mat-form-field>
       }
 
@@ -230,6 +231,7 @@
         <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-half">
           <mat-label>Max photos par membre</mat-label>
           <input matInput type="number" formControlName="maxPhotos" min="1" />
+          <mat-error>Obligatoire, minimum 1</mat-error>
         </mat-form-field>
         <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-half">
           <mat-label>Nb photos expo (objectif final, optionnel)</mat-label>
@@ -272,9 +274,10 @@
       }
 
       <div class="form-row">
-        <mat-form-field appearance="outline" class="field-half">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-half">
           <mat-label>Max photos par participant</mat-label>
           <input matInput type="number" formControlName="maxPhotos" min="1" />
+          <mat-error>Obligatoire, minimum 1</mat-error>
         </mat-form-field>
         <mat-form-field appearance="outline" class="field-half">
           <mat-label>Votes par membre</mat-label>
