@@ -4,6 +4,12 @@
 
 ## v1.0.0-beta — En cours (2026-11-12)
 
+### Images actualités — affichage complet sans recadrage (2026-11-15)
+
+- Accueil (`.actu-img`) : remplacement de `height: 160px` + `object-fit: cover` par `aspect-ratio: 16/9` + `object-fit: contain`. La hauteur fixe avec `cover` créait un ratio ~2:1 qui coupait le haut et le bas des images.
+- Page actualités (`app-article-card`) : idem `object-fit: contain` sur la zone `aspect-ratio: 16/9`.
+- Les images non 16/9 s'inscrivent entièrement dans la zone ; un fond `--bg-surface-raised` comble les marges éventuelles.
+
 ### Cache session liste des membres (2026-11-15)
 
 - `AuthService.getAllMembersOnce()` et `getPublicMembresOnce()` : première lecture Firestore mise en cache avec `shareReplay(1)`. Les appels suivants — quel que soit le composant — reçoivent le résultat en mémoire sans nouveau read.

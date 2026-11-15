@@ -176,10 +176,11 @@
 
 .actu-img {
   width: 100%;
-  height: 160px;
-  object-fit: cover;
+  aspect-ratio: 16/9;
+  object-fit: contain;
   display: block;
   margin-top: 12px;
+  background: var(--bg-surface-raised);
 }
 
 .actu-img-ph {
