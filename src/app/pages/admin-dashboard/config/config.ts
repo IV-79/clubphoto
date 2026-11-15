@@ -204,13 +204,13 @@ export class AdminConfig implements OnInit {
     this.heroError.set('');
     try {
       const oldPath = this.siteConfigSignal()?.heroImageStoragePath;
-      if (oldPath) await this.configService.deleteHeroImage(oldPath).catch(() => {});
       const { url, storagePath } = await this.configService.uploadHeroImage(file);
       await this.configService.saveSiteConfig({
         heroImageUrl: url,
         heroImageStoragePath: storagePath,
       });
       this.siteConfigSignal.update((c) => ({ ...c, heroImageUrl: url, heroImageStoragePath: storagePath }));
+      if (oldPath) this.configService.deleteHeroImage(oldPath).catch(() => {});
       this.heroFile.set(null);
       this.heroPreview.set(null);
     } catch {

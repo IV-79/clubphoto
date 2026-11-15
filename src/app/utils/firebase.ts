@@ -7,6 +7,8 @@ import {
   UploadMetadata,
   uploadBytesResumable,
   uploadBytes,
+  deleteObject,
+  ref as storageRef,
 } from 'firebase/storage';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
@@ -32,6 +34,10 @@ export function uploadStatic(
   extraMeta?: UploadMetadata,
 ) {
   return uploadBytes(storageRef, data, { cacheControl: CACHE_1YEAR, ...extraMeta });
+}
+
+export function deleteStoragePath(path: string): Promise<void> {
+  return deleteObject(storageRef(storage, path)).catch(() => {});
 }
 
 export function collectionStream<T>(q: Query<any>, idField?: string): Observable<T[]> {

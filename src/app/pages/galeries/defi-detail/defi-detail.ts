@@ -15,6 +15,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
 import { DefiService } from '../../../services/defi.service';
 import { ImageDecodeError } from '../../../utils/image-compress';
+import { deleteStoragePath } from '../../../utils/firebase';
 import { AuthService } from '../../../services/auth.service';
 import { NotificationService } from '../../../services/notification.service';
 import { ConfirmService } from '../../../services/confirm.service';
@@ -568,8 +569,8 @@ export class DefiDetail {
     this.coverUploading.set(true);
     try {
       const oldPath = this.defi()?.photoCouverturePath;
-      if (oldPath) await this.defiService.removeCouverture(this.id, oldPath).catch(() => {});
       await this.defiService.setCouverture(this.id, file);
+      if (oldPath) deleteStoragePath(oldPath);
       firstValueFrom(this.defiService.getDefiOnce(this.id))
         .then((d) => { if (d) this.defi.set(d); })
         .catch(() => {});

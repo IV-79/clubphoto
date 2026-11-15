@@ -39,6 +39,7 @@ import { LightboxPhoto, PhotoLightboxCallbacks } from '../../../models/commentai
 import { EventHero, HeroBadge } from '../../../components/event-hero/event-hero';
 import { PhotoLightbox } from '../../../components/photo-lightbox/photo-lightbox';
 import { compressImage, COMPRESS_EVENT, ImageDecodeError } from '../../../utils/image-compress';
+import { deleteStoragePath } from '../../../utils/firebase';
 import { readExifWithConsent } from '../../../utils/exif-reader';
 import { localDateISO } from '../../../utils/date';
 import { GpsConsentService } from '../../../services/gps-consent.service';
@@ -1629,13 +1630,12 @@ export class ExpositionDetail {
       });
 
       if (this.pendingCoverFile()) {
-        const currentExpo = this.expo();
-        if (currentExpo?.photoCouverturePath)
-          await this.expoService.removeCouverture(this.expoId, currentExpo.photoCouverturePath);
+        const oldCoverPath = this.expo()?.photoCouverturePath;
         const { url, path } = await this.expoService.setCouverture(
           this.expoId,
           this.pendingCoverFile()!,
         );
+        if (oldCoverPath) deleteStoragePath(oldCoverPath);
         this.expo.update((ex) =>
           ex ? { ...ex, photoCouvertureUrl: url, photoCouverturePath: path } : ex,
         );

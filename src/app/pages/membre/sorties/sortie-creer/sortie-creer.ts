@@ -89,6 +89,8 @@ export class SortieCreer {
     // Atelier-specific
     modeGroupes: new FormControl(false, { nonNullable: true }),
     maxPhotosParGroupe: new FormControl<number | null>(null),
+    // Sortie-specific (optionnel)
+    sortieMaxPhotos: new FormControl<number | null>(null, { validators: [Validators.min(1)] }),
     // Défi-specific
     theme: new FormControl('', { nonNullable: true }),
     dateDebutSoumission: new FormControl('', { nonNullable: true }),
@@ -303,7 +305,7 @@ export class SortieCreer {
           ...(v.type === 'atelier' && v.modeGroupes && v.maxParticipants != null
             ? { maxParticipants: v.maxParticipants }
             : {}),
-          ...(!v.modeGroupes ? { maxPhotos: v.maxPhotos } : {}),
+          ...(!v.modeGroupes && v.sortieMaxPhotos != null ? { maxPhotos: v.sortieMaxPhotos } : {}),
         });
         if (inscriptionObligatoire) {
           await this.sortieService.inscrire(id, profile.uid, nom);

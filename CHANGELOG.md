@@ -2,6 +2,47 @@
 
 ---
 
+## v1.0.0 — Sortie de bêta (2026-11-15)
+
+### Notifications — nouvelles photos de portfolio (2026-11-15)
+
+- Nouveau type de notification `newPhoto` dans le modèle.
+- `PhotoService.uploadPhoto` : après upload réussi, broadcast vers tous les membres abonnés ("X a ajouté une nouvelle photo à son portfolio"), lien direct `/galeries/membres/{uid}`, en excluant l'uploader.
+- Préférences : nouvelle section "Portfolios des membres" avec toggle "Nouvelles photos de portfolio" (actif par défaut, opt-out possible).
+- `UserSubscriptions` : ajout de `portfolioPhotos?: boolean`.
+
+### Cadenas 🔒 sur les activités membres uniquement (2026-11-15)
+
+- `ActiviteCard` : computed `isMembre` sur `visibilite === 'membre'`; badge cadenas en haut à gauche de la couverture, identique à celui des fiches articles.
+
+### Max photos par membre — Sortie (2026-11-15)
+
+- `Sortie.maxPhotos?: number` : champ optionnel ajouté au modèle.
+- Formulaire de création : champ "Max photos par membre" obligatoire (sauf atelier en mode groupes).
+- `sortie-detail` : compteur "Mes photos X/max", upload bloqué + message quota si atteint.
+- `canUpload` : vérifie le quota individuel en plus des règles existantes.
+- Formulaire d'édition : champ maxPhotos visible et modifiable (même condition atelier).
+
+### Max photos — Exposition : défaut 2 (2026-11-15)
+
+- `maxPhotosParMembre` initialisé à 2 (au lieu de 1) dans le formulaire de création d'exposition.
+
+### Likes dans les lightbox — sortie-detail et oneshot-detail (2026-11-15)
+
+- `sortie-detail` : `toggleLike` met à jour le signal `photos` localement (signal writable).
+- `oneshot-detail` : `toggleLike` appelle `refresh()` après le service (signal dérivé de `toSignal`).
+
+### Ordre des actualités — 3 groupes (2026-11-15)
+
+- Tri client : épinglés actifs (date croissante) → à venir non épinglés (date croissante) → passés (date décroissante).
+- Chargement initial passé de 6 à 20 articles pour couvrir une majorité de cas sans pagination supplémentaire.
+
+### Images actualités — affichage complet sans recadrage (2026-11-15)
+
+- Accueil et page actualités : `aspect-ratio: 16/9` + `object-fit: contain` ; fin du recadrage dû à la hauteur fixe.
+
+---
+
 ## v1.0.0-beta — En cours (2026-11-12)
 
 ### Images actualités — affichage complet sans recadrage (2026-11-15)

@@ -11,6 +11,7 @@ import { ThemeService } from '../../../services/theme.service';
 import { AuthService } from '../../../services/auth.service';
 import { ConfirmService } from '../../../services/confirm.service';
 import { compressImage, COMPRESS_ACTUALITE } from '../../../utils/image-compress';
+import { deleteStoragePath } from '../../../utils/firebase';
 import {
   ThemeMensuel,
   computeThemeStatut,
@@ -255,9 +256,9 @@ export class AdminThemes implements OnInit {
     this.editCoverUploading.set(true);
     try {
       const oldPath = this.themes().find((t) => t.id === themeId)?.photoCouverturePath;
-      if (oldPath) await this.themeService.removeCouverture(themeId, oldPath).catch(() => {});
       const compressed = await compressImage(file, COMPRESS_ACTUALITE);
       await this.themeService.setCouverture(themeId, compressed);
+      if (oldPath) deleteStoragePath(oldPath);
       await this.charger();
     } finally {
       this.editCoverUploading.set(false);

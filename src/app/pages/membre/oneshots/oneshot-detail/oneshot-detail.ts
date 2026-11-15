@@ -35,6 +35,7 @@ import { ImgRetryDirective } from '../../../../directives/img-retry.directive';
 import { EventHero, HeroBadge } from '../../../../components/event-hero/event-hero';
 import { DatePickerComponent } from '../../../../components/date-picker/date-picker';
 import { compressImage, COMPRESS_COUVERTURE } from '../../../../utils/image-compress';
+import { deleteStoragePath } from '../../../../utils/firebase';
 
 @Component({
   selector: 'app-oneshot-detail',
@@ -684,9 +685,9 @@ export class OneShotDetail {
     this.coverUploading.set(true);
     try {
       const oldPath = this.event()?.photoCouverturePath;
-      if (oldPath) await this.oneShotService.removeCouverture(this.id, oldPath).catch(() => {});
       const compressed = await compressImage(file, COMPRESS_COUVERTURE);
       await this.oneShotService.setCouverture(this.id, compressed);
+      if (oldPath) deleteStoragePath(oldPath);
       this.refresh();
     } finally {
       this.coverUploading.set(false);

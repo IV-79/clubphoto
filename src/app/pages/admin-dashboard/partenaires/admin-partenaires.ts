@@ -187,7 +187,7 @@ export class AdminPartenaires implements OnInit {
       };
 
       if (this.editFile) {
-        if (p.logoPath) await this.service.supprimerLogo(p.logoPath).catch(() => {});
+        const oldLogoPath = p.logoPath;
         const compressed = await compressImage(this.editFile, COMPRESS_LOGO);
         await new Promise<void>((resolve, reject) => {
           this.service.uploadLogo(compressed, p.id).subscribe({
@@ -202,6 +202,7 @@ export class AdminPartenaires implements OnInit {
             complete: resolve,
           });
         });
+        if (oldLogoPath) this.service.supprimerLogo(oldLogoPath).catch(() => {});
       }
 
       await this.service.modifierPartenaire(p.id, updates);

@@ -35,6 +35,7 @@ import { UserProfile } from '../../../models/user.model';
 import { LightboxPhoto, PhotoLightboxCallbacks } from '../../../models/commentaire.model';
 import { PhotoLightbox } from '../../../components/photo-lightbox/photo-lightbox';
 import { compressImage, COMPRESS_EVENT, COMPRESS_COUVERTURE, ImageDecodeError } from '../../../utils/image-compress';
+import { deleteStoragePath } from '../../../utils/firebase';
 import { readExifWithConsent } from '../../../utils/exif-reader';
 import { GpsConsentService } from '../../../services/gps-consent.service';
 import { ImgRetryDirective } from '../../../directives/img-retry.directive';
@@ -920,10 +921,32 @@ export class SortieDetail {
     if (files.length) this.processPhotoFiles(files);
   }
 
-  private async processPhotoFiles(files: File[]) {
+  private async processPhotoFiles(allFiles: File[]) {
     const p = this.profile();
     if (!p) return;
+    const s = this.sortie();
     const groupeId = this.modeGroupes() ? (this.uploadGroupeId() ?? this.monGroupe()?.id) : undefined;
+    const inProgress = this.uploads().filter((t) => !t.done && !t.error).length;
+
+    let restant = allFiles.length;
+    if (this.modeGroupes() && groupeId && s?.maxPhotosParGroupe != null) {
+      const groupePhotos = this.allPhotos().filter((ph) => ph.groupeId === groupeId).length;
+      restant = Math.max(0, s.maxPhotosParGroupe - groupePhotos - inProgress);
+    } else if (!this.modeGroupes() && s?.maxPhotos != null) {
+      const mesPhotos = this.allPhotos().filter((ph) => ph.uploaderUid === p.uid).length;
+      restant = Math.max(0, s.maxPhotos - mesPhotos - inProgress);
+    }
+
+    const files = allFiles.slice(0, restant);
+    const dropped = allFiles.slice(restant);
+    const maxLabel = this.modeGroupes() ? s?.maxPhotosParGroupe : s?.maxPhotos;
+    for (const file of dropped) {
+      const taskId = Math.random().toString(36).slice(2);
+      this.uploads.update((u) => [
+        ...u,
+        { id: taskId, name: file.name, progress: 0, done: false, error: `Quota atteint (max ${maxLabel})` },
+      ]);
+    }
 
     for (const file of files) {
       const taskId = Math.random().toString(36).slice(2);
@@ -1066,9 +1089,9 @@ export class SortieDetail {
     this.coverUploading.set(true);
     try {
       const oldPath = this.sortie()?.imageEvenementPath;
-      if (oldPath) await this.sortieService.removeImageEvenement(this.sortieId, oldPath).catch(() => {});
       const compressed = await compressImage(file, COMPRESS_COUVERTURE);
       await this.sortieService.setImageEvenement(this.sortieId, compressed);
+      if (oldPath) deleteStoragePath(oldPath);
       firstValueFrom(this.sortieService.getSortieOnce(this.sortieId))
         .then((s) => { if (s) this.sortie.set(s); })
         .catch(() => {});
