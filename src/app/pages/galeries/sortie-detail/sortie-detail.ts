@@ -1072,6 +1072,8 @@ export class SortieDetail {
   private async uploadCoverFile(file: File) {
     this.coverUploading.set(true);
     try {
+      const oldPath = this.sortie()?.imageEvenementPath;
+      if (oldPath) await this.sortieService.removeImageEvenement(this.sortieId, oldPath).catch(() => {});
       const compressed = await compressImage(file, COMPRESS_COUVERTURE);
       await this.sortieService.setImageEvenement(this.sortieId, compressed);
       firstValueFrom(this.sortieService.getSortieOnce(this.sortieId))

@@ -567,6 +567,8 @@ export class DefiDetail {
     if (this.coverUploading()) return;
     this.coverUploading.set(true);
     try {
+      const oldPath = this.defi()?.photoCouverturePath;
+      if (oldPath) await this.defiService.removeCouverture(this.id, oldPath).catch(() => {});
       await this.defiService.setCouverture(this.id, file);
       firstValueFrom(this.defiService.getDefiOnce(this.id))
         .then((d) => { if (d) this.defi.set(d); })

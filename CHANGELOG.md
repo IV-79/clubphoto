@@ -4,6 +4,15 @@
 
 ## v1.0.0-beta — En cours (2026-11-12)
 
+### Suppression automatique de l'ancienne image lors du remplacement (2026-11-15)
+
+- Corrige une fuite Storage : remplacer une image via « Changer » laissait l'ancien fichier en Storage sans le supprimer.
+- 6 cas corrigés : couverture thème du mois, couverture défi, couverture oneshot, image événement sortie, image d'accueil (hero), logo partenaire.
+- Pattern : avant l'upload du nouveau fichier, si un ancien chemin (`storagePath`) est connu, il est effacé d'abord (`.catch(() => {})` défensif si déjà absent).
+- `PartenairesService` : ajout de `supprimerLogo(path)` utilisé lors de la modification d'un partenaire.
+
+---
+
 ### Cache Firebase Storage — 1 an sur toutes les images (2026-11-12)
 
 - `firebase.ts` : ajout de `uploadResumable()` et `uploadStatic()`, wrappers autour de `uploadBytesResumable` / `uploadBytes` qui injectent automatiquement `Cache-Control: public, max-age=31536000, immutable` sur tous les uploads.

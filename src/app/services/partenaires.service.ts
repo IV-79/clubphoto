@@ -65,6 +65,10 @@ export class PartenairesService {
     await updateDoc(doc(db, 'partenaires', id), data);
   }
 
+  async supprimerLogo(path: string): Promise<void> {
+    await deleteObject(ref(storage, path)).catch(() => {});
+  }
+
   async supprimerPartenaire(id: string, logoPath: string): Promise<void> {
     await Promise.all([
       deleteDoc(doc(db, 'partenaires', id)),

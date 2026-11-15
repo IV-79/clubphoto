@@ -187,6 +187,7 @@ export class AdminPartenaires implements OnInit {
       };
 
       if (this.editFile) {
+        if (p.logoPath) await this.service.supprimerLogo(p.logoPath).catch(() => {});
         const compressed = await compressImage(this.editFile, COMPRESS_LOGO);
         await new Promise<void>((resolve, reject) => {
           this.service.uploadLogo(compressed, p.id).subscribe({

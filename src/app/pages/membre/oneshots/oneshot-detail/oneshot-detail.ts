@@ -681,6 +681,8 @@ export class OneShotDetail {
   private async uploadCoverFile(file: File) {
     this.coverUploading.set(true);
     try {
+      const oldPath = this.event()?.photoCouverturePath;
+      if (oldPath) await this.oneShotService.removeCouverture(this.id, oldPath).catch(() => {});
       const compressed = await compressImage(file, COMPRESS_COUVERTURE);
       await this.oneShotService.setCouverture(this.id, compressed);
       this.refresh();

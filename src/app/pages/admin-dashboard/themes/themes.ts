@@ -254,6 +254,8 @@ export class AdminThemes implements OnInit {
   private async uploadEditCoverFile(themeId: string, file: File) {
     this.editCoverUploading.set(true);
     try {
+      const oldPath = this.themes().find((t) => t.id === themeId)?.photoCouverturePath;
+      if (oldPath) await this.themeService.removeCouverture(themeId, oldPath).catch(() => {});
       const compressed = await compressImage(file, COMPRESS_ACTUALITE);
       await this.themeService.setCouverture(themeId, compressed);
       await this.charger();
