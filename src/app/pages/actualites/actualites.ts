@@ -200,7 +200,7 @@ export class Actualites {
         this.articles.set([]);
         this.cursor.set(null);
         this.hasMore.set(false);
-        void this.loadPage(6);
+        void this.loadPage(20);
       });
     });
   }
@@ -228,11 +228,25 @@ export class Actualites {
   filtered = computed(() => {
     const type = this.activeType();
     const today = new Date().toISOString().slice(0, 10);
-    const isActivePin = (a: Article) => a.epingle && (!a.date || a.date >= today);
-    const all = this.articles();
-    const pins = all.filter((a) => isActivePin(a));
-    const rest = all.filter((a) => !isActivePin(a));
-    const list = [...pins, ...rest];
-    return type ? list.filter((a) => a.type === type) : list;
+
+    const isPast = (a: Article) => !!a.date && a.date < today;
+    const isActivePin = (a: Article) => a.epingle && !isPast(a);
+
+    // no date = evergreen, sort at top of their group (ascending: undefined < any date string)
+    const dateAsc = (a: Article, b: Article) => {
+      if (!a.date && !b.date) return 0;
+      if (!a.date) return -1;
+      if (!b.date) return 1;
+      return a.date.localeCompare(b.date);
+    };
+
+    let list = this.articles();
+    if (type) list = list.filter((a) => a.type === type);
+
+    const g1 = list.filter((a) => isActivePin(a)).sort(dateAsc);                           // pinned, pas passé
+    const g2 = list.filter((a) => !isPast(a) && !isActivePin(a)).sort(dateAsc);            // pas passé, non pinned
+    const g3 = list.filter((a) => isPast(a)).sort((a, b) => b.date!.localeCompare(a.date!)); // passé, récent en premier
+
+    return [...g1, ...g2, ...g3];
   });
 }
