@@ -303,6 +303,7 @@ export class SortieCreer {
           ...(v.type === 'atelier' && v.modeGroupes && v.maxParticipants != null
             ? { maxParticipants: v.maxParticipants }
             : {}),
+          ...(!v.modeGroupes ? { maxPhotos: v.maxPhotos } : {}),
         });
         if (inscriptionObligatoire) {
           await this.sortieService.inscrire(id, profile.uid, nom);

@@ -176,6 +176,8 @@ export class ActiviteCard {
     return (data as Defi).organisateurNom ?? null;
   });
 
+  protected isMembre = computed(() => this.item().data.visibilite === 'membre');
+
   protected sortie = computed(() =>
     this.item().kind === 'sortie' ? (this.item().data as Sortie) : null,
   );

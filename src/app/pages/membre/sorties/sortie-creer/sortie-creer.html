@@ -151,6 +151,13 @@
         }
       }
 
+      @if (!isOneShot() && !(isAtelier() && form.get('modeGroupes')!.value)) {
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-half">
+          <mat-label>Max photos par membre</mat-label>
+          <input matInput type="number" formControlName="maxPhotos" min="1" />
+        </mat-form-field>
+      }
+
       @if (isOneShot()) {
         <div class="field-themes">
           <label class="field-label"

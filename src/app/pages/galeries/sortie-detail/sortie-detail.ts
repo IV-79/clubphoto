@@ -301,6 +301,7 @@ export class SortieDetail {
     dateFinSoumission: new FormControl('', { nonNullable: true }),
     modeGroupes: new FormControl(false, { nonNullable: true }),
     maxPhotosParGroupe: new FormControl<number | null>(null),
+    maxPhotos: new FormControl<number | null>(null),
   });
 
   // ── Computed basiques ─────────────────────────────────────────
@@ -350,6 +351,10 @@ export class SortieDetail {
         if (groupePhotos.length >= max) return false;
       }
       return true;
+    }
+    if (s.maxPhotos != null) {
+      const mesPhotos = this.allPhotos().filter((ph) => ph.uploaderUid === p.uid);
+      if (mesPhotos.length >= s.maxPhotos) return false;
     }
     if (!s.inscriptionObligatoire) return true;
     return this.isInscrit() || this.isOrganisateur() || this.isAdmin();
@@ -413,8 +418,16 @@ export class SortieDetail {
 
   private buildCallbacks(sortieId: string, uid: string): PhotoLightboxCallbacks {
     return {
-      toggleLike: (photoId, liked) =>
-        this.sortieService.toggleLikePhoto(sortieId, photoId, uid, liked),
+      toggleLike: async (photoId, liked) => {
+        await this.sortieService.toggleLikePhoto(sortieId, photoId, uid, liked);
+        this.photos.update((ps) =>
+          ps.map((p) =>
+            p.id === photoId
+              ? { ...p, likes: liked ? p.likes.filter((l) => l !== uid) : [...p.likes, uid] }
+              : p,
+          ),
+        );
+      },
       getComments: (photoId) => this.sortieService.getCommentaires(sortieId, photoId),
       addComment: (photoId, texte, auteurUid, nomAuteur) =>
         this.sortieService.addCommentaire(sortieId, photoId, { texte, auteurUid, nomAuteur }),
@@ -705,6 +718,7 @@ export class SortieDetail {
       dateFinSoumission: s.dateFinSoumission ?? '',
       modeGroupes: s.modeGroupes ?? false,
       maxPhotosParGroupe: s.maxPhotosParGroupe ?? null,
+      maxPhotos: s.maxPhotos ?? null,
     });
     this.editMode.set(true);
   }
@@ -741,6 +755,7 @@ export class SortieDetail {
           inscriptionObligatoire: v.inscriptionObligatoire,
           visibilite: v.visibilite,
           dateFinSoumission: v.dateFinSoumission,
+          maxPhotos: v.maxPhotos ?? undefined,
           ...(v.type === 'atelier'
             ? {
                 modeGroupes: v.modeGroupes,
@@ -768,6 +783,7 @@ export class SortieDetail {
               inscriptionObligatoire: v.inscriptionObligatoire,
               visibilite: v.visibilite,
               dateFinSoumission: v.dateFinSoumission,
+              maxPhotos: v.maxPhotos ?? undefined,
               ...(v.type === 'atelier'
                 ? {
                     modeGroupes: v.modeGroupes,

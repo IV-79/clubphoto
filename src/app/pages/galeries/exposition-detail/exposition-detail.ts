@@ -1485,7 +1485,7 @@ export class ExpositionDetail {
     }),
     description: new FormControl('', { nonNullable: true }),
     themeChoisi: new FormControl('', { nonNullable: true }),
-    maxPhotosParMembre: new FormControl(1, {
+    maxPhotosParMembre: new FormControl(2, {
       validators: [Validators.required, Validators.min(1)],
       nonNullable: true,
     }),

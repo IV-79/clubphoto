@@ -90,6 +90,12 @@
                 <strong>{{ s.maxPhotosParGroupe }}</strong>
               </div>
             }
+            @if (s.maxPhotos && profile()) {
+              <div class="stat-row">
+                <span>Mes photos</span>
+                <strong>{{ allPhotos().filter(p => p.uploaderUid === profile()!.uid).length }} / {{ s.maxPhotos }}</strong>
+              </div>
+            }
           }
           @if (!modeGroupes() && profile()) {
             <div class="stat-row">
@@ -233,6 +239,13 @@
                     </mat-form-field>
                   </div>
                 }
+              }
+
+              @if (!(form.get('type')!.value === 'atelier' && form.get('modeGroupes')!.value)) {
+                <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-half">
+                  <mat-label>Max photos par membre</mat-label>
+                  <input matInput type="number" formControlName="maxPhotos" min="1" placeholder="Optionnel" />
+                </mat-form-field>
               }
 
               <mat-form-field appearance="outline" class="field-half">
@@ -785,6 +798,8 @@
           } @else if (!isAVenir() && profile()) {
             @if (uploadVerrouille()) {
               <p class="upload-locked">🔒 Soumissions de photos clôturées{{ s.dateFinSoumission ? ' le ' + formatDate(s.dateFinSoumission) : '' }}.</p>
+            } @else if (s.maxPhotos != null && allPhotos().filter(p => p.uploaderUid === profile()!.uid).length >= s.maxPhotos) {
+              <p class="upload-locked">🔒 Vous avez atteint le maximum de {{ s.maxPhotos }} photo{{ s.maxPhotos > 1 ? 's' : '' }}.</p>
             } @else {
               <p class="upload-locked">🔒 Upload réservé aux participants inscrits.</p>
             }

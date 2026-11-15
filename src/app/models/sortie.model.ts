@@ -43,6 +43,7 @@ export interface Sortie {
   soumissionsFermees?: boolean;  // fermeture manuelle immédiate
   modeGroupes?: boolean;         // atelier en mode groupes de travail
   maxPhotosParGroupe?: number;   // limite de photos par groupe (mode groupes)
+  maxPhotos?: number;            // limite de photos par membre (hors mode groupes)
 }
 
 export interface SortieInscription {

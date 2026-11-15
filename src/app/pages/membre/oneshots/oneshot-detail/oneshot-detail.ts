@@ -413,8 +413,10 @@ export class OneShotDetail {
     const oneShotId = this.id;
     const uid = this.profile()?.uid ?? '';
     return {
-      toggleLike: (photoId, liked) =>
-        this.oneShotService.toggleLikePhoto(oneShotId, photoId, uid, liked),
+      toggleLike: async (photoId, liked) => {
+        await this.oneShotService.toggleLikePhoto(oneShotId, photoId, uid, liked);
+        this.refresh();
+      },
       getComments: (photoId) => this.oneShotService.getCommentaires(oneShotId, photoId),
       addComment: (photoId, texte, auteurUid, nomAuteur) =>
         this.oneShotService.addCommentaire(oneShotId, photoId, { texte, auteurUid, nomAuteur }),
