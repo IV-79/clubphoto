@@ -83,11 +83,12 @@ import { ClubDocument, DocumentDossier, getExtensionMeta, extractExtension, extr
               } @else {
                 <mat-icon>upload_file</mat-icon>
                 <span>Glisser un fichier ici ou cliquer pour choisir</span>
-                <span class="file-hint">Max {{ MAX_DOC_MB }} Mo</span>
               }
             </label>
             @if (uploadSizeError()) {
               <span class="size-error"><mat-icon>error_outline</mat-icon> Fichier trop lourd — max {{ MAX_DOC_MB }} Mo</span>
+            } @else {
+              <span class="file-hint">Max {{ MAX_DOC_MB }} Mo</span>
             }
             <input id="upload-input" type="file" style="display:none" (change)="onUploadFileSelected($event)" />
           }
@@ -555,8 +556,9 @@ import { ClubDocument, DocumentDossier, getExtensionMeta, extractExtension, extr
         color: var(--text-secondary);
       }
       .file-hint {
-        font-size: 0.75rem;
-        color: var(--text-muted);
+        font-size: 0.78rem;
+        color: var(--text-secondary);
+        margin-top: -4px;
       }
       .size-error {
         display: flex;
