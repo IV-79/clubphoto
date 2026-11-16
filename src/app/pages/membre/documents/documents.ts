@@ -83,8 +83,12 @@ import { ClubDocument, DocumentDossier, getExtensionMeta, extractExtension, extr
               } @else {
                 <mat-icon>upload_file</mat-icon>
                 <span>Glisser un fichier ici ou cliquer pour choisir</span>
+                <span class="file-hint">Max {{ MAX_DOC_MB }} Mo</span>
               }
             </label>
+            @if (uploadSizeError()) {
+              <span class="size-error"><mat-icon>error_outline</mat-icon> Fichier trop lourd — max {{ MAX_DOC_MB }} Mo</span>
+            }
             <input id="upload-input" type="file" style="display:none" (change)="onUploadFileSelected($event)" />
           }
 
@@ -550,6 +554,23 @@ import { ClubDocument, DocumentDossier, getExtensionMeta, extractExtension, extr
         font-size: 0.8rem;
         color: var(--text-secondary);
       }
+      .file-hint {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+      }
+      .size-error {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 0.82rem;
+        color: #d32f2f;
+        margin-top: 4px;
+      }
+      .size-error mat-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+      }
       .upload-actions {
         display: flex;
         gap: 8px;
@@ -858,11 +879,14 @@ export class Documents implements OnInit {
   showUploadForm = signal(false);
   expandedDocId = signal<string | null>(null);
 
+  readonly MAX_DOC_MB = 10;
+
   // Fichier upload
   uploadNomBase = '';
   uploadExtension = '';
   uploadDossier = '';
   uploadFile = signal<File | null>(null);
+  uploadSizeError = signal(false);
   uploadProgress = signal(0);
   uploading = signal(false);
   isDragging = signal(false);
@@ -1006,6 +1030,12 @@ export class Documents implements OnInit {
   }
 
   private setUploadFile(file: File) {
+    if (file.size > this.MAX_DOC_MB * 1024 * 1024) {
+      this.uploadSizeError.set(true);
+      this.uploadFile.set(null);
+      return;
+    }
+    this.uploadSizeError.set(false);
     this.uploadFile.set(file);
     const ext = extractExtension(file.name);
     this.uploadExtension = ext;
@@ -1123,6 +1153,7 @@ export class Documents implements OnInit {
     this.uploadExtension = '';
     this.uploadDossier = '';
     this.uploadFile.set(null);
+    this.uploadSizeError.set(false);
     this.uploadProgress.set(0);
     this.showUploadForm.set(false);
     this.isDragging.set(false);
