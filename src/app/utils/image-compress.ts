@@ -10,10 +10,11 @@ export interface CompressOptions {
   maxWidth?: number; // then scale so width  ≤ this
   maxHeight?: number; // then scale so height ≤ this
   quality?: number; // initial WebP quality (0–1), default 0.85
+  fallbackLong?: number; // if still > 5 MB at quality floor, restart at this size
 }
 
 // ── Presets ──────────────────────────────────────────────────────────────────
-export const COMPRESS_PORTFOLIO: CompressOptions = { maxLong: 3840 }; // 4K  — vitrine artistique
+export const COMPRESS_PORTFOLIO: CompressOptions = { maxLong: 3840, fallbackLong: 2048 }; // 4K → 2K cascade
 export const COMPRESS_EVENT: CompressOptions = { maxLong: 2048 }; // 2K  — oneshot / sortie / défi
 export const COMPRESS_THEME: CompressOptions = { maxLong: 2048 }; // 2K  — soumissions thème du mois
 export const COMPRESS_COUVERTURE: CompressOptions = { maxWidth: 1280, maxHeight: 720 }; // 720p — hero événement
@@ -62,15 +63,34 @@ export function compressImage(
       canvas.getContext('2d')!.drawImage(img, 0, 0, w, h);
 
       const name = file.name.replace(/\.[^.]+$/, '.webp');
-      const toBlob = (q: number) =>
-        new Promise<Blob | null>((r) => canvas.toBlob(r, 'image/webp', q));
+      const encodeCanvas = (cnv: HTMLCanvasElement, q: number) =>
+        new Promise<Blob | null>((r) => cnv.toBlob(r, 'image/webp', q));
       (async () => {
-        let quality = opts.quality ?? 0.85;
-        let blob = await toBlob(quality);
-        while (blob && blob.size > 5 * 1024 * 1024 && quality > 0.65) {
-          quality -= 0.15;
-          blob = await toBlob(quality);
+        const q0 = opts.quality ?? 0.85;
+        const SIZE_LIMIT = 5 * 1024 * 1024;
+        const Q_FLOOR = 0.70;
+
+        let blob = await encodeCanvas(canvas, q0);
+        if (blob && blob.size > SIZE_LIMIT) {
+          blob = await encodeCanvas(canvas, Q_FLOOR);
         }
+
+        if (blob && blob.size > SIZE_LIMIT && opts.fallbackLong && Math.max(w, h) > opts.fallbackLong) {
+          const scale = opts.fallbackLong / Math.max(w, h);
+          const fw = Math.round(w * scale);
+          const fh = Math.round(h * scale);
+          const fc = document.createElement('canvas');
+          fc.width = fw;
+          fc.height = fh;
+          fc.getContext('2d')!.drawImage(canvas, 0, 0, fw, fh);
+          let q2 = q0;
+          blob = await encodeCanvas(fc, q2);
+          while (blob && blob.size > SIZE_LIMIT && q2 > 0.4) {
+            q2 = Math.max(0.4, q2 - 0.15);
+            blob = await encodeCanvas(fc, q2);
+          }
+        }
+
         if (!blob) {
           reject(new ImageDecodeError(`Impossible d'encoder l'image : ${file.name}`));
           return;

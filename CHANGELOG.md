@@ -60,6 +60,20 @@
 - `canUpload` et `processPhotoFiles` dans `sortie-detail` simplifiés : une seule branche `s.maxPhotos` pour les deux modes.
 - Validators du formulaire d'édition simplifiés : `required + min(1)` statique sur `maxPhotos`, plus d'effet dynamique conditionnel.
 
+### Upload documents — limite explicite 10 Mo (2026-11-15)
+
+- Validation côté client dans `documents.ts` : fichier refusé immédiatement si > 10 Mo, signal `uploadSizeError` affiché en rouge sous la drop zone.
+- Règles Storage (`isValidDoc`) : plafond abaissé de 50 Mo à 10 Mo.
+- Drop zone : mention "Max 10 Mo" affichée en permanence sous la zone.
+
+### Compression portfolio — cascade de résolution (2026-11-17)
+
+- `image-compress.ts` : remplace la boucle qualité décroissante par une stratégie en cascade.
+  - Étape 1 : encodage à 3840 px (pleine résolution), qualité 0.85, puis 0.70 si > 5 Mo.
+  - Étape 2 : si encore > 5 Mo, recalcul du canvas à 2048 px (côté long), qualité 0.85, puis 0.70.
+- `COMPRESS_PORTFOLIO` : ajout de `fallbackLong: 2048`.
+- Résultat : photos complexes (reflets, dégradés) livrables sous 5 Mo sans descendre sous q=0.70.
+
 ---
 
 ## v1.0.0-beta — En cours (2026-11-12)
