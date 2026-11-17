@@ -95,6 +95,10 @@ export function compressImage(
           reject(new ImageDecodeError(`Impossible d'encoder l'image : ${file.name}`));
           return;
         }
+        if (blob.type !== 'image/webp') {
+          reject(new ImageDecodeError(`Votre navigateur ne peut pas traiter cette photo. Utilisez Chrome, Firefox ou Edge, ou envoyez la photo en format JPEG.`));
+          return;
+        }
         resolve(new File([blob], name, { type: 'image/webp' }));
       })().catch((e) =>
         reject(e instanceof ImageDecodeError ? e : new ImageDecodeError(`Erreur de compression : ${file.name}`)),

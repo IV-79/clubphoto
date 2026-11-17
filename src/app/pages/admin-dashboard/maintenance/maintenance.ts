@@ -12,6 +12,10 @@ import { AuthService } from '../../../services/auth.service';
 import { OneShotService } from '../../../services/oneshot.service';
 import { ConfirmService } from '../../../services/confirm.service';
 import { DatePickerComponent } from '../../../components/date-picker/date-picker';
+import { collection, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
+import { ref, getDownloadURL } from 'firebase/storage';
+import { db, storage, uploadStatic } from '../../../utils/firebase';
+import { compressImage, COMPRESS_PORTFOLIO, COMPRESS_THUMB } from '../../../utils/image-compress';
 
 @Component({
   selector: 'app-maintenance',
@@ -67,6 +71,13 @@ export class Maintenance implements OnInit {
   recalculOsRunning = signal(false);
   recalculOsOk = signal(false);
   recalculOsProgress = signal('');
+
+  // ── Réencodage portfolio ─────────────────────────────────────────────────
+
+  reencodeRunning = signal(false);
+  reencodeOk = signal(false);
+  reencodeProgress = signal('');
+  reencodeResult = signal<{ scanned: number; reencoded: number; savedBytes: number } | null>(null);
 
   private twoYearsAgo(): string {
     const d = new Date();
@@ -392,6 +403,85 @@ export class Maintenance implements OnInit {
       console.error(e);
     } finally {
       this.recalculOsRunning.set(false);
+    }
+  }
+
+  async reencodePhotosLourdes() {
+    if (this.reencodeRunning()) return;
+    this.reencodeRunning.set(true);
+    this.reencodeResult.set(null);
+    this.reencodeProgress.set('Scan…');
+    try {
+      const q = query(collection(db, 'photos'), where('fileSize', '>', 5 * 1024 * 1024));
+      const snap = await getDocs(q);
+      const photos = snap.docs.map((d) => ({
+        id: d.id,
+        ...(d.data() as {
+          uid: string;
+          url: string;
+          storagePath: string;
+          thumbnailPath?: string;
+          fileSize: number;
+        }),
+      }));
+
+      let reencoded = 0;
+      let savedBytes = 0;
+      const affectedUids = new Set<string>();
+
+      for (let i = 0; i < photos.length; i++) {
+        const photo = photos[i];
+        this.reencodeProgress.set(`${i + 1}/${photos.length}`);
+        try {
+          const resp = await fetch(photo.url);
+          const blob = await resp.blob();
+          const filename = photo.storagePath.split('/').pop() ?? 'photo.webp';
+          const file = new File([blob], filename, { type: blob.type });
+
+          const mainNew = await compressImage(file, COMPRESS_PORTFOLIO);
+          const thumbNew = await compressImage(mainNew, COMPRESS_THUMB);
+          const newSize = mainNew.size + thumbNew.size;
+          if (newSize >= photo.fileSize) continue;
+
+          const mainRef = ref(storage, photo.storagePath);
+          await uploadStatic(mainRef, mainNew);
+          const newUrl = await getDownloadURL(mainRef);
+
+          let newThumbUrl: string | undefined;
+          if (photo.thumbnailPath) {
+            const thumbRef = ref(storage, photo.thumbnailPath);
+            await uploadStatic(thumbRef, thumbNew);
+            newThumbUrl = await getDownloadURL(thumbRef);
+          }
+
+          await updateDoc(doc(db, 'photos', photo.id), {
+            url: newUrl,
+            fileSize: newSize,
+            ...(newThumbUrl ? { thumbnailUrl: newThumbUrl } : {}),
+          });
+
+          savedBytes += photo.fileSize - newSize;
+          affectedUids.add(photo.uid);
+          reencoded++;
+        } catch (e) {
+          console.error(`Erreur photo ${photo.id}:`, e);
+        }
+      }
+
+      for (const uid of affectedUids) {
+        await this.authService.recalculateStorage(uid);
+      }
+
+      this.reencodeResult.set({ scanned: photos.length, reencoded, savedBytes });
+      if (reencoded > 0) {
+        this.reencodeOk.set(true);
+        setTimeout(() => this.reencodeOk.set(false), 6000);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      this.reencodeRunning.set(false);
+      this.reencodeProgress.set('');
     }
   }
 

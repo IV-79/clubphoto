@@ -66,13 +66,20 @@
 - Règles Storage (`isValidDoc`) : plafond abaissé de 50 Mo à 10 Mo.
 - Drop zone : mention "Max 10 Mo" affichée en permanence sous la zone.
 
-### Compression portfolio — cascade de résolution (2026-11-17)
+### Maintenance — réencodage photos portfolio lourdes (2026-11-17)
+
+- Nouvelle section dans Admin → Maintenance : "Réencodage photos portfolio".
+- Scanne tous les docs `photos/` avec `fileSize > 5 Mo`, re-compresse avec la cascade (3840 px → 2048 px), ré-uploade au même `storagePath`, met à jour `url`, `thumbnailUrl` et `fileSize`.
+- Appelle `recalculateStorage()` pour chaque membre touché à la fin.
+- Résultat affiché : nombre de photos scannées / réencodées / Mo récupérés.
+
+### Compression — cascade de résolution + détection fallback PNG (2026-11-17)
 
 - `image-compress.ts` : remplace la boucle qualité décroissante par une stratégie en cascade.
   - Étape 1 : encodage à 3840 px (pleine résolution), qualité 0.85, puis 0.70 si > 5 Mo.
-  - Étape 2 : si encore > 5 Mo, recalcul du canvas à 2048 px (côté long), qualité 0.85, puis 0.70.
+  - Étape 2 : si encore > 5 Mo, recalcul du canvas à 2048 px (côté long), qualité 0.85 → 0.70 → 0.55 → 0.40.
 - `COMPRESS_PORTFOLIO` : ajout de `fallbackLong: 2048`.
-- Résultat : photos complexes (reflets, dégradés) livrables sous 5 Mo sans descendre sous q=0.70.
+- Détection fallback PNG : si `canvas.toBlob` renvoie un blob non-WebP (vieux Safari < 14), rejet immédiat avec message explicite plutôt qu'upload silencieux d'un PNG de 11 Mo déguisé en `.webp`.
 
 ---
 

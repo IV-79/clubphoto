@@ -475,4 +475,38 @@
       </div>
     </div>
   </section>
+
+  <!-- ── Réencodage portfolio ────────────────────────────── -->
+  <section class="maint-section">
+    <h3 class="section-title">Réencodage photos portfolio</h3>
+    <p class="section-desc">
+      Repasse toutes les photos de portfolio &gt; 5 Mo dans la cascade de compression (3840 px → 2048
+      px si nécessaire) et met à jour <code>fileSize</code>, <code>storageUsed</code> et les URLs.
+      Utile pour corriger les photos uploadées sans compression (vieux navigateur).
+    </p>
+
+    @if (reencodeOk()) {
+      <div class="recalcul-ok">✓ Réencodage terminé</div>
+    }
+    @if (reencodeResult(); as r) {
+      <div class="ri-desc" style="margin-top: 8px">
+        {{ r.scanned }} photo(s) scannée(s) — {{ r.reencoded }} réencodée(s) —
+        {{ formatBytes(r.savedBytes) }} récupérés
+      </div>
+    }
+
+    <div class="cleanup-btns" style="margin-top: 12px">
+      <button
+        class="btn-cu-preview"
+        (click)="reencodePhotosLourdes()"
+        [disabled]="reencodeRunning() || cleanupRunning() || recalculStorageRunning()"
+      >
+        {{
+          reencodeRunning()
+            ? 'Traitement… ' + reencodeProgress()
+            : 'Réencoder les photos lourdes'
+        }}
+      </button>
+    </div>
+  </section>
 </div>
