@@ -13,7 +13,7 @@ import { OneShotService } from '../../../services/oneshot.service';
 import { ConfirmService } from '../../../services/confirm.service';
 import { DatePickerComponent } from '../../../components/date-picker/date-picker';
 import { collection, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
-import { ref, getDownloadURL } from 'firebase/storage';
+import { ref, getDownloadURL, getBytes } from 'firebase/storage';
 import { db, storage, uploadStatic } from '../../../utils/firebase';
 import { compressImage, COMPRESS_PORTFOLIO, COMPRESS_THUMB } from '../../../utils/image-compress';
 
@@ -433,10 +433,9 @@ export class Maintenance implements OnInit {
         const photo = photos[i];
         this.reencodeProgress.set(`${i + 1}/${photos.length}`);
         try {
-          const resp = await fetch(photo.url);
-          const blob = await resp.blob();
+          const bytes = await getBytes(ref(storage, photo.storagePath));
           const filename = photo.storagePath.split('/').pop() ?? 'photo.webp';
-          const file = new File([blob], filename, { type: blob.type });
+          const file = new File([bytes], filename, { type: 'image/webp' });
 
           const mainNew = await compressImage(file, COMPRESS_PORTFOLIO);
           const thumbNew = await compressImage(mainNew, COMPRESS_THUMB);
