@@ -82,3 +82,4 @@ src/environments/environment.prod.ts
 /scripts/data/
 /scripts/dump-firestore.js
 /scripts/init-queue-pos.js
+/verre.webp
