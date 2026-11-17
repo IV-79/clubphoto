@@ -1,0 +1,13 @@
+[
+  {
+    "origin": [
+      "https://clubphototournontain.fr",
+      "https://www.clubphototournontain.fr",
+      "https://test.clubphototournontain.fr",
+      "http://localhost:4200"
+    ],
+    "method": ["GET"],
+    "responseHeader": ["Content-Type"],
+    "maxAgeSeconds": 3600
+  }
+]
