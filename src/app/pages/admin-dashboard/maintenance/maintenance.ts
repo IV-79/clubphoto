@@ -470,6 +470,9 @@ export class Maintenance implements OnInit {
       for (const uid of affectedUids) {
         await this.authService.recalculateStorage(uid);
       }
+      if (affectedUids.size > 0) {
+        this.authService.invalidateAllMembresCache();
+      }
 
       this.reencodeResult.set({ scanned: photos.length, reencoded, savedBytes });
       if (reencoded > 0) {
