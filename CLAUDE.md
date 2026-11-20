@@ -117,3 +117,13 @@ config/          site-wide settings (admin only)
 ### New Pages — Background Rule
 
 New pages under `MemberLayout` inherit a white background from the layout. Do **not** add a dark `:host` override or a background style on the component itself.
+
+## Agent skills
+
+### Issue tracker
+
+Issues live as markdown files under `.scratch/<feature>/` in this repo. See `docs/agents/issue-tracker.md`.
+
+### Domain docs
+
+Single-context: one `GLOSSARY.md` at the repo root and ADRs under `docs/adr/`. See `docs/agents/domain.md`.

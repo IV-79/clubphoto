@@ -39,6 +39,15 @@ testem.log
 /typings
 __screenshots__/
 
+# AI Skills & Agents
+.agents/
+.claude/
+.scratch/
+docs/
+agent/
+CLAUDE.md
+skills-lock.json
+
 # System files
 .DS_Store
 Thumbs.db
