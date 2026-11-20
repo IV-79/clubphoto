@@ -5,7 +5,8 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "watch": "ng build --watch --configuration development"
+    "watch": "ng build --watch --configuration development",
+    "test": "vitest run"
   },
   "private": true,
   "packageManager": "npm@11.10.1",
@@ -40,7 +41,9 @@
     "@angular/cli": "^22.2.3",
     "@angular/compiler-cli": "^22.2.3",
     "firebase-admin": "^14.5.0",
+    "jsdom": "^31.0.1",
     "prettier": "^3.8.1",
-    "typescript": "~6.0.3"
+    "typescript": "~6.0.3",
+    "vitest": "^5.1.1"
   }
 }
