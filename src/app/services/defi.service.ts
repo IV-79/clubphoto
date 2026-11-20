@@ -15,8 +15,6 @@ import {
   increment,
   limit,
   deleteField,
-  arrayUnion,
-  arrayRemove,
 } from 'firebase/firestore';
 import { ref, getDownloadURL, deleteObject } from 'firebase/storage';
 import { Observable, from, map } from 'rxjs';
@@ -32,7 +30,6 @@ import {
   COMPRESS_COUVERTURE,
   COMPRESS_EVENT,
   COMPRESS_THUMB,
-  ImageDecodeError,
   imageExt,
 } from '../utils/image-compress';
 import { NotificationService } from './notification.service';

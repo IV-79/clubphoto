@@ -29,8 +29,8 @@ import { ThemeMensuel, ThemeSoumission, ThemeVote } from '../models/theme.model'
 import { PhotoExif } from '../models/photo.model';
 import { Commentaire, Reponse } from '../models/commentaire.model';
 import { hasExif } from '../utils/exif-reader';
-import { generateId } from '../utils/id';
 import { compressImage, COMPRESS_THUMB, imageExt } from '../utils/image-compress';
+import { CommentaireService } from './commentaire.service';
 
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
@@ -358,14 +358,12 @@ export class ThemeService {
 
   // --- Commentaires ---
 
+  private cs(themeId: string): CommentaireService {
+    return new CommentaireService(`themes/${themeId}/soumissions`);
+  }
+
   getCommentaires(themeId: string, soumissionId: string): Observable<Commentaire[]> {
-    const q = query(
-      collection(db, `themes/${themeId}/soumissions/${soumissionId}/commentaires`),
-      orderBy('createdAt', 'asc'),
-    );
-    return from(getDocs(q)).pipe(
-      map((snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Commentaire)),
-    );
+    return this.cs(themeId).getCommentaires(soumissionId);
   }
 
   async addCommentaire(
@@ -373,18 +371,11 @@ export class ThemeService {
     soumissionId: string,
     data: { texte: string; auteurUid: string; nomAuteur: string },
   ): Promise<void> {
-    await addDoc(collection(db, `themes/${themeId}/soumissions/${soumissionId}/commentaires`), {
-      ...data,
-      likes: [],
-      replies: [],
-      createdAt: new Date().toISOString(),
-    });
+    return this.cs(themeId).addCommentaire(soumissionId, data);
   }
 
   async deleteCommentaire(themeId: string, soumissionId: string, commentId: string): Promise<void> {
-    await deleteDoc(
-      doc(db, `themes/${themeId}/soumissions/${soumissionId}/commentaires`, commentId),
-    );
+    return this.cs(themeId).deleteCommentaire(soumissionId, commentId);
   }
 
   async toggleLikeCommentaire(
@@ -394,12 +385,7 @@ export class ThemeService {
     uid: string,
     currentlyLiked: boolean,
   ): Promise<void> {
-    await updateDoc(
-      doc(db, `themes/${themeId}/soumissions/${soumissionId}/commentaires`, commentId),
-      {
-        likes: currentlyLiked ? arrayRemove(uid) : arrayUnion(uid),
-      },
-    );
+    return this.cs(themeId).toggleLikeCommentaire(soumissionId, commentId, uid, currentlyLiked);
   }
 
   async addReply(
@@ -408,13 +394,7 @@ export class ThemeService {
     commentId: string,
     reply: Omit<Reponse, 'id'>,
   ): Promise<void> {
-    const replyWithId: Reponse = { ...reply, id: generateId() };
-    await updateDoc(
-      doc(db, `themes/${themeId}/soumissions/${soumissionId}/commentaires`, commentId),
-      {
-        replies: arrayUnion(replyWithId),
-      },
-    );
+    return this.cs(themeId).addReply(soumissionId, commentId, reply);
   }
 
   async deleteReply(
@@ -424,11 +404,6 @@ export class ThemeService {
     replyId: string,
     allReplies: Reponse[],
   ): Promise<void> {
-    await updateDoc(
-      doc(db, `themes/${themeId}/soumissions/${soumissionId}/commentaires`, commentId),
-      {
-        replies: allReplies.filter((r) => r.id !== replyId),
-      },
-    );
+    return this.cs(themeId).deleteReply(soumissionId, commentId, replyId, allReplies);
   }
 }

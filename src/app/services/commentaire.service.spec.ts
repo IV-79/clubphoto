@@ -285,5 +285,12 @@ describe('CommentaireService', () => {
       expect(paths.some((p) => p.startsWith('photos/photo-1/commentaires/'))).toBe(true);
       expect(paths.some((p) => p.startsWith('sorties/sortie-1/photos/photo-1/commentaires/'))).toBe(true);
     });
+
+    it('theme basePath writes to themes/{id}/soumissions/{soumissionId}/commentaires', async () => {
+      const theme = new CommentaireService('themes/theme-1/soumissions');
+      await theme.addCommentaire('soum-1', { texte: 'x', auteurUid: 'u1', nomAuteur: 'A' });
+      const paths = Object.keys(fake.docs);
+      expect(paths.some((p) => p.startsWith('themes/theme-1/soumissions/soum-1/commentaires/'))).toBe(true);
+    });
   });
 });
