@@ -25,6 +25,16 @@ export const COMPRESS_HERO: CompressOptions = { maxLong: 1920 }; // 1920px — i
 export const COMPRESS_THUMB: CompressOptions = { maxLong: 600 }; //  600px — miniature grilles de cartes
 export const COMPRESS_LOGO: CompressOptions = { maxWidth: 400, maxHeight: 200, quality: 0.92 }; // logo partenaire
 
+// ── WebP support detection (cached, Safari/iOS fall back to PNG silently) ─────
+let webpSupport: boolean | undefined;
+async function supportsWebp(): Promise<boolean> {
+  if (webpSupport !== undefined) return webpSupport;
+  const c = document.createElement('canvas');
+  c.width = c.height = 1;
+  const b = await new Promise<Blob | null>((r) => c.toBlob(r, 'image/webp'));
+  return (webpSupport = b?.type === 'image/webp');
+}
+
 // ── Core ─────────────────────────────────────────────────────────────────────
 export function compressImage(
   file: File,
@@ -62,10 +72,13 @@ export function compressImage(
       canvas.height = h;
       canvas.getContext('2d')!.drawImage(img, 0, 0, w, h);
 
-      const name = file.name.replace(/\.[^.]+$/, '.webp');
-      const encodeCanvas = (cnv: HTMLCanvasElement, q: number) =>
-        new Promise<Blob | null>((r) => cnv.toBlob(r, 'image/webp', q));
       (async () => {
+        const mime = (await supportsWebp()) ? 'image/webp' : 'image/jpeg';
+        const ext = mime === 'image/webp' ? '.webp' : '.jpg';
+        const name = file.name.replace(/\.[^.]+$/, ext);
+        const encodeCanvas = (cnv: HTMLCanvasElement, q: number) =>
+          new Promise<Blob | null>((r) => cnv.toBlob(r, mime, q));
+
         const q0 = opts.quality ?? 0.85;
         const SIZE_LIMIT = 5 * 1024 * 1024;
         const Q_FLOOR = 0.70;
@@ -91,15 +104,11 @@ export function compressImage(
           }
         }
 
-        if (!blob) {
+        if (!blob || blob.type !== mime) {
           reject(new ImageDecodeError(`Impossible d'encoder l'image : ${file.name}`));
           return;
         }
-        if (blob.type !== 'image/webp') {
-          reject(new ImageDecodeError(`Votre navigateur ne peut pas traiter cette photo. Utilisez Chrome, Firefox ou Edge, ou envoyez la photo en format JPEG.`));
-          return;
-        }
-        resolve(new File([blob], name, { type: 'image/webp' }));
+        resolve(new File([blob], name, { type: mime }));
       })().catch((e) =>
         reject(e instanceof ImageDecodeError ? e : new ImageDecodeError(`Erreur de compression : ${file.name}`)),
       );
