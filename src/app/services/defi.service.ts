@@ -32,6 +32,7 @@ import {
   COMPRESS_EVENT,
   COMPRESS_THUMB,
   ImageDecodeError,
+  imageExt,
 } from '../utils/image-compress';
 import { NotificationService } from './notification.service';
 
@@ -194,10 +195,10 @@ export class DefiService {
   // ── Couverture ───────────────────────────────────────────────────────
 
   async setCouverture(id: string, file: File): Promise<void> {
-    const storagePath = `defis/${id}/couverture_${Date.now()}.webp`;
-    const storageRef = ref(storage, storagePath);
     const compressed = await compressImage(file, COMPRESS_COUVERTURE);
-    await uploadResumable(storageRef, compressed, { contentType: 'image/webp' });
+    const storagePath = `defis/${id}/couverture_${Date.now()}.${imageExt(compressed)}`;
+    const storageRef = ref(storage, storagePath);
+    await uploadResumable(storageRef, compressed, { contentType: compressed.type });
     const url = await getDownloadURL(storageRef);
     await updateDoc(doc(db, 'defis', id), {
       photoCouvertureUrl: url,
@@ -263,15 +264,15 @@ export class DefiService {
         try {
           const exif = await readExif(file);
           const id = generateId();
-          const storagePath = `defis/${defiId}/${user.uid}-${id}.webp`;
-          const thumbPath = `defis/${defiId}/${user.uid}-${id}_thumb.webp`;
           const [compressed, thumb] = await Promise.all([
             compressImage(file, COMPRESS_EVENT),
             compressImage(file, COMPRESS_THUMB),
           ]);
+          const storagePath = `defis/${defiId}/${user.uid}-${id}.${imageExt(compressed)}`;
+          const thumbPath = `defis/${defiId}/${user.uid}-${id}_thumb.${imageExt(thumb)}`;
           const fileSize = compressed.size + thumb.size;
           const storageRef = ref(storage, storagePath);
-          const task = uploadResumable(storageRef, compressed, { contentType: 'image/webp' });
+          const task = uploadResumable(storageRef, compressed, { contentType: compressed.type });
 
           task.on(
             'state_changed',
@@ -284,7 +285,7 @@ export class DefiService {
             async () => {
               const [url, thumbSnap] = await Promise.all([
                 getDownloadURL(task.snapshot.ref),
-                uploadStatic(ref(storage, thumbPath), thumb, { contentType: 'image/webp' }),
+                uploadStatic(ref(storage, thumbPath), thumb, { contentType: thumb.type }),
               ]);
               const thumbnailUrl = await getDownloadURL(thumbSnap.ref);
               const membreNom = `${user.prenom ?? ''} ${user.nom}`.trim();

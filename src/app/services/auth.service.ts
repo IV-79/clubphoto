@@ -27,6 +27,7 @@ import { db, auth, storage, docStream, uploadResumable } from '../utils/firebase
 import { todayISO } from '../utils/date';
 import { DocumentService } from './document.service';
 import { UserProfile } from '../models/user.model';
+import { imageExt } from '../utils/image-compress';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -373,9 +374,9 @@ export class AuthService {
     oldPath?: string,
   ): Observable<{ state: 'uploading' | 'done'; progress: number; url?: string; storagePath?: string }> {
     return new Observable((observer) => {
-      const storagePath = `user-photos/${uid}/${type}_${Date.now()}.webp`;
+      const storagePath = `user-photos/${uid}/${type}_${Date.now()}.${imageExt(file)}`;
       const storageRef = ref(storage, storagePath);
-      const task = uploadResumable(storageRef, file, { contentType: 'image/webp' });
+      const task = uploadResumable(storageRef, file, { contentType: file.type });
       task.on(
         'state_changed',
         (snap) =>

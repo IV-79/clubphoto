@@ -4,7 +4,7 @@ import { ref, getDownloadURL, deleteObject } from 'firebase/storage';
 import { Observable, from, map, catchError, of } from 'rxjs';
 import { db, storage, docStream, uploadResumable } from '../utils/firebase';
 import { PHOTO_CATEGORIES } from '../models/photo.model';
-import { compressImage, COMPRESS_HERO } from '../utils/image-compress';
+import { compressImage, COMPRESS_HERO, imageExt } from '../utils/image-compress';
 
 export interface CategorieConfig {
   value: string;
@@ -63,9 +63,9 @@ export class ConfigService {
 
   async uploadHeroImage(file: File): Promise<{ url: string; storagePath: string }> {
     const compressed = await compressImage(file, COMPRESS_HERO);
-    const storagePath = `config/hero_${Date.now()}.webp`;
+    const storagePath = `config/hero_${Date.now()}.${imageExt(compressed)}`;
     const storageRef = ref(storage, storagePath);
-    const task = uploadResumable(storageRef, compressed, { contentType: 'image/webp' });
+    const task = uploadResumable(storageRef, compressed, { contentType: compressed.type });
     await new Promise<void>((resolve, reject) => task.on('state_changed', null, reject, resolve));
     const url = await getDownloadURL(storageRef);
     return { url, storagePath };

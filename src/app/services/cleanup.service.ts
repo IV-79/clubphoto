@@ -468,9 +468,11 @@ export class CleanupService {
     const usersSnap = await getDocs(collection(db, 'users'));
     usersSnap.docs.forEach((d) => {
       const uid = d.id;
-      const data = d.data() as { photoProfilUrl?: string; photoBandeauUrl?: string };
-      if (data.photoProfilUrl) known.add(`user-photos/${uid}/profil.webp`);
-      if (data.photoBandeauUrl) known.add(`user-photos/${uid}/bandeau.webp`);
+      const data = d.data() as { photoProfilUrl?: string; photoBandeauUrl?: string; photoProfilPath?: string; photoBandeauPath?: string };
+      if (data.photoProfilPath) known.add(data.photoProfilPath);
+      else if (data.photoProfilUrl) known.add(`user-photos/${uid}/profil.webp`);
+      if (data.photoBandeauPath) known.add(data.photoBandeauPath);
+      else if (data.photoBandeauUrl) known.add(`user-photos/${uid}/bandeau.webp`);
     });
     this.progress.set({ label: 'Lecture Firestore…', current: 7, total: 8 });
 

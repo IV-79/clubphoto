@@ -13,6 +13,9 @@ export interface CompressOptions {
   fallbackLong?: number; // if still > 5 MB at quality floor, restart at this size
 }
 
+// ── Helpers ──────────────────────────────────────────────────────────────────
+export const imageExt = (f: Blob) => (f.type === 'image/jpeg' ? 'jpg' : 'webp');
+
 // ── Presets ──────────────────────────────────────────────────────────────────
 export const COMPRESS_PORTFOLIO: CompressOptions = { maxLong: 3840, fallbackLong: 2048 }; // 4K → 2K cascade
 export const COMPRESS_EVENT: CompressOptions = { maxLong: 2048 }; // 2K  — oneshot / sortie / défi

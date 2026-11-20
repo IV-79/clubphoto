@@ -435,7 +435,8 @@ export class Maintenance implements OnInit {
         try {
           const bytes = await getBytes(ref(storage, photo.storagePath));
           const filename = photo.storagePath.split('/').pop() ?? 'photo.webp';
-          const file = new File([bytes], filename, { type: 'image/webp' });
+          const type = filename.endsWith('.jpg') ? 'image/jpeg' : 'image/webp';
+          const file = new File([bytes], filename, { type });
 
           const mainNew = await compressImage(file, COMPRESS_PORTFOLIO);
           const thumbNew = await compressImage(mainNew, COMPRESS_THUMB);

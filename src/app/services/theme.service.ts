@@ -30,7 +30,7 @@ import { PhotoExif } from '../models/photo.model';
 import { Commentaire, Reponse } from '../models/commentaire.model';
 import { hasExif } from '../utils/exif-reader';
 import { generateId } from '../utils/id';
-import { compressImage, COMPRESS_THUMB } from '../utils/image-compress';
+import { compressImage, COMPRESS_THUMB, imageExt } from '../utils/image-compress';
 
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
@@ -231,8 +231,8 @@ export class ThemeService {
     const isFirstSoumission = existingSnap.empty;
 
     const ts = Date.now();
-    const storagePath = `themes/${themeId}/${uid}_${ts}.webp`;
-    const thumbPath = `themes/${themeId}/${uid}_${ts}_thumb.webp`;
+    const storagePath = `themes/${themeId}/${uid}_${ts}.${imageExt(file)}`;
+    const thumbPath = `themes/${themeId}/${uid}_${ts}_thumb.${imageExt(file)}`;
     const storageRef = ref(storage, storagePath);
     const task = uploadResumable(storageRef, file);
 

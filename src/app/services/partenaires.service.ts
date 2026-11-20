@@ -15,6 +15,7 @@ import { ref, getDownloadURL, deleteObject } from 'firebase/storage';
 import { db, storage, uploadResumable } from '../utils/firebase';
 import { Partenaire } from '../models/partenaire.model';
 import { generateId } from '../utils/id';
+import { imageExt } from '../utils/image-compress';
 
 export interface LogoUploadState {
   progress: number;
@@ -37,9 +38,9 @@ export class PartenairesService {
 
   uploadLogo(file: File, id: string): Observable<LogoUploadState> {
     return new Observable((observer) => {
-      const path = `partenaires/${id}_${Date.now()}.webp`;
+      const path = `partenaires/${id}_${Date.now()}.${imageExt(file)}`;
       const storageRef = ref(storage, path);
-      const task = uploadResumable(storageRef, file, { contentType: 'image/webp' });
+      const task = uploadResumable(storageRef, file, { contentType: file.type });
       task.on(
         'state_changed',
         (snap) =>
