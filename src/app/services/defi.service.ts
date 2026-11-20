@@ -25,6 +25,7 @@ import { Defi, DefiInscription, DefiPhoto, DefiVote } from '../models/defi.model
 import { Commentaire, Reponse } from '../models/commentaire.model';
 import { UserProfile } from '../models/user.model';
 import { generateId } from '../utils/id';
+import { CommentaireService } from './commentaire.service';
 import { readExif } from '../utils/exif-reader';
 import {
   compressImage,
@@ -383,15 +384,12 @@ export class DefiService {
 
   // ── Commentaires photos ───────────────────────────────────────────────
 
+  private cs(defiId: string): CommentaireService {
+    return new CommentaireService(`defis/${defiId}/photos`);
+  }
+
   getCommentaires(defiId: string, photoId: string): Observable<Commentaire[]> {
-    return from(
-      getDocs(
-        query(
-          collection(db, `defis/${defiId}/photos/${photoId}/commentaires`),
-          orderBy('createdAt', 'asc'),
-        ),
-      ),
-    ).pipe(map((snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Commentaire)));
+    return this.cs(defiId).getCommentaires(photoId);
   }
 
   async addCommentaire(
@@ -399,16 +397,11 @@ export class DefiService {
     photoId: string,
     data: { texte: string; auteurUid: string; nomAuteur: string },
   ): Promise<void> {
-    await addDoc(collection(db, `defis/${defiId}/photos/${photoId}/commentaires`), {
-      ...data,
-      likes: [],
-      replies: [],
-      createdAt: new Date().toISOString(),
-    });
+    return this.cs(defiId).addCommentaire(photoId, data);
   }
 
   async deleteCommentaire(defiId: string, photoId: string, commentaireId: string): Promise<void> {
-    await deleteDoc(doc(db, `defis/${defiId}/photos/${photoId}/commentaires`, commentaireId));
+    return this.cs(defiId).deleteCommentaire(photoId, commentaireId);
   }
 
   async toggleLikeCommentaire(
@@ -418,9 +411,7 @@ export class DefiService {
     uid: string,
     currentlyLiked: boolean,
   ): Promise<void> {
-    await updateDoc(doc(db, `defis/${defiId}/photos/${photoId}/commentaires`, commentaireId), {
-      likes: currentlyLiked ? arrayRemove(uid) : arrayUnion(uid),
-    });
+    return this.cs(defiId).toggleLikeCommentaire(photoId, commentaireId, uid, currentlyLiked);
   }
 
   async addReply(
@@ -429,10 +420,7 @@ export class DefiService {
     commentaireId: string,
     reply: Omit<Reponse, 'id'>,
   ): Promise<void> {
-    const replyWithId: Reponse = { ...reply, id: generateId() };
-    await updateDoc(doc(db, `defis/${defiId}/photos/${photoId}/commentaires`, commentaireId), {
-      replies: arrayUnion(replyWithId),
-    });
+    return this.cs(defiId).addReply(photoId, commentaireId, reply);
   }
 
   async deleteReply(
@@ -442,8 +430,6 @@ export class DefiService {
     replyId: string,
     allReplies: Reponse[],
   ): Promise<void> {
-    await updateDoc(doc(db, `defis/${defiId}/photos/${photoId}/commentaires`, commentaireId), {
-      replies: allReplies.filter((r) => r.id !== replyId),
-    });
+    return this.cs(defiId).deleteReply(photoId, commentaireId, replyId, allReplies);
   }
 }

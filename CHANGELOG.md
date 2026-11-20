@@ -2,6 +2,13 @@
 
 ---
 
+## CommentaireService — refactorisation commentaires (2026-11-20)
+
+- Extraction d'un `CommentaireService` (plain class paramétrée sur `basePath`) portant les 6 opérations commentaires : `getCommentaires`, `addCommentaire`, `deleteCommentaire`, `toggleLikeCommentaire`, `addReply`, `deleteReply`.
+- Les 5 services événements (`PhotoService`, `SortieService`, `OneShotService`, `DefiService`, `ExpositionService`) délèguent désormais à `CommentaireService` — tout code commentaire dupliqué supprimé.
+- 12 tests Vitest couvrent le service via un fake Firestore en mémoire.
+- Suppression des alias de types `SortieCommentaire` / `SortieReply` de `sortie.model.ts`.
+
 ## v1.0.0 — Sortie de bêta (2026-11-15)
 
 ### Notifications — nouvelles photos de portfolio (2026-11-15)

@@ -31,13 +31,13 @@ import {
   AtelierGroupe,
   SortieInscription,
   SortieImage,
-  SortieCommentaire,
-  SortieReply,
 } from '../models/sortie.model';
 import { PhotoExif } from '../models/photo.model';
+import { Commentaire, Reponse } from '../models/commentaire.model';
 import { compressImage, COMPRESS_THUMB } from '../utils/image-compress';
 import { hasExif } from '../utils/exif-reader';
 import { generateId } from '../utils/id';
+import { CommentaireService } from './commentaire.service';
 
 export interface SortieUploadState {
   progress: number;
@@ -507,14 +507,12 @@ export class SortieService {
 
   // --- Commentaires ---
 
-  getCommentaires(sortieId: string, photoId: string): Observable<SortieCommentaire[]> {
-    const q = query(
-      collection(db, `sorties/${sortieId}/photos/${photoId}/commentaires`),
-      orderBy('createdAt', 'asc'),
-    );
-    return from(getDocs(q)).pipe(
-      map((snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }) as SortieCommentaire)),
-    );
+  private cs(sortieId: string): CommentaireService {
+    return new CommentaireService(`sorties/${sortieId}/photos`);
+  }
+
+  getCommentaires(sortieId: string, photoId: string): Observable<Commentaire[]> {
+    return this.cs(sortieId).getCommentaires(photoId);
   }
 
   async addCommentaire(
@@ -522,16 +520,11 @@ export class SortieService {
     photoId: string,
     data: { texte: string; auteurUid: string; nomAuteur: string },
   ): Promise<void> {
-    await addDoc(collection(db, `sorties/${sortieId}/photos/${photoId}/commentaires`), {
-      ...data,
-      likes: [],
-      replies: [],
-      createdAt: new Date().toISOString(),
-    });
+    return this.cs(sortieId).addCommentaire(photoId, data);
   }
 
   async deleteCommentaire(sortieId: string, photoId: string, commentaireId: string): Promise<void> {
-    await deleteDoc(doc(db, `sorties/${sortieId}/photos/${photoId}/commentaires`, commentaireId));
+    return this.cs(sortieId).deleteCommentaire(photoId, commentaireId);
   }
 
   async toggleLikeCommentaire(
@@ -541,21 +534,16 @@ export class SortieService {
     uid: string,
     currentlyLiked: boolean,
   ): Promise<void> {
-    await updateDoc(doc(db, `sorties/${sortieId}/photos/${photoId}/commentaires`, commentaireId), {
-      likes: currentlyLiked ? arrayRemove(uid) : arrayUnion(uid),
-    });
+    return this.cs(sortieId).toggleLikeCommentaire(photoId, commentaireId, uid, currentlyLiked);
   }
 
   async addReply(
     sortieId: string,
     photoId: string,
     commentaireId: string,
-    reply: Omit<SortieReply, 'id'>,
+    reply: Omit<Reponse, 'id'>,
   ): Promise<void> {
-    const replyWithId: SortieReply = { ...reply, id: generateId() };
-    await updateDoc(doc(db, `sorties/${sortieId}/photos/${photoId}/commentaires`, commentaireId), {
-      replies: arrayUnion(replyWithId),
-    });
+    return this.cs(sortieId).addReply(photoId, commentaireId, reply);
   }
 
   async deleteReply(
@@ -563,10 +551,8 @@ export class SortieService {
     photoId: string,
     commentaireId: string,
     replyId: string,
-    allReplies: SortieReply[],
+    allReplies: Reponse[],
   ): Promise<void> {
-    await updateDoc(doc(db, `sorties/${sortieId}/photos/${photoId}/commentaires`, commentaireId), {
-      replies: allReplies.filter((r) => r.id !== replyId),
-    });
+    return this.cs(sortieId).deleteReply(photoId, commentaireId, replyId, allReplies);
   }
 }

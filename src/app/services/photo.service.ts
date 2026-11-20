@@ -25,6 +25,7 @@ import { generateId } from '../utils/id';
 import { compressImage, COMPRESS_THUMB } from '../utils/image-compress';
 import { NotificationService } from './notification.service';
 import { UserSubscriptions } from '../models/notification.model';
+import { CommentaireService } from './commentaire.service';
 
 @Injectable({ providedIn: 'root' })
 export class PhotoService {
@@ -241,11 +242,10 @@ export class PhotoService {
 
   // --- Commentaires ---
 
+  private readonly commentaires = new CommentaireService('photos');
+
   getCommentaires(photoId: string): Observable<Commentaire[]> {
-    const q = query(collection(db, `photos/${photoId}/commentaires`), orderBy('createdAt', 'asc'));
-    return from(getDocs(q)).pipe(
-      map((snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Commentaire)),
-    );
+    return this.commentaires.getCommentaires(photoId);
   }
 
   async addCommentaire(
@@ -258,12 +258,7 @@ export class PhotoService {
       ownerSubscriptions?: UserSubscriptions;
     },
   ): Promise<void> {
-    await addDoc(collection(db, `photos/${photoId}/commentaires`), {
-      ...data,
-      likes: [],
-      replies: [],
-      createdAt: new Date().toISOString(),
-    });
+    await this.commentaires.addCommentaire(photoId, data);
     if (notif) {
       const msg = notif.photoTitre
         ? `${data.nomAuteur} a commenté votre photo «${notif.photoTitre}»`
@@ -278,7 +273,7 @@ export class PhotoService {
   }
 
   async deleteCommentaire(photoId: string, commentId: string): Promise<void> {
-    await deleteDoc(doc(db, `photos/${photoId}/commentaires`, commentId));
+    return this.commentaires.deleteCommentaire(photoId, commentId);
   }
 
   async toggleLikeCommentaire(
@@ -287,16 +282,11 @@ export class PhotoService {
     uid: string,
     currentlyLiked: boolean,
   ): Promise<void> {
-    await updateDoc(doc(db, `photos/${photoId}/commentaires`, commentId), {
-      likes: currentlyLiked ? arrayRemove(uid) : arrayUnion(uid),
-    });
+    return this.commentaires.toggleLikeCommentaire(photoId, commentId, uid, currentlyLiked);
   }
 
   async addReply(photoId: string, commentId: string, reply: Omit<Reponse, 'id'>): Promise<void> {
-    const replyWithId: Reponse = { ...reply, id: generateId() };
-    await updateDoc(doc(db, `photos/${photoId}/commentaires`, commentId), {
-      replies: arrayUnion(replyWithId),
-    });
+    return this.commentaires.addReply(photoId, commentId, reply);
   }
 
   async deleteReply(
@@ -305,8 +295,6 @@ export class PhotoService {
     replyId: string,
     allReplies: Reponse[],
   ): Promise<void> {
-    await updateDoc(doc(db, `photos/${photoId}/commentaires`, commentId), {
-      replies: allReplies.filter((r) => r.id !== replyId),
-    });
+    return this.commentaires.deleteReply(photoId, commentId, replyId, allReplies);
   }
 }

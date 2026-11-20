@@ -36,6 +36,7 @@ import { Commentaire, Reponse } from '../models/commentaire.model';
 import { compressImage, COMPRESS_THUMB } from '../utils/image-compress';
 import { hasExif } from '../utils/exif-reader';
 import { generateId } from '../utils/id';
+import { CommentaireService } from './commentaire.service';
 
 export interface OneShotUploadState {
   progress: number;
@@ -485,14 +486,12 @@ export class OneShotService {
 
   // --- Commentaires ---
 
+  private cs(oneShotId: string): CommentaireService {
+    return new CommentaireService(`oneshots/${oneShotId}/photos`);
+  }
+
   getCommentaires(oneShotId: string, photoId: string): Observable<Commentaire[]> {
-    const q = query(
-      collection(db, `oneshots/${oneShotId}/photos/${photoId}/commentaires`),
-      orderBy('createdAt', 'asc'),
-    );
-    return from(getDocs(q)).pipe(
-      map((snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Commentaire)),
-    );
+    return this.cs(oneShotId).getCommentaires(photoId);
   }
 
   async addCommentaire(
@@ -500,16 +499,11 @@ export class OneShotService {
     photoId: string,
     data: { texte: string; auteurUid: string; nomAuteur: string },
   ): Promise<void> {
-    await addDoc(collection(db, `oneshots/${oneShotId}/photos/${photoId}/commentaires`), {
-      ...data,
-      likes: [],
-      replies: [],
-      createdAt: new Date().toISOString(),
-    });
+    return this.cs(oneShotId).addCommentaire(photoId, data);
   }
 
   async deleteCommentaire(oneShotId: string, photoId: string, commentId: string): Promise<void> {
-    await deleteDoc(doc(db, `oneshots/${oneShotId}/photos/${photoId}/commentaires`, commentId));
+    return this.cs(oneShotId).deleteCommentaire(photoId, commentId);
   }
 
   async toggleLikeCommentaire(
@@ -519,9 +513,7 @@ export class OneShotService {
     uid: string,
     currentlyLiked: boolean,
   ): Promise<void> {
-    await updateDoc(doc(db, `oneshots/${oneShotId}/photos/${photoId}/commentaires`, commentId), {
-      likes: currentlyLiked ? arrayRemove(uid) : arrayUnion(uid),
-    });
+    return this.cs(oneShotId).toggleLikeCommentaire(photoId, commentId, uid, currentlyLiked);
   }
 
   async addReply(
@@ -530,10 +522,7 @@ export class OneShotService {
     commentId: string,
     reply: Omit<Reponse, 'id'>,
   ): Promise<void> {
-    const replyWithId: Reponse = { ...reply, id: generateId() };
-    await updateDoc(doc(db, `oneshots/${oneShotId}/photos/${photoId}/commentaires`, commentId), {
-      replies: arrayUnion(replyWithId),
-    });
+    return this.cs(oneShotId).addReply(photoId, commentId, reply);
   }
 
   async deleteReply(
@@ -543,8 +532,6 @@ export class OneShotService {
     replyId: string,
     allReplies: Reponse[],
   ): Promise<void> {
-    await updateDoc(doc(db, `oneshots/${oneShotId}/photos/${photoId}/commentaires`, commentId), {
-      replies: allReplies.filter((r) => r.id !== replyId),
-    });
+    return this.cs(oneShotId).deleteReply(photoId, commentId, replyId, allReplies);
   }
 }

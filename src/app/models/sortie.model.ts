@@ -1,4 +1,3 @@
-export type { Commentaire as SortieCommentaire, Reponse as SortieReply } from './commentaire.model';
 import { PhotoExif } from './photo.model';
 
 export type SortieType = 'sortie_photo' | 'sortie_club' | 'atelier';
