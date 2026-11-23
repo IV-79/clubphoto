@@ -1,10 +1,10 @@
 <!-- ── Hero ── -->
-<section class="hero" [class.hero--theme]="isThemeMode()" [style.backgroundImage]="isThemeMode() ? null : heroStyle()">
-  @if (isThemeMode()) {
+<section class="hero">
+  @if (heroRawUrl()) {
     <div class="hero-blur-bg">
-      <img [src]="heroImgUrl()" aria-hidden="true" class="hero-blur-img" />
+      <img [src]="heroRawUrl()" aria-hidden="true" class="hero-blur-img" />
     </div>
-    <div class="hero-photo-fixed" [style.backgroundImage]="heroStyle()"></div>
+    <img class="hero-main-img" [src]="heroRawUrl()" alt="" imgRetry />
   }
   <div class="hero-overlay">
     <div class="hero-content">
@@ -65,7 +65,6 @@
                   [href]="mapsUrl(article.lieu!)"
                   target="_blank"
                   rel="noopener"
-                  (click)="$event.stopPropagation()"
                   ><mat-icon class="lieu-icon">location_on</mat-icon> {{ article.lieu }}</a
                 >
               }

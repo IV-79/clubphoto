@@ -2,6 +2,17 @@
 
 ---
 
+## Fix — burger menu mobile invisible sur admin/config (2026-11-23)
+
+- Les lignes `.limit-row` et `.source-row` de la page Configuration débordaient horizontalement sur mobile, étendant le layout viewport et poussant le bouton burger hors de la zone visible.
+- Ajout de `flex-wrap: wrap` sur `.limit-row` et `.source-row` + `flex: 1` sur `.source-segmented` pour que ces éléments se répartissent sur plusieurs lignes plutôt que de dépasser à droite.
+
+## Hero page d'accueil — photo entière + fond flouté (2026-11-23)
+
+- Le hero affiche désormais n'importe quel format de photo (portrait, paysage, carré) sans recadrage : `object-fit: contain` sur l'image principale, avec la même photo en arrière-plan flouté (`blur(24px)`, `object-fit: cover`) pour remplir les zones vides.
+- Fonctionne pour les deux modes de configuration admin : photo fixe et photo gagnante du thème du mois.
+- Corrections suite à code review : couleur des chips membres adaptée au dark mode (`var(--text-secondary)`), animation de la flèche de scroll respecte `prefers-reduced-motion`, `shareReplay` avec `refCount: true`, sections principales en `100dvh` pour un meilleur rendu mobile.
+
 ## CommentaireService — refactorisation commentaires (2026-11-20)
 
 - Extraction d'un `CommentaireService` (plain class paramétrée sur `basePath`) portant les 6 opérations commentaires : `getCommentaires`, `addCommentaire`, `deleteCommentaire`, `toggleLikeCommentaire`, `addReply`, `deleteReply`.

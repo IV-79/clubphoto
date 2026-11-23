@@ -15,7 +15,6 @@ import {
 import { RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
-import { DomSanitizer, SafeStyle } from '@angular/platform-browser';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { map, filter, take, switchMap, shareReplay } from 'rxjs/operators';
 import { Subscription, race, timer, combineLatest, of } from 'rxjs';
@@ -50,7 +49,6 @@ interface NavItem {
   styleUrl: './home.css',
 })
 export class Home implements OnInit, OnDestroy, AfterViewInit {
-  private sanitizer = inject(DomSanitizer);
   private configService = inject(ConfigService);
   private articleService = inject(ArticleService);
   private sortieService = inject(SortieService);
@@ -97,22 +95,12 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
     { initialValue: null as string | null },
   );
 
-  heroStyle = computed((): SafeStyle => {
+  heroRawUrl = computed((): string => {
     const cfg = this.siteConfig();
-    const url =
-      cfg?.heroSource === 'theme_du_mois'
-        ? (this.heroThemeUrl() ?? cfg?.heroImageUrl ?? '')
-        : (cfg?.heroImageUrl ?? '');
-    if (!url) return this.sanitizer.bypassSecurityTrustStyle('none');
-    return this.sanitizer.bypassSecurityTrustStyle(`url('${url}')`);
+    return cfg?.heroSource === 'theme_du_mois'
+      ? (this.heroThemeUrl() ?? cfg?.heroImageUrl ?? '')
+      : (cfg?.heroImageUrl ?? '');
   });
-
-  isThemeMode = computed((): boolean => {
-    const cfg = this.siteConfig();
-    return cfg?.heroSource === 'theme_du_mois' && !!this.heroThemeUrl();
-  });
-
-  heroImgUrl = computed((): string => this.heroThemeUrl() ?? '');
 
   articles = toSignal(
     this.articleService.getPublicArticlesOnce().pipe(
@@ -142,7 +130,7 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
 
   // Shared one-time read — both recentPhotos and membres derive from it without double read
   // Server-side filter on visibilite === 'public' avoids loading all user docs
-  private membresOnce$ = this.authService.getPublicMembresOnce().pipe(shareReplay(1));
+  private membresOnce$ = this.authService.getPublicMembresOnce().pipe(shareReplay({ bufferSize: 1, refCount: true }));
 
   recentPhotos = toSignal(
     combineLatest([
@@ -251,7 +239,6 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
       this.zone.run(() => this.gsapReady.set(true));
     });
 
-    // Mise à jour du dot actif au scroll
     if (this.scrollHandler) window.removeEventListener('scroll', this.scrollHandler);
     this.scrollHandler = () => {
       const y = window.scrollY;
