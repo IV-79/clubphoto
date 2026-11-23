@@ -1,5 +1,11 @@
 <!-- ── Hero ── -->
-<section class="hero" [style.backgroundImage]="heroStyle()">
+<section class="hero" [class.hero--theme]="isThemeMode()" [style.backgroundImage]="isThemeMode() ? null : heroStyle()">
+  @if (isThemeMode()) {
+    <div class="hero-blur-bg">
+      <img [src]="heroImgUrl()" aria-hidden="true" class="hero-blur-img" />
+    </div>
+    <div class="hero-photo-fixed" [style.backgroundImage]="heroStyle()"></div>
+  }
   <div class="hero-overlay">
     <div class="hero-content">
       <p class="hero-eyebrow">Depuis 2015</p>

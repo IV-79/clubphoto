@@ -107,6 +107,13 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
     return this.sanitizer.bypassSecurityTrustStyle(`url('${url}')`);
   });
 
+  isThemeMode = computed((): boolean => {
+    const cfg = this.siteConfig();
+    return cfg?.heroSource === 'theme_du_mois' && !!this.heroThemeUrl();
+  });
+
+  heroImgUrl = computed((): string => this.heroThemeUrl() ?? '');
+
   articles = toSignal(
     this.articleService.getPublicArticlesOnce().pipe(
       map((list) =>
