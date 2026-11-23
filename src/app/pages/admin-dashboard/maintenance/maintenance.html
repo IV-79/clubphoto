@@ -508,5 +508,33 @@
         }}
       </button>
     </div>
+
+    <!-- TMP nettoyage — à supprimer après usage -->
+    <p class="section-desc" style="margin-top: 20px; color: var(--color-warn)">
+      <strong>Nettoyage ponctuel :</strong> réencode toutes les photos du portfolio (sans filtre taille).
+      À utiliser une seule fois puis supprimer.
+    </p>
+    @if (reencodeAllOk()) {
+      <div class="recalcul-ok">✓ Réencodage complet terminé</div>
+    }
+    @if (reencodeAllResult(); as r) {
+      <div class="ri-desc" style="margin-top: 8px">
+        {{ r.scanned }} photo(s) scannée(s) — {{ r.reencoded }} réencodée(s) —
+        {{ formatBytes(r.savedBytes) }} récupérés
+      </div>
+    }
+    <div class="cleanup-btns" style="margin-top: 8px">
+      <button
+        class="btn-cu-delete"
+        (click)="reencodeToutes()"
+        [disabled]="reencodeAllRunning() || reencodeRunning() || cleanupRunning() || recalculStorageRunning()"
+      >
+        {{
+          reencodeAllRunning()
+            ? 'Traitement… ' + reencodeAllProgress()
+            : 'Tout réencoder (nettoyage)'
+        }}
+      </button>
+    </div>
   </section>
 </div>

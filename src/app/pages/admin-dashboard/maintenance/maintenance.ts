@@ -79,6 +79,12 @@ export class Maintenance implements OnInit {
   reencodeProgress = signal('');
   reencodeResult = signal<{ scanned: number; reencoded: number; savedBytes: number } | null>(null);
 
+  // TMP nettoyage — à supprimer après usage
+  reencodeAllRunning = signal(false);
+  reencodeAllOk = signal(false);
+  reencodeAllProgress = signal('');
+  reencodeAllResult = signal<{ scanned: number; reencoded: number; savedBytes: number } | null>(null);
+
   private twoYearsAgo(): string {
     const d = new Date();
     d.setFullYear(d.getFullYear() - 2);
@@ -485,6 +491,88 @@ export class Maintenance implements OnInit {
     } finally {
       this.reencodeRunning.set(false);
       this.reencodeProgress.set('');
+    }
+  }
+
+  // TMP nettoyage — à supprimer après usage
+  async reencodeToutes() {
+    if (this.reencodeAllRunning()) return;
+    this.reencodeAllRunning.set(true);
+    this.reencodeAllResult.set(null);
+    this.reencodeAllProgress.set('Scan…');
+    try {
+      const snap = await getDocs(collection(db, 'photos'));
+      const photos = snap.docs.map((d) => ({
+        id: d.id,
+        ...(d.data() as {
+          uid: string;
+          url: string;
+          storagePath: string;
+          thumbnailPath?: string;
+          fileSize: number;
+        }),
+      }));
+
+      let reencoded = 0;
+      let savedBytes = 0;
+      const affectedUids = new Set<string>();
+
+      for (let i = 0; i < photos.length; i++) {
+        const photo = photos[i];
+        this.reencodeAllProgress.set(`${i + 1}/${photos.length}`);
+        try {
+          const bytes = await getBytes(ref(storage, photo.storagePath));
+          const filename = photo.storagePath.split('/').pop() ?? 'photo.webp';
+          const type = filename.endsWith('.jpg') ? 'image/jpeg' : 'image/webp';
+          const file = new File([bytes], filename, { type });
+
+          const mainNew = await compressImage(file, COMPRESS_PORTFOLIO);
+          const thumbNew = await compressImage(mainNew, COMPRESS_THUMB);
+          const newSize = mainNew.size + thumbNew.size;
+          if (newSize >= photo.fileSize) continue;
+
+          const mainRef = ref(storage, photo.storagePath);
+          await uploadStatic(mainRef, mainNew);
+          const newUrl = await getDownloadURL(mainRef);
+
+          let newThumbUrl: string | undefined;
+          if (photo.thumbnailPath) {
+            const thumbRef = ref(storage, photo.thumbnailPath);
+            await uploadStatic(thumbRef, thumbNew);
+            newThumbUrl = await getDownloadURL(thumbRef);
+          }
+
+          await updateDoc(doc(db, 'photos', photo.id), {
+            url: newUrl,
+            fileSize: newSize,
+            ...(newThumbUrl ? { thumbnailUrl: newThumbUrl } : {}),
+          });
+
+          savedBytes += photo.fileSize - newSize;
+          affectedUids.add(photo.uid);
+          reencoded++;
+        } catch (e) {
+          console.error(`Erreur photo ${photo.id}:`, e);
+        }
+      }
+
+      for (const uid of affectedUids) {
+        await this.authService.recalculateStorage(uid);
+      }
+      if (affectedUids.size > 0) {
+        this.authService.invalidateAllMembresCache();
+      }
+
+      this.reencodeAllResult.set({ scanned: photos.length, reencoded, savedBytes });
+      if (reencoded > 0) {
+        this.reencodeAllOk.set(true);
+        setTimeout(() => this.reencodeAllOk.set(false), 6000);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      this.reencodeAllRunning.set(false);
+      this.reencodeAllProgress.set('');
     }
   }
 

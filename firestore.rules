@@ -56,6 +56,7 @@ service cloud.firestore {
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes']);
       allow update: if isLoggedIn() &&
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['queuePos']);
+      allow update: if isAdmin();
       allow delete: if isLoggedIn() && (resource.data.uid == request.auth.uid || isAdmin());
     }
 
