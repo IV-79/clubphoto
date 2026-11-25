@@ -34,6 +34,13 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // Données privées membres (email, etc.) — lecture/écriture : propriétaire ou admin uniquement
+    match /users_private/{uid} {
+      allow read: if request.auth.uid == uid || isAdmin();
+      allow create, update: if request.auth.uid == uid || isAdmin();
+      allow delete: if isAdmin();
+    }
+
     // Articles (lecture publique pour statut=publie+portee=public, membres pour portee=membre)
     match /articles/{articleId} {
       allow read: if resource.data.statut == 'publie' && resource.data.portee == 'public';

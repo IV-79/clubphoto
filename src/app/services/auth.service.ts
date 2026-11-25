@@ -26,7 +26,7 @@ import { from, switchMap, of, Observable, map, shareReplay, pairwise, filter, ta
 import { db, auth, storage, docStream, uploadResumable } from '../utils/firebase';
 import { todayISO } from '../utils/date';
 import { DocumentService } from './document.service';
-import { UserProfile } from '../models/user.model';
+import { UserPrivate, UserProfile } from '../models/user.model';
 import { imageExt } from '../utils/image-compress';
 
 @Injectable({ providedIn: 'root' })
@@ -95,13 +95,15 @@ export class AuthService {
     if (snap.exists()) return snap.data() as UserProfile;
     const profile: UserProfile = {
       uid: user.uid,
-      email: user.email ?? '',
-      nom: user.displayName ?? user.email ?? '',
+      nom: user.displayName ?? '',
       role: 'membre',
       dateAdhesion: todayISO(),
       queuePos: Date.now() / 1000 + Math.random(),
     };
-    await setDoc(doc(db, 'users', user.uid), profile);
+    await Promise.all([
+      setDoc(doc(db, 'users', user.uid), profile),
+      setDoc(doc(db, 'users_private', user.uid), { email: user.email ?? '' } satisfies UserPrivate),
+    ]);
     return profile;
   }
 
@@ -118,8 +120,22 @@ export class AuthService {
 
   getAllMembersOnce(): Observable<UserProfile[]> {
     if (!this.allMembresCache$) {
-      this.allMembresCache$ = from(getDocs(collection(db, 'users'))).pipe(
-        map((snap) => snap.docs.map((d) => ({ uid: d.id, ...d.data() }) as UserProfile)),
+      this.allMembresCache$ = from(
+        Promise.all([
+          getDocs(collection(db, 'users')),
+          getDocs(collection(db, 'users_private')),
+        ]),
+      ).pipe(
+        map(([usersSnap, privateSnap]) => {
+          const emailMap = new Map(
+            privateSnap.docs.map((d) => [d.id, (d.data() as UserPrivate).email]),
+          );
+          return usersSnap.docs.map((d) => ({
+            uid: d.id,
+            ...d.data(),
+            email: emailMap.get(d.id),
+          }) as UserProfile);
+        }),
         shareReplay(1),
       );
     }
@@ -361,8 +377,9 @@ export class AuthService {
     deletes.push(deleteObject(ref(storage, profilPath)).catch(() => {}));
     deletes.push(deleteObject(ref(storage, bandeauPath)).catch(() => {}));
 
-    // 8. Profil Firestore
+    // 8. Profil Firestore (public + privé)
     deletes.push(deleteDoc(doc(db, 'users', uid)));
+    deletes.push(deleteDoc(doc(db, 'users_private', uid)).catch(() => {}) as Promise<void>);
 
     await Promise.all(deletes);
   }

@@ -1,8 +1,12 @@
 import { UserSubscriptions } from './notification.model';
 
+export interface UserPrivate {
+  email: string;
+}
+
 export interface UserProfile {
   uid: string;
-  email: string;
+  email?: string;
   nom: string;
   prenom?: string;
   role: 'admin' | 'contributeur' | 'membre';

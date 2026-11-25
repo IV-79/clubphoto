@@ -2,6 +2,17 @@
 
 ---
 
+## RGPD — Migration email vers users_private (2026-11-25)
+
+- L'email n'est plus stocké dans `users/{uid}` (collection publiquement lisible).
+- Nouvelle collection `users_private/{uid}` : accessible uniquement par le propriétaire et les admins.
+- Interface TypeScript `UserPrivate { email }` ajoutée ; `email` devient optionnel dans `UserProfile`.
+- `getAllMembersOnce()` (admin uniquement) fusionne `users` + `users_private` pour afficher les emails dans le tableau des membres.
+- `deleteMemberData` supprime aussi `users_private/{uid}`.
+- Nouveaux comptes créés via `ensureUserDocument` ou `completer-profil` : email écrit directement dans `users_private`.
+- Script de migration : `node scripts/migrate-email-private.js --sa <service-account.json>`
+- Wizard de déploiement : `bash scripts/wizard-migrate-email.sh`
+
 ## Fix — burger menu mobile invisible sur admin/config (2026-11-23)
 
 - Les lignes `.limit-row` et `.source-row` de la page Configuration débordaient horizontalement sur mobile, étendant le layout viewport et poussant le bouton burger hors de la zone visible.

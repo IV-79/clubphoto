@@ -108,13 +108,15 @@ export class CompleterProfilComponent implements OnInit {
 
       const profile: UserProfile = {
         uid: user.uid,
-        email: this.signedInEmail,
         nom: this.nom,
         prenom: this.prenom || undefined,
         role: 'membre',
         dateAdhesion: todayISO(),
       };
-      await setDoc(doc(db, 'users', user.uid), profile);
+      await Promise.all([
+        setDoc(doc(db, 'users', user.uid), profile),
+        setDoc(doc(db, 'users_private', user.uid), { email: this.signedInEmail }),
+      ]);
 
       this.step.set('done');
       setTimeout(() => this.router.navigate(['/membre/portfolio']), 2000);

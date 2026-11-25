@@ -10,6 +10,7 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../services/auth.service';
+import { auth } from '../../../utils/firebase';
 import { STYLES_PHOTO, UserProfile } from '../../../models/user.model';
 import { compressForUpload, COMPRESS_AVATAR, COMPRESS_BANDEAU } from '../../../utils/image-compress';
 
@@ -27,6 +28,7 @@ export class MembreProfil implements OnInit {
   private authService = inject(AuthService);
 
   profile = toSignal(this.authService.currentUserProfile$);
+  readonly currentEmail = auth.currentUser?.email ?? '';
 
   stylesDisponibles = STYLES_PHOTO;
 

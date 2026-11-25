@@ -1,4 +1,4 @@
-import { Component, inject, signal, HostListener, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
@@ -28,10 +28,6 @@ export class LoginModalComponent {
   resetMessage = signal('');
   resetSuccess = signal(false);
 
-  @HostListener('document:keydown.escape')
-  onEscape() {
-    if (this.modal.isOpen()) this.close();
-  }
 
   close() {
     this.modal.close();
