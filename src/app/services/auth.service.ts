@@ -120,26 +120,27 @@ export class AuthService {
 
   getAllMembersOnce(): Observable<UserProfile[]> {
     if (!this.allMembresCache$) {
-      this.allMembresCache$ = from(
-        Promise.all([
-          getDocs(collection(db, 'users')),
-          getDocs(collection(db, 'users_private')),
-        ]),
-      ).pipe(
-        map(([usersSnap, privateSnap]) => {
-          const emailMap = new Map(
-            privateSnap.docs.map((d) => [d.id, (d.data() as UserPrivate).email]),
-          );
-          return usersSnap.docs.map((d) => ({
-            uid: d.id,
-            ...d.data(),
-            email: emailMap.get(d.id),
-          }) as UserProfile);
-        }),
+      this.allMembresCache$ = from(getDocs(collection(db, 'users'))).pipe(
+        map((snap) => snap.docs.map((d) => ({ uid: d.id, ...d.data() }) as UserProfile)),
         shareReplay(1),
       );
     }
     return this.allMembresCache$;
+  }
+
+  getAllMembersWithEmailOnce(): Observable<UserProfile[]> {
+    return this.getAllMembersOnce().pipe(
+      switchMap((membres) =>
+        from(getDocs(collection(db, 'users_private'))).pipe(
+          map((snap) => {
+            const emailMap = new Map(
+              snap.docs.map((d) => [d.id, (d.data() as UserPrivate).email]),
+            );
+            return membres.map((m) => ({ ...m, email: emailMap.get(m.uid) }));
+          }),
+        ),
+      ),
+    );
   }
 
   invalidateAllMembresCache(): void {

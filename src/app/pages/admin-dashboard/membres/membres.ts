@@ -50,7 +50,7 @@ export class Membres implements OnInit {
   membres = signal<UserProfile[]>([]);
 
   async ngOnInit() {
-    this.membres.set(await firstValueFrom(this.authService.getAllMembersOnce()));
+    this.membres.set(await firstValueFrom(this.authService.getAllMembersWithEmailOnce()));
   }
   filterText = signal('');
   loadingUid = signal<string | null>(null);
@@ -178,7 +178,7 @@ export class Membres implements OnInit {
     try {
       await this.authService.recalculateStorage(membre.uid);
       this.authService.invalidateAllMembresCache();
-      this.membres.set(await firstValueFrom(this.authService.getAllMembersOnce()));
+      this.membres.set(await firstValueFrom(this.authService.getAllMembersWithEmailOnce()));
       this.snackBar.open('Stockage recalculé', '', { duration: 2500 });
     } catch {
       this.snackBar.open('Erreur lors du recalcul', '', { duration: 3000 });
